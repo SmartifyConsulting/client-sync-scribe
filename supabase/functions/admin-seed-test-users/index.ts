@@ -11,21 +11,27 @@ type Seed = {
   role: "doctor" | "hospital_staff" | "ambulance_staff";
   hospital_name?: string;
   ambulance_company?: string;
+  as_member?: boolean;
+  member_role?: string;
 };
 
 const SEEDS: Seed[] = [
   { email: "xtina@smartify.co.za", full_name: "Xtina", role: "doctor" },
   { email: "zano@smartify.co.za", full_name: "Zano", role: "hospital_staff", hospital_name: "Zano Hospital" },
   { email: "renken@smartify.co.za", full_name: "Renken", role: "ambulance_staff", ambulance_company: "Renken Ambulance Service" },
+  { email: "hospital.test@holarchealth.com", full_name: "Holarc General Hospital Admin", role: "hospital_staff", hospital_name: "Holarc General Hospital" },
+  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", role: "hospital_staff", hospital_name: "Holarc General Hospital", as_member: true, member_role: "er_staff" },
 ];
 
 const FIXED_PASSWORD = "Password123";
-const PASSWORD_TARGETS: Array<{ email: string; full_name: string }> = [
+const PASSWORD_TARGETS: Array<{ email: string; full_name: string; password?: string }> = [
   { email: "paraskevoulasoldatos@gmail.com", full_name: "Paraskevi Soldatos" },
   { email: "zano@smartify.co.za", full_name: "Zano" },
   { email: "xtina@smartify.co.za", full_name: "Xtina" },
   { email: "renken@smartify.co.za", full_name: "Renken" },
   { email: "nonastasia@gmail.com", full_name: "Nonastasia" },
+  { email: "hospital.test@holarchealth.com", full_name: "Holarc General Hospital Admin", password: "Hospital@2026" },
+  { email: "er.test@holarchealth.com", full_name: "Holarc General ER Staff", password: "ER@2026" },
 ];
 
 function randomPassword() {
@@ -83,17 +89,27 @@ Deno.serve(async (req) => {
 
       // Provider rows
       if (seed.role === "hospital_staff" && seed.hospital_name) {
-        const { data: existsH } = await sb.from("holarchelp_hospitals").select("id").eq("owner_id", userId).maybeSingle();
-        if (!existsH) {
-          await sb.from("holarchelp_hospitals").insert({
-            owner_id: userId,
-            name: seed.hospital_name,
-            contact_email: seed.email,
-            status: "approved",
-            approved_at: new Date().toISOString(),
-          });
+        if (seed.as_member) {
+          const { data: hosp } = await sb.from("holarchelp_hospitals").select("id").eq("name", seed.hospital_name).maybeSingle();
+          if (hosp) {
+            const { data: mem } = await sb.from("holarchelp_hospital_members").select("id").eq("hospital_id", hosp.id).eq("user_id", userId).maybeSingle();
+            if (!mem) {
+              await sb.from("holarchelp_hospital_members").insert({ hospital_id: hosp.id, user_id: userId, role: seed.member_role ?? "staff" });
+            }
+          }
         } else {
-          await sb.from("holarchelp_hospitals").update({ status: "approved" }).eq("id", existsH.id);
+          const { data: existsH } = await sb.from("holarchelp_hospitals").select("id").eq("owner_id", userId).maybeSingle();
+          if (!existsH) {
+            await sb.from("holarchelp_hospitals").insert({
+              owner_id: userId,
+              name: seed.hospital_name,
+              contact_email: seed.email,
+              status: "approved",
+              approved_at: new Date().toISOString(),
+            });
+          } else {
+            await sb.from("holarchelp_hospitals").update({ status: "approved" }).eq("id", existsH.id);
+          }
         }
       }
 
@@ -121,18 +137,19 @@ Deno.serve(async (req) => {
     list2?.users.forEach((u) => { if (u.email) byEmail.set(u.email.toLowerCase(), u.id); });
     const pwResults: any[] = [];
     for (const t of PASSWORD_TARGETS) {
+      const pw = t.password ?? FIXED_PASSWORD;
       try {
         let id = byEmail.get(t.email.toLowerCase());
         if (!id) {
           const { data: created, error: ce } = await sb.auth.admin.createUser({
-            email: t.email, password: FIXED_PASSWORD, email_confirm: true,
+            email: t.email, password: pw, email_confirm: true,
             user_metadata: { full_name: t.full_name, role: "patient" },
           });
           if (ce) throw ce;
           id = created.user!.id;
           pwResults.push({ email: t.email, status: "created" });
         } else {
-          const { error: ue } = await sb.auth.admin.updateUserById(id, { password: FIXED_PASSWORD });
+          const { error: ue } = await sb.auth.admin.updateUserById(id, { password: pw });
           if (ue) throw ue;
           pwResults.push({ email: t.email, status: "password_set" });
         }

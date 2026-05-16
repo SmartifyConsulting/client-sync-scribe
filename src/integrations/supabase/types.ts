@@ -834,6 +834,47 @@ export type Database = {
         }
         Relationships: []
       }
+      doctor_hospital_affiliations: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          hospital_id: string | null
+          hospital_name_snapshot: string | null
+          id: string
+          role_at_hospital: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          hospital_id?: string | null
+          hospital_name_snapshot?: string | null
+          id?: string
+          role_at_hospital?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          hospital_id?: string | null
+          hospital_name_snapshot?: string | null
+          id?: string
+          role_at_hospital?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_hospital_affiliations_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_patient_access: {
         Row: {
           created_at: string

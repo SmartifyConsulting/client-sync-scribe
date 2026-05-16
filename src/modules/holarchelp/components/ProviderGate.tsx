@@ -22,9 +22,11 @@ export function useProviderAccess() {
       return;
     }
     (async () => {
-      const [{ data: hosp }, { data: amb }] = await Promise.all([
+      const [{ data: hosp }, { data: amb }, { data: hospMem }, { data: ambMem }] = await Promise.all([
         supabase.from("holarchelp_hospitals" as any).select("id").eq("owner_id", user.id).maybeSingle(),
         supabase.from("holarchelp_ambulance_providers" as any).select("id").eq("owner_id", user.id).maybeSingle(),
+        supabase.from("holarchelp_hospital_members" as any).select("hospital_id").eq("user_id", user.id).maybeSingle(),
+        supabase.from("holarchelp_ambulance_members" as any).select("provider_id").eq("user_id", user.id).maybeSingle(),
       ]);
       if ((hosp as any)?.id) {
         setProviderType("hospital");
@@ -32,6 +34,12 @@ export function useProviderAccess() {
       } else if ((amb as any)?.id) {
         setProviderType("ambulance");
         setProviderId((amb as any).id);
+      } else if ((hospMem as any)?.hospital_id) {
+        setProviderType("hospital");
+        setProviderId((hospMem as any).hospital_id);
+      } else if ((ambMem as any)?.provider_id) {
+        setProviderType("ambulance");
+        setProviderId((ambMem as any).provider_id);
       }
       setLoading(false);
     })();
