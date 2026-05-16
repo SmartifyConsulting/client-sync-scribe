@@ -11,6 +11,8 @@ type Seed = {
   role: "doctor" | "hospital_staff" | "ambulance_staff";
   hospital_name?: string;
   ambulance_company?: string;
+  as_member?: boolean;
+  member_role?: string;
 };
 
 const SEEDS: Seed[] = [
