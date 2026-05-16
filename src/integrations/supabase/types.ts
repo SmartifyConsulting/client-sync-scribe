@@ -267,6 +267,79 @@ export type Database = {
           },
         ]
       }
+      ambulance_coverage_areas: {
+        Row: {
+          area_name: string
+          country: string | null
+          created_at: string
+          id: string
+          provider_id: string
+          region: string | null
+        }
+        Insert: {
+          area_name: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          provider_id: string
+          region?: string | null
+        }
+        Update: {
+          area_name?: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          provider_id?: string
+          region?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulance_coverage_areas_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ambulance_fleet: {
+        Row: {
+          count: number
+          created_at: string
+          id: string
+          notes: string | null
+          provider_id: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          provider_id: string
+          updated_at?: string
+          vehicle_type: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          provider_id?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulance_fleet_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_modules: {
         Row: {
           description: string | null
@@ -1133,6 +1206,7 @@ export type Database = {
           credential_score: number | null
           credential_score_updated_at: string | null
           dispatch_priority: number
+          emergency_phone: string | null
           fleet_size: number | null
           id: string
           latitude: number | null
@@ -1161,6 +1235,7 @@ export type Database = {
           credential_score?: number | null
           credential_score_updated_at?: string | null
           dispatch_priority?: number
+          emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
           latitude?: number | null
@@ -1189,6 +1264,7 @@ export type Database = {
           credential_score?: number | null
           credential_score_updated_at?: string | null
           dispatch_priority?: number
+          emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
           latitude?: number | null
@@ -1973,6 +2049,54 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_doctor_affiliations: {
+        Row: {
+          created_at: string
+          department: string | null
+          doctor_id: string
+          hospital_id: string
+          id: string
+          is_active: boolean
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          doctor_id: string
+          hospital_id: string
+          id?: string
+          is_active?: boolean
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          doctor_id?: string
+          hospital_id?: string
+          id?: string
+          is_active?: boolean
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_doctor_affiliations_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_doctor_affiliations_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
             referencedColumns: ["id"]
           },
         ]
