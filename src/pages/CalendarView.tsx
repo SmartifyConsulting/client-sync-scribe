@@ -129,6 +129,7 @@ export default function CalendarView() {
     setScopeState(s);
     localStorage.setItem("calendar-scope", s);
   };
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('all');
   // Fall back to "mine" if no practice exists
   useEffect(() => {
     if (scope === 'practice' && !practice) setScopeState('mine');
@@ -183,6 +184,9 @@ export default function CalendarView() {
 
         if (scope === 'practice' && practice) {
           query = query.eq('practice_id', practice.id);
+          if (selectedDoctorId !== 'all') {
+            query = query.eq('user_id', selectedDoctorId);
+          }
         } else {
           query = query.eq('user_id', user.id);
         }
@@ -219,7 +223,7 @@ export default function CalendarView() {
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, scope, practice?.id, members.length, user?.id]);
+  }, [selectedDate, scope, practice?.id, members.length, user?.id, selectedDoctorId]);
 
   const currentDate = new Date();
   const monthName = selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -414,6 +418,27 @@ export default function CalendarView() {
                 </button>
               ))}
             </div>
+          )}
+          {practice && scope === 'practice' && members.length > 0 && (
+            <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
+              <SelectTrigger className="h-8 w-[200px] text-xs">
+                <SelectValue placeholder="Filter doctor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All doctors in practice</SelectItem>
+                {members.map((m) => (
+                  <SelectItem key={m.doctor_id} value={m.doctor_id}>
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: m.practice_color || '#0EA5E9' }}
+                      />
+                      {m.full_name || 'Doctor'}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
           {!calendarLoading && (
             isConnected ? (
