@@ -37,6 +37,7 @@ import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
+import HospitalAffiliations from "@/components/doctor/HospitalAffiliations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
