@@ -46,9 +46,8 @@ import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherence
 import { MonthlyAdherenceSummary } from "@/components/rewards/MonthlyAdherenceSummary";
 import { TodaysMedicationsCard } from "@/components/rewards/TodaysMedicationsCard";
 import { useToast } from "@/hooks/use-toast";
-import { VulaExplainerDialog, VulaExplainerContent } from "@/features/rewards/components/VulaExplainerDialog";
+import { VulaExplainerDialog } from "@/features/rewards/components/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
-import vulaVaultLogo from "@/assets/vula-vault-logo.png";
 import vulaVaultVendors from "@/assets/vula-vault-vendors.png";
 
 const VAULT_UNLOCK_THRESHOLD = 2000;
@@ -752,19 +751,9 @@ export default function MyRewards() {
             const progressPct = Math.min(100, (lollipopCount / VAULT_UNLOCK_THRESHOLD) * 100);
             return (
               <>
-                {/* What are Vulas — inline explainer */}
-                <Card className="border-0 p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 ring-1 ring-blue-500/20">
-                  <VulaExplainerContent hideCta />
-                </Card>
-
                 {/* Vula Vault brand card */}
                 <Card className="border-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/5 via-background to-teal-500/5 ring-1 ring-blue-500/30">
                   <CardHeader className="items-center text-center pb-2">
-                    <img
-                      src={vulaVaultLogo}
-                      alt="Vula Vault"
-                      className="h-36 md:h-44 w-auto object-contain mx-auto"
-                    />
                     <CardDescription className="text-base text-foreground/80 max-w-md mx-auto pt-2">
                       Redeem your Vulas at participating retailers through your Vula Vault.
                     </CardDescription>
