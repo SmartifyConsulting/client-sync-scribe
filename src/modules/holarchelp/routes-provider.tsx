@@ -11,6 +11,7 @@ import TriageScreen from "./pages/provider/hospital/TriageScreen";
 import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
 import ErCapacityScreen from "./pages/provider/hospital/ErCapacityScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
+import AffiliatedDoctorsScreen from "./pages/provider/hospital/AffiliatedDoctorsScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
 
 import AmbulanceOpsLayout from "./pages/provider/ambulance/AmbulanceOpsLayout";
