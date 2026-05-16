@@ -1,6 +1,21 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History, Vault } from "lucide-react";
+import {
+  Loader2,
+  Trophy,
+  Target,
+  Flame,
+  Gift,
+  Star,
+  Video,
+  Send,
+  ArrowRightLeft,
+  Pill,
+  ArrowLeft,
+  Info,
+  History,
+  Vault,
+} from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,14 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -24,19 +32,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { format, parseISO, differenceInDays, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useMyRewards, useMyStreaks, useMyChronicPatientId } from "@/hooks/usePatientRewards";
@@ -46,11 +43,8 @@ import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherence
 import { MonthlyAdherenceSummary } from "@/components/rewards/MonthlyAdherenceSummary";
 import { TodaysMedicationsCard } from "@/components/rewards/TodaysMedicationsCard";
 import { useToast } from "@/hooks/use-toast";
-import { VulaExplainerDialog } from "@/features/rewards/components/VulaExplainerDialog";
+import { VulaExplainerDialog } from "@/components/rewards/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
-import vulaVaultLogo from "@/assets/vula-vault-logo.png";
-
-const VAULT_UNLOCK_THRESHOLD = 2000;
 
 const MILESTONES = [
   { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
@@ -59,7 +53,6 @@ const MILESTONES = [
   { count: 50, label: "Wellness Warrior", icon: "⚔️", color: "text-orange-500" },
   { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
 ];
-
 
 interface PartnerApp {
   id: string;
@@ -97,7 +90,9 @@ export default function MyRewards() {
     if (v === "history") next = "overview";
     else if (v === "streaks" || v === "milestones" || v === "wins" || v === "wins-and-streaks") next = "wins-streaks";
     setActiveTabRaw(next);
-    try { localStorage.setItem("rewards_last_tab_v1", next); } catch {}
+    try {
+      localStorage.setItem("rewards_last_tab_v1", next);
+    } catch {}
   };
   const [showTransferDialog, setShowTransferDialog] = useState(false);
   const [transferFromAppId, setTransferFromAppId] = useState("");
@@ -118,7 +113,13 @@ export default function MyRewards() {
   useEffect(() => {
     if (hasAutoSwitched) return;
     if (!patientRecord?.is_chronic) return;
-    const stored = (() => { try { return localStorage.getItem("rewards_last_tab_v1"); } catch { return null; } })();
+    const stored = (() => {
+      try {
+        return localStorage.getItem("rewards_last_tab_v1");
+      } catch {
+        return null;
+      }
+    })();
     if (!stored || stored === "overview") {
       setActiveTabRaw("chronic-meds");
     }
@@ -130,16 +131,10 @@ export default function MyRewards() {
     setActiveTab("chronic-meds");
   };
 
-
-
   const { data: partnerApps = [] } = useQuery({
     queryKey: ["vula-partner-apps"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("vula_partner_apps")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
+      const { data, error } = await supabase.from("vula_partner_apps").select("*").eq("is_active", true).order("name");
       if (error) throw error;
       return (data || []) as PartnerApp[];
     },
@@ -148,7 +143,9 @@ export default function MyRewards() {
   const { data: transfers = [] } = useQuery({
     queryKey: ["vula-transfers"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
       const { data, error } = await supabase
         .from("vula_transfers")
@@ -162,7 +159,9 @@ export default function MyRewards() {
 
   const transferMutation = useMutation({
     mutationFn: async ({ appId, amount }: { appId: string; amount: number }) => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       if (amount > lollipopCount) throw new Error("Insufficient Vulas");
@@ -188,15 +187,13 @@ export default function MyRewards() {
       }
 
       // Insert negative reward to deduct balance
-      const { error: deductError } = await supabase
-        .from("patient_rewards")
-        .insert({
-          patient_id: patient.id,
-          awarded_by: user.id,
-          lollipops_count: -amount,
-          visit_category: isVault ? "Vula Vault" : "Vula Transfer",
-          reward_type: "transfer",
-        });
+      const { error: deductError } = await supabase.from("patient_rewards").insert({
+        patient_id: patient.id,
+        awarded_by: user.id,
+        lollipops_count: -amount,
+        visit_category: isVault ? "Vula Vault" : "Vula Transfer",
+        reward_type: "transfer",
+      });
       if (deductError) throw deductError;
     },
     onSuccess: () => {
@@ -239,9 +236,7 @@ export default function MyRewards() {
       items.push({
         id: `t-${t.id}`,
         date: parseISO(t.created_at),
-        label: t.vula_partner_apps?.name
-          ? `Transfer to ${t.vula_partner_apps.name}`
-          : "Vula Transfer",
+        label: t.vula_partner_apps?.name ? `Transfer to ${t.vula_partner_apps.name}` : "Vula Transfer",
         amount: -Math.abs(t.amount),
         kind: "transfer",
       });
@@ -284,13 +279,11 @@ export default function MyRewards() {
     );
   }
 
-  const currentMilestone = MILESTONES.filter(m => lollipopCount >= m.count).pop();
-  const nextMilestone = MILESTONES.find(m => lollipopCount < m.count);
-  const progressToNext = nextMilestone
-    ? Math.round((lollipopCount / nextMilestone.count) * 100)
-    : 100;
+  const currentMilestone = MILESTONES.filter((m) => lollipopCount >= m.count).pop();
+  const nextMilestone = MILESTONES.find((m) => lollipopCount < m.count);
+  const progressToNext = nextMilestone ? Math.round((lollipopCount / nextMilestone.count) * 100) : 100;
 
-  const activeStreaks = streaks.filter(s => s.current_streak > 0);
+  const activeStreaks = streaks.filter((s) => s.current_streak > 0);
   const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
 
   return (
@@ -313,9 +306,7 @@ export default function MyRewards() {
                 What are Vulas?
               </button>
             </div>
-            <p className="mt-1 text-muted-foreground text-[12px]">
-              Track your Vulas, milestones, and health streaks
-            </p>
+            <p className="mt-1 text-muted-foreground text-[12px]">Track your Vulas, milestones, and health streaks</p>
           </div>
         </div>
         {partnerApps.length > 0 && (
@@ -332,7 +323,8 @@ export default function MyRewards() {
           <DialogHeader>
             <DialogTitle>Transfer Vulas</DialogTitle>
             <DialogDescription>
-              Send your Vulas to a linked partner app. Available balance: {lollipopCount} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" />
+              Send your Vulas to a linked partner app. Available balance: {lollipopCount}{" "}
+              <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" />
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -345,7 +337,9 @@ export default function MyRewards() {
                 <SelectContent>
                   <SelectItem value="wallet">My Vula Vault</SelectItem>
                   {partnerApps.map((app) => (
-                    <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                    <SelectItem key={app.id} value={app.id}>
+                      {app.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -359,7 +353,9 @@ export default function MyRewards() {
                 <SelectContent>
                   <SelectItem value="vault">Vula Vault</SelectItem>
                   {partnerApps.map((app) => (
-                    <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                    <SelectItem key={app.id} value={app.id}>
+                      {app.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -374,16 +370,31 @@ export default function MyRewards() {
                 value={transferAmount}
                 onChange={(e) => setTransferAmount(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">Max: {lollipopCount} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block" /></p>
+              <p className="text-xs text-muted-foreground">
+                Max: {lollipopCount}{" "}
+                <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block" />
+              </p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowTransferDialog(false)}>
+              Cancel
+            </Button>
             <Button
               onClick={() => transferMutation.mutate({ appId: transferToAppId, amount: parseInt(transferAmount) || 0 })}
-              disabled={!transferToAppId || !transferAmount || parseInt(transferAmount) <= 0 || parseInt(transferAmount) > lollipopCount || transferMutation.isPending}
+              disabled={
+                !transferToAppId ||
+                !transferAmount ||
+                parseInt(transferAmount) <= 0 ||
+                parseInt(transferAmount) > lollipopCount ||
+                transferMutation.isPending
+              }
             >
-              {transferMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              {transferMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
               Transfer
             </Button>
           </DialogFooter>
@@ -411,9 +422,7 @@ export default function MyRewards() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] md:text-sm font-medium text-blue-100">Current Level</p>
-                <p className="text-sm md:text-xl font-bold text-white">
-                  {currentMilestone?.label || "Beginner"}
-                </p>
+                <p className="text-sm md:text-xl font-bold text-white">{currentMilestone?.label || "Beginner"}</p>
               </div>
               <span className="text-2xl md:text-4xl">{currentMilestone?.icon || "🌱"}</span>
             </div>
@@ -445,7 +454,10 @@ export default function MyRewards() {
               variant="ghost"
               size="sm"
               className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2"
-              onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
+              onClick={() => {
+                setTransferToAppId("vault");
+                setShowTransferDialog(true);
+              }}
             >
               Transfer to Vault <ArrowRightLeft className="h-4 w-4" />
             </Button>
@@ -455,27 +467,43 @@ export default function MyRewards() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-primary">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+          <TabsTrigger
+            value="overview"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+          >
             Overview
           </TabsTrigger>
           {patientRecord?.is_chronic && (
-            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger
+              value="chronic-meds"
+              className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+            >
               <Pill className="h-4 w-4 mr-1" />
-              Chronic Meds
+              Chronic
             </TabsTrigger>
           )}
-          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+          <TabsTrigger
+            value="wins-streaks"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+          >
             <Trophy className="h-4 w-4 mr-1" />
             Wins and Streaks
           </TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-             Redeem
-           </TabsTrigger>
-         </TabsList>
+          <TabsTrigger
+            value="transfers"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+          >
+            Redeem
+          </TabsTrigger>
+        </TabsList>
 
         {patientRecord?.is_chronic && patientRecord?.id && (
           <TabsContent value="chronic-meds" className="space-y-6">
-            <MedicationAdherenceTab patientId={patientRecord.id} focusRxId={focusRxId} onFocusHandled={() => setFocusRxId(null)} />
+            <MedicationAdherenceTab
+              patientId={patientRecord.id}
+              focusRxId={focusRxId}
+              onFocusHandled={() => setFocusRxId(null)}
+            />
           </TabsContent>
         )}
 
@@ -508,14 +536,16 @@ export default function MyRewards() {
 
           <Card>
             <CardHeader>
-              <CardTitle>
-                Recent Rewards
-              </CardTitle>
+              <CardTitle>Recent Rewards</CardTitle>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-20 md:h-10 w-auto object-contain mx-auto mb-4" />
+                  <img
+                    src={vulaVouchersLogo}
+                    alt="Vula Vouchers"
+                    className="h-20 md:h-10 w-auto object-contain mx-auto mb-4"
+                  />
                   <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
                 </div>
               ) : (
@@ -531,8 +561,16 @@ export default function MyRewards() {
                           </p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                        +{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-6 md:h-3 w-auto object-contain inline-block ml-1" />
+                      <Badge
+                        variant="secondary"
+                        className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                      >
+                        +{reward.lollipops_count}{" "}
+                        <img
+                          src={vulaVouchersLogo}
+                          alt="Vula"
+                          className="h-6 md:h-3 w-auto object-contain inline-block ml-1"
+                        />
                       </Badge>
                     </div>
                   ))}
@@ -570,21 +608,20 @@ export default function MyRewards() {
                         <AccordionContent>
                           <div className="space-y-2">
                             {group.items.map((it) => (
-                              <div
-                                key={it.id}
-                                className="flex items-center justify-between p-3 rounded-lg bg-muted/40"
-                              >
+                              <div key={it.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/40">
                                 <div className="flex items-center gap-3 min-w-0">
                                   {it.kind === "earn" ? (
-                                    <img src={vulaVouchersLogo} alt="Vula" className="h-6 w-6 object-contain shrink-0" />
+                                    <img
+                                      src={vulaVouchersLogo}
+                                      alt="Vula"
+                                      className="h-6 w-6 object-contain shrink-0"
+                                    />
                                   ) : (
                                     <ArrowRightLeft className="h-5 w-5 text-blue-500 shrink-0" />
                                   )}
                                   <div className="min-w-0">
                                     <p className="font-medium truncate">{it.label}</p>
-                                    <p className="text-xs text-muted-foreground">
-                                      {format(it.date, "MMM d, yyyy")}
-                                    </p>
+                                    <p className="text-xs text-muted-foreground">{format(it.date, "MMM d, yyyy")}</p>
                                   </div>
                                 </div>
                                 <Badge
@@ -622,9 +659,7 @@ export default function MyRewards() {
                 <Trophy className="h-5 w-5 text-yellow-500" />
                 Wins
               </CardTitle>
-              <CardDescription>
-                Collect Vulas to unlock milestone badges
-              </CardDescription>
+              <CardDescription>Collect Vulas to unlock milestone badges</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -640,16 +675,10 @@ export default function MyRewards() {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className={`text-4xl ${!unlocked && "grayscale"}`}>
-                          {milestone.icon}
-                        </span>
+                        <span className={`text-4xl ${!unlocked && "grayscale"}`}>{milestone.icon}</span>
                         <div>
-                          <p className={`font-bold ${milestone.color}`}>
-                            {milestone.label}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {milestone.count} Vulas
-                          </p>
+                          <p className={`font-bold ${milestone.color}`}>{milestone.label}</p>
+                          <p className="text-sm text-muted-foreground">{milestone.count} Vulas</p>
                         </div>
                       </div>
                       {unlocked && (
@@ -665,9 +694,7 @@ export default function MyRewards() {
           </Card>
 
           {/* Monthly Adherence Summary */}
-          {patientRecord?.is_chronic && patientRecord?.id && (
-            <MonthlyAdherenceSummary patientId={patientRecord.id} />
-          )}
+          {patientRecord?.is_chronic && patientRecord?.id && <MonthlyAdherenceSummary patientId={patientRecord.id} />}
 
           {/* Streaks */}
           <Card>
@@ -676,9 +703,7 @@ export default function MyRewards() {
                 <Flame className="h-5 w-5 text-orange-500" />
                 Health Streaks
               </CardTitle>
-              <CardDescription>
-                Maintain regular health checkups to earn bonus Vulas
-              </CardDescription>
+              <CardDescription>Maintain regular health checkups to earn bonus Vulas</CardDescription>
             </CardHeader>
             <CardContent>
               {streaks.length === 0 ? (
@@ -710,7 +735,9 @@ export default function MyRewards() {
                           </div>
                           <div className="text-right">
                             <div className="flex items-center gap-1">
-                              <Flame className={`h-5 w-5 ${streak.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`} />
+                              <Flame
+                                className={`h-5 w-5 ${streak.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
+                              />
                               <span className="text-2xl font-bold">{streak.current_streak}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">streak</p>
@@ -724,16 +751,15 @@ export default function MyRewards() {
                           </div>
                           {daysUntilDue !== null && (
                             <Badge variant={isOverdue ? "destructive" : "secondary"}>
-                              {isOverdue
-                                ? `${Math.abs(daysUntilDue)} days overdue`
-                                : `Due in ${daysUntilDue} days`
-                              }
+                              {isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : `Due in ${daysUntilDue} days`}
                             </Badge>
                           )}
                         </div>
 
                         <div className="mt-2 text-xs text-muted-foreground">
-                          Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" /> per completion
+                          Earns: {streak.lollipops_awarded}{" "}
+                          <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" />{" "}
+                          per completion
                         </div>
                       </div>
                     );
@@ -745,69 +771,28 @@ export default function MyRewards() {
         </TabsContent>
 
         <TabsContent value="transfers" className="space-y-6">
-          {(() => {
-            const isUnlocked = lollipopCount >= VAULT_UNLOCK_THRESHOLD;
-            const remaining = Math.max(0, VAULT_UNLOCK_THRESHOLD - lollipopCount);
-            const progressPct = Math.min(100, (lollipopCount / VAULT_UNLOCK_THRESHOLD) * 100);
-            return (
-              <Card className="relative border-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/5 via-background to-teal-500/5 ring-1 ring-blue-500/30">
-                {/* What are Vulas? info icon */}
-                <button
-                  type="button"
-                  onClick={() => setShowVulaExplainer(true)}
-                  aria-label="What are Vulas?"
-                  className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full flex items-center justify-center bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 transition-colors"
-                >
-                  <Info className="h-4 w-4" />
-                </button>
-
-                <CardHeader className="items-center text-center pb-2">
-                  <img
-                    src={vulaVaultLogo}
-                    alt="Vula Vault"
-                    className="h-36 md:h-44 w-auto object-contain mx-auto"
-                  />
-                  <CardDescription className="text-base text-foreground/80 max-w-md mx-auto pt-2">
-                    Redeem your Vulas at participating retailers through your Vula Vault.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="max-w-md mx-auto space-y-3">
-                    {isUnlocked ? (
-                      <p className="text-center text-sm font-semibold bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
-                        Your Vula Vault is unlocked!
-                      </p>
-                    ) : (
-                      <>
-                        <p className="text-center text-sm text-foreground">
-                          Earn <span className="font-bold">{remaining.toLocaleString()}</span> more Vulas to unlock your Vula Vault.
-                        </p>
-                        <Progress value={progressPct} className="h-2" />
-                        <p className="text-center text-xs text-muted-foreground">
-                          {lollipopCount.toLocaleString()} / {VAULT_UNLOCK_THRESHOLD.toLocaleString()} Vulas
-                        </p>
-                      </>
-                    )}
-
-                    <div className="flex justify-center">
-                      <Button
-                        disabled={!isUnlocked}
-                        onClick={() => window.open("https://secure.6dot50.com/lite/default", "_blank", "noopener,noreferrer")}
-                        className="gap-2 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white shadow-md"
-                        size="lg"
-                      >
-                        <Vault className="h-4 w-4" />
-                        {isUnlocked ? "Redeem at Vula Vault" : `Locked — ${VAULT_UNLOCK_THRESHOLD.toLocaleString()} Vulas required`}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })()}
+          {/* Vula Vault */}
+          <Card className="border-primary/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Vault className="h-5 w-5 text-primary" />
+                Vula Vault
+              </CardTitle>
+              <CardDescription>
+                Sign in to your Vula Vault to redeem your Vulas at participating retailers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => window.open("https://secure.6dot50.com/lite/default", "_blank", "noopener,noreferrer")}
+                className="gap-2"
+              >
+                <Vault className="h-4 w-4" /> Redeem at Vula Vault
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
   );
 }
-
