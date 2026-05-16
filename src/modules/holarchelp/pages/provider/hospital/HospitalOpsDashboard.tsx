@@ -1,0 +1,154 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useProviderAccess } from "../../../components/ProviderGate";
+import { EtaCountdown } from "../../../components/EtaCountdown";
+import { Ambulance, ChevronRight, AlertTriangle } from "lucide-react";
+
+type Row = {
+  id: string; status: string; severity: string | null;
+  created_at: string; eta_minutes: number | null; last_eta_update: string | null;
+  assigned_provider_id: string | null;
+  incident_type?: string | null; user_id?: string | null;
+  conscious: boolean | null; breathing: boolean | null;
+};
+
+const sevTone = (s: string | null) =>
+  s === "critical" ? "bg-red-500/15 text-red-700 border-red-500/40"
+  : s === "high" ? "bg-orange-500/15 text-orange-700 border-orange-500/40"
+  : s === "moderate" ? "bg-yellow-500/15 text-yellow-700 border-yellow-500/40"
+  : "bg-muted text-muted-foreground border-border";
+
+const statusTone = (s: string) =>
+  s === "en_route_to_hospital" ? "bg-primary/10 text-primary border-primary/30"
+  : s === "at_hospital" ? "bg-green-500/10 text-green-700 border-green-500/30"
+  : s === "arrived" || s === "patient_collected" ? "bg-orange-500/10 text-orange-700 border-orange-500/30"
+  : "bg-muted text-muted-foreground border-border";
+
+const ago = (iso: string) => {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  return `${Math.floor(s / 3600)}h`;
+};
+
+export default function HospitalOpsDashboard() {
+  const { providerId } = useProviderAccess();
+  const [rows, setRows] = useState<Row[]>([]);
+  const [crews, setCrews] = useState<Record<string,string>>({});
+  const [patients, setPatients] = useState<Record<string,string>>({});
+
+  const load = async () => {
+    if (!providerId) return;
+    const { data } = await supabase.from("holarchelp_incidents" as any)
+      .select("*")
+      .eq("destination_hospital_id", providerId)
+      .in("status", ["assigned","en_route","arrived","patient_collected","en_route_to_hospital","at_hospital"])
+      .order("created_at", { ascending: false }).limit(200);
+    const list = ((data as any) ?? []) as Row[];
+    setRows(list);
+
+    const ambIds = Array.from(new Set(list.map(r => r.assigned_provider_id).filter(Boolean))) as string[];
+    const userIds = Array.from(new Set(list.map(r => r.user_id).filter(Boolean))) as string[];
+    if (ambIds.length) {
+      const { data: amb } = await supabase.from("holarchelp_ambulance_providers" as any)
+        .select("id, company_name").in("id", ambIds);
+      const m: Record<string,string> = {};
+      ((amb as any) ?? []).forEach((a: any) => { m[a.id] = a.company_name; });
+      setCrews(m);
+    }
+    if (userIds.length) {
+      const { data: profs } = await supabase.from("profiles" as any)
+        .select("id, full_name").in("id", userIds);
+      const m: Record<string,string> = {};
+      ((profs as any) ?? []).forEach((p: any) => { m[p.id] = p.full_name; });
+      setPatients(m);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    if (!providerId) return;
+    const ch = supabase.channel(`hosp-queue-${providerId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents", filter: `destination_hospital_id=eq.${providerId}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [providerId]);
+
+  return (
+    <div className="space-y-4">
+      <header className="flex items-end justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hospital Emergency Operations</p>
+          <h1 className="text-2xl font-extrabold leading-tight">Live Emergency Queue</h1>
+        </div>
+        <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">{rows.length} active</span>
+      </header>
+
+      <div className="overflow-hidden rounded-2xl border bg-card">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2 text-left">Patient</th>
+              <th className="px-3 py-2 text-left">Severity</th>
+              <th className="px-3 py-2 text-left">Incident</th>
+              <th className="px-3 py-2 text-left">Ambulance</th>
+              <th className="px-3 py-2 text-right">ETA</th>
+              <th className="px-3 py-2 text-left">Status</th>
+              <th className="px-3 py-2" />
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {rows.map((r) => (
+              <tr key={r.id} className="transition hover:bg-muted/40">
+                <td className="px-3 py-2">
+                  <p className="font-semibold">{r.user_id ? (patients[r.user_id] ?? `Patient ${r.id.slice(0,6)}`) : `Incident ${r.id.slice(0,6)}`}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {r.conscious === false && <span className="text-destructive font-semibold">Unconscious · </span>}
+                    {r.breathing === false && <span className="text-destructive font-semibold">Not breathing · </span>}
+                    Triggered {ago(r.created_at)} ago
+                  </p>
+                </td>
+                <td className="px-3 py-2">
+                  <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${sevTone(r.severity)}`}>
+                    {(r.severity ?? "—").toUpperCase()}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-xs">{r.incident_type ?? "Emergency"}</td>
+                <td className="px-3 py-2 text-xs">
+                  <span className="inline-flex items-center gap-1"><Ambulance className="h-3.5 w-3.5 text-red-600" />
+                    {crews[r.assigned_provider_id ?? ""] ?? "—"}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-right">
+                  {r.eta_minutes != null
+                    ? <span className="text-base font-extrabold tabular-nums"><EtaCountdown etaMinutes={r.eta_minutes} lastUpdate={r.last_eta_update} /></span>
+                    : <span className="text-[10px] uppercase text-muted-foreground">—</span>}
+                </td>
+                <td className="px-3 py-2">
+                  <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${statusTone(r.status)}`}>
+                    {r.status.replace(/_/g," ")}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-right">
+                  <Link to={`/provider/hospital/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted">
+                    Open <ChevronRight className="h-3 w-3" />
+                  </Link>
+                </td>
+              </tr>
+            ))}
+            {!rows.length && (
+              <tr>
+                <td colSpan={7} className="p-8 text-center text-xs text-muted-foreground">
+                  <AlertTriangle className="mx-auto mb-1 h-4 w-4 opacity-50" />
+                  No active emergencies in your queue.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

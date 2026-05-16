@@ -23,7 +23,7 @@ export function HospitalInboundListener() {
           description: n.description,
           action: n.reference_id ? {
             label: "Open",
-            onClick: () => navigate(`/provider/incident/${n.reference_id}`),
+            onClick: () => navigate(`/provider/hospital/incident/${n.reference_id}`),
           } : undefined,
           duration: 12_000,
         });
