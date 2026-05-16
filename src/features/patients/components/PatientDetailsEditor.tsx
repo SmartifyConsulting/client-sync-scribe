@@ -2547,7 +2547,7 @@ export function PatientDetailsEditor({
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-3">
               <div className="space-y-3">
                 {/* General Information */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card">
