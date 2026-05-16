@@ -185,7 +185,7 @@ const SectionHeader = ({
   extra?: React.ReactNode;
   onEdit?: () => void;
 }) => (
-  <CollapsibleTrigger className="flex w-full items-center justify-between border-b border-border hover:bg-muted/40 transition-colors px-4 py-3 group">
+  <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-muted/40 transition-colors px-4 py-3 group">
     <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
       <Icon className="h-4 w-4 text-primary" /> {label}
     </h3>
@@ -1274,9 +1274,9 @@ export function PatientDetailsEditor({
           </div>
           {/* Vula Vouchers inline on desktop only (tablet shows below "What's happening") */}
           {!rewardsLoading && lollipopCount !== undefined && (
-            <div className="hidden lg:flex shrink-0 items-start gap-3 ml-auto">
+            <div className="hidden lg:flex shrink-0 items-center gap-3 ml-auto">
               <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[60px] w-auto object-contain" />
-              <span className="text-4xl font-bold leading-none pt-1 bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
@@ -1324,9 +1324,9 @@ export function PatientDetailsEditor({
         {/* Row 3: Vula Vouchers - mobile + tablet (desktop shows inline above) */}
         {!rewardsLoading && lollipopCount !== undefined && (
           <div className="mt-3 border-t border-border pt-3 lg:hidden">
-            <div className="flex items-start justify-center gap-2">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[60px] md:h-[60px] w-auto object-contain" />
-              <span className="text-4xl font-bold leading-none pt-1 bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+            <div className="flex items-center justify-center gap-2">
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[60px] w-auto object-contain" />
+              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
@@ -1497,9 +1497,9 @@ export function PatientDetailsEditor({
             <AvatarFallback className="bg-primary/10 text-primary text-base font-semibold">{initials}</AvatarFallback>
           </Avatar>
           {/* Vula counter + logo */}
-          <div className="flex-1 min-w-0 flex items-start gap-2">
+          <div className="flex-1 min-w-0 flex items-center gap-2">
             <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-6 w-auto object-contain" />
-            <span className="text-xl font-bold leading-none pt-0.5 bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
               <AnimatedCounter target={lollipopCount} />
             </span>
           </div>
