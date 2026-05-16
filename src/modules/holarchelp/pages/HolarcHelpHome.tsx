@@ -5,37 +5,26 @@ import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Check, Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
-import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
-// DoctorSosChooser removed — patient SOS is always self.
 import logo from "@/assets/holarc-help-logo.png";
 
 type Coords = { lat: number; lng: number };
 
 export default function HolarcHelpHome() {
   const { user } = useAuth();
-  
+
   const navigate = useNavigate();
   const [activeIncidentId, setActiveIncidentId] = useState<string | null>(null);
   const [triggering, setTriggering] = useState(false);
-  
+
   const [permDenied, setPermDenied] = useState(false);
-  const [coords, setCoords] = useState<Coords | null>(null);
-  const [incidentId, setIncidentId] = useState<string | null>(null);
-  const [helpOnTheWay, setHelpOnTheWay] = useState(false);
-  const [severityOpen, setSeverityOpen] = useState(false);
-  const [voiceNoteOpen, setVoiceNoteOpen] = useState(false);
   const [hasEmergency, setHasEmergency] = useState<boolean | null>(null);
-  const [contactsNotified, setContactsNotified] = useState(false);
-  const [providerAssigned, setProviderAssigned] = useState(false);
-  const [cancelSecondsLeft, setCancelSecondsLeft] = useState(10);
   const channelRef = useRef<any>(null);
 
   type AckKey = "a" | "b" | "c";
-  // Always require fresh acknowledgement each session — never persisted.
-  const [ack, setAck] = useState<Record<AckKey, boolean>>({ a: false, b: false, c: false });
+  // Default ticked — patient can untick if they want, but SOS should be one-tap by default.
+  const [ack, setAck] = useState<Record<AckKey, boolean>>({ a: true, b: true, c: true });
   const allAck = ack.a && ack.b && ack.c;
   const setAckField = (k: AckKey, v: boolean) => {
     setAck((prev) => ({ ...prev, [k]: v }));
@@ -57,78 +46,9 @@ export default function HolarcHelpHome() {
       .eq("user_id", user.id).in("status", ["open", "assigned", "en_route", "arrived", "patient_collected", "at_hospital", "reopened"])
       .order("created_at", { ascending: false }).limit(1).maybeSingle()
       .then(({ data }: any) => {
-        if (data?.id) {
-          // Track active incident so user can resume — but don't trap them on this page.
-          const ageMs = Date.now() - new Date(data.created_at).getTime();
-          setActiveIncidentId(data.id);
-          if (ageMs > 30_000) {
-            // Older incident: just surface a Resume banner, leave user free to navigate.
-            return;
-          }
-          setIncidentId(data.id);
-          if (data.assigned_provider_id || data.accepted_at) {
-            setHelpOnTheWay(true);
-            setProviderAssigned(true);
-          }
-        }
+        if (data?.id) setActiveIncidentId(data.id);
       });
-  }, [user, navigate]);
-
-  // Safety timeouts so confirmation spinners can never hang
-  useEffect(() => {
-    if (!incidentId) return;
-    const t1 = setTimeout(() => setContactsNotified(true), 8000);
-    const t2 = setTimeout(() => setProviderAssigned((v) => v || false) /* noop */, 0);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [incidentId]);
-
-  const [searchTimedOut, setSearchTimedOut] = useState(false);
-  useEffect(() => {
-    if (!incidentId || providerAssigned) return;
-    setSearchTimedOut(false);
-    const t = setTimeout(() => setSearchTimedOut(true), 30000);
-    return () => clearTimeout(t);
-  }, [incidentId, providerAssigned]);
-
-  // Realtime subscription for the active incident
-  useEffect(() => {
-    if (!incidentId) return;
-    const ch = supabase
-      .channel(`incident-${incidentId}`)
-      .on("postgres_changes",
-        { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${incidentId}` },
-        (payload: any) => {
-          const row = payload.new;
-          if (row.assigned_provider_id || row.accepted_at) {
-            setHelpOnTheWay(true);
-            setProviderAssigned(true);
-          }
-          if (row.status && ["completed", "cancelled"].includes(row.status)) {
-            setIncidentId(null);
-            setHelpOnTheWay(false);
-            setCoords(null);
-            setActiveIncidentId(null);
-            setProviderAssigned(false);
-            setContactsNotified(false);
-          }
-        })
-      .subscribe();
-    channelRef.current = ch;
-    return () => { supabase.removeChannel(ch); };
-  }, [incidentId]);
-
-  // Cancel countdown after triggering
-  useEffect(() => {
-    if (!incidentId || helpOnTheWay) return;
-    setCancelSecondsLeft(10);
-    const t = setInterval(() => {
-      setCancelSecondsLeft((s) => {
-        if (s <= 1) { clearInterval(t); return 0; }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(t);
-  }, [incidentId, helpOnTheWay]);
+  }, [user]);
 
   const triggerSOS = async () => {
     if (!user || triggering) return;
@@ -147,7 +67,6 @@ export default function HolarcHelpHome() {
       });
       if (!pos) { setTriggering(false); return; }
       setPermDenied(false);
-      setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
 
       let coverage: "public" | "private" = "public";
       try {
@@ -172,18 +91,21 @@ export default function HolarcHelpHome() {
       });
 
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
-      setIncidentId((incident as any).id);
-      setActiveIncidentId((incident as any).id);
-      // Don't block on missing contacts — just inform the user.
+
       if (hasEmergency === false) {
         toast.message("SOS sent. Add an emergency contact later so we can also notify someone you trust.");
       }
+
+      // Fire-and-forget dispatch + in-app notification to emergency contacts
       supabase.functions.invoke("dispatch-sos", { body: { incident_id: (incident as any).id } })
         .catch((e) => console.warn("dispatch-sos failed", e));
       supabase.functions.invoke("share-incident-with-contacts", {
         body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
-      }).then(() => setContactsNotified(true)).catch((e) => console.warn("share-incident-with-contacts failed", e));
-      setVoiceNoteOpen(true);
+      }).catch((e) => console.warn("share-incident-with-contacts failed", e));
+
+      // Route patient straight to the live incident page where they see the
+      // list of available ambulances/hospitals to choose from.
+      navigate(`/patient/holarchelp/incident/${(incident as any).id}?fresh=1`);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not trigger SOS");
     } finally {
@@ -191,27 +113,6 @@ export default function HolarcHelpHome() {
     }
   };
 
-  const finishSeverity = async (severity: SeverityResult | null) => {
-    setSeverityOpen(false);
-    if (!incidentId || !severity) return;
-    await supabase.from("holarchelp_incidents" as any).update({
-      severity: severity.severity,
-      conscious: severity.conscious,
-      breathing: severity.breathing,
-    } as any).eq("id", incidentId);
-    supabase.functions.invoke("share-incident-with-contacts", {
-      body: { incident_id: incidentId },
-    }).catch((e) => console.warn("share-incident-with-contacts (severity) failed", e));
-  };
-
-  const cancelAlert = async () => {
-    if (!incidentId) return;
-    await supabase.from("holarchelp_incidents" as any)
-      .update({ status: "cancelled", resolved_at: new Date().toISOString() } as any).eq("id", incidentId);
-    toast.success("Alert cancelled");
-  };
-
-  // ============ TAP-TO-TRIGGER ============
   const handleSosClick = () => {
     if (triggering) return;
     if (!activeIncidentId && !allAck) {
@@ -226,76 +127,7 @@ export default function HolarcHelpHome() {
     }
   };
 
-
   // ============ RENDER ============
-
-  // Confirmation state — after trigger
-  if (incidentId) {
-    const steps = [
-      { label: "Location shared", done: !!coords },
-      { label: "Contacts notified", done: contactsNotified },
-      {
-        label: providerAssigned
-          ? "Responder assigned"
-          : searchTimedOut
-            ? "Still searching — open live tracking"
-            : "Searching for nearby providers",
-        done: providerAssigned,
-        stopSpin: searchTimedOut && !providerAssigned,
-      },
-    ];
-    return (
-      <div className="mx-auto max-w-md px-5 py-10">
-        <SosVoiceNoteDialog
-          open={voiceNoteOpen}
-          incidentId={incidentId}
-          onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
-        />
-        <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
-
-        <div className="text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 animate-scale-in">
-            <Check className="h-10 w-10 text-white" strokeWidth={3} />
-          </div>
-          <h1 className="mt-6 text-3xl font-extrabold tracking-tight">Help is on the way</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Notifying your emergency contacts and nearby responders</p>
-        </div>
-
-        <ul className="mt-8 space-y-3">
-          {steps.map((s, i) => (
-            <li key={i} className="flex items-center gap-3 rounded-2xl border bg-card p-4">
-              {s.done ? (
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                  <Check className="h-4 w-4 text-emerald-700" strokeWidth={3} />
-                </span>
-              ) : (
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Loader2 className={`h-4 w-4 text-muted-foreground ${s.stopSpin ? "" : "animate-spin"}`} />
-                </span>
-              )}
-              <span className={`text-sm font-semibold ${s.done ? "text-foreground" : "text-muted-foreground"}`}>{s.label}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-8 space-y-3">
-          <Button
-            className="w-full h-12 rounded-2xl"
-            onClick={() => navigate(`/patient/holarchelp/incident/${incidentId}`)}
-          >
-            View live tracking →
-          </Button>
-          {cancelSecondsLeft > 0 && !helpOnTheWay && (
-            <Button variant="outline" className="w-full h-12 rounded-2xl" onClick={cancelAlert}>
-              Cancel alert ({cancelSecondsLeft}s)
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Landing state
   return (
     <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
       {/* Header */}
@@ -316,7 +148,7 @@ export default function HolarcHelpHome() {
             Before using SOS, please acknowledge:
           </p>
           {[
-          { k: "a" as const, label: "SOS support is provided on a best-effort basis and cannot guarantee emergency response." },
+            { k: "a" as const, label: "SOS support is provided on a best-effort basis and cannot guarantee emergency response." },
             { k: "b" as const, label: "SOS depends on network, device status, location access, and third-party responders." },
             { k: "c" as const, label: "SOS requires location permissions, battery power, and internet or cellular connectivity." },
           ].map((item) => (
@@ -365,13 +197,13 @@ export default function HolarcHelpHome() {
           </button>
         </div>
 
-        {/* Hint */}
-        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          Tap once to send SOS
+        {/* What happens when you tap SOS — static notice, no spinners */}
+        <p className="mt-6 max-w-xs text-center text-xs leading-relaxed text-muted-foreground">
+          Tapping SOS shares your location and notifies your emergency contacts.
         </p>
 
         {/* Active SOS — surfaced directly under the hint */}
-        {activeIncidentId && !incidentId && (
+        {activeIncidentId && (
           <button
             onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
             className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-red-500/60 bg-red-50 px-4 py-3 text-left shadow-sm transition hover:bg-red-100 dark:bg-red-950/20"
@@ -409,16 +241,16 @@ export default function HolarcHelpHome() {
       {/* Secondary actions */}
       <div className="mb-8 mt-6 flex flex-col items-center gap-2">
         <button
-          onClick={() => navigate("/patient/details?section=health")}
-          className="text-sm font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          onClick={() => navigate("/patient/holarchelp/contacts")}
+          className="text-xs font-semibold text-primary underline-offset-4 hover:underline"
         >
-          + Add someone we can notify
+          Manage emergency contacts
         </button>
         <button
-          onClick={() => navigate("/patient/holarchelp/contacts")}
-          className="text-xs text-muted-foreground/80 underline-offset-4 hover:text-foreground hover:underline"
+          onClick={() => navigate("/patient/holarchelp/incidents")}
+          className="text-xs font-semibold text-muted-foreground underline-offset-4 hover:underline"
         >
-          Set preferred responders
+          View incident history
         </button>
       </div>
     </div>

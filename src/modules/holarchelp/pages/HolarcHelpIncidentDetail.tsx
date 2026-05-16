@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
+import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveMap } from "../components/LiveMap";
 import { VoiceNoteAudio } from "../components/VoiceNoteAudio";
@@ -24,6 +26,8 @@ type Loc = { latitude: number; longitude: number; recorded_at: string };
 export default function HolarcHelpIncidentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isFresh = searchParams.get("fresh") === "1";
   const { user } = useAuth();
   const [incident, setIncident] = useState<any | null>(null);
   const [locations, setLocations] = useState<Loc[]>([]);
@@ -138,7 +142,36 @@ export default function HolarcHelpIncidentDetail() {
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
-  
+  // Fresh-trigger flow: voice note → severity picker, plus 10s cancel window
+  const [voiceNoteOpen, setVoiceNoteOpen] = useState(isFresh);
+  const [severityOpen, setSeverityOpen] = useState(false);
+  const [cancelSecondsLeft, setCancelSecondsLeft] = useState(isFresh ? 10 : 0);
+
+  useEffect(() => {
+    if (!isFresh) return;
+    if (cancelSecondsLeft <= 0) return;
+    const t = setTimeout(() => setCancelSecondsLeft((s) => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [isFresh, cancelSecondsLeft]);
+
+  const finishSeverity = async (severity: SeverityResult | null) => {
+    setSeverityOpen(false);
+    if (!id || !severity) return;
+    await supabase.from("holarchelp_incidents" as any).update({
+      severity: severity.severity,
+      conscious: severity.conscious,
+      breathing: severity.breathing,
+    } as any).eq("id", id);
+  };
+
+  const cancelAlert = async () => {
+    if (!id) return;
+    await supabase.from("holarchelp_incidents" as any)
+      .update({ status: "cancelled", resolved_at: new Date().toISOString() } as any).eq("id", id);
+    toast.success("Alert cancelled");
+    navigate("/patient/holarchelp");
+  };
+
 
   const [closeOpen, setCloseOpen] = useState(false);
   const [closureNote, setClosureNote] = useState("");
@@ -201,6 +234,24 @@ export default function HolarcHelpIncidentDetail() {
 
   return (
     <div className="mx-auto max-w-md pb-6">
+      <SosVoiceNoteDialog
+        open={voiceNoteOpen}
+        incidentId={id ?? null}
+        onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
+      />
+      <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
+
+      {isFresh && cancelSecondsLeft > 0 && isLive && (
+        <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 text-amber-900 dark:bg-amber-950/20 dark:text-amber-100">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider">False alarm?</p>
+            <p className="text-sm">You can still cancel for the next {cancelSecondsLeft}s.</p>
+          </div>
+          <Button size="sm" variant="outline" className="shrink-0" onClick={cancelAlert}>
+            Cancel alert
+          </Button>
+        </div>
+      )}
       {/* Sticky quick-action bar */}
       <div className="sticky top-0 z-30 -mx-4 mb-3 border-b bg-background/95 px-4 py-2 backdrop-blur md:mx-0 md:rounded-b-xl">
         <div className="flex items-center gap-1.5">

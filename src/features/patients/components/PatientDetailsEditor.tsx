@@ -351,27 +351,38 @@ const formatSurgeryDate = (date: string, precision?: string) => {
 };
 
 function AnimatedCounter({ target }: { target: number }) {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(target);
   const rafRef = useRef<number>();
   const startRef = useRef<number>();
+  const fromRef = useRef<number>(target);
+  const lastTargetRef = useRef<number>(target);
   useEffect(() => {
+    // Skip if target hasn't actually changed — prevents the double-animation
+    // that happens when lollipopCount arrives in two passes (0 → real value).
+    if (target === lastTargetRef.current && count === target) return;
+    lastTargetRef.current = target;
     if (target <= 0) {
       setCount(0);
+      fromRef.current = 0;
       return;
     }
+    const from = count;
+    fromRef.current = from;
     startRef.current = undefined;
-    const duration = 1500;
+    const duration = 1200;
+    const delta = target - from;
     const step = (ts: number) => {
       if (!startRef.current) startRef.current = ts;
       const progress = Math.min((ts - startRef.current) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
+      setCount(Math.round(from + delta * eased));
       if (progress < 1) rafRef.current = requestAnimationFrame(step);
     };
     rafRef.current = requestAnimationFrame(step);
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target]);
   return <span>{count}</span>;
 }
