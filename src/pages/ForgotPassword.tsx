@@ -55,6 +55,7 @@ export default function ForgotPassword() {
             >
               <img src={holarcLogo} alt="Holarc Health" className="h-[81px] w-auto" />
             </button>
+            <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
             <p className="text-muted-foreground mt-2">Reset your password</p>
           </div>
 
@@ -91,7 +92,9 @@ export default function ForgotPassword() {
                       required
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">Enter the email address associated with your account</p>
+                  <p className="text-xs text-muted-foreground">
+                    Enter the email address associated with your account
+                  </p>
                 </div>
 
                 <Button type="submit" className="w-full" disabled={loading}>
@@ -99,7 +102,12 @@ export default function ForgotPassword() {
                   Send Reset Link
                 </Button>
 
-                <Button type="button" variant="ghost" onClick={() => navigate("/auth")} className="w-full">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => navigate("/auth")}
+                  className="w-full"
+                >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Sign In
                 </Button>
