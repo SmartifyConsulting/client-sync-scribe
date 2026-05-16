@@ -487,7 +487,7 @@ export default function MyRewards() {
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
           >
             <Trophy className="h-4 w-4 mr-1" />
-            Wins and Streaks
+            Wins & Streaks
           </TabsTrigger>
           <TabsTrigger
             value="transfers"
