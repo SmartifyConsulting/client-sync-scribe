@@ -48,7 +48,8 @@ import { TodaysMedicationsCard } from "@/components/rewards/TodaysMedicationsCar
 import { useToast } from "@/hooks/use-toast";
 import { VulaExplainerDialog } from "@/features/rewards/components/VulaExplainerDialog";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
-import vulaVaultVendors from "@/assets/vula-vault-vendors.png";
+import vulaVaultLogo from "@/assets/vula-vault-logo.png";
+import vulaVaultMerchants from "@/assets/vula-vault-merchants.png";
 
 const VAULT_UNLOCK_THRESHOLD = 2000;
 
@@ -754,50 +755,32 @@ export default function MyRewards() {
                 {/* Vula Vault brand card */}
                 <Card className="border-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/5 via-background to-teal-500/5 ring-1 ring-blue-500/30">
                   <CardHeader className="items-center text-center pb-2">
+                    <img
+                      src={vulaVaultLogo}
+                      alt="Vula Vault"
+                      className="h-28 md:h-36 w-auto object-contain mx-auto"
+                    />
                     <CardDescription className="text-base text-foreground/80 max-w-md mx-auto pt-2">
                       Redeem your Vulas at participating retailers through your Vula Vault.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <img
-                        src={vulaVaultVendors}
-                        alt="Participating retailers where you can use your Vulas"
-                        className="w-full max-w-2xl mx-auto h-auto object-contain"
-                      />
-                      <p className="text-center text-xs text-muted-foreground">
-                        Use your Vulas at these participating retailers.
-                      </p>
-                    </div>
+                    <img
+                      src={vulaVaultMerchants}
+                      alt="Use your Vula Vouchers at these merchants"
+                      className="w-full max-w-3xl mx-auto h-auto object-contain"
+                    />
 
-                    <div className="max-w-md mx-auto space-y-3">
-                      {isUnlocked ? (
-                        <p className="text-center text-sm font-semibold bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
-                          Your Vula Vault is unlocked!
-                        </p>
-                      ) : (
-                        <>
-                          <p className="text-center text-sm text-foreground">
-                            Earn <span className="font-bold">{remaining.toLocaleString()}</span> more Vulas to unlock your Vula Vault.
-                          </p>
-                          <Progress value={progressPct} className="h-2" />
-                          <p className="text-center text-xs text-muted-foreground">
-                            {lollipopCount.toLocaleString()} / {VAULT_UNLOCK_THRESHOLD.toLocaleString()} Vulas
-                          </p>
-                        </>
-                      )}
-
-                      <div className="flex justify-center">
-                        <Button
-                          disabled={!isUnlocked}
-                          onClick={() => window.open("https://secure.6dot50.com/lite/default", "_blank", "noopener,noreferrer")}
-                          className="gap-2 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white shadow-md"
-                          size="lg"
-                        >
-                          <Vault className="h-4 w-4" />
-                          {isUnlocked ? "Redeem at Vula Vault" : `Locked — ${VAULT_UNLOCK_THRESHOLD.toLocaleString()} Vulas required`}
-                        </Button>
-                      </div>
+                    <div className="flex justify-center">
+                      <Button
+                        disabled={!isUnlocked}
+                        onClick={() => window.open("https://secure.6dot50.com/lite/default", "_blank", "noopener,noreferrer")}
+                        className="gap-2 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white shadow-md"
+                        size="lg"
+                      >
+                        <Vault className="h-4 w-4" />
+                        {isUnlocked ? "Redeem at Vula Vault" : `Locked — ${VAULT_UNLOCK_THRESHOLD.toLocaleString()} Vulas required`}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
