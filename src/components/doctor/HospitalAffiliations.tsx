@@ -78,7 +78,7 @@ export default function HospitalAffiliations() {
         owner_id: userId,
         name: search.trim(),
         contact_email: `pending+${Date.now()}@holarchealth.com`,
-        status: "inactive",
+        status: "pending",
       })
       .select("id, name")
       .single();
