@@ -1272,11 +1272,11 @@ export function PatientDetailsEditor({
               Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
           </div>
-          {/* Vula Vouchers inline on web */}
+          {/* Vula Vouchers inline on desktop only (tablet shows below "What's happening") */}
           {!rewardsLoading && lollipopCount !== undefined && (
-            <div className="hidden md:flex shrink-0 items-end gap-3 pb-1 ml-auto">
+            <div className="hidden lg:flex shrink-0 items-start gap-3 ml-auto">
               <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[60px] w-auto object-contain" />
-              <span className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+              <span className="text-4xl font-bold leading-none pt-1 bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
@@ -1321,12 +1321,12 @@ export function PatientDetailsEditor({
           )}
         </div>
 
-        {/* Row 3: Vula Vouchers - mobile only (shown inline on web) */}
+        {/* Row 3: Vula Vouchers - mobile + tablet (desktop shows inline above) */}
         {!rewardsLoading && lollipopCount !== undefined && (
-          <div className="mt-3 border-t border-border pt-3 md:hidden">
-            <div className="flex items-center justify-center gap-2">
-              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[44px] w-auto object-contain" />
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
+          <div className="mt-3 border-t border-border pt-3 lg:hidden">
+            <div className="flex items-start justify-center gap-2">
+              <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-[60px] md:h-[60px] w-auto object-contain" />
+              <span className="text-4xl font-bold leading-none pt-1 bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
                 <AnimatedCounter target={lollipopCount} />
               </span>
             </div>
