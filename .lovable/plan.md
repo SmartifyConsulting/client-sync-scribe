@@ -1,27 +1,25 @@
-# Switch auth emails to Mailgun
+## Findings
 
-## Current state
-
-Good news — most of the work is already in place:
-
-- `supabase/functions/auth-email-hook/index.ts` already renders branded HolarcHealth emails and sends them through `_shared/mailgun.ts` (Mailgun connector), from `HolarcHealth <noreply@holarchealth.com>`.
-- Required secrets are present: `MAILGUN_API_KEY` (connector) and `SEND_EMAIL_HOOK_SECRET`.
-- Lovable's own auth email templates have NOT been scaffolded under `_shared/email-templates/`, so we're not double-handling auth mail.
-
-What's missing is the Supabase Auth-side wiring that tells Supabase to call our hook for every auth email (signup, recovery, magic link, invite, email change, reauthentication). Until that's enabled, Supabase falls back to its built-in sender (the lovable.cloud "from" address you're seeing).
+- Password reset requests reach the auth email hook successfully, but the email is still being delivered through the default Lovable Cloud sender path, not Mailgun.
+- The custom Mailgun auth-email-hook function exists in the codebase and is configured to send from `HolarcHealth <noreply@holarchealth.com>`, but it shows no recent invocation logs — Supabase Auth is not routing to it.
+- The previously configured sender subdomain `notify.nigeria.holarchealth.com` is **no longer in use** and should be ignored / removed. The intended sender domain going forward is `holarchealth.com` (the root domain already verified in Mailgun).
 
 ## Plan
 
-1. **Redeploy `auth-email-hook`** to make sure the latest Mailgun version is live.
-2. **Enable the Supabase Auth "Send Email" hook** pointing at this edge function, using `SEND_EMAIL_HOOK_SECRET` for signature verification. This is done via `supabase--configure_auth` (hook URI = the deployed function URL, secret = existing `SEND_EMAIL_HOOK_SECRET`).
-3. **Verify** by triggering a password reset from `/auth` → confirm the email arrives from `noreply@holarchealth.com` (Mailgun) and Mailgun logs show delivery. If anything fails, check `auth-email-hook` logs.
+1. **Remove the stale `notify.nigeria.holarchealth.com` configuration**
+   - Disable Lovable Emails for the project so the managed sender stops competing with the Mailgun hook.
+   - Surface the NS records that need to be removed from the domain registrar (delegation will not clear on its own).
 
-## Out of scope / explicitly NOT doing
+2. **Activate the custom Mailgun hook**
+   - Redeploy `auth-email-hook`.
+   - Register it as the Supabase Auth Send Email hook, signed with `SEND_EMAIL_HOOK_SECRET`, so all auth emails (recovery, signup, magic link, invite, email-change, reauthentication) are sent via Mailgun from `noreply@holarchealth.com`.
 
-- Not scaffolding Lovable's auth email templates (`scaffold_auth_email_templates`) — that path would route through lovable.cloud infra, which is what you want to avoid.
-- Not touching `_shared/mailgun.ts` — current sender domain `holarchealth.com` and `noreply@` address are correct.
-- Not changing transactional (non-auth) email functions — they already go through Mailgun.
+3. **Validate**
+   - Trigger a `/forgot-password` reset.
+   - Confirm: auth log shows the hook URL pointing at the custom function, function logs show a Mailgun send, and the email arrives from `HolarcHealth <noreply@holarchealth.com>` — not Lovable Cloud.
 
-## Risk
+## Technical notes
 
-The only risk is if `holarchealth.com` isn't fully verified in Mailgun (SPF/DKIM/MX). If sends fail with a Mailgun 401/forbidden error, you'll need to confirm the domain is verified in the Mailgun dashboard before auth emails work. I'll surface any such error from the function logs after the first test.
+- Sender domain is `holarchealth.com` (root), already verified in Mailgun — no DNS work needed.
+- Do NOT scaffold Lovable auth email templates; that would re-route through the managed Lovable email pipeline.
+- The `nigeria.holarchealth.com` subdomain is abandoned and any references to it in email configuration should be cleared.
