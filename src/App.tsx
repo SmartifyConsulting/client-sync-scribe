@@ -140,6 +140,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <SosAlertListener />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
