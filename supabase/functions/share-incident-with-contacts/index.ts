@@ -174,16 +174,28 @@ Deno.serve(async (req) => {
         } as any).then(() => {}, () => {});
 
         // 2. Auto-share the SOS record (profile + live tracking) so they can open it
-        await admin.from("patient_profile_shares").upsert({
-          owner_user_id: user.id,
-          shared_with_user_id: contactUserId,
-          shared_with_email: r.email,
-          shared_with_username: r.name,
-          relationship: r.via,
-          can_view_profile: true,
-          can_view_live_tracking: true,
-          source: "sos_auto",
-        } as any, { onConflict: "owner_user_id,shared_with_user_id" }).then(() => {}, () => {});
+        const { data: existing } = await admin
+          .from("patient_profile_shares")
+          .select("id")
+          .eq("owner_user_id", user.id)
+          .eq("shared_with_user_id", contactUserId)
+          .maybeSingle();
+        if (existing?.id) {
+          await admin.from("patient_profile_shares")
+            .update({ can_view_profile: true, can_view_live_tracking: true } as any)
+            .eq("id", existing.id).then(() => {}, () => {});
+        } else {
+          await admin.from("patient_profile_shares").insert({
+            owner_user_id: user.id,
+            shared_with_user_id: contactUserId,
+            shared_with_email: r.email,
+            shared_with_username: r.name,
+            relationship: r.via,
+            can_view_profile: true,
+            can_view_live_tracking: true,
+            source: "sos_auto",
+          } as any).then(() => {}, () => {});
+        }
       }
 
       await admin.from("holarchelp_messaging_log").insert({
