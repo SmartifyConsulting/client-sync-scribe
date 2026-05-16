@@ -26,6 +26,8 @@ type Loc = { latitude: number; longitude: number; recorded_at: string };
 export default function HolarcHelpIncidentDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isFresh = searchParams.get("fresh") === "1";
   const { user } = useAuth();
   const [incident, setIncident] = useState<any | null>(null);
   const [locations, setLocations] = useState<Loc[]>([]);
