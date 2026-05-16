@@ -1,101 +1,83 @@
-## Goal
+# Plan: Finish remaining seed + schema gaps
 
-Append doctor/practice/provider/hospital seed data to the existing patient-update plan, then execute all updates together and **report verification results**.
+## 1. Paraskavoula's 3 historical appointments
 
-The earlier 3 patient-record updates + doctor links (Sharon → Xtina; Georgia → Xtina, Dean Allie; Paraskavoula → Xtina, Dean Allie, Jean Prodromos) remain unchanged in this plan.
+Insert into `public.appointments` (`start_time`/`end_time`, type defaults to `session`, `user_id` = doctor, `patient_id` = `67ea0671…`).
 
----
+| # | Date (09:00–09:30 UTC) | Title | Doctor (`user_id`) |
+|---|---|---|---|
+| 1 | 2026-01-14 | Cardiology Review — Dr Christina | `ee5401ed…` |
+| 2 | 2026-02-10 | Orthopedic Consultation — Dr Dean Allie | `54fa34d8…` |
+| 3 | 2026-03-04 | Dental Cleaning — Dr Jean Prodromos | `a2bdfef2…` |
 
-## Part A — Patient records (unchanged from prior plan)
+Location = doctor's practice address. `description` flags it as historical seed.
 
-Same three `UPDATE patients` statements + three `INSERT … doctor_patient_access … ON CONFLICT DO UPDATE` upserts as previously approved.
+## 2. Hospital ↔ Doctor affiliation FK
 
----
+Migration — new table:
 
-## Part B — Doctor profile updates
+```sql
+CREATE TABLE public.hospital_doctor_affiliations (
+  id uuid PK default gen_random_uuid(),
+  hospital_id uuid NOT NULL REFERENCES holarchelp_hospitals(id) ON DELETE CASCADE,
+  doctor_id  uuid NOT NULL REFERENCES profiles(id)              ON DELETE CASCADE,
+  role text, department text,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now(),
+  UNIQUE (hospital_id, doctor_id)
+);
+```
+RLS: SELECT authenticated; write = `is_hospital_staff()` OR admin.
 
-`UPDATE public.profiles` on the three existing doctor accounts:
+Seed: ZA Private Clinic (`8bab7ca0…`) ↔ Christina (Cardiology), Dean Allie (Orthopedics), Jean (Dentistry).
 
-| Source name | Real profile id |
-|---|---|
-| Dr Christina Papadopoulos → **Xtina** | `ee5401ed-f435-4d95-be6c-37a7f6f69e8d` |
-| Dr Dean Matthews → **Dean Allie** *(per your correction)* | `54fa34d8-9705-4407-a825-19c5756ca184` |
-| Dr Jean Prothermos → **Jean Prodromos** | `a2bdfef2-e6bb-43fe-95ce-ba463c3c2cc6` |
+## 3. Renken — coverage areas, fleet, emergency line
 
-Fields written per doctor (only those that map to real `profiles` columns):
-- `specialty` (Cardiologist / Orthopedic Surgeon / Dentist)
-- `doctor_number` (HPCSA: MP0721194 / MP0517750 / DT0088811)
-- `practice_number` (0549987 / 0672211 / 0549987)
-- `practice_address` (full street block as listed)
-- `mobile_number`
-- `preferred_language` (`en` — first language)
-- `about_me` — short bio combining Years of Experience + Languages Spoken + Special Interests / Services Offered + Consultation Hours
+Migration — two tables + column:
 
-Email is left untouched (each doctor already has a working auth email; source supplied none).
+```sql
+CREATE TABLE public.ambulance_fleet (
+  id uuid PK, provider_id uuid NOT NULL REFERENCES holarchelp_ambulance_providers(id) ON DELETE CASCADE,
+  vehicle_type text NOT NULL, count integer NOT NULL DEFAULT 0, notes text,
+  UNIQUE (provider_id, vehicle_type)
+);
+CREATE TABLE public.ambulance_coverage_areas (
+  id uuid PK, provider_id uuid NOT NULL REFERENCES holarchelp_ambulance_providers(id) ON DELETE CASCADE,
+  area_name text NOT NULL, region text, country text,
+  UNIQUE (provider_id, area_name)
+);
+ALTER TABLE public.holarchelp_ambulance_providers ADD COLUMN emergency_phone text;
+```
+RLS: SELECT authenticated; write = `is_ambulance_staff()` OR admin.
 
----
+Seed Renken (`49968d4c…`): `emergency_phone='0861 RENKEN'`; Fleet ALS×5, BLS×12, RRV×3; Coverage: Sandton, Rosebank, Midrand, Fourways, Randburg, Johannesburg CBD (Gauteng, ZA).
 
-## Part C — Practices
+## 4. Dedicated Sharon Kennedy auth account
 
-`INSERT … ON CONFLICT (id) DO UPDATE` on `public.practices`:
+a. One-shot edge function `seed-sharon-user` → `auth.admin.createUser({ email:'sharon.kennedy@testmail.com', password:'Sharon!Test2026', email_confirm:true, user_metadata:{ full_name:'Sharon Elise Kennedy', role:'patient' }})`. Uses existing `SUPABASE_SERVICE_ROLE_KEY`. `handle_new_user` trigger auto-creates profile + user_roles row.
 
-1. **Sandton Heart & Dental Centre** — owner = Xtina (Christina). After insert, add Jean Prodromos as a `practice_members` row (role `partner`) so the shared practice is reflected.
-2. **Johannesburg Orthopedic Institute** — owner = Dean Allie.
+b. Re-parent Sharon's patient record off Shannon (`96740682…`):
+```sql
+UPDATE patients SET user_id = <new>, patient_user_id = <new> WHERE id='bc6973cc…';
+```
+c. Re-point `doctor_patient_access` rows for Sharon's doctor (Christina) from Shannon's uid → Sharon's new uid.
 
-Both practices use deterministic UUIDs so re-runs are idempotent. No reception phone/email columns exist on `practices`, so those values go into the practice **name suffix is avoided**; instead they're written into the owner's `practice_address` (already covered in Part B) and noted in this plan only.
+## 5. Rename "Zano Private Clinic" → "ZA Private Clinic"
 
----
+```sql
+UPDATE public.holarchelp_hospitals
+SET name = 'ZA Private Clinic', updated_at = now()
+WHERE id = '8bab7ca0-0e5c-4835-93c1-815d121c5326';
+```
+Also rg the codebase for hard-coded "Zano" references; replace any seed/test strings found. The string already updated in `.lovable/plan.md` (use "ZA Private Clinic" going forward).
 
-## Part D — HolarcHelp providers (hospital + ambulance)
+## 6. Verification & report
 
-Existing rows already present:
-- `holarchelp_hospitals`: a "Zano Hospital" row owned by user `zano@smartify.co.za` (status approved).
-- `holarchelp_ambulance_providers`: a "Renken Ambulance Service" row owned by `renken@smartify.co.za` (status approved).
+Per-item PASS/FAIL with read-back rows: appointments (3), affiliations (3), Renken fleet (3) + coverage (6) + emergency_phone, Sharon new uid + re-parented patient + re-pointed access, ZA Private Clinic name.
 
-We will **UPDATE** these in place (no new auth users) with the supplied details:
+## Execution order
 
-**Zano → "Zano Private Clinic"**
-- `name`, `registration_number = HSP220199`
-- `address = 101 Willowbrook Boulevard`, `city = Fourways`, `state = Gauteng`, `country = South Africa`
-- `contact_phone = +27 11 555 4400`, `contact_email = admin@zanoclinic.test`
-- `bed_capacity = 80`, `icu_capacity = 8`, `beds_available = 80`, `icu_available = 8`
-- `services = {Emergency Medicine, Cardiology, Orthopedics, General Surgery, Dentistry, Radiology, Pharmacy}`
-- `ownership = 'private'`, `status = 'approved'`
-
-**Renken → "Renken ER Services"**
-- `company_name`, `registration_number = EMS-778411`
-- `base_address = 18 Emergency Way`, `city = Johannesburg`, `country = South Africa`
-- `contact_phone = +27 11 772 4411`, `contact_email = dispatch@renkener.test`
-- `status = 'approved'`
-
-Sub-resources without columns on these tables (fleet counts, coverage areas, emergency 0861 number, "linked hospital", affiliated providers list) — **not seeded**; the schema has no place for them. Flag if you want a `notes` column added later.
-
----
-
-## Part E — Out of scope (flag to seed)
-
-- Paraskavoula's 3 historical appointments — needs `appointments` inserts tied to a specific doctor + practice + UTC start/end times.
-- "Affiliated providers" linkage between Zano clinic and Drs Christina / Dean / Jean — no FK table exists for hospital↔doctor affiliation.
-- Coverage area / fleet details for Renken — no columns.
-- A dedicated Sharon Kennedy auth account — she currently shares Shannon's user.
-
----
-
-## Execution + verification
-
-1. Single `supabase--insert` call running, in order:
-   - 3× `UPDATE patients` (Part A)
-   - 3× `INSERT INTO doctor_patient_access … ON CONFLICT DO UPDATE` (Part A)
-   - 3× `UPDATE profiles` (Part B)
-   - 2× `INSERT INTO practices … ON CONFLICT DO UPDATE` + 1× `INSERT INTO practice_members … ON CONFLICT DO NOTHING` (Part C)
-   - 1× `UPDATE holarchelp_hospitals` (Zano) + 1× `UPDATE holarchelp_ambulance_providers` (Renken) (Part D)
-
-2. Read-back queries:
-   - `SELECT … FROM patients WHERE id IN (…3 ids…)`
-   - `SELECT doctor_id, patient_user_id, is_active FROM doctor_patient_access WHERE patient_user_id IN (…3 uids…)`
-   - `SELECT id, full_name, specialty, doctor_number, practice_number, practice_address, mobile_number FROM profiles WHERE id IN (…3 doctor ids…)`
-   - `SELECT * FROM practices ORDER BY name`
-   - `SELECT name, status, registration_number, contact_email, services, bed_capacity FROM holarchelp_hospitals`
-   - `SELECT company_name, status, registration_number, contact_email, base_address FROM holarchelp_ambulance_providers`
-
-3. **Report back**: per-record checklist (✅ written / ⚠️ mismatch / ⏭️ skipped — no column) covering every supplied field across all parts, plus the final doctor-access matrix.
+1. Migration (sections 2 & 3 tables + RLS).
+2. Edge function deploy + invoke; capture Sharon's new uid.
+3. Data seed via `supabase--insert` (appointments, affiliations, fleet, coverage, Sharon re-parent, ZA rename).
+4. Verification queries + final report.
