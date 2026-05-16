@@ -137,18 +137,19 @@ Deno.serve(async (req) => {
     list2?.users.forEach((u) => { if (u.email) byEmail.set(u.email.toLowerCase(), u.id); });
     const pwResults: any[] = [];
     for (const t of PASSWORD_TARGETS) {
+      const pw = t.password ?? FIXED_PASSWORD;
       try {
         let id = byEmail.get(t.email.toLowerCase());
         if (!id) {
           const { data: created, error: ce } = await sb.auth.admin.createUser({
-            email: t.email, password: FIXED_PASSWORD, email_confirm: true,
+            email: t.email, password: pw, email_confirm: true,
             user_metadata: { full_name: t.full_name, role: "patient" },
           });
           if (ce) throw ce;
           id = created.user!.id;
           pwResults.push({ email: t.email, status: "created" });
         } else {
-          const { error: ue } = await sb.auth.admin.updateUserById(id, { password: FIXED_PASSWORD });
+          const { error: ue } = await sb.auth.admin.updateUserById(id, { password: pw });
           if (ue) throw ue;
           pwResults.push({ email: t.email, status: "password_set" });
         }
