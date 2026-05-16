@@ -1948,6 +1948,62 @@ export type Database = {
         }
         Relationships: []
       }
+      holarchelp_provider_locations: {
+        Row: {
+          accuracy: number | null
+          created_at: string
+          heading: number | null
+          id: string
+          incident_id: string
+          latitude: number
+          longitude: number
+          provider_id: string
+          provider_kind: string
+          recorded_at: string
+          speed: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          incident_id: string
+          latitude: number
+          longitude: number
+          provider_id: string
+          provider_kind: string
+          recorded_at?: string
+          speed?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accuracy?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          incident_id?: string
+          latitude?: number
+          longitude?: number
+          provider_id?: string
+          provider_kind?: string
+          recorded_at?: string
+          speed?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holarchelp_provider_locations_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       holarchelp_voice_clip_settings: {
         Row: {
           default_clip_path: string | null

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { supabase } from "@/integrations/supabase/client";
-import { LiveMap } from "../components/LiveMap";
+import { SosLiveMap } from "../components/SosLiveMap";
 import { VoiceNoteAudio } from "../components/VoiceNoteAudio";
 import { IncidentTimeline } from "../components/IncidentTimeline";
 import { IncidentVoiceNoteRecorder } from "../components/IncidentVoiceNoteRecorder";
@@ -338,7 +338,7 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      <LiveMap points={mapPoints} />
+      <SosLiveMap incidentId={id!} mode="patient" height={320} />
 
       {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
         <div className="mt-4 rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
