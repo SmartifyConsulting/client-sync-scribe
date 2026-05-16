@@ -642,6 +642,8 @@ function NotificationList({
 
   const getIcon = (type: string) => {
     switch (type) {
+      case 'sos_alert':
+        return <Bell className="h-5 w-5 text-red-600 animate-pulse" />;
       case 'document_received':
         return <FileText className="h-5 w-5 text-primary" />;
       case 'invitation_received':
