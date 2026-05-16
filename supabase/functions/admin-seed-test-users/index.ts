@@ -89,17 +89,27 @@ Deno.serve(async (req) => {
 
       // Provider rows
       if (seed.role === "hospital_staff" && seed.hospital_name) {
-        const { data: existsH } = await sb.from("holarchelp_hospitals").select("id").eq("owner_id", userId).maybeSingle();
-        if (!existsH) {
-          await sb.from("holarchelp_hospitals").insert({
-            owner_id: userId,
-            name: seed.hospital_name,
-            contact_email: seed.email,
-            status: "approved",
-            approved_at: new Date().toISOString(),
-          });
+        if (seed.as_member) {
+          const { data: hosp } = await sb.from("holarchelp_hospitals").select("id").eq("name", seed.hospital_name).maybeSingle();
+          if (hosp) {
+            const { data: mem } = await sb.from("holarchelp_hospital_members").select("id").eq("hospital_id", hosp.id).eq("user_id", userId).maybeSingle();
+            if (!mem) {
+              await sb.from("holarchelp_hospital_members").insert({ hospital_id: hosp.id, user_id: userId, role: seed.member_role ?? "staff" });
+            }
+          }
         } else {
-          await sb.from("holarchelp_hospitals").update({ status: "approved" }).eq("id", existsH.id);
+          const { data: existsH } = await sb.from("holarchelp_hospitals").select("id").eq("owner_id", userId).maybeSingle();
+          if (!existsH) {
+            await sb.from("holarchelp_hospitals").insert({
+              owner_id: userId,
+              name: seed.hospital_name,
+              contact_email: seed.email,
+              status: "approved",
+              approved_at: new Date().toISOString(),
+            });
+          } else {
+            await sb.from("holarchelp_hospitals").update({ status: "approved" }).eq("id", existsH.id);
+          }
         }
       }
 
