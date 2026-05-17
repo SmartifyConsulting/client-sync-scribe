@@ -128,8 +128,12 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 <div key={l.id} className="text-xs p-2 rounded bg-muted/40">
                   <p className="font-medium">{l.test_name}</p>
                   <p>{l.result_value} {l.units} {l.reference_range && <span className="text-muted-foreground">(ref: {l.reference_range})</span>}</p>
-                  <p className="text-[10px] text-muted-foreground">{format(new Date(l.result_date), "dd MMM yyyy")}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {format(new Date(l.result_date), "dd MMM yyyy")}
+                    {l.nurse_name_snapshot && <span> · Nurse: {l.nurse_name_snapshot}</span>}
+                  </p>
                   {l.attachment_url && <a href={l.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-[10px] inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> View attachment</a>}
+                  <RateNurseControl admissionId={admission.id} recordTable="admission_lab_results" recordId={l.id} nurseId={l.nurse_id ?? null} nurseName={l.nurse_name_snapshot} />
                 </div>
               ))}
             </div>
