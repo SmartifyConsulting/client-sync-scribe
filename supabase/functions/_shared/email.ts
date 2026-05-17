@@ -1,11 +1,9 @@
-// Shared transactional email sender — routes through ZeptoMail (Zoho).
+// Shared transactional email sender — routes through Resend via the Lovable connector gateway.
 // All callers import { sendEmail } from "../_shared/email.ts".
 
 const DEFAULT_FROM_EMAIL = "no-reply@holarchealth.com";
 const DEFAULT_FROM_NAME = "Holarc Health";
-// Region defaults to global (.com). Set ZEPTOMAIL_REGION="eu" for EU accounts.
-const REGION = (Deno.env.get("ZEPTOMAIL_REGION") || "com").toLowerCase();
-const API_URL = `https://api.zeptomail.${REGION === "eu" ? "eu" : "com"}/v1.1/email`;
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 export interface EmailAddressInput {
   email: string;
@@ -43,69 +41,60 @@ function parseAddress(input: string | EmailAddressInput): EmailAddressInput {
   return { email: trimmed };
 }
 
-function toAddressArray(
+function formatAddress(a: EmailAddressInput): string {
+  return a.name ? `${a.name} <${a.email}>` : a.email;
+}
+
+function toAddressList(
   input: string | string[] | EmailAddressInput | EmailAddressInput[] | undefined,
-): EmailAddressInput[] | undefined {
+): string[] | undefined {
   if (input === undefined) return undefined;
   const arr = Array.isArray(input) ? input : [input];
-  return arr.map(parseAddress);
-}
-
-function toZeptoRecipient(a: EmailAddressInput) {
-  const ea: Record<string, string> = { address: a.email };
-  if (a.name) ea.name = a.name;
-  return { email_address: ea };
-}
-
-function toZeptoFrom(a: EmailAddressInput) {
-  const out: Record<string, string> = { address: a.email };
-  if (a.name) out.name = a.name;
-  return out;
+  return arr.map((v) => formatAddress(parseAddress(v)));
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const RAW_TOKEN = Deno.env.get("ZEPTOMAIL_API_TOKEN");
-  if (!RAW_TOKEN) {
-    return { ok: false, status: 500, error: "ZEPTOMAIL_API_TOKEN is not configured" };
+  const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+  const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+  if (!LOVABLE_API_KEY) {
+    return { ok: false, status: 500, error: "LOVABLE_API_KEY is not configured" };
+  }
+  if (!RESEND_API_KEY) {
+    return { ok: false, status: 500, error: "RESEND_API_KEY is not configured" };
   }
   if (!input.html && !input.text) {
     return { ok: false, status: 400, error: "Either html or text must be provided" };
   }
 
-  // ZeptoMail expects: "Zoho-enczapikey <token>". Accept token with or without prefix.
-  const authHeader = RAW_TOKEN.trim().toLowerCase().startsWith("zoho-enczapikey")
-    ? RAW_TOKEN.trim()
-    : `Zoho-enczapikey ${RAW_TOKEN.trim()}`;
-
   const from = input.from
     ? parseAddress(input.from)
     : { email: DEFAULT_FROM_EMAIL, name: DEFAULT_FROM_NAME };
 
-  const toArr = toAddressArray(input.to) ?? [];
-  const ccArr = toAddressArray(input.cc);
-  const bccArr = toAddressArray(input.bcc);
+  const toArr = toAddressList(input.to) ?? [];
+  const ccArr = toAddressList(input.cc);
+  const bccArr = toAddressList(input.bcc);
 
   const payload: Record<string, unknown> = {
-    from: toZeptoFrom(from),
-    to: toArr.map(toZeptoRecipient),
+    from: formatAddress(from),
+    to: toArr,
     subject: input.subject,
   };
-  if (input.html) payload.htmlbody = input.html;
-  if (input.text) payload.textbody = input.text;
-  if (ccArr?.length) payload.cc = ccArr.map(toZeptoRecipient);
-  if (bccArr?.length) payload.bcc = bccArr.map(toZeptoRecipient);
+  if (input.html) payload.html = input.html;
+  if (input.text) payload.text = input.text;
+  if (ccArr?.length) payload.cc = ccArr;
+  if (bccArr?.length) payload.bcc = bccArr;
   if (input.replyTo) {
-    const r = parseAddress(input.replyTo);
-    payload.reply_to = [toZeptoFrom(r)];
+    payload.reply_to = formatAddress(parseAddress(input.replyTo));
   }
 
   try {
-    const resp = await fetch(API_URL, {
+    const resp = await fetch(`${GATEWAY_URL}/emails`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        Authorization: authHeader,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "X-Connection-Api-Key": RESEND_API_KEY,
       },
       body: JSON.stringify(payload),
     });
@@ -118,20 +107,11 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
       console.error("Email send failed", resp.status, text);
       let message = `Email provider error ${resp.status}`;
       if (data && typeof data === "object") {
-        const errObj = (data as Record<string, unknown>).error as
-          | { message?: string; details?: Array<{ message?: string }> }
-          | undefined;
-        if (errObj?.message) {
-          message = errObj.message;
-          if (errObj.details?.length) {
-            const detailMsgs = errObj.details
-              .map((d) => d?.message)
-              .filter(Boolean)
-              .join("; ");
-            if (detailMsgs) message += `: ${detailMsgs}`;
-          }
-        } else if ((data as Record<string, unknown>).message) {
-          message = String((data as Record<string, unknown>).message);
+        const d = data as Record<string, unknown>;
+        if (typeof d.message === "string") message = d.message;
+        else if (typeof d.error === "string") message = d.error;
+        else if (d.error && typeof (d.error as Record<string, unknown>).message === "string") {
+          message = (d.error as Record<string, unknown>).message as string;
         }
       }
       return { ok: false, status: resp.status, data, error: message };
