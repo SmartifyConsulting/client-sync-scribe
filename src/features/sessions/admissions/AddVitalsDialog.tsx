@@ -7,19 +7,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { NursePicker } from "@/components/admissions/NursePicker";
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   admissionId: string;
+  hospitalId?: string | null;
   defaultHeight?: number | null;
   defaultWeight?: number | null;
 }
 
-export function AddVitalsDialog({ open, onOpenChange, admissionId, defaultHeight, defaultWeight }: Props) {
+export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, defaultHeight, defaultWeight }: Props) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
+  const [nurse, setNurse] = useState<{ id: string; name: string } | null>(null);
   const [hr, setHr] = useState("");
   const [bps, setBps] = useState("");
   const [bpd, setBpd] = useState("");
