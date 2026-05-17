@@ -1362,25 +1362,43 @@ export type Database = {
       }
       holarchelp_ambulance_members: {
         Row: {
+          accepted_at: string | null
           created_at: string
           id: string
+          invite_expires_at: string | null
+          invite_token: string | null
+          invited_by: string | null
+          invited_email: string | null
+          invited_name: string | null
           provider_id: string
           role: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           created_at?: string
           id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_by?: string | null
+          invited_email?: string | null
+          invited_name?: string | null
           provider_id: string
           role?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           created_at?: string
           id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_by?: string | null
+          invited_email?: string | null
+          invited_name?: string | null
           provider_id?: string
           role?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -1526,25 +1544,43 @@ export type Database = {
       }
       holarchelp_hospital_members: {
         Row: {
+          accepted_at: string | null
           created_at: string
           hospital_id: string
           id: string
+          invite_expires_at: string | null
+          invite_token: string | null
+          invited_by: string | null
+          invited_email: string | null
+          invited_name: string | null
           role: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           created_at?: string
           hospital_id: string
           id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_by?: string | null
+          invited_email?: string | null
+          invited_name?: string | null
           role?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           created_at?: string
           hospital_id?: string
           id?: string
+          invite_expires_at?: string | null
+          invite_token?: string | null
+          invited_by?: string | null
+          invited_email?: string | null
+          invited_name?: string | null
           role?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -4493,6 +4529,10 @@ export type Database = {
         Args: { _incident_id: string }
         Returns: boolean
       }
+      check_provider_duplicate: {
+        Args: { _city: string; _name: string; _reg_no: string; _type: string }
+        Returns: Json
+      }
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
@@ -4606,8 +4646,16 @@ export type Database = {
         Returns: undefined
       }
       holarchelp_user_enabled: { Args: { _uid: string }; Returns: boolean }
+      is_ambulance_admin: {
+        Args: { _provider_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_ambulance_staff: {
         Args: { _provider_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_hospital_admin: {
+        Args: { _hospital_id: string; _user_id: string }
         Returns: boolean
       }
       is_hospital_staff: {
@@ -4622,6 +4670,7 @@ export type Database = {
         Args: { _practice_id: string; _user_id: string }
         Returns: boolean
       }
+      norm_text: { Args: { _t: string }; Returns: string }
       search_doctor_profiles: {
         Args: { _language?: string; _name?: string; _specialty?: string }
         Returns: {
