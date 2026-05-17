@@ -217,11 +217,6 @@ export default function ProviderSignup() {
               </div>
 
               <div className="space-y-1.5">
-                <Label>Contact phone</Label>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+27821234567" />
-              </div>
-
-              <div className="space-y-1.5">
                 <Label>Password</Label>
                 <div className="relative">
                   <Input

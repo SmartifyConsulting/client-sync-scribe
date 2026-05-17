@@ -293,8 +293,7 @@ export default function Auth() {
       if (!userId) throw new Error("No user account found");
 
       const preferredLanguage = selectedCountry.lang;
-      const phoneDigits = userRole === "doctor" ? mobileNumber : phone;
-      const fullPhone = phoneDigits ? `${countryCode} ${phoneDigits}` : null;
+      const fullPhone: string | null = null;
 
       const nameParts = fullName.trim().toLowerCase().split(/\s+/);
       const firstPart = nameParts[0] || "user";
@@ -386,7 +385,7 @@ export default function Auth() {
       }, { onConflict: "user_id" });
 
       clearDraft();
-      toast({ title: "Account created!", description: "Welcome to HolarcHealth. Please complete your profile next." });
+      toast({ title: "Account created!", description: "Check your inbox to confirm your email before signing in." });
       await routeAfterLogin(userId);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -592,11 +591,8 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Mobile Number</Label>
-              <div className="flex gap-2">
-                <CountrySelector />
-                <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" />
-              </div>
+              <Label>Country / Language</Label>
+              <CountrySelector />
               <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
           </div>
@@ -677,11 +673,8 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Mobile Number</Label>
-              <div className="flex gap-2">
-                <CountrySelector />
-                <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" />
-              </div>
+              <Label>Country / Language</Label>
+              <CountrySelector />
               <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
           </div>
