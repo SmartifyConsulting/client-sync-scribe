@@ -32,7 +32,7 @@ function Brand() {
       {state !== "collapsed" && (
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-extrabold">HolarcHelp</p>
-          <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">Dispatch</p>
+          <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">ER Provider</p>
         </div>
       )}
     </div>
