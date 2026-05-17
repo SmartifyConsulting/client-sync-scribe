@@ -142,7 +142,37 @@ export function IncidentVoiceNoteRecorder({
               {new Date(n.created_at).toLocaleString()} {n.duration_seconds ? `· ${n.duration_seconds.toFixed(1)}s` : ""}
             </p>
             {n.transcript && <p className="mt-1.5 whitespace-pre-wrap text-sm">{n.transcript}</p>}
-            <div className="mt-2"><VoiceNoteAudio path={n.audio_url} /></div>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex-1"><VoiceNoteAudio path={n.audio_url} /></div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                onClick={async () => {
+                  toast.message("Re-transcribing…");
+                  try {
+                    const { data: signed } = await supabase.storage.from("session-audio").createSignedUrl(n.audio_url, 120);
+                    if (!signed?.signedUrl) throw new Error("Could not access audio");
+                    const ar = await fetch(signed.signedUrl);
+                    const blob = await ar.blob();
+                    const b64 = await new Promise<string>((res, rej) => {
+                      const r = new FileReader();
+                      r.onloadend = () => res((r.result as string).split(",")[1] || "");
+                      r.onerror = rej;
+                      r.readAsDataURL(blob);
+                    });
+                    const { data, error } = await supabase.functions.invoke("transcribe-audio", { body: { audio: b64 } });
+                    if (error || !(data as any)?.text) throw new Error("Empty transcript");
+                    await supabase.from("holarchelp_voice_notes" as any).update({ transcript: String((data as any).text) } as any).eq("id", n.id);
+                    toast.success("Transcript updated");
+                  } catch (e: any) {
+                    toast.error(e?.message ?? "Retry failed");
+                  }
+                }}
+              >
+                Retry
+              </Button>
+            </div>
           </div>
         ))}
       </div>
