@@ -7,17 +7,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { NursePicker } from "@/components/admissions/NursePicker";
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   admissionId: string;
+  hospitalId?: string | null;
 }
 
-export function AddLabResultDialog({ open, onOpenChange, admissionId }: Props) {
+export function AddLabResultDialog({ open, onOpenChange, admissionId, hospitalId }: Props) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
+  const [nurse, setNurse] = useState<{ id: string; name: string } | null>(null);
   const [testName, setTestName] = useState("");
   const [resultValue, setResultValue] = useState("");
   const [units, setUnits] = useState("");
@@ -57,6 +60,8 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId }: Props) {
       const { error } = await supabase.from("admission_lab_results").insert({
         admission_id: admissionId,
         recorded_by: user.id,
+        nurse_id: nurse?.id ?? null,
+        nurse_name_snapshot: nurse?.name ?? null,
         test_name: testName,
         result_value: resultValue || null,
         units: units || null,
@@ -64,7 +69,7 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId }: Props) {
         result_date: resultDate,
         attachment_url: attachmentUrl || null,
         notes: notes || null,
-      });
+      } as any);
       if (error) throw error;
       toast({ title: "Lab result saved" });
       qc.invalidateQueries({ queryKey: ["admission-lab-results", admissionId] });
@@ -82,6 +87,7 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId }: Props) {
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Add Lab Result</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
           <div><Label className="text-[11px]">Test Name *</Label><Input value={testName} onChange={(e) => setTestName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-[11px]">Result</Label><Input value={resultValue} onChange={(e) => setResultValue(e.target.value)} /></div>
