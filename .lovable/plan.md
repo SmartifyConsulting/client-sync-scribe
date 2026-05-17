@@ -1,41 +1,51 @@
+## Goal
+All auth emails (signup confirmation, password reset, magic link, email change, reauthentication) leave via your already-connected Resend account from `no-reply@holarchealth.com`. Lovable Emails is switched off so the two systems don't fight.
+
+## Current state
+- `_shared/email.ts` already sends through the Resend connector gateway — verified `holarchealth.com` domain.
+- `auth-email-sender` exists but is **not wired into Supabase's auth pipeline**. It's only callable manually (currently from `ForgotPassword.tsx`), so Supabase's own signup confirmation email never goes through it.
+- Lovable Emails was the active sender; you've now removed the `notify.nigeria.holarchealth.com` delegation.
+
 ## Plan
 
-### 1. Restore the contact phone number on signup
+### 1. Turn off Lovable Emails
+Disable the managed Lovable Emails pipeline so Supabase stops trying to route auth mail through it.
 
-`src/pages/Auth.tsx`
-- In `renderDoctorStep`, replace the current "Country / Language" block with the original "Mobile Number" block (CountrySelector + phone input side-by-side, "Language will be set to: …" helper using `mobileNumber` state).
-- In `renderPatientStep`, same restoration using `phone` state.
-- Restore submit logic in `handleFinalSubmit`:
-  ```
-  const phoneDigits = userRole === "doctor" ? mobileNumber : phone;
-  const fullPhone = phoneDigits ? `${countryCode} ${phoneDigits}` : null;
-  ```
-  and pass `fullPhone` back into `profiles.mobile_number` and `patients.phone` as before.
+### 2. Build a proper Supabase Send Email Hook
+Create `supabase/functions/auth-email-hook/index.ts`:
+- Verifies the `standard-webhooks` signature using a new `SEND_EMAIL_HOOK_SECRET`.
+- Receives Supabase's hook payload (`user`, `email_data` with `token_hash`, `email_action_type`, `redirect_to`, `site_url`).
+- Builds the correct action URL (`{site_url}/auth/v1/verify?token={token_hash}&type={email_action_type}&redirect_to={redirect_to}`).
+- Renders the branded Holarc Health HTML (reusing the template currently in `auth-email-sender`) per action type: `signup`, `recovery`, `magiclink`, `email_change`, `reauthentication`.
+- Sends via `_shared/email.ts` (Resend gateway).
+- Returns 200 on success, 4xx/5xx on failure so Supabase retries.
 
-`src/pages/ProviderSignup.tsx`
-- Restore the "Contact phone" input field and pass `phone` to `register-emergency-provider`.
+Register it in `supabase/config.toml` with `verify_jwt = false` (hook is signature-verified, not JWT).
 
-No DB changes — `mobile_number` / `phone` / `contact_phone` columns are still nullable.
+### 3. Add the hook secret
+Add a single new secret: `SEND_EMAIL_HOOK_SECRET` (you'll generate/paste a value when prompted).
 
-### 2. Fix verification email delivery (Option A — Lovable Emails on `notify.holarchealth.com`)
+### 4. Enable the hook in Supabase Auth config
+Point Supabase's "Send Email Hook" to the new edge function URL and paste the same secret. This is the step that actually replaces Supabase's built-in email sending with our Resend pipeline. (Done from the Cloud → Users → Auth Settings area — exact toggle path called out after deploy.)
 
-The current Lovable Emails sender is `notify.nigeria.holarchealth.com` and DNS is still pending — that's why Marlene never received the confirmation email. Switching to `notify.holarchealth.com` (a sibling of your already-active Resend domain) is the right path.
+### 5. Clean up the old wiring
+- `ForgotPassword.tsx` keeps using `supabase.auth.resetPasswordForEmail(...)` (already done) — once the hook is live, that call automatically goes through Resend too.
+- Keep `auth-email-sender` deleted/retired (the hook supersedes it). I'll delete the function to avoid two code paths.
 
-Steps I will run:
-1. Open the email-domain setup dialog so you can add the new sender domain `notify.holarchealth.com`. The dialog walks you through publishing the two NS records at your registrar.
-2. Once the domain is added, Lovable's auth-email hook (already wired into Supabase signup, password reset, magic link, email change) will start using it. No code changes required — Supabase logs already show the hook firing successfully.
-3. Re-trigger Marlene's confirmation email from the Auth screen (Resend confirmation link) so she gets a fresh email from the new domain once DNS verifies.
-4. Remove the now-redundant custom `auth-email-sender` Resend wiring from `ForgotPassword.tsx` so password resets also go through the unified Lovable Emails pipeline (one less moving part to maintain). The old function file can stay in place but won't be invoked.
+### 6. Verify
+- Re-trigger Marlene Smith's signup confirmation from `/auth` (resend confirmation).
+- Watch `auth-email-hook` logs → expect 200 + Resend `id` in response.
+- Confirm email arrives from `no-reply@holarchealth.com`.
 
-### Things I will NOT touch
-- The Resend connection / `auth-email-sender` edge function (kept in case you want it back; just unused after Step 4).
-- Database schema, RLS, profile triggers.
-- The current `notify.nigeria.holarchealth.com` domain — you can leave or remove it from Cloud → Emails later; it does no harm while pending.
+## Technical notes
+- Default `From` stays `Holarc Health <no-reply@holarchealth.com>` (already set in `_shared/email.ts`).
+- Hook payload uses the `standard-webhooks` HMAC scheme; verification is ~15 lines using `npm:standardwebhooks`.
+- No DB changes, no RLS changes, no front-end changes beyond what's already shipped.
+- After the hook is wired, **every** auth email Supabase generates (including ones triggered by `signUp`, `resetPasswordForEmail`, `signInWithOtp`, `updateUser({email})`) flows through Resend automatically — no per-call invocation needed.
 
-### Order of operations
-1. Patch `Auth.tsx` + `ProviderSignup.tsx` to bring back the phone field.
-2. Open the email setup dialog for `notify.holarchealth.com`. You add the NS records at your registrar.
-3. While DNS propagates, signups still trigger the hook — emails will start landing automatically once verification flips to active (usually < 1 hour, up to 72 hours).
-4. After verification, retry Marlene's signup confirmation.
-
-Ready to implement on approval.
+## Order of operations
+1. Toggle Lovable Emails off.
+2. Request `SEND_EMAIL_HOOK_SECRET`.
+3. Write + deploy `auth-email-hook`, delete `auth-email-sender`.
+4. Configure the Supabase Send Email Hook (URL + secret).
+5. Resend Marlene's confirmation to verify end-to-end.
