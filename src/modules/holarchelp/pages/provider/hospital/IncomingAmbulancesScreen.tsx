@@ -76,8 +76,8 @@ export default function IncomingAmbulancesScreen() {
               <div className="flex items-center justify-between gap-3 border-b px-3 py-2">
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 text-sm font-extrabold">
-                    <Ambulance className="h-4 w-4 text-red-600" />
-                    {crew?.name ?? "Ambulance"}
+                    <Ambulance className="h-4 w-4 text-destructive" />
+                    {crew?.name ?? "ER Provider"}
                     {r.assigned_provider_id && partners.has(r.assigned_provider_id) && (
                       <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-[9px]">
                         <Handshake className="h-2.5 w-2.5" /> Partner
