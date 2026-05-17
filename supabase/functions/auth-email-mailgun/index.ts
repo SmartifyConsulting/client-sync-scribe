@@ -8,15 +8,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, webhook-id, webhook-timestamp, webhook-signature",
 };
 
-const MAILGUN_API_KEY = Deno.env.get("MAILGUN_API_KEY")!;
+const MAILGUN_CONNECTION_KEY = Deno.env.get("MAILGUN_API_KEY")!; // connector-managed
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const MAILGUN_DOMAIN = Deno.env.get("MAILGUN_DOMAIN") || "mg.holarchealth.com";
-const MAILGUN_REGION = (Deno.env.get("MAILGUN_REGION") || "us").toLowerCase();
 const HOOK_SECRET_RAW = Deno.env.get("SEND_EMAIL_HOOK_SECRET") || "";
 
-const MAILGUN_BASE =
-  MAILGUN_REGION === "eu"
-    ? "https://api.eu.mailgun.net"
-    : "https://api.mailgun.net";
+const MAILGUN_GATEWAY = "https://connector-gateway.lovable.dev/mailgun";
 
 const FROM_ADDRESS = `HolarcHealth <no-reply@${MAILGUN_DOMAIN}>`;
 const BRAND_COLOR = "#0D9488"; // teal-600
@@ -179,7 +176,7 @@ async function sendViaMailgun(
   html: string,
   text: string,
 ): Promise<{ ok: boolean; status: number; body: string }> {
-  const url = `${MAILGUN_BASE}/v3/${MAILGUN_DOMAIN}/messages`;
+  const url = `${MAILGUN_GATEWAY}/${MAILGUN_DOMAIN}/messages`;
   const form = new URLSearchParams({
     from: FROM_ADDRESS,
     to,
@@ -187,11 +184,11 @@ async function sendViaMailgun(
     html,
     text,
   });
-  const auth = "Basic " + btoa(`api:${MAILGUN_API_KEY}`);
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: auth,
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "X-Connection-Api-Key": MAILGUN_CONNECTION_KEY,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: form.toString(),
