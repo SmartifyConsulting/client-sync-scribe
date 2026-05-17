@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Ambulance, Hospital } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type EventRow = {
@@ -90,20 +91,27 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
           const pid = e.provider_id || e.payload?.provider_id;
           const prov = pid ? providers[pid] : undefined;
           const showProvider = prov && PROVIDER_EVENTS.has(e.event_type);
+          const suffix =
+            e.event_type === "auto_assigned"
+              ? "auto-assigned"
+              : e.event_type === "accepted" || e.event_type === "patient_picked"
+                ? "responded & picked the call"
+                : null;
+          const Icon = prov?.kind === "hospital" ? Hospital : Ambulance;
           return (
             <li key={e.id} className="relative">
               <span className="absolute -left-[22px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
-              <p className="text-sm font-semibold">
-                {labelFor(e)}
-                {showProvider && (
-                  <span className="ml-1.5 font-normal text-muted-foreground">
-                    · {prov!.kind === "hospital" ? "🏥" : "🚑"} <span className="font-semibold text-foreground">{prov!.name}</span>
-                  </span>
-                )}
-              </p>
+              <p className="text-sm font-semibold">{labelFor(e)}</p>
               <p className="text-xs text-muted-foreground">
                 {new Date(e.created_at).toLocaleString([], { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
               </p>
+              {showProvider && (
+                <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border-2 border-primary/40 bg-primary/5 px-2.5 py-1 text-xs">
+                  <Icon className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-semibold text-foreground">{prov!.name}</span>
+                  {suffix && <span className="text-muted-foreground">· {suffix}</span>}
+                </div>
+              )}
             </li>
           );
         })}

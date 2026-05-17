@@ -84,16 +84,26 @@ export function IncidentVoiceNoteRecorder({
         incident_id: incidentId, provider_id: providerId, actor_user_id: user.id,
         event_type: "voice_note", payload: { duration: Number(dur.toFixed(1)) },
       } as any);
-      // best-effort transcription
+      // best-effort transcription with retries
       try {
         const reader = new FileReader();
         reader.onloadend = async () => {
           const b64 = (reader.result as string).split(",")[1];
-          const { data: tx } = await supabase.functions.invoke("transcribe-audio", { body: { audio: b64 } });
-          if (tx?.text) {
-            const { data: latest } = await (supabase.from("holarchelp_voice_notes" as any) as any)
-              .select("id").eq("incident_id", incidentId).eq("audio_url", path).maybeSingle();
-            if ((latest as any)?.id) await supabase.from("holarchelp_voice_notes" as any).update({ transcript: tx.text } as any).eq("id", (latest as any).id);
+          let text = "";
+          const delays = [0, 1000, 3000];
+          for (const d of delays) {
+            if (d) await new Promise((r) => setTimeout(r, d));
+            try {
+              const { data: tx } = await supabase.functions.invoke("transcribe-audio", { body: { audio: b64 } });
+              if (tx?.text) { text = String(tx.text); break; }
+            } catch { /* retry */ }
+          }
+          const { data: latest } = await (supabase.from("holarchelp_voice_notes" as any) as any)
+            .select("id").eq("incident_id", incidentId).eq("audio_url", path).maybeSingle();
+          if ((latest as any)?.id) {
+            await supabase.from("holarchelp_voice_notes" as any).update({
+              transcript: text || "(Transcription unavailable — tap Retry)",
+            } as any).eq("id", (latest as any).id);
           }
         };
         reader.readAsDataURL(blob);
