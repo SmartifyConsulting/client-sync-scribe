@@ -293,7 +293,8 @@ export default function Auth() {
       if (!userId) throw new Error("No user account found");
 
       const preferredLanguage = selectedCountry.lang;
-      const fullPhone: string | null = null;
+      const phoneDigits = userRole === "doctor" ? mobileNumber : phone;
+      const fullPhone = phoneDigits ? `${countryCode} ${phoneDigits}` : null;
 
       const nameParts = fullName.trim().toLowerCase().split(/\s+/);
       const firstPart = nameParts[0] || "user";
@@ -591,8 +592,11 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Country / Language</Label>
-              <CountrySelector />
+              <Label>Mobile Number</Label>
+              <div className="flex gap-2">
+                <CountrySelector />
+                <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" />
+              </div>
               <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
           </div>
@@ -673,8 +677,11 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Country / Language</Label>
-              <CountrySelector />
+              <Label>Mobile Number</Label>
+              <div className="flex gap-2">
+                <CountrySelector />
+                <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" />
+              </div>
               <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
           </div>
