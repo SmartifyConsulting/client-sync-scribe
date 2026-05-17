@@ -18,6 +18,7 @@ export default function IncomingAmbulancesScreen() {
   const { providerId } = useProviderAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [crews, setCrews] = useState<Record<string,{name:string;phone?:string}>>({});
+  const [partners, setPartners] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const load = async () => {
