@@ -1,8 +1,6 @@
-/// <reference types="google.maps" />
-import { useEffect, useRef, useState } from "react";
-import { loadGoogleMaps, GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_MAP_ID } from "../config/google-maps";
-import hospitalIcon from "@/assets/marker-hospital.png";
-import ambulanceIcon from "@/assets/marker-ambulance.png";
+import { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 export type ProviderMarker = {
   id: string;
@@ -16,10 +14,21 @@ export type ProviderMarker = {
   distanceKm?: number;
 };
 
-const TIER_LABEL = (t?: string) => t ? t.replace("tier_", "Tier ") : "";
-const TIER_COLOR: Record<string, string> = {
-  tier_1: "#db2777", tier_2: "#ea580c", tier_3: "#ca8a04", tier_4: "#2563eb",
+interface Props {
+  center: { lat: number; lng: number } | null;
+  providers: ProviderMarker[];
+  height?: number;
+}
+
+const ICON_HTML = {
+  user:
+    '<div style="width:18px;height:18px;border-radius:50%;background:#1d8cff;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>',
+  ambulance: (dimmed: boolean) =>
+    `<div style="width:34px;height:34px;border-radius:50%;background:white;border:3px solid #dc2626;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35);opacity:${dimmed ? 0.45 : 1};filter:${dimmed ? "grayscale(1)" : "none"}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10H6"/><path d="M8 8v4"/><path d="M9 18h6"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14"/><path d="M3 17V6a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v11"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></div>`,
+  hospital: (dimmed: boolean) =>
+    `<div style="width:34px;height:34px;border-radius:6px;background:white;border:3px solid #16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35);opacity:${dimmed ? 0.45 : 1};filter:${dimmed ? "grayscale(1)" : "none"}"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#16a34a"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg></div>`,
 };
+
 const distanceBetweenKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
   const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
@@ -27,101 +36,86 @@ const distanceBetweenKm = (a: { lat: number; lng: number }, b: { lat: number; ln
   return 2 * R * Math.asin(Math.sqrt(x));
 };
 
-interface Props {
-  center: { lat: number; lng: number } | null;
-  providers: ProviderMarker[];
-  height?: number;
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
 
 export function ProviderMap({ center, providers, height = 360 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const userMarkerRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
-  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
-  const infoRef = useRef<google.maps.InfoWindow | null>(null);
-  const [ready, setReady] = useState(false);
+  const mapRef = useRef<L.Map | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
 
   useEffect(() => {
-    if (!GOOGLE_MAPS_API_KEY || !containerRef.current || mapRef.current) return;
-    let cancelled = false;
-    loadGoogleMaps().then(() => {
-      if (cancelled || !containerRef.current) return;
-      mapRef.current = new google.maps.Map(containerRef.current, {
-        center: center ?? { lat: -26.1, lng: 28.05 },
-        zoom: center ? 12 : 5,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        mapId: GOOGLE_MAPS_MAP_ID,
-      });
-      setReady(true);
+    if (!containerRef.current || mapRef.current) return;
+    const map = L.map(containerRef.current, {
+      center: center ? [center.lat, center.lng] : [-26.1, 28.05],
+      zoom: center ? 12 : 5,
+      zoomControl: true,
     });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+    mapRef.current = map;
+    requestAnimationFrame(() => map.invalidateSize());
+    const t1 = setTimeout(() => map.invalidateSize(), 250);
+    const t2 = setTimeout(() => map.invalidateSize(), 800);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && containerRef.current) {
+      ro = new ResizeObserver(() => map.invalidateSize());
+      ro.observe(containerRef.current);
+    }
     return () => {
-      cancelled = true;
-      markersRef.current.forEach((m) => (m.map = null));
-      markersRef.current = [];
-      if (userMarkerRef.current) userMarkerRef.current.map = null;
-      userMarkerRef.current = null;
+      clearTimeout(t1); clearTimeout(t2); ro?.disconnect();
+      map.remove();
       mapRef.current = null;
+      userMarkerRef.current = null;
+      markersRef.current = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!ready || !mapRef.current || !center) return;
-    mapRef.current.panTo(center);
-    if (mapRef.current.getZoom()! < 11) mapRef.current.setZoom(12);
+    const map = mapRef.current;
+    if (!map || !center) return;
+    map.setView([center.lat, center.lng], Math.max(map.getZoom() ?? 11, 12));
     if (!userMarkerRef.current) {
-      const dot = document.createElement("div");
-      dot.style.cssText =
-        "width:18px;height:18px;border-radius:50%;background:#1d8cff;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)";
-      userMarkerRef.current = new google.maps.marker.AdvancedMarkerElement({
-        position: center, map: mapRef.current, content: dot, title: "You",
-      });
+      userMarkerRef.current = L.marker([center.lat, center.lng], {
+        icon: L.divIcon({ html: ICON_HTML.user, className: "", iconSize: [18, 18], iconAnchor: [9, 9] }),
+        title: "You",
+      }).addTo(map);
     } else {
-      userMarkerRef.current.position = center;
+      userMarkerRef.current.setLatLng([center.lat, center.lng]);
     }
-  }, [ready, center?.lat, center?.lng]);
+  }, [center?.lat, center?.lng]);
 
   useEffect(() => {
-    if (!ready || !mapRef.current) return;
-    markersRef.current.forEach((m) => (m.map = null));
+    const map = mapRef.current;
+    if (!map) return;
+    markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
-    if (!infoRef.current) infoRef.current = new google.maps.InfoWindow();
     for (const p of providers) {
       if (p.latitude == null || p.longitude == null) continue;
-      const img = document.createElement("img");
       const dimmed = p.accepting === false;
-      img.src = p.type === "hospital" ? hospitalIcon : ambulanceIcon;
-      img.style.cssText = `width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))${dimmed ? " grayscale(1)" : ""};opacity:${dimmed ? 0.45 : 1};cursor:pointer`;
-      img.alt = p.name;
-      const marker = new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: p.latitude, lng: p.longitude },
-        map: mapRef.current!, content: img, title: p.name,
-      });
+      const html = p.type === "hospital" ? ICON_HTML.hospital(dimmed) : ICON_HTML.ambulance(dimmed);
+      const marker = L.marker([p.latitude, p.longitude], {
+        icon: L.divIcon({ html, className: "", iconSize: [34, 34], iconAnchor: [17, 17] }),
+        title: p.name,
+      }).addTo(map);
       const dKm = p.distanceKm ?? (center ? distanceBetweenKm(center, { lat: p.latitude, lng: p.longitude }) : null);
       const eta = dKm != null ? Math.max(1, Math.round((dKm / 40) * 60)) : null;
-      const tierColor = TIER_COLOR[p.tier ?? ""] ?? "#64748b";
-      const html = `
+      const popup = `
         <div style="font-family:system-ui,sans-serif;min-width:180px;padding:2px 4px">
           <div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:4px">${escapeHtml(p.name)}</div>
-          ${p.tier ? `<div style="display:inline-block;padding:2px 8px;border-radius:999px;background:${tierColor}1a;color:${tierColor};font-size:11px;font-weight:600;margin-bottom:6px">${TIER_LABEL(p.tier)}</div>` : ""}
           ${dKm != null ? `<div style="font-size:12px;color:#475569"><strong>${dKm.toFixed(1)} km</strong> away</div>` : ""}
           ${eta != null ? `<div style="font-size:12px;color:#475569">≈ ${eta} min by car</div>` : ""}
           ${dimmed ? `<div style="font-size:11px;color:#dc2626;font-weight:600;margin-top:4px">Currently full capacity</div>` : ""}
         </div>`;
-      marker.addListener("gmp-click", () => {
-        infoRef.current!.setContent(html);
-        infoRef.current!.setPosition({ lat: p.latitude, lng: p.longitude });
-        infoRef.current!.open({ map: mapRef.current!, anchor: marker });
-      });
+      marker.bindPopup(popup);
       markersRef.current.push(marker);
     }
-  }, [ready, providers, center?.lat, center?.lng]);
+  }, [providers, center?.lat, center?.lng]);
 
-  return <div ref={containerRef} style={{ height }} className="overflow-hidden rounded-2xl border" />;
-}
-
-function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+  return <div ref={containerRef} style={{ height }} className="overflow-hidden rounded-2xl border z-0" />;
 }

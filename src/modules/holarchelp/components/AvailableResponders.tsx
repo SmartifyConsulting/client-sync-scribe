@@ -27,33 +27,19 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
 
   useEffect(() => {
     const load = async () => {
-      const { data: rawOffers } = await supabase
-        .from("holarchelp_incident_offers" as any)
-        .select("provider_id, provider_kind, distance_km")
-        .eq("incident_id", incidentId)
-        .eq("response", "pending");
-      const list = (rawOffers as any[]) ?? [];
-      if (!list.length) { setOffers([]); return; }
-      const ambIds = list.filter((o) => o.provider_kind === "ambulance").map((o) => o.provider_id);
-      const hospIds = list.filter((o) => o.provider_kind === "hospital").map((o) => o.provider_id);
-      const [ambRes, hospRes] = await Promise.all([
-        ambIds.length
-          ? supabase.from("holarchelp_ambulance_providers" as any).select("id, company_name, ownership").in("id", ambIds)
-          : Promise.resolve({ data: [] as any[] }),
-        hospIds.length
-          ? supabase.from("holarchelp_hospitals" as any).select("id, name, ownership").in("id", hospIds)
-          : Promise.resolve({ data: [] as any[] }),
-      ]);
-      const ambMap = new Map((ambRes.data ?? []).map((r: any) => [r.id, r]));
-      const hospMap = new Map((hospRes.data ?? []).map((r: any) => [r.id, r]));
-      const merged: Offer[] = list.map((o: any) => {
-        if (o.provider_kind === "ambulance") {
-          const r: any = ambMap.get(o.provider_id);
-          return { ...o, name: r?.company_name ?? "Unknown ambulance", ownership: r?.ownership ?? null };
-        }
-        const r: any = hospMap.get(o.provider_id);
-        return { ...o, name: r?.name ?? "Unknown hospital", ownership: r?.ownership ?? null };
-      }).sort((a, b) => (a.distance_km ?? 999) - (b.distance_km ?? 999));
+      const { data, error } = await supabase.rpc("holarchelp_get_incident_offers" as any, { _incident_id: incidentId });
+      if (error) { setOffers([]); return; }
+      const merged: Offer[] = ((data as any[]) ?? [])
+        // Defensive: drop any row missing a real display name
+        .filter((r) => r?.name && String(r.name).trim().length > 0)
+        .map((r: any) => ({
+          provider_id: r.provider_id,
+          provider_kind: r.provider_kind,
+          distance_km: r.distance_km,
+          name: r.name,
+          ownership: r.ownership ?? null,
+        }))
+        .sort((a, b) => (a.distance_km ?? 999) - (b.distance_km ?? 999));
       setOffers(merged);
     };
     load();
@@ -64,7 +50,6 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
     return () => { supabase.removeChannel(ch); clearInterval(t); };
   }, [incidentId]);
 
-  // countdown + auto-assign trigger
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
@@ -107,7 +92,7 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
               <p className="truncate text-sm font-semibold">{o.name}</p>
               <p className="text-[11px] text-muted-foreground">
                 {o.ownership ? <span className="capitalize">{o.ownership}</span> : null}
-                {o.distance_km != null && <> · {o.distance_km.toFixed(1)} km</>}
+                {o.distance_km != null && <> · {Number(o.distance_km).toFixed(1)} km</>}
               </p>
             </div>
             <Button size="sm" className="h-8 shrink-0" onClick={() => pick(o)} disabled={!!picking}>
