@@ -87,6 +87,7 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId, hospitalId
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Add Lab Result</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
           <div><Label className="text-[11px]">Test Name *</Label><Input value={testName} onChange={(e) => setTestName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-[11px]">Result</Label><Input value={resultValue} onChange={(e) => setResultValue(e.target.value)} /></div>
