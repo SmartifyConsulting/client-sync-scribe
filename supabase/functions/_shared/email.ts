@@ -1,9 +1,11 @@
-// Shared transactional email sender — routes through MailerSend.
+// Shared transactional email sender — routes through ZeptoMail (Zoho).
 // All callers import { sendEmail } from "../_shared/email.ts".
 
 const DEFAULT_FROM_EMAIL = "no-reply@holarchealth.com";
 const DEFAULT_FROM_NAME = "Holarc Health";
-const API_URL = "https://api.mailersend.com/v1/email";
+// Region defaults to global (.com). Set ZEPTOMAIL_REGION="eu" for EU accounts.
+const REGION = (Deno.env.get("ZEPTOMAIL_REGION") || "com").toLowerCase();
+const API_URL = `https://api.zeptomail.${REGION === "eu" ? "eu" : "com"}/v1.1/email`;
 
 export interface EmailAddressInput {
   email: string;
@@ -32,7 +34,6 @@ export interface SendEmailResult {
 function parseAddress(input: string | EmailAddressInput): EmailAddressInput {
   if (typeof input !== "string") return input;
   const trimmed = input.trim();
-  // Match: Name <email@x.com>
   const m = trimmed.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
   if (m) {
     const name = m[1].trim();
@@ -50,39 +51,61 @@ function toAddressArray(
   return arr.map(parseAddress);
 }
 
+function toZeptoRecipient(a: EmailAddressInput) {
+  const ea: Record<string, string> = { address: a.email };
+  if (a.name) ea.name = a.name;
+  return { email_address: ea };
+}
+
+function toZeptoFrom(a: EmailAddressInput) {
+  const out: Record<string, string> = { address: a.email };
+  if (a.name) out.name = a.name;
+  return out;
+}
+
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const API_TOKEN = Deno.env.get("MAILERSEND_API_TOKEN");
-  if (!API_TOKEN) {
-    return { ok: false, status: 500, error: "MAILERSEND_API_TOKEN is not configured" };
+  const RAW_TOKEN = Deno.env.get("ZEPTOMAIL_API_TOKEN");
+  if (!RAW_TOKEN) {
+    return { ok: false, status: 500, error: "ZEPTOMAIL_API_TOKEN is not configured" };
   }
   if (!input.html && !input.text) {
     return { ok: false, status: 400, error: "Either html or text must be provided" };
   }
 
+  // ZeptoMail expects: "Zoho-enczapikey <token>". Accept token with or without prefix.
+  const authHeader = RAW_TOKEN.trim().toLowerCase().startsWith("zoho-enczapikey")
+    ? RAW_TOKEN.trim()
+    : `Zoho-enczapikey ${RAW_TOKEN.trim()}`;
+
   const from = input.from
     ? parseAddress(input.from)
     : { email: DEFAULT_FROM_EMAIL, name: DEFAULT_FROM_NAME };
 
+  const toArr = toAddressArray(input.to) ?? [];
+  const ccArr = toAddressArray(input.cc);
+  const bccArr = toAddressArray(input.bcc);
+
   const payload: Record<string, unknown> = {
-    from,
-    to: toAddressArray(input.to),
+    from: toZeptoFrom(from),
+    to: toArr.map(toZeptoRecipient),
     subject: input.subject,
   };
-  if (input.html) payload.html = input.html;
-  if (input.text) payload.text = input.text;
-  const cc = toAddressArray(input.cc);
-  if (cc?.length) payload.cc = cc;
-  const bcc = toAddressArray(input.bcc);
-  if (bcc?.length) payload.bcc = bcc;
-  if (input.replyTo) payload.reply_to = parseAddress(input.replyTo);
+  if (input.html) payload.htmlbody = input.html;
+  if (input.text) payload.textbody = input.text;
+  if (ccArr?.length) payload.cc = ccArr.map(toZeptoRecipient);
+  if (bccArr?.length) payload.bcc = bccArr.map(toZeptoRecipient);
+  if (input.replyTo) {
+    const r = parseAddress(input.replyTo);
+    payload.reply_to = [toZeptoFrom(r)];
+  }
 
   try {
     const resp = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_TOKEN}`,
-        "X-Requested-With": "XMLHttpRequest",
+        Accept: "application/json",
+        Authorization: authHeader,
       },
       body: JSON.stringify(payload),
     });
@@ -93,10 +116,24 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
 
     if (!resp.ok) {
       console.error("Email send failed", resp.status, text);
-      const message =
-        typeof data === "object" && data && "message" in (data as Record<string, unknown>)
-          ? String((data as Record<string, unknown>).message)
-          : `Email provider error ${resp.status}`;
+      let message = `Email provider error ${resp.status}`;
+      if (data && typeof data === "object") {
+        const errObj = (data as Record<string, unknown>).error as
+          | { message?: string; details?: Array<{ message?: string }> }
+          | undefined;
+        if (errObj?.message) {
+          message = errObj.message;
+          if (errObj.details?.length) {
+            const detailMsgs = errObj.details
+              .map((d) => d?.message)
+              .filter(Boolean)
+              .join("; ");
+            if (detailMsgs) message += `: ${detailMsgs}`;
+          }
+        } else if ((data as Record<string, unknown>).message) {
+          message = String((data as Record<string, unknown>).message);
+        }
+      }
       return { ok: false, status: resp.status, data, error: message };
     }
     return { ok: true, status: resp.status, data };
