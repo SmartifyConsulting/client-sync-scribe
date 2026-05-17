@@ -16,6 +16,7 @@ const NAV = [
   { to: "/provider/ambulance/incoming", icon: Ambulance, label: "Incoming SOS" },
   { to: "/provider/ambulance/navigation", icon: NavIcon, label: "Navigation" },
   { to: "/provider/ambulance/hospitals", icon: Hospital, label: "Hospitals" },
+  { to: "/provider/ambulance/affiliations", icon: Hospital, label: "Affiliated Hospitals" },
   { to: "/provider/ambulance/history", icon: History, label: "Incident History" },
   { to: "/provider/ambulance/team", icon: Users, label: "Team Status" },
 ];
