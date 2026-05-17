@@ -27,7 +27,6 @@ export function TopBarIcons() {
   const navigate = useNavigate();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
   const { isAdmin } = useIsAdmin();
-  const [switching, setSwitching] = useState<string | null>(null);
   const [seeded, setSeeded] = useState(false);
   const { impersonate, switching } = useImpersonate();
 
