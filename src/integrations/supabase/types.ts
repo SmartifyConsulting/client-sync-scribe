@@ -4591,6 +4591,18 @@ export type Database = {
         Args: { _incident_id: string }
         Returns: Json
       }
+      holarchelp_get_incident_offers: {
+        Args: { _incident_id: string }
+        Returns: {
+          accepting_patients: boolean
+          distance_km: number
+          name: string
+          ownership: string
+          provider_id: string
+          provider_kind: string
+          response: string
+        }[]
+      }
       holarchelp_get_tracking_incident: {
         Args: { _token: string }
         Returns: {

@@ -32,20 +32,24 @@ Deno.serve(async (req) => {
     const center = { lat: loc.latitude as number, lng: loc.longitude as number };
 
     const { data: ambulances } = await sb.from("holarchelp_ambulance_providers")
-      .select("id, latitude, longitude, ownership, accepting_patients, status")
-      .eq("status", "approved").eq("accepting_patients", true)
+      .select("id, company_name, latitude, longitude, ownership, accepting_patients, status, subscription_status")
+      .eq("status", "approved").eq("subscription_status", "active").eq("accepting_patients", true)
       .not("latitude", "is", null).not("longitude", "is", null);
     const { data: hospitals } = await sb.from("holarchelp_hospitals")
-      .select("id, latitude, longitude, ownership, accepting_patients, status")
-      .eq("status", "approved").eq("accepting_patients", true)
+      .select("id, name, latitude, longitude, ownership, accepting_patients, status, subscription_status")
+      .eq("status", "approved").eq("subscription_status", "active").eq("accepting_patients", true)
       .not("latitude", "is", null).not("longitude", "is", null);
+
+    // Defensive: drop rows without a usable display name
+    const ambList = (ambulances ?? []).filter((r: any) => r?.company_name && String(r.company_name).trim().length > 0);
+    const hospList = (hospitals ?? []).filter((r: any) => r?.name && String(r.name).trim().length > 0);
 
     const isPublicCoverage = (incident as any).coverage === "public";
     const tag = (rows: any[] | null, kind: string) =>
       (rows ?? [])
         .filter((p: any) => !exclude_provider_ids.includes(p.id))
         .map((p: any) => ({ ...p, _kind: kind, _d: distKm(center, { lat: p.latitude, lng: p.longitude }) }));
-    const all = [...tag(ambulances, "ambulance"), ...tag(hospitals, "hospital")];
+    const all = [...tag(ambList, "ambulance"), ...tag(hospList, "hospital")];
 
     let candidates: any[] = [];
     for (const radius of [50, 150, 500, 5000]) {

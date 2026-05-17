@@ -46,12 +46,13 @@ Deno.serve(async (req) => {
     });
 
     if (!resp.ok) {
-      const txt = await resp.text();
-      return json({ error: 'routes_api_failed', detail: txt }, 502);
+      // Return a safe fallback so the client falls back to straight-line ETA instead of breaking the map
+      const txt = await resp.text().catch(() => '');
+      return json({ fallback: true, reason: 'routes_api_failed', detail: txt }, 200);
     }
     const data = await resp.json();
     const route = data?.routes?.[0];
-    if (!route) return json({ error: 'no_route' }, 404);
+    if (!route) return json({ fallback: true, reason: 'no_route' }, 200);
 
     const seconds = parseInt(String(route.duration ?? '0').replace('s', '')) || 0;
     return json({
@@ -61,7 +62,7 @@ Deno.serve(async (req) => {
       polyline: route.polyline?.encodedPolyline ?? null,
     });
   } catch (e) {
-    return json({ error: String((e as Error).message ?? e) }, 500);
+    return json({ fallback: true, reason: String((e as Error).message ?? e) }, 200);
   }
 });
 
