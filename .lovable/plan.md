@@ -1,62 +1,49 @@
-# Switch email pipeline to ZeptoMail (no Mailgun, no MailerSend, no Lovable Emails)
+# Auth emails via ZeptoMail — bypass Lovable entirely
 
-Since the Supabase Send Email Hook secret is hard to find/manage, we'll bypass auth hooks entirely and use **Supabase Auth's built-in custom SMTP** for auth emails. ZeptoMail offers SMTP credentials directly — no webhook secret needed.
+## The core problem
+Lovable Cloud doesn't expose Supabase's SMTP settings UI, and the auth email hook needs a `SEND_EMAIL_HOOK_SECRET` you can't easily see. Both paths have wasted credits. We'll avoid both.
 
-Transactional emails (invoices, invitations, etc.) will switch from MailerSend to ZeptoMail's REST API.
+## The solution
+Stop using Supabase's built-in auth emails. Instead, intercept the two auth flows that actually send mail (password reset + signup confirmation) on the **frontend**, generate the link **server-side** using the Supabase Admin API in an edge function, and send the email through **ZeptoMail** ourselves. No hook, no hook secret, no SMTP config.
 
-## 1. Transactional sends — swap MailerSend for ZeptoMail in `_shared/email.ts`
-- Replace MailerSend endpoint with ZeptoMail: `POST https://api.zeptomail.{REGION}/v1.1/email`
-  - Region depends on the user's ZeptoMail account: `.com` (US/global) or `.eu` (EU). I'll ask.
-- Auth header: `Authorization: Zoho-enczapikey ${ZEPTOMAIL_API_TOKEN}` (ZeptoMail uses `Zoho-enczapikey` prefix, not `Bearer`)
-- Payload shape:
-  ```json
-  {
-    "from": { "address": "no-reply@holarchealth.com", "name": "Holarc Health" },
-    "to":   [{ "email_address": { "address": "...", "name": "..." } }],
-    "subject": "...",
-    "htmlbody": "...",
-    "textbody": "...",
-    "reply_to": [{ "address": "..." }],
-    "cc": [...],
-    "bcc": [...]
-  }
-  ```
-- Keep the public `sendEmail({ to, subject, html, text, from, replyTo, cc, bcc })` signature so **no caller files change**.
+## What changes
 
-## 2. New secret
-- Add `ZEPTOMAIL_API_TOKEN` (from ZeptoMail → Mail Agents → your agent → Setup Info → Send Mail API Token, including the `Zoho-enczapikey ` prefix or just the token portion — I'll handle both).
+### 1. New edge function: `auth-email-sender`
+- Accepts `{ type: "recovery" | "signup" | "email_change", email, redirectTo? }`
+- Uses `supabase.auth.admin.generateLink({ type, email, options: { redirectTo } })` with the service role key to mint the action link
+- Renders a branded HTML email (Holarc Health styling) for that type
+- Sends via `sendEmail()` from `_shared/email.ts` (already ZeptoMail)
+- Returns `{ ok: true }` on success
+- `verify_jwt = false` so it's callable from unauthenticated screens (Forgot Password)
 
-## 3. Remove unused secrets
-- Delete `MAILERSEND_API_TOKEN` after the swap is confirmed working.
+### 2. Frontend swap (3 call sites)
+- `src/pages/ForgotPassword.tsx` — replace `supabase.auth.resetPasswordForEmail(...)` with `supabase.functions.invoke('auth-email-sender', { body: { type: 'recovery', email, redirectTo: \`\${origin}/reset-password\` } })`
+- `src/pages/Auth.tsx` (signup flow) — after `supabase.auth.signUp(...)`, if email confirmation is required, invoke `auth-email-sender` with `type: 'signup'`. If auto-confirm is on, skip.
+- Anywhere `supabase.auth.updateUser({ email })` is called (email change) — follow up with `type: 'email_change'`
 
-## 4. Auth emails — use Supabase custom SMTP (no hook)
-This is the part that removes the "hook secret" pain. In **Cloud → Auth → SMTP Settings** you (manually, one time) enter:
-- **Host**: `smtp.zeptomail.com` (or `smtp.zeptomail.eu` for EU)
-- **Port**: `587`
-- **Username**: `emailapikey`
-- **Password**: your ZeptoMail SMTP token (different from the API token — generated under Mail Agents → SMTP Info)
-- **Sender email**: `no-reply@holarchealth.com`
-- **Sender name**: `Holarc Health`
+### 3. Disable Supabase's default auth emails
+In Cloud → Auth settings:
+- Keep email confirmations **on** if you want verified signups (the function handles it), or turn **auto-confirm on** to skip entirely
+- The default Supabase sender will still try to fire for any flow we didn't intercept — but since we're calling `generateLink` (admin API) instead of the user-facing `resetPasswordForEmail`/`signUp` for emails, Supabase doesn't send its own copy
 
-Once saved, all Supabase Auth emails (password reset, signup confirm, magic link, invites, email change, 2FA) go straight through ZeptoMail SMTP. No webhook, no hook secret, no edge function.
+### 4. Email templates (inline in the edge function)
+Three minimal branded HTML templates — Recovery, Confirm Signup, Confirm Email Change — using the Holarc Health red `#E01837` and teal accents, with the action link as a clear CTA button.
 
-I'll also delete or skip-deploy the now-unused `auth-email-hook` function in step 5 to avoid confusion.
+## What you don't have to do
+- No SMTP config anywhere
+- No `SEND_EMAIL_HOOK_SECRET`
+- No domain verification on Lovable's side (only on ZeptoMail, which you're already doing)
+- No `auth-email-hook` function (still deleted)
 
-## 5. Cleanup
-- Delete `supabase/functions/auth-email-hook/` (no longer used — SMTP path replaces it)
-- Remove `[functions.auth-email-hook]` block from `supabase/config.toml`
-- Scrub any lingering "mailgun", "mailersend", or "resend" strings from the codebase
-- Update `.lovable/plan.md` to reflect ZeptoMail as the chosen provider
+## Files touched
+- **New:** `supabase/functions/auth-email-sender/index.ts`
+- **Edit:** `src/pages/ForgotPassword.tsx`
+- **Edit:** `src/pages/Auth.tsx`
+- **Edit:** `supabase/config.toml` (add `[functions.auth-email-sender] verify_jwt = false`)
 
-## 6. Redeploy
-- Redeploy all 8 transactional functions that import `_shared/email.ts`
+## Caveats
+- This covers password reset + signup + email change. Magic links and OTP aren't currently used in the app (confirmed by codebase) — if added later, same pattern applies.
+- 2FA codes (if you ever enable) still go via Supabase's SMS/email pipeline and would need separate handling.
+- The Supabase default "reset password" template will no longer fire because we never call `resetPasswordForEmail`. Same for signup confirmation.
 
-## 7. Verify ZeptoMail domain
-You must verify `holarchealth.com` in **ZeptoMail → Domains** (publish their SPF + DKIM DNS records). Until verified, ZeptoMail rejects every send.
-
-## Questions before I implement
-1. Which ZeptoMail region — `.com` (US/global) or `.eu` (EU)?
-2. Do you want auth emails via SMTP (recommended, no hook secret) or do you still want me to keep `auth-email-hook` available as a fallback?
-3. Is `no-reply@holarchealth.com` still the desired From address, or do you want something else (e.g. `noreply@holarchealth.com`)?
-
-After you answer + add `ZEPTOMAIL_API_TOKEN`, I'll do steps 1, 3, 5, 6 in one pass.
+Approve and I'll implement.
