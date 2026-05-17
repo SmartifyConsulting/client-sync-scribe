@@ -36,6 +36,14 @@ export default function IncomingAmbulancesScreen() {
         const m: Record<string,{name:string;phone?:string}> = {};
         ((amb as any) ?? []).forEach((a: any) => { m[a.id] = { name: a.company_name, phone: a.contact_phone }; });
         setCrews(m);
+
+        const { data: aff } = await supabase
+          .from("ambulance_hospital_affiliations" as any)
+          .select("ambulance_provider_id")
+          .eq("hospital_id", providerId)
+          .eq("status", "active")
+          .in("ambulance_provider_id", ids);
+        setPartners(new Set(((aff as any) || []).map((a: any) => a.ambulance_provider_id)));
       }
     };
     load();
