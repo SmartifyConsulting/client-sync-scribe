@@ -15,6 +15,7 @@ import { AddImagingDialog } from "./AddImagingDialog";
 import { UploadAdmissionDialog } from "./UploadAdmissionDialog";
 import { ManualLogAdmissionDialog } from "./ManualLogAdmissionDialog";
 import { Upload } from "lucide-react";
+import { RateNurseControl } from "@/components/admissions/RateNurseControl";
 
 interface Props {
   patientId: string;
