@@ -138,14 +138,33 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     return out;
   }, [patient?.lat, patient?.lng, provider?.lat, provider?.lng, provider?.kind, hospital?.lat, hospital?.lng, hospital?.name]);
 
+  // Countdown timer tied to the latest ETA
+  const [remainingSec, setRemainingSec] = useState<number | null>(null);
+  useEffect(() => {
+    if (!eta) { setRemainingSec(null); return; }
+    setRemainingSec(Math.max(0, Math.round(eta.minutes * 60)));
+    const id = setInterval(() => {
+      setRemainingSec((s) => (s === null ? null : Math.max(0, s - 1)));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [eta?.minutes]);
+
+  const countdownLabel = useMemo(() => {
+    if (remainingSec === null) return null;
+    if (remainingSec <= 0) return "Arriving now";
+    const m = Math.floor(remainingSec / 60);
+    const s = remainingSec % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }, [remainingSec]);
+
   return (
     <div className="relative">
       <LiveMap points={points} height={height} />
-      {eta && provider && (
-        <div className="absolute left-2 top-2 z-[400] rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-semibold shadow-md backdrop-blur">
-          <span className="text-foreground">{eta.minutes} min</span>
-          <span className="ml-1 text-muted-foreground">· {eta.km.toFixed(1)} km</span>
-          <span className="ml-1 text-[10px] uppercase text-muted-foreground">{hospital ? "→ hospital" : "→ patient"}</span>
+      {eta && provider && countdownLabel && (
+        <div className="absolute left-2 top-2 z-[400] flex items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-1.5 text-xs font-semibold shadow-md backdrop-blur">
+          <span className="tabular-nums text-foreground">{countdownLabel}</span>
+          <span className="text-muted-foreground">· {eta.km.toFixed(1)} km</span>
+          <span className="text-[10px] uppercase text-muted-foreground">{hospital ? "→ hospital" : "→ patient"}</span>
         </div>
       )}
       <div className="absolute right-2 top-2 z-[400] rounded-full bg-background/95 px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground shadow-md">
