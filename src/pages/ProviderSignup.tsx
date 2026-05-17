@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Building2, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Loader2, Building2, ArrowLeft, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
 import { toast } from "sonner";
+import { AddressAutocomplete } from "@/features/patients/components/AddressAutocomplete";
+import { supabase } from "@/integrations/supabase/client";
 
 type ProviderType = "hospital" | "ambulance";
 
