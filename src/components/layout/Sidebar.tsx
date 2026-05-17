@@ -59,6 +59,8 @@ const adminNavItems: NavItem[] = [
   { icon: Users, label: "Users", to: "/admin/users" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", to: "/admin/gamification" },
+  { icon: Siren, label: "Hospital Portal", to: "/provider/hospital", danger: true },
+  { icon: Siren, label: "ER Portal", to: "/provider/ambulance", danger: true },
 ];
 
 interface SidebarProps {
