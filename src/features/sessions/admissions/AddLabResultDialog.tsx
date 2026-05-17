@@ -60,6 +60,8 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId, hospitalId
       const { error } = await supabase.from("admission_lab_results").insert({
         admission_id: admissionId,
         recorded_by: user.id,
+        nurse_id: nurse?.id ?? null,
+        nurse_name_snapshot: nurse?.name ?? null,
         test_name: testName,
         result_value: resultValue || null,
         units: units || null,
@@ -67,7 +69,7 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId, hospitalId
         result_date: resultDate,
         attachment_url: attachmentUrl || null,
         notes: notes || null,
-      });
+      } as any);
       if (error) throw error;
       toast({ title: "Lab result saved" });
       qc.invalidateQueries({ queryKey: ["admission-lab-results", admissionId] });
