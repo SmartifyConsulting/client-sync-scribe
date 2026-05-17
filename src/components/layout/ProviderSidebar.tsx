@@ -55,6 +55,7 @@ const ambulanceNav: NavItem[] = [
   { icon: Hospital, label: "Affiliated Hospitals", to: "/provider/ambulance/affiliations" },
   { icon: History, label: "Incident History", to: "/provider/ambulance/history" },
   { icon: Users, label: "Team Status", to: "/provider/ambulance/team" },
+  { icon: UserCheck, label: "Administrators", to: "/provider/ambulance/admins" },
 ];
 
 interface ProviderSidebarProps {
