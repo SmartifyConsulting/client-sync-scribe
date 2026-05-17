@@ -93,5 +93,6 @@ verify_jwt = false
 [functions.register-emergency-provider]
 verify_jwt = false
 
-[functions.auth-email-hook]
+
+[functions.send-password-reset]
 verify_jwt = false
