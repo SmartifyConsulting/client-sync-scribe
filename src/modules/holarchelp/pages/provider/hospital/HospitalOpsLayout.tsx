@@ -118,9 +118,9 @@ function TopBar() {
   }, []);
 
   const capTone =
-    stats.capacityStatus === "red" ? "border-red-500/40 bg-red-500/10 text-red-700"
-    : stats.capacityStatus === "yellow" ? "border-yellow-500/40 bg-yellow-500/10 text-yellow-700"
-    : "border-green-500/40 bg-green-500/10 text-green-700";
+    stats.capacityStatus === "red" ? "border-destructive/40 bg-destructive/10 text-destructive"
+    : stats.capacityStatus === "yellow" ? "border-warning/40 bg-warning/10 text-warning-foreground"
+    : "border-success/40 bg-success/10 text-success";
 
   return (
     <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-background/95 px-3 py-2 backdrop-blur">
