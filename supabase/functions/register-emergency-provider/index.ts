@@ -45,13 +45,16 @@ serve(async (req) => {
     if (!password || password.length < 6) return bad("password must be at least 6 characters");
     if (!first_name || !last_name) return bad("contact first and last name required");
 
-    const registration_number = body.registration_number ? String(body.registration_number).slice(0, 100) : null;
-    const address = body.address ? String(body.address).slice(0, 500) : null;
+    const registration_number = body.registration_number ? String(body.registration_number).trim().slice(0, 100) : null;
+    const address = body.address ? String(body.address).trim().slice(0, 500) : null;
     const city = body.city ? String(body.city).slice(0, 100) : null;
     const country = body.country ? String(body.country).slice(0, 100) : "South Africa";
     const phone = body.phone ? String(body.phone).slice(0, 50) : null;
     const latitude = typeof body.latitude === "number" ? body.latitude : null;
     const longitude = typeof body.longitude === "number" ? body.longitude : null;
+
+    if (!registration_number) return bad("registration_number required");
+    if (!address) return bad("address required");
 
     const fullName = `${first_name} ${last_name}`.trim();
 
@@ -60,6 +63,22 @@ serve(async (req) => {
       SUPABASE_URL,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // Duplicate pre-check (DB also enforces a unique index on registration_number)
+    const dupCheck = await supabase.rpc("check_provider_duplicate", {
+      _type: type,
+      _reg_no: registration_number,
+      _name: company_name,
+      _city: city,
+    });
+    if (!dupCheck.error && (dupCheck.data as any)?.exists) {
+      const existing = (dupCheck.data as any)?.name ?? "another organisation";
+      return bad(
+        `An organisation with this registration number or name already exists ("${existing}"). If this is your organisation, ask the existing administrator to invite you as an admin. Otherwise check your registration number and try again.`,
+        409,
+      );
+    }
+
 
     // Use anon-key client + signUp so Supabase Auth automatically sends
     // the built-in "Confirm your email" message to the provider. This
