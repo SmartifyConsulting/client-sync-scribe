@@ -19,6 +19,7 @@ import {
   Users,
   HeartPulse,
   ArrowLeft,
+  UserCheck,
 } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
