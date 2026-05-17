@@ -14,12 +14,12 @@ import { ProviderProfileMenu } from "@/components/layout/ProviderProfileMenu";
 
 const NAV = [
   { to: "/provider/hospital", icon: Siren, label: "Emergency Queue", end: true },
-  { to: "/provider/hospital/incoming", icon: Ambulance, label: "Incoming Ambulances" },
+  { to: "/provider/hospital/incoming", icon: Ambulance, label: "Incoming ER Providers" },
   { to: "/provider/hospital/triage", icon: Stethoscope, label: "Triage" },
   { to: "/provider/hospital/admissions", icon: ClipboardList, label: "Admissions" },
   { to: "/provider/hospital/capacity", icon: BedDouble, label: "ER Capacity" },
   { to: "/provider/hospital/doctors", icon: Stethoscope, label: "Our Doctors" },
-  { to: "/provider/hospital/ambulances", icon: Ambulance, label: "Our Ambulances" },
+  { to: "/provider/hospital/ambulances", icon: Ambulance, label: "Our ER Providers" },
   { to: "/provider/hospital/timeline", icon: Activity, label: "Incident Timeline" },
 ];
 
