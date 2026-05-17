@@ -1,43 +1,50 @@
-## Switch auth + transactional emails to Resend
+# Switch email pipeline to MailerSend (no Mailgun references)
 
-Replace the Mailgun-based email pipeline with Resend, using a Resend API key stored as a secret.
+User preference: **no references to "mailgun" anywhere in the codebase** — file names, function names, variable names, comments, or env vars.
 
-### 1. Secrets
-- Add `RESEND_API_KEY` (user provides from resend.com/api-keys)
-- Remove `MAILGUN_API_KEY`, `MAILGUN_REGION`, `MAILGUN_CONNECTION_KEY`, `SEND_EMAIL_HOOK_SECRET` (no longer needed)
+## 1. Secrets
+- Add `MAILERSEND_API_TOKEN` (from mailersend.com → Integrations → API tokens)
+- Remove unused: `RESEND_API_KEY`, `MAILGUN_API_KEY`, `MAILGUN_REGION`, `MAILGUN_CONNECTION_KEY`, `SEND_EMAIL_HOOK_SECRET`
 
-### 2. Shared sender module
-- Replace `supabase/functions/_shared/mailgun.ts` with `supabase/functions/_shared/resend.ts` exporting `sendEmail({ to, subject, html, from?, replyTo? })`
-- Default `from`: `Holarc Health <no-reply@holarchealth.com>` (Resend-verified domain)
-- Calls `https://api.resend.com/emails` directly with `Authorization: Bearer ${RESEND_API_KEY}`
-- Keep the same return shape (`{ ok, data?, error? }`) so callers don't change
+## 2. New shared sender module
+- Create `supabase/functions/_shared/email.ts` exporting `sendEmail({ to, subject, html, text?, from?, replyTo?, cc?, bcc? })`
+- Default `from`: `Holarc Health <no-reply@holarchealth.com>` (MailerSend-verified domain required)
+- Calls `POST https://api.mailersend.com/v1/email` with `Authorization: Bearer ${MAILERSEND_API_TOKEN}`
+- Payload shape: `{ from: { email, name }, to: [{ email }], subject, html, text, reply_to, cc, bcc }`
+- Parse `"Name <email>"` strings into MailerSend's `{ email, name }` objects
+- Return shape: `{ ok, status, data?, error? }`
 
-### 3. Update existing transactional functions
-Swap `sendMailgunEmail` → `sendEmail` in:
+## 3. Delete the old shared module
+- Delete `supabase/functions/_shared/mailgun.ts` (no compat alias — clean break)
+
+## 4. Update every caller
+Replace `import { sendMailgunEmail } from "../_shared/mailgun.ts"` with `import { sendEmail } from "../_shared/email.ts"` and rename the call:
 - `send-document-email`
 - `send-invoice-report`
 - `submit-insurance-claim`
-- any other function importing `_shared/mailgun.ts` (grep first)
+- `send-user-invitation`
+- `send-patient-invitation`
+- `notify-next-of-kin`
+- `paypal-subscription`
+- `auth-email-hook`
+- any other grep hit on `mailgun`
 
-### 4. Auth emails (password reset, signup, magic link)
-Replace the abandoned `auth-email-mailgun` approach with an **app-layer Resend flow** (since Lovable Cloud doesn't expose the Supabase Send Email Hook UI):
-- Delete `supabase/functions/auth-email-mailgun/`
-- Create `supabase/functions/send-password-reset/index.ts`: takes `{ email }`, calls `supabase.auth.admin.generateLink({ type: 'recovery' })`, sends a branded reset email via Resend pointing to `https://holarchealth.com/reset-password#...`
-- Update `src/pages/ForgotPassword.tsx` to invoke `send-password-reset` instead of `supabase.auth.resetPasswordForEmail`
-- Disable Supabase's built-in auth emails for signup/recovery in `supabase/config.toml` (or accept that default Supabase templates remain as fallback)
+Also scrub any comments/variable names mentioning Mailgun (e.g. `"Mailgun error:"` log strings → `"Email send failed:"`).
 
-### 5. Domain prerequisite
-User must verify `holarchealth.com` (or a subdomain like `mail.holarchealth.com`) in Resend dashboard before sending. I'll prompt for which sender domain to use.
+## 5. Config cleanup
+- Confirm no `[functions.auth-email-mailgun]` block remains in `supabase/config.toml` (already removed earlier)
+- Search project for any remaining "mailgun" string and remove
 
-### 6. Cleanup
-- Delete `supabase/functions/_shared/mailgun.ts`
-- Delete `supabase/functions/auth-email-mailgun/`
-- Remove related entries from `supabase/config.toml`
+## 6. Auth emails
+Unchanged — Supabase's built-in templates handle password reset / signup confirm. MailerSend powers only the app/transactional sends listed above.
 
-### Out of scope
-- Signup confirmation / email-change / magic-link custom templates (only password reset for now; can add later)
-- Lovable Emails managed flow (`notify.nigeria.holarchealth.com`) — left alone
+## 7. Redeploy
+Redeploy all functions touched in step 4.
 
-### Questions before I build
-1. **Which sender domain** is verified (or will be verified) in Resend? `holarchealth.com`, `mail.holarchealth.com`, or other?
-2. **Auth emails scope**: just password reset, or also signup confirmation + magic link via custom Resend functions?
+## User action required
+Verify `holarchealth.com` in the MailerSend dashboard (Domains → Add domain → publish the SPF + DKIM DNS records). Until verified, sends will be rejected.
+
+## Out of scope
+- UI changes
+- Custom auth email templates
+- Database changes
