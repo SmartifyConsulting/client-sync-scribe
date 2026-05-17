@@ -32,7 +32,7 @@ function Brand() {
       {state !== "collapsed" && (
         <div className="min-w-0 leading-tight">
           <p className="truncate text-sm font-extrabold">HolarcHelp</p>
-          <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">Dispatch</p>
+          <p className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">ER Provider</p>
         </div>
       )}
     </div>
@@ -115,7 +115,7 @@ function TopBar() {
   const vehicleTone =
     vehicle === "dispatched" ? "border-primary/40 bg-primary/10 text-primary"
     : vehicle === "out_of_service" ? "border-destructive/40 bg-destructive/10 text-destructive"
-    : "border-green-500/40 bg-green-500/10 text-green-700";
+    : "border-success/40 bg-success/10 text-success";
 
   return (
     <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-background/95 px-3 py-2 backdrop-blur">
@@ -139,7 +139,7 @@ function TopBar() {
         <button
           onClick={() => setTeam((s) => s === "on_shift" ? "off_shift" : "on_shift")}
           className={cn("inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
-            team === "on_shift" ? "border-green-500/40 bg-green-500/10 text-green-700" : "border-border bg-card text-muted-foreground")}
+            team === "on_shift" ? "border-success/40 bg-success/10 text-success" : "border-border bg-card text-muted-foreground")}
         >
           <Users className="h-3.5 w-3.5" />
           {team === "on_shift" ? "On shift" : "Off shift"}
@@ -161,7 +161,7 @@ function TopBar() {
         </span>
       </div>
       <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-        <Wifi className={cn("h-3.5 w-3.5", online ? "text-green-600" : "text-destructive")} />
+        <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
         <span>{online ? "Online" : "Offline"}</span>
         <ProviderProfileMenu />
       </div>

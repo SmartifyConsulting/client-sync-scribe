@@ -40,7 +40,9 @@ export default function ProviderRoutes() {
       <Route index element={<ProviderShell><ProviderRedirect /></ProviderShell>} />
       {/* Back-compat: old /provider/incident/:id deep-links */}
       <Route path="incident/:id" element={<ProviderShell><ProviderRedirect incidentMode /></ProviderShell>} />
-
+      {/* Forward-friendly alias: /provider/er → /provider/ambulance */}
+      <Route path="er" element={<Navigate to="/provider/ambulance" replace />} />
+      <Route path="er/*" element={<Navigate to="/provider/ambulance" replace />} />
       <Route path="hospital" element={<ProviderShell><HospitalOpsLayout /></ProviderShell>}>
         <Route index element={<HospitalOpsDashboard />} />
         <Route path="incoming" element={<IncomingAmbulancesScreen />} />

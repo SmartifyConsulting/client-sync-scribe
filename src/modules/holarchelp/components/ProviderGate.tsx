@@ -68,7 +68,7 @@ export function ProviderGate({ children }: { children: React.ReactNode }) {
         </div>
         <h1 className="mt-4 text-2xl font-extrabold">HolarcHelp Provider Portal</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This portal is for approved hospitals and ambulance providers in the HolarcHelp network.
+          This portal is for approved hospitals and ER providers in the HolarcHelp network.
         </p>
         <div className="mt-6 rounded-2xl border bg-card p-4 text-left text-sm">
           <p className="flex items-center gap-2 font-semibold"><Lock className="h-4 w-4" /> Not a provider yet</p>

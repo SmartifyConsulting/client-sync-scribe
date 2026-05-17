@@ -8,6 +8,7 @@ import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
@@ -115,13 +116,20 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function RoleBasedRedirect() {
   const { isPatient, isEmergency, hasDoctorRole, hasPatientRole, loading } = useUserRole();
   const { providerType, loading: providerLoading } = useProviderAccess();
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
 
-  if (loading || providerLoading) {
+  if (loading || providerLoading || adminLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
+  }
+
+  // Admins always land on the doctor dashboard; they can still reach
+  // the provider portal manually via the profile switcher.
+  if (isAdmin) {
+    return <Navigate to="/doctor-dashboard" replace />;
   }
 
   // Provider portal takes priority over patient/doctor routing

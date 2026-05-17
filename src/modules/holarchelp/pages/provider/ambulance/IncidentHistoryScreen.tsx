@@ -62,7 +62,7 @@ export default function IncidentHistoryScreen() {
                 <td className="px-3 py-2 text-xs font-bold">#{r.id.slice(0,8)}</td>
                 <td className="px-3 py-2 text-xs">
                   {r.status === "completed"
-                    ? <span className="inline-flex items-center gap-1 text-green-700"><CheckCircle2 className="h-3.5 w-3.5" /> Completed</span>
+                    ? <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 className="h-3.5 w-3.5" /> Completed</span>
                     : <span className="inline-flex items-center gap-1 text-destructive"><XCircle className="h-3.5 w-3.5" /> Cancelled</span>}
                 </td>
                 <td className="px-3 py-2 text-xs">{hosp[r.destination_hospital_id ?? ""] ?? "—"}</td>

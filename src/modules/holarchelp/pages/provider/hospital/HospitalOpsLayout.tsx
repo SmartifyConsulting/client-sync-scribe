@@ -14,12 +14,12 @@ import { ProviderProfileMenu } from "@/components/layout/ProviderProfileMenu";
 
 const NAV = [
   { to: "/provider/hospital", icon: Siren, label: "Emergency Queue", end: true },
-  { to: "/provider/hospital/incoming", icon: Ambulance, label: "Incoming Ambulances" },
+  { to: "/provider/hospital/incoming", icon: Ambulance, label: "Incoming ER Providers" },
   { to: "/provider/hospital/triage", icon: Stethoscope, label: "Triage" },
   { to: "/provider/hospital/admissions", icon: ClipboardList, label: "Admissions" },
   { to: "/provider/hospital/capacity", icon: BedDouble, label: "ER Capacity" },
   { to: "/provider/hospital/doctors", icon: Stethoscope, label: "Our Doctors" },
-  { to: "/provider/hospital/ambulances", icon: Ambulance, label: "Our Ambulances" },
+  { to: "/provider/hospital/ambulances", icon: Ambulance, label: "Our ER Providers" },
   { to: "/provider/hospital/timeline", icon: Activity, label: "Incident Timeline" },
 ];
 
@@ -118,9 +118,9 @@ function TopBar() {
   }, []);
 
   const capTone =
-    stats.capacityStatus === "red" ? "border-red-500/40 bg-red-500/10 text-red-700"
-    : stats.capacityStatus === "yellow" ? "border-yellow-500/40 bg-yellow-500/10 text-yellow-700"
-    : "border-green-500/40 bg-green-500/10 text-green-700";
+    stats.capacityStatus === "red" ? "border-destructive/40 bg-destructive/10 text-destructive"
+    : stats.capacityStatus === "yellow" ? "border-warning/40 bg-warning/10 text-warning-foreground"
+    : "border-success/40 bg-success/10 text-success";
 
   return (
     <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-background/95 px-3 py-2 backdrop-blur">
@@ -131,10 +131,10 @@ function TopBar() {
         <TopChip label="Incoming ambulances" value={stats.incomingAmbulances} tone="border-primary/40 bg-primary/10 text-primary" />
         <TopChip label="ICU beds" value={stats.icuAvailable ?? "—"} tone="border-border bg-card text-foreground" />
         <TopChip label="ER capacity" value={(stats.capacityStatus ?? "green").toUpperCase()} tone={capTone} />
-        <TopChip label="Alerts" value={stats.alerts} tone="border-orange-500/40 bg-orange-500/10 text-orange-700" />
+        <TopChip label="Alerts" value={stats.alerts} tone="border-warning/40 bg-warning/10 text-warning" />
       </div>
       <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-        <Wifi className={cn("h-3.5 w-3.5", online ? "text-green-600" : "text-destructive")} />
+        <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
         <span className="tabular-nums">{now.toLocaleTimeString()}</span>
         <ProviderProfileMenu />
       </div>

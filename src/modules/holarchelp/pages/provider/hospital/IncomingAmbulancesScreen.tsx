@@ -58,13 +58,13 @@ export default function IncomingAmbulancesScreen() {
     <div className="space-y-4">
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hospital Emergency Operations</p>
-        <h1 className="text-2xl font-extrabold">Incoming Ambulances</h1>
+        <h1 className="text-2xl font-extrabold">Incoming ER Providers</h1>
       </header>
 
       {!rows.length && (
         <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           <AlertTriangle className="mx-auto mb-2 h-5 w-5 opacity-50" />
-          No ambulances currently en route to your facility.
+          No ER providers currently en route to your facility.
         </div>
       )}
 
@@ -76,8 +76,8 @@ export default function IncomingAmbulancesScreen() {
               <div className="flex items-center justify-between gap-3 border-b px-3 py-2">
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 text-sm font-extrabold">
-                    <Ambulance className="h-4 w-4 text-red-600" />
-                    {crew?.name ?? "Ambulance"}
+                    <Ambulance className="h-4 w-4 text-destructive" />
+                    {crew?.name ?? "ER Provider"}
                     {r.assigned_provider_id && partners.has(r.assigned_provider_id) && (
                       <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-[9px]">
                         <Handshake className="h-2.5 w-2.5" /> Partner
@@ -95,8 +95,8 @@ export default function IncomingAmbulancesScreen() {
               </div>
               <SosLiveMap incidentId={r.id} mode="hospital" height={200} />
               {r.pre_arrival_notes && (
-                <div className="border-t bg-orange-50 px-3 py-2 text-xs dark:bg-orange-950/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-orange-700">Pre-arrival notes</p>
+                <div className="border-t bg-warning/10 px-3 py-2 text-xs dark:bg-warning/10">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-warning">Pre-arrival notes</p>
                   <p className="mt-0.5 line-clamp-3">{r.pre_arrival_notes}</p>
                 </div>
               )}

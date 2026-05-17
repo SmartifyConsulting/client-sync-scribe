@@ -123,7 +123,7 @@ export function ImportDoctorsDialog({ hospitalId, onImported }: { hospitalId: st
           {results && summary && (
             <div className="space-y-2">
               <div className="flex flex-wrap gap-2">
-                <Badge className="bg-green-600">{summary.matched} matched</Badge>
+                <Badge className="bg-success">{summary.matched} matched</Badge>
                 <Badge variant="secondary">{summary.pending} pending</Badge>
                 <Badge variant="outline">{summary.skipped} skipped</Badge>
                 {summary.errors > 0 && <Badge variant="destructive">{summary.errors} errors</Badge>}

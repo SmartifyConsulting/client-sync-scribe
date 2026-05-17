@@ -9,7 +9,7 @@ type Ev = { id: string; incident_id: string; event_type: string; payload: any; c
 const fmt = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
 const tone = (t: string) =>
-  t.includes("completed") || t.includes("admitted") ? "border-green-500/40 bg-green-500/10 text-green-700"
+  t.includes("completed") || t.includes("admitted") ? "border-success/40 bg-success/10 text-success"
   : t.includes("released") || t.includes("escalated") ? "border-destructive/40 bg-destructive/10 text-destructive"
   : t.includes("accepted") || t.includes("assigned") ? "border-primary/40 bg-primary/10 text-primary"
   : "border-border bg-card text-foreground";

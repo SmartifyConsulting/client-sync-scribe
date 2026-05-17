@@ -99,8 +99,8 @@ export default function HospitalIncidentConsole() {
       )}
 
       {incident.pre_arrival_notes && (
-        <div className="rounded-2xl border-2 border-orange-500/30 bg-orange-50 p-3 dark:bg-orange-950/20">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300">Pre-arrival notes from crew</p>
+        <div className="rounded-2xl border-2 border-warning/30 bg-warning/10 p-3 dark:bg-warning/10">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-warning dark:text-warning">Pre-arrival notes from crew</p>
           <p className="mt-1 whitespace-pre-wrap text-sm">{incident.pre_arrival_notes}</p>
         </div>
       )}
