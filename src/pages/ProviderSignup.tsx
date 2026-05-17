@@ -116,7 +116,7 @@ export default function ProviderSignup() {
                   <Label htmlFor="t-amb" className="flex flex-col items-center rounded-lg border-2 border-muted bg-popover p-3 cursor-pointer has-[[data-state=checked]]:border-primary">
                     <RadioGroupItem value="ambulance" id="t-amb" className="sr-only" />
                     <img src={ambulanceIcon} alt="" className="mb-2 h-8 w-8" />
-                    <span className="text-sm font-medium">Ambulance</span>
+                    <span className="text-sm font-medium">ER Provider</span>
                   </Label>
                 </RadioGroup>
               </div>
