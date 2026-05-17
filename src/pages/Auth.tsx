@@ -676,8 +676,11 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Country / Language</Label>
-              <CountrySelector />
+              <Label>Mobile Number</Label>
+              <div className="flex gap-2">
+                <CountrySelector />
+                <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" />
+              </div>
               <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
           </div>
