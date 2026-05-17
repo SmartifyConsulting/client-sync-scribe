@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { SosLiveMap } from "../../../components/SosLiveMap";
 import { EtaCountdown } from "../../../components/EtaCountdown";
-import { Ambulance, MapPin, AlertTriangle, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Ambulance, MapPin, AlertTriangle, ChevronRight, Handshake } from "lucide-react";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -17,6 +18,7 @@ export default function IncomingAmbulancesScreen() {
   const { providerId } = useProviderAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [crews, setCrews] = useState<Record<string,{name:string;phone?:string}>>({});
+  const [partners, setPartners] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const load = async () => {
@@ -34,6 +36,14 @@ export default function IncomingAmbulancesScreen() {
         const m: Record<string,{name:string;phone?:string}> = {};
         ((amb as any) ?? []).forEach((a: any) => { m[a.id] = { name: a.company_name, phone: a.contact_phone }; });
         setCrews(m);
+
+        const { data: aff } = await supabase
+          .from("ambulance_hospital_affiliations" as any)
+          .select("ambulance_provider_id")
+          .eq("hospital_id", providerId)
+          .eq("status", "active")
+          .in("ambulance_provider_id", ids);
+        setPartners(new Set(((aff as any) || []).map((a: any) => a.ambulance_provider_id)));
       }
     };
     load();
@@ -68,6 +78,11 @@ export default function IncomingAmbulancesScreen() {
                   <p className="flex items-center gap-1.5 text-sm font-extrabold">
                     <Ambulance className="h-4 w-4 text-red-600" />
                     {crew?.name ?? "Ambulance"}
+                    {r.assigned_provider_id && partners.has(r.assigned_provider_id) && (
+                      <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-[9px]">
+                        <Handshake className="h-2.5 w-2.5" /> Partner
+                      </Badge>
+                    )}
                   </p>
                   <p className="text-[11px] text-muted-foreground">Incident {r.id.slice(0,8)} · {r.status.replace(/_/g," ")}</p>
                 </div>

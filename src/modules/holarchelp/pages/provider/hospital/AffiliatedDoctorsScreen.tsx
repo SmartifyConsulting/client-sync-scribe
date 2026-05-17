@@ -1,16 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Stethoscope, Phone, Search } from "lucide-react";
+import { Stethoscope, Phone, Search, UserPlus } from "lucide-react";
+import { ImportDoctorsDialog } from "./ImportDoctorsDialog";
 
 type Row = {
   id: string;
   role_at_hospital: string | null;
   hospital_name_snapshot: string | null;
+  status: string;
+  doctor_id: string | null;
+  pending_doctor_payload: any | null;
   doctor: {
     id: string;
     full_name: string | null;
@@ -27,42 +31,39 @@ export default function AffiliatedDoctorsScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!providerId) return;
-    (async () => {
-      const { data } = await supabase
-        .from("doctor_hospital_affiliations")
-        .select("id, role_at_hospital, hospital_name_snapshot, doctor:profiles!doctor_hospital_affiliations_doctor_id_fkey(id, full_name, specialty, practice_number, doctor_number, mobile_number, avatar_url)")
-        .eq("hospital_id", providerId)
-        .eq("status", "active");
-      // Fallback if FK alias not resolved
-      if (!data) {
-        const { data: raw } = await supabase
-          .from("doctor_hospital_affiliations")
-          .select("id, role_at_hospital, hospital_name_snapshot, doctor_id")
-          .eq("hospital_id", providerId)
-          .eq("status", "active");
-        const ids = (raw || []).map((r: any) => r.doctor_id);
-        if (ids.length === 0) { setRows([]); return; }
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, specialty, practice_number, doctor_number, mobile_number, avatar_url")
-          .in("id", ids);
-        const map = new Map((profiles || []).map((p: any) => [p.id, p]));
-        setRows((raw || []).map((r: any) => ({ ...r, doctor: map.get(r.doctor_id) || null })));
-        return;
-      }
-      setRows((data as any) || []);
-    })();
+    const { data: raw } = await supabase
+      .from("doctor_hospital_affiliations" as any)
+      .select("id, role_at_hospital, hospital_name_snapshot, status, doctor_id, pending_doctor_payload")
+      .eq("hospital_id", providerId);
+    const ids = ((raw as any) || []).map((r: any) => r.doctor_id).filter(Boolean);
+    let profileMap = new Map<string, any>();
+    if (ids.length) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, specialty, practice_number, doctor_number, mobile_number, avatar_url")
+        .in("id", ids);
+      profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+    }
+    setRows(((raw as any) || []).map((r: any) => ({
+      ...r,
+      doctor: r.doctor_id ? profileMap.get(r.doctor_id) || null : null,
+    })));
   }, [providerId]);
+
+  useEffect(() => { load(); }, [load]);
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
     if (!s) return rows;
-    return rows.filter((r) =>
-      [r.doctor?.full_name, r.doctor?.specialty, r.doctor?.practice_number, r.doctor?.doctor_number, r.role_at_hospital]
-        .filter(Boolean).some((v) => (v as string).toLowerCase().includes(s))
-    );
+    return rows.filter((r) => {
+      const name = r.doctor?.full_name || r.pending_doctor_payload?.full_name || r.hospital_name_snapshot;
+      const specialty = r.doctor?.specialty || r.pending_doctor_payload?.specialty;
+      const pn = r.doctor?.practice_number || r.pending_doctor_payload?.practice_number;
+      return [name, specialty, pn, r.role_at_hospital]
+        .filter(Boolean).some((v) => (v as string).toLowerCase().includes(s));
+    });
   }, [rows, q]);
 
   return (
@@ -70,41 +71,54 @@ export default function AffiliatedDoctorsScreen() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-lg font-bold flex items-center gap-2"><Stethoscope className="h-5 w-5 text-primary" /> Our Doctors</h1>
-          <p className="text-xs text-muted-foreground">Doctors who serve at this hospital.</p>
+          <p className="text-xs text-muted-foreground">Doctors who serve at this hospital. Pending rows link automatically when the doctor signs up.</p>
         </div>
-        <div className="relative w-full sm:w-64">
-          <Search className="h-3.5 w-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, specialty, MP no." className="pl-7 h-8 text-sm" />
+        <div className="flex items-center gap-2">
+          <div className="relative w-full sm:w-64">
+            <Search className="h-3.5 w-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, specialty, MP no." className="pl-7 h-8 text-sm" />
+          </div>
+          {providerId && <ImportDoctorsDialog hospitalId={providerId} onImported={load} />}
         </div>
       </div>
 
       {filtered.length === 0 ? (
         <Card className="p-6 text-center text-sm text-muted-foreground">
-          No affiliated doctors yet. Doctors can list this hospital from their Practice Management page.
+          No affiliated doctors yet. Doctors can list this hospital from their Practice Management page, or import a CSV/XLSX above.
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filtered.map((r) => (
-            <Card key={r.id} className="p-3 flex items-center gap-3 border-2 border-primary/20">
-              <Avatar className="h-12 w-12 border-2 border-primary/40">
-                <AvatarImage src={r.doctor?.avatar_url || undefined} />
-                <AvatarFallback>{(r.doctor?.full_name || "?").slice(0, 1)}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold text-sm truncate">{r.doctor?.full_name || "Unknown"}</div>
-                <div className="text-xs text-muted-foreground truncate">{r.doctor?.specialty || "—"}</div>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  {r.role_at_hospital && <Badge variant="secondary" className="text-[10px]">{r.role_at_hospital}</Badge>}
-                  {r.doctor?.practice_number && <Badge variant="outline" className="text-[10px]">MP {r.doctor.practice_number}</Badge>}
-                </div>
-                {r.doctor?.mobile_number && (
-                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
-                    <Phone className="h-3 w-3" /> {r.doctor.mobile_number}
+          {filtered.map((r) => {
+            const pending = !r.doctor_id;
+            const name = r.doctor?.full_name || r.pending_doctor_payload?.full_name || r.hospital_name_snapshot || "Unknown";
+            const specialty = r.doctor?.specialty || r.pending_doctor_payload?.specialty || "—";
+            const practiceNo = r.doctor?.practice_number || r.pending_doctor_payload?.practice_number;
+            const mobile = r.doctor?.mobile_number || r.pending_doctor_payload?.mobile_number;
+            return (
+              <Card key={r.id} className={`p-3 flex items-center gap-3 border-2 ${pending ? "border-dashed border-muted-foreground/30" : "border-primary/20"}`}>
+                <Avatar className="h-12 w-12 border-2 border-primary/40">
+                  <AvatarImage src={r.doctor?.avatar_url || undefined} />
+                  <AvatarFallback>{pending ? <UserPlus className="h-4 w-4" /> : name.slice(0, 1)}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-sm truncate flex items-center gap-1.5">
+                    {name}
+                    {pending && <Badge variant="outline" className="text-[9px]">Not yet on platform</Badge>}
                   </div>
-                )}
-              </div>
-            </Card>
-          ))}
+                  <div className="text-xs text-muted-foreground truncate">{specialty}</div>
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    {r.role_at_hospital && <Badge variant="secondary" className="text-[10px]">{r.role_at_hospital}</Badge>}
+                    {practiceNo && <Badge variant="outline" className="text-[10px]">MP {practiceNo}</Badge>}
+                  </div>
+                  {mobile && (
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                      <Phone className="h-3 w-3" /> {mobile}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

@@ -12,6 +12,7 @@ import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
 import ErCapacityScreen from "./pages/provider/hospital/ErCapacityScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
 import AffiliatedDoctorsScreen from "./pages/provider/hospital/AffiliatedDoctorsScreen";
+import AffiliatedAmbulancesScreen from "./pages/provider/hospital/AffiliatedAmbulancesScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
 
 import AmbulanceOpsLayout from "./pages/provider/ambulance/AmbulanceOpsLayout";
@@ -19,6 +20,7 @@ import AmbulanceOpsDashboard from "./pages/provider/ambulance/AmbulanceOpsDashbo
 import IncomingSosScreen from "./pages/provider/ambulance/IncomingSosScreen";
 import NavigationScreen from "./pages/provider/ambulance/NavigationScreen";
 import HospitalsDirectoryScreen from "./pages/provider/ambulance/HospitalsDirectoryScreen";
+import AffiliatedHospitalsScreen from "./pages/provider/ambulance/AffiliatedHospitalsScreen";
 import IncidentHistoryScreen from "./pages/provider/ambulance/IncidentHistoryScreen";
 import TeamStatusScreen from "./pages/provider/ambulance/TeamStatusScreen";
 import AmbulanceIncidentConsole from "./pages/provider/AmbulanceIncidentConsole";
@@ -47,6 +49,7 @@ export default function ProviderRoutes() {
         <Route path="capacity" element={<ErCapacityScreen />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
         <Route path="doctors" element={<AffiliatedDoctorsScreen />} />
+        <Route path="ambulances" element={<AffiliatedAmbulancesScreen />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
         <Route path="profile" element={<ProviderProfile />} />
         <Route path="*" element={<Navigate to="" replace />} />
@@ -58,6 +61,7 @@ export default function ProviderRoutes() {
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
         <Route path="hospitals" element={<HospitalsDirectoryScreen />} />
+        <Route path="affiliations" element={<AffiliatedHospitalsScreen />} />
         <Route path="history" element={<IncidentHistoryScreen />} />
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="incident/:id" element={<AmbulanceIncidentConsole />} />

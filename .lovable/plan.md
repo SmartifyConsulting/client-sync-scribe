@@ -1,56 +1,64 @@
-## Doctor → Hospital affiliations
+# Hospital affiliations: discovery, ambulance parity, bulk import
 
-### 1. Data model
-New table `doctor_hospital_affiliations`:
-- `doctor_id` (uuid → profiles.id)
-- `hospital_id` (uuid → holarchelp_hospitals.id, nullable — null when hospital not yet on platform)
-- `hospital_name_snapshot` (text — typed name when no match)
-- `role_at_hospital` (text — e.g. Visiting, Resident, Consultant)
-- `status` ('active' | 'inactive')
-- standard timestamps
+## 1. Affiliation search shows ALL hospitals (active + pending)
 
-RLS:
-- Doctor can CRUD their own affiliations.
-- Hospital staff (`is_hospital_staff`) can SELECT affiliations where `hospital_id` matches their hospital.
-- Admins full access.
+- `HospitalAffiliations.tsx` (doctor) autocomplete: query `holarchelp_hospitals` **without** the `status='approved'` filter. Show a small `Pending` / `Inactive` badge next to any non-approved result.
+- "Add new hospital" still inserts a row with `status='pending'`; once a second doctor (or ambulance) picks the same hospital, it stays as one shared row (already enforced by name+city de-dup lookup before insert).
+- **No change to SOS surfaces** — `HospitalsDirectoryScreen`, `HospitalPicker`, `HolarcHelpNearby` keep `.eq('status','approved')`, so pending/inactive hospitals stay invisible to dispatch.
 
-When a doctor types a hospital name with no match, we also insert a stub row into `holarchelp_hospitals` with `status='inactive'`, `created_by=doctor`, so it surfaces in the admin Hospitals list for approval/activation.
+## 2. Ambulance → Hospital affiliations (mirror of doctor flow)
 
-### 2. Doctor UI — `src/pages/MyPractice.tsx`
-New "Hospital Affiliations" section under Practice Management:
-- Autocomplete search against approved `holarchelp_hospitals` (name + city).
-- If no match → "Add new hospital" inline → creates inactive hospital + affiliation.
-- List of current affiliations with role + remove button.
+New table `ambulance_hospital_affiliations`:
+- `ambulance_provider_id`, `hospital_id` (nullable for pending), `hospital_name_snapshot`, `role` (e.g. "Primary receiving ER"), `status` ('active'|'inactive')
+- RLS: ambulance staff CRUD their own rows; hospital staff SELECT rows where `hospital_id` matches their hospital; admins full access.
 
-### 3. Hospital UI — new screen `src/modules/holarchelp/pages/provider/hospital/AffiliatedDoctorsScreen.tsx`
-Added to `HospitalOpsLayout` sidebar as "Our Doctors":
-- Lists all doctors with an active affiliation to this hospital.
-- Shows name, specialty, practice number, contact, avatar.
-- Filter by specialty / search.
-- Link to doctor profile.
+New UI:
+- **Ambulance Ops Layout** → new sidebar item **"Affiliated Hospitals"** → `AffiliatedHospitalsScreen.tsx` reusing the same autocomplete component (parameterised by owner type).
+- **Hospital Ops Layout** → new sidebar item **"Our Ambulances"** → `AffiliatedAmbulancesScreen.tsx` listing ambulance providers with active affiliations.
+- **Incoming Ambulances screen** (existing): join against this table; render a teal `Partner` badge next to ambulance unit names that are affiliated with this hospital.
 
-### 4. Admin UI — `src/pages/admin/HolarcHelpProviders.tsx`
-Hospitals tab already shows status. Add visual badge for `inactive` (user-submitted) hospitals plus an "Activate" action that flips status to `pending` for normal approval flow, and a "Linked Doctors" count column.
+## 3. CSV / XLS bulk import of doctors (hospital admin)
 
-### 5. Test credentials
-Create two new auth users via migration + insert seed data:
+On the **Our Doctors** screen, add an **"Import doctors"** button (visible to hospital owner / `er_staff` members).
 
-| Role | Email | Password |
-|------|-------|----------|
-| Hospital Admin | `hospital.test@holarchealth.com` | `Hospital@2026` |
-| ER Staff | `er.test@holarchealth.com` | `ER@2026` |
+- Dialog with:
+  - Drop-zone + "Download template" link (CSV).
+  - Parser uses **`read-excel-file`** for `.xlsx` and a small CSV parser for `.csv` (no `xlsx` package — per project memory).
+  - Columns: `practice_number, email, full_name, role_at_hospital, specialty, mobile_number`.
+- Edge function `hospital-import-affiliations`:
+  - For each row, look up a doctor profile by `practice_number` OR `email` (OR match).
+  - Matched → upsert `doctor_hospital_affiliations` row (`status='active'`, links to that hospital).
+  - Unmatched → upsert a **pending affiliation** with `doctor_id=NULL`, `hospital_name_snapshot` reused for `full_name`, plus `specialty` / `mobile_number` / `email` / `practice_number` stored in a new `pending_doctor_payload jsonb` column. These rows render in "Our Doctors" with a `Not yet on platform` badge.
+  - When a doctor later signs up with the matching practice number or email, a trigger / signup hook links the pending row to their `doctor_id` and flips `status='active'`.
+- Returns a per-row report (`matched`, `pending`, `error`) shown in the dialog.
 
-Both are linked to a seeded hospital "Holarc General Hospital" (approved). Hospital Admin = `owner_id`; ER Staff = `holarchelp_hospital_members` row with role `er_staff`. Roles assigned in `user_roles` as `hospital_staff`.
+## 4. Migration summary
 
-Credentials are also added to the admin Profile-avatar tester switcher (alongside Christina etc.) for one-click login.
+```text
+ambulance_hospital_affiliations          -- new table + RLS
+doctor_hospital_affiliations             -- add column pending_doctor_payload jsonb
+trigger on auth.users insert / profiles  -- link pending affiliations by practice_number/email
+```
 
-### Technical notes
-- Migration: new table + RLS + indexes; seed two `auth.users` via `auth.admin` is not available in migrations, so the seed will use the existing `admin-create-user` edge function pattern (or be inserted via Supabase tools) and then linked.
-- Hospital sidebar gets one new nav item; no changes to the ambulance interface.
-- No design tokens added; reuses existing tab + card patterns.
+## 5. Files
 
-### Files
-- New: `supabase/migrations/<ts>_doctor_hospital_affiliations.sql`
-- New: `src/components/doctor/HospitalAffiliations.tsx`
-- New: `src/modules/holarchelp/pages/provider/hospital/AffiliatedDoctorsScreen.tsx`
-- Edit: `src/pages/MyPractice.tsx`, `src/modules/holarchelp/pages/provider/hospital/HospitalOpsLayout.tsx`, `src/pages/admin/HolarcHelpProviders.tsx`, `src/components/layout/TopBarIcons.tsx` (tester switcher entries)
+**New**
+- `supabase/migrations/<ts>_affiliations_v2.sql`
+- `supabase/functions/hospital-import-affiliations/index.ts`
+- `src/components/doctor/HospitalAffiliations.tsx` — extend to show pending badge
+- `src/modules/holarchelp/components/AmbulanceHospitalAffiliations.tsx`
+- `src/modules/holarchelp/pages/provider/ambulance/AffiliatedHospitalsScreen.tsx`
+- `src/modules/holarchelp/pages/provider/hospital/AffiliatedAmbulancesScreen.tsx`
+- `src/modules/holarchelp/pages/provider/hospital/ImportDoctorsDialog.tsx`
+- `public/templates/doctor-affiliations-template.csv`
+
+**Edited**
+- `src/modules/holarchelp/pages/provider/hospital/AffiliatedDoctorsScreen.tsx` (Import button, pending badge)
+- `src/modules/holarchelp/pages/provider/hospital/HospitalOpsLayout.tsx` (Our Ambulances)
+- `src/modules/holarchelp/pages/provider/ambulance/AmbulanceOpsLayout.tsx` (Affiliated Hospitals)
+- `src/modules/holarchelp/pages/provider/hospital/IncomingAmbulancesScreen.tsx` (Partner badge)
+- `src/modules/holarchelp/routes-provider.tsx` (two new routes)
+
+## Out of scope
+- Email invites for unmatched doctors (kept as pending only).
+- Admin-side global CSV import (this is hospital-admin scoped per request).
