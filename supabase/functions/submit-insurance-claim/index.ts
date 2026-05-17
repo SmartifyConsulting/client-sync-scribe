@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { sendMailgunEmail } from "../_shared/mailgun.ts";
+import { sendEmail } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
       currency: "ZAR",
     }).format(amount);
 
-    // Send the claim email via Mailgun
+    // Send the claim email via the email provider
     const html = `
           <!DOCTYPE html>
           <html>
@@ -123,7 +123,7 @@ const handler = async (req: Request): Promise<Response> => {
           </html>
         `;
 
-    const emailResult = await sendMailgunEmail({
+    const emailResult = await sendEmail({
       from: `mIRI Claims <noreply@holarchealth.com>`,
       to: claimsEmail,
       subject: `Medical Insurance Claim - ${invoiceNumber}`,
@@ -132,7 +132,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!emailResult.ok) {
-      console.error("Mailgun error:", emailResult.error);
+      console.error("Email send error:", emailResult.error);
       throw new Error(emailResult.error || "Failed to send claim email");
     }
     console.log("Claim email sent successfully");

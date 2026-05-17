@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { sendMailgunEmail } from "../_shared/mailgun.ts";
+import { sendEmail } from "../_shared/email.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -99,9 +99,9 @@ serve(async (req) => {
       </body></html>
     `;
 
-    const result = await sendMailgunEmail({ to: nokEmail, subject, html });
+    const result = await sendEmail({ to: nokEmail, subject, html });
     if (!result.ok) {
-      console.error('Mailgun failed:', result.status, result.error);
+      console.error('Email send failed:', result.status, result.error);
       return new Response(
         JSON.stringify({ error: 'Failed to send email', detail: result.error }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

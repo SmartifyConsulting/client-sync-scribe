@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { sendMailgunEmail } from "../_shared/mailgun.ts";
+import { sendEmail } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -207,7 +207,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     if (finalRecipientEmail || recipientEmail) {
-      const emailResponse = await sendMailgunEmail({
+      const emailResponse = await sendEmail({
         to: (finalRecipientEmail || recipientEmail) as string,
         subject: isPracticePartner
           ? `${senderName} added you as a practice partner on Holarc`
@@ -216,7 +216,7 @@ const handler = async (req: Request): Promise<Response> => {
             : `${senderName} has invited you to join Holarc`,
         html: emailHtml,
       });
-      if (!emailResponse.ok) console.error("Mailgun error:", emailResponse.error);
+      if (!emailResponse.ok) console.error("Email send error:", emailResponse.error);
       else console.log("Email sent successfully");
     }
 
