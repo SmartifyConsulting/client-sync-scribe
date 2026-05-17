@@ -61,9 +61,9 @@ export default function AffiliatedAmbulancesScreen() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <Ambulance className="h-5 w-5 text-primary" /> Our Ambulances
+            <Ambulance className="h-5 w-5 text-primary" /> Our ER Providers
           </h1>
-          <p className="text-xs text-muted-foreground">Ambulance services partnered with this hospital.</p>
+          <p className="text-xs text-muted-foreground">ER providers partnered with this hospital.</p>
         </div>
         <div className="relative w-full sm:w-64">
           <Search className="h-3.5 w-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
