@@ -245,6 +245,64 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     };
   }, [phase, provider?.lat, provider?.lng, hospital?.lat, hospital?.lng]);
 
+  // Arrival event emission — only the patient view writes these (to avoid duplicates)
+  const arrivedSceneRef = useRef(false);
+  const arrivedDestRef = useRef(false);
+  useEffect(() => {
+    if (mode !== "patient") return;
+    if (!provider) return;
+    const insertOnce = async (event_type: string, flagRef: React.MutableRefObject<boolean>) => {
+      if (flagRef.current) return;
+      flagRef.current = true;
+      // Guard against duplicates from prior sessions
+      const { data: existing } = await supabase
+        .from("holarchelp_incident_events" as any)
+        .select("id")
+        .eq("incident_id", incidentId)
+        .eq("event_type", event_type)
+        .limit(1)
+        .maybeSingle();
+      if (existing) return;
+      await supabase.from("holarchelp_incident_events" as any).insert({
+        incident_id: incidentId,
+        event_type,
+        payload: {},
+      } as any);
+    };
+    if (phase === "pickup" && patient) {
+      const d = haversineKm(provider, patient) * 1000;
+      if (d <= 50) insertOnce("arrived", arrivedSceneRef);
+    }
+    if (phase === "transport" && hospital) {
+      const d = haversineKm(provider, hospital) * 1000;
+      if (d <= 50) insertOnce("at_hospital", arrivedDestRef);
+    }
+  }, [mode, incidentId, phase, provider?.lat, provider?.lng, patient?.lat, patient?.lng, hospital?.lat, hospital?.lng]);
+
+  // Status-change fallback: if status flips to patient_collected / at_hospital without a GPS proximity event
+  useEffect(() => {
+    if (mode !== "patient" || !status) return;
+    const insertOnce = async (event_type: string, flagRef: React.MutableRefObject<boolean>) => {
+      if (flagRef.current) return;
+      flagRef.current = true;
+      const { data: existing } = await supabase
+        .from("holarchelp_incident_events" as any)
+        .select("id")
+        .eq("incident_id", incidentId)
+        .eq("event_type", event_type)
+        .limit(1)
+        .maybeSingle();
+      if (existing) return;
+      await supabase.from("holarchelp_incident_events" as any).insert({
+        incident_id: incidentId,
+        event_type,
+        payload: { source: "status_fallback" },
+      } as any);
+    };
+    if (status === "patient_collected") insertOnce("arrived", arrivedSceneRef);
+    if (status === "at_hospital") insertOnce("at_hospital", arrivedDestRef);
+  }, [mode, status, incidentId]);
+
   // Map points
   const points = useMemo<LiveMapPoint[]>(() => {
     const out: LiveMapPoint[] = [];
