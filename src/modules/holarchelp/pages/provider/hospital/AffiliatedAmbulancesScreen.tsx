@@ -73,7 +73,7 @@ export default function AffiliatedAmbulancesScreen() {
 
       {filtered.length === 0 ? (
         <Card className="p-6 text-center text-sm text-muted-foreground">
-          No affiliated ambulance services yet. Ambulance providers can list this hospital from their "Affiliated Hospitals" tab.
+          No affiliated ER providers yet. ER providers can list this hospital from their "Affiliated Hospitals" tab.
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
