@@ -173,6 +173,33 @@ export default function ProviderSignup() {
                 />
               </div>
 
+              <div className="space-y-1.5">
+                <Label>Company registration number</Label>
+                <Input
+                  value={registrationNumber}
+                  onChange={(e) => setRegistrationNumber(e.target.value)}
+                  placeholder="e.g. 2010/123456/07"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Organisation address</Label>
+                <AddressAutocomplete
+                  value={address}
+                  onChange={setAddress}
+                  placeholder="Start typing the address…"
+                  rows={2}
+                />
+              </div>
+
+              {duplicateWarning && (
+                <div className="flex items-start gap-2 rounded-lg border border-[#E01837]/40 bg-[#E01837]/10 p-3 text-xs text-foreground">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#E01837]" />
+                  <span>{duplicateWarning}</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label>Contact first name</Label>
