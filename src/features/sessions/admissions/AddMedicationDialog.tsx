@@ -63,6 +63,7 @@ export function AddMedicationDialog({ open, onOpenChange, admissionId, hospitalI
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Add Active Medication</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
           <div><Label className="text-[11px]">Medication Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-[11px]">Dosage</Label><Input value={dosage} onChange={(e) => setDosage(e.target.value)} placeholder="e.g. 500mg" /></div>
