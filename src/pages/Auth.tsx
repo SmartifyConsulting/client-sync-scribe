@@ -467,8 +467,15 @@ export default function Auth() {
     }
     setLoading(true);
     try {
-      const { error } = await signInWithOtp(email);
+      const { data, error } = await supabase.functions.invoke("auth-email-sender", {
+        body: {
+          type: "magiclink",
+          email,
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       setOtpSent(true);
       setOtpCooldown(30);
       toast({ title: "Code sent", description: "Check your email for a 6-digit code or magic link." });
