@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       (rows ?? [])
         .filter((p: any) => !exclude_provider_ids.includes(p.id))
         .map((p: any) => ({ ...p, _kind: kind, _d: distKm(center, { lat: p.latitude, lng: p.longitude }) }));
-    const all = [...tag(ambulances, "ambulance"), ...tag(hospitals, "hospital")];
+    const all = [...tag(ambList, "ambulance"), ...tag(hospList, "hospital")];
 
     let candidates: any[] = [];
     for (const radius of [50, 150, 500, 5000]) {
