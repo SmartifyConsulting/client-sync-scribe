@@ -83,9 +83,19 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
             <div className="space-y-2">
               {vitals.map((v: any) => (
                 <div key={v.id} className="text-xs p-2 rounded bg-muted/40">
-                  <p className="text-[10px] text-muted-foreground">{format(new Date(v.recorded_at), "dd MMM yyyy HH:mm")}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {format(new Date(v.recorded_at), "dd MMM yyyy HH:mm")}
+                    {v.nurse_name_snapshot && <span> · Nurse: {v.nurse_name_snapshot}</span>}
+                  </p>
                   <p>HR: {v.heart_rate || "-"} bpm · BP: {v.bp_systolic || "-"}/{v.bp_diastolic || "-"} · SpO₂: {v.spo2 || "-"}% · Temp: {v.temperature_c || "-"}°C · BMI: {v.bmi || "-"}</p>
                   {v.notes && <p className="text-muted-foreground mt-1">{v.notes}</p>}
+                  <RateNurseControl
+                    admissionId={admission.id}
+                    recordTable="admission_vitals"
+                    recordId={v.id}
+                    nurseId={v.nurse_id ?? null}
+                    nurseName={v.nurse_name_snapshot}
+                  />
                 </div>
               ))}
             </div>
