@@ -14,6 +14,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Search } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -94,6 +95,7 @@ export default function HolarcHelpProviders() {
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
   const [chooserOpen, setChooserOpen] = useState(false);
+  const [providerSearch, setProviderSearch] = useState<Record<Kind, string>>({ hospital: "", ambulance: "", pharmacy: "" });
 
   const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
   const [clipFile, setClipFile] = useState<File | null>(null);
@@ -353,16 +355,40 @@ export default function HolarcHelpProviders() {
             </TabsContent>
 
             {(["hospital", "ambulance", "pharmacy"] as Kind[]).map((k) => {
-              const list = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
+              const fullList = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
               const noun = nounFor(k);
+              const q = providerSearch[k].trim().toLowerCase();
+              const list = q
+                ? fullList.filter((r: any) => {
+                    const ownerEmail = (userEmails[r.owner_id ?? r.user_id] ?? "").toLowerCase();
+                    return [
+                      r[nameField(k)],
+                      r.city,
+                      r.contact_email,
+                      r.contact_phone,
+                      ownerEmail,
+                    ]
+                      .filter(Boolean)
+                      .some((v: any) => String(v).toLowerCase().includes(q));
+                  })
+                : fullList;
               return (
                 <TabsContent key={k} value={k} className="mt-4">
                   <AdminPanel
-                    title={`${list.length} ${noun}`}
+                    title={`${list.length} ${noun}${q ? ` matching "${providerSearch[k]}"` : ""}`}
                     description="Grouped by country, then tier."
                     bodyClassName="p-0"
                     actions={
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="relative">
+                          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            value={providerSearch[k]}
+                            onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
+                            placeholder={`Search ${noun}…`}
+                            className="h-8 w-48 pl-7 text-[12px]"
+                          />
+                        </div>
                         <div className="inline-flex rounded-md border border-[hsl(var(--admin-border-strong))] bg-[hsl(var(--admin-surface))] p-0.5">
                           {(["active", "inactive", "all"] as Status[]).map((s) => (
                             <button
@@ -389,7 +415,7 @@ export default function HolarcHelpProviders() {
                     {loading ? (
                       <RowSkeleton rows={6} cols={6} />
                     ) : list.length === 0 ? (
-                      <EmptyState title={`No ${status === "all" ? "" : status + " "}${noun}`} />
+                      <EmptyState title={q ? `No ${noun} match "${providerSearch[k]}"` : `No ${status === "all" ? "" : status + " "}${noun}`} />
                     ) : (
                       <div className="p-3">{renderGroupedTable(list, k)}</div>
                     )}

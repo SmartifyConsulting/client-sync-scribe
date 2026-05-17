@@ -338,7 +338,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
             </div>
           )}
           {isAdmin && (
-            <Link to="/admin" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+            <Link to="/admin/users" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
               <ShieldCheck className="h-3.5 w-3.5" /> Admin
             </Link>
           )}

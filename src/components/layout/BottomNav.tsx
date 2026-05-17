@@ -10,8 +10,11 @@ import {
   UserCog,
   Gift,
   Siren,
+  DollarSign,
+  Home,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
@@ -29,13 +32,61 @@ const patientSections = [
   { icon: Siren, label: "SOS", section: "sos", to: "/patient/holarchelp", danger: true },
 ];
 
+const adminNavItems = [
+  { icon: Users, label: "Users", to: "/admin/users" },
+  { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
+  { icon: Gift, label: "Rewards", to: "/admin/gamification" },
+  { icon: LayoutDashboard, label: "Hub", to: "/admin", exact: true },
+  { icon: Home, label: "Exit Admin", to: "/doctor-dashboard" },
+];
+
 export function BottomNav() {
   const { isPatient, loading } = useUserRole();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
   if (loading) return null;
+
+  const isOnAdminRoute = location.pathname.startsWith("/admin");
+
+  // Admin variant — shown whenever an admin is on an /admin/* route
+  if (isAdmin && isOnAdminRoute) {
+    return (
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
+        <div className="flex items-center justify-around px-2 py-2">
+          {adminNavItems.map((item) => {
+            const isActive = item.exact
+              ? location.pathname === item.to
+              : location.pathname.startsWith(item.to);
+            return (
+              <button
+                key={item.to + item.label}
+                onClick={() => navigate(item.to)}
+                className={cn(
+                  "flex flex-1 flex-col items-center gap-0.5 px-1 py-2 rounded-xl transition-all duration-200 min-w-0",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
+                    isActive && "bg-primary/15 scale-110",
+                  )}
+                >
+                  <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                </div>
+                <span className={cn("text-[10px] font-medium text-center leading-tight", isActive && "text-primary")}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    );
+  }
 
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
   const showPatientNav = isPatient || isOnPatientRoute;

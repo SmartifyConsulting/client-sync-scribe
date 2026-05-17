@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveMap, type LiveMapPoint, type LiveMapRoute } from "./LiveMap";
 
@@ -58,7 +58,9 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         .maybeSingle();
       if (cancelled) return;
       const l: any = loc;
-      if (l?.latitude && l?.longitude) setPatient({ lat: l.latitude, lng: l.longitude });
+      const patientPos: LatLng | null =
+        l?.latitude && l?.longitude ? { lat: l.latitude, lng: l.longitude } : null;
+      if (patientPos) setPatient(patientPos);
 
       const { data: livePos } = await supabase
         .from("holarchelp_provider_locations" as any)
@@ -73,6 +75,34 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         setProvider({ lat: p.latitude, lng: p.longitude, kind: p.provider_kind ?? "ambulance" });
       } else if (i?.provider_latitude && i?.provider_longitude && i?.assigned_provider_id) {
         setProvider({ lat: i.provider_latitude, lng: i.provider_longitude, kind: "ambulance" });
+      } else if (i?.assigned_provider_id) {
+        // Fallback: use the assigned ambulance's base coords so red line/countdown render
+        const { data: amb } = await supabase
+          .from("holarchelp_ambulance_providers" as any)
+          .select("latitude, longitude")
+          .eq("id", i.assigned_provider_id)
+          .maybeSingle();
+        const a: any = amb;
+        if (!cancelled && a?.latitude && a?.longitude) {
+          setProvider({ lat: a.latitude, lng: a.longitude, kind: "ambulance" });
+        }
+      } else if (patientPos) {
+        // No ambulance assigned yet — show nearest active ambulance as projection
+        const { data: ambs } = await supabase
+          .from("holarchelp_ambulance_providers" as any)
+          .select("latitude, longitude, status, accepting_patients")
+          .eq("status", "approved")
+          .not("latitude", "is", null)
+          .not("longitude", "is", null);
+        const list = ((ambs as any[]) ?? []).filter((a) => a.accepting_patients !== false);
+        if (!cancelled && list.length) {
+          let best: any = null, bestD = Infinity;
+          for (const a of list) {
+            const d = haversineKm(patientPos, { lat: a.latitude, lng: a.longitude });
+            if (d < bestD) { bestD = d; best = a; }
+          }
+          if (best) setProvider({ lat: best.latitude, lng: best.longitude, kind: "ambulance" });
+        }
       }
 
       if (i?.destination_hospital_id) {
@@ -84,6 +114,23 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         const hh: any = h;
         if (!cancelled && hh?.latitude && hh?.longitude) {
           setHospital({ lat: hh.latitude, lng: hh.longitude, name: hh.name });
+        }
+      } else if (patientPos) {
+        // Auto-pick nearest approved hospital so teal line/pin still render
+        const { data: hosps } = await supabase
+          .from("holarchelp_hospitals" as any)
+          .select("name, latitude, longitude, status, accepting_patients")
+          .eq("status", "approved")
+          .not("latitude", "is", null)
+          .not("longitude", "is", null);
+        const list = ((hosps as any[]) ?? []).filter((h) => h.accepting_patients !== false);
+        if (!cancelled && list.length) {
+          let best: any = null, bestD = Infinity;
+          for (const h of list) {
+            const d = haversineKm(patientPos, { lat: h.latitude, lng: h.longitude });
+            if (d < bestD) { bestD = d; best = h; }
+          }
+          if (best) setHospital({ lat: best.latitude, lng: best.longitude, name: best.name });
         }
       }
     })();
@@ -197,6 +244,64 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       clearTimeout(t);
     };
   }, [phase, provider?.lat, provider?.lng, hospital?.lat, hospital?.lng]);
+
+  // Arrival event emission — only the patient view writes these (to avoid duplicates)
+  const arrivedSceneRef = useRef(false);
+  const arrivedDestRef = useRef(false);
+  useEffect(() => {
+    if (mode !== "patient") return;
+    if (!provider) return;
+    const insertOnce = async (event_type: string, flagRef: React.MutableRefObject<boolean>) => {
+      if (flagRef.current) return;
+      flagRef.current = true;
+      // Guard against duplicates from prior sessions
+      const { data: existing } = await supabase
+        .from("holarchelp_incident_events" as any)
+        .select("id")
+        .eq("incident_id", incidentId)
+        .eq("event_type", event_type)
+        .limit(1)
+        .maybeSingle();
+      if (existing) return;
+      await supabase.from("holarchelp_incident_events" as any).insert({
+        incident_id: incidentId,
+        event_type,
+        payload: {},
+      } as any);
+    };
+    if (phase === "pickup" && patient) {
+      const d = haversineKm(provider, patient) * 1000;
+      if (d <= 50) insertOnce("arrived", arrivedSceneRef);
+    }
+    if (phase === "transport" && hospital) {
+      const d = haversineKm(provider, hospital) * 1000;
+      if (d <= 50) insertOnce("at_hospital", arrivedDestRef);
+    }
+  }, [mode, incidentId, phase, provider?.lat, provider?.lng, patient?.lat, patient?.lng, hospital?.lat, hospital?.lng]);
+
+  // Status-change fallback: if status flips to patient_collected / at_hospital without a GPS proximity event
+  useEffect(() => {
+    if (mode !== "patient" || !status) return;
+    const insertOnce = async (event_type: string, flagRef: React.MutableRefObject<boolean>) => {
+      if (flagRef.current) return;
+      flagRef.current = true;
+      const { data: existing } = await supabase
+        .from("holarchelp_incident_events" as any)
+        .select("id")
+        .eq("incident_id", incidentId)
+        .eq("event_type", event_type)
+        .limit(1)
+        .maybeSingle();
+      if (existing) return;
+      await supabase.from("holarchelp_incident_events" as any).insert({
+        incident_id: incidentId,
+        event_type,
+        payload: { source: "status_fallback" },
+      } as any);
+    };
+    if (status === "patient_collected") insertOnce("arrived", arrivedSceneRef);
+    if (status === "at_hospital") insertOnce("at_hospital", arrivedDestRef);
+  }, [mode, status, incidentId]);
 
   // Map points
   const points = useMemo<LiveMapPoint[]>(() => {

@@ -11,16 +11,16 @@ type ProviderInfo = { name: string; kind: "ambulance" | "hospital" };
 const labelFor = (e: EventRow) => {
   switch (e.event_type) {
     case "sos_triggered": return "SOS triggered";
-    case "auto_assigned": return "Auto-assigned";
-    case "patient_picked": return "You picked";
-    case "accepted": return "Responder accepted";
+    case "auto_assigned": return "🤖 Auto-assigned";
+    case "patient_picked": return "✋ You picked";
+    case "accepted": return "✋ Selected the call";
     case "declined": return "Responder declined";
     case "reassigned": return "Re-assigned";
     case "released": return "Responder released — finding next";
     case "en_route": return "En route";
-    case "arrived": return "Arrived on scene";
+    case "arrived": return "Ambulance arrived at SOS scene";
     case "patient_collected": return "Patient collected";
-    case "at_hospital": return "Arrived at hospital";
+    case "at_hospital": return "Ambulance arrived at destination hospital";
     case "completed": return "Incident completed";
     case "voice_note": return "Voice note added";
     case "eta_set": return `ETA set${e.payload?.eta_minutes ? `: ${e.payload.eta_minutes} min` : ""}`;
