@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useHospitalOpsStats } from "../../../hooks/useHospitalOpsStats";
 import { useEffect, useState } from "react";
+import { ProviderProfileMenu } from "@/components/layout/ProviderProfileMenu";
 
 const NAV = [
   { to: "/provider/hospital", icon: Siren, label: "Emergency Queue", end: true },
@@ -135,6 +136,7 @@ function TopBar() {
       <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
         <Wifi className={cn("h-3.5 w-3.5", online ? "text-green-600" : "text-destructive")} />
         <span className="tabular-nums">{now.toLocaleTimeString()}</span>
+        <ProviderProfileMenu />
       </div>
     </header>
   );
