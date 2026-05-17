@@ -1,53 +1,42 @@
-## Hospital nav: collapse providers into one menu with sub-tabs
+## Additions to the working plan
 
-**`src/components/layout/ProviderSidebar.tsx`** — Replace the three separate hospital nav items ("Our Doctors", "Our Nurses", "Our ER Providers") with a single **"Providers"** item (icon: `Users`, route: `/provider/hospital/providers`). Highlight as active when `pathname.startsWith("/provider/hospital/providers")` OR matches the three legacy paths (back-compat).
+### 6. Grant Dr Christina the same access to Shannon Kennedy that Dr Allie has (data only)
 
-**New page `src/modules/holarchelp/pages/provider/HospitalProviders.tsx`** — Tabbed shell (shadcn `Tabs`, teal `bg-primary` TabsList per style manifest) with three triggers: **Doctors**, **Nurses**, **ER Providers**. Each tab renders the existing page body, factored out of the current `HospitalDoctors.tsx` / `HospitalNurses.tsx` / `HospitalAmbulances.tsx` (extract their inner JSX into `DoctorsTab`, `NursesTab`, `ErProvidersTab` components co-located in `pages/provider/providers/`). Initial tab driven by `?tab=doctors|nurses|er` (default `doctors`).
+Today, the "green lock" on Shannon's My Holarchy is driven by an **accepted `doctor_access_requests` row** matched on the viewing doctor's `practice_number` + `doctor_number` (via `doctor_has_access_request_from`). Dr Allie (`54fa34d8…`, practice 985623145 / reg 7542136) has one. Dr Christina (`8dcadaba…`) has `doctor_patient_access` but no accepted access request, so no green lock.
 
-**Routing (`src/modules/holarchelp/routes-provider.tsx`)** — Add `/provider/hospital/providers` → `HospitalProviders`. Keep the three legacy routes as redirects to `/provider/hospital/providers?tab=...` so existing links still work.
+Steps:
+- Read Dr Christina's `profiles.practice_number` and `profiles.doctor_number`.
+- Insert one row into `doctor_access_requests` for Shannon (`96740682…`):
+  - `patient_user_id = 96740682-20a5-4b6c-99a0-d26c5d4d20c9`
+  - `patient_name = 'Shannon Kennedy'`
+  - `doctor_practice_number` / `doctor_registration_number` = Christina's values
+  - `status = 'accepted'`
+- Ensure Christina's existing `doctor_patient_access` row for Shannon stays `is_active = true` (already true; no change).
+- No code or schema changes.
 
-## Auto-assignment timer: 60 s → 30 s
+Verification: log in as Dr Christina → open Shannon's My Holarchy → green lock should display, identical to Dr Allie.
 
-**`src/modules/holarchelp/components/AvailableResponders.tsx`** — Change `AUTO_ASSIGN_MS = 60 * 1000` to `30 * 1000`. Copy ("Auto-assign in …", "we'll auto-assign the closest one in …") still uses the same constant so it reflows automatically.
+### 7. Merge Shannon Kennedy into Sharon Elise Kennedy (data only)
 
-No DB / edge-function change needed — `holarchelp_auto_assign_incident` is already invoked by the client when the countdown hits zero.
+Two distinct user accounts exist:
+- Shannon Kennedy — `user_id 96740682-20a5-4b6c-99a0-d26c5d4d20c9`, two patient records (`30cadfb3…` legacy with NULL `patient_user_id`, and `6bab47a6…` current).
+- Sharon Elise Kennedy — `user_id cf9b1db5…`, one patient record (`bc6973cc…`).
 
-## Voice note transcription — initial + every subsequent note
+The user has confirmed these are the same person. Treat **Sharon Elise Kennedy (`cf9b1db5…` / patient `bc6973cc…`) as the surviving canonical profile**.
 
-**Initial SOS voice note (`SosVoiceNoteDialog.tsx`)** — Transcription is already attempted via `transcribe-audio`, but failures are silent and the user sees no transcript. Harden it:
+Steps:
+1. **Audit Shannon's clinical data** across patient-scoped tables (prescriptions, sessions, hospital_admissions, patient_documents, patient_media, patient_rewards, patient_tasks, prescription_pill_references, blood_donations, doctor_patient_checkins, notifications, patient_profile_shares, etc.) keyed by either `patient_id` ∈ {`30cadfb3…`, `6bab47a6…`} or `patient_user_id`/`user_id` = `96740682…`.
+2. **Re-parent** all those rows to the surviving Sharon record:
+   - `patient_id → bc6973cc-e8ca-45b0-9fbd-0879e8ad41f7`
+   - `patient_user_id / user_id → cf9b1db5-eef9-46c8-9f5d-b571630355aa`
+3. **Re-parent Dr Christina's and Dr Allie's `doctor_patient_access`** rows so they now point at Sharon's `patient_user_id` (skip if a duplicate already exists for that doctor+patient).
+4. **Update `doctor_access_requests`** for Shannon → `patient_user_id = cf9b1db5…`, `patient_name = 'Sharon Elise Kennedy'` (including the new Christina row from step 6).
+5. **Delete** the two Shannon patient rows (`30cadfb3…`, `6bab47a6…`) after all FK references are moved.
+6. **Soft-archive Shannon's auth profile**: set `profiles.full_name = 'Sharon Elise Kennedy (merged)'`, `profiles.status = 'merged'` for `96740682…`. Do NOT delete the auth user (would break audit history and any orphaned FK we missed).
+7. Optional: add a note row (e.g. in `notifications` to Sharon) explaining the merge timestamp.
 
-1. After the audio path is saved, call `transcribe-audio` and **retry up to 2× with exponential backoff** (1 s, 3 s) if it fails or returns empty.
-2. On final failure, write `voice_note_transcript = "(Transcription unavailable — tap to retry)"` so responders see something actionable; expose a small "Retry transcription" button on `HolarcHelpIncidentDetail.tsx` that re-runs the edge function against `voice_note_audio_url`.
-3. Add a `voice_note` event to `holarchelp_incident_events` with `payload: { kind: "initial", duration }` so it appears on the timeline.
+No code or schema changes; all done via reversible insert/update tool calls executed in a single transaction script.
 
-**Subsequent voice notes (`IncidentVoiceNoteRecorder.tsx`)** — Same hardening: wrap the existing best-effort `transcribe-audio` call in 2× retry, persist `transcript` reliably, and show a per-note "Retry transcription" button when `transcript` is null. (The component already lists notes with their transcripts; the gap is reliability + a retry path.)
+### Execution order
 
-Both flows continue to use the existing `transcribe-audio` edge function — no new secrets, no schema change.
-
-## Timeline: show which ambulance / ER provider was assigned
-
-The timeline already enriches `auto_assigned`, `patient_picked`, and `accepted` events with the provider name inline on the **same line as the label**. The user wants the provider call-out to appear **after the date/time stamp** so it reads as a clear follow-up to the clinical timestamp row.
-
-**`IncidentTimeline.tsx`** — For events in `PROVIDER_EVENTS` with a known provider, render the provider line **below** the timestamp instead of inline:
-
-```
-Auto-assigned
-14:32 · 17 May
-🚑 City Ambulance Services  (auto-assigned)
-```
-
-Use a dedicated badge row (rounded chip, teal border, `Ambulance` / `Hospital` icon) so it visually stands out from generic event metadata. Label suffix differentiates `auto_assigned` ("auto-assigned"), `accepted` / `patient_picked` ("responded & picked the call"). No event-emission change needed — the existing `holarchelp_accept_incident`, `holarchelp_auto_assign_incident`, and `holarchelp_patient_pick_provider` RPCs already insert these events with `provider_id`.
-
-## Files touched
-
-- `src/components/layout/ProviderSidebar.tsx`
-- `src/modules/holarchelp/routes-provider.tsx`
-- `src/modules/holarchelp/pages/provider/HospitalProviders.tsx` (new)
-- `src/modules/holarchelp/pages/provider/providers/{DoctorsTab,NursesTab,ErProvidersTab}.tsx` (new, extracted from existing pages)
-- `src/modules/holarchelp/components/AvailableResponders.tsx`
-- `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx`
-- `src/modules/holarchelp/components/IncidentVoiceNoteRecorder.tsx`
-- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` (retry button for initial transcript)
-- `src/modules/holarchelp/components/IncidentTimeline.tsx`
-
-No migrations, no new edge functions, no secrets.
+This merge (item 7) must run **after** the Christina access grant (item 6), so the new `doctor_access_requests` row gets re-pointed in step 4 along with the rest.
