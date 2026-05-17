@@ -18,6 +18,7 @@ const NAV = [
   { to: "/provider/hospital/admissions", icon: ClipboardList, label: "Admissions" },
   { to: "/provider/hospital/capacity", icon: BedDouble, label: "ER Capacity" },
   { to: "/provider/hospital/doctors", icon: Stethoscope, label: "Our Doctors" },
+  { to: "/provider/hospital/ambulances", icon: Ambulance, label: "Our Ambulances" },
   { to: "/provider/hospital/timeline", icon: Activity, label: "Incident Timeline" },
 ];
 
