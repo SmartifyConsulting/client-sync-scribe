@@ -95,6 +95,7 @@ export default function HolarcHelpProviders() {
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
   const [chooserOpen, setChooserOpen] = useState(false);
+  const [providerSearch, setProviderSearch] = useState<Record<Kind, string>>({ hospital: "", ambulance: "", pharmacy: "" });
 
   const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
   const [clipFile, setClipFile] = useState<File | null>(null);
