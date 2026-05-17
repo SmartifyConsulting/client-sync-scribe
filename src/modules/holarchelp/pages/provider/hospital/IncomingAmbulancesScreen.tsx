@@ -58,13 +58,13 @@ export default function IncomingAmbulancesScreen() {
     <div className="space-y-4">
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hospital Emergency Operations</p>
-        <h1 className="text-2xl font-extrabold">Incoming Ambulances</h1>
+        <h1 className="text-2xl font-extrabold">Incoming ER Providers</h1>
       </header>
 
       {!rows.length && (
         <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           <AlertTriangle className="mx-auto mb-2 h-5 w-5 opacity-50" />
-          No ambulances currently en route to your facility.
+          No ER providers currently en route to your facility.
         </div>
       )}
 
