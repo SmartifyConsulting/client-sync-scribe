@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileSpreadsheet, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import readXlsxFile from "read-excel-file";
+import readXlsxFile from "read-excel-file/browser";
 
 type Row = {
   practice_number?: string;
