@@ -259,14 +259,8 @@ export default function HolarcHelpIncidentDetail() {
             <ArrowLeft className="h-4 w-4" /> SOS Home
           </Button>
           <div className="flex-1" />
-          <Button size="icon" variant="destructive" className="h-9 w-9 rounded-full" onClick={callEmergency} aria-label="Call 10177" title="Call 10177">
-            <Phone className="h-4 w-4" />
-          </Button>
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
             <Share2 className="h-4 w-4" />
-          </Button>
-          <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={() => navigate("/patient/holarchelp/nearby")} aria-label="Search nearby providers" title="Search nearby">
-            <MapPin className="h-4 w-4" />
           </Button>
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={() => navigate("/patient/holarchelp/incidents")} aria-label="Incident history" title="History">
             <History className="h-4 w-4" />
