@@ -385,7 +385,7 @@ export default function Auth() {
       }, { onConflict: "user_id" });
 
       clearDraft();
-      toast({ title: "Account created!", description: "Welcome to HolarcHealth. Please complete your profile next." });
+      toast({ title: "Account created!", description: "Check your inbox to confirm your email before signing in." });
       await routeAfterLogin(userId);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
