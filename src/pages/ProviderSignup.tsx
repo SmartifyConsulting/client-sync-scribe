@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Building2, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Loader2, Building2, ArrowLeft, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import hospitalIcon from "@/assets/marker-hospital.png";
 import ambulanceIcon from "@/assets/marker-ambulance.png";
 import { toast } from "sonner";
+import { AddressAutocomplete } from "@/features/patients/components/AddressAutocomplete";
+import { supabase } from "@/integrations/supabase/client";
 
 type ProviderType = "hospital" | "ambulance";
 
@@ -37,6 +39,8 @@ export default function ProviderSignup() {
   const [type, setType] = useState<ProviderType>("ambulance");
 
   const [companyName, setCompanyName] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [address, setAddress] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,11 +48,51 @@ export default function ProviderSignup() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+
+  // Soft duplicate check (debounced) — warns the user before submit.
+  useEffect(() => {
+    const reg = registrationNumber.trim();
+    const name = companyName.trim();
+    if (!reg && !name) {
+      setDuplicateWarning(null);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const { data } = await supabase.rpc("check_provider_duplicate", {
+          _type: type,
+          _reg_no: reg || null,
+          _name: name || null,
+          _city: null,
+        });
+        const hit = data as { exists?: boolean; name?: string } | null;
+        if (hit?.exists) {
+          setDuplicateWarning(
+            `An organisation called "${hit.name}" is already registered with these details. If this is yours, ask the existing administrator to add you. Otherwise use a different registration number.`,
+          );
+        } else {
+          setDuplicateWarning(null);
+        }
+      } catch {
+        // silent — server still enforces uniqueness
+      }
+    }, 500);
+    return () => clearTimeout(handle);
+  }, [type, registrationNumber, companyName]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName || !email || !password || !firstName || !lastName) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+    if (!registrationNumber.trim()) {
+      toast.error("Company registration number is required");
+      return;
+    }
+    if (!address.trim()) {
+      toast.error("Organisation address is required");
       return;
     }
     if (!acceptedTerms) {
@@ -57,14 +101,12 @@ export default function ProviderSignup() {
     }
     setSubmitting(true);
     try {
-      // Minimal signup. Address, registration number, ownership and the rest
-      // are completed later from the provider's profile screen.
       await callFn("register-emergency-provider", {
         type,
         ownership: "private",
         company_name: companyName,
-        registration_number: null,
-        address: null,
+        registration_number: registrationNumber.trim(),
+        address: address.trim(),
         city: null,
         country: null,
         latitude: null,
@@ -130,6 +172,33 @@ export default function ProviderSignup() {
                   required
                 />
               </div>
+
+              <div className="space-y-1.5">
+                <Label>Company registration number</Label>
+                <Input
+                  value={registrationNumber}
+                  onChange={(e) => setRegistrationNumber(e.target.value)}
+                  placeholder="e.g. 2010/123456/07"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Organisation address</Label>
+                <AddressAutocomplete
+                  value={address}
+                  onChange={setAddress}
+                  placeholder="Start typing the address…"
+                  rows={2}
+                />
+              </div>
+
+              {duplicateWarning && (
+                <div className="flex items-start gap-2 rounded-lg border border-[#E01837]/40 bg-[#E01837]/10 p-3 text-xs text-foreground">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#E01837]" />
+                  <span>{duplicateWarning}</span>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">

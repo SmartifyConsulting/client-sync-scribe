@@ -15,6 +15,7 @@ import AffiliatedDoctorsScreen from "./pages/provider/hospital/AffiliatedDoctors
 import NursesScreen from "./pages/provider/hospital/NursesScreen";
 import AffiliatedAmbulancesScreen from "./pages/provider/hospital/AffiliatedAmbulancesScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
+import AdministratorsScreen from "./pages/provider/AdministratorsScreen";
 
 import AmbulanceOpsLayout from "./pages/provider/ambulance/AmbulanceOpsLayout";
 import AmbulanceOpsDashboard from "./pages/provider/ambulance/AmbulanceOpsDashboard";
@@ -55,6 +56,7 @@ export default function ProviderRoutes() {
         <Route path="nurses" element={<NursesScreen />} />
         <Route path="ambulances" element={<AffiliatedAmbulancesScreen />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
+        <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
         <Route path="*" element={<Navigate to="" replace />} />
       </Route>
@@ -69,6 +71,7 @@ export default function ProviderRoutes() {
         <Route path="history" element={<IncidentHistoryScreen />} />
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="incident/:id" element={<AmbulanceIncidentConsole />} />
+        <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
         <Route path="*" element={<Navigate to="" replace />} />
       </Route>

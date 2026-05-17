@@ -19,6 +19,7 @@ import {
   Users,
   HeartPulse,
   ArrowLeft,
+  UserCheck,
 } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -43,6 +44,7 @@ const hospitalNav: NavItem[] = [
   { icon: HeartPulse, label: "Our Nurses", to: "/provider/hospital/nurses" },
   { icon: Ambulance, label: "Our ER Providers", to: "/provider/hospital/ambulances" },
   { icon: Activity, label: "Incident Timeline", to: "/provider/hospital/timeline" },
+  { icon: UserCheck, label: "Administrators", to: "/provider/hospital/admins" },
 ];
 
 const ambulanceNav: NavItem[] = [
@@ -53,6 +55,7 @@ const ambulanceNav: NavItem[] = [
   { icon: Hospital, label: "Affiliated Hospitals", to: "/provider/ambulance/affiliations" },
   { icon: History, label: "Incident History", to: "/provider/ambulance/history" },
   { icon: Users, label: "Team Status", to: "/provider/ambulance/team" },
+  { icon: UserCheck, label: "Administrators", to: "/provider/ambulance/admins" },
 ];
 
 interface ProviderSidebarProps {
