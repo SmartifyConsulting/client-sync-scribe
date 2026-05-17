@@ -54,12 +54,7 @@ serve(async (req) => {
     if (okErr) return json({ error: okErr.message }, 500);
     if (!okData) return json({ error: "Only the owner or an existing admin can invite" }, 403);
 
-    // Look up an existing user with this email
-    const { data: existingUsers } = await admin
-      .from("profiles")
-      .select("id, full_name")
-      .limit(1);
-    // profiles doesn't store email — go via auth admin
+    // Look up an existing user with this email via the auth admin API
     const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
     const existingUser = list?.users?.find(
       (u) => (u.email ?? "").toLowerCase() === email,
