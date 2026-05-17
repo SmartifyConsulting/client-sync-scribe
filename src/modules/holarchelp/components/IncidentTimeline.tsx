@@ -66,16 +66,20 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
     const missing = providerIds.filter((id) => !providers[id]);
     if (missing.length === 0) return;
     (async () => {
-      const [{ data: amb }, { data: hosp }] = await Promise.all([
-        supabase.from("holarchelp_ambulance_providers" as any).select("id, company_name").in("id", missing),
-        supabase.from("holarchelp_hospitals" as any).select("id, name").in("id", missing),
-      ]);
+      const { data, error } = await supabase.rpc(
+        "holarchelp_get_incident_providers_public" as any,
+        { _incident_id: incidentId },
+      );
+      if (error) return;
       const next: Record<string, ProviderInfo> = {};
-      for (const a of (amb as any[]) ?? []) next[a.id] = { name: a.company_name, kind: "ambulance" };
-      for (const h of (hosp as any[]) ?? []) next[h.id] = { name: h.name, kind: "hospital" };
+      for (const r of (data as any[]) ?? []) {
+        if (r?.id && r?.display_name) {
+          next[r.id] = { name: r.display_name, kind: r.kind === "hospital" ? "hospital" : "ambulance" };
+        }
+      }
       if (Object.keys(next).length) setProviders((prev) => ({ ...prev, ...next }));
     })();
-  }, [providerIds, providers]);
+  }, [providerIds, providers, incidentId]);
 
   if (events.length === 0) return null;
   return (
