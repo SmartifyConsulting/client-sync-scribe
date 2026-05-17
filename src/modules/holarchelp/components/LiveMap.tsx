@@ -9,13 +9,25 @@ export type LiveMapPoint = {
   label?: string;
 };
 
+export type LiveMapRoute = {
+  from: { lat: number; lng: number };
+  to: { lat: number; lng: number };
+  color: "red" | "teal";
+  distanceKm?: number;
+};
+
+const COLOR: Record<LiveMapRoute["color"], string> = {
+  red: "#dc2626",
+  teal: "#0d9488",
+};
+
 const ICON_HTML: Record<LiveMapPoint["kind"], string> = {
   patient:
     '<div style="width:18px;height:18px;border-radius:50%;background:#1d8cff;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>',
   ambulance:
     '<div style="width:34px;height:34px;border-radius:50%;background:white;border:3px solid #dc2626;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10H6"/><path d="M8 8v4"/><path d="M9 18h6"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14"/><path d="M3 17V6a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v11"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></div>',
   hospital:
-    '<div style="width:34px;height:34px;border-radius:6px;background:white;border:3px solid #dc2626;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#dc2626"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg></div>',
+    '<div style="width:34px;height:34px;border-radius:6px;background:white;border:3px solid #0d9488;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#0d9488"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg></div>',
 };
 
 const makeIcon = (kind: LiveMapPoint["kind"]) =>
@@ -26,13 +38,15 @@ const makeIcon = (kind: LiveMapPoint["kind"]) =>
     iconAnchor: kind === "patient" ? [9, 9] : [17, 17],
   });
 
-const distancePillIcon = (km: number) =>
-  L.divIcon({
-    html: `<div style="white-space:nowrap;padding:3px 8px;border-radius:9999px;background:white;border:2px solid #dc2626;color:#dc2626;font-weight:700;font-size:11px;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${km.toFixed(1)} km</div>`,
+const distancePillIcon = (km: number, color: LiveMapRoute["color"]) => {
+  const hex = COLOR[color];
+  return L.divIcon({
+    html: `<div style="white-space:nowrap;padding:3px 8px;border-radius:9999px;background:white;border:2px solid ${hex};color:${hex};font-weight:700;font-size:11px;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${km.toFixed(1)} km</div>`,
     className: "",
     iconSize: [60, 22],
     iconAnchor: [30, 11],
   });
+};
 
 function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371,
@@ -47,12 +61,12 @@ function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: num
 
 export const LiveMap = ({
   points,
+  routes = [],
   height = 360,
-  showDistanceLabel = true,
 }: {
   points: LiveMapPoint[];
+  routes?: LiveMapRoute[];
   height?: number;
-  showDistanceLabel?: boolean;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -60,8 +74,7 @@ export const LiveMap = ({
   const vehicleMarkerRef = useRef<L.Marker | null>(null);
   const vehicleCurrentRef = useRef<{ lat: number; lng: number } | null>(null);
   const tweenRafRef = useRef<number | null>(null);
-  const lineRef = useRef<L.Polyline | null>(null);
-  const distancePillRef = useRef<L.Marker | null>(null);
+  const routeLayersRef = useRef<L.Layer[]>([]);
 
   const hasAnyPoint = points.some(
     (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
@@ -108,13 +121,38 @@ export const LiveMap = ({
       staticMarkersRef.current = [];
       vehicleMarkerRef.current = null;
       vehicleCurrentRef.current = null;
-      lineRef.current = null;
-      distancePillRef.current = null;
+      routeLayersRef.current = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update markers + bounds whenever points change.
+  // Routes (lines + pills)
+  const drawRoutes = (rs: LiveMapRoute[]) => {
+    const map = mapRef.current;
+    if (!map) return;
+    routeLayersRef.current.forEach((l) => l.remove());
+    routeLayersRef.current = [];
+    for (const r of rs) {
+      const line = L.polyline(
+        [
+          [r.from.lat, r.from.lng],
+          [r.to.lat, r.to.lng],
+        ],
+        { color: COLOR[r.color], weight: 3, dashArray: "6 6", opacity: 0.85 },
+      ).addTo(map);
+      routeLayersRef.current.push(line);
+      const km = r.distanceKm ?? haversineKm(r.from, r.to);
+      const mid: [number, number] = [(r.from.lat + r.to.lat) / 2, (r.from.lng + r.to.lng) / 2];
+      const pill = L.marker(mid, {
+        icon: distancePillIcon(km, r.color),
+        interactive: false,
+        keyboard: false,
+      }).addTo(map);
+      routeLayersRef.current.push(pill);
+    }
+  };
+
+  // Update markers + bounds + routes whenever inputs change.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -125,7 +163,6 @@ export const LiveMap = ({
 
     map.invalidateSize();
 
-    // Refresh static (non-vehicle) markers each time
     staticMarkersRef.current.forEach((m) => m.remove());
     staticMarkersRef.current = [];
 
@@ -141,7 +178,6 @@ export const LiveMap = ({
       staticMarkersRef.current.push(marker);
     }
 
-    // Handle the vehicle (ambulance) marker with tweening
     if (vehicle) {
       const target = { lat: vehicle.latitude, lng: vehicle.longitude };
       if (!vehicleMarkerRef.current) {
@@ -155,9 +191,8 @@ export const LiveMap = ({
             offset: [0, -16],
           });
         vehicleCurrentRef.current = target;
-        redrawLineAndPill();
+        drawRoutes(routes);
       } else {
-        // Tween from current position to target
         const from = vehicleCurrentRef.current ?? target;
         const start = performance.now();
         const duration = 800;
@@ -168,52 +203,27 @@ export const LiveMap = ({
           const lng = from.lng + (target.lng - from.lng) * t;
           vehicleCurrentRef.current = { lat, lng };
           vehicleMarkerRef.current?.setLatLng([lat, lng]);
-          redrawLineAndPill();
+          // Substitute the live vehicle position into any routes that originally point at the target.
+          const live = routes.map((r) => {
+            const fromMatches = r.from.lat === target.lat && r.from.lng === target.lng;
+            const toMatches = r.to.lat === target.lat && r.to.lng === target.lng;
+            if (fromMatches) return { ...r, from: { lat, lng } };
+            if (toMatches) return { ...r, to: { lat, lng } };
+            return r;
+          });
+          drawRoutes(live);
           if (t < 1) tweenRafRef.current = requestAnimationFrame(step);
           else tweenRafRef.current = null;
         };
         tweenRafRef.current = requestAnimationFrame(step);
       }
-    } else if (vehicleMarkerRef.current) {
-      vehicleMarkerRef.current.remove();
-      vehicleMarkerRef.current = null;
-      vehicleCurrentRef.current = null;
-      redrawLineAndPill();
-    }
-
-    function redrawLineAndPill() {
-      const map = mapRef.current;
-      if (!map) return;
-      if (lineRef.current) {
-        lineRef.current.remove();
-        lineRef.current = null;
+    } else {
+      if (vehicleMarkerRef.current) {
+        vehicleMarkerRef.current.remove();
+        vehicleMarkerRef.current = null;
+        vehicleCurrentRef.current = null;
       }
-      if (distancePillRef.current) {
-        distancePillRef.current.remove();
-        distancePillRef.current = null;
-      }
-      const pt = statics.find((p) => p.kind === "patient");
-      const veh = vehicleCurrentRef.current;
-      if (pt && veh) {
-        const a = { lat: pt.latitude, lng: pt.longitude };
-        const b = veh;
-        lineRef.current = L.polyline(
-          [
-            [a.lat, a.lng],
-            [b.lat, b.lng],
-          ],
-          { color: "#dc2626", weight: 3, dashArray: "6 6", opacity: 0.85 },
-        ).addTo(map);
-        if (showDistanceLabel) {
-          const km = haversineKm(a, b);
-          const mid: [number, number] = [(a.lat + b.lat) / 2, (a.lng + b.lng) / 2];
-          distancePillRef.current = L.marker(mid, {
-            icon: distancePillIcon(km),
-            interactive: false,
-            keyboard: false,
-          }).addTo(map);
-        }
-      }
+      drawRoutes(routes);
     }
 
     if (valid.length === 1) {
@@ -222,10 +232,10 @@ export const LiveMap = ({
       const bounds = L.latLngBounds(
         valid.map((p) => [p.latitude, p.longitude] as [number, number]),
       );
-      map.fitBounds(bounds, { padding: [56, 56] });
+      map.fitBounds(bounds, { padding: [64, 64] });
     }
     setTimeout(() => map.invalidateSize(), 100);
-  }, [points, showDistanceLabel]);
+  }, [points, routes]);
 
   return (
     <div className="relative" style={{ height }}>
