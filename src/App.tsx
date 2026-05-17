@@ -124,11 +124,16 @@ function RoleBasedRedirect() {
     );
   }
 
+  // Provider portal takes priority over patient/doctor routing
+  if (providerType && !hasDoctorRole) {
+    return <Navigate to="/provider" replace />;
+  }
+
   if (isPatient) {
     return <Navigate to="/patient/details" replace />;
   }
 
-  if ((isEmergency || providerType) && !hasDoctorRole && !hasPatientRole) {
+  if (isEmergency && !hasDoctorRole && !hasPatientRole) {
     return <Navigate to="/provider" replace />;
   }
 

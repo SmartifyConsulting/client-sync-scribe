@@ -34,8 +34,12 @@ Deno.serve(async (req) => {
       "projectmanager@smartify.co.za",
       "paraskevoulasoldatos@gmail.com",
       "xtina@smartify.co.za",
+      "christina@smartify.co.za",
       "zano@smartify.co.za",
       "renken@smartify.co.za",
+      "jeanprodromos@smartify.co.za",
+      "hospital.test@holarchealth.com",
+      "er.test@holarchealth.com",
     ]);
     const isReverseToAdmin = email === REVERSE_ADMIN_EMAIL && SEEDED_EMAILS.has(callerEmail);
 
