@@ -1,30 +1,43 @@
-## Why the previous approach is stuck
-Lovable Cloud's Auth UI doesn't surface the Supabase "Send Email Hook" secret — so we can't wire a custom hook endpoint from the dashboard. Our standalone `auth-email-mailgun` function works in tests but Supabase Auth has no way to reach it.
+## Switch auth + transactional emails to Resend
 
-## New approach: piggyback on Lovable's managed `auth-email-hook`
-Lovable has built-in plumbing for auth email hooks: scaffolding `auth-email-hook` automatically registers it with Supabase Auth and provisions the signing secret behind the scenes. We'll:
+Replace the Mailgun-based email pipeline with Resend, using a Resend API key stored as a secret.
 
-1. Run the Lovable scaffold to create `auth-email-hook` (and templates) and let Lovable wire the hook + secret automatically.
-2. **Replace the body of `auth-email-hook/index.ts`** so instead of calling Lovable's Email API, it renders the email and sends it via the **Mailgun connector gateway** (`https://connector-gateway.lovable.dev/mailgun/mg.holarchealth.com/messages`) using `LOVABLE_API_KEY` + `MAILGUN_API_KEY`.
-3. Keep signature verification using `@lovable.dev/webhooks-js` (already handled by the scaffold template) — no manual secret needed.
-4. Deploy `auth-email-hook`.
-5. Delete the now-unused `auth-email-mailgun` function and remove `SEND_EMAIL_HOOK_SECRET` / `MAILGUN_REGION` secrets (no longer needed; Mailgun routing is via the connector gateway).
-6. Test by triggering a password reset from `/auth` → email arrives from `no-reply@mg.holarchealth.com`.
+### 1. Secrets
+- Add `RESEND_API_KEY` (user provides from resend.com/api-keys)
+- Remove `MAILGUN_API_KEY`, `MAILGUN_REGION`, `MAILGUN_CONNECTION_KEY`, `SEND_EMAIL_HOOK_SECRET` (no longer needed)
 
-## Files
-- **Scaffold (auto-created):** `supabase/functions/auth-email-hook/index.ts`, `supabase/functions/auth-email-hook/deno.json`, `supabase/functions/_shared/email-templates/*.tsx`
-- **Edit:** `supabase/functions/auth-email-hook/index.ts` — replace the Lovable Email API call with a Mailgun gateway POST
-- **Edit:** `supabase/config.toml` — remove the `[functions.auth-email-mailgun]` block
-- **Delete:** `supabase/functions/auth-email-mailgun/` (entire folder)
+### 2. Shared sender module
+- Replace `supabase/functions/_shared/mailgun.ts` with `supabase/functions/_shared/resend.ts` exporting `sendEmail({ to, subject, html, from?, replyTo? })`
+- Default `from`: `Holarc Health <no-reply@holarchealth.com>` (Resend-verified domain)
+- Calls `https://api.resend.com/emails` directly with `Authorization: Bearer ${RESEND_API_KEY}`
+- Keep the same return shape (`{ ok, data?, error? }`) so callers don't change
 
-## What stays the same
-- Mailgun connector is already linked (`MAILGUN_API_KEY` populated by the connector).
-- `mg.holarchealth.com` is verified in your Mailgun account; SPF record is already in DNS.
-- The branded HTML template (HolarcHealth teal, button, fallback link) — we'll keep the same look but render via simple inline HTML inside the hook (skipping React Email to keep it simple).
+### 3. Update existing transactional functions
+Swap `sendMailgunEmail` → `sendEmail` in:
+- `send-document-email`
+- `send-invoice-report`
+- `submit-insurance-claim`
+- any other function importing `_shared/mailgun.ts` (grep first)
 
-## Out of scope
-- Lovable Emails / `notify.nigeria.holarchealth.com` (left alone).
-- Transactional/app emails (only auth emails).
+### 4. Auth emails (password reset, signup, magic link)
+Replace the abandoned `auth-email-mailgun` approach with an **app-layer Resend flow** (since Lovable Cloud doesn't expose the Supabase Send Email Hook UI):
+- Delete `supabase/functions/auth-email-mailgun/`
+- Create `supabase/functions/send-password-reset/index.ts`: takes `{ email }`, calls `supabase.auth.admin.generateLink({ type: 'recovery' })`, sends a branded reset email via Resend pointing to `https://holarchealth.com/reset-password#...`
+- Update `src/pages/ForgotPassword.tsx` to invoke `send-password-reset` instead of `supabase.auth.resetPasswordForEmail`
+- Disable Supabase's built-in auth emails for signup/recovery in `supabase/config.toml` (or accept that default Supabase templates remain as fallback)
 
-## Risk
-If Lovable's managed hook setup later overwrites `auth-email-hook/index.ts` on re-scaffold, our Mailgun customization would be lost. Mitigation: only re-scaffold with `confirm_overwrite=true` when intentional.
+### 5. Domain prerequisite
+User must verify `holarchealth.com` (or a subdomain like `mail.holarchealth.com`) in Resend dashboard before sending. I'll prompt for which sender domain to use.
+
+### 6. Cleanup
+- Delete `supabase/functions/_shared/mailgun.ts`
+- Delete `supabase/functions/auth-email-mailgun/`
+- Remove related entries from `supabase/config.toml`
+
+### Out of scope
+- Signup confirmation / email-change / magic-link custom templates (only password reset for now; can add later)
+- Lovable Emails managed flow (`notify.nigeria.holarchealth.com`) — left alone
+
+### Questions before I build
+1. **Which sender domain** is verified (or will be verified) in Resend? `holarchealth.com`, `mail.holarchealth.com`, or other?
+2. **Auth emails scope**: just password reset, or also signup confirmation + magic link via custom Resend functions?
