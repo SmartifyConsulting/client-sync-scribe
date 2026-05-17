@@ -44,6 +44,7 @@ const hospitalNav: NavItem[] = [
   { icon: HeartPulse, label: "Our Nurses", to: "/provider/hospital/nurses" },
   { icon: Ambulance, label: "Our ER Providers", to: "/provider/hospital/ambulances" },
   { icon: Activity, label: "Incident Timeline", to: "/provider/hospital/timeline" },
+  { icon: UserCheck, label: "Administrators", to: "/provider/hospital/admins" },
 ];
 
 const ambulanceNav: NavItem[] = [
