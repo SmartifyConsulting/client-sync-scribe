@@ -63,7 +63,7 @@ export default function AdministratorsScreen() {
         .eq(fkCol, providerId!)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      const rows = (data ?? []) as AdminRow[];
+      const rows = ((data ?? []) as unknown) as AdminRow[];
       const userIds = rows.map((r) => r.user_id).filter(Boolean) as string[];
       if (userIds.length) {
         const { data: profiles } = await supabase
