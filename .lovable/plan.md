@@ -1,30 +1,34 @@
-## Problem
+## What's in place today
 
-The incident timeline already records `auto_assigned` events with `provider_id` set (verified in DB for the current incident — Mediclinic Sandton). The `IncidentTimeline` component supports rendering "Auto-assigned · 🏥 {name}", but the provider name never appears because the lookup uses direct `select` against `holarchelp_hospitals` / `holarchelp_ambulance_providers`. RLS blocks those reads for the patient (they aren't owner/staff, and many offered providers have `subscription_status = inactive`), so `providers[pid]` stays empty and the "· 🏥 Name" suffix is suppressed.
+- `SosLiveMap` already renders patient + responder + (optional) hospital on Leaflet/OpenStreetMap.
+- It already shows a dashed red line between patient and responder.
+- It already pulls an ETA (`{minutes} min · {km} km`) from `routes-eta`, with a haversine fallback.
+- Provider position is already wired to realtime updates on `holarchelp_provider_locations`, so when the vehicle sends a new GPS fix, the marker re-renders. So "showing the vehicle moving" is already supported when fixes arrive — we'll polish it.
 
-This is the same class of bug we fixed for `AvailableResponders` — that fix went through the new `holarchelp_get_incident_offers` RPC. The timeline was missed.
+## Changes (all UI-only, no schema or business logic)
 
-## Fix
+### 1. Distance label on the map line — `src/modules/holarchelp/components/LiveMap.tsx`
+- Accept an optional `distanceKm` prop.
+- Place a small tooltip/`L.marker` with a `divIcon` at the midpoint of the dashed line showing e.g. `4.2 km`, styled as a white pill with a red border (matches the line).
+- Hide when only one point exists.
 
-### 1. Database — add a safe public resolver
+### 2. Countdown timer — `src/modules/holarchelp/components/SosLiveMap.tsx`
+- When `eta.minutes` is set, start a local countdown (`useEffect` + `setInterval(1000)`) that ticks down a `remainingSeconds` state.
+- Whenever a new ETA arrives from `routes-eta`, reset the countdown to the new value.
+- Replace the static "{minutes} min" badge with a live "mm:ss" countdown plus the km. When it reaches `00:00`, display "Arriving now".
+- Keep the dashed line + the distance pill in sync (they update from haversine on every provider move regardless of the routes-eta debounce).
 
-Create a `SECURITY DEFINER` SQL function:
+### 3. Smoother vehicle movement — `src/modules/holarchelp/components/LiveMap.tsx`
+- Keep a ref to the responder marker. Instead of removing+re-adding it on every update, tween its `setLatLng` from the previous coords to the new coords over ~800 ms using `requestAnimationFrame` (linear interpolation). Patient + hospital still render as static markers.
+- Also redraw the dashed polyline + recompute the midpoint distance pill each frame so the line "follows" the vehicle in real time.
+- No tile changes; still OpenStreetMap.
 
-```
-holarchelp_get_incident_providers_public(_incident_id uuid)
-  returns table(id uuid, kind text, display_name text)
-```
+## Files touched
 
-It checks the caller is the incident owner, an assigned provider's staff, or an admin (same auth pattern as the offers RPC). It returns id/kind/display_name for every provider referenced by that incident's events (from `provider_id` and `payload->>'provider_id'`), regardless of subscription/approval status — name + kind only, no sensitive fields.
+- `src/modules/holarchelp/components/LiveMap.tsx` — distance pill + smooth marker tween for the ambulance.
+- `src/modules/holarchelp/components/SosLiveMap.tsx` — countdown state + pass `distanceKm` to `LiveMap`.
 
-### 2. Frontend — `src/modules/holarchelp/components/IncidentTimeline.tsx`
+## Notes / non-goals
 
-Replace the two direct `.from("holarchelp_ambulance_providers"…)` / `.from("holarchelp_hospitals"…)` lookups with a single `supabase.rpc("holarchelp_get_incident_providers_public", { _incident_id: incidentId })` call. Keep the existing render logic; the suffix "· 🏥 Mediclinic Sandton" will then appear on `auto_assigned`, `accepted`, `en_route`, etc.
-
-Also extend `PROVIDER_EVENTS` only if needed (already covers `auto_assigned`).
-
-### Files touched
-- New migration: `holarchelp_get_incident_providers_public` function
-- `src/modules/holarchelp/components/IncidentTimeline.tsx`
-
-No UI/business-logic changes elsewhere.
+- Real-time movement only animates when actual GPS fixes arrive from the ambulance app (writes to `holarchelp_provider_locations`). We do not fabricate motion when no new fix is received.
+- No turn-by-turn route polyline — that would need a routing provider (OSRM/Mapbox) and is out of scope. The dashed straight line + live distance/ETA remains.
