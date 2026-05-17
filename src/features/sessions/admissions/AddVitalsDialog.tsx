@@ -79,6 +79,9 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, d
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Add Vitals</DialogTitle></DialogHeader>
+        <div className="mb-2">
+          <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <div><Label className="text-[11px]">Heart Rate (bpm)</Label><Input value={hr} onChange={(e) => setHr(e.target.value)} type="number" /></div>
           <div><Label className="text-[11px]">SpO₂ (%)</Label><Input value={spo2} onChange={(e) => setSpo2(e.target.value)} type="number" /></div>
