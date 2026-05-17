@@ -4603,6 +4603,14 @@ export type Database = {
           response: string
         }[]
       }
+      holarchelp_get_incident_providers_public: {
+        Args: { _incident_id: string }
+        Returns: {
+          display_name: string
+          id: string
+          kind: string
+        }[]
+      }
       holarchelp_get_tracking_incident: {
         Args: { _token: string }
         Returns: {

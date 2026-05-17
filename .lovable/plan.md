@@ -1,56 +1,30 @@
-## What’s actually wrong
+## Problem
 
-1. **“Unknown ambulance / Unknown hospital” is not bad seed data.** The offers in this incident point to real providers, but the patient UI fetches offer rows first, then fetches provider names separately through normal client permissions. Some offered providers are approved but not `active`, so the patient can see the offer but cannot read that provider row directly. That makes the name lookup return empty and the UI falls back to “Unknown”.
+The incident timeline already records `auto_assigned` events with `provider_id` set (verified in DB for the current incident — Mediclinic Sandton). The `IncidentTimeline` component supports rendering "Auto-assigned · 🏥 {name}", but the provider name never appears because the lookup uses direct `select` against `holarchelp_hospitals` / `holarchelp_ambulance_providers`. RLS blocks those reads for the patient (they aren't owner/staff, and many offered providers have `subscription_status = inactive`), so `providers[pid]` stays empty and the "· 🏥 Name" suffix is suppressed.
 
-2. **Google Maps is failing because the browser key is invalid for Maps rendering.** The console shows `BillingNotEnabledMapError`, and `ProviderMap` also has a hardcoded fallback public Google key. So even with `GOOGLE_MAPS_API_KEY` set, the app can still render with a key/project that has billing disabled.
+This is the same class of bug we fixed for `AvailableResponders` — that fix went through the new `holarchelp_get_incident_offers` RPC. The timeline was missed.
 
-## Plan
+## Fix
 
-### 1. Stop client-side provider name joins from causing “Unknown” rows
-- Add a backend function for incident offers, e.g. `holarchelp_get_incident_offers(_incident_id)`.
-- It will verify the caller owns the incident, is assigned provider staff, linked hospital staff, or admin.
-- It will return offer data with safe display fields already resolved:
-  - provider id
-  - provider kind
-  - provider display name
-  - ownership
-  - distance
-  - response
-  - accepting status
-- Update `AvailableResponders` to call this function instead of querying offers + provider tables separately.
-- Only show rows with a resolved provider display name; no more “Unknown …” fallback labels.
+### 1. Database — add a safe public resolver
 
-### 2. Fix dispatch so it only offers providers the patient UI is meant to show
-- Update `dispatch-sos` to include `subscription_status = active` when finding hospitals and ambulances, matching the public/provider listing rules.
-- Add defensive filtering so providers missing a real display name or coordinates are never offered.
-- This prevents future incidents from creating offers that the UI cannot resolve.
+Create a `SECURITY DEFINER` SQL function:
 
-### 3. Clean up old/current bad pending offers
-- For unresolved or inactive-provider offers, mark them `superseded` so they disappear from active/pending responder lists.
-- Keep accepted/completed historical assignment data intact.
+```
+holarchelp_get_incident_providers_public(_incident_id uuid)
+  returns table(id uuid, kind text, display_name text)
+```
 
-### 4. Replace fragile Google Maps rendering with the existing Leaflet map fallback
-- Convert the SOS live tracking map (`SosLiveMap`) to use the already-installed `LiveMap` / OpenStreetMap renderer for patient, ambulance, hospital, and admin incident views.
-- Keep the same patient/provider/hospital markers and live updates.
-- Keep ETA calculation via the backend `routes-eta` function when available, but do not let Google Routes failures break map rendering.
-- This removes the browser-side Google Maps dependency from the emergency incident map completely.
+It checks the caller is the incident owner, an assigned provider's staff, or an admin (same auth pattern as the offers RPC). It returns id/kind/display_name for every provider referenced by that incident's events (from `provider_id` and `payload->>'provider_id'`), regardless of subscription/approval status — name + kind only, no sensitive fields.
 
-### 5. Fix the nearby provider map too
-- Replace `ProviderMap`’s Google Maps implementation with Leaflet/OpenStreetMap.
-- Remove the hardcoded fallback Google browser key from the frontend map loader path.
-- The nearby provider list and markers will render even if Google billing/API restrictions fail.
+### 2. Frontend — `src/modules/holarchelp/components/IncidentTimeline.tsx`
 
-### 6. Make Google backend failures graceful
-- Update `routes-eta` so Google API/billing failures return a safe fallback response instead of a hard error.
-- The UI will show straight-line distance/marker tracking instead of a broken map.
+Replace the two direct `.from("holarchelp_ambulance_providers"…)` / `.from("holarchelp_hospitals"…)` lookups with a single `supabase.rpc("holarchelp_get_incident_providers_public", { _incident_id: incidentId })` call. Keep the existing render logic; the suffix "· 🏥 Mediclinic Sandton" will then appear on `auto_assigned`, `accepted`, `en_route`, etc.
 
-## Technical notes
+Also extend `PROVIDER_EVENTS` only if needed (already covers `auto_assigned`).
 
-- This requires one database migration for the safe incident-offer resolver and cleanup.
-- It requires updates to:
-  - `src/modules/holarchelp/components/AvailableResponders.tsx`
-  - `src/modules/holarchelp/components/SosLiveMap.tsx`
-  - `src/modules/holarchelp/components/ProviderMap.tsx`
-  - `supabase/functions/dispatch-sos/index.ts`
-  - `supabase/functions/routes-eta/index.ts`
-- After implementation, I’ll validate the current incident no longer shows unknown providers and that maps render without the Google Maps billing modal.
+### Files touched
+- New migration: `holarchelp_get_incident_providers_public` function
+- `src/modules/holarchelp/components/IncidentTimeline.tsx`
+
+No UI/business-logic changes elsewhere.
