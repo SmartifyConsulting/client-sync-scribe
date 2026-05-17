@@ -15,6 +15,7 @@ import AffiliatedDoctorsScreen from "./pages/provider/hospital/AffiliatedDoctors
 import NursesScreen from "./pages/provider/hospital/NursesScreen";
 import AffiliatedAmbulancesScreen from "./pages/provider/hospital/AffiliatedAmbulancesScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
+import AdministratorsScreen from "./pages/provider/AdministratorsScreen";
 
 import AmbulanceOpsLayout from "./pages/provider/ambulance/AmbulanceOpsLayout";
 import AmbulanceOpsDashboard from "./pages/provider/ambulance/AmbulanceOpsDashboard";
