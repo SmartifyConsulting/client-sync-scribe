@@ -1,70 +1,53 @@
-## 1. Admin → User Management: search for Hospitals / Ambulances / Pharmacies
+## Hospital nav: collapse providers into one menu with sub-tabs
 
-**Problem.** On desktop/tablet, the search box appears only on the Patients / Healthcare Providers / Admin sub-tabs (`UsersTab` has its own search). The Hospitals / Ambulances / Pharmacies sub-tabs use a different render path (`renderGroupedTable` in `HolarcHelpProviders.tsx`) with no search input.
+**`src/components/layout/ProviderSidebar.tsx`** — Replace the three separate hospital nav items ("Our Doctors", "Our Nurses", "Our ER Providers") with a single **"Providers"** item (icon: `Users`, route: `/provider/hospital/providers`). Highlight as active when `pathname.startsWith("/provider/hospital/providers")` OR matches the three legacy paths (back-compat).
 
-**Fix (`src/pages/admin/HolarcHelpProviders.tsx`).**
-- Add one `searchTerm` state per provider kind.
-- Render a small `Search`-icon `Input` in the `AdminPanel` `actions` row on each of the hospital / ambulance / pharmacy tabs.
-- Filter list before `renderGroupedTable`: case-insensitive match on `name` / `company_name`, `city`, `contact_email`, `contact_phone`, and resolved login email from `userEmails`.
-- Empty-state copy: "No hospitals match your search." etc.
+**New page `src/modules/holarchelp/pages/provider/HospitalProviders.tsx`** — Tabbed shell (shadcn `Tabs`, teal `bg-primary` TabsList per style manifest) with three triggers: **Doctors**, **Nurses**, **ER Providers**. Each tab renders the existing page body, factored out of the current `HospitalDoctors.tsx` / `HospitalNurses.tsx` / `HospitalAmbulances.tsx` (extract their inner JSX into `DoctorsTab`, `NursesTab`, `ErProvidersTab` components co-located in `pages/provider/providers/`). Initial tab driven by `?tab=doctors|nurses|er` (default `doctors`).
 
-## 2. Mobile: admin section unreachable from avatar menu
+**Routing (`src/modules/holarchelp/routes-provider.tsx`)** — Add `/provider/hospital/providers` → `HospitalProviders`. Keep the three legacy routes as redirects to `/provider/hospital/providers?tab=...` so existing links still work.
 
-**Fix (`src/components/layout/BottomNav.tsx`).** When `pathname.startsWith("/admin")` AND `useIsAdmin()` is true, render an **admin variant** of the bottom nav with 5 items:
-1. **Users** → `/admin/users` (`Users`)
-2. **Pricing** → `/admin/pricing` (`DollarSign`)
-3. **Rewards** → `/admin/gamification` (`Gift`)
-4. **Hub** → `/admin` (`LayoutDashboard`)
-5. **Exit Admin** → `/doctor-dashboard` (or `/patient/details`) (`Home`)
+## Auto-assignment timer: 60 s → 30 s
 
-**Fix (`src/components/layout/TopBarIcons.tsx`).** Change avatar-menu "Admin" link target from `/admin` to `/admin/users`.
+**`src/modules/holarchelp/components/AvailableResponders.tsx`** — Change `AUTO_ASSIGN_MS = 60 * 1000` to `30 * 1000`. Copy ("Auto-assign in …", "we'll auto-assign the closest one in …") still uses the same constant so it reflows automatically.
 
-## 3. SOS map: red & teal lines + countdown timer on auto-assigned incidents
+No DB / edge-function change needed — `holarchelp_auto_assign_incident` is already invoked by the client when the countdown hits zero.
 
-**Clarification from user.** A destination hospital **was auto-picked** for them, so teal line + hospital pin must show even without manual selection. If no ambulance claims the call, the system **auto-assigns the nearest available ambulance**, and that ambulance's position must drive the red line + PICKUP countdown immediately.
+## Voice note transcription — initial + every subsequent note
 
-**Fix (`src/modules/holarchelp/components/SosLiveMap.tsx`).**
-- **Auto-pick destination hospital if missing.** When incident loads with `destination_hospital_id = NULL`, query approved hospitals with lat/lng nearest the patient (haversine), use it as the destination for line/pin rendering (no DB write — client-side fallback).
-- **Auto-pick nearest ambulance if missing.** When `assigned_provider_id` is set but `provider_latitude/longitude` and live `holarchelp_provider_locations` are both empty, fall back to `holarchelp_ambulance_providers.latitude/longitude` for the assigned provider. When `assigned_provider_id` is also empty, query nearest active ambulance by haversine. Drive red line + countdown from this position.
-- **Phase rule.** `transport` if `status ∈ {en_route, patient_collected, at_hospital}`; else `pickup` whenever both provider & destination exist (real or fallback); only `selecting` if neither exists.
-- Net result for the current incident: teal patient↔hospital line + pill, red patient↔ambulance line + PICKUP `mm:ss` countdown, both visible.
+**Initial SOS voice note (`SosVoiceNoteDialog.tsx`)** — Transcription is already attempted via `transcribe-audio`, but failures are silent and the user sees no transcript. Harden it:
 
-## 4. Remove top-row SOS icons that don't belong
+1. After the audio path is saved, call `transcribe-audio` and **retry up to 2× with exponential backoff** (1 s, 3 s) if it fails or returns empty.
+2. On final failure, write `voice_note_transcript = "(Transcription unavailable — tap to retry)"` so responders see something actionable; expose a small "Retry transcription" button on `HolarcHelpIncidentDetail.tsx` that re-runs the edge function against `voice_note_audio_url`.
+3. Add a `voice_note` event to `holarchelp_incident_events` with `payload: { kind: "initial", duration }` so it appears on the timeline.
 
-**File: `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx`** (top action icon row, ~line 268).
-- **Remove the `MapPin` "Search nearby" round icon button** (and its `MapPin` import if unused elsewhere). Route `/patient/holarchelp/nearby` stays intact for deep links.
-- **Remove the `Phone` SOS icon button** from the same top row. Reason: the emergency phone number varies by country and a single hard-coded number is misleading. Drop the icon and its `Phone` import. Country-aware emergency dialing can be reintroduced later via the NOK / country settings.
+**Subsequent voice notes (`IncidentVoiceNoteRecorder.tsx`)** — Same hardening: wrap the existing best-effort `transcribe-audio` call in 2× retry, persist `transcript` reliably, and show a per-note "Retry transcription" button when `transcript` is null. (The component already lists notes with their transcripts; the gap is reliability + a retry path.)
 
-## 5. Timeline events: ambulance assignment + arrival at scene + arrival at destination
+Both flows continue to use the existing `transcribe-audio` edge function — no new secrets, no schema change.
 
-All three are display-side additions in **`src/modules/holarchelp/components/IncidentTimeline.tsx`** plus emission logic in `SosLiveMap.tsx` / incident assignment flow.
+## Timeline: show which ambulance / ER provider was assigned
 
-### 5a. Ambulance assigned
-- New timeline event type: **`provider_assigned`** — renders as "Ambulance assigned: {ambulance company name}" with `Ambulance` icon, teal/primary color.
-- The label distinguishes **auto-assigned vs self-selected** via a sub-field:
-  - **Auto:** "🤖 Auto-assigned · {company_name}" (when `assignment_mode = 'auto'`)
-  - **Manual:** "✋ Selected the call · {company_name}" (when an ambulance operator claims the SOS themselves, `assignment_mode = 'manual'`)
-- Emission: wherever `holarchelp_incidents.assigned_provider_id` is set (auto-dispatch edge function and the ambulance operator's "Accept call" handler), also insert a row into the existing incident-events table with `type='provider_assigned'`, payload `{ provider_id, provider_name, mode }`. If no such table is in use, derive the event client-side in `IncidentTimeline` by detecting the `assigned_provider_id` change in realtime and joining `holarchelp_ambulance_providers.company_name`.
-- For the current incident view, also do a one-time backfill render: if `assigned_provider_id` is non-null but no `provider_assigned` event exists, synthesize a synthetic timeline row from the incident `updated_at` + ambulance company name so existing SOSes show the entry too.
+The timeline already enriches `auto_assigned`, `patient_picked`, and `accepted` events with the provider name inline on the **same line as the label**. The user wants the provider call-out to appear **after the date/time stamp** so it reads as a clear follow-up to the clinical timestamp row.
 
-### 5b. Arrived at scene
-- New timeline event type: **`provider_arrived_scene`** — "Ambulance arrived at SOS scene" (icon: `MapPin`, red/destructive).
-- Emission in `SosLiveMap.tsx`: on each provider GPS update, haversine to patient ≤ 50 m + phase = `pickup` + not already emitted → insert event once.
-- Fallback: if status flips to `patient_collected` and no arrival event was emitted within 60 s prior, emit `provider_arrived_scene` at the status-change timestamp.
+**`IncidentTimeline.tsx`** — For events in `PROVIDER_EVENTS` with a known provider, render the provider line **below** the timestamp instead of inline:
 
-### 5c. Arrived at destination
-- New timeline event type: **`provider_arrived_destination`** — "Ambulance arrived at destination hospital · {hospital name}" (icon: `Hospital`, teal/primary).
-- Emission: haversine to destination hospital ≤ 50 m + phase = `transport` + not already emitted → insert once.
-- Fallback: if status flips to `at_hospital`, emit at that timestamp.
+```
+Auto-assigned
+14:32 · 17 May
+🚑 City Ambulance Services  (auto-assigned)
+```
+
+Use a dedicated badge row (rounded chip, teal border, `Ambulance` / `Hospital` icon) so it visually stands out from generic event metadata. Label suffix differentiates `auto_assigned` ("auto-assigned"), `accepted` / `patient_picked` ("responded & picked the call"). No event-emission change needed — the existing `holarchelp_accept_incident`, `holarchelp_auto_assign_incident`, and `holarchelp_patient_pick_provider` RPCs already insert these events with `provider_id`.
 
 ## Files touched
 
-- `src/pages/admin/HolarcHelpProviders.tsx` — per-kind search input + filter.
-- `src/components/layout/BottomNav.tsx` — admin variant of mobile bottom nav.
-- `src/components/layout/TopBarIcons.tsx` — avatar Admin link → `/admin/users`.
-- `src/modules/holarchelp/components/SosLiveMap.tsx` — destination & ambulance fallback positions; emit assignment + arrival events.
-- `src/modules/holarchelp/components/IncidentTimeline.tsx` — render assignment, arrival-at-scene, arrival-at-destination events.
-- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` — remove MapPin "Search nearby" and Phone SOS icon buttons (+ unused imports).
-- *(If an auto-dispatch edge function exists for ambulance assignment, add the `provider_assigned` event insert there too — confirmed at implementation time.)*
+- `src/components/layout/ProviderSidebar.tsx`
+- `src/modules/holarchelp/routes-provider.tsx`
+- `src/modules/holarchelp/pages/provider/HospitalProviders.tsx` (new)
+- `src/modules/holarchelp/pages/provider/providers/{DoctorsTab,NursesTab,ErProvidersTab}.tsx` (new, extracted from existing pages)
+- `src/modules/holarchelp/components/AvailableResponders.tsx`
+- `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx`
+- `src/modules/holarchelp/components/IncidentVoiceNoteRecorder.tsx`
+- `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` (retry button for initial transcript)
+- `src/modules/holarchelp/components/IncidentTimeline.tsx`
 
-No schema / migration / RLS changes required.
+No migrations, no new edge functions, no secrets.
