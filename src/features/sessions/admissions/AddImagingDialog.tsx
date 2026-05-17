@@ -82,6 +82,7 @@ export function AddImagingDialog({ open, onOpenChange, admissionId, hospitalId }
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Add Imaging Record</DialogTitle></DialogHeader>
         <div className="space-y-3">
+          <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
           <div>
             <Label className="text-[11px]">Modality</Label>
             <Select value={modality} onValueChange={setModality}>
