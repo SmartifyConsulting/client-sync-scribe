@@ -17,8 +17,11 @@ import {
   Navigation as NavIcon,
   History,
   Users,
+  HeartPulse,
+  ArrowLeft,
 } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 
