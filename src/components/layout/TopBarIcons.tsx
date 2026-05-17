@@ -18,7 +18,22 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-export function TopBarIcons() {
+const PROVIDER_PROFILE_NOTIF_TYPES = [
+  "access_request",
+  "access_accepted",
+  "access_revoked",
+  "invitation_received",
+  "appointment_request",
+  "appointment_accepted",
+  "document_received",
+];
+
+export interface TopBarIconsProps {
+  variant?: "default" | "provider";
+}
+
+export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
+  const isProvider = variant === "provider";
   const [reportOpen, setReportOpen] = useState(false);
   const { profile } = useProfile();
   const { isDoctor } = useUserRole();
@@ -46,32 +61,36 @@ export function TopBarIcons() {
   }, [isAdmin, seeded]);
 
   const { data: unreadNotifCount = 0 } = useQuery({
-    queryKey: ["unread-notifications-topbar"],
+    queryKey: ["unread-notifications-topbar", variant],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return 0;
-      const { count } = await supabase
+      let q = supabase
         .from("notifications")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
         .eq("is_read", false);
+      if (isProvider) q = q.in("type", PROVIDER_PROFILE_NOTIF_TYPES);
+      const { count } = await q;
       return count || 0;
     },
     refetchInterval: 30000,
   });
 
   const { data: recentNotifications = [] } = useQuery({
-    queryKey: ["recent-notifications-topbar"],
+    queryKey: ["recent-notifications-topbar", variant],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
-      const { data } = await supabase
+      let q = supabase
         .from("notifications")
         .select("*")
         .eq("user_id", user.id)
         .eq("is_read", false)
         .order("created_at", { ascending: false })
         .limit(10);
+      if (isProvider) q = q.in("type", PROVIDER_PROFILE_NOTIF_TYPES);
+      const { data } = await q;
       return data || [];
     },
     refetchInterval: 30000,
@@ -129,33 +148,37 @@ export function TopBarIcons() {
       </TooltipProvider>
       <ReportFixSheet open={reportOpen} onOpenChange={setReportOpen} />
 
-      {/* Calendar quick-access */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link to={isOnPatientRoute ? "/patient/calendar" : "/calendar"}>
-              <div className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
-                <CalendarIcon className="h-4 w-4 text-white" />
-              </div>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>Calendar</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {!isProvider && (
+        <>
+          {/* Calendar quick-access */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link to={isOnPatientRoute ? "/patient/calendar" : "/calendar"}>
+                  <div className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
+                    <CalendarIcon className="h-4 w-4 text-white" />
+                  </div>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Calendar</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-      {/* Mic */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link to="/todos?autoRecord=true">
-              <div className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
-                <Mic className="h-4 w-4 text-white stroke-white fill-none" />
-              </div>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>Record a Task</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+          {/* Mic */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link to="/todos?autoRecord=true">
+                  <div className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
+                    <Mic className="h-4 w-4 text-white stroke-white fill-none" />
+                  </div>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Record a Task</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </>
+      )}
 
       {/* Bell */}
       <Popover>

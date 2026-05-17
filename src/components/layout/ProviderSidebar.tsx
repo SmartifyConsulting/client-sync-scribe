@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcHelpLogo from "@/assets/holarc-help-logo.png";
 import { cn } from "@/lib/utils";
 import {
   Settings,
@@ -60,12 +61,14 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const location = useLocation();
   const nav = portal === "hospital" ? hospitalNav : ambulanceNav;
   const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
+  const logo = portal === "ambulance" ? holarcHelpLogo : holarcLogo;
+  const logoAlt = portal === "ambulance" ? "Holarc Help" : "Holarc Health";
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         <div className="flex h-20 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Health" className="h-12 w-auto object-contain" />
+          <img src={logo} alt={logoAlt} className="h-12 w-auto object-contain" />
         </div>
 
         <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto font-size-preserve">

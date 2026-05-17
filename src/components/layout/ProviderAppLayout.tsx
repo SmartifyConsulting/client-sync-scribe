@@ -6,6 +6,7 @@ import { TopBarIcons } from "./TopBarIcons";
 import { Footer } from "./Footer";
 import { PageTransition } from "./PageTransition";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcHelpLogo from "@/assets/holarc-help-logo.png";
 
 interface ProviderAppLayoutProps {
   portal: "hospital" | "ambulance";
@@ -14,6 +15,8 @@ interface ProviderAppLayoutProps {
 
 export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps) {
   const location = useLocation();
+  const logo = portal === "ambulance" ? holarcHelpLogo : holarcLogo;
+  const logoAlt = portal === "ambulance" ? "Holarc Help" : "Holarc Health";
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
@@ -24,14 +27,14 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
 
       {/* Mobile header (no sidebar drawer for providers yet — Holarc logo + TopBarIcons) */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
-        <img src={holarcLogo} alt="Holarc Health" className="h-10 w-auto object-contain" />
-        <TopBarIcons />
+        <img src={logo} alt={logoAlt} className="h-10 w-auto object-contain" />
+        <TopBarIcons variant="provider" />
       </header>
 
       <main className="flex-1 pb-8 md:ml-[210px]">
         {/* Desktop top bar with TopBarIcons */}
         <div className="hidden md:flex justify-end px-8 pt-4">
-          <TopBarIcons />
+          <TopBarIcons variant="provider" />
         </div>
 
         {/* Provider ops stats strip */}
