@@ -38,12 +38,14 @@ export function AddMedicationDialog({ open, onOpenChange, admissionId, hospitalI
       const { error } = await supabase.from("admission_medications").insert({
         admission_id: admissionId,
         recorded_by: user.id,
+        nurse_id: nurse?.id ?? null,
+        nurse_name_snapshot: nurse?.name ?? null,
         name,
         dosage: dosage || null,
         frequency: frequency || null,
         started_at: new Date().toISOString().slice(0, 10),
         notes: notes || null,
-      });
+      } as any);
       if (error) throw error;
       toast({ title: "Medication added" });
       qc.invalidateQueries({ queryKey: ["admission-medications", admissionId] });
