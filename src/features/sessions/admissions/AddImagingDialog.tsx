@@ -8,17 +8,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { NursePicker } from "@/components/admissions/NursePicker";
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   admissionId: string;
+  hospitalId?: string | null;
 }
 
-export function AddImagingDialog({ open, onOpenChange, admissionId }: Props) {
+export function AddImagingDialog({ open, onOpenChange, admissionId, hospitalId }: Props) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
+  const [nurse, setNurse] = useState<{ id: string; name: string } | null>(null);
   const [modality, setModality] = useState("X-ray");
   const [bodyRegion, setBodyRegion] = useState("");
   const [performedAt, setPerformedAt] = useState(new Date().toISOString().slice(0, 10));
