@@ -12,6 +12,7 @@ export interface HospitalAdmission {
   diagnosis: string | null;
   procedure_description: string | null;
   status: string;
+  hospital_provider_id?: string | null;
   created_at: string;
   updated_at: string;
 }
