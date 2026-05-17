@@ -78,6 +78,11 @@ export default function IncomingAmbulancesScreen() {
                   <p className="flex items-center gap-1.5 text-sm font-extrabold">
                     <Ambulance className="h-4 w-4 text-red-600" />
                     {crew?.name ?? "Ambulance"}
+                    {r.assigned_provider_id && partners.has(r.assigned_provider_id) && (
+                      <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-[9px]">
+                        <Handshake className="h-2.5 w-2.5" /> Partner
+                      </Badge>
+                    )}
                   </p>
                   <p className="text-[11px] text-muted-foreground">Incident {r.id.slice(0,8)} · {r.status.replace(/_/g," ")}</p>
                 </div>
