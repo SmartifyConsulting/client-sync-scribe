@@ -293,8 +293,7 @@ export default function Auth() {
       if (!userId) throw new Error("No user account found");
 
       const preferredLanguage = selectedCountry.lang;
-      const phoneDigits = userRole === "doctor" ? mobileNumber : phone;
-      const fullPhone = phoneDigits ? `${countryCode} ${phoneDigits}` : null;
+      const fullPhone: string | null = null;
 
       const nameParts = fullName.trim().toLowerCase().split(/\s+/);
       const firstPart = nameParts[0] || "user";
