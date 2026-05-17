@@ -340,6 +340,54 @@ export type Database = {
           },
         ]
       }
+      ambulance_hospital_affiliations: {
+        Row: {
+          ambulance_provider_id: string
+          created_at: string
+          hospital_id: string | null
+          hospital_name_snapshot: string | null
+          id: string
+          role: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ambulance_provider_id: string
+          created_at?: string
+          hospital_id?: string | null
+          hospital_name_snapshot?: string | null
+          id?: string
+          role?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ambulance_provider_id?: string
+          created_at?: string
+          hospital_id?: string | null
+          hospital_name_snapshot?: string | null
+          id?: string
+          role?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulance_hospital_affiliations_ambulance_provider_id_fkey"
+            columns: ["ambulance_provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambulance_hospital_affiliations_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_modules: {
         Row: {
           description: string | null
@@ -837,30 +885,33 @@ export type Database = {
       doctor_hospital_affiliations: {
         Row: {
           created_at: string
-          doctor_id: string
+          doctor_id: string | null
           hospital_id: string | null
           hospital_name_snapshot: string | null
           id: string
+          pending_doctor_payload: Json | null
           role_at_hospital: string | null
           status: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          doctor_id: string
+          doctor_id?: string | null
           hospital_id?: string | null
           hospital_name_snapshot?: string | null
           id?: string
+          pending_doctor_payload?: Json | null
           role_at_hospital?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          doctor_id?: string
+          doctor_id?: string | null
           hospital_id?: string | null
           hospital_name_snapshot?: string | null
           id?: string
+          pending_doctor_payload?: Json | null
           role_at_hospital?: string | null
           status?: string
           updated_at?: string
