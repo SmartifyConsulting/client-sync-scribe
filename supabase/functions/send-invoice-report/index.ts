@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { sendMailgunEmail } from "../_shared/mailgun.ts";
+import { sendEmail } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -128,7 +128,7 @@ const handler = async (req: Request): Promise<Response> => {
       </html>
     `;
 
-    const emailResponse = await sendMailgunEmail({
+    const emailResponse = await sendEmail({
       to: email,
       subject: `Invoice Report: ${dateFrom} to ${dateTo}`,
       html,

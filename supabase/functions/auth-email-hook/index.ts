@@ -1,7 +1,7 @@
-// Supabase Auth Send-Email Hook → Mailgun
-// Receives auth email events from Supabase, renders branded HTML, sends via Mailgun.
+// Supabase Auth Send-Email Hook
+// Receives auth email events from Supabase, renders branded HTML, sends via the email provider.
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
-import { sendMailgunEmail } from "../_shared/mailgun.ts";
+import { sendEmail } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -155,10 +155,10 @@ Deno.serve(async (req) => {
 
   console.log(`auth-email-hook: sending ${action} to ${recipient}`);
 
-  const result = await sendMailgunEmail({ to: recipient, subject, html, text, from: FROM });
+  const result = await sendEmail({ to: recipient, subject, html, text, from: FROM });
 
   if (!result.ok) {
-    console.error(`auth-email-hook: Mailgun failed (${result.status}):`, result.error);
+    console.error(`auth-email-hook: Email send failed (${result.status}):`, result.error);
     return new Response(JSON.stringify({ error: result.error || "send failed" }), {
       status: 502,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

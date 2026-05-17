@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { sendMailgunEmail } from "../_shared/mailgun.ts";
+import { sendEmail } from "../_shared/email.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -126,7 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
       // Send a "connected" email (not "Create Account")
       {
         const appUrl = Deno.env.get("APP_URL") || "https://lovable.dev";
-        await sendMailgunEmail({
+        await sendEmail({
           to: patientEmail,
           subject: `${doctorName} has connected with you on Holarc`,
           html: `
@@ -193,7 +193,7 @@ const handler = async (req: Request): Promise<Response> => {
     const appUrl = Deno.env.get("APP_URL") || "https://lovable.dev";
     const registrationLink = `${appUrl}/auth?invite=${invitation.token}`;
 
-    const emailResponse = await sendMailgunEmail({
+    const emailResponse = await sendEmail({
       to: patientEmail,
       subject: `${doctorName} has invited you to join Holarc`,
       html: `
@@ -232,7 +232,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!emailResponse.ok) {
-      console.error("Mailgun error:", emailResponse.error);
+      console.error("Email send error:", emailResponse.error);
       throw new Error("Failed to send email");
     }
 

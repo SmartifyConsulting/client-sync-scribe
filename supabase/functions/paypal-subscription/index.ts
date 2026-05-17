@@ -138,8 +138,8 @@ async function capturePayPalOrder(accessToken: string, orderId: string): Promise
 }
 
 async function sendSubscriptionEmail(email: string, subject: string, htmlContent: string): Promise<void> {
-  const { sendMailgunEmail } = await import("../_shared/mailgun.ts");
-  const result = await sendMailgunEmail({ to: email, subject, html: htmlContent });
+  const { sendEmail } = await import("../_shared/email.ts");
+  const result = await sendEmail({ to: email, subject, html: htmlContent });
   if (!result.ok) {
     console.error("Error sending email:", result.error);
   } else {
