@@ -8,6 +8,7 @@ import { PatientAppLayout } from "@/components/layout/PatientAppLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProviderAccess } from "@/modules/holarchelp/components/ProviderGate";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
