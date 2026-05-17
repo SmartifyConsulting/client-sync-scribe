@@ -153,7 +153,7 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </AccordionItem>
       </Accordion>
 
-      <AddVitalsDialog open={showVitals} onOpenChange={setShowVitals} admissionId={admission.id} defaultHeight={defaultHeight} defaultWeight={defaultWeight} />
+      <AddVitalsDialog open={showVitals} onOpenChange={setShowVitals} admissionId={admission.id} hospitalId={admission.hospital_provider_id} defaultHeight={defaultHeight} defaultWeight={defaultWeight} />
       <AddMedicationDialog open={showMeds} onOpenChange={setShowMeds} admissionId={admission.id} />
       <AddLabResultDialog open={showLabs} onOpenChange={setShowLabs} admissionId={admission.id} />
       <AddImagingDialog open={showImaging} onOpenChange={setShowImaging} admissionId={admission.id} />
