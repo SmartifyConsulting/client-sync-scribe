@@ -336,7 +336,43 @@ export default function HolarcHelpIncidentDetail() {
 
       {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
         <div className="mt-4 rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
-          <p className="mb-2 text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your initial voice note</p>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your initial voice note</p>
+            {incident.voice_note_audio_url && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                onClick={async () => {
+                  toast.message("Re-transcribing…");
+                  try {
+                    const { data: signed } = await supabase.storage.from("session-audio").createSignedUrl(incident.voice_note_audio_url, 120);
+                    if (!signed?.signedUrl) throw new Error("Could not access audio");
+                    const audioRes = await fetch(signed.signedUrl);
+                    const blob = await audioRes.blob();
+                    const b64 = await new Promise<string>((res, rej) => {
+                      const r = new FileReader();
+                      r.onloadend = () => res((r.result as string).split(",")[1] || "");
+                      r.onerror = rej;
+                      r.readAsDataURL(blob);
+                    });
+                    const { data, error } = await supabase.functions.invoke("transcribe-audio", {
+                      body: { audio: b64, patientName: "Patient", doctorName: "Responder" },
+                    });
+                    if (error || !(data as any)?.text) throw new Error("Empty transcript");
+                    await supabase.from("holarchelp_incidents" as any).update({
+                      voice_note_transcript: String((data as any).text),
+                    } as any).eq("id", id);
+                    toast.success("Transcript updated");
+                  } catch (e: any) {
+                    toast.error(e?.message ?? "Retry failed");
+                  }
+                }}
+              >
+                Retry transcription
+              </Button>
+            )}
+          </div>
           {incident.voice_note_transcript && (
             <p className="text-sm whitespace-pre-wrap mb-2">{incident.voice_note_transcript}</p>
           )}
