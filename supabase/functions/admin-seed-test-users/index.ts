@@ -47,11 +47,23 @@ Deno.serve(async (req) => {
 
     const url = Deno.env.get("SUPABASE_URL")!;
     const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
+
+    // Validate the caller's JWT using an anon client + getClaims (works with signing-keys)
+    const authClient = createClient(url, anon, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    const { data: claimsData, error: claimsErr } = await authClient.auth.getClaims(token);
+    if (claimsErr || !claimsData?.claims?.sub) {
+      console.error("getClaims failed", claimsErr);
+      throw new Error("Invalid auth");
+    }
+    const callerId = claimsData.claims.sub as string;
+
+    // Service-role client for admin operations
     const sb = createClient(url, service);
 
-    const { data: userData, error: userErr } = await sb.auth.getUser(token);
-    if (userErr || !userData?.user) throw new Error("Invalid auth");
-    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: userData.user.id, _role: "admin" });
+    const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
     if (!isAdmin) throw new Error("Admin role required");
 
     const results: Array<{ email: string; status: string; user_id?: string }> = [];
