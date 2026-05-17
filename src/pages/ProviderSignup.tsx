@@ -39,6 +39,8 @@ export default function ProviderSignup() {
   const [type, setType] = useState<ProviderType>("ambulance");
 
   const [companyName, setCompanyName] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [address, setAddress] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -46,11 +48,51 @@ export default function ProviderSignup() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+
+  // Soft duplicate check (debounced) — warns the user before submit.
+  useEffect(() => {
+    const reg = registrationNumber.trim();
+    const name = companyName.trim();
+    if (!reg && !name) {
+      setDuplicateWarning(null);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const { data } = await supabase.rpc("check_provider_duplicate", {
+          _type: type,
+          _reg_no: reg || null,
+          _name: name || null,
+          _city: null,
+        });
+        const hit = data as { exists?: boolean; name?: string } | null;
+        if (hit?.exists) {
+          setDuplicateWarning(
+            `An organisation called "${hit.name}" is already registered with these details. If this is yours, ask the existing administrator to add you. Otherwise use a different registration number.`,
+          );
+        } else {
+          setDuplicateWarning(null);
+        }
+      } catch {
+        // silent — server still enforces uniqueness
+      }
+    }, 500);
+    return () => clearTimeout(handle);
+  }, [type, registrationNumber, companyName]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyName || !email || !password || !firstName || !lastName) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+    if (!registrationNumber.trim()) {
+      toast.error("Company registration number is required");
+      return;
+    }
+    if (!address.trim()) {
+      toast.error("Organisation address is required");
       return;
     }
     if (!acceptedTerms) {
@@ -59,14 +101,12 @@ export default function ProviderSignup() {
     }
     setSubmitting(true);
     try {
-      // Minimal signup. Address, registration number, ownership and the rest
-      // are completed later from the provider's profile screen.
       await callFn("register-emergency-provider", {
         type,
         ownership: "private",
         company_name: companyName,
-        registration_number: null,
-        address: null,
+        registration_number: registrationNumber.trim(),
+        address: address.trim(),
         city: null,
         country: null,
         latitude: null,
