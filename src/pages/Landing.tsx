@@ -521,26 +521,36 @@ export default function Landing() {
             <DialogTitle className="text-center text-2xl">Join Holarc</DialogTitle>
             <DialogDescription className="text-center">How will you use the platform?</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
             <button
               onClick={() => handleRoleSelect("doctor")}
-              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-6 hover:border-primary hover:bg-accent transition-all duration-200"
+              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-5 hover:border-primary hover:bg-accent transition-all duration-200"
             >
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <Stethoscope className="h-8 w-8 text-primary" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
+                <Stethoscope className="h-7 w-7 text-primary" />
               </div>
-              <span className="text-lg font-semibold text-foreground">Healthcare Provider</span>
-              <span className="text-sm text-muted-foreground mt-1 text-center">Manage patients & collaborate</span>
+              <span className="text-base font-semibold text-foreground">Healthcare Provider</span>
+              <span className="text-xs text-muted-foreground mt-1 text-center">Manage patients & collaborate</span>
             </button>
             <button
               onClick={() => handleRoleSelect("patient")}
-              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-6 hover:border-primary hover:bg-accent transition-all duration-200"
+              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-5 hover:border-primary hover:bg-accent transition-all duration-200"
             >
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <UserCircle className="h-8 w-8 text-primary" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
+                <UserCircle className="h-7 w-7 text-primary" />
               </div>
-              <span className="text-lg font-semibold text-foreground">Patient</span>
-              <span className="text-sm text-muted-foreground mt-1 text-center">Own your health journey</span>
+              <span className="text-base font-semibold text-foreground">Patient</span>
+              <span className="text-xs text-muted-foreground mt-1 text-center">Own your health journey</span>
+            </button>
+            <button
+              onClick={() => handleRoleSelect("emergency")}
+              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-5 hover:border-[#E01837] hover:bg-accent transition-all duration-200"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#E01837]/10 mb-3">
+                <Ambulance className="h-7 w-7 text-[#E01837]" />
+              </div>
+              <span className="text-base font-semibold text-foreground">Emergency Service Provider</span>
+              <span className="text-xs text-muted-foreground mt-1 text-center">Hospital, ER or ambulance</span>
             </button>
           </div>
         </DialogContent>
