@@ -1,5 +1,8 @@
 project_id = "lqnnrvvrjscjceswpfal"
 
+[functions.auth-email-mailgun]
+verify_jwt = false
+
 [functions.summarize-session]
 verify_jwt = false
 
