@@ -51,6 +51,8 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, d
       const { error } = await supabase.from("admission_vitals").insert({
         admission_id: admissionId,
         recorded_by: user.id,
+        nurse_id: nurse?.id ?? null,
+        nurse_name_snapshot: nurse?.name ?? null,
         heart_rate: hr ? parseInt(hr) : null,
         bp_systolic: bps ? parseInt(bps) : null,
         bp_diastolic: bpd ? parseInt(bpd) : null,
@@ -60,7 +62,7 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, d
         weight_kg: weight ? parseFloat(weight) : null,
         bmi: computedBmi,
         notes: notes || null,
-      });
+      } as any);
       if (error) throw error;
       toast({ title: "Vitals saved" });
       qc.invalidateQueries({ queryKey: ["admission-vitals", admissionId] });
