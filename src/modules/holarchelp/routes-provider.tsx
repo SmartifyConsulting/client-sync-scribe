@@ -12,6 +12,7 @@ import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
 import ErCapacityScreen from "./pages/provider/hospital/ErCapacityScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
 import AffiliatedDoctorsScreen from "./pages/provider/hospital/AffiliatedDoctorsScreen";
+import NursesScreen from "./pages/provider/hospital/NursesScreen";
 import AffiliatedAmbulancesScreen from "./pages/provider/hospital/AffiliatedAmbulancesScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
 
