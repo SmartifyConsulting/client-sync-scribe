@@ -1,4 +1,6 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, Ambulance, Building2, ShieldCheck, Loader2 } from "lucide-react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
+import { TEST_PROFILES, ADMIN_EMAIL } from "./testProfiles";
+import { useImpersonate } from "./useImpersonate";
 import { useEffect, useState } from "react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { toast } from "sonner";
@@ -27,20 +29,8 @@ export function TopBarIcons() {
   const { isAdmin } = useIsAdmin();
   const [switching, setSwitching] = useState<string | null>(null);
   const [seeded, setSeeded] = useState(false);
+  const { impersonate, switching } = useImpersonate();
 
-  const TEST_PROFILES: Array<{ email: string; name: string; role: string; icon: any }> = [
-    { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
-    { email: "sme@smartify.co.za", name: "Dean Allie", role: "Doctor", icon: Stethoscope },
-    { email: "dean.allie@gmail.com", name: "Dean Allie", role: "Patient", icon: HeartPulse },
-    { email: "projectmanager@smartify.co.za", name: "Shannon Kennedy", role: "Patient", icon: HeartPulse },
-    { email: "paraskevoulasoldatos@gmail.com", name: "Paraskevi Soldatos", role: "Patient", icon: HeartPulse },
-    { email: "christina@smartify.co.za", name: "Christina", role: "Doctor", icon: Stethoscope },
-    { email: "zano@smartify.co.za", name: "Zano", role: "Hospital", icon: Building2 },
-    { email: "renken@smartify.co.za", name: "Renken", role: "Ambulance", icon: Ambulance },
-    { email: "jeanprodromos@smartify.co.za", name: "Jean Prodromos", role: "Doctor", icon: Stethoscope },
-    { email: "hospital.test@holarchealth.com", name: "Hospital Admin (Test)", role: "Hospital", icon: Building2 },
-    { email: "er.test@holarchealth.com", name: "ER Staff (Test)", role: "Hospital", icon: Building2 },
-  ];
   const { data: currentEmail = "" } = useQuery({
     queryKey: ["auth-email-topbar"],
     queryFn: async () => {
@@ -55,23 +45,6 @@ export function TopBarIcons() {
     setSeeded(true);
     supabase.functions.invoke("admin-seed-test-users").catch(() => {});
   }, [isAdmin, seeded]);
-
-  async function impersonate(email: string) {
-    if (switching) return;
-    setSwitching(email);
-    try {
-      const { data, error } = await supabase.functions.invoke("admin-impersonate", { body: { email } });
-      if (error || !data?.token_hash) throw new Error(error?.message || data?.error || "Failed");
-      await supabase.auth.signOut();
-      const { error: vErr } = await supabase.auth.verifyOtp({ token_hash: data.token_hash, type: "email" });
-      if (vErr) throw vErr;
-      toast.success(`Signed in as ${email}`);
-      window.location.href = "/";
-    } catch (e: any) {
-      toast.error(`Switch failed: ${e.message}`);
-      setSwitching(null);
-    }
-  }
 
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-topbar"],
