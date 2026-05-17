@@ -71,6 +71,7 @@ export default function ProviderRoutes() {
         <Route path="history" element={<IncidentHistoryScreen />} />
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="incident/:id" element={<AmbulanceIncidentConsole />} />
+        <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
         <Route path="*" element={<Navigate to="" replace />} />
       </Route>
