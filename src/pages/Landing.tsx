@@ -118,9 +118,13 @@ export default function Landing() {
     return null;
   }
 
-  const handleRoleSelect = (role: "doctor" | "patient") => {
+  const handleRoleSelect = (role: "doctor" | "patient" | "emergency") => {
     setShowRoleDialog(false);
-    navigate(`/auth?mode=signup&role=${role}`);
+    if (role === "emergency") {
+      navigate("/provider-signup");
+    } else {
+      navigate(`/auth?mode=signup&role=${role}`);
+    }
   };
 
   return (
