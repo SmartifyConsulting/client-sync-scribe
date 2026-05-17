@@ -111,6 +111,8 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 <div key={m.id} className="text-xs p-2 rounded bg-muted/40">
                   <p className="font-medium">{m.name}</p>
                   <p className="text-muted-foreground">{m.dosage} · {m.frequency}</p>
+                  {m.nurse_name_snapshot && <p className="text-[10px] text-muted-foreground">Nurse: {m.nurse_name_snapshot}</p>}
+                  <RateNurseControl admissionId={admission.id} recordTable="admission_medications" recordId={m.id} nurseId={m.nurse_id ?? null} nurseName={m.nurse_name_snapshot} />
                 </div>
               ))}
             </div>
