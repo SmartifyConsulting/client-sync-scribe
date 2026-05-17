@@ -7,19 +7,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { NursePicker } from "@/components/admissions/NursePicker";
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   admissionId: string;
+  hospitalId?: string | null;
   defaultHeight?: number | null;
   defaultWeight?: number | null;
 }
 
-export function AddVitalsDialog({ open, onOpenChange, admissionId, defaultHeight, defaultWeight }: Props) {
+export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, defaultHeight, defaultWeight }: Props) {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
+  const [nurse, setNurse] = useState<{ id: string; name: string } | null>(null);
   const [hr, setHr] = useState("");
   const [bps, setBps] = useState("");
   const [bpd, setBpd] = useState("");
@@ -48,6 +51,8 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, defaultHeight
       const { error } = await supabase.from("admission_vitals").insert({
         admission_id: admissionId,
         recorded_by: user.id,
+        nurse_id: nurse?.id ?? null,
+        nurse_name_snapshot: nurse?.name ?? null,
         heart_rate: hr ? parseInt(hr) : null,
         bp_systolic: bps ? parseInt(bps) : null,
         bp_diastolic: bpd ? parseInt(bpd) : null,
@@ -57,7 +62,7 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, defaultHeight
         weight_kg: weight ? parseFloat(weight) : null,
         bmi: computedBmi,
         notes: notes || null,
-      });
+      } as any);
       if (error) throw error;
       toast({ title: "Vitals saved" });
       qc.invalidateQueries({ queryKey: ["admission-vitals", admissionId] });
@@ -74,6 +79,9 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, defaultHeight
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader><DialogTitle>Add Vitals</DialogTitle></DialogHeader>
+        <div className="mb-2">
+          <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <div><Label className="text-[11px]">Heart Rate (bpm)</Label><Input value={hr} onChange={(e) => setHr(e.target.value)} type="number" /></div>
           <div><Label className="text-[11px]">SpO₂ (%)</Label><Input value={spo2} onChange={(e) => setSpo2(e.target.value)} type="number" /></div>

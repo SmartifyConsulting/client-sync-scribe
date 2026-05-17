@@ -17,8 +17,11 @@ import {
   Navigation as NavIcon,
   History,
   Users,
+  HeartPulse,
+  ArrowLeft,
 } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,6 +40,7 @@ const hospitalNav: NavItem[] = [
   { icon: ClipboardList, label: "Admissions", to: "/provider/hospital/admissions" },
   { icon: BedDouble, label: "ER Capacity", to: "/provider/hospital/capacity" },
   { icon: Stethoscope, label: "Our Doctors", to: "/provider/hospital/doctors" },
+  { icon: HeartPulse, label: "Our Nurses", to: "/provider/hospital/nurses" },
   { icon: Ambulance, label: "Our ER Providers", to: "/provider/hospital/ambulances" },
   { icon: Activity, label: "Incident Timeline", to: "/provider/hospital/timeline" },
 ];
@@ -58,6 +62,7 @@ interface ProviderSidebarProps {
 
 export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const { profile } = useProfile();
+  const { isAdmin } = useIsAdmin();
   const location = useLocation();
   const nav = portal === "hospital" ? hospitalNav : ambulanceNav;
   const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
@@ -70,6 +75,16 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
         <div className="flex h-20 items-center gap-3 px-6">
           <img src={logo} alt={logoAlt} className="h-12 w-auto object-contain" />
         </div>
+
+        {isAdmin && (
+          <NavLink
+            to="/admin/users"
+            onClick={onNavigate}
+            className="mx-4 mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+          >
+            <ArrowLeft className="h-3 w-3" /> Back to Admin
+          </NavLink>
+        )}
 
         <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto font-size-preserve">
           {nav.map((item) => {

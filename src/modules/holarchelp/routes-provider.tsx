@@ -12,6 +12,7 @@ import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
 import ErCapacityScreen from "./pages/provider/hospital/ErCapacityScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
 import AffiliatedDoctorsScreen from "./pages/provider/hospital/AffiliatedDoctorsScreen";
+import NursesScreen from "./pages/provider/hospital/NursesScreen";
 import AffiliatedAmbulancesScreen from "./pages/provider/hospital/AffiliatedAmbulancesScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
 
@@ -51,6 +52,7 @@ export default function ProviderRoutes() {
         <Route path="capacity" element={<ErCapacityScreen />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
         <Route path="doctors" element={<AffiliatedDoctorsScreen />} />
+        <Route path="nurses" element={<NursesScreen />} />
         <Route path="ambulances" element={<AffiliatedAmbulancesScreen />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
         <Route path="profile" element={<ProviderProfile />} />
