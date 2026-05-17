@@ -12,9 +12,9 @@ type H = {
 };
 
 const capColor = (s: string | null) =>
-  s === "red" ? "border-red-500/40 bg-red-500/10 text-red-700"
-  : s === "yellow" ? "border-yellow-500/40 bg-yellow-500/10 text-yellow-700"
-  : "border-green-500/40 bg-green-500/10 text-green-700";
+  s === "red" ? "border-destructive/40 bg-destructive/10 text-destructive"
+  : s === "yellow" ? "border-warning/40 bg-warning/10 text-warning"
+  : "border-success/40 bg-success/10 text-success";
 
 const distKm = (a: { lat: number; lng: number } | null, b: { lat: number; lng: number } | null) => {
   if (!a || !b) return undefined;

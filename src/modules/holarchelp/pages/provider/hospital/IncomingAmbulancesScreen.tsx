@@ -95,8 +95,8 @@ export default function IncomingAmbulancesScreen() {
               </div>
               <SosLiveMap incidentId={r.id} mode="hospital" height={200} />
               {r.pre_arrival_notes && (
-                <div className="border-t bg-orange-50 px-3 py-2 text-xs dark:bg-orange-950/20">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-orange-700">Pre-arrival notes</p>
+                <div className="border-t bg-warning/10 px-3 py-2 text-xs dark:bg-warning/10">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-warning">Pre-arrival notes</p>
                   <p className="mt-0.5 line-clamp-3">{r.pre_arrival_notes}</p>
                 </div>
               )}

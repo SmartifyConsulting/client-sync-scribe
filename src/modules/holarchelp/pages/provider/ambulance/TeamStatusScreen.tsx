@@ -61,7 +61,7 @@ export default function TeamStatusScreen() {
             return (
               <li key={m.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40">
                 {active
-                  ? <UserCheck className="h-4 w-4 text-green-600" />
+                  ? <UserCheck className="h-4 w-4 text-success" />
                   : <UserX className="h-4 w-4 text-muted-foreground" />}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">{m.full_name}</p>
@@ -69,7 +69,7 @@ export default function TeamStatusScreen() {
                 </div>
                 <button
                   onClick={() => toggle(m.user_id)}
-                  className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider transition ${active ? "border-green-500/40 bg-green-500/10 text-green-700" : "border-border bg-background text-muted-foreground"}`}
+                  className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider transition ${active ? "border-success/40 bg-success/10 text-success" : "border-border bg-background text-muted-foreground"}`}
                 >
                   {active ? "On shift" : "Off shift"}
                 </button>

@@ -14,15 +14,15 @@ type Row = {
 };
 
 const sevTone = (s: string | null) =>
-  s === "critical" ? "bg-red-500/15 text-red-700 border-red-500/40"
-  : s === "high" ? "bg-orange-500/15 text-orange-700 border-orange-500/40"
-  : s === "moderate" ? "bg-yellow-500/15 text-yellow-700 border-yellow-500/40"
+  s === "critical" ? "bg-destructive/15 text-destructive border-destructive/40"
+  : s === "high" ? "bg-warning/15 text-warning border-warning/40"
+  : s === "moderate" ? "bg-warning/15 text-warning border-warning/40"
   : "bg-muted text-muted-foreground border-border";
 
 const statusTone = (s: string) =>
   s === "en_route_to_hospital" ? "bg-primary/10 text-primary border-primary/30"
-  : s === "at_hospital" ? "bg-green-500/10 text-green-700 border-green-500/30"
-  : s === "arrived" || s === "patient_collected" ? "bg-orange-500/10 text-orange-700 border-orange-500/30"
+  : s === "at_hospital" ? "bg-success/10 text-success border-success/30"
+  : s === "arrived" || s === "patient_collected" ? "bg-warning/10 text-warning border-warning/30"
   : "bg-muted text-muted-foreground border-border";
 
 const ago = (iso: string) => {

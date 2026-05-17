@@ -21,7 +21,7 @@ const COLUMNS: { key: string; label: string; statuses: string[]; admit?: string 
 ];
 
 const sevDot = (s: string | null) =>
-  s === "critical" ? "bg-red-500" : s === "high" ? "bg-orange-500" : s === "moderate" ? "bg-yellow-500" : "bg-muted-foreground";
+  s === "critical" ? "bg-destructive" : s === "high" ? "bg-warning" : s === "moderate" ? "bg-warning" : "bg-muted-foreground";
 
 export default function TriageScreen() {
   const { providerId } = useProviderAccess();

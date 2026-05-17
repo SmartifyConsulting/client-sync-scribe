@@ -69,7 +69,7 @@ export default function AdmissionsScreen() {
                 </td>
                 <td className="px-3 py-2 text-xs">
                   <span className="inline-flex items-center gap-1 rounded-full border bg-background px-1.5 py-0.5 text-[10px] font-semibold">
-                    {r.hospital_admission_status === "admitted" && <CheckCircle2 className="h-3 w-3 text-green-600" />}
+                    {r.hospital_admission_status === "admitted" && <CheckCircle2 className="h-3 w-3 text-success" />}
                     {(r.hospital_admission_status ?? "incoming").replace(/_/g," ")}
                   </span>
                 </td>

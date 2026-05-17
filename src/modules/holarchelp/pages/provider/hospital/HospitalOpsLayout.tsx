@@ -131,10 +131,10 @@ function TopBar() {
         <TopChip label="Incoming ambulances" value={stats.incomingAmbulances} tone="border-primary/40 bg-primary/10 text-primary" />
         <TopChip label="ICU beds" value={stats.icuAvailable ?? "—"} tone="border-border bg-card text-foreground" />
         <TopChip label="ER capacity" value={(stats.capacityStatus ?? "green").toUpperCase()} tone={capTone} />
-        <TopChip label="Alerts" value={stats.alerts} tone="border-orange-500/40 bg-orange-500/10 text-orange-700" />
+        <TopChip label="Alerts" value={stats.alerts} tone="border-warning/40 bg-warning/10 text-warning" />
       </div>
       <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-        <Wifi className={cn("h-3.5 w-3.5", online ? "text-green-600" : "text-destructive")} />
+        <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
         <span className="tabular-nums">{now.toLocaleTimeString()}</span>
         <ProviderProfileMenu />
       </div>

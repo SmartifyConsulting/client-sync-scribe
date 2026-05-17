@@ -13,9 +13,9 @@ type Row = {
 };
 
 const sevBig = (s: string | null) =>
-  s === "critical" ? "border-red-500/60 bg-red-500/10"
-  : s === "high" ? "border-orange-500/60 bg-orange-500/10"
-  : "border-yellow-500/40 bg-yellow-500/5";
+  s === "critical" ? "border-destructive/60 bg-destructive/10"
+  : s === "high" ? "border-warning/60 bg-warning/10"
+  : "border-warning/40 bg-warning/5";
 
 const ago = (iso: string) => {
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
