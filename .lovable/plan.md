@@ -1,40 +1,34 @@
-# Switch auth emails to Resend
+## Goal
 
-You've moved off ZeptoMail. The existing `auth-email-sender` edge function (used by Forgot Password and the OTP/magic-link sign-in) currently calls `supabase/functions/_shared/email.ts`, which posts to the ZeptoMail API. We'll repoint it at Resend via the Lovable connector gateway — no code in the frontend needs to change.
-
-## Prerequisites
-
-1. **Resend connector connected** in Lovable (you mentioned you've switched, so this should be done). If not, we'll connect it.
-2. **Verified sender domain in Resend** — `holarchealth.com` must be verified there (DNS records added at your registrar). Until then, sends will only work to your own Resend account email or via `onboarding@resend.dev`.
-3. **`RESEND_API_KEY` secret** present in the project (added automatically when the connector is connected).
+1. Remove the contact/mobile phone number input from every signup form.
+2. Turn on email verification so new users must confirm their email before signing in.
 
 ## Changes
 
-### 1. `supabase/functions/_shared/email.ts`
-Rewrite the `sendEmail` implementation to POST to the Resend gateway instead of ZeptoMail:
-- Endpoint: `https://connector-gateway.lovable.dev/resend/emails`
-- Headers: `Authorization: Bearer ${LOVABLE_API_KEY}`, `X-Connection-Api-Key: ${RESEND_API_KEY}`
-- Body shape: `{ from, to, subject, html, text, cc, bcc, reply_to }` (Resend format — note `reply_to`, not `replyTo`)
-- Keep the existing `SendEmailInput` interface so callers (`auth-email-sender`, plus any other functions that import it) don't need to change.
-- Default `from`: `Holarc Health <no-reply@holarchealth.com>`.
+### 1. `src/pages/Auth.tsx` (doctor + patient signup)
+- Remove the "Mobile Number" field block in both `renderDoctorStep` (lines ~594–601) and `renderPatientStep` (lines ~679–686).
+- Keep the `CountrySelector` but relabel its wrapper to "Country / Language" so we preserve language auto-detection (per project memory) without asking for a phone number.
+- Drop `phone`, `mobileNumber`, `setPhone`, `setMobileNumber` state + draft persistence usage. Set `mobile_number: null` in the profile insert (instead of the constructed `fullPhone`).
+- Remove `phone` references from any signUp `options.data` and from the patient/doctor record inserts that currently pass `phone: fullPhone`.
 
-### 2. `auth-email-sender/index.ts`
-No logic changes needed — it already calls `sendEmail()` from the shared module. It will automatically route through Resend once the shared module is updated.
+### 2. `src/pages/ProviderSignup.tsx` (emergency provider signup)
+- Remove the `phone` state, the "Contact phone" input (lines ~219–222), and stop sending `phone` in the `register-emergency-provider` call.
 
-### 3. Remove ZeptoMail-only env vars from logic
-Drop `ZEPTOMAIL_API_TOKEN` / `ZEPTOMAIL_REGION` usage. (The secret can stay in storage harmlessly, or you can delete it later.)
+### 3. `supabase/functions/register-emergency-provider/index.ts`
+- Treat `phone` as optional (already optional today). No schema change needed — just stop relying on it. `contact_phone` columns stay nullable.
 
-### 4. Deploy
-Redeploy `auth-email-sender` (and any other functions importing `_shared/email.ts`) so the new shared code takes effect.
+### 4. Email verification (auth setting)
+- Call `configure_auth` with `auto_confirm_email: false` so Supabase sends the built-in "Confirm your email" message on signup and blocks sign-in until the user clicks the link. Other flags stay as-is.
+- The custom Resend-backed `auth-email-sender` and the existing `ForgotPassword` flow already cover the email delivery path, so no edge-function changes are required.
 
-## What stays the same
+### 5. UX copy
+- In `Auth.tsx`, after a successful signup, show a toast/inline message: "Check your inbox to confirm your email before signing in."
+- In `ProviderSignup.tsx`, the existing success toast already mentions "Verify your email" — leave as-is.
 
-- `src/pages/ForgotPassword.tsx` and `src/pages/Auth.tsx` keep invoking `auth-email-sender` exactly as today.
-- Branded HTML templates inside `auth-email-sender` are preserved.
-- `verify_jwt = false` config for the function stays.
-- Supabase's auto-confirm email setting stays on so Supabase never sends its own emails.
+## Out of scope
+- No database migrations (existing `mobile_number` / `contact_phone` columns remain, just nullable and unused at signup).
+- No changes to profile pages where users can later add a phone if they wish.
+- No changes to the Resend integration.
 
-## Two quick confirmations before I build
-
-1. **Sender address** — confirm `no-reply@holarchealth.com` from "Holarc Health", or give me a different one.
-2. **Domain status in Resend** — is `holarchealth.com` already verified there? If not, sends will fail until DNS propagates. (We can still ship the code now and it will start working as soon as the domain verifies.)
+## Open question
+The `CountrySelector` currently lives next to the phone input and feeds language detection. Confirm: keep it visible as a standalone "Country" field on the signup step, or remove it entirely and default language to browser locale?
