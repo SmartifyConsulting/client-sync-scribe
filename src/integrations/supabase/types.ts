@@ -22,6 +22,8 @@ export type Database = {
           created_at: string
           id: string
           modality: string
+          nurse_id: string | null
+          nurse_name_snapshot: string | null
           pacs_link: string | null
           performed_at: string
           recorded_by: string
@@ -35,6 +37,8 @@ export type Database = {
           created_at?: string
           id?: string
           modality: string
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           pacs_link?: string | null
           performed_at?: string
           recorded_by: string
@@ -48,6 +52,8 @@ export type Database = {
           created_at?: string
           id?: string
           modality?: string
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           pacs_link?: string | null
           performed_at?: string
           recorded_by?: string
@@ -62,6 +68,70 @@ export type Database = {
             referencedRelation: "hospital_admissions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admission_imaging_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admission_interactions: {
+        Row: {
+          admission_id: string
+          created_at: string
+          id: string
+          interaction_type: string
+          notes: string | null
+          nurse_id: string | null
+          nurse_name_snapshot: string
+          payload: Json | null
+          recorded_at: string
+          recorded_by_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          created_at?: string
+          id?: string
+          interaction_type: string
+          notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot: string
+          payload?: Json | null
+          recorded_at?: string
+          recorded_by_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot?: string
+          payload?: Json | null
+          recorded_at?: string
+          recorded_by_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admission_interactions_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_interactions_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
         ]
       }
       admission_lab_results: {
@@ -71,6 +141,8 @@ export type Database = {
           created_at: string
           id: string
           notes: string | null
+          nurse_id: string | null
+          nurse_name_snapshot: string | null
           recorded_by: string
           reference_range: string | null
           result_date: string
@@ -85,6 +157,8 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           recorded_by: string
           reference_range?: string | null
           result_date?: string
@@ -99,6 +173,8 @@ export type Database = {
           created_at?: string
           id?: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           recorded_by?: string
           reference_range?: string | null
           result_date?: string
@@ -115,6 +191,13 @@ export type Database = {
             referencedRelation: "hospital_admissions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admission_lab_results_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
         ]
       }
       admission_medications: {
@@ -126,6 +209,8 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          nurse_id: string | null
+          nurse_name_snapshot: string | null
           recorded_by: string
           started_at: string | null
           stopped_at: string | null
@@ -139,6 +224,8 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           recorded_by: string
           started_at?: string | null
           stopped_at?: string | null
@@ -152,6 +239,8 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           recorded_by?: string
           started_at?: string | null
           stopped_at?: string | null
@@ -163,6 +252,13 @@ export type Database = {
             columns: ["admission_id"]
             isOneToOne: false
             referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_medications_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
             referencedColumns: ["id"]
           },
         ]
@@ -219,6 +315,8 @@ export type Database = {
           height_cm: number | null
           id: string
           notes: string | null
+          nurse_id: string | null
+          nurse_name_snapshot: string | null
           recorded_at: string
           recorded_by: string
           spo2: number | null
@@ -235,6 +333,8 @@ export type Database = {
           height_cm?: number | null
           id?: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           recorded_at?: string
           recorded_by: string
           spo2?: number | null
@@ -251,6 +351,8 @@ export type Database = {
           height_cm?: number | null
           id?: string
           notes?: string | null
+          nurse_id?: string | null
+          nurse_name_snapshot?: string | null
           recorded_at?: string
           recorded_by?: string
           spo2?: number | null
@@ -263,6 +365,13 @@ export type Database = {
             columns: ["admission_id"]
             isOneToOne: false
             referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admission_vitals_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
             referencedColumns: ["id"]
           },
         ]
@@ -2282,6 +2391,69 @@ export type Database = {
           },
         ]
       }
+      hospital_nurses: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          hospital_id: string
+          id: string
+          linked_user_id: string | null
+          mobile_number: string | null
+          nurse_registration_number: string | null
+          pending_payload: Json | null
+          role_title: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name: string
+          hospital_id: string
+          id?: string
+          linked_user_id?: string | null
+          mobile_number?: string | null
+          nurse_registration_number?: string | null
+          pending_payload?: Json | null
+          role_title?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name?: string
+          hospital_id?: string
+          id?: string
+          linked_user_id?: string | null
+          mobile_number?: string | null
+          nurse_registration_number?: string | null
+          pending_payload?: Json | null
+          role_title?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_nurses_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_nurses_linked_user_id_fkey"
+            columns: ["linked_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       image_comparisons: {
         Row: {
           ai_analysis: string | null
@@ -2518,6 +2690,111 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      nurse_pending_vulas: {
+        Row: {
+          awarded_at: string
+          awarded_by: string | null
+          claimed_at: string | null
+          claimed_user_id: string | null
+          hospital_nurse_id: string
+          id: string
+          reason: string
+          reference_id: string | null
+          vulas_count: number
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by?: string | null
+          claimed_at?: string | null
+          claimed_user_id?: string | null
+          hospital_nurse_id: string
+          id?: string
+          reason: string
+          reference_id?: string | null
+          vulas_count?: number
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string | null
+          claimed_at?: string | null
+          claimed_user_id?: string | null
+          hospital_nurse_id?: string
+          id?: string
+          reason?: string
+          reference_id?: string | null
+          vulas_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurse_pending_vulas_claimed_user_id_fkey"
+            columns: ["claimed_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nurse_pending_vulas_hospital_nurse_id_fkey"
+            columns: ["hospital_nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nurse_record_ratings: {
+        Row: {
+          admission_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          nurse_id: string
+          patient_user_id: string
+          rating: number
+          record_id: string
+          record_table: string
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          nurse_id: string
+          patient_user_id: string
+          rating: number
+          record_id: string
+          record_table: string
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          nurse_id?: string
+          patient_user_id?: string
+          rating?: number
+          record_id?: string
+          record_table?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurse_record_ratings_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nurse_record_ratings_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       patient_invitations: {
         Row: {
