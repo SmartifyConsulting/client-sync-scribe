@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { SosLiveMap } from "../../../components/SosLiveMap";
 import { EtaCountdown } from "../../../components/EtaCountdown";
-import { Ambulance, MapPin, AlertTriangle, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Ambulance, MapPin, AlertTriangle, ChevronRight, Handshake } from "lucide-react";
 
 type Row = {
   id: string; status: string; severity: string | null;
