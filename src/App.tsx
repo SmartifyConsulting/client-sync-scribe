@@ -115,13 +115,20 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function RoleBasedRedirect() {
   const { isPatient, isEmergency, hasDoctorRole, hasPatientRole, loading } = useUserRole();
   const { providerType, loading: providerLoading } = useProviderAccess();
+  const { isAdmin, isLoading: adminLoading } = useIsAdmin();
 
-  if (loading || providerLoading) {
+  if (loading || providerLoading || adminLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
+  }
+
+  // Admins always land on the doctor dashboard; they can still reach
+  // the provider portal manually via the profile switcher.
+  if (isAdmin) {
+    return <Navigate to="/doctor-dashboard" replace />;
   }
 
   // Provider portal takes priority over patient/doctor routing
