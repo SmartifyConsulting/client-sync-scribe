@@ -40,6 +40,7 @@ const hospitalNav: NavItem[] = [
   { icon: ClipboardList, label: "Admissions", to: "/provider/hospital/admissions" },
   { icon: BedDouble, label: "ER Capacity", to: "/provider/hospital/capacity" },
   { icon: Stethoscope, label: "Our Doctors", to: "/provider/hospital/doctors" },
+  { icon: HeartPulse, label: "Our Nurses", to: "/provider/hospital/nurses" },
   { icon: Ambulance, label: "Our ER Providers", to: "/provider/hospital/ambulances" },
   { icon: Activity, label: "Incident Timeline", to: "/provider/hospital/timeline" },
 ];
