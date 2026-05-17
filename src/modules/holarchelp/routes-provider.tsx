@@ -56,6 +56,7 @@ export default function ProviderRoutes() {
         <Route path="nurses" element={<NursesScreen />} />
         <Route path="ambulances" element={<AffiliatedAmbulancesScreen />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
+        <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
         <Route path="*" element={<Navigate to="" replace />} />
       </Route>
