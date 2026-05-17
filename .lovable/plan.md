@@ -1,64 +1,41 @@
-# Hospital affiliations: discovery, ambulance parity, bulk import
+# Fix hospital/ER profile switching & missing hospital interface
 
-## 1. Affiliation search shows ALL hospitals (active + pending)
+## What's wrong
 
-- `HospitalAffiliations.tsx` (doctor) autocomplete: query `holarchelp_hospitals` **without** the `status='approved'` filter. Show a small `Pending` / `Inactive` badge next to any non-approved result.
-- "Add new hospital" still inserts a row with `status='pending'`; once a second doctor (or ambulance) picks the same hospital, it stays as one shared row (already enforced by name+city de-dup lookup before insert).
-- **No change to SOS surfaces** — `HospitalsDirectoryScreen`, `HospitalPicker`, `HolarcHelpNearby` keep `.eq('status','approved')`, so pending/inactive hospitals stay invisible to dispatch.
+1. **Hospital interface doesn't appear after switching.** After `admin-impersonate`, the app forces `window.location.href = "/"`. The home route renders the doctor/patient `AppLayout`, not the hospital portal. Hospital staff land on a regular dashboard with nothing relevant.
+2. **Can't switch back to admin.** The profile-switcher popover lives inside `TopBarIcons`, which is only rendered by `AppLayout` / `PatientAppLayout` / `MobileHeader`. `HospitalOpsLayout` (and `AmbulanceOpsLayout`) have their own custom top bar with no avatar menu, so once you're on `/provider/hospital` there's no UI to return to the admin account.
 
-## 2. Ambulance → Hospital affiliations (mirror of doctor flow)
+## Fix
 
-New table `ambulance_hospital_affiliations`:
-- `ambulance_provider_id`, `hospital_id` (nullable for pending), `hospital_name_snapshot`, `role` (e.g. "Primary receiving ER"), `status` ('active'|'inactive')
-- RLS: ambulance staff CRUD their own rows; hospital staff SELECT rows where `hospital_id` matches their hospital; admins full access.
+### 1. Auto-redirect to the provider portal at `/`
 
-New UI:
-- **Ambulance Ops Layout** → new sidebar item **"Affiliated Hospitals"** → `AffiliatedHospitalsScreen.tsx` reusing the same autocomplete component (parameterised by owner type).
-- **Hospital Ops Layout** → new sidebar item **"Our Ambulances"** → `AffiliatedAmbulancesScreen.tsx` listing ambulance providers with active affiliations.
-- **Incoming Ambulances screen** (existing): join against this table; render a teal `Partner` badge next to ambulance unit names that are affiliated with this hospital.
+In the root home component mounted at `/` inside `AppLayout`, use `useProviderAccess()` from `ProviderGate.tsx`. If it resolves to a provider type, `navigate("/provider", { replace: true })`. `<ProviderRedirect />` at `/provider` already forwards to `/provider/hospital` or `/provider/ambulance`.
 
-## 3. CSV / XLS bulk import of doctors (hospital admin)
+### 2. Add a profile/admin switcher in HospitalOpsLayout & AmbulanceOpsLayout
 
-On the **Our Doctors** screen, add an **"Import doctors"** button (visible to hospital owner / `er_staff` members).
+Add an avatar popover to the `<TopBar>` of `HospitalOpsLayout.tsx` and `AmbulanceOpsLayout.tsx`, sitting to the right of the clock. Contents:
 
-- Dialog with:
-  - Drop-zone + "Download template" link (CSV).
-  - Parser uses **`read-excel-file`** for `.xlsx` and a small CSV parser for `.csv` (no `xlsx` package — per project memory).
-  - Columns: `practice_number, email, full_name, role_at_hospital, specialty, mobile_number`.
-- Edge function `hospital-import-affiliations`:
-  - For each row, look up a doctor profile by `practice_number` OR `email` (OR match).
-  - Matched → upsert `doctor_hospital_affiliations` row (`status='active'`, links to that hospital).
-  - Unmatched → upsert a **pending affiliation** with `doctor_id=NULL`, `hospital_name_snapshot` reused for `full_name`, plus `specialty` / `mobile_number` / `email` / `practice_number` stored in a new `pending_doctor_payload jsonb` column. These rows render in "Our Doctors" with a `Not yet on platform` badge.
-  - When a doctor later signs up with the matching practice number or email, a trigger / signup hook links the pending row to their `doctor_id` and flips `status='active'`.
-- Returns a per-row report (`matched`, `pending`, `error`) shown in the dialog.
+- Current user's name + email + role badge.
+- **If the current user is an admin** (`useIsAdmin()`): render the full `TEST_PROFILES` switcher list — same UI and behaviour as the admin block in `TopBarIcons` (loading spinner per row, disabled current row, etc.).
+- **If the current user is a seeded test profile but not admin**: show a single **"Switch to Admin"** button that impersonates `info@georgiaadams.co.za`.
+- **Sign out** for convenience.
 
-## 4. Migration summary
+Extract the impersonation logic + `TEST_PROFILES` constant from `TopBarIcons.tsx` into:
+- `src/components/layout/useImpersonate.ts` — hook exposing `{ impersonate, switching }`.
+- `src/components/layout/testProfiles.ts` — shared `TEST_PROFILES` array.
 
-```text
-ambulance_hospital_affiliations          -- new table + RLS
-doctor_hospital_affiliations             -- add column pending_doctor_payload jsonb
-trigger on auth.users insert / profiles  -- link pending affiliations by practice_number/email
-```
+`TopBarIcons.tsx` then imports from these two files (no behaviour change).
 
-## 5. Files
+## Files
 
-**New**
-- `supabase/migrations/<ts>_affiliations_v2.sql`
-- `supabase/functions/hospital-import-affiliations/index.ts`
-- `src/components/doctor/HospitalAffiliations.tsx` — extend to show pending badge
-- `src/modules/holarchelp/components/AmbulanceHospitalAffiliations.tsx`
-- `src/modules/holarchelp/pages/provider/ambulance/AffiliatedHospitalsScreen.tsx`
-- `src/modules/holarchelp/pages/provider/hospital/AffiliatedAmbulancesScreen.tsx`
-- `src/modules/holarchelp/pages/provider/hospital/ImportDoctorsDialog.tsx`
-- `public/templates/doctor-affiliations-template.csv`
-
-**Edited**
-- `src/modules/holarchelp/pages/provider/hospital/AffiliatedDoctorsScreen.tsx` (Import button, pending badge)
-- `src/modules/holarchelp/pages/provider/hospital/HospitalOpsLayout.tsx` (Our Ambulances)
-- `src/modules/holarchelp/pages/provider/ambulance/AmbulanceOpsLayout.tsx` (Affiliated Hospitals)
-- `src/modules/holarchelp/pages/provider/hospital/IncomingAmbulancesScreen.tsx` (Partner badge)
-- `src/modules/holarchelp/routes-provider.tsx` (two new routes)
+- **Edit** the home component mounted at `/` (e.g. `src/pages/Index.tsx`) — add provider auto-redirect using `useProviderAccess`.
+- **New** `src/components/layout/useImpersonate.ts` — extracted impersonation hook.
+- **New** `src/components/layout/testProfiles.ts` — shared test-profile list.
+- **Edit** `src/components/layout/TopBarIcons.tsx` — consume the new hook/constant.
+- **Edit** `src/modules/holarchelp/pages/provider/hospital/HospitalOpsLayout.tsx` — add avatar + switcher popover (admin full list, otherwise "Switch to Admin").
+- **Edit** `src/modules/holarchelp/pages/provider/ambulance/AmbulanceOpsLayout.tsx` — same.
 
 ## Out of scope
-- Email invites for unmatched doctors (kept as pending only).
-- Admin-side global CSV import (this is hospital-admin scoped per request).
+
+- Reworking how `TopBarIcons` is hosted across layouts.
+- Changing the impersonation edge function or seed data.
