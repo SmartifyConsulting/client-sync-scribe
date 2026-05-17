@@ -7,11 +7,11 @@ export default function AffiliatedHospitalsScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Operations</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">ER Provider Operations</p>
         <h1 className="text-2xl font-extrabold flex items-center gap-2">
           <Hospital className="h-5 w-5 text-primary" /> Affiliated Hospitals
         </h1>
-        <p className="text-xs text-muted-foreground mt-1">Hospitals you typically deliver patients to. Affiliated hospitals see your unit highlighted on their Incoming Ambulances board.</p>
+        <p className="text-xs text-muted-foreground mt-1">Hospitals you typically deliver patients to. Affiliated hospitals see your unit highlighted on their Incoming ER Providers board.</p>
       </header>
       <AmbulanceHospitalAffiliations providerId={providerId} />
     </div>
