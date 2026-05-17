@@ -11,9 +11,7 @@ import TriageScreen from "./pages/provider/hospital/TriageScreen";
 import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
 import ErCapacityScreen from "./pages/provider/hospital/ErCapacityScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
-import AffiliatedDoctorsScreen from "./pages/provider/hospital/AffiliatedDoctorsScreen";
-import NursesScreen from "./pages/provider/hospital/NursesScreen";
-import AffiliatedAmbulancesScreen from "./pages/provider/hospital/AffiliatedAmbulancesScreen";
+import ProvidersScreen from "./pages/provider/hospital/ProvidersScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
 import AdministratorsScreen from "./pages/provider/AdministratorsScreen";
 
@@ -52,9 +50,10 @@ export default function ProviderRoutes() {
         <Route path="admissions" element={<AdmissionsScreen />} />
         <Route path="capacity" element={<ErCapacityScreen />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
-        <Route path="doctors" element={<AffiliatedDoctorsScreen />} />
-        <Route path="nurses" element={<NursesScreen />} />
-        <Route path="ambulances" element={<AffiliatedAmbulancesScreen />} />
+        <Route path="providers" element={<ProvidersScreen />} />
+        <Route path="doctors" element={<Navigate to="/provider/hospital/providers?tab=doctors" replace />} />
+        <Route path="nurses" element={<Navigate to="/provider/hospital/providers?tab=nurses" replace />} />
+        <Route path="ambulances" element={<Navigate to="/provider/hospital/providers?tab=er" replace />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />

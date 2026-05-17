@@ -84,16 +84,26 @@ export function IncidentVoiceNoteRecorder({
         incident_id: incidentId, provider_id: providerId, actor_user_id: user.id,
         event_type: "voice_note", payload: { duration: Number(dur.toFixed(1)) },
       } as any);
-      // best-effort transcription
+      // best-effort transcription with retries
       try {
         const reader = new FileReader();
         reader.onloadend = async () => {
           const b64 = (reader.result as string).split(",")[1];
-          const { data: tx } = await supabase.functions.invoke("transcribe-audio", { body: { audio: b64 } });
-          if (tx?.text) {
-            const { data: latest } = await (supabase.from("holarchelp_voice_notes" as any) as any)
-              .select("id").eq("incident_id", incidentId).eq("audio_url", path).maybeSingle();
-            if ((latest as any)?.id) await supabase.from("holarchelp_voice_notes" as any).update({ transcript: tx.text } as any).eq("id", (latest as any).id);
+          let text = "";
+          const delays = [0, 1000, 3000];
+          for (const d of delays) {
+            if (d) await new Promise((r) => setTimeout(r, d));
+            try {
+              const { data: tx } = await supabase.functions.invoke("transcribe-audio", { body: { audio: b64 } });
+              if (tx?.text) { text = String(tx.text); break; }
+            } catch { /* retry */ }
+          }
+          const { data: latest } = await (supabase.from("holarchelp_voice_notes" as any) as any)
+            .select("id").eq("incident_id", incidentId).eq("audio_url", path).maybeSingle();
+          if ((latest as any)?.id) {
+            await supabase.from("holarchelp_voice_notes" as any).update({
+              transcript: text || "(Transcription unavailable — tap Retry)",
+            } as any).eq("id", (latest as any).id);
           }
         };
         reader.readAsDataURL(blob);
@@ -132,7 +142,37 @@ export function IncidentVoiceNoteRecorder({
               {new Date(n.created_at).toLocaleString()} {n.duration_seconds ? `· ${n.duration_seconds.toFixed(1)}s` : ""}
             </p>
             {n.transcript && <p className="mt-1.5 whitespace-pre-wrap text-sm">{n.transcript}</p>}
-            <div className="mt-2"><VoiceNoteAudio path={n.audio_url} /></div>
+            <div className="mt-2 flex items-center gap-2">
+              <div className="flex-1"><VoiceNoteAudio path={n.audio_url} /></div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                onClick={async () => {
+                  toast.message("Re-transcribing…");
+                  try {
+                    const { data: signed } = await supabase.storage.from("session-audio").createSignedUrl(n.audio_url, 120);
+                    if (!signed?.signedUrl) throw new Error("Could not access audio");
+                    const ar = await fetch(signed.signedUrl);
+                    const blob = await ar.blob();
+                    const b64 = await new Promise<string>((res, rej) => {
+                      const r = new FileReader();
+                      r.onloadend = () => res((r.result as string).split(",")[1] || "");
+                      r.onerror = rej;
+                      r.readAsDataURL(blob);
+                    });
+                    const { data, error } = await supabase.functions.invoke("transcribe-audio", { body: { audio: b64 } });
+                    if (error || !(data as any)?.text) throw new Error("Empty transcript");
+                    await supabase.from("holarchelp_voice_notes" as any).update({ transcript: String((data as any).text) } as any).eq("id", n.id);
+                    toast.success("Transcript updated");
+                  } catch (e: any) {
+                    toast.error(e?.message ?? "Retry failed");
+                  }
+                }}
+              >
+                Retry
+              </Button>
+            </div>
           </div>
         ))}
       </div>

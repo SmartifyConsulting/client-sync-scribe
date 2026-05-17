@@ -165,18 +165,36 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       cleanup();
       onClose();
 
-      // Transcribe in the background; UPDATE will surface via realtime
+      // Transcribe in the background with retries; UPDATE will surface via realtime
       try {
         const base64 = await blobToBase64(blob);
-        const { data: trData, error: trErr } = await supabase.functions.invoke("transcribe-audio", {
-          body: { audio: base64, patientName: "Patient", doctorName: "Responder" },
-        });
-        const transcript = (!trErr && (trData as any)?.text) ? String((trData as any).text) : "";
-        if (transcript) {
-          await supabase.from("holarchelp_incidents" as any).update({
-            voice_note_transcript: transcript,
-          } as any).eq("id", incidentId);
+        let transcript = "";
+        const delays = [0, 1000, 3000];
+        for (const d of delays) {
+          if (d) await new Promise((r) => setTimeout(r, d));
+          try {
+            const { data: trData, error: trErr } = await supabase.functions.invoke("transcribe-audio", {
+              body: { audio: base64, patientName: "Patient", doctorName: "Responder" },
+            });
+            if (!trErr && (trData as any)?.text) {
+              transcript = String((trData as any).text);
+              break;
+            }
+          } catch (err) {
+            console.error("Transcription attempt failed", err);
+          }
         }
+        await supabase.from("holarchelp_incidents" as any).update({
+          voice_note_transcript: transcript || "(Transcription unavailable — tap Retry below)",
+        } as any).eq("id", incidentId);
+        // Log voice-note event for the timeline
+        try {
+          await supabase.from("holarchelp_incident_events" as any).insert({
+            incident_id: incidentId,
+            event_type: "voice_note",
+            payload: { kind: "initial" },
+          } as any);
+        } catch { /* ignore */ }
       } catch (err) {
         console.error("Transcription failed (audio still saved)", err);
       }
