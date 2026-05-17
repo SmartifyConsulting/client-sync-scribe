@@ -148,10 +148,14 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
               {imaging.map((i: any) => (
                 <div key={i.id} className="text-xs p-2 rounded bg-muted/40">
                   <p className="font-medium">{i.modality} · {i.body_region}</p>
-                  <p className="text-[10px] text-muted-foreground">{format(new Date(i.performed_at), "dd MMM yyyy")}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {format(new Date(i.performed_at), "dd MMM yyyy")}
+                    {i.nurse_name_snapshot && <span> · Nurse: {i.nurse_name_snapshot}</span>}
+                  </p>
                   {i.summary && <p className="mt-1">{i.summary}</p>}
                   {i.pacs_link && <a href={i.pacs_link} target="_blank" rel="noreferrer" className="text-primary text-[10px] inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> PACS</a>}
                   {i.attachment_url && <a href={i.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-[10px] inline-flex items-center gap-1 ml-2"><ExternalLink className="h-2 w-2" /> PDF</a>}
+                  <RateNurseControl admissionId={admission.id} recordTable="admission_imaging" recordId={i.id} nurseId={i.nurse_id ?? null} nurseName={i.nurse_name_snapshot} />
                 </div>
               ))}
             </div>
