@@ -803,7 +803,7 @@ export default function Auth() {
     );
   }
 
-  // Signup wizard
+  // Signup disabled for MVP — invite-only
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center p-4">
@@ -812,58 +812,15 @@ export default function Auth() {
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
               <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
             </button>
-            <p className="text-muted-foreground mt-1">{userRole === "doctor" ? "Healthcare Provider" : "Patient"} Registration</p>
           </div>
-
-          {/* Progress indicator */}
-          <div className="mb-6">
-            <div className="flex justify-between text-xs text-muted-foreground mb-2">
-              <span>Step {currentStep + 1} of {totalSteps}</span>
-              <span>{steps[currentStep]}</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-            <div className="flex justify-between mt-2">
-              {steps.map((step, i) => (
-                <div key={step} className={`h-2 w-2 rounded-full ${i <= currentStep ? 'bg-primary' : 'bg-muted'}`} />
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm max-h-[60vh] overflow-y-auto">
-            {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
-          </div>
-
-          {/* Navigation buttons */}
-          <div className="flex justify-between mt-4 gap-3">
-            <Button
-              variant="outline"
-              onClick={currentStep === 0 ? () => setIsLogin(true) : handlePrev}
-              disabled={loading}
-              className="gap-1"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              {currentStep === 0 ? "Sign In" : "Back"}
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm text-center space-y-4">
+            <h2 className="text-lg font-semibold">Sign-ups are invite-only</h2>
+            <p className="text-sm text-muted-foreground">
+              Account creation is currently disabled while we run the MVP. Please contact an administrator to be granted access.
+            </p>
+            <Button onClick={() => setIsLogin(true)} className="w-full">
+              Back to Sign In
             </Button>
-
-            {isLastStep ? (
-              <Button
-                onClick={handleFinalSubmit}
-                disabled={loading || !acceptedTerms}
-                className="gap-1 flex-1"
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Account
-              </Button>
-            ) : (
-              <Button onClick={handleNext} disabled={loading} className="gap-1 flex-1">
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Next <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          <div className="mt-3 text-center">
-            <button type="button" onClick={() => { setIsLogin(true); setCurrentStep(0); }} className="text-sm text-primary hover:underline">Already have an account? Sign in</button>
           </div>
         </div>
       </div>
