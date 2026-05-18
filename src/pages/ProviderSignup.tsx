@@ -262,12 +262,11 @@ export default function ProviderSignup() {
                 </Label>
               </div>
 
-              <Button type="submit" className="w-full h-11" disabled={submitting || !acceptedTerms}>
-                {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              <Button type="button" className="w-full h-11" disabled>
                 Create account
               </Button>
               <p className="text-[11px] text-center text-muted-foreground">
-                After signing in you'll complete your organisation's address, registration number and service details. An administrator will then review and activate your account before dispatch is enabled.
+                Sign-ups are currently invite-only. Please contact an administrator for access.
               </p>
             </form>
           </CardContent>
