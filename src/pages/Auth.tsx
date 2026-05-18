@@ -791,8 +791,9 @@ export default function Auth() {
                 >
                   {useOtp ? "Sign in with password instead" : "Email me a sign-in code instead"}
                 </button>
-                <button type="button" onClick={() => { setIsLogin(false); setCurrentStep(0); }} className="block w-full text-sm text-primary hover:underline">Don't have an account? Sign up</button>
-                <a href="/provider-signup" className="block text-xs text-muted-foreground hover:text-primary hover:underline">Are you a hospital or ambulance provider? Sign up here</a>
+                <p className="block w-full text-xs text-muted-foreground">
+                  Sign-ups are currently invite-only. Please contact an administrator for access.
+                </p>
               </div>
             </div>
           </div>
