@@ -863,7 +863,7 @@ export default function Auth() {
                 className="gap-1 flex-1"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Start Free Trial
+                Create Account
               </Button>
             ) : (
               <Button onClick={handleNext} disabled={loading} className="gap-1 flex-1">
