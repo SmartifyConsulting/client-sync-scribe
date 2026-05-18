@@ -9,6 +9,12 @@ export function useSubscriptionGate() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // MVP: subscription gate disabled — never block, never surface a trial countdown.
+    setIsBlocked(false);
+    setDaysRemaining(null);
+    setLoading(false);
+    return;
+    // eslint-disable-next-line no-unreachable
     if (authLoading) return;
     if (!user) {
       setIsBlocked(false);

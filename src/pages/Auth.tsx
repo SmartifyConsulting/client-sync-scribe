@@ -371,19 +371,7 @@ export default function Auth() {
         }
       }
 
-      // Create free period subscription (30 days)
-      const freeEndsAt = new Date();
-      freeEndsAt.setDate(freeEndsAt.getDate() + 30);
-
-      await supabase.from("subscriptions").upsert({
-        user_id: userId,
-        plan_type: userRole,
-        billing_cycle: "monthly",
-        status: "free_period",
-        is_trial: true,
-        trial_ends_at: freeEndsAt.toISOString(),
-        accepted_terms_at: new Date().toISOString(),
-      }, { onConflict: "user_id" });
+      // MVP: no trial/subscription row created at signup — users get full access without countdowns.
 
       clearDraft();
       toast({ title: "Account created!", description: "Check your inbox to confirm your email before signing in." });
