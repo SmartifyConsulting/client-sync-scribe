@@ -14,10 +14,10 @@ export function SubscriptionGateModal() {
 
         <div className="space-y-2">
           <h2 className="text-xl font-bold text-foreground">
-            Your Free Access Has Ended
+            Subscription Required
           </h2>
           <p className="text-sm text-muted-foreground">
-            Your 30-day free access period has expired. Subscribe to continue using all features of the app.
+            Subscribe to continue using all features of the app.
           </p>
         </div>
 
