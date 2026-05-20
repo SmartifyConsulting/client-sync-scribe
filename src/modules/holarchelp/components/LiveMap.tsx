@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useMapboxToken } from "../hooks/useMapboxToken";
+import { MAPBOX_STYLE } from "../config/mapbox";
 
 export type LiveMapPoint = {
   kind: "patient" | "ambulance" | "hospital";
@@ -30,23 +32,19 @@ const ICON_HTML: Record<LiveMapPoint["kind"], string> = {
     '<div style="width:34px;height:34px;border-radius:6px;background:white;border:3px solid #0d9488;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35)"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#0d9488"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg></div>',
 };
 
-const makeIcon = (kind: LiveMapPoint["kind"]) =>
-  L.divIcon({
-    html: ICON_HTML[kind],
-    className: "",
-    iconSize: kind === "patient" ? [18, 18] : [34, 34],
-    iconAnchor: kind === "patient" ? [9, 9] : [17, 17],
-  });
+function makeMarkerEl(kind: LiveMapPoint["kind"]) {
+  const el = document.createElement("div");
+  el.innerHTML = ICON_HTML[kind];
+  el.style.cursor = "pointer";
+  return el.firstElementChild as HTMLElement;
+}
 
-const distancePillIcon = (km: number, color: LiveMapRoute["color"]) => {
+function distancePillEl(km: number, color: LiveMapRoute["color"]) {
   const hex = COLOR[color];
-  return L.divIcon({
-    html: `<div style="white-space:nowrap;padding:3px 8px;border-radius:9999px;background:white;border:2px solid ${hex};color:${hex};font-weight:700;font-size:11px;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${km.toFixed(1)} km</div>`,
-    className: "",
-    iconSize: [60, 22],
-    iconAnchor: [30, 11],
-  });
-};
+  const el = document.createElement("div");
+  el.innerHTML = `<div style="white-space:nowrap;padding:3px 8px;border-radius:9999px;background:white;border:2px solid ${hex};color:${hex};font-weight:700;font-size:11px;box-shadow:0 1px 4px rgba(0,0,0,0.25)">${km.toFixed(1)} km</div>`;
+  return el.firstElementChild as HTMLElement;
+}
 
 function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371,
@@ -68,173 +66,200 @@ export const LiveMap = ({
   routes?: LiveMapRoute[];
   height?: number;
 }) => {
+  const { data: token } = useMapboxToken();
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const staticMarkersRef = useRef<L.Marker[]>([]);
-  const vehicleMarkerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const styleLoadedRef = useRef(false);
+  const staticMarkersRef = useRef<mapboxgl.Marker[]>([]);
+  const vehicleMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const vehicleCurrentRef = useRef<{ lat: number; lng: number } | null>(null);
   const tweenRafRef = useRef<number | null>(null);
-  const routeLayersRef = useRef<L.Layer[]>([]);
+  const pillMarkersRef = useRef<mapboxgl.Marker[]>([]);
+  const routeIdsRef = useRef<string[]>([]);
 
   const hasAnyPoint = points.some(
     (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
   );
 
-  // Init map once
+  // Init map
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
+    if (!containerRef.current || mapRef.current || !token) return;
+    mapboxgl.accessToken = token;
     const first = points.find(
       (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
     );
     const center: [number, number] = first
-      ? [first.latitude, first.longitude]
-      : [-26.2041, 28.0473];
-    const map = L.map(containerRef.current, {
+      ? [first.longitude, first.latitude]
+      : [28.0473, -26.2041];
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: MAPBOX_STYLE,
       center,
-      zoom: first ? 14 : 11,
-      zoomControl: true,
-      attributionControl: true,
+      zoom: first ? 13 : 10,
     });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
     mapRef.current = map;
-
-    requestAnimationFrame(() => map.invalidateSize());
-    const t1 = setTimeout(() => map.invalidateSize(), 250);
-    const t2 = setTimeout(() => map.invalidateSize(), 800);
+    map.on("load", () => {
+      styleLoadedRef.current = true;
+    });
 
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && containerRef.current) {
-      ro = new ResizeObserver(() => map.invalidateSize());
+      ro = new ResizeObserver(() => map.resize());
       ro.observe(containerRef.current);
     }
+    requestAnimationFrame(() => map.resize());
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
       ro?.disconnect();
       if (tweenRafRef.current) cancelAnimationFrame(tweenRafRef.current);
+      staticMarkersRef.current.forEach((m) => m.remove());
+      pillMarkersRef.current.forEach((m) => m.remove());
+      vehicleMarkerRef.current?.remove();
       map.remove();
       mapRef.current = null;
+      styleLoadedRef.current = false;
       staticMarkersRef.current = [];
+      pillMarkersRef.current = [];
       vehicleMarkerRef.current = null;
       vehicleCurrentRef.current = null;
-      routeLayersRef.current = [];
+      routeIdsRef.current = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [token]);
 
-  // Routes (lines + pills)
   const drawRoutes = (rs: LiveMapRoute[]) => {
     const map = mapRef.current;
-    if (!map) return;
-    routeLayersRef.current.forEach((l) => l.remove());
-    routeLayersRef.current = [];
-    for (const r of rs) {
-      const line = L.polyline(
-        [
-          [r.from.lat, r.from.lng],
-          [r.to.lat, r.to.lng],
-        ],
-        { color: COLOR[r.color], weight: 3, dashArray: "6 6", opacity: 0.85 },
-      ).addTo(map);
-      routeLayersRef.current.push(line);
-      const km = r.distanceKm ?? haversineKm(r.from, r.to);
-      const mid: [number, number] = [(r.from.lat + r.to.lat) / 2, (r.from.lng + r.to.lng) / 2];
-      const pill = L.marker(mid, {
-        icon: distancePillIcon(km, r.color),
-        interactive: false,
-        keyboard: false,
-      }).addTo(map);
-      routeLayersRef.current.push(pill);
+    if (!map || !styleLoadedRef.current) return;
+    // Remove previous route layers + sources
+    for (const id of routeIdsRef.current) {
+      if (map.getLayer(id)) map.removeLayer(id);
+      if (map.getSource(id)) map.removeSource(id);
     }
+    routeIdsRef.current = [];
+    pillMarkersRef.current.forEach((m) => m.remove());
+    pillMarkersRef.current = [];
+
+    rs.forEach((r, i) => {
+      const id = `route-${i}`;
+      map.addSource(id, {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [r.from.lng, r.from.lat],
+              [r.to.lng, r.to.lat],
+            ],
+          },
+          properties: {},
+        },
+      });
+      map.addLayer({
+        id,
+        type: "line",
+        source: id,
+        paint: {
+          "line-color": COLOR[r.color],
+          "line-width": 3,
+          "line-dasharray": [2, 2],
+          "line-opacity": 0.85,
+        },
+      });
+      routeIdsRef.current.push(id);
+
+      const km = r.distanceKm ?? haversineKm(r.from, r.to);
+      const mid: [number, number] = [(r.from.lng + r.to.lng) / 2, (r.from.lat + r.to.lat) / 2];
+      const pill = new mapboxgl.Marker({ element: distancePillEl(km, r.color) })
+        .setLngLat(mid)
+        .addTo(map);
+      pillMarkersRef.current.push(pill);
+    });
   };
 
-  // Update markers + bounds + routes whenever inputs change.
+  // Render markers + routes + bounds
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    const valid = points.filter(
-      (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
-    );
+    const apply = () => {
+      const valid = points.filter(
+        (p) => typeof p.latitude === "number" && typeof p.longitude === "number",
+      );
 
-    map.invalidateSize();
+      staticMarkersRef.current.forEach((m) => m.remove());
+      staticMarkersRef.current = [];
 
-    staticMarkersRef.current.forEach((m) => m.remove());
-    staticMarkersRef.current = [];
+      const vehicle = valid.find((p) => p.kind === "ambulance");
+      const statics = valid.filter((p) => p !== vehicle);
 
-    const vehicle = valid.find((p) => p.kind === "ambulance");
-    const statics = valid.filter((p) => p !== vehicle);
-
-    for (const p of statics) {
-      const marker = L.marker([p.latitude, p.longitude], {
-        icon: makeIcon(p.kind),
-        title: p.label ?? p.kind,
-      }).addTo(map);
-      if (p.label) marker.bindTooltip(p.label, { direction: "top", offset: [0, -12] });
-      staticMarkersRef.current.push(marker);
-    }
-
-    if (vehicle) {
-      const target = { lat: vehicle.latitude, lng: vehicle.longitude };
-      if (!vehicleMarkerRef.current) {
-        vehicleMarkerRef.current = L.marker([target.lat, target.lng], {
-          icon: makeIcon("ambulance"),
-          title: vehicle.label ?? "Ambulance",
-        }).addTo(map);
-        if (vehicle.label)
-          vehicleMarkerRef.current.bindTooltip(vehicle.label, {
-            direction: "top",
-            offset: [0, -16],
-          });
-        vehicleCurrentRef.current = target;
-        drawRoutes(routes);
-      } else {
-        const from = vehicleCurrentRef.current ?? target;
-        const start = performance.now();
-        const duration = 800;
-        if (tweenRafRef.current) cancelAnimationFrame(tweenRafRef.current);
-        const step = (now: number) => {
-          const t = Math.min(1, (now - start) / duration);
-          const lat = from.lat + (target.lat - from.lat) * t;
-          const lng = from.lng + (target.lng - from.lng) * t;
-          vehicleCurrentRef.current = { lat, lng };
-          vehicleMarkerRef.current?.setLatLng([lat, lng]);
-          // Substitute the live vehicle position into any routes that originally point at the target.
-          const live = routes.map((r) => {
-            const fromMatches = r.from.lat === target.lat && r.from.lng === target.lng;
-            const toMatches = r.to.lat === target.lat && r.to.lng === target.lng;
-            if (fromMatches) return { ...r, from: { lat, lng } };
-            if (toMatches) return { ...r, to: { lat, lng } };
-            return r;
-          });
-          drawRoutes(live);
-          if (t < 1) tweenRafRef.current = requestAnimationFrame(step);
-          else tweenRafRef.current = null;
-        };
-        tweenRafRef.current = requestAnimationFrame(step);
+      for (const p of statics) {
+        const m = new mapboxgl.Marker({ element: makeMarkerEl(p.kind) })
+          .setLngLat([p.longitude, p.latitude])
+          .addTo(map);
+        if (p.label) m.setPopup(new mapboxgl.Popup({ offset: 16 }).setText(p.label));
+        staticMarkersRef.current.push(m);
       }
-    } else {
-      if (vehicleMarkerRef.current) {
-        vehicleMarkerRef.current.remove();
+
+      if (vehicle) {
+        const target = { lat: vehicle.latitude, lng: vehicle.longitude };
+        if (!vehicleMarkerRef.current) {
+          vehicleMarkerRef.current = new mapboxgl.Marker({ element: makeMarkerEl("ambulance") })
+            .setLngLat([target.lng, target.lat])
+            .addTo(map);
+          if (vehicle.label) {
+            vehicleMarkerRef.current.setPopup(
+              new mapboxgl.Popup({ offset: 16 }).setText(vehicle.label),
+            );
+          }
+          vehicleCurrentRef.current = target;
+          drawRoutes(routes);
+        } else {
+          const from = vehicleCurrentRef.current ?? target;
+          const start = performance.now();
+          const duration = 800;
+          if (tweenRafRef.current) cancelAnimationFrame(tweenRafRef.current);
+          const step = (now: number) => {
+            const t = Math.min(1, (now - start) / duration);
+            const lat = from.lat + (target.lat - from.lat) * t;
+            const lng = from.lng + (target.lng - from.lng) * t;
+            vehicleCurrentRef.current = { lat, lng };
+            vehicleMarkerRef.current?.setLngLat([lng, lat]);
+            const live = routes.map((r) => {
+              const fromMatches = r.from.lat === target.lat && r.from.lng === target.lng;
+              const toMatches = r.to.lat === target.lat && r.to.lng === target.lng;
+              if (fromMatches) return { ...r, from: { lat, lng } };
+              if (toMatches) return { ...r, to: { lat, lng } };
+              return r;
+            });
+            drawRoutes(live);
+            if (t < 1) tweenRafRef.current = requestAnimationFrame(step);
+            else tweenRafRef.current = null;
+          };
+          tweenRafRef.current = requestAnimationFrame(step);
+        }
+      } else {
+        vehicleMarkerRef.current?.remove();
         vehicleMarkerRef.current = null;
         vehicleCurrentRef.current = null;
+        drawRoutes(routes);
       }
-      drawRoutes(routes);
-    }
 
-    if (valid.length === 1) {
-      map.setView([valid[0].latitude, valid[0].longitude], Math.max(14, map.getZoom()));
-    } else if (valid.length > 1) {
-      const bounds = L.latLngBounds(
-        valid.map((p) => [p.latitude, p.longitude] as [number, number]),
-      );
-      map.fitBounds(bounds, { padding: [64, 64] });
-    }
-    setTimeout(() => map.invalidateSize(), 100);
+      if (valid.length === 1) {
+        map.easeTo({
+          center: [valid[0].longitude, valid[0].latitude],
+          zoom: Math.max(13, map.getZoom()),
+        });
+      } else if (valid.length > 1) {
+        const bounds = new mapboxgl.LngLatBounds();
+        valid.forEach((p) => bounds.extend([p.longitude, p.latitude]));
+        map.fitBounds(bounds, { padding: 64, duration: 600 });
+      }
+    };
+
+    if (styleLoadedRef.current) apply();
+    else map.once("load", apply);
   }, [points, routes]);
 
   return (

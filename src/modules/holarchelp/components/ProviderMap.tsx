@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useMapboxToken } from "../hooks/useMapboxToken";
+import { MAPBOX_STYLE } from "../config/mapbox";
 
 export type ProviderMarker = {
   id: string;
@@ -29,6 +31,13 @@ const ICON_HTML = {
     `<div style="width:34px;height:34px;border-radius:6px;background:white;border:3px solid #16a34a;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.35);opacity:${dimmed ? 0.45 : 1};filter:${dimmed ? "grayscale(1)" : "none"}"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="#16a34a"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg></div>`,
 };
 
+function makeEl(html: string): HTMLElement {
+  const el = document.createElement("div");
+  el.innerHTML = html;
+  el.style.cursor = "pointer";
+  return el.firstElementChild as HTMLElement;
+}
+
 const distanceBetweenKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
   const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
@@ -41,52 +50,51 @@ function escapeHtml(s: string) {
 }
 
 export function ProviderMap({ center, providers, height = 360 }: Props) {
+  const { data: token } = useMapboxToken();
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const userMarkerRef = useRef<L.Marker | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, {
-      center: center ? [center.lat, center.lng] : [-26.1, 28.05],
-      zoom: center ? 12 : 5,
-      zoomControl: true,
+    if (!containerRef.current || mapRef.current || !token) return;
+    mapboxgl.accessToken = token;
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: MAPBOX_STYLE,
+      center: center ? [center.lng, center.lat] : [28.05, -26.1],
+      zoom: center ? 11 : 4,
     });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
     mapRef.current = map;
-    requestAnimationFrame(() => map.invalidateSize());
-    const t1 = setTimeout(() => map.invalidateSize(), 250);
-    const t2 = setTimeout(() => map.invalidateSize(), 800);
     let ro: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && containerRef.current) {
-      ro = new ResizeObserver(() => map.invalidateSize());
+      ro = new ResizeObserver(() => map.resize());
       ro.observe(containerRef.current);
     }
+    requestAnimationFrame(() => map.resize());
     return () => {
-      clearTimeout(t1); clearTimeout(t2); ro?.disconnect();
+      ro?.disconnect();
+      markersRef.current.forEach((m) => m.remove());
+      userMarkerRef.current?.remove();
       map.remove();
       mapRef.current = null;
       userMarkerRef.current = null;
       markersRef.current = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !center) return;
-    map.setView([center.lat, center.lng], Math.max(map.getZoom() ?? 11, 12));
+    map.easeTo({ center: [center.lng, center.lat], zoom: Math.max(map.getZoom() ?? 10, 11) });
     if (!userMarkerRef.current) {
-      userMarkerRef.current = L.marker([center.lat, center.lng], {
-        icon: L.divIcon({ html: ICON_HTML.user, className: "", iconSize: [18, 18], iconAnchor: [9, 9] }),
-        title: "You",
-      }).addTo(map);
+      userMarkerRef.current = new mapboxgl.Marker({ element: makeEl(ICON_HTML.user) })
+        .setLngLat([center.lng, center.lat])
+        .addTo(map);
     } else {
-      userMarkerRef.current.setLatLng([center.lat, center.lng]);
+      userMarkerRef.current.setLngLat([center.lng, center.lat]);
     }
   }, [center?.lat, center?.lng]);
 
@@ -99,20 +107,19 @@ export function ProviderMap({ center, providers, height = 360 }: Props) {
       if (p.latitude == null || p.longitude == null) continue;
       const dimmed = p.accepting === false;
       const html = p.type === "hospital" ? ICON_HTML.hospital(dimmed) : ICON_HTML.ambulance(dimmed);
-      const marker = L.marker([p.latitude, p.longitude], {
-        icon: L.divIcon({ html, className: "", iconSize: [34, 34], iconAnchor: [17, 17] }),
-        title: p.name,
-      }).addTo(map);
+      const marker = new mapboxgl.Marker({ element: makeEl(html) })
+        .setLngLat([p.longitude, p.latitude])
+        .addTo(map);
       const dKm = p.distanceKm ?? (center ? distanceBetweenKm(center, { lat: p.latitude, lng: p.longitude }) : null);
       const eta = dKm != null ? Math.max(1, Math.round((dKm / 40) * 60)) : null;
-      const popup = `
+      const popup = new mapboxgl.Popup({ offset: 18 }).setHTML(`
         <div style="font-family:system-ui,sans-serif;min-width:180px;padding:2px 4px">
           <div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:4px">${escapeHtml(p.name)}</div>
           ${dKm != null ? `<div style="font-size:12px;color:#475569"><strong>${dKm.toFixed(1)} km</strong> away</div>` : ""}
           ${eta != null ? `<div style="font-size:12px;color:#475569">≈ ${eta} min by car</div>` : ""}
           ${dimmed ? `<div style="font-size:11px;color:#dc2626;font-weight:600;margin-top:4px">Currently full capacity</div>` : ""}
-        </div>`;
-      marker.bindPopup(popup);
+        </div>`);
+      marker.setPopup(popup);
       markersRef.current.push(marker);
     }
   }, [providers, center?.lat, center?.lng]);

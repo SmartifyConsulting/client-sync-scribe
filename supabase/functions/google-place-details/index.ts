@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+// NOTE: Function name kept as 'google-place-details' for backwards
+// compatibility, but it now proxies Mapbox Search Box /retrieve.
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -21,49 +24,39 @@ serve(async (req) => {
     const { data: claims, error: ce } = await supabase.auth.getClaims(token);
     if (ce || !claims?.claims) return j({ error: "Unauthorized" }, 401);
 
-    const KEY = Deno.env.get("GOOGLE_MAPS_API_KEY");
-    if (!KEY) return j({ error: "GOOGLE_MAPS_API_KEY not configured" }, 500);
+    const KEY = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
+    if (!KEY) return j({ error: "MAPBOX_PUBLIC_TOKEN not configured" }, 500);
 
     const body = await req.json().catch(() => null);
     const placeId = typeof body?.place_id === "string" ? body.place_id.trim() : "";
+    const sessionToken = typeof body?.session_token === "string" ? body.session_token : crypto.randomUUID();
     if (!placeId || placeId.length > 200) return j({ error: "invalid place_id" }, 400);
 
-    const fieldMask = [
-      "id", "displayName", "formattedAddress", "location",
-      "addressComponents", "internationalPhoneNumber", "websiteUri",
-    ].join(",");
-
-    const res = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
-      method: "GET",
-      headers: { "X-Goog-Api-Key": KEY, "X-Goog-FieldMask": fieldMask },
-    });
+    const res = await fetch(
+      `https://api.mapbox.com/search/searchbox/v1/retrieve/${encodeURIComponent(placeId)}?session_token=${encodeURIComponent(sessionToken)}&access_token=${KEY}`,
+    );
     const data = await res.json();
-    if (!res.ok) {
-      console.error("Place Details (New) error:", res.status, data);
-      return j({ error: data?.error?.message ?? `HTTP ${res.status}` }, 500);
+    const feat = data?.features?.[0];
+    if (!res.ok || !feat) {
+      console.error("Mapbox retrieve error:", res.status, data);
+      return j({ error: data?.message ?? `HTTP ${res.status}` }, 500);
     }
-
-    const comps: any[] = data.addressComponents ?? [];
-    const findComp = (type: string) =>
-      comps.find((c: any) => Array.isArray(c.types) && c.types.includes(type));
-    const city = findComp("locality")?.longText
-      ?? findComp("postal_town")?.longText
-      ?? findComp("administrative_area_level_2")?.longText
-      ?? null;
-    const country = findComp("country")?.longText ?? null;
+    const props = feat.properties ?? {};
+    const ctx = props.context ?? {};
+    const [lng, lat] = feat.geometry?.coordinates ?? [];
 
     return j({
-      name: data.displayName?.text ?? null,
-      formatted_address: data.formattedAddress ?? null,
-      lat: data.location?.latitude ?? null,
-      lng: data.location?.longitude ?? null,
-      city,
-      country,
-      phone: data.internationalPhoneNumber ?? null,
-      website: data.websiteUri ?? null,
+      name: props.name ?? null,
+      formatted_address: props.full_address ?? props.place_formatted ?? null,
+      lat,
+      lng,
+      city: ctx.place?.name ?? ctx.locality?.name ?? null,
+      country: ctx.country?.name ?? null,
+      phone: props.metadata?.phone ?? null,
+      website: props.metadata?.website ?? null,
     });
   } catch (e) {
-    console.error("place-details error", e);
+    console.error("place-details (Mapbox) error", e);
     return j({ error: e instanceof Error ? e.message : "Unknown" }, 500);
   }
 });

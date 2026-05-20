@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../components/ProviderGate";
+import { useMapboxToken } from "../../hooks/useMapboxToken";
+import { MAPBOX_STYLE } from "../../config/mapbox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -179,49 +181,45 @@ const Field = ({ label, value, onChange, type = "text" }: { label: string; value
 );
 
 function PinMap({ latitude, longitude }: { latitude?: number | null; longitude?: number | null }) {
+  const { data: token } = useMapboxToken();
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current, {
-      center: [latitude ?? -26.1, longitude ?? 28.05],
-      zoom: latitude && longitude ? 14 : 4,
-      zoomControl: true,
+    if (!containerRef.current || mapRef.current || !token) return;
+    mapboxgl.accessToken = token;
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: MAPBOX_STYLE,
+      center: [longitude ?? 28.05, latitude ?? -26.1],
+      zoom: latitude && longitude ? 14 : 3,
     });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
     mapRef.current = map;
-    requestAnimationFrame(() => map.invalidateSize());
-    const t = setTimeout(() => map.invalidateSize(), 300);
+    requestAnimationFrame(() => map.resize());
     return () => {
-      clearTimeout(t);
+      markerRef.current?.remove();
       map.remove();
       mapRef.current = null;
       markerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    if (markerRef.current) {
-      markerRef.current.remove();
-      markerRef.current = null;
-    }
+    markerRef.current?.remove();
+    markerRef.current = null;
     if (typeof latitude === "number" && typeof longitude === "number") {
-      const icon = L.divIcon({
-        className: "",
-        html: '<div style="width:18px;height:18px;border-radius:50%;background:#dc2626;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>',
-        iconSize: [18, 18],
-        iconAnchor: [9, 9],
-      });
-      markerRef.current = L.marker([latitude, longitude], { icon }).addTo(map);
-      map.setView([latitude, longitude], 14);
+      const el = document.createElement("div");
+      el.innerHTML =
+        '<div style="width:18px;height:18px;border-radius:50%;background:#dc2626;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>';
+      markerRef.current = new mapboxgl.Marker({ element: el.firstElementChild as HTMLElement })
+        .setLngLat([longitude, latitude])
+        .addTo(map);
+      map.easeTo({ center: [longitude, latitude], zoom: 14 });
     }
   }, [latitude, longitude]);
 
