@@ -339,6 +339,9 @@ export default function HolarcHelpProviders() {
               <TabsTrigger value="pharmacy" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Pill className="h-3.5 w-3.5" />Pharmacies
               </TabsTrigger>
+              <TabsTrigger value="emergency-users" className={`${adminTabsTriggerClass} gap-1.5`}>
+                <Ambulance className="h-3.5 w-3.5" />Emergency Users
+              </TabsTrigger>
               <TabsTrigger value="admin" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <ShieldAlert className="h-3.5 w-3.5" />Admin
               </TabsTrigger>
@@ -349,6 +352,9 @@ export default function HolarcHelpProviders() {
             </TabsContent>
             <TabsContent value="providers" className="mt-4">
               <UsersTab kind="doctor" />
+            </TabsContent>
+            <TabsContent value="emergency-users" className="mt-4">
+              <UsersTab kind="emergency" />
             </TabsContent>
             <TabsContent value="admin" className="mt-4">
               <UsersTab kind="admin" />

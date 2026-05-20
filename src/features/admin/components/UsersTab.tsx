@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
@@ -22,16 +25,30 @@ import { EmptyState } from "@/pages/admin/_shared/EmptyState";
 import { RowSkeleton } from "@/pages/admin/_shared/RowSkeleton";
 import { Toolbar } from "@/pages/admin/_shared/Toolbar";
 
-type RoleEnum = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "none";
-type UsersKind = "patient" | "doctor" | "admin";
+type RawRole = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "nurse";
+type RoleEnum = RawRole | "none";
+type UsersKind = "patient" | "doctor" | "admin" | "emergency";
 
 const EMERGENCY_ROLES: RoleEnum[] = ["hospital_staff", "ambulance_staff", "blood_bank", "pharmacy_staff"];
+
+const ROLE_OPTIONS: { value: RawRole; label: string }[] = [
+  { value: "patient", label: "Patient" },
+  { value: "doctor", label: "Doctor" },
+  { value: "admin", label: "Admin" },
+  { value: "ambulance_staff", label: "Ambulance / ER" },
+  { value: "hospital_staff", label: "Hospital" },
+  { value: "pharmacy_staff", label: "Pharmacy" },
+  { value: "blood_bank", label: "Blood bank" },
+  { value: "nurse", label: "Nurse" },
+];
+
+const ROLE_LABEL: Record<string, string> = Object.fromEntries(ROLE_OPTIONS.map((r) => [r.value, r.label]));
 
 interface UserRecord {
   user_id: string;
   email: string;
   full_name: string | null;
-  role: string;
+  role: string; // from get_users_admin (joined user_roles row, may be 'none')
   created_at: string;
   status: string;
   holarchelp_enabled?: boolean;
@@ -59,6 +76,8 @@ export default function UsersTab({ kind }: UsersTabProps) {
   const [saving, setSaving] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<UserRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [pendingRoleChange, setPendingRoleChange] = useState<{ user: UserRecord; newRole: RawRole } | null>(null);
+  const [roleSaving, setRoleSaving] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdmin) fetchUsers();
@@ -103,16 +122,14 @@ export default function UsersTab({ kind }: UsersTabProps) {
       }));
 
       // Dedupe by user_id, preferring highest-priority role
-      const priority = (r: string) => ({ admin: 4, doctor: 3, patient: 2, none: 1 } as any)[r] ?? 0;
+      const priority = (r: string) =>
+        ({ admin: 6, ambulance_staff: 5, hospital_staff: 5, pharmacy_staff: 5, blood_bank: 5, nurse: 4, doctor: 3, patient: 2, none: 1 } as any)[r] ?? 0;
       const byId = new Map<string, UserRecord>();
       for (const u of merged) {
         const existing = byId.get(u.user_id);
         if (!existing || priority(u.role) > priority(existing.role)) byId.set(u.user_id, u);
       }
-      const deduped = Array.from(byId.values()).filter(
-        (u) => !EMERGENCY_ROLES.includes(u.role as RoleEnum),
-      );
-      setUsers(deduped);
+      setUsers(Array.from(byId.values()));
     } else {
       setUsers(baseUsers);
     }
@@ -124,11 +141,13 @@ export default function UsersTab({ kind }: UsersTabProps) {
   const filtered = useMemo(() => {
     let list: UserRecord[];
     if (kind === "patient") {
-      list = users.filter((u) => u.role === "patient" || u.role === "none");
+      list = users.filter((u) => (u.role === "patient" || u.role === "none") && !EMERGENCY_ROLES.includes(u.role as RoleEnum));
     } else if (kind === "doctor") {
       list = users.filter((u) => u.role === "doctor");
-    } else {
+    } else if (kind === "admin") {
       list = users.filter((u) => u.role === "admin");
+    } else {
+      list = users.filter((u) => EMERGENCY_ROLES.includes(u.role as RoleEnum));
     }
     const q = search.trim().toLowerCase();
     if (!q) return list;
@@ -138,8 +157,22 @@ export default function UsersTab({ kind }: UsersTabProps) {
     );
   }, [users, kind, search]);
 
-  const grouped = useMemo(() => groupByCountry(filtered, (u) => u.country), [filtered]);
-  const countries = useMemo(() => sortedCountries(grouped), [grouped]);
+  const grouped = useMemo(() => {
+    if (kind === "emergency") {
+      // Group by provider kind instead of country
+      const out: Record<string, UserRecord[]> = {};
+      for (const u of filtered) {
+        const label = ROLE_LABEL[u.role] || "Other";
+        (out[label] ||= []).push(u);
+      }
+      return out;
+    }
+    return groupByCountry(filtered, (u) => u.country);
+  }, [filtered, kind]);
+  const groups = useMemo(() => {
+    if (kind === "emergency") return Object.keys(grouped).sort();
+    return sortedCountries(grouped);
+  }, [grouped, kind]);
 
   const toggleHolarcHelp = async (userId: string, current: boolean) => {
     const { error } = await supabase
@@ -217,8 +250,38 @@ export default function UsersTab({ kind }: UsersTabProps) {
     }
   };
 
+  const handleRoleSelect = (user: UserRecord, newRole: RawRole) => {
+    if (newRole === user.role) return;
+    if (newRole === "admin" || user.role === "admin") {
+      setPendingRoleChange({ user, newRole });
+      return;
+    }
+    void applyRoleChange(user, newRole);
+  };
+
+  const applyRoleChange = async (user: UserRecord, newRole: RawRole) => {
+    setRoleSaving(user.user_id);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-set-user-role", {
+        body: { userId: user.user_id, role: newRole },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Role updated", description: `${user.email} → ${ROLE_LABEL[newRole]}` });
+      setPendingRoleChange(null);
+      await fetchUsers();
+    } catch (e: any) {
+      toast({ title: "Failed to change role", description: e.message, variant: "destructive" });
+    } finally {
+      setRoleSaving(null);
+    }
+  };
+
   const showCompany = kind === "doctor";
-  const noun = kind === "doctor" ? "healthcare providers" : kind === "admin" ? "administrators" : "patients";
+  const noun =
+    kind === "doctor" ? "healthcare providers" :
+    kind === "admin" ? "administrators" :
+    kind === "emergency" ? "emergency providers" : "patients";
 
   const renderRows = (rows: UserRecord[]) => (
     <div className="admin-table-wrap">
@@ -229,6 +292,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
             {showCompany && <TableHead>Practice</TableHead>}
+            <TableHead>Role</TableHead>
             <TableHead>
               <span className="inline-flex items-center gap-1.5"><Shield className="h-3 w-3" />HolarcHelp</span>
             </TableHead>
@@ -241,6 +305,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
           {rows.map((u) => {
             const { first, last } = splitName(u.full_name);
             const isEditing = editingId === u.user_id;
+            const currentRole = u.role === "none" ? "patient" : (u.role as RawRole);
             return (
               <TableRow key={u.user_id} className={isEditing ? "bg-[hsl(var(--admin-accent-soft))]" : ""}>
                 <TableCell>
@@ -267,6 +332,26 @@ export default function UsersTab({ kind }: UsersTabProps) {
                 {showCompany && (
                   <TableCell>{u.company || "—"}</TableCell>
                 )}
+                <TableCell>
+                  <Select
+                    value={currentRole}
+                    onValueChange={(v) => handleRoleSelect(u, v as RawRole)}
+                    disabled={roleSaving === u.user_id}
+                  >
+                    <SelectTrigger className="h-7 w-[140px] text-[11.5px]">
+                      {roleSaving === u.user_id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <SelectValue />
+                      )}
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ROLE_OPTIONS.map((r) => (
+                        <SelectItem key={r.value} value={r.value} className="text-[12px]">{r.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </TableCell>
                 <TableCell>
                   <Switch
                     checked={!!u.holarchelp_enabled}
@@ -310,7 +395,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
     <>
       <AdminPanel
         title={`${filtered.length} ${noun}`}
-        description="Grouped by country. Expand to view, edit, or remove."
+        description={kind === "emergency" ? "Grouped by provider type. Expand to manage." : "Grouped by country. Expand to view, edit, or remove."}
         bodyClassName="p-0"
         actions={
           <Toolbar
@@ -321,7 +406,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
         }
       >
         {loading ? (
-          <RowSkeleton rows={6} cols={showCompany ? 8 : 7} />
+          <RowSkeleton rows={6} cols={showCompany ? 9 : 8} />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Users}
@@ -330,18 +415,20 @@ export default function UsersTab({ kind }: UsersTabProps) {
           />
         ) : (
           <Accordion type="multiple" className="divide-y divide-[hsl(var(--admin-border-subtle))]">
-            {countries.map((country) => {
-              const rows = grouped[country];
+            {groups.map((group) => {
+              const rows = grouped[group];
               return (
                 <AccordionItem
-                  key={country}
-                  value={country}
+                  key={group}
+                  value={group}
                   className="border-0"
                 >
                   <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-[hsl(var(--admin-accent-soft))]">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-[14px] leading-none">{countryFlag(country)}</span>
-                      <span className="text-[12.5px] font-semibold text-[hsl(var(--admin-text-primary))]">{country}</span>
+                      {kind !== "emergency" && (
+                        <span className="text-[14px] leading-none">{countryFlag(group)}</span>
+                      )}
+                      <span className="text-[12.5px] font-semibold text-[hsl(var(--admin-text-primary))]">{group}</span>
                       <span className="text-[11px] text-[hsl(var(--admin-text-tertiary))]">{rows.length}</span>
                     </div>
                   </AccordionTrigger>
@@ -367,6 +454,26 @@ export default function UsersTab({ kind }: UsersTabProps) {
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={deleteUser} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingRoleChange} onOpenChange={(o) => !roleSaving && !o && setPendingRoleChange(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change role?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Change <strong>{pendingRoleChange?.user.email}</strong> from <strong>{ROLE_LABEL[pendingRoleChange?.user.role || ""] || pendingRoleChange?.user.role}</strong> to <strong>{ROLE_LABEL[pendingRoleChange?.newRole || ""]}</strong>? This grants or revokes admin-level access.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!roleSaving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => pendingRoleChange && applyRoleChange(pendingRoleChange.user, pendingRoleChange.newRole)}
+              disabled={!!roleSaving}
+            >
+              {roleSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirm"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
