@@ -22,24 +22,40 @@ export function useProviderAccess() {
       return;
     }
     (async () => {
-      const [{ data: hosp }, { data: amb }, { data: hospMem }, { data: ambMem }] = await Promise.all([
+      const [{ data: hosp }, { data: amb }, { data: hospMem }, { data: ambMem }, { data: roles }] = await Promise.all([
         supabase.from("holarchelp_hospitals" as any).select("id").eq("owner_id", user.id).maybeSingle(),
         supabase.from("holarchelp_ambulance_providers" as any).select("id").eq("owner_id", user.id).maybeSingle(),
         supabase.from("holarchelp_hospital_members" as any).select("hospital_id").eq("user_id", user.id).maybeSingle(),
         supabase.from("holarchelp_ambulance_members" as any).select("provider_id").eq("user_id", user.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", user.id),
       ]);
-      if ((hosp as any)?.id) {
+
+      const hospId = (hosp as any)?.id ?? (hospMem as any)?.hospital_id ?? null;
+      const ambId = (amb as any)?.id ?? (ambMem as any)?.provider_id ?? null;
+      const roleSet = new Set(((roles as any[]) ?? []).map((r) => r.role as string));
+      const isHospitalRole = roleSet.has("hospital_staff");
+      const isAmbulanceRole = roleSet.has("ambulance_staff");
+
+      // Prefer the side the user is explicitly roled for when they happen to
+      // be linked to both kinds of providers.
+      let pickHospital = false;
+      let pickAmbulance = false;
+      if (hospId && ambId) {
+        if (isHospitalRole && !isAmbulanceRole) pickHospital = true;
+        else if (isAmbulanceRole && !isHospitalRole) pickAmbulance = true;
+        else pickHospital = true; // tie-break: hospital first (matches prior owner-first order)
+      } else if (hospId) {
+        pickHospital = true;
+      } else if (ambId) {
+        pickAmbulance = true;
+      }
+
+      if (pickHospital && hospId) {
         setProviderType("hospital");
-        setProviderId((hosp as any).id);
-      } else if ((amb as any)?.id) {
+        setProviderId(hospId);
+      } else if (pickAmbulance && ambId) {
         setProviderType("ambulance");
-        setProviderId((amb as any).id);
-      } else if ((hospMem as any)?.hospital_id) {
-        setProviderType("hospital");
-        setProviderId((hospMem as any).hospital_id);
-      } else if ((ambMem as any)?.provider_id) {
-        setProviderType("ambulance");
-        setProviderId((ambMem as any).provider_id);
+        setProviderId(ambId);
       }
       setLoading(false);
     })();
