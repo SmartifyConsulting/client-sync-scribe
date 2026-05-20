@@ -21,29 +21,32 @@ serve(async (req) => {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
     if (rateLimited(ip)) return j({ error: "Too many requests" }, 429);
 
-    const KEY = Deno.env.get("GOOGLE_MAPS_API_KEY");
-    if (!KEY) return j({ error: "GOOGLE_MAPS_API_KEY is not configured" }, 500);
+    const KEY = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
+    if (!KEY) return j({ error: "MAPBOX_PUBLIC_TOKEN is not configured" }, 500);
 
     const body = await req.json().catch(() => null);
     const input = typeof body?.input === "string" ? body.input.trim() : "";
-    if (!input || input.length < 2) return j({ predictions: [] });
+    const sessionToken = typeof body?.session_token === "string" ? body.session_token : crypto.randomUUID();
+    if (!input || input.length < 2) return j({ predictions: [], session_token: sessionToken });
     if (input.length > 200) return j({ error: "input too long" }, 400);
 
-    const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Goog-Api-Key": KEY },
-      body: JSON.stringify({ input }),
+    const params = new URLSearchParams({
+      q: input,
+      session_token: sessionToken,
+      access_token: KEY,
+      limit: "8",
     });
+    const res = await fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?${params}`);
     const data = await res.json();
     if (!res.ok) {
-      console.error("Places autocomplete (public) error:", res.status, data);
-      return j({ predictions: [] });
+      console.error("Mapbox suggest (public) error:", res.status, data);
+      return j({ predictions: [], session_token: sessionToken });
     }
-    const predictions = (data?.suggestions ?? [])
-      .map((s: any) => s.placePrediction)
-      .filter(Boolean)
-      .map((p: any) => ({ description: p.text?.text ?? "", place_id: p.placeId }));
-    return j({ predictions, status: "OK" });
+    const predictions = ((data?.suggestions ?? []) as any[]).map((s: any) => ({
+      description: s.full_address ?? [s.name, s.place_formatted].filter(Boolean).join(", "),
+      place_id: s.mapbox_id,
+    }));
+    return j({ predictions, status: "OK", session_token: sessionToken });
   } catch (e) {
     console.error("places-autocomplete-public error", e);
     return j({ error: e instanceof Error ? e.message : "Unknown" }, 500);

@@ -1,6 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+// NOTE: Function name kept as 'google-places-autocomplete' for backwards
+// compatibility, but it now proxies Mapbox Search Box /suggest.
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -21,50 +24,50 @@ serve(async (req) => {
     const { data: claims, error: ce } = await supabase.auth.getClaims(token);
     if (ce || !claims?.claims) return j({ error: "Unauthorized" }, 401);
 
-    const KEY = Deno.env.get("GOOGLE_MAPS_API_KEY");
-    if (!KEY) return j({ error: "GOOGLE_MAPS_API_KEY is not configured" }, 500);
+    const KEY = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
+    if (!KEY) return j({ error: "MAPBOX_PUBLIC_TOKEN is not configured" }, 500);
 
     const body = await req.json().catch(() => null);
     const input = typeof body?.input === "string" ? body.input.trim() : "";
     const requestedTypes = typeof body?.types === "string" ? body.types.trim() : "any";
-    if (!input || input.length < 2) return j({ predictions: [] });
+    const sessionToken = typeof body?.session_token === "string" ? body.session_token : crypto.randomUUID();
+    if (!input || input.length < 2) return j({ predictions: [], session_token: sessionToken });
     if (input.length > 200) return j({ error: "input too long" }, 400);
 
-    let includedPrimaryTypes: string[] | undefined;
-    if (requestedTypes === "address") includedPrimaryTypes = ["street_address", "route", "premise"];
-    else if (requestedTypes === "establishment") includedPrimaryTypes = ["establishment"];
-    else if (requestedTypes === "(cities)") includedPrimaryTypes = ["locality", "administrative_area_level_3"];
-    else if (requestedTypes === "(regions)") includedPrimaryTypes = ["administrative_area_level_1", "administrative_area_level_2", "country"];
+    let types: string | undefined;
+    if (requestedTypes === "address") types = "address,street";
+    else if (requestedTypes === "establishment") types = "poi";
+    else if (requestedTypes === "(cities)") types = "place,locality";
+    else if (requestedTypes === "(regions)") types = "region,district,country";
 
-    const reqBody: Record<string, unknown> = { input };
-    if (includedPrimaryTypes) reqBody.includedPrimaryTypes = includedPrimaryTypes;
-
-    const res = await fetch("https://places.googleapis.com/v1/places:autocomplete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Goog-Api-Key": KEY },
-      body: JSON.stringify(reqBody),
+    const params = new URLSearchParams({
+      q: input,
+      session_token: sessionToken,
+      access_token: KEY,
+      limit: "8",
     });
+    if (types) params.set("types", types);
+
+    const res = await fetch(`https://api.mapbox.com/search/searchbox/v1/suggest?${params}`);
     const data = await res.json();
     if (!res.ok) {
-      console.error("Places (New) autocomplete error:", res.status, data);
+      console.error("Mapbox suggest error:", res.status, data);
       return j({
         predictions: [],
-        status: data?.error?.status ?? "REQUEST_DENIED",
-        error_message: data?.error?.message ?? `HTTP ${res.status}`,
+        status: "REQUEST_DENIED",
+        error_message: data?.message ?? `HTTP ${res.status}`,
+        session_token: sessionToken,
       });
     }
 
-    const predictions = (data?.suggestions ?? [])
-      .map((s: any) => s.placePrediction)
-      .filter(Boolean)
-      .map((p: any) => ({
-        description: p.text?.text ?? "",
-        place_id: p.placeId,
-      }));
+    const predictions = ((data?.suggestions ?? []) as any[]).map((s: any) => ({
+      description: s.full_address ?? [s.name, s.place_formatted].filter(Boolean).join(", "),
+      place_id: s.mapbox_id,
+    }));
 
-    return j({ predictions, status: "OK" });
+    return j({ predictions, status: "OK", session_token: sessionToken });
   } catch (error) {
-    console.error("Places autocomplete error:", error);
+    console.error("Mapbox autocomplete error:", error);
     return j({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
