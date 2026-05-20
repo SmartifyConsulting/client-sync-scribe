@@ -1,73 +1,60 @@
-# Migrate Maps Stack: Google Maps + Leaflet → Mapbox
+## Problem
 
-Replace both rendering engines (Leaflet) and geocoding/places (Google) with Mapbox GL JS + Mapbox Geocoding/Search Box APIs. Default style: `mapbox://styles/mapbox/navigation-day-v1`.
+1. `er.test@holarchealth.com` (and similar provider users like Renken, Zano, Hospital Admin) sees the **patient portal** when signing in. Their `profiles.role` is `'patient'`, and `useUserRole` prefers `profiles.role` over `user_roles` — even though `user_roles` contains `ambulance_staff`/`hospital_staff`.
+2. The admin **Users** screen (`UsersTab`) explicitly filters out anyone with an emergency role (`hospital_staff`, `ambulance_staff`, …), so Renken/Zano/ER providers never appear under any tab. There's no "Ambulance" / "Hospital" / "ER" users tab.
+3. There's no way for the admin to change a user's role from the Users screen — only edit name/email/delete.
 
-## Prerequisites
+## Plan
 
-- Add `MAPBOX_PUBLIC_TOKEN` (pk.*) as a backend secret. Mapbox public tokens are designed for browser use, but we'll serve it via a small edge function (`mapbox-config`) so it can be rotated/URL-restricted without redeploy — mirroring the current `maps-config` pattern.
-- Install `mapbox-gl` package; remove `leaflet`, `@types/leaflet`, `@googlemaps/js-api-loader`.
+### 1. Data fix — align profile role with actual provider role
+One-off migration / data update via the insert tool to set `profiles.role = 'emergency'` for users that have any of `hospital_staff`, `ambulance_staff`, `blood_bank`, `pharmacy_staff` in `user_roles` but whose `profiles.role` is currently `patient` or `doctor` only because of a stale signup. After this, `useUserRole` returns `'emergency'` and the app routes them to the provider portal (existing `ProviderRedirect` / `ProviderGate` flow).
 
-## Map components (rendering)
+Specifically targets: `er.test@holarchealth.com`, `hospital.test@holarchealth.com`, `renken@smartify.co.za`, `zano@smartify.co.za`, and any other matching account.
 
-Rewrite these three with Mapbox GL JS, keeping the same prop signatures so call sites don't change:
+### 2. Admin Users — add an "Emergency providers" tab
+In `src/pages/admin/HolarcHelpProviders.tsx` (which already hosts the Users tabs alongside Patients/Doctors/Admins via `UsersTab`), add a fourth `UsersTab` kind: `"emergency"`.
 
-1. `src/modules/holarchelp/components/LiveMap.tsx` — patient/ambulance/hospital markers + dashed route lines + animated vehicle tween + distance pills. Use HTML markers (`new mapboxgl.Marker({ element })`) to preserve existing SVG icons, `GeoJSON` source + `line` layer for routes, and `requestAnimationFrame` tween on `setLngLat`.
-2. `src/modules/holarchelp/components/ProviderMap.tsx` — hospital/ambulance markers with popups; greying for `accepting === false`. Use `mapboxgl.Popup`.
-3. `src/modules/holarchelp/components/SosLiveMap.tsx` — same approach.
+In `src/features/admin/components/UsersTab.tsx`:
+- Extend `UsersKind` to `"patient" | "doctor" | "admin" | "emergency"`.
+- For `kind === "emergency"`: do **not** strip emergency roles; instead show users whose effective role is `hospital_staff`, `ambulance_staff`, `blood_bank`, or `pharmacy_staff`. Group/label rows by provider kind (Ambulance, Hospital, Blood Bank, Pharmacy) using a sub-label column or a secondary grouping.
+- For other tabs keep current behavior (still filter out emergency users so they don't double-list).
 
-All three: navigation control, fit-bounds, ResizeObserver for invalidate-size equivalent (Mapbox uses `map.resize()`).
+Renken will then show up under the Ambulance group inside the new Emergency tab.
 
-## Geocoding / address autocomplete
+### 3. Inline "Change role" control for all users
+In `UsersTab` row actions, add a small **Role** dropdown (shadcn `Select`) next to the edit/delete buttons that lists: Patient, Doctor, Admin, Hospital staff, Ambulance staff, Blood bank, Pharmacy staff.
 
-Replace Google Places with Mapbox Search Box / Geocoding v6:
+Saving the role calls a new edge function `admin-set-user-role` that:
+- verifies caller is admin (`has_role(auth.uid(), 'admin')`),
+- updates `profiles.role` to the canonical bucket (`patient` / `doctor` / `admin` / `emergency`),
+- replaces rows in `user_roles` for that user with the chosen role (single source of truth),
+- returns the new role.
 
-- `supabase/functions/geocode-address/index.ts` → call `https://api.mapbox.com/search/geocode/v6/forward`.
-- `supabase/functions/google-places-autocomplete/index.ts` → rename usage to call Mapbox Search Box `/suggest`; keep edge function name for now to avoid frontend churn, OR rename to `mapbox-autocomplete` and update callers.
-- `supabase/functions/google-place-details/index.ts` → Mapbox Search Box `/retrieve`.
-- Public variants (`places-autocomplete-public`, `place-details-public`) get the same treatment.
-- `supabase/functions/routes-eta/index.ts` → Mapbox Directions API (`/directions/v5/mapbox/driving`).
-- `src/components/patients/AddressAutocomplete.tsx` and `src/features/patients/components/AddressAutocomplete.tsx` — keep the component API; swap the internal fetch to the new endpoints. Session token handling moves from Google to Mapbox `session_token` param.
+Client refetches the list and shows a toast. Because the row may move tabs after the change (e.g. patient → emergency), we just refresh.
 
-## Config layer
+### 4. UX details
+- Role dropdown shows current role pre-selected.
+- Confirmation `AlertDialog` when changing **to** or **from** `admin` (destructive-level change).
+- Inline role badge in each row so the current role is visible at a glance on every tab.
 
-- Delete `src/modules/holarchelp/config/google-maps.ts`; add `src/modules/holarchelp/config/mapbox.ts` exporting `MAPBOX_STYLE = "mapbox://styles/mapbox/navigation-day-v1"` and a `loadMapboxToken()` helper.
-- Rename `useGoogleMapsKey.ts` → `useMapboxToken.ts`; point at new `mapbox-config` edge function.
-- Edge function `maps-config` → renamed to `mapbox-config`, returns `{ token }` from `MAPBOX_PUBLIC_TOKEN`.
+## Technical notes
 
-## Files touched
-
-```text
-NEW   supabase/functions/mapbox-config/index.ts
-EDIT  supabase/functions/geocode-address/index.ts
-EDIT  supabase/functions/google-places-autocomplete/index.ts   (→ Mapbox internally)
-EDIT  supabase/functions/google-place-details/index.ts         (→ Mapbox internally)
-EDIT  supabase/functions/places-autocomplete-public/index.ts
-EDIT  supabase/functions/place-details-public/index.ts
-EDIT  supabase/functions/routes-eta/index.ts
-DEL   supabase/functions/maps-config/index.ts
-NEW   src/modules/holarchelp/config/mapbox.ts
-NEW   src/modules/holarchelp/hooks/useMapboxToken.ts
-DEL   src/modules/holarchelp/config/google-maps.ts
-DEL   src/modules/holarchelp/hooks/useGoogleMapsKey.ts
-EDIT  src/modules/holarchelp/components/LiveMap.tsx
-EDIT  src/modules/holarchelp/components/ProviderMap.tsx
-EDIT  src/modules/holarchelp/components/SosLiveMap.tsx
-EDIT  src/components/patients/AddressAutocomplete.tsx
-EDIT  src/features/patients/components/AddressAutocomplete.tsx
-EDIT  src/modules/holarchelp/pages/provider/ProviderProfile.tsx  (import paths only)
-EDIT  package.json                                               (drop leaflet, add mapbox-gl)
+```
+src/features/admin/components/UsersTab.tsx     # new "emergency" kind + role <Select> column + role badge
+src/pages/admin/HolarcHelpProviders.tsx        # add 4th Users tab "Emergency"
+supabase/functions/admin-set-user-role/        # new edge function (admin-guarded)
 ```
 
-## Out of scope
+Migration (data only, run via insert tool, no schema change):
+```sql
+UPDATE public.profiles p
+SET role = 'emergency'::user_role
+WHERE EXISTS (
+  SELECT 1 FROM public.user_roles ur
+  WHERE ur.user_id = p.id
+    AND ur.role IN ('hospital_staff','ambulance_staff','blood_bank','pharmacy_staff')
+)
+AND p.role <> 'emergency';
+```
 
-- No changes to map data schemas, RLS, or any business logic.
-- No visual redesign beyond the new Mapbox tile style.
-- Marker SVGs reused as-is via HTML elements.
-
-## Risks
-
-- Mapbox Search Box returns slightly different result shapes than Google Places — the `AddressAutocomplete` adapter handles the mapping.
-- Mapbox GL JS requires a container with explicit width/height (already true for current Leaflet wrappers).
-- `navigation-day-v1` is a paid-tier–friendly style but counts toward Mapbox map-load quota; usage will need monitoring.
-
-After approval I'll request the `MAPBOX_PUBLIC_TOKEN` secret first, then implement.
+No changes to `useUserRole`, `ProviderGate`, or routing — the existing emergency-role plumbing already routes these users correctly once `profiles.role = 'emergency'`.
