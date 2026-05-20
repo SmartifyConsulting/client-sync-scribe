@@ -126,15 +126,15 @@ function RoleBasedRedirect() {
     );
   }
 
-  // Admins always land on the doctor dashboard; they can still reach
-  // the provider portal manually via the profile switcher.
-  if (isAdmin) {
-    return <Navigate to="/doctor-dashboard" replace />;
+  // Provider routing wins when the user is solely a provider (hospital/ambulance staff).
+  // Admins who are also providers fall through to /doctor-dashboard via the catch-all,
+  // and can still reach the provider portal via the profile switcher.
+  if (providerType && !hasDoctorRole && !hasPatientRole) {
+    return <Navigate to="/provider" replace />;
   }
 
-  // Provider portal takes priority over patient/doctor routing
-  if (providerType && !hasDoctorRole) {
-    return <Navigate to="/provider" replace />;
+  if (isAdmin) {
+    return <Navigate to="/doctor-dashboard" replace />;
   }
 
   if (isPatient) {
