@@ -584,12 +584,21 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
             Note: providers control their own "accepting patients" status from their provider view.
           </p>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={saving || !form[nameField(kind)]}>
-            {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-            {isEdit ? "Save" : "Create"}
-          </Button>
+        <DialogFooter className="items-center sm:justify-between gap-2">
+          {isEdit ? (
+            <>
+              <AutosaveIndicator status={autosave.status} error={autosave.error} />
+              <Button variant="outline" onClick={() => { onSaved(); }}>Close</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button onClick={create} disabled={saving || !form[nameField(kind)]}>
+                {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                Create
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
