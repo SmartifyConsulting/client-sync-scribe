@@ -302,6 +302,69 @@ export default function HolarcHelpProviders() {
 
   const providerKindNeedsAdd = (k: string) => k === "hospital" || k === "ambulance" || k === "pharmacy";
 
+  const renderProviderPanel = (k: Kind) => {
+    const fullList = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
+    const noun = nounFor(k);
+    const q = providerSearch[k].trim().toLowerCase();
+    const list = q
+      ? fullList.filter((r: any) => {
+          const ownerEmail = (userEmails[r.owner_id ?? r.user_id] ?? "").toLowerCase();
+          return [r[nameField(k)], r.city, r.contact_email, r.contact_phone, ownerEmail]
+            .filter(Boolean)
+            .some((v: any) => String(v).toLowerCase().includes(q));
+        })
+      : fullList;
+    return (
+      <AdminPanel
+        title={`${list.length} ${noun}${q ? ` matching "${providerSearch[k]}"` : ""}`}
+        description="Grouped by country, then tier."
+        bodyClassName="p-0"
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={providerSearch[k]}
+                onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
+                placeholder={`Search ${noun}…`}
+                className="h-8 w-48 pl-7 text-[12px]"
+              />
+            </div>
+            <div className="inline-flex rounded-md border border-[hsl(var(--admin-border-strong))] bg-[hsl(var(--admin-surface))] p-0.5">
+              {(["active", "inactive", "all"] as Status[]).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setStatus(s)}
+                  className={`px-2.5 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
+                    status === s
+                      ? "bg-[hsl(var(--admin-accent))] text-white"
+                      : "text-[hsl(var(--admin-text-secondary))] hover:text-[hsl(var(--admin-text-primary))]"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            {providerKindNeedsAdd(k) && (
+              <Button size="sm" className="h-8 px-3 text-[12px]" onClick={() => { setTab(k); setChooserOpen(true); }}>
+                <Plus className="mr-1 h-3.5 w-3.5" />Add
+              </Button>
+            )}
+          </div>
+        }
+      >
+        {loading ? (
+          <RowSkeleton rows={6} cols={6} />
+        ) : list.length === 0 ? (
+          <EmptyState title={q ? `No ${noun} match "${providerSearch[k]}"` : `No ${status === "all" ? "" : status + " "}${noun}`} />
+        ) : (
+          <div className="p-3">{renderGroupedTable(list, k)}</div>
+        )}
+      </AdminPanel>
+    );
+  };
+
+
   return (
     <AdminPage
       eyebrow="Admin"
@@ -333,14 +396,11 @@ export default function HolarcHelpProviders() {
               <TabsTrigger value="hospital" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Hospital className="h-3.5 w-3.5" />Hospitals
               </TabsTrigger>
-              <TabsTrigger value="ambulance" className={`${adminTabsTriggerClass} gap-1.5`}>
-                <Ambulance className="h-3.5 w-3.5" />Ambulance
+              <TabsTrigger value="emergency-users" className={`${adminTabsTriggerClass} gap-1.5`}>
+                <Ambulance className="h-3.5 w-3.5" />Emergency Users
               </TabsTrigger>
               <TabsTrigger value="pharmacy" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Pill className="h-3.5 w-3.5" />Pharmacies
-              </TabsTrigger>
-              <TabsTrigger value="emergency-users" className={`${adminTabsTriggerClass} gap-1.5`}>
-                <Ambulance className="h-3.5 w-3.5" />Emergency Users
               </TabsTrigger>
               <TabsTrigger value="admin" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <ShieldAlert className="h-3.5 w-3.5" />Admin
@@ -353,82 +413,19 @@ export default function HolarcHelpProviders() {
             <TabsContent value="providers" className="mt-4">
               <UsersTab kind="doctor" />
             </TabsContent>
-            <TabsContent value="emergency-users" className="mt-4">
+            <TabsContent value="emergency-users" className="mt-4 space-y-6">
               <UsersTab kind="emergency" />
+              {renderProviderPanel("ambulance")}
             </TabsContent>
             <TabsContent value="admin" className="mt-4">
               <UsersTab kind="admin" />
             </TabsContent>
 
-            {(["hospital", "ambulance", "pharmacy"] as Kind[]).map((k) => {
-              const fullList = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
-              const noun = nounFor(k);
-              const q = providerSearch[k].trim().toLowerCase();
-              const list = q
-                ? fullList.filter((r: any) => {
-                    const ownerEmail = (userEmails[r.owner_id ?? r.user_id] ?? "").toLowerCase();
-                    return [
-                      r[nameField(k)],
-                      r.city,
-                      r.contact_email,
-                      r.contact_phone,
-                      ownerEmail,
-                    ]
-                      .filter(Boolean)
-                      .some((v: any) => String(v).toLowerCase().includes(q));
-                  })
-                : fullList;
-              return (
-                <TabsContent key={k} value={k} className="mt-4">
-                  <AdminPanel
-                    title={`${list.length} ${noun}${q ? ` matching "${providerSearch[k]}"` : ""}`}
-                    description="Grouped by country, then tier."
-                    bodyClassName="p-0"
-                    actions={
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="relative">
-                          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            value={providerSearch[k]}
-                            onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
-                            placeholder={`Search ${noun}…`}
-                            className="h-8 w-48 pl-7 text-[12px]"
-                          />
-                        </div>
-                        <div className="inline-flex rounded-md border border-[hsl(var(--admin-border-strong))] bg-[hsl(var(--admin-surface))] p-0.5">
-                          {(["active", "inactive", "all"] as Status[]).map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setStatus(s)}
-                              className={`px-2.5 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
-                                status === s
-                                  ? "bg-[hsl(var(--admin-accent))] text-white"
-                                  : "text-[hsl(var(--admin-text-secondary))] hover:text-[hsl(var(--admin-text-primary))]"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                        {providerKindNeedsAdd(k) && (
-                          <Button size="sm" className="h-8 px-3 text-[12px]" onClick={() => { setTab(k); setChooserOpen(true); }}>
-                            <Plus className="mr-1 h-3.5 w-3.5" />Add
-                          </Button>
-                        )}
-                      </div>
-                    }
-                  >
-                    {loading ? (
-                      <RowSkeleton rows={6} cols={6} />
-                    ) : list.length === 0 ? (
-                      <EmptyState title={q ? `No ${noun} match "${providerSearch[k]}"` : `No ${status === "all" ? "" : status + " "}${noun}`} />
-                    ) : (
-                      <div className="p-3">{renderGroupedTable(list, k)}</div>
-                    )}
-                  </AdminPanel>
-                </TabsContent>
-              );
-            })}
+            {(["hospital", "pharmacy"] as Kind[]).map((k) => (
+              <TabsContent key={k} value={k} className="mt-4">
+                {renderProviderPanel(k)}
+              </TabsContent>
+            ))}
           </Tabs>
         </TabsContent>
 
