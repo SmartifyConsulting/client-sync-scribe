@@ -221,35 +221,36 @@ export default function UsersTab({ kind }: UsersTabProps) {
 
   const cancelEditing = () => setEditingId(null);
 
-  const saveUser = async (userId: string) => {
-    setSaving(true);
-    try {
-      const combinedName = `${editState.first_name} ${editState.last_name}`.trim();
+  const saveEdit = async (userId: string, next: EditState, original: UserRecord) => {
+    const combinedName = `${next.first_name} ${next.last_name}`.trim();
+    if (combinedName !== (original.full_name || "")) {
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ full_name: combinedName })
         .eq("id", userId);
       if (profileError) throw profileError;
-
-      const currentUser = users.find((u) => u.user_id === userId);
-      if (currentUser && currentUser.email !== editState.email) {
-        const { data, error: emailError } = await supabase.functions.invoke("admin-update-email", {
-          body: { userId, newEmail: editState.email },
-        });
-        if (emailError) throw emailError;
-        if (data?.error) throw new Error(data.error);
-      }
-
-      toast({ title: "User updated" });
-      setEditingId(null);
-      fetchUsers();
-    } catch (error: any) {
-      console.error("saveUser failed", error);
-      toast({ title: "Error saving", description: error.message || "Unknown error", variant: "destructive" });
-    } finally {
-      setSaving(false);
     }
+
+    if (next.email && next.email !== original.email && /.+@.+\..+/.test(next.email)) {
+      const { data, error: emailError } = await supabase.functions.invoke("admin-update-email", {
+        body: { userId, newEmail: next.email },
+      });
+      if (emailError) throw emailError;
+      if (data?.error) throw new Error(data.error);
+    }
+
+    setUsers((prev) => prev.map((u) => u.user_id === userId ? { ...u, full_name: combinedName, email: next.email } : u));
   };
+
+  const editingUser = useMemo(() => users.find((u) => u.user_id === editingId) || null, [users, editingId]);
+  const autosave = useAutosave(
+    editState,
+    async (val) => {
+      if (!editingId || !editingUser) return;
+      await saveEdit(editingId, val, editingUser);
+    },
+    { enabled: !!editingId, delay: 600 },
+  );
 
   const deleteUser = async () => {
     if (!pendingDelete) return;
