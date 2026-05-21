@@ -136,7 +136,7 @@ export default function HolarcHelpNearby() {
               <AlertTriangle className="h-4 w-4" /> Location is blocked
             </div>
             <p className="text-amber-900/80 text-xs">
-              To find nearby hospitals and ambulances, enable location access for this site:
+              To find nearby hospitals and emergency responders, enable location access for this site:
             </p>
             <ul className="list-disc pl-5 text-xs text-amber-900/80 space-y-0.5">
               <li>Tap the lock/info icon in the address bar</li>
