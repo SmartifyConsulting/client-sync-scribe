@@ -384,11 +384,11 @@ export default function Landing() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground text-sm">HolarcHelp SOS</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      One-tap dispatch to nearby ambulances and hospitals with live location, ETA tracking, and full
+                      One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full
                       medical context shared on arrival.
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      {["Ambulance providers", "Hospitals", "Blood banks"].map((b) => (
+                      {["Emergency responders", "Hospitals", "Blood banks"].map((b) => (
                         <span
                           key={b}
                           className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2 py-0.5 text-[10px] text-foreground/80"
