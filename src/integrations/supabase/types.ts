@@ -2895,6 +2895,60 @@ export type Database = {
           },
         ]
       }
+      paramedic_shifts: {
+        Row: {
+          ambulance_id: string
+          created_at: string
+          current_incident_id: string | null
+          ended_at: string | null
+          id: string
+          provider_id: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ambulance_id: string
+          created_at?: string
+          current_incident_id?: string | null
+          ended_at?: string | null
+          id?: string
+          provider_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ambulance_id?: string
+          created_at?: string
+          current_incident_id?: string | null
+          ended_at?: string | null
+          id?: string
+          provider_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paramedic_shifts_ambulance_id_fkey"
+            columns: ["ambulance_id"]
+            isOneToOne: false
+            referencedRelation: "ambulances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paramedic_shifts_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_invitations: {
         Row: {
           created_at: string
@@ -4654,6 +4708,15 @@ export type Database = {
         Args: { _incident_id: string }
         Returns: Json
       }
+      holarchelp_eligible_paramedics: {
+        Args: { _provider_ids: string[] }
+        Returns: {
+          ambulance_id: string
+          provider_id: string
+          user_id: string
+        }[]
+      }
+      holarchelp_end_shift: { Args: never; Returns: Json }
       holarchelp_get_incident_offers: {
         Args: { _incident_id: string }
         Returns: {
@@ -4728,6 +4791,7 @@ export type Database = {
         Args: { _incident_id: string; _payload?: Json; _status: string }
         Returns: Json
       }
+      holarchelp_start_shift: { Args: { _ambulance_id: string }; Returns: Json }
       holarchelp_update_provider_location: {
         Args: { _incident_id: string; _lat: number; _lng: number }
         Returns: undefined
