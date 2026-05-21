@@ -299,6 +299,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
   };
 
   const showCompany = kind === "doctor";
+  const showAddress = kind === "emergency";
   const noun =
     kind === "doctor" ? "healthcare providers" :
     kind === "admin" ? "administrators" :
@@ -312,6 +313,8 @@ export default function UsersTab({ kind }: UsersTabProps) {
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            {showAddress && <TableHead>Address</TableHead>}
             {showCompany && <TableHead>Practice</TableHead>}
             <TableHead>Role</TableHead>
             <TableHead>
@@ -319,7 +322,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
             </TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Joined</TableHead>
-            <TableHead className="w-[88px] text-right">Actions</TableHead>
+            <TableHead className="w-[110px] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -350,6 +353,12 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     u.email
                   )}
                 </TableCell>
+                <TableCell className="text-[hsl(var(--admin-text-secondary))] text-[12px] tabular-nums">{u.phone || "—"}</TableCell>
+                {showAddress && (
+                  <TableCell className="text-[hsl(var(--admin-text-secondary))] text-[12px] max-w-[260px] truncate" title={u.address || ""}>
+                    {u.address || "—"}
+                  </TableCell>
+                )}
                 {showCompany && (
                   <TableCell>{u.company || "—"}</TableCell>
                 )}
@@ -385,11 +394,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
                 <TableCell className="text-[hsl(var(--admin-text-tertiary))]">{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
                 <TableCell className="text-right">
                   {isEditing ? (
-                    <div className="flex justify-end gap-0.5">
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => saveUser(u.user_id)} disabled={saving}>
-                        {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={cancelEditing} disabled={saving}>
+                    <div className="flex justify-end items-center gap-1.5">
+                      <AutosaveIndicator status={autosave.status} error={autosave.error} />
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={cancelEditing} title="Close">
                         <X className="h-3.5 w-3.5" />
                       </Button>
                     </div>
