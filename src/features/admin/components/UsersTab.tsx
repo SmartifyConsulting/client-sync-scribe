@@ -26,6 +26,7 @@ import { StatusDot, statusToTone } from "@/pages/admin/_shared/StatusDot";
 import { EmptyState } from "@/pages/admin/_shared/EmptyState";
 import { RowSkeleton } from "@/pages/admin/_shared/RowSkeleton";
 import { Toolbar } from "@/pages/admin/_shared/Toolbar";
+import { CreateTestUserDialog } from "@/features/admin/components/CreateTestUserDialog";
 
 type RawRole = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "nurse";
 type RoleEnum = RawRole | "none";
