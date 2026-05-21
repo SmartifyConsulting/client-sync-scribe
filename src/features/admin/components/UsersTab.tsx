@@ -101,28 +101,44 @@ export default function UsersTab({ kind }: UsersTabProps) {
     const ids = baseUsers.map((u) => u.user_id);
 
     if (ids.length) {
-      const [profsRes, doctorPracticeRes] = await Promise.all([
-        supabase.from("profiles").select("id, holarchelp_enabled, specialty, country" as any).in("id", ids),
+      const [profsRes, doctorPracticeRes, hospitalsRes, hospMembersRes] = await Promise.all([
+        supabase.from("profiles").select("id, holarchelp_enabled, specialty, country, mobile_number" as any).in("id", ids),
         supabase.from("practice_members" as any).select("doctor_id, practices(name)").in("doctor_id", ids),
+        supabase.from("holarchelp_hospitals" as any).select("owner_id, address, city, country").in("owner_id", ids),
+        supabase.from("holarchelp_hospital_members" as any).select("user_id, hospital_id, holarchelp_hospitals(address, city, country)").in("user_id", ids),
       ]);
 
       const helpMap = new Map<string, boolean>();
       const countryMap = new Map<string, string | null>();
+      const phoneMap = new Map<string, string | null>();
       const docCompanyMap = new Map<string, string>();
+      const hospitalAddrMap = new Map<string, string>();
       (profsRes.data || []).forEach((p: any) => {
         helpMap.set(p.id, !!p.holarchelp_enabled);
         countryMap.set(p.id, p.country ?? null);
+        phoneMap.set(p.id, p.mobile_number ?? null);
         if (p.specialty) docCompanyMap.set(p.id, p.specialty);
       });
       (doctorPracticeRes.data || []).forEach((m: any) => {
         if (m?.practices?.name) docCompanyMap.set(m.doctor_id, m.practices.name);
+      });
+      const formatAddr = (h: any) => [h?.address, h?.city, h?.country].filter(Boolean).join(", ");
+      (hospitalsRes.data || []).forEach((h: any) => {
+        const formatted = formatAddr(h);
+        if (h.owner_id && formatted && !hospitalAddrMap.has(h.owner_id)) hospitalAddrMap.set(h.owner_id, formatted);
+      });
+      (hospMembersRes.data || []).forEach((m: any) => {
+        const formatted = formatAddr(m?.holarchelp_hospitals);
+        if (m.user_id && formatted && !hospitalAddrMap.has(m.user_id)) hospitalAddrMap.set(m.user_id, formatted);
       });
 
       const merged = baseUsers.map((u) => ({
         ...u,
         holarchelp_enabled: helpMap.get(u.user_id) || false,
         country: countryMap.get(u.user_id) ?? null,
+        phone: phoneMap.get(u.user_id) ?? null,
         company: u.role === "doctor" ? docCompanyMap.get(u.user_id) || null : null,
+        address: u.role === "hospital_staff" ? hospitalAddrMap.get(u.user_id) || null : null,
       }));
 
       // Dedupe by user_id, preferring highest-priority role
