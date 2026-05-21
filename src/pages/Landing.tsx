@@ -549,8 +549,8 @@ export default function Landing() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#E01837]/10 mb-3">
                 <Ambulance className="h-7 w-7 text-[#E01837]" />
               </div>
-              <span className="text-base font-semibold text-foreground">Emergency Service Provider</span>
-              <span className="text-xs text-muted-foreground mt-1 text-center">Hospital, ER or emergency response</span>
+              <span className="text-base font-semibold text-foreground">Hospital or ER Provider</span>
+              <span className="text-xs text-muted-foreground mt-1 text-center">Contact us to onboard your organisation</span>
             </button>
           </div>
         </DialogContent>
