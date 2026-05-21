@@ -475,29 +475,39 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
 
   const update = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
 
-  const save = async () => {
+  const buildPayload = () => ({
+    [nameField(kind)]: form[nameField(kind)],
+    contact_email: form.contact_email || null,
+    contact_phone: form.contact_phone || null,
+    city: form.city || null,
+    country: form.country || null,
+    tier: form.tier || "tier_3",
+    latitude: form.latitude ?? null,
+    longitude: form.longitude ?? null,
+  });
+
+  // Autosave when editing an existing row (debounced).
+  const autosave = useAutosave(
+    form,
+    async () => {
+      if (!isEdit || !row?.id || !form[nameField(kind)]) return;
+      const { error } = await supabase.from(tableFor(kind) as any).update(buildPayload()).eq("id", row.id);
+      if (error) throw error;
+    },
+    { enabled: isEdit, delay: 500 },
+  );
+
+  const create = async () => {
     setSaving(true);
     try {
-      const payload: any = {
-        [nameField(kind)]: form[nameField(kind)],
-        contact_email: form.contact_email || null,
-        contact_phone: form.contact_phone || null,
-        city: form.city || null,
-        country: form.country || null,
-        tier: form.tier || "tier_3",
-        latitude: form.latitude ?? null,
-        longitude: form.longitude ?? null,
-      };
-      if (!isEdit) {
-        payload.status = "approved";
-        payload.approved_at = new Date().toISOString();
-        const { data: u } = await supabase.auth.getUser();
-        if (u?.user?.id) payload.owner_id = u.user.id;
-      }
-      const q = supabase.from(tableFor(kind) as any);
-      const { error } = isEdit ? await q.update(payload).eq("id", row.id) : await q.insert(payload);
+      const payload: any = buildPayload();
+      payload.status = "approved";
+      payload.approved_at = new Date().toISOString();
+      const { data: u } = await supabase.auth.getUser();
+      if (u?.user?.id) payload.owner_id = u.user.id;
+      const { error } = await supabase.from(tableFor(kind) as any).insert(payload);
       if (error) throw error;
-      toast.success(isEdit ? "Updated" : "Created");
+      toast.success("Created");
       onSaved();
     } catch (e: any) {
       toast.error(e?.message ?? "Save failed");
@@ -505,6 +515,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
       setSaving(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
