@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
-import { Siren, AlertTriangle, Clock } from "lucide-react";
+import { Siren, AlertTriangle, Clock, PlayCircle, Pause } from "lucide-react";
 import { ParamedicAcceptDialog } from "../../../components/ParamedicAcceptDialog";
+import { StartShiftDialog } from "../../../components/StartShiftDialog";
+import { useParamedicShift } from "../../../hooks/useParamedicShift";
+import { useProviderAccess } from "../../../components/ProviderGate";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -25,8 +27,10 @@ const ago = (iso: string) => {
 
 export default function IncomingSosScreen() {
   const { providerId } = useProviderAccess();
+  const { shift } = useParamedicShift();
   const [rows, setRows] = useState<Row[]>([]);
   const [pickFor, setPickFor] = useState<string | null>(null);
+  const [startOpen, setStartOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -44,6 +48,9 @@ export default function IncomingSosScreen() {
     return () => { supabase.removeChannel(ch); };
   }, []);
 
+  const isOffShift = !shift;
+  const isBusy = shift?.status === "busy";
+
   return (
     <div className="space-y-4">
       <header>
@@ -52,52 +59,72 @@ export default function IncomingSosScreen() {
         <p className="text-xs text-muted-foreground">First paramedic to accept locks the incident.</p>
       </header>
 
-      {!rows.length && (
+      {isOffShift && (
+        <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-8 text-center">
+          <PlayCircle className="mx-auto mb-2 h-7 w-7 text-primary" />
+          <p className="text-base font-bold">You are off shift</p>
+          <p className="mt-1 text-xs text-muted-foreground">Start a shift and pick your ambulance to begin receiving SOS notifications.</p>
+          <Button className="mt-3" onClick={() => setStartOpen(true)}>Start shift</Button>
+          <StartShiftDialog providerId={providerId} open={startOpen} onOpenChange={setStartOpen} />
+        </div>
+      )}
+
+      {!isOffShift && isBusy && (
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center">
+          <Pause className="mx-auto mb-2 h-6 w-6 text-destructive" />
+          <p className="text-sm font-bold">You're on an active incident</p>
+          <p className="mt-1 text-xs text-muted-foreground">You won't receive new SOS until you complete the current one.</p>
+        </div>
+      )}
+
+      {!isOffShift && !isBusy && !rows.length && (
         <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">
           <Siren className="mx-auto mb-2 h-6 w-6 opacity-50" />
           No unassigned SOS in your area. Standing by.
         </div>
       )}
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        {rows.map((r) => (
-          <div key={r.id} className={`rounded-2xl border-2 p-4 shadow-sm ${sevBig(r.severity)}`}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sos">
-                  <Siren className="h-3.5 w-3.5" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? "Emergency"}
-                </p>
-                <p className="mt-1 text-lg font-extrabold">Incident #{r.id.slice(0,8)}</p>
-                <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Clock className="h-3 w-3" /> Triggered {ago(r.created_at)} ago
-                </p>
+      {!isOffShift && !isBusy && (
+        <div className="grid gap-3 lg:grid-cols-2">
+          {rows.map((r) => (
+            <div key={r.id} className={`rounded-2xl border-2 p-4 shadow-sm ${sevBig(r.severity)}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sos">
+                    <Siren className="h-3.5 w-3.5" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? "Emergency"}
+                  </p>
+                  <p className="mt-1 text-lg font-extrabold">Incident #{r.id.slice(0,8)}</p>
+                  <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Clock className="h-3 w-3" /> Triggered {ago(r.created_at)} ago
+                  </p>
+                </div>
+                {(r.conscious === false || r.breathing === false) && (
+                  <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-1 text-[10px] font-bold uppercase text-destructive">
+                    <AlertTriangle className="mr-1 inline h-3 w-3" /> Life-threat
+                  </span>
+                )}
               </div>
-              {(r.conscious === false || r.breathing === false) && (
-                <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-1 text-[10px] font-bold uppercase text-destructive">
-                  <AlertTriangle className="mr-1 inline h-3 w-3" /> Life-threat
-                </span>
-              )}
+
+              <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                <Stat label="Conscious" value={r.conscious === false ? "No" : "Yes"} tone={r.conscious === false ? "destructive" : undefined} />
+                <Stat label="Breathing" value={r.breathing === false ? "No" : "Yes"} tone={r.breathing === false ? "destructive" : undefined} />
+              </div>
+
+              {r.notes && <p className="mt-2 rounded-xl border bg-background/60 p-2 text-xs italic text-muted-foreground line-clamp-3">"{r.notes}"</p>}
+
+              <Button size="lg" className="mt-3 h-12 w-full text-base font-extrabold" onClick={() => setPickFor(r.id)}>
+                Accept Incident
+              </Button>
             </div>
-
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <Stat label="Conscious" value={r.conscious === false ? "No" : "Yes"} tone={r.conscious === false ? "destructive" : undefined} />
-              <Stat label="Breathing" value={r.breathing === false ? "No" : "Yes"} tone={r.breathing === false ? "destructive" : undefined} />
-            </div>
-
-            {r.notes && <p className="mt-2 rounded-xl border bg-background/60 p-2 text-xs italic text-muted-foreground line-clamp-3">"{r.notes}"</p>}
-
-            <Button size="lg" className="mt-3 h-12 w-full text-base font-extrabold" onClick={() => setPickFor(r.id)}>
-              Accept Incident
-            </Button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <ParamedicAcceptDialog
         incidentId={pickFor}
-        providerId={providerId}
         open={!!pickFor}
         onOpenChange={(v) => { if (!v) setPickFor(null); }}
+        onNeedShift={() => setStartOpen(true)}
       />
     </div>
   );

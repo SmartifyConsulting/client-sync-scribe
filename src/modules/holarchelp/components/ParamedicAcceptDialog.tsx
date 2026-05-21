@@ -1,58 +1,30 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Truck, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Loader2, Truck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-type Ambulance = { id: string; vehicle_code: string; registration_number: string | null; status: string };
+import { useParamedicShift } from "../hooks/useParamedicShift";
 
 interface Props {
   incidentId: string | null;
-  providerId: string | null;
   open: boolean;
   onOpenChange: (v: boolean) => void;
+  onNeedShift?: () => void;
 }
 
-/**
- * Paramedic accept flow: lists the org's available ambulances, forces a pick,
- * then calls holarchelp_paramedic_accept. First to accept wins.
- */
-export function ParamedicAcceptDialog({ incidentId, providerId, open, onOpenChange }: Props) {
+export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedShift }: Props) {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [ambulances, setAmbulances] = useState<Ambulance[]>([]);
-  const [selected, setSelected] = useState<string>("");
+  const { shift } = useParamedicShift();
   const [accepting, setAccepting] = useState(false);
 
-  useEffect(() => {
-    if (!open || !providerId) return;
-    setLoading(true);
-    setSelected("");
-    supabase
-      .from("ambulances" as any)
-      .select("id, vehicle_code, registration_number, status")
-      .eq("provider_id", providerId)
-      .eq("status", "available")
-      .order("vehicle_code")
-      .then(({ data, error }) => {
-        if (error) toast.error(error.message);
-        const list = ((data as any) ?? []) as Ambulance[];
-        setAmbulances(list);
-        if (list.length === 1) setSelected(list[0].id);
-        setLoading(false);
-      });
-  }, [open, providerId]);
-
   const accept = async () => {
-    if (!incidentId || !selected) return;
+    if (!incidentId || !shift) return;
     setAccepting(true);
     const { error } = await supabase.rpc("holarchelp_paramedic_accept" as any, {
       _incident_id: incidentId,
-      _ambulance_id: selected,
+      _ambulance_id: shift.ambulance_id,
     });
     setAccepting(false);
     if (error) {
@@ -65,52 +37,46 @@ export function ParamedicAcceptDialog({ incidentId, providerId, open, onOpenChan
     navigate(`/provider/ambulance/incident/${incidentId}`);
   };
 
+  const noShift = !shift || shift.status !== "available";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5 text-primary" /> Accept SOS — pick your ambulance
+            <Truck className="h-5 w-5 text-primary" /> Accept SOS
           </DialogTitle>
         </DialogHeader>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : ambulances.length === 0 ? (
-          <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-            No available ambulances in your organisation. Ask your ER admin to add one or mark a vehicle as
-            available before accepting an incident.
+        {noShift ? (
+          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
+            <p className="flex items-center gap-2 font-semibold text-destructive">
+              <AlertCircle className="h-4 w-4" /> You're not on an available shift
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Start your shift and pick an ambulance before accepting an incident.
+            </p>
           </div>
         ) : (
-          <div className="space-y-2">
-            <Label>Ambulance</Label>
-            <Select value={selected} onValueChange={setSelected}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a vehicle" />
-              </SelectTrigger>
-              <SelectContent>
-                {ambulances.map((a) => (
-                  <SelectItem key={a.id} value={a.id}>
-                    {a.vehicle_code}
-                    {a.registration_number ? ` · ${a.registration_number}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              The ambulance is marked <strong>assigned</strong> until the incident is completed or released.
+          <div className="rounded-lg border bg-muted/30 p-4 text-sm">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">Responding with</p>
+            <p className="mt-1 text-lg font-bold">Ambulance · {shift.ambulance_id.slice(0, 8)}</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              You and your ambulance will be marked <strong>Busy</strong> until this incident is completed.
             </p>
           </div>
         )}
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={accept} disabled={!selected || accepting || ambulances.length === 0}>
-            {accepting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Accept incident
-          </Button>
+          {noShift ? (
+            <Button onClick={() => { onOpenChange(false); onNeedShift?.(); }}>Start shift</Button>
+          ) : (
+            <Button onClick={accept} disabled={accepting}>
+              {accepting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Accept incident
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

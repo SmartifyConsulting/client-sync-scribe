@@ -4,21 +4,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { InviteStaffDialog } from "../../../components/InviteStaffDialog";
 import { Button } from "@/components/ui/button";
-import { Users, UserCheck, UserX, UserPlus } from "lucide-react";
+import { Users, UserCheck, UserX, UserPlus, Truck } from "lucide-react";
 
 type Member = { id: string; user_id: string; role?: string | null; full_name?: string | null };
-
-const SHIFT_KEY = "holarc_amb_team_shifts";
-
-const readShifts = (): Record<string, boolean> => {
-  try { return JSON.parse(localStorage.getItem(SHIFT_KEY) ?? "{}"); } catch { return {}; }
-};
+type Shift = { user_id: string; status: string; ambulance_id: string; vehicle_code?: string | null };
 
 export default function TeamStatusScreen() {
   const { user } = useAuth();
   const { providerId } = useProviderAccess();
   const [members, setMembers] = useState<Member[]>([]);
-  const [shifts, setShifts] = useState<Record<string, boolean>>(readShifts);
+  const [shiftsByUser, setShiftsByUser] = useState<Record<string, Shift>>({});
   const [isAdmin, setIsAdmin] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
 
@@ -31,6 +26,18 @@ export default function TeamStatusScreen() {
       setIsAdmin(!!ok);
     })();
   }, [providerId, user?.id]);
+
+  const loadShifts = async (pid: string) => {
+    const { data } = await supabase.from("paramedic_shifts" as any)
+      .select("user_id, status, ambulance_id, ambulances(vehicle_code)")
+      .eq("provider_id", pid)
+      .is("ended_at", null);
+    const map: Record<string, Shift> = {};
+    ((data as any) ?? []).forEach((r: any) => {
+      map[r.user_id] = { user_id: r.user_id, status: r.status, ambulance_id: r.ambulance_id, vehicle_code: r.ambulances?.vehicle_code ?? null };
+    });
+    setShiftsByUser(map);
+  };
 
   useEffect(() => {
     if (!providerId) return;
@@ -46,17 +53,16 @@ export default function TeamStatusScreen() {
       }
       setMembers(list.map(x => ({ ...x, full_name: profMap[x.user_id] ?? "Crew member" })));
     })();
+    loadShifts(providerId);
+    const ch = supabase.channel(`shifts-${providerId}`)
+      .on("postgres_changes",
+        { event: "*", schema: "public", table: "paramedic_shifts", filter: `provider_id=eq.${providerId}` },
+        () => loadShifts(providerId))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [providerId]);
 
-  const toggle = (uid: string) => {
-    setShifts((s) => {
-      const next = { ...s, [uid]: !s[uid] };
-      try { localStorage.setItem(SHIFT_KEY, JSON.stringify(next)); } catch {}
-      return next;
-    });
-  };
-
-  const onShift = members.filter(m => shifts[m.user_id]).length;
+  const onShift = Object.values(shiftsByUser).filter(s => s.status !== "off_shift").length;
 
   return (
     <div className="space-y-4">
@@ -64,6 +70,7 @@ export default function TeamStatusScreen() {
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
           <h1 className="text-2xl font-extrabold">Team Status</h1>
+          <p className="text-xs text-muted-foreground">Live shift + ambulance status. Synced with active incidents.</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">
@@ -80,22 +87,30 @@ export default function TeamStatusScreen() {
       <div className="overflow-hidden rounded-2xl border bg-card">
         <ul className="divide-y">
           {members.map((m) => {
-            const active = !!shifts[m.user_id];
+            const s = shiftsByUser[m.user_id];
+            const active = !!s && s.status !== "off_shift";
+            const busy = s?.status === "busy";
             return (
               <li key={m.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40">
                 {active
-                  ? <UserCheck className="h-4 w-4 text-success" />
+                  ? <UserCheck className={`h-4 w-4 ${busy ? "text-destructive" : "text-success"}`} />
                   : <UserX className="h-4 w-4 text-muted-foreground" />}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">{m.full_name}</p>
-                  <p className="text-[11px] text-muted-foreground">{m.role ?? "Paramedic"}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {m.role ?? "Paramedic"}
+                    {s?.vehicle_code && <> · <Truck className="inline h-3 w-3" /> {s.vehicle_code}</>}
+                  </p>
                 </div>
-                <button
-                  onClick={() => toggle(m.user_id)}
-                  className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider transition ${active ? "border-success/40 bg-success/10 text-success" : "border-border bg-background text-muted-foreground"}`}
+                <span
+                  className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                    busy ? "border-destructive/40 bg-destructive/10 text-destructive"
+                    : active ? "border-success/40 bg-success/10 text-success"
+                    : "border-border bg-background text-muted-foreground"
+                  }`}
                 >
-                  {active ? "On shift" : "Off shift"}
-                </button>
+                  {busy ? "Busy" : active ? "Available" : "Off shift"}
+                </span>
               </li>
             );
           })}

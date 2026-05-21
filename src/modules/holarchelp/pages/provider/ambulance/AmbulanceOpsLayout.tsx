@@ -1,27 +1,21 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Siren, Users, Truck, Wifi } from "lucide-react";
+import { Siren, Truck, Wifi, PlayCircle, StopCircle, Loader2 } from "lucide-react";
 import { ProviderAppLayout } from "@/components/layout/ProviderAppLayout";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useAmbulanceOpsStats } from "../../../hooks/useAmbulanceOpsStats";
+import { useParamedicShift } from "../../../hooks/useParamedicShift";
+import { StartShiftDialog } from "../../../components/StartShiftDialog";
 import { cn } from "@/lib/utils";
-
-type VehicleStatus = "available" | "dispatched" | "out_of_service";
-type TeamStatus = "on_shift" | "off_shift";
-
-const VEHICLE_KEY = "holarc_amb_vehicle_status";
-const TEAM_KEY = "holarc_amb_team_status";
+import { toast } from "sonner";
 
 function AmbulanceStatsStrip() {
   const { providerId } = useProviderAccess();
   const { stats } = useAmbulanceOpsStats(providerId);
+  const { shift, endShift } = useParamedicShift();
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
-  const [vehicle, setVehicle] = useState<VehicleStatus>(
-    () => (typeof localStorage !== "undefined" ? (localStorage.getItem(VEHICLE_KEY) as VehicleStatus) : null) || "available",
-  );
-  const [team, setTeam] = useState<TeamStatus>(
-    () => (typeof localStorage !== "undefined" ? (localStorage.getItem(TEAM_KEY) as TeamStatus) : null) || "on_shift",
-  );
+  const [startOpen, setStartOpen] = useState(false);
+  const [ending, setEnding] = useState(false);
 
   useEffect(() => {
     const on = () => setOnline(true);
@@ -34,15 +28,17 @@ function AmbulanceStatsStrip() {
     };
   }, []);
 
-  useEffect(() => { try { localStorage.setItem(VEHICLE_KEY, vehicle); } catch {} }, [vehicle]);
-  useEffect(() => { try { localStorage.setItem(TEAM_KEY, team); } catch {} }, [team]);
+  const onEnd = async () => {
+    setEnding(true);
+    try { await endShift(); toast.success("Shift ended"); }
+    catch (e: any) { toast.error(e.message ?? "Could not end shift"); }
+    finally { setEnding(false); }
+  };
 
-  const vehicleTone =
-    vehicle === "dispatched"
-      ? "border-primary/40 bg-primary/10 text-primary"
-      : vehicle === "out_of_service"
-        ? "border-destructive/40 bg-destructive/10 text-destructive"
-        : "border-success/40 bg-success/10 text-success";
+  const statusTone =
+    !shift ? "border-border bg-card text-muted-foreground"
+    : shift.status === "busy" ? "border-destructive/40 bg-destructive/10 text-destructive"
+    : "border-success/40 bg-success/10 text-success";
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-card/60 p-2">
@@ -62,28 +58,32 @@ function AmbulanceStatsStrip() {
         </span>
       )}
 
-      <button
-        onClick={() => setTeam((s) => (s === "on_shift" ? "off_shift" : "on_shift"))}
-        className={cn(
-          "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
-          team === "on_shift"
-            ? "border-success/40 bg-success/10 text-success"
-            : "border-border bg-card text-muted-foreground",
-        )}
-      >
-        <Users className="h-3.5 w-3.5" />
-        {team === "on_shift" ? "On shift" : "Off shift"}
-      </button>
+      <span className={cn(
+        "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
+        statusTone,
+      )}>
+        <Truck className="h-3.5 w-3.5" />
+        {!shift ? "Off shift" : shift.status === "busy" ? "Busy" : "Available"}
+      </span>
 
-      <select
-        value={vehicle}
-        onChange={(e) => setVehicle(e.target.value as VehicleStatus)}
-        className={cn("rounded-xl border bg-transparent px-2 py-1.5 text-xs font-bold uppercase tracking-wider", vehicleTone)}
-      >
-        <option value="available">🟢 Available</option>
-        <option value="dispatched">🚑 Dispatched</option>
-        <option value="out_of_service">⛔ Out of service</option>
-      </select>
+      {!shift ? (
+        <button
+          onClick={() => setStartOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/15"
+        >
+          <PlayCircle className="h-3.5 w-3.5" /> Start shift
+        </button>
+      ) : (
+        <button
+          onClick={onEnd}
+          disabled={ending || shift.status === "busy"}
+          title={shift.status === "busy" ? "Finish your active incident first" : ""}
+          className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted disabled:opacity-50"
+        >
+          {ending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StopCircle className="h-3.5 w-3.5" />}
+          End shift
+        </button>
+      )}
 
       <span className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-[11px]">
         <Truck className="h-3.5 w-3.5 text-muted-foreground" />
@@ -94,6 +94,8 @@ function AmbulanceStatsStrip() {
         <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
         {online ? "Online" : "Offline"}
       </span>
+
+      <StartShiftDialog providerId={providerId} open={startOpen} onOpenChange={setStartOpen} />
     </div>
   );
 }
