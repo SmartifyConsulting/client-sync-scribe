@@ -550,7 +550,7 @@ export default function Landing() {
                 <Ambulance className="h-7 w-7 text-[#E01837]" />
               </div>
               <span className="text-base font-semibold text-foreground">Emergency Service Provider</span>
-              <span className="text-xs text-muted-foreground mt-1 text-center">Hospital, ER or ambulance</span>
+              <span className="text-xs text-muted-foreground mt-1 text-center">Hospital, ER or emergency response</span>
             </button>
           </div>
         </DialogContent>
