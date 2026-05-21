@@ -280,7 +280,7 @@ export default function HolarcHelpIncidentDetail() {
         <div className="mb-3 flex items-start gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 p-3 text-sm dark:bg-red-950/20">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="flex-1">
-            <p className="font-semibold text-red-700">No ambulance has accepted yet.</p>
+            <p className="font-semibold text-red-700">No emergency responder has accepted yet.</p>
             <p className="text-xs text-red-700/80">We're still searching. Please consider calling an emergency line directly.</p>
             <Button size="sm" variant="destructive" className="mt-2 gap-1" onClick={callEmergency}>
               <Phone className="h-4 w-4" /> Call 10177 now
