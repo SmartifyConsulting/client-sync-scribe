@@ -1,47 +1,51 @@
-## What's wrong
+## Changes
 
-1. **Duplicate Renken rows.** `holarchelp_ambulance_providers` contains **224 rows** of "Renken Ambulance Service" all owned by the same user (`3697719d-…`). Only one of them is real — the rest are leftover from earlier bulk-insert tests. None are referenced by incidents.
-   - A separate row, **"Renken ER Services"** (different owner), is legitimate and stays.
-   - No other provider has duplicates.
+### 1. Remove SOS Voice Clip tab from HolarcHelp admin
 
-2. **Tab layout.** In `src/pages/admin/HolarcHelpProviders.tsx` the Users tabs currently render in this order:
-   `Patients · Healthcare Providers · Hospitals · Ambulance · Pharmacies · Emergency Users · Admin`
-   You want the standalone "Ambulance" tab folded into "Emergency Users" and placed next to Hospitals.
+In `src/pages/admin/HolarcHelpProviders.tsx`:
 
-## Fix
+- Remove the `voice-clip` TabsTrigger and its TabsContent.
+- Remove the `voiceClipPath`, `clipFile`, `uploadingClip` state, `loadVoiceClip`, `uploadClip`, related useEffect, and the `Mic2` import.
+- Update the page description: drop "and the SOS voice clip".
 
-### 1. Data cleanup (one-off)
-Keep the oldest Renken Ambulance Service row per owner, delete the other 223:
+### 2. Show Address + Phone in User Admin
 
-```sql
-DELETE FROM public.holarchelp_ambulance_providers a
-WHERE a.company_name = 'Renken Ambulance Service'
-  AND a.id <> (
-    SELECT id FROM public.holarchelp_ambulance_providers b
-    WHERE b.company_name = a.company_name AND b.owner_id = a.owner_id
-    ORDER BY created_at ASC LIMIT 1
-  );
-```
-Safe because no incidents reference these rows.
+In `src/features/admin/components/UsersTab.tsx`:
 
-### 2. Tab merge (UI only)
-In `HolarcHelpProviders.tsx`:
-- Remove the standalone `ambulance` trigger and its `TabsContent`.
-- Move `emergency-users` to sit **immediately after Hospitals**.
-- Keep its label "Emergency Users" with the `Ambulance` icon.
-- The dedicated Ambulance provider management (tier/status/edit table) is still reachable — it remains accessible via the existing flow, just no longer as its own top-level tab. (The Ambulance CRUD UI currently lives only inside that tab. See below for one decision needed.)
+- Extend the hospital profiles fetch to also select `practice_address`
+- &nbsp;
+- Add an "Address" column **only** on the Hospital tab; within that tab show the hospital address for hospital_staff rows and "—" for other emergency roles.
+- Fields are read-only in the table (editing handled by the existing edit flow / autosave below).
 
-### Final tab order
-`Patients · Healthcare Providers · Hospitals · Emergency Users · Pharmacies · Admin`
+### 3. Autosave on changes across Admin
 
-## One question before I build
+Switch every admin form from explicit Save buttons to debounced autosave (500ms) with a subtle "Saving… / Saved" status indicator next to each field group.
 
-The current **Ambulance** tab is not just a user list — it also contains the **provider management table** (tier, active/inactive switch, edit/delete) for ambulance companies, grouped by country. The **Emergency Users** tab is a *user* list grouped by provider type (it uses `UsersTab kind="emergency"`).
+- **UsersTab inline edit (`src/features/admin/components/UsersTab.tsx`)**
+  - Remove the Save/Cancel buttons; clicking Pencil still opens edit mode, but typing in First/Last/Email autosaves on debounce.
+  - Email change still routes through the `admin-update-email` edge function (only fires once the new value is a valid email and differs from current).
+  - Role Select already autosaves (kept as-is, including the admin-confirmation dialog).
+  - HolarcHelp toggle already autosaves (unchanged).
+  - Replace per-row Save icon with a small status pill: idle → "Edited" → spinner → check.
+- **Provider edit dialog (`HolarcHelpProviders.tsx` → `ProviderDialog`)**
+  - Remove the Save button. Each field autosaves on blur/change (debounced 500ms). Dialog footer shows live "Saving / Saved" state and a Close button only.
+  - Approve action still requires explicit click.
+- **PricingAdmin (`src/pages/admin/PricingAdmin.tsx`)**
+  - Remove explicit Save; autosave each pricing tier field on debounce. Show inline "Saved" indicator.
+- **GamificationAdmin (`src/pages/admin/GamificationAdmin.tsx`)**
+  - Same pattern: drop Save buttons, autosave with debounce and "Saved" indicator.
 
-These are two different things. Which do you want?
+A shared `useAutosave(value, save, { delay: 500 })` hook will live at `src/features/admin/hooks/useAutosave.ts` and be reused across all four surfaces.
 
-- **A.** Drop the ambulance provider-management table entirely (you'd manage ambulance companies from the Healthcare Providers / Hospitals-style flow elsewhere, or not at all from admin).
-- **B.** Keep the ambulance provider-management table, but render it *inside* the new "Emergency Users" tab below the user list (so one tab shows both staff users and the companies they belong to).
-- **C.** Keep the ambulance provider-management table somewhere else (e.g. a sub-tab inside Hospitals, or a new "Providers" admin page).
+## Technical notes
 
-I'd recommend **B** — single Emergency Users tab with users on top and a collapsible "Ambulance companies" section below — but want your call before touching the file.
+- The `holarchelp_voice_clip_settings` table and `guardian-voice-clips` storage bucket are left untouched (no data migration) — only the admin UI is removed.
+- For the Emergency tab Address lookup we batch-query `holarchelp_hospitals` by `owner_id IN (...)` once per fetch.
+- Email autosave guards: skip if value === original, skip if it fails a basic RFC regex, and show an inline error toast if the edge function rejects.
+- Role changes that require confirmation (to/from admin) keep the AlertDialog — autosave only applies after confirmation.
+
+## Out of scope
+
+- No schema changes (no new `address` column on profiles).
+- No edits to non-admin pages or to the existing SOS user flow that consumes the voice clip.
+- No changes to the bucket / DB row for the voice clip.

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +7,8 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminPage } from "@/pages/admin/_shared/AdminPage";
 import { AdminPanel } from "@/pages/admin/_shared/AdminPanel";
+import { useAutosave } from "@/features/admin/hooks/useAutosave";
+import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 
 interface PricingConfig {
   id: string;

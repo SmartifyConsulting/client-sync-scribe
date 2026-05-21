@@ -23,7 +23,9 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, Upload, BarChart3, Mic2, Plus, Pencil, Trash2, Users, Pill, Stethoscope } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, BarChart3, Plus, Pencil, Trash2, Users, Pill, Stethoscope } from "lucide-react";
+import { useAutosave } from "@/features/admin/hooks/useAutosave";
+import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import { AccountabilityPanel } from "./HolarcHelpAccountability";
 import UsersTab from "@/features/admin/components/UsersTab";
 import { AdminPage } from "./_shared/AdminPage";
@@ -97,10 +99,6 @@ export default function HolarcHelpProviders() {
   const [chooserOpen, setChooserOpen] = useState(false);
   const [providerSearch, setProviderSearch] = useState<Record<Kind, string>>({ hospital: "", ambulance: "", pharmacy: "" });
 
-  const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
-  const [clipFile, setClipFile] = useState<File | null>(null);
-  const [uploadingClip, setUploadingClip] = useState(false);
-
   const filterByStatus = (rows: any[]) =>
     status === "all" ? rows : status === "active" ? rows.filter((r) => isActive(r.status)) : rows.filter((r) => !isActive(r.status));
 
@@ -129,17 +127,7 @@ export default function HolarcHelpProviders() {
     }
   };
 
-  const loadVoiceClip = async () => {
-    const { data } = await supabase
-      .from("holarchelp_voice_clip_settings" as any)
-      .select("default_clip_path")
-      .eq("id", 1)
-      .maybeSingle();
-    setVoiceClipPath((data as any)?.default_clip_path ?? null);
-  };
-
   useEffect(() => { if (isAdmin) load(); }, [isAdmin, status]);
-  useEffect(() => { if (isAdmin) loadVoiceClip(); }, [isAdmin]);
 
   if (roleLoading) {
     return <div className="flex h-64 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
@@ -172,22 +160,6 @@ export default function HolarcHelpProviders() {
     toast.success("Deleted"); setConfirmDelete(null); load();
   };
 
-  const uploadClip = async () => {
-    if (!clipFile) return toast.error("Choose an MP3 first");
-    setUploadingClip(true);
-    const path = `default/${Date.now()}-${clipFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const { error: upErr } = await supabase.storage.from("guardian-voice-clips").upload(path, clipFile, {
-      contentType: clipFile.type || "audio/mpeg", upsert: false,
-    });
-    if (upErr) { setUploadingClip(false); return toast.error(upErr.message); }
-    const { error: dbErr } = await supabase.from("holarchelp_voice_clip_settings" as any)
-      .upsert({ id: 1, default_clip_path: path, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
-    setUploadingClip(false);
-    if (dbErr) return toast.error(dbErr.message);
-    toast.success("SOS voice clip set");
-    setClipFile(null);
-    loadVoiceClip();
-  };
 
   const renderRow = (kind: Kind, r: any) => {
     const active = isActive(r.status);
@@ -369,7 +341,7 @@ export default function HolarcHelpProviders() {
     <AdminPage
       eyebrow="Admin"
       title="User Management"
-      description="Manage users, accountability, and the SOS voice clip."
+      description="Manage users and accountability."
     >
       <Tabs defaultValue="users">
         <TabsList className={adminTabsListClass}>
@@ -378,9 +350,6 @@ export default function HolarcHelpProviders() {
           </TabsTrigger>
           <TabsTrigger value="accountability" className={`${adminTabsTriggerClass} gap-1.5`}>
             <BarChart3 className="h-3.5 w-3.5" />Accountability
-          </TabsTrigger>
-          <TabsTrigger value="voice-clip" className={`${adminTabsTriggerClass} gap-1.5`}>
-            <Mic2 className="h-3.5 w-3.5" />SOS Voice Clip
           </TabsTrigger>
         </TabsList>
 
@@ -433,37 +402,6 @@ export default function HolarcHelpProviders() {
           <AccountabilityPanel />
         </TabsContent>
 
-        <TabsContent value="voice-clip" className="mt-4">
-          <AdminPanel
-            title="SOS voice clip"
-            description="The MP3 played to emergency contacts when an SOS call connects."
-          >
-            <div className="space-y-3">
-              <div className="rounded-md border border-[hsl(var(--admin-border-subtle))] p-3 bg-[hsl(var(--admin-surface-muted))]">
-                <p className="text-[11.5px] font-semibold text-[hsl(var(--admin-text-primary))]">Current default clip</p>
-                <p className="text-[11.5px] text-[hsl(var(--admin-text-tertiary))] mt-0.5">
-                  {voiceClipPath ? voiceClipPath : "None — calls will use a fallback text-to-speech message."}
-                </p>
-              </div>
-              <div className="rounded-md border border-[hsl(var(--admin-border-subtle))] p-3 space-y-2">
-                <p className="text-[11.5px] font-semibold text-[hsl(var(--admin-text-primary))]">Upload new MP3</p>
-                <input
-                  type="file"
-                  accept="audio/mpeg,.mp3"
-                  onChange={(e) => setClipFile(e.target.files?.[0] ?? null)}
-                  className="block w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
-                />
-                <Button size="sm" onClick={uploadClip} disabled={!clipFile || uploadingClip} className="h-8 px-3 text-[12px]">
-                  {uploadingClip ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
-                  Upload &amp; set as default
-                </Button>
-                <p className="text-[11px] text-[hsl(var(--admin-text-tertiary))]">
-                  Tip: keep clips under ~30 seconds. Africa's Talking sandbox only delivers to numbers registered in their Simulator.
-                </p>
-              </div>
-            </div>
-          </AdminPanel>
-        </TabsContent>
       </Tabs>
 
       <ProviderDialog
@@ -537,29 +475,39 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
 
   const update = (k: string, v: any) => setForm((f: any) => ({ ...f, [k]: v }));
 
-  const save = async () => {
+  const buildPayload = () => ({
+    [nameField(kind)]: form[nameField(kind)],
+    contact_email: form.contact_email || null,
+    contact_phone: form.contact_phone || null,
+    city: form.city || null,
+    country: form.country || null,
+    tier: form.tier || "tier_3",
+    latitude: form.latitude ?? null,
+    longitude: form.longitude ?? null,
+  });
+
+  // Autosave when editing an existing row (debounced).
+  const autosave = useAutosave(
+    form,
+    async () => {
+      if (!isEdit || !row?.id || !form[nameField(kind)]) return;
+      const { error } = await supabase.from(tableFor(kind) as any).update(buildPayload()).eq("id", row.id);
+      if (error) throw error;
+    },
+    { enabled: isEdit, delay: 500 },
+  );
+
+  const create = async () => {
     setSaving(true);
     try {
-      const payload: any = {
-        [nameField(kind)]: form[nameField(kind)],
-        contact_email: form.contact_email || null,
-        contact_phone: form.contact_phone || null,
-        city: form.city || null,
-        country: form.country || null,
-        tier: form.tier || "tier_3",
-        latitude: form.latitude ?? null,
-        longitude: form.longitude ?? null,
-      };
-      if (!isEdit) {
-        payload.status = "approved";
-        payload.approved_at = new Date().toISOString();
-        const { data: u } = await supabase.auth.getUser();
-        if (u?.user?.id) payload.owner_id = u.user.id;
-      }
-      const q = supabase.from(tableFor(kind) as any);
-      const { error } = isEdit ? await q.update(payload).eq("id", row.id) : await q.insert(payload);
+      const payload: any = buildPayload();
+      payload.status = "approved";
+      payload.approved_at = new Date().toISOString();
+      const { data: u } = await supabase.auth.getUser();
+      if (u?.user?.id) payload.owner_id = u.user.id;
+      const { error } = await supabase.from(tableFor(kind) as any).insert(payload);
       if (error) throw error;
-      toast.success(isEdit ? "Updated" : "Created");
+      toast.success("Created");
       onSaved();
     } catch (e: any) {
       toast.error(e?.message ?? "Save failed");
@@ -567,6 +515,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
       setSaving(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -635,12 +584,21 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
             Note: providers control their own "accepting patients" status from their provider view.
           </p>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={save} disabled={saving || !form[nameField(kind)]}>
-            {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
-            {isEdit ? "Save" : "Create"}
-          </Button>
+        <DialogFooter className="items-center sm:justify-between gap-2">
+          {isEdit ? (
+            <>
+              <AutosaveIndicator status={autosave.status} error={autosave.error} />
+              <Button variant="outline" onClick={() => { onSaved(); }}>Close</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button onClick={create} disabled={saving || !form[nameField(kind)]}>
+                {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+                Create
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

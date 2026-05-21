@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, Save, X, Shield, Trash2, Users } from "lucide-react";
+import { Loader2, Pencil, X, Shield, Trash2, Users } from "lucide-react";
+import { useAutosave } from "@/features/admin/hooks/useAutosave";
+import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -54,6 +56,8 @@ interface UserRecord {
   holarchelp_enabled?: boolean;
   company?: string | null;
   country?: string | null;
+  phone?: string | null;
+  address?: string | null;
 }
 
 interface EditState {
@@ -97,28 +101,44 @@ export default function UsersTab({ kind }: UsersTabProps) {
     const ids = baseUsers.map((u) => u.user_id);
 
     if (ids.length) {
-      const [profsRes, doctorPracticeRes] = await Promise.all([
-        supabase.from("profiles").select("id, holarchelp_enabled, specialty, country" as any).in("id", ids),
+      const [profsRes, doctorPracticeRes, hospitalsRes, hospMembersRes] = await Promise.all([
+        supabase.from("profiles").select("id, holarchelp_enabled, specialty, country, mobile_number" as any).in("id", ids),
         supabase.from("practice_members" as any).select("doctor_id, practices(name)").in("doctor_id", ids),
+        supabase.from("holarchelp_hospitals" as any).select("owner_id, address, city, country").in("owner_id", ids),
+        supabase.from("holarchelp_hospital_members" as any).select("user_id, hospital_id, holarchelp_hospitals(address, city, country)").in("user_id", ids),
       ]);
 
       const helpMap = new Map<string, boolean>();
       const countryMap = new Map<string, string | null>();
+      const phoneMap = new Map<string, string | null>();
       const docCompanyMap = new Map<string, string>();
+      const hospitalAddrMap = new Map<string, string>();
       (profsRes.data || []).forEach((p: any) => {
         helpMap.set(p.id, !!p.holarchelp_enabled);
         countryMap.set(p.id, p.country ?? null);
+        phoneMap.set(p.id, p.mobile_number ?? null);
         if (p.specialty) docCompanyMap.set(p.id, p.specialty);
       });
       (doctorPracticeRes.data || []).forEach((m: any) => {
         if (m?.practices?.name) docCompanyMap.set(m.doctor_id, m.practices.name);
+      });
+      const formatAddr = (h: any) => [h?.address, h?.city, h?.country].filter(Boolean).join(", ");
+      (hospitalsRes.data || []).forEach((h: any) => {
+        const formatted = formatAddr(h);
+        if (h.owner_id && formatted && !hospitalAddrMap.has(h.owner_id)) hospitalAddrMap.set(h.owner_id, formatted);
+      });
+      (hospMembersRes.data || []).forEach((m: any) => {
+        const formatted = formatAddr(m?.holarchelp_hospitals);
+        if (m.user_id && formatted && !hospitalAddrMap.has(m.user_id)) hospitalAddrMap.set(m.user_id, formatted);
       });
 
       const merged = baseUsers.map((u) => ({
         ...u,
         holarchelp_enabled: helpMap.get(u.user_id) || false,
         country: countryMap.get(u.user_id) ?? null,
+        phone: phoneMap.get(u.user_id) ?? null,
         company: u.role === "doctor" ? docCompanyMap.get(u.user_id) || null : null,
+        address: u.role === "hospital_staff" ? hospitalAddrMap.get(u.user_id) || null : null,
       }));
 
       // Dedupe by user_id, preferring highest-priority role
@@ -201,35 +221,36 @@ export default function UsersTab({ kind }: UsersTabProps) {
 
   const cancelEditing = () => setEditingId(null);
 
-  const saveUser = async (userId: string) => {
-    setSaving(true);
-    try {
-      const combinedName = `${editState.first_name} ${editState.last_name}`.trim();
+  const saveEdit = async (userId: string, next: EditState, original: UserRecord) => {
+    const combinedName = `${next.first_name} ${next.last_name}`.trim();
+    if (combinedName !== (original.full_name || "")) {
       const { error: profileError } = await supabase
         .from("profiles")
         .update({ full_name: combinedName })
         .eq("id", userId);
       if (profileError) throw profileError;
-
-      const currentUser = users.find((u) => u.user_id === userId);
-      if (currentUser && currentUser.email !== editState.email) {
-        const { data, error: emailError } = await supabase.functions.invoke("admin-update-email", {
-          body: { userId, newEmail: editState.email },
-        });
-        if (emailError) throw emailError;
-        if (data?.error) throw new Error(data.error);
-      }
-
-      toast({ title: "User updated" });
-      setEditingId(null);
-      fetchUsers();
-    } catch (error: any) {
-      console.error("saveUser failed", error);
-      toast({ title: "Error saving", description: error.message || "Unknown error", variant: "destructive" });
-    } finally {
-      setSaving(false);
     }
+
+    if (next.email && next.email !== original.email && /.+@.+\..+/.test(next.email)) {
+      const { data, error: emailError } = await supabase.functions.invoke("admin-update-email", {
+        body: { userId, newEmail: next.email },
+      });
+      if (emailError) throw emailError;
+      if (data?.error) throw new Error(data.error);
+    }
+
+    setUsers((prev) => prev.map((u) => u.user_id === userId ? { ...u, full_name: combinedName, email: next.email } : u));
   };
+
+  const editingUser = useMemo(() => users.find((u) => u.user_id === editingId) || null, [users, editingId]);
+  const autosave = useAutosave(
+    editState,
+    async (val) => {
+      if (!editingId || !editingUser) return;
+      await saveEdit(editingId, val, editingUser);
+    },
+    { enabled: !!editingId, delay: 600 },
+  );
 
   const deleteUser = async () => {
     if (!pendingDelete) return;
@@ -278,6 +299,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
   };
 
   const showCompany = kind === "doctor";
+  const showAddress = kind === "emergency";
   const noun =
     kind === "doctor" ? "healthcare providers" :
     kind === "admin" ? "administrators" :
@@ -291,6 +313,8 @@ export default function UsersTab({ kind }: UsersTabProps) {
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            {showAddress && <TableHead>Address</TableHead>}
             {showCompany && <TableHead>Practice</TableHead>}
             <TableHead>Role</TableHead>
             <TableHead>
@@ -298,7 +322,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
             </TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Joined</TableHead>
-            <TableHead className="w-[88px] text-right">Actions</TableHead>
+            <TableHead className="w-[110px] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -329,6 +353,12 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     u.email
                   )}
                 </TableCell>
+                <TableCell className="text-[hsl(var(--admin-text-secondary))] text-[12px] tabular-nums">{u.phone || "—"}</TableCell>
+                {showAddress && (
+                  <TableCell className="text-[hsl(var(--admin-text-secondary))] text-[12px] max-w-[260px] truncate" title={u.address || ""}>
+                    {u.address || "—"}
+                  </TableCell>
+                )}
                 {showCompany && (
                   <TableCell>{u.company || "—"}</TableCell>
                 )}
@@ -364,11 +394,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
                 <TableCell className="text-[hsl(var(--admin-text-tertiary))]">{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
                 <TableCell className="text-right">
                   {isEditing ? (
-                    <div className="flex justify-end gap-0.5">
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => saveUser(u.user_id)} disabled={saving}>
-                        {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={cancelEditing} disabled={saving}>
+                    <div className="flex justify-end items-center gap-1.5">
+                      <AutosaveIndicator status={autosave.status} error={autosave.error} />
+                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={cancelEditing} title="Close">
                         <X className="h-3.5 w-3.5" />
                       </Button>
                     </div>
