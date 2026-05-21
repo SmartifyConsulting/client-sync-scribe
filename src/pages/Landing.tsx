@@ -86,7 +86,7 @@ const providerBenefits = [
     icon: Ambulance,
     title: "Emergency Service Providers",
     description:
-      "Ambulance crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context.",
+      "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context.",
   },
   {
     icon: Hospital,
