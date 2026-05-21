@@ -23,7 +23,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, BarChart3, Plus, Pencil, Trash2, Users, Pill, Stethoscope } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, BarChart3, Plus, Pencil, Trash2, Users, Pill, Stethoscope, UserPlus } from "lucide-react";
+import { InviteStaffDialog, type OrgType } from "@/modules/holarchelp/components/InviteStaffDialog";
 import { useAutosave } from "@/features/admin/hooks/useAutosave";
 import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import { AccountabilityPanel } from "./HolarcHelpAccountability";
@@ -97,6 +98,7 @@ export default function HolarcHelpProviders() {
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
   const [chooserOpen, setChooserOpen] = useState(false);
+  const [invite, setInvite] = useState<{ orgType: OrgType; id: string; name: string } | null>(null);
   const [providerSearch, setProviderSearch] = useState<Record<Kind, string>>({ hospital: "", ambulance: "", pharmacy: "" });
 
   const filterByStatus = (rows: any[]) =>
@@ -196,6 +198,12 @@ export default function HolarcHelpProviders() {
           </div>
         </TableCell>
         <TableCell className="text-right space-x-1">
+          {(kind === "hospital" || kind === "ambulance") && (
+            <Button size="icon" variant="ghost" className="h-8 w-8" title="Invite staff"
+              onClick={() => setInvite({ orgType: kind as OrgType, id: r.id, name: r[nameField(kind)] })}>
+              <UserPlus className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEdit({ kind, row: r })}>
             <Pencil className="h-3.5 w-3.5" />
           </Button>
@@ -448,6 +456,16 @@ export default function HolarcHelpProviders() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {invite && (
+        <InviteStaffDialog
+          open={!!invite}
+          onOpenChange={(o) => !o && setInvite(null)}
+          orgType={invite.orgType}
+          orgId={invite.id}
+          orgName={invite.name}
+        />
+      )}
     </AdminPage>
   );
 }
