@@ -36,7 +36,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
   const isProvider = variant === "provider";
   const [reportOpen, setReportOpen] = useState(false);
   const { profile } = useProfile();
-  const { isDoctor } = useUserRole();
+  const { isDoctor, isEmergency } = useUserRole();
   const queryClient = useQueryClient();
   const location = useLocation();
   const navigate = useNavigate();
