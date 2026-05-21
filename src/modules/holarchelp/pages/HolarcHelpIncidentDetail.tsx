@@ -298,7 +298,7 @@ export default function HolarcHelpIncidentDetail() {
           <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600" />
           <div>
             <p className="font-semibold text-red-700">Your responder is unable to continue.</p>
-            <p className="text-xs text-red-700/80">Finding the next available ambulance…</p>
+            <p className="text-xs text-red-700/80">Finding the next available emergency responder…</p>
           </div>
         </div>
       )}
