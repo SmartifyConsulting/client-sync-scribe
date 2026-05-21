@@ -521,7 +521,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : kind === "ambulance" ? "Ambulance Provider" : "Pharmacy"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit" : "Add"} {kind === "hospital" ? "Hospital" : kind === "ambulance" ? "Emergency Response Provider" : "Pharmacy"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1.5">
