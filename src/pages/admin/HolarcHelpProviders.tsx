@@ -358,26 +358,26 @@ export default function HolarcHelpProviders() {
               <UsersTab kind="admin" />
             </TabsContent>
 
-            {(["hospital", "ambulance", "pharmacy"] as Kind[]).map((k) => {
-              const fullList = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
-              const noun = nounFor(k);
-              const q = providerSearch[k].trim().toLowerCase();
-              const list = q
-                ? fullList.filter((r: any) => {
-                    const ownerEmail = (userEmails[r.owner_id ?? r.user_id] ?? "").toLowerCase();
-                    return [
-                      r[nameField(k)],
-                      r.city,
-                      r.contact_email,
-                      r.contact_phone,
-                      ownerEmail,
-                    ]
-                      .filter(Boolean)
-                      .some((v: any) => String(v).toLowerCase().includes(q));
-                  })
-                : fullList;
-              return (
-                <TabsContent key={k} value={k} className="mt-4">
+            {(() => {
+              const renderProviderPanelInner = (k: Kind) => {
+                const fullList = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
+                const noun = nounFor(k);
+                const q = providerSearch[k].trim().toLowerCase();
+                const list = q
+                  ? fullList.filter((r: any) => {
+                      const ownerEmail = (userEmails[r.owner_id ?? r.user_id] ?? "").toLowerCase();
+                      return [
+                        r[nameField(k)],
+                        r.city,
+                        r.contact_email,
+                        r.contact_phone,
+                        ownerEmail,
+                      ]
+                        .filter(Boolean)
+                        .some((v: any) => String(v).toLowerCase().includes(q));
+                    })
+                  : fullList;
+                return (
                   <AdminPanel
                     title={`${list.length} ${noun}${q ? ` matching "${providerSearch[k]}"` : ""}`}
                     description="Grouped by country, then tier."
@@ -424,9 +424,16 @@ export default function HolarcHelpProviders() {
                       <div className="p-3">{renderGroupedTable(list, k)}</div>
                     )}
                   </AdminPanel>
+                );
+              };
+              // expose to outer scope via closure
+              (renderProviderPanel as any).current = renderProviderPanelInner;
+              return (["hospital", "pharmacy"] as Kind[]).map((k) => (
+                <TabsContent key={k} value={k} className="mt-4">
+                  {renderProviderPanelInner(k)}
                 </TabsContent>
-              );
-            })}
+              ));
+            })()}
           </Tabs>
         </TabsContent>
 
