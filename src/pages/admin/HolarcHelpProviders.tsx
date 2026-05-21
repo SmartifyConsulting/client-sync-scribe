@@ -402,37 +402,6 @@ export default function HolarcHelpProviders() {
           <AccountabilityPanel />
         </TabsContent>
 
-        <TabsContent value="voice-clip" className="mt-4">
-          <AdminPanel
-            title="SOS voice clip"
-            description="The MP3 played to emergency contacts when an SOS call connects."
-          >
-            <div className="space-y-3">
-              <div className="rounded-md border border-[hsl(var(--admin-border-subtle))] p-3 bg-[hsl(var(--admin-surface-muted))]">
-                <p className="text-[11.5px] font-semibold text-[hsl(var(--admin-text-primary))]">Current default clip</p>
-                <p className="text-[11.5px] text-[hsl(var(--admin-text-tertiary))] mt-0.5">
-                  {voiceClipPath ? voiceClipPath : "None — calls will use a fallback text-to-speech message."}
-                </p>
-              </div>
-              <div className="rounded-md border border-[hsl(var(--admin-border-subtle))] p-3 space-y-2">
-                <p className="text-[11.5px] font-semibold text-[hsl(var(--admin-text-primary))]">Upload new MP3</p>
-                <input
-                  type="file"
-                  accept="audio/mpeg,.mp3"
-                  onChange={(e) => setClipFile(e.target.files?.[0] ?? null)}
-                  className="block w-full text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:bg-muted file:text-foreground"
-                />
-                <Button size="sm" onClick={uploadClip} disabled={!clipFile || uploadingClip} className="h-8 px-3 text-[12px]">
-                  {uploadingClip ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
-                  Upload &amp; set as default
-                </Button>
-                <p className="text-[11px] text-[hsl(var(--admin-text-tertiary))]">
-                  Tip: keep clips under ~30 seconds. Africa's Talking sandbox only delivers to numbers registered in their Simulator.
-                </p>
-              </div>
-            </div>
-          </AdminPanel>
-        </TabsContent>
       </Tabs>
 
       <ProviderDialog
