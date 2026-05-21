@@ -38,7 +38,7 @@ const ROLE_OPTIONS: { value: RawRole; label: string }[] = [
   { value: "patient", label: "Patient" },
   { value: "doctor", label: "Doctor" },
   { value: "admin", label: "Admin" },
-  { value: "ambulance_staff", label: "Ambulance / ER" },
+  { value: "ambulance_staff", label: "Emergency Response / ER" },
   { value: "hospital_staff", label: "Hospital" },
   { value: "pharmacy_staff", label: "Pharmacy" },
   { value: "blood_bank", label: "Blood bank" },
