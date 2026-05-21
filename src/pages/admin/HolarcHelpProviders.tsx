@@ -341,7 +341,7 @@ export default function HolarcHelpProviders() {
     <AdminPage
       eyebrow="Admin"
       title="User Management"
-      description="Manage users, accountability, and the SOS voice clip."
+      description="Manage users and accountability."
     >
       <Tabs defaultValue="users">
         <TabsList className={adminTabsListClass}>
