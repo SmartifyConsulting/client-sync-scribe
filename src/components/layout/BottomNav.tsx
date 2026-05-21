@@ -36,8 +36,8 @@ const adminNavItems = [
   { icon: Users, label: "Users", to: "/admin/users" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", to: "/admin/gamification" },
-  { icon: LayoutDashboard, label: "Hub", to: "/admin", exact: true },
-  { icon: Home, label: "Exit Admin", to: "/doctor-dashboard" },
+  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
+  { icon: Home, label: "Exit", to: "/doctor-dashboard" },
 ];
 
 export function BottomNav() {
