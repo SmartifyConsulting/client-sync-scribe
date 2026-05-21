@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, Save, X, Shield, Trash2, Users } from "lucide-react";
+import { Loader2, Pencil, X, Shield, Trash2, Users } from "lucide-react";
+import { useAutosave } from "@/features/admin/hooks/useAutosave";
+import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
