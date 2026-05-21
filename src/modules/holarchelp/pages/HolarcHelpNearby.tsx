@@ -193,7 +193,7 @@ export default function HolarcHelpNearby() {
               return (
                 <div className="space-y-1 pt-1 text-[11px] text-muted-foreground">
                   {hospCount === 0 && <p>No approved hospitals in your area yet.</p>}
-                  {ambCount === 0 && <p>No approved ambulance providers in your area yet.</p>}
+                  {ambCount === 0 && <p>No approved emergency response providers in your area yet.</p>}
                 </div>
               );
             })()}
