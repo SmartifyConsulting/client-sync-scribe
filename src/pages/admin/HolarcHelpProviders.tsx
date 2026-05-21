@@ -99,10 +99,6 @@ export default function HolarcHelpProviders() {
   const [chooserOpen, setChooserOpen] = useState(false);
   const [providerSearch, setProviderSearch] = useState<Record<Kind, string>>({ hospital: "", ambulance: "", pharmacy: "" });
 
-  const [voiceClipPath, setVoiceClipPath] = useState<string | null>(null);
-  const [clipFile, setClipFile] = useState<File | null>(null);
-  const [uploadingClip, setUploadingClip] = useState(false);
-
   const filterByStatus = (rows: any[]) =>
     status === "all" ? rows : status === "active" ? rows.filter((r) => isActive(r.status)) : rows.filter((r) => !isActive(r.status));
 
