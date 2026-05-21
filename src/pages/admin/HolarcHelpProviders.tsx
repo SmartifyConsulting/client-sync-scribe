@@ -127,17 +127,7 @@ export default function HolarcHelpProviders() {
     }
   };
 
-  const loadVoiceClip = async () => {
-    const { data } = await supabase
-      .from("holarchelp_voice_clip_settings" as any)
-      .select("default_clip_path")
-      .eq("id", 1)
-      .maybeSingle();
-    setVoiceClipPath((data as any)?.default_clip_path ?? null);
-  };
-
   useEffect(() => { if (isAdmin) load(); }, [isAdmin, status]);
-  useEffect(() => { if (isAdmin) loadVoiceClip(); }, [isAdmin]);
 
   if (roleLoading) {
     return <div className="flex h-64 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
