@@ -153,7 +153,7 @@ export default function HolarcHelpNearby() {
           <ProviderMap center={coords} providers={providers} height={320} />
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
-            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> Ambulance</span>
+            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> ER</span>
           </div>
 
           <div className="space-y-2">
