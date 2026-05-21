@@ -119,7 +119,7 @@ export default function HolarcHelpNearby() {
       </Link>
       <div>
         <h1 className="text-2xl font-extrabold">Find nearby provider</h1>
-        <p className="text-sm text-muted-foreground">Approved hospitals and ambulances within reach.</p>
+        <p className="text-sm text-muted-foreground">Approved hospitals and emergency responders within reach.</p>
       </div>
 
       {!coords && permState !== "denied" && (
