@@ -422,7 +422,7 @@ export default function HolarcHelpProviders() {
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
               <Ambulance className="h-6 w-6" />
-              <span className="text-xs font-semibold">Ambulance</span>
+              <span className="text-xs font-semibold">Emergency Response</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("pharmacy"); setEdit({ kind: "pharmacy", row: null }); }}>
               <Pill className="h-6 w-6" />
