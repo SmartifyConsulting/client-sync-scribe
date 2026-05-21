@@ -427,11 +427,14 @@ export default function UsersTab({ kind }: UsersTabProps) {
         description={kind === "emergency" ? "Grouped by provider type. Expand to manage." : "Grouped by country. Expand to view, edit, or remove."}
         bodyClassName="p-0"
         actions={
-          <Toolbar
-            searchValue={search}
-            onSearchChange={setSearch}
-            searchPlaceholder={`Search ${noun}…`}
-          />
+          <div className="flex items-center gap-2">
+            <Toolbar
+              searchValue={search}
+              onSearchChange={setSearch}
+              searchPlaceholder={`Search ${noun}…`}
+            />
+            <CreateTestUserDialog onCreated={fetchUsers} />
+          </div>
         }
       >
         {loading ? (
