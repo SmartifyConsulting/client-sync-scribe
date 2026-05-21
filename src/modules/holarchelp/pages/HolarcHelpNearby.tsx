@@ -119,7 +119,7 @@ export default function HolarcHelpNearby() {
       </Link>
       <div>
         <h1 className="text-2xl font-extrabold">Find nearby provider</h1>
-        <p className="text-sm text-muted-foreground">Approved hospitals and ambulances within reach.</p>
+        <p className="text-sm text-muted-foreground">Approved hospitals and emergency responders within reach.</p>
       </div>
 
       {!coords && permState !== "denied" && (
@@ -136,7 +136,7 @@ export default function HolarcHelpNearby() {
               <AlertTriangle className="h-4 w-4" /> Location is blocked
             </div>
             <p className="text-amber-900/80 text-xs">
-              To find nearby hospitals and ambulances, enable location access for this site:
+              To find nearby hospitals and emergency responders, enable location access for this site:
             </p>
             <ul className="list-disc pl-5 text-xs text-amber-900/80 space-y-0.5">
               <li>Tap the lock/info icon in the address bar</li>
@@ -153,7 +153,7 @@ export default function HolarcHelpNearby() {
           <ProviderMap center={coords} providers={providers} height={320} />
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
-            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> Ambulance</span>
+            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> ER</span>
           </div>
 
           <div className="space-y-2">
@@ -168,7 +168,7 @@ export default function HolarcHelpNearby() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold truncate">{p.name}</p>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground capitalize">
-                    <span>{p.type}{p.subtitle && ` · ${p.subtitle}`}</span>
+                    <span>{p.type === "ambulance" ? "ER" : p.type}{p.subtitle && ` · ${p.subtitle}`}</span>
                     <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
                       {isPublic ? 'Public' : 'Private'}
                     </span>
@@ -193,7 +193,7 @@ export default function HolarcHelpNearby() {
               return (
                 <div className="space-y-1 pt-1 text-[11px] text-muted-foreground">
                   {hospCount === 0 && <p>No approved hospitals in your area yet.</p>}
-                  {ambCount === 0 && <p>No approved ambulance providers in your area yet.</p>}
+                  {ambCount === 0 && <p>No approved emergency response providers in your area yet.</p>}
                 </div>
               );
             })()}

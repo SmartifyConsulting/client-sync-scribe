@@ -93,7 +93,7 @@ export default function HospitalOpsDashboard() {
               <th className="px-3 py-2 text-left">Patient</th>
               <th className="px-3 py-2 text-left">Severity</th>
               <th className="px-3 py-2 text-left">Incident</th>
-              <th className="px-3 py-2 text-left">Ambulance</th>
+              <th className="px-3 py-2 text-left">ER</th>
               <th className="px-3 py-2 text-right">ETA</th>
               <th className="px-3 py-2 text-left">Status</th>
               <th className="px-3 py-2" />

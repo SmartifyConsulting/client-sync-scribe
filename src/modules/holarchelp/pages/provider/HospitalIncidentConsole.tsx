@@ -86,7 +86,7 @@ export default function HospitalIncidentConsole() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Ambulance ETA" value={<EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />} />
+        <Stat label="ER ETA" value={<EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />} />
         <Stat label="Transport" value={(incident.status ?? "").replace(/_/g," ")} />
         <Stat label="Admission" value={incident.hospital_admission_status ?? "incoming"} />
         <Stat label="Triage" value={incident.triage_priority ?? "—"} />

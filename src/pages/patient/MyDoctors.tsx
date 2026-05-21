@@ -296,7 +296,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                   {(['doctor','hospital','ambulance'] as const).map((groupKind) => {
                     const groupRows = searchResults.filter((r) => r.kind === groupKind);
                     if (groupRows.length === 0) return null;
-                    const groupLabel = groupKind === 'doctor' ? 'Doctors' : groupKind === 'hospital' ? 'Hospitals' : 'Ambulances';
+                    const groupLabel = groupKind === 'doctor' ? 'Doctors' : groupKind === 'hospital' ? 'Hospitals' : 'Emergency Responders';
                     const GroupIcon = groupKind === 'hospital' ? Building2 : groupKind === 'ambulance' ? Ambulance : Stethoscope;
                     return (
                       <div key={groupKind} className="space-y-1">

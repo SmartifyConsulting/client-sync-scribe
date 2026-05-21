@@ -89,7 +89,7 @@ export function ProviderGate({ children }: { children: React.ReactNode }) {
         <div className="mt-6 rounded-2xl border bg-card p-4 text-left text-sm">
           <p className="flex items-center gap-2 font-semibold"><Lock className="h-4 w-4" /> Not a provider yet</p>
           <p className="mt-1 text-muted-foreground">
-            Your account isn't linked to a hospital or ambulance service. If you started signing up
+            Your account isn't linked to a hospital or emergency response service. If you started signing up
             but didn't finish, complete your application below — an administrator will activate your
             organisation before you can access the dispatch portal.
           </p>

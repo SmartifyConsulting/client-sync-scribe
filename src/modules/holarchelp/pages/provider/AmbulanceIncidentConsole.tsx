@@ -117,7 +117,7 @@ export default function AmbulanceIncidentConsole() {
       <div className="flex items-center justify-between">
         <div>
           <button onClick={() => navigate("/provider/ambulance")} className="text-xs text-muted-foreground hover:text-foreground">← Back to dispatch</button>
-          <h1 className="mt-1 text-xl font-extrabold">Ambulance console</h1>
+          <h1 className="mt-1 text-xl font-extrabold">Emergency response console</h1>
         </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
           {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
