@@ -220,12 +220,7 @@ export default function PricingAdmin() {
       eyebrow="Admin"
       title="Subscription Pricing"
       description="Define monthly and annual rates for providers, patients, and emergency services."
-      actions={
-        <Button size="sm" onClick={handleSave} disabled={saving} className="h-8 px-3 text-[12px]">
-          {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
-          Publish changes
-        </Button>
-      }
+      actions={<AutosaveIndicator status={autosaveStatus} error={autosaveError} />}
     >
       <div className="space-y-3">
         <RoleSection title="Tier 01 — Healthcare Providers" badgeLabel="Doctor"     monthly={doctorMonthly}    annual={doctorAnnual}    onChange={handleChange} />
