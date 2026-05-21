@@ -40,7 +40,6 @@ Deno.serve(async (req) => {
       .eq("status", "approved").eq("subscription_status", "active").eq("accepting_patients", true)
       .not("latitude", "is", null).not("longitude", "is", null);
 
-    // Defensive: drop rows without a usable display name
     const ambList = (ambulances ?? []).filter((r: any) => r?.company_name && String(r.company_name).trim().length > 0);
     const hospList = (hospitals ?? []).filter((r: any) => r?.name && String(r.name).trim().length > 0);
 
@@ -67,27 +66,21 @@ Deno.serve(async (req) => {
       })
       .slice(0, 20);
 
-    // Fetch incident user for doctor notification
     const { data: incidentDetail } = await sb.from("holarchelp_incidents")
       .select("user_id, severity").eq("id", incident_id).maybeSingle();
 
-    // Notify connected doctors regardless of ambulance candidates
+    // Notify connected doctors
     if (incidentDetail?.user_id) {
       const { data: access } = await sb.from("doctor_patient_access")
-        .select("doctor_id")
-        .eq("patient_user_id", incidentDetail.user_id)
-        .eq("is_active", true);
+        .select("doctor_id").eq("patient_user_id", incidentDetail.user_id).eq("is_active", true);
       const doctorIds = Array.from(new Set((access ?? []).map((a: any) => a.doctor_id))).filter(Boolean);
       if (doctorIds.length) {
         const { data: pat } = await sb.from("profiles").select("full_name").eq("id", incidentDetail.user_id).maybeSingle();
         const patientName = (pat as any)?.full_name ?? "A patient";
         const sev = (incidentDetail as any).severity ?? "critical";
         const notifs = doctorIds.map((doctor_id: string) => ({
-          user_id: doctor_id,
-          type: "patient_incident",
-          title: "Patient SOS triggered",
-          description: `${patientName} has triggered an SOS (${sev}).`,
-          reference_id: incident_id,
+          user_id: doctor_id, type: "patient_incident", title: "Patient SOS triggered",
+          description: `${patientName} has triggered an SOS (${sev}).`, reference_id: incident_id,
         }));
         await sb.from("notifications").insert(notifs as any).then(() => {}, () => {});
       }
@@ -97,16 +90,55 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ offered: 0 }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Org-level offers (kept for hospitals + audit + ER admin manual assign)
     const rows = candidates.map((p: any) => ({
       incident_id, provider_id: p.id, provider_kind: p._kind,
       response: "pending", distance_km: Number(p._d.toFixed(2)),
     }));
-    const { error } = await sb.from("holarchelp_incident_offers").upsert(rows, {
+    await sb.from("holarchelp_incident_offers").upsert(rows, {
       onConflict: "incident_id,provider_id", ignoreDuplicates: true,
     });
-    if (error) throw error;
 
-    return new Response(JSON.stringify({ offered: candidates.length }), {
+    // Paramedic-direct offers: expand each ER candidate to its paramedics.
+    const ambCandidateIds = candidates.filter((p) => p._kind === "ambulance").map((p) => p.id);
+    let paramedicOffered = 0;
+    if (ambCandidateIds.length) {
+      const { data: paramedics } = await sb.from("holarchelp_ambulance_members")
+        .select("provider_id, user_id")
+        .in("provider_id", ambCandidateIds)
+        .eq("role", "paramedic")
+        .not("user_id", "is", null);
+
+      if (paramedics?.length) {
+        const distByProvider = new Map<string, number>(
+          candidates.filter((p) => p._kind === "ambulance").map((p) => [p.id, Number(p._d.toFixed(2))]),
+        );
+        const paramedicRows = paramedics.map((m: any) => ({
+          incident_id,
+          provider_id: m.provider_id,
+          provider_kind: "ambulance",
+          paramedic_user_id: m.user_id,
+          response: "pending",
+          distance_km: distByProvider.get(m.provider_id) ?? null,
+        }));
+        // No unique constraint on (incident, paramedic), so insert + ignore dup-key on (incident, provider) gracefully
+        for (const row of paramedicRows) {
+          await sb.from("holarchelp_incident_offers").insert(row).then(() => { paramedicOffered++; }, () => {});
+        }
+
+        // Realtime notifications for paramedics
+        const notifs = paramedics.map((m: any) => ({
+          user_id: m.user_id,
+          type: "sos_incoming",
+          title: "Incoming SOS",
+          description: "A patient near you has triggered an SOS. Tap to accept.",
+          reference_id: incident_id,
+        }));
+        await sb.from("notifications").insert(notifs as any).then(() => {}, () => {});
+      }
+    }
+
+    return new Response(JSON.stringify({ offered: candidates.length, paramedics_offered: paramedicOffered }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {

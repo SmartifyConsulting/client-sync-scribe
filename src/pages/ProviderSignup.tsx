@@ -1,277 +1,72 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Building2, ArrowLeft, Eye, EyeOff, AlertTriangle } from "lucide-react";
-import hospitalIcon from "@/assets/marker-hospital.png";
-import ambulanceIcon from "@/assets/marker-ambulance.png";
-import { toast } from "sonner";
-import { AddressAutocomplete } from "@/features/patients/components/AddressAutocomplete";
-import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Building2, Mail, ShieldCheck } from "lucide-react";
 
-type ProviderType = "hospital" | "ambulance";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
-
-async function callFn(name: string, body: unknown) {
-  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_ANON,
-      Authorization: `Bearer ${SUPABASE_ANON}`,
-    },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
-  return data;
-}
-
+/**
+ * Public organisation self-signup is intentionally disabled.
+ * Hospitals and Emergency Response providers are onboarded by Holarc admins;
+ * individual staff are then invited from the organisation's admin console.
+ */
 export default function ProviderSignup() {
   const navigate = useNavigate();
-  const [submitting, setSubmitting] = useState(false);
-  const [type, setType] = useState<ProviderType>("ambulance");
-
-  const [companyName, setCompanyName] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
-
-  // Soft duplicate check (debounced) — warns the user before submit.
-  useEffect(() => {
-    const reg = registrationNumber.trim();
-    const name = companyName.trim();
-    if (!reg && !name) {
-      setDuplicateWarning(null);
-      return;
-    }
-    const handle = setTimeout(async () => {
-      try {
-        const { data } = await supabase.rpc("check_provider_duplicate", {
-          _type: type,
-          _reg_no: reg || null,
-          _name: name || null,
-          _city: null,
-        });
-        const hit = data as { exists?: boolean; name?: string } | null;
-        if (hit?.exists) {
-          setDuplicateWarning(
-            `An organisation called "${hit.name}" is already registered with these details. If this is yours, ask the existing administrator to add you. Otherwise use a different registration number.`,
-          );
-        } else {
-          setDuplicateWarning(null);
-        }
-      } catch {
-        // silent — server still enforces uniqueness
-      }
-    }, 500);
-    return () => clearTimeout(handle);
-  }, [type, registrationNumber, companyName]);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!companyName || !email || !password || !firstName || !lastName) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-    if (!registrationNumber.trim()) {
-      toast.error("Company registration number is required");
-      return;
-    }
-    if (!address.trim()) {
-      toast.error("Organisation address is required");
-      return;
-    }
-    if (!acceptedTerms) {
-      toast.error("You must accept the Terms and Conditions");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await callFn("register-emergency-provider", {
-        type,
-        ownership: "private",
-        company_name: companyName,
-        registration_number: registrationNumber.trim(),
-        address: address.trim(),
-        city: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        phone,
-        password,
-      });
-      toast.success(
-        "Application submitted! Verify your email, then sign in to complete your profile. An administrator will activate your account before you can access the dispatch portal."
-      );
-      navigate("/auth");
-    } catch (err: any) {
-      toast.error(err?.message ?? "Sign-up failed");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-muted/20 px-4 py-8">
-      <div className="mx-auto max-w-md space-y-4">
-        <Link to="/auth">
-          <Button size="sm" variant="ghost">
-            <ArrowLeft className="mr-1 h-4 w-4" /> Back to sign-in
+    <div className="min-h-screen bg-background">
+      <header className="border-b">
+        <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-3">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Home
           </Button>
-        </Link>
-        <div className="text-center">
-          <Building2 className="mx-auto h-10 w-10 text-primary" />
-          <h1 className="mt-2 text-2xl font-extrabold">Emergency Service Provider Sign-Up</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create your account in two steps. You'll fill in the rest of your organisation's details from your profile after signing in.
-          </p>
         </div>
+      </header>
 
-        <Card>
-          <CardContent className="p-5">
-            <form onSubmit={submit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label>Provider type</Label>
-                <RadioGroup value={type} onValueChange={(v) => setType(v as ProviderType)} className="grid grid-cols-2 gap-3">
-                  <Label htmlFor="t-hosp" className="flex flex-col items-center rounded-lg border-2 border-muted bg-popover p-3 cursor-pointer has-[[data-state=checked]]:border-primary">
-                    <RadioGroupItem value="hospital" id="t-hosp" className="sr-only" />
-                    <img src={hospitalIcon} alt="" className="mb-2 h-8 w-8" />
-                    <span className="text-sm font-medium">Hospital</span>
-                  </Label>
-                  <Label htmlFor="t-amb" className="flex flex-col items-center rounded-lg border-2 border-muted bg-popover p-3 cursor-pointer has-[[data-state=checked]]:border-primary">
-                    <RadioGroupItem value="ambulance" id="t-amb" className="sr-only" />
-                    <img src={ambulanceIcon} alt="" className="mb-2 h-8 w-8" />
-                    <span className="text-sm font-medium">ER Provider</span>
-                  </Label>
-                </RadioGroup>
+      <main className="mx-auto max-w-2xl px-4 py-12">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+          <Building2 className="h-8 w-8 text-primary" />
+        </div>
+        <h1 className="text-center text-3xl font-extrabold">Onboard your organisation</h1>
+        <p className="mt-3 text-center text-muted-foreground">
+          Hospitals and Emergency Response providers are onboarded directly by the Holarc Health team.
+          Public self-signup for organisations has been disabled to protect the SOS network.
+        </p>
+
+        <Card className="mt-8">
+          <CardContent className="space-y-4 p-6">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="mt-0.5 h-5 w-5 text-primary" />
+              <div>
+                <p className="font-semibold">How onboarding works</p>
+                <ol className="mt-1 list-decimal pl-4 text-sm text-muted-foreground space-y-1">
+                  <li>Contact us with your organisation details and credentials.</li>
+                  <li>Holarc creates your organisation and assigns your first admin account.</li>
+                  <li>That admin invites paramedics, doctors, nurses and coordinators from inside the portal.</li>
+                </ol>
               </div>
+            </div>
 
-              <div className="space-y-1.5">
-                <Label>Organisation name</Label>
-                <Input
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder={type === "hospital" ? "Mediclinic Sandton" : "Emergency ER"}
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Company registration number</Label>
-                <Input
-                  value={registrationNumber}
-                  onChange={(e) => setRegistrationNumber(e.target.value)}
-                  placeholder="e.g. 2010/123456/07"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Organisation address</Label>
-                <AddressAutocomplete
-                  value={address}
-                  onChange={setAddress}
-                  placeholder="Start typing the address…"
-                  rows={2}
-                />
-              </div>
-
-              {duplicateWarning && (
-                <div className="flex items-start gap-2 rounded-lg border border-[#E01837]/40 bg-[#E01837]/10 p-3 text-xs text-foreground">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#E01837]" />
-                  <span>{duplicateWarning}</span>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label>Contact first name</Label>
-                  <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Contact last name</Label>
-                  <Input value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Contact email</Label>
-                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Contact phone</Label>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+27821234567" />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label>Password</Label>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    minLength={6}
-                    required
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/30 p-3">
-                <Checkbox
-                  id="accept-terms"
-                  checked={acceptedTerms}
-                  onCheckedChange={(v) => setAcceptedTerms(v === true)}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="accept-terms" className="text-xs leading-relaxed cursor-pointer">
-                  I accept the{" "}
-                  <Link to="/terms" className="text-primary hover:underline" target="_blank">
-                    Terms and Conditions
-                  </Link>{" "}
-                  and{" "}
-                  <Link to="/privacy" className="text-primary hover:underline" target="_blank">
-                    Privacy Policy
-                  </Link>
-                  .
-                </Label>
-              </div>
-
-              <Button type="button" className="w-full h-11" disabled>
-                Create account
-              </Button>
-              <p className="text-[11px] text-center text-muted-foreground">
-                Sign-ups are currently invite-only. Please contact an administrator for access.
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Mail className="h-4 w-4" /> Reach the onboarding team
               </p>
-            </form>
+              <a
+                href="mailto:onboarding@holarchealth.com?subject=Organisation%20onboarding%20request"
+                className="mt-1 inline-block text-primary underline"
+              >
+                onboarding@holarchealth.com
+              </a>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Already invited? Check your email for an invitation link from your administrator and follow it to
+              create your individual staff account.
+            </p>
           </CardContent>
         </Card>
-      </div>
+
+        <div className="mt-6 text-center">
+          <Button variant="outline" onClick={() => navigate("/auth")}>I already have an account — sign in</Button>
+        </div>
+      </main>
     </div>
   );
 }

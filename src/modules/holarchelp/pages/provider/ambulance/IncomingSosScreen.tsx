@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { Siren, AlertTriangle, Clock } from "lucide-react";
+import { ParamedicAcceptDialog } from "../../../components/ParamedicAcceptDialog";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -26,16 +25,15 @@ const ago = (iso: string) => {
 
 export default function IncomingSosScreen() {
   const { providerId } = useProviderAccess();
-  const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
+  const [pickFor, setPickFor] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase.from("holarchelp_incidents" as any)
-        .select("*").is("assigned_provider_id", null)
+        .select("*").is("assigned_paramedic_user_id", null)
         .in("status", ["open","reopened"])
         .order("created_at", { ascending: true }).limit(40);
-      // Sort by severity desc, then oldest first
       const order: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
       setRows((((data as any) ?? []) as Row[]).sort((a,b) => (order[a.severity ?? ""] ?? 9) - (order[b.severity ?? ""] ?? 9)));
     };
@@ -46,20 +44,12 @@ export default function IncomingSosScreen() {
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  const accept = async (id: string) => {
-    if (!providerId) return;
-    const { error } = await supabase.rpc("holarchelp_accept_incident" as any, { _incident_id: id, _provider_id: providerId });
-    if (error) return toast.error(error.message === "Incident already taken" ? "Another crew accepted first" : error.message);
-    toast.success("Incident locked");
-    navigate(`/provider/ambulance/incident/${id}`);
-  };
-
   return (
     <div className="space-y-4">
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
         <h1 className="text-2xl font-extrabold">Incoming SOS</h1>
-        <p className="text-xs text-muted-foreground">First to accept locks the incident.</p>
+        <p className="text-xs text-muted-foreground">First paramedic to accept locks the incident.</p>
       </header>
 
       {!rows.length && (
@@ -96,12 +86,19 @@ export default function IncomingSosScreen() {
 
             {r.notes && <p className="mt-2 rounded-xl border bg-background/60 p-2 text-xs italic text-muted-foreground line-clamp-3">"{r.notes}"</p>}
 
-            <Button size="lg" className="mt-3 h-12 w-full text-base font-extrabold" onClick={() => accept(r.id)}>
+            <Button size="lg" className="mt-3 h-12 w-full text-base font-extrabold" onClick={() => setPickFor(r.id)}>
               Accept Incident
             </Button>
           </div>
         ))}
       </div>
+
+      <ParamedicAcceptDialog
+        incidentId={pickFor}
+        providerId={providerId}
+        open={!!pickFor}
+        onOpenChange={(v) => { if (!v) setPickFor(null); }}
+      />
     </div>
   );
 }

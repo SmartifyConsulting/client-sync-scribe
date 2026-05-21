@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 /**
- * Streams the assigned ambulance crew's GPS into holarchelp_provider_locations
- * (used by the shared SosLiveMap so patient + hospital + admin see live position).
- * Also calls the legacy RPC for backward-compat ETA fields on the incident.
+ * Streams the logged-in paramedic's GPS into holarchelp_provider_locations.
+ * Active only when the current user is the assigned paramedic on the incident
+ * (or — legacy — the assigned org owner). The patient + hospital + admin
+ * SosLiveMap views subscribe to that table for the moving pin.
  */
 export function useLiveProviderLocation(
   incidentId: string | null,
@@ -14,7 +15,7 @@ export function useLiveProviderLocation(
 ) {
   const { user } = useAuth();
   useEffect(() => {
-    if (!incidentId || !providerId || !active || !user || !("geolocation" in navigator)) return;
+    if (!incidentId || !active || !user || !("geolocation" in navigator)) return;
     let watchId: number | null = null;
     let last = 0;
     watchId = navigator.geolocation.watchPosition(
@@ -28,7 +29,7 @@ export function useLiveProviderLocation(
           .from("holarchelp_provider_locations" as any)
           .upsert({
             incident_id: incidentId,
-            provider_id: providerId,
+            provider_id: providerId ?? null,
             provider_kind: "ambulance",
             user_id: user.id,
             latitude: lat,

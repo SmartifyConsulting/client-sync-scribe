@@ -497,6 +497,53 @@ export type Database = {
           },
         ]
       }
+      ambulances: {
+        Row: {
+          created_at: string
+          current_latitude: number | null
+          current_longitude: number | null
+          id: string
+          notes: string | null
+          provider_id: string
+          registration_number: string | null
+          status: string
+          updated_at: string
+          vehicle_code: string
+        }
+        Insert: {
+          created_at?: string
+          current_latitude?: number | null
+          current_longitude?: number | null
+          id?: string
+          notes?: string | null
+          provider_id: string
+          registration_number?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_code: string
+        }
+        Update: {
+          created_at?: string
+          current_latitude?: number | null
+          current_longitude?: number | null
+          id?: string
+          notes?: string | null
+          provider_id?: string
+          registration_number?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulances_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_modules: {
         Row: {
           description: string | null
@@ -1826,6 +1873,7 @@ export type Database = {
           id: string
           incident_id: string
           offered_at: string
+          paramedic_user_id: string | null
           priority_boost: boolean
           provider_id: string
           provider_kind: string
@@ -1837,6 +1885,7 @@ export type Database = {
           id?: string
           incident_id: string
           offered_at?: string
+          paramedic_user_id?: string | null
           priority_boost?: boolean
           provider_id: string
           provider_kind?: string
@@ -1848,6 +1897,7 @@ export type Database = {
           id?: string
           incident_id?: string
           offered_at?: string
+          paramedic_user_id?: string | null
           priority_boost?: boolean
           provider_id?: string
           provider_kind?: string
@@ -1905,6 +1955,8 @@ export type Database = {
           admitted_at: string | null
           ai_emergency_summary: string | null
           arrived_at: string | null
+          assigned_ambulance_id: string | null
+          assigned_paramedic_user_id: string | null
           assigned_provider_id: string | null
           at_hospital_at: string | null
           at_risk: boolean
@@ -1947,6 +1999,8 @@ export type Database = {
           admitted_at?: string | null
           ai_emergency_summary?: string | null
           arrived_at?: string | null
+          assigned_ambulance_id?: string | null
+          assigned_paramedic_user_id?: string | null
           assigned_provider_id?: string | null
           at_hospital_at?: string | null
           at_risk?: boolean
@@ -1989,6 +2043,8 @@ export type Database = {
           admitted_at?: string | null
           ai_emergency_summary?: string | null
           arrived_at?: string | null
+          assigned_ambulance_id?: string | null
+          assigned_paramedic_user_id?: string | null
           assigned_provider_id?: string | null
           at_hospital_at?: string | null
           at_risk?: boolean
@@ -2027,6 +2083,13 @@ export type Database = {
           voice_note_transcript?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "holarchelp_incidents_assigned_ambulance_id_fkey"
+            columns: ["assigned_ambulance_id"]
+            isOneToOne: false
+            referencedRelation: "ambulances"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "holarchelp_incidents_destination_hospital_id_fkey"
             columns: ["destination_hospital_id"]
@@ -4630,6 +4693,10 @@ export type Database = {
           recorded_at: string
         }[]
       }
+      holarchelp_paramedic_accept: {
+        Args: { _ambulance_id: string; _incident_id: string }
+        Returns: Json
+      }
       holarchelp_patient_pick_provider: {
         Args: { _incident_id: string; _kind: string; _provider_id: string }
         Returns: Json
@@ -4670,6 +4737,10 @@ export type Database = {
         Args: { _provider_id: string; _user_id: string }
         Returns: boolean
       }
+      is_ambulance_role: {
+        Args: { _provider_id: string; _role: string; _user_id: string }
+        Returns: boolean
+      }
       is_ambulance_staff: {
         Args: { _provider_id: string; _user_id: string }
         Returns: boolean
@@ -4678,10 +4749,15 @@ export type Database = {
         Args: { _hospital_id: string; _user_id: string }
         Returns: boolean
       }
+      is_hospital_role: {
+        Args: { _hospital_id: string; _role: string; _user_id: string }
+        Returns: boolean
+      }
       is_hospital_staff: {
         Args: { _hospital_id: string; _user_id: string }
         Returns: boolean
       }
+      is_paramedic: { Args: { _user_id: string }; Returns: boolean }
       is_practice_member: {
         Args: { _practice_id: string; _user_id: string }
         Returns: boolean
