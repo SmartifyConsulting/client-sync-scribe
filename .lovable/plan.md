@@ -1,60 +1,32 @@
 ## Problem
 
-1. `er.test@holarchealth.com` (and similar provider users like Renken, Zano, Hospital Admin) sees the **patient portal** when signing in. Their `profiles.role` is `'patient'`, and `useUserRole` prefers `profiles.role` over `user_roles` — even though `user_roles` contains `ambulance_staff`/`hospital_staff`.
-2. The admin **Users** screen (`UsersTab`) explicitly filters out anyone with an emergency role (`hospital_staff`, `ambulance_staff`, …), so Renken/Zano/ER providers never appear under any tab. There's no "Ambulance" / "Hospital" / "ER" users tab.
-3. There's no way for the admin to change a user's role from the Users screen — only edit name/email/delete.
+Renken (`renken@smartify.co.za`) and Zano (`zano@smartify.co.za`) still land in the Patient Portal even though their `user_roles` are correctly `ambulance_staff` and `hospital_staff`.
 
-## Plan
+Database check confirms:
+- Renken: `profiles.role = 'patient'`, `user_roles = [ambulance_staff]`
+- Zano:   `profiles.role = 'patient'`, `user_roles = [hospital_staff]`
 
-### 1. Data fix — align profile role with actual provider role
-One-off migration / data update via the insert tool to set `profiles.role = 'emergency'` for users that have any of `hospital_staff`, `ambulance_staff`, `blood_bank`, `pharmacy_staff` in `user_roles` but whose `profiles.role` is currently `patient` or `doctor` only because of a stale signup. After this, `useUserRole` returns `'emergency'` and the app routes them to the provider portal (existing `ProviderRedirect` / `ProviderGate` flow).
+`useUserRole.ts` always prefers `profiles.role` when it is set, so the lingering `'patient'` value wins and the user is routed to the patient app. The previous data fix missed these two accounts.
 
-Specifically targets: `er.test@holarchealth.com`, `hospital.test@holarchealth.com`, `renken@smartify.co.za`, `zano@smartify.co.za`, and any other matching account.
+## Fix
 
-### 2. Admin Users — add an "Emergency providers" tab
-In `src/pages/admin/HolarcHelpProviders.tsx` (which already hosts the Users tabs alongside Patients/Doctors/Admins via `UsersTab`), add a fourth `UsersTab` kind: `"emergency"`.
+### 1. Data fix (one-off)
+Set `profiles.role = NULL` for every user whose `user_roles` contain `hospital_staff`, `ambulance_staff`, `blood_bank`, or `pharmacy_staff` AND whose current `profiles.role` is `'patient'` or `'doctor'` (i.e. a wrong override). This catches Renken, Zano, and any future stragglers.
 
-In `src/features/admin/components/UsersTab.tsx`:
-- Extend `UsersKind` to `"patient" | "doctor" | "admin" | "emergency"`.
-- For `kind === "emergency"`: do **not** strip emergency roles; instead show users whose effective role is `hospital_staff`, `ambulance_staff`, `blood_bank`, or `pharmacy_staff`. Group/label rows by provider kind (Ambulance, Hospital, Blood Bank, Pharmacy) using a sub-label column or a secondary grouping.
-- For other tabs keep current behavior (still filter out emergency users so they don't double-list).
+### 2. Prevent regressions (DB trigger)
+Add a `BEFORE INSERT OR UPDATE` trigger on `public.user_roles`: when a row with an emergency role (`hospital_staff` / `ambulance_staff` / `blood_bank` / `pharmacy_staff`) is added for a user, automatically clear `profiles.role` if it is currently `'patient'` or `'doctor'`. This guarantees that promoting any user via the new admin role-changer or via the approval RPCs (`holarchelp_approve_hospital`, `holarchelp_approve_ambulance`, etc.) routes them to the correct portal immediately.
 
-Renken will then show up under the Ambulance group inside the new Emergency tab.
+### 3. Verify `admin-set-user-role` already nulls `profiles.role`
+The edge function written last turn already sets `profiles.role = NULL` when assigning an emergency role, so no code change needed there — the trigger is just belt-and-braces for paths that bypass the edge function.
 
-### 3. Inline "Change role" control for all users
-In `UsersTab` row actions, add a small **Role** dropdown (shadcn `Select`) next to the edit/delete buttons that lists: Patient, Doctor, Admin, Hospital staff, Ambulance staff, Blood bank, Pharmacy staff.
+## Files
 
-Saving the role calls a new edge function `admin-set-user-role` that:
-- verifies caller is admin (`has_role(auth.uid(), 'admin')`),
-- updates `profiles.role` to the canonical bucket (`patient` / `doctor` / `admin` / `emergency`),
-- replaces rows in `user_roles` for that user with the chosen role (single source of truth),
-- returns the new role.
+- **Migration** — data update + new trigger function `sync_profile_role_for_emergency()` on `public.user_roles`.
+- No frontend changes required.
 
-Client refetches the list and shows a toast. Because the row may move tabs after the change (e.g. patient → emergency), we just refresh.
+## Verification
 
-### 4. UX details
-- Role dropdown shows current role pre-selected.
-- Confirmation `AlertDialog` when changing **to** or **from** `admin` (destructive-level change).
-- Inline role badge in each row so the current role is visible at a glance on every tab.
-
-## Technical notes
-
-```
-src/features/admin/components/UsersTab.tsx     # new "emergency" kind + role <Select> column + role badge
-src/pages/admin/HolarcHelpProviders.tsx        # add 4th Users tab "Emergency"
-supabase/functions/admin-set-user-role/        # new edge function (admin-guarded)
-```
-
-Migration (data only, run via insert tool, no schema change):
-```sql
-UPDATE public.profiles p
-SET role = 'emergency'::user_role
-WHERE EXISTS (
-  SELECT 1 FROM public.user_roles ur
-  WHERE ur.user_id = p.id
-    AND ur.role IN ('hospital_staff','ambulance_staff','blood_bank','pharmacy_staff')
-)
-AND p.role <> 'emergency';
-```
-
-No changes to `useUserRole`, `ProviderGate`, or routing — the existing emergency-role plumbing already routes these users correctly once `profiles.role = 'emergency'`.
+After migration:
+1. Query `profiles.role` for both users → expect `NULL`.
+2. Sign in as Renken → should land on `/provider/ambulance`.
+3. Sign in as Zano → should land on `/provider/hospital`.
