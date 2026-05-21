@@ -333,14 +333,11 @@ export default function HolarcHelpProviders() {
               <TabsTrigger value="hospital" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Hospital className="h-3.5 w-3.5" />Hospitals
               </TabsTrigger>
-              <TabsTrigger value="ambulance" className={`${adminTabsTriggerClass} gap-1.5`}>
-                <Ambulance className="h-3.5 w-3.5" />Ambulance
+              <TabsTrigger value="emergency-users" className={`${adminTabsTriggerClass} gap-1.5`}>
+                <Ambulance className="h-3.5 w-3.5" />Emergency Users
               </TabsTrigger>
               <TabsTrigger value="pharmacy" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Pill className="h-3.5 w-3.5" />Pharmacies
-              </TabsTrigger>
-              <TabsTrigger value="emergency-users" className={`${adminTabsTriggerClass} gap-1.5`}>
-                <Ambulance className="h-3.5 w-3.5" />Emergency Users
               </TabsTrigger>
               <TabsTrigger value="admin" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <ShieldAlert className="h-3.5 w-3.5" />Admin
@@ -353,8 +350,9 @@ export default function HolarcHelpProviders() {
             <TabsContent value="providers" className="mt-4">
               <UsersTab kind="doctor" />
             </TabsContent>
-            <TabsContent value="emergency-users" className="mt-4">
+            <TabsContent value="emergency-users" className="mt-4 space-y-6">
               <UsersTab kind="emergency" />
+              {renderProviderPanel("ambulance")}
             </TabsContent>
             <TabsContent value="admin" className="mt-4">
               <UsersTab kind="admin" />
