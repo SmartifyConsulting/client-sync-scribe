@@ -130,7 +130,7 @@ export default function AmbulanceIncidentConsole() {
         </span>
       </div>
 
-      {!isAssigned && incident.assigned_provider_id && (
+      {!isAssignedParamedic && !isAssignedProvider && incident.assigned_provider_id && (
         <div className="rounded-2xl border-2 border-amber-500/40 bg-amber-50 p-3 text-sm dark:bg-amber-950/20">
           <p className="font-semibold text-amber-800 dark:text-amber-300">This incident has been locked by another responder.</p>
         </div>
@@ -141,7 +141,7 @@ export default function AmbulanceIncidentConsole() {
           <SosLiveMap incidentId={id!} mode="ambulance" height={320} />
 
 
-          {isAssigned && (
+          {(isAssignedParamedic || isAssignedProvider) && (
             <>
               <div className="rounded-2xl border bg-card p-3 space-y-3">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status stepper</p>
