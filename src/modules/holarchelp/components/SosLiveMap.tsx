@@ -71,40 +71,43 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         .maybeSingle();
       if (cancelled) return;
       const p: any = livePos;
+
+      // Detect kind of assigned provider (ambulance vs hospital) up-front,
+      // so a hospital-as-responder also renders the destination + responder pin.
+      let assignedAmb: any = null;
+      let assignedHosp: any = null;
+      if (i?.assigned_provider_id) {
+        const [{ data: amb }, { data: hosp }] = await Promise.all([
+          supabase
+            .from("holarchelp_ambulance_providers" as any)
+            .select("latitude, longitude")
+            .eq("id", i.assigned_provider_id)
+            .maybeSingle(),
+          supabase
+            .from("holarchelp_hospitals" as any)
+            .select("name, latitude, longitude")
+            .eq("id", i.assigned_provider_id)
+            .maybeSingle(),
+        ]);
+        assignedAmb = amb;
+        assignedHosp = hosp;
+      }
+      if (cancelled) return;
+
+      // --- Provider (responder) marker ---
       if (p?.latitude && p?.longitude) {
         setProvider({ lat: p.latitude, lng: p.longitude, kind: p.provider_kind ?? "ambulance" });
       } else if (i?.provider_latitude && i?.provider_longitude && i?.assigned_provider_id) {
         setProvider({ lat: i.provider_latitude, lng: i.provider_longitude, kind: "ambulance" });
-      } else if (i?.assigned_provider_id) {
-        // Fallback: use the assigned ambulance's base coords so red line/countdown render
-        const { data: amb } = await supabase
-          .from("holarchelp_ambulance_providers" as any)
-          .select("latitude, longitude")
-          .eq("id", i.assigned_provider_id)
-          .maybeSingle();
-        const a: any = amb;
-        if (!cancelled && a?.latitude && a?.longitude) {
-          setProvider({ lat: a.latitude, lng: a.longitude, kind: "ambulance" });
-        }
-      } else if (patientPos) {
-        // No ambulance assigned yet — show nearest active ambulance as projection
-        const { data: ambs } = await supabase
-          .from("holarchelp_ambulance_providers" as any)
-          .select("latitude, longitude, status, accepting_patients")
-          .eq("status", "approved")
-          .not("latitude", "is", null)
-          .not("longitude", "is", null);
-        const list = ((ambs as any[]) ?? []).filter((a) => a.accepting_patients !== false);
-        if (!cancelled && list.length) {
-          let best: any = null, bestD = Infinity;
-          for (const a of list) {
-            const d = haversineKm(patientPos, { lat: a.latitude, lng: a.longitude });
-            if (d < bestD) { bestD = d; best = a; }
-          }
-          if (best) setProvider({ lat: best.latitude, lng: best.longitude, kind: "ambulance" });
-        }
+      } else if (assignedAmb?.latitude && assignedAmb?.longitude) {
+        setProvider({ lat: assignedAmb.latitude, lng: assignedAmb.longitude, kind: "ambulance" });
+      } else if (assignedHosp?.latitude && assignedHosp?.longitude) {
+        // Assigned provider is a hospital — mirror it as the responder pin too.
+        setProvider({ lat: assignedHosp.latitude, lng: assignedHosp.longitude, kind: "hospital" });
       }
 
+      // --- Destination hospital ---
+      const MAX_AUTOPICK_KM = 150;
       if (i?.destination_hospital_id) {
         const { data: h } = await supabase
           .from("holarchelp_hospitals" as any)
@@ -115,8 +118,12 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         if (!cancelled && hh?.latitude && hh?.longitude) {
           setHospital({ lat: hh.latitude, lng: hh.longitude, name: hh.name });
         }
+      } else if (assignedHosp?.latitude && assignedHosp?.longitude) {
+        // The accepted/assigned hospital IS the destination.
+        setHospital({ lat: assignedHosp.latitude, lng: assignedHosp.longitude, name: assignedHosp.name });
       } else if (patientPos) {
-        // Auto-pick nearest approved hospital so teal line/pin still render
+        // No assignment or destination yet — auto-pick nearest approved hospital,
+        // but only within MAX_AUTOPICK_KM so a remote provider can't show up.
         const { data: hosps } = await supabase
           .from("holarchelp_hospitals" as any)
           .select("name, latitude, longitude, status, accepting_patients")
@@ -130,7 +137,9 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
             const d = haversineKm(patientPos, { lat: h.latitude, lng: h.longitude });
             if (d < bestD) { bestD = d; best = h; }
           }
-          if (best) setHospital({ lat: best.latitude, lng: best.longitude, name: best.name });
+          if (best && bestD <= MAX_AUTOPICK_KM) {
+            setHospital({ lat: best.latitude, lng: best.longitude, name: best.name });
+          }
         }
       }
     })();
