@@ -1,77 +1,74 @@
-## Plan: Finish org + staff refactor UI
+# Paramedic Shift + Availability Sync — Plan
 
-Five focused pieces wrapping up the paramedic-direct dispatch refactor. All UI/frontend except one small invite edge-function tweak.
+Goal: implement the missing pieces so the SOS workflow matches the spec end-to-end, with paramedic and ambulance statuses kept in lockstep during an active incident.
 
-### 1. Fleet management (ER admin)
+## 1. Database (single migration)
 
-New route: `/provider/ambulance/fleet` (added to `routes-provider.tsx`).
+### 1a. New table `paramedic_shifts`
+Tracks a paramedic's on-duty session and the ambulance they're operating.
 
-Page `provider/ambulance/FleetPage.tsx`:
-- Lists `ambulances` for the current provider (via `useProviderAccess()` → `providerId`).
-- Columns: `vehicle_code`, `registration_number`, `status` (badge: available/assigned/out_of_service), updated_at.
-- Actions: **Add ambulance**, **Edit**, **Set status**, **Delete** (soft-block delete if `status='assigned'`).
-- Gated to `er_admin` via `is_ambulance_role(providerId, uid, 'er_admin')` — paramedics see read-only.
-- Add "Fleet" link in the ambulance provider sidebar (`ProviderAppLayout` ambulance nav).
+| column | type | notes |
+|---|---|---|
+| `id` | uuid PK | |
+| `user_id` | uuid | the paramedic |
+| `provider_id` | uuid → `holarchelp_ambulance_providers` | |
+| `ambulance_id` | uuid → `ambulances` | the rig they picked at Start Shift |
+| `status` | text | `available` \| `busy` \| `off_shift` (check constraint) |
+| `current_incident_id` | uuid nullable | set when busy |
+| `started_at`, `ended_at`, `updated_at`, `created_at` | timestamptz | |
 
-Dialog `AmbulanceFormDialog.tsx` — fields: vehicle_code (required), registration_number, status. Uses supabase upsert.
+- Unique partial index: one open shift per paramedic (`WHERE ended_at IS NULL`).
+- RLS: paramedic can read/update own shift; ER admins of the provider can read all; platform admin full.
 
-### 2. Hospital-role granularity UI
+### 1b. RPCs
+- `holarchelp_start_shift(_ambulance_id uuid)` — verifies caller is a `paramedic` member of the ambulance's provider, ambulance is `available`, no existing open shift; inserts shift with `status='available'`, flips ambulance to `assigned`-equivalent? No — keep ambulance `available` at shift start so dispatcher can still see it; ambulance only flips to `assigned` when an incident is accepted. (Confirms your example table: paramedic Available, ambulance Available → both Busy on accept.)
+- `holarchelp_end_shift()` — only allowed if `status != 'busy'`; sets `ended_at`, ambulance back to `available` if previously linked.
+- Update existing `holarchelp_paramedic_accept`:
+  - Require caller to have an **open shift** whose `ambulance_id` matches `_ambulance_id` (no more per-incident vehicle selection).
+  - Set `paramedic_shifts.status='busy'`, `current_incident_id=_incident_id`.
+  - Continue to set `ambulances.status='assigned'`.
+- New `holarchelp_release_incident(_incident_id uuid)` triggered when incident reaches a terminal state (`completed`, `cancelled`, `resolved`):
+  - Flip `paramedic_shifts.status='available'`, clear `current_incident_id`.
+  - Flip `ambulances.status='available'`.
+  - Idempotent; also called by a trigger on `holarchelp_incidents` status transitions so any path (hospital handover, cancel) syncs both entities.
 
-`HospitalOpsLayout` / `HospitalOpsDashboard`:
-- Read current user's hospital role from `holarchelp_hospital_members.role` for the active hospital.
-- Render role chip in the header: `hospital_admin` / `coordinator` / `doctor` / `nurse`.
-- Gate sections:
-  - **ER capacity edit, accept incoming, dispatch decisions** → `hospital_admin` or `coordinator`.
-  - **Clinical patient view (incoming patient context)** → `doctor`, `nurse`, plus admins.
-  - **Members/Settings tab** → `hospital_admin` only.
-- New `useHospitalRole(hospitalId)` hook returning `{ role, can: { manage, dispatch, clinical } }`.
-- "Read-only" badge + disabled buttons with tooltip for non-permitted roles (no hard redirect — staff still see ops view).
+### 1c. Trigger
+`AFTER UPDATE ON holarchelp_incidents` — when `status` changes into a terminal state and there is an `assigned_paramedic_user_id`, call the release RPC body inline.
 
-### 3. Admin tab rename → "Organisations"
+## 2. Edge function `dispatch-sos`
 
-In `src/pages/admin/HolarcHelpProviders.tsx` (and wherever it's registered in admin nav):
-- Rename label "HolarcHelp Providers" → **"Organisations"**, route stays.
-- Unified list of Hospitals + ER Providers with type filter chip.
-- Row click opens a side **Drawer** (`OrganisationDrawer.tsx`) with tabs:
-  - **Profile** — existing edit fields.
-  - **Members** — list `holarchelp_hospital_members` / `holarchelp_ambulance_members` with role chip + remove + "Invite staff" button.
-  - **Ambulances** — (ER only) read-only list of `ambulances` with status badges, link to fleet page.
+Replace the "expand each ER candidate to its paramedics" block: query only paramedics with an **open shift** where `status='available'`. Use `paramedic_shifts` joined to `holarchelp_ambulance_members` (or just to `ambulances` for `provider_id`).
+Result: off-shift or busy paramedics are no longer offered new incidents.
 
-### 4. Invite Staff dialog with role dropdown
+## 3. Frontend
 
-New `InviteStaffDialog.tsx` (separate from generic `InviteUserDialog`):
-- Props: `orgType: 'hospital'|'ambulance'`, `orgId`.
-- Fields: email, full_name, **role** (dropdown):
-  - hospital → `hospital_admin`, `coordinator`, `doctor`, `nurse`
-  - ambulance → `er_admin`, `paramedic`
-- Calls existing edge function `invite-provider-admin`, passing `invited_role` in the body.
-- Edge function update: accept `invited_role`, write into `role` column on the pending member row (already exists per migration).
-- Used from Organisation Drawer → Members tab, and ER Admin team page.
+### 3a. New shift controller (replaces the localStorage toggle)
+- `useParamedicShift()` hook — reads/subscribes to the caller's open shift row; exposes `{ shift, startShift(ambulanceId), endShift(), setAvailable(), setBusy() }`.
+- `StartShiftDialog` — lists the org's `available` ambulances, paramedic picks one, calls `holarchelp_start_shift`.
+- Replace the "On shift / Off shift" pill in `AmbulanceOpsLayout` with a real button driven by the hook (with badge showing the bound vehicle code and live `available / busy` status).
+- `TeamStatusScreen`: drop the localStorage `SHIFT_KEY` map; instead read all open shifts for the provider (ER admin view) and show paramedic ↔ ambulance ↔ status.
 
-### 5. Landing page copy
+### 3b. `ParamedicAcceptDialog` simplification
+- Remove the ambulance picker. Read the active shift's `ambulance_id` and show it as a read-only confirmation card ("Responding with ER24-12"). If no open shift → block accept and prompt "Start your shift first".
+- Call `holarchelp_paramedic_accept(_incident_id, shift.ambulance_id)`.
 
-In `src/pages/Landing.tsx`:
-- Remove the "Register as Emergency Provider" CTA button that links to `/provider-signup`.
-- Replace with a small line under the relevant section: *"Are you a hospital or ambulance service? [Contact us](/provider-signup)"* — still routes to the contact panel.
-- Update any nav/footer reference accordingly.
+### 3c. `IncomingSosScreen` gating
+- Hide the screen contents (or show "You are off shift") when there is no open shift.
+- Hide it when `shift.status === 'busy'` to enforce "no new SOS while on an active incident".
 
-### Files touched
+### 3d. Incident completion UI
+- Wherever a paramedic marks an incident complete/handover/cancel (e.g. `AmbulanceIncidentConsole` / `NavigationScreen`), no client change needed beyond surfacing a success toast — the DB trigger handles the release. Verify the existing complete buttons set `status` to a terminal value.
 
-```
-src/modules/holarchelp/pages/provider/ambulance/FleetPage.tsx      (new)
-src/modules/holarchelp/components/AmbulanceFormDialog.tsx          (new)
-src/modules/holarchelp/components/InviteStaffDialog.tsx            (new)
-src/modules/holarchelp/components/OrganisationDrawer.tsx           (new)
-src/modules/holarchelp/hooks/useHospitalRole.ts                    (new)
-src/modules/holarchelp/routes-provider.tsx                         (add fleet route + nav)
-src/modules/holarchelp/pages/provider/hospital/HospitalOpsDashboard.tsx (role gating)
-src/modules/holarchelp/pages/provider/hospital/HospitalOpsLayout.tsx   (role chip)
-src/pages/admin/HolarcHelpProviders.tsx                            (rename + drawer)
-src/pages/Landing.tsx                                              (CTA copy)
-supabase/functions/invite-provider-admin/index.ts                  (accept invited_role)
-```
+## 4. Out of scope
+- No changes to hospital flows, payments, or organisation admin UI.
+- No new map/ETA logic — ETA already updates from `provider_*` columns.
+- No multi-shift / handover-mid-incident logic.
 
-### Out of scope (confirm OK)
-- No schema changes — `role` columns and `ambulances` table already exist.
-- No changes to dispatch / accept logic.
-- No mobile-specific redesign beyond responsive tables.
+## 5. Acceptance checklist
+- [ ] Paramedic cannot accept an SOS without an open shift.
+- [ ] Starting a shift requires picking an available ambulance.
+- [ ] Off-shift paramedics receive **no** `sos_incoming` notifications.
+- [ ] Accepting an SOS flips paramedic → `busy` AND ambulance → `assigned` in one transaction.
+- [ ] Busy paramedics do not appear in `dispatch-sos` candidate set.
+- [ ] Completing/cancelling an incident flips paramedic → `available` AND ambulance → `available`.
+- [ ] `TeamStatusScreen` reflects all of the above in realtime (no localStorage).
