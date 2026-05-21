@@ -40,7 +40,7 @@ export default function IncidentHistoryScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Dispatch</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
         <h1 className="text-2xl font-extrabold">Incident History</h1>
       </header>
 

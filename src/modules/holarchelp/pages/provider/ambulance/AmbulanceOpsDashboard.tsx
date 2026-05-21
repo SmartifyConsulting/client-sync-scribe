@@ -64,7 +64,7 @@ export default function AmbulanceOpsDashboard() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Dispatch</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
           <h1 className="text-2xl font-extrabold leading-tight">Live SOS Incident Feed</h1>
         </div>
         <div className="flex gap-1.5">
