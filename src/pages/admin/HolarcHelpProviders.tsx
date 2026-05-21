@@ -421,82 +421,11 @@ export default function HolarcHelpProviders() {
               <UsersTab kind="admin" />
             </TabsContent>
 
-            {(() => {
-              const renderProviderPanelInner = (k: Kind) => {
-                const fullList = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
-                const noun = nounFor(k);
-                const q = providerSearch[k].trim().toLowerCase();
-                const list = q
-                  ? fullList.filter((r: any) => {
-                      const ownerEmail = (userEmails[r.owner_id ?? r.user_id] ?? "").toLowerCase();
-                      return [
-                        r[nameField(k)],
-                        r.city,
-                        r.contact_email,
-                        r.contact_phone,
-                        ownerEmail,
-                      ]
-                        .filter(Boolean)
-                        .some((v: any) => String(v).toLowerCase().includes(q));
-                    })
-                  : fullList;
-                return (
-                  <AdminPanel
-                    title={`${list.length} ${noun}${q ? ` matching "${providerSearch[k]}"` : ""}`}
-                    description="Grouped by country, then tier."
-                    bodyClassName="p-0"
-                    actions={
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="relative">
-                          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            value={providerSearch[k]}
-                            onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
-                            placeholder={`Search ${noun}…`}
-                            className="h-8 w-48 pl-7 text-[12px]"
-                          />
-                        </div>
-                        <div className="inline-flex rounded-md border border-[hsl(var(--admin-border-strong))] bg-[hsl(var(--admin-surface))] p-0.5">
-                          {(["active", "inactive", "all"] as Status[]).map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setStatus(s)}
-                              className={`px-2.5 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
-                                status === s
-                                  ? "bg-[hsl(var(--admin-accent))] text-white"
-                                  : "text-[hsl(var(--admin-text-secondary))] hover:text-[hsl(var(--admin-text-primary))]"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                        {providerKindNeedsAdd(k) && (
-                          <Button size="sm" className="h-8 px-3 text-[12px]" onClick={() => { setTab(k); setChooserOpen(true); }}>
-                            <Plus className="mr-1 h-3.5 w-3.5" />Add
-                          </Button>
-                        )}
-                      </div>
-                    }
-                  >
-                    {loading ? (
-                      <RowSkeleton rows={6} cols={6} />
-                    ) : list.length === 0 ? (
-                      <EmptyState title={q ? `No ${noun} match "${providerSearch[k]}"` : `No ${status === "all" ? "" : status + " "}${noun}`} />
-                    ) : (
-                      <div className="p-3">{renderGroupedTable(list, k)}</div>
-                    )}
-                  </AdminPanel>
-                );
-              };
-              // expose to outer scope via closure
-              (renderProviderPanel as any).current = renderProviderPanelInner;
-              return (["hospital", "pharmacy"] as Kind[]).map((k) => (
-                <TabsContent key={k} value={k} className="mt-4">
-                  {renderProviderPanelInner(k)}
-                </TabsContent>
-              ));
-            })()}
+            {(["hospital", "pharmacy"] as Kind[]).map((k) => (
+              <TabsContent key={k} value={k} className="mt-4">
+                {renderProviderPanel(k)}
+              </TabsContent>
+            ))}
           </Tabs>
         </TabsContent>
 
