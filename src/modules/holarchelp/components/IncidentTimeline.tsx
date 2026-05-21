@@ -19,9 +19,9 @@ const labelFor = (e: EventRow) => {
     case "reassigned": return "Re-assigned";
     case "released": return "Responder released — finding next";
     case "en_route": return "En route";
-    case "arrived": return "Ambulance arrived at SOS scene";
+    case "arrived": return "Emergency responder arrived at SOS scene";
     case "patient_collected": return "Patient collected";
-    case "at_hospital": return "Ambulance arrived at destination hospital";
+    case "at_hospital": return "Emergency responder arrived at destination hospital";
     case "completed": return "Incident completed";
     case "voice_note": return "Voice note added";
     case "eta_set": return `ETA set${e.payload?.eta_minutes ? `: ${e.payload.eta_minutes} min` : ""}`;
