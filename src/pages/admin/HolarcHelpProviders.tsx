@@ -160,22 +160,6 @@ export default function HolarcHelpProviders() {
     toast.success("Deleted"); setConfirmDelete(null); load();
   };
 
-  const uploadClip = async () => {
-    if (!clipFile) return toast.error("Choose an MP3 first");
-    setUploadingClip(true);
-    const path = `default/${Date.now()}-${clipFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const { error: upErr } = await supabase.storage.from("guardian-voice-clips").upload(path, clipFile, {
-      contentType: clipFile.type || "audio/mpeg", upsert: false,
-    });
-    if (upErr) { setUploadingClip(false); return toast.error(upErr.message); }
-    const { error: dbErr } = await supabase.from("holarchelp_voice_clip_settings" as any)
-      .upsert({ id: 1, default_clip_path: path, updated_at: new Date().toISOString() } as any, { onConflict: "id" });
-    setUploadingClip(false);
-    if (dbErr) return toast.error(dbErr.message);
-    toast.success("SOS voice clip set");
-    setClipFile(null);
-    loadVoiceClip();
-  };
 
   const renderRow = (kind: Kind, r: any) => {
     const active = isActive(r.status);
