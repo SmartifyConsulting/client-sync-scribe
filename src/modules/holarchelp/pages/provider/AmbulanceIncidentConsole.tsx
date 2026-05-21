@@ -37,11 +37,17 @@ export default function AmbulanceIncidentConsole() {
   const [eta, setEta] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [meId, setMeId] = useState<string | null>(null);
 
-  const isAssigned = incident?.assigned_provider_id === providerId;
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setMeId(data.user?.id ?? null));
+  }, []);
+
+  const isAssignedParamedic = !!meId && incident?.assigned_paramedic_user_id === meId;
+  const isAssignedProvider = incident?.assigned_provider_id === providerId; // legacy fallback
   const isLive = incident && !["completed","cancelled"].includes(incident.status);
 
-  useLiveProviderLocation(id ?? null, providerId, !!isAssigned && !!isLive);
+  useLiveProviderLocation(id ?? null, providerId, (isAssignedParamedic || isAssignedProvider) && !!isLive);
 
   useEffect(() => {
     if (!id) return;
