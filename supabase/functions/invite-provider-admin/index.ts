@@ -36,6 +36,11 @@ serve(async (req) => {
     const provider_type = body?.provider_type as "hospital" | "ambulance" | undefined;
     const email = String(body?.email ?? "").trim().toLowerCase();
     const name = body?.name ? String(body.name).trim().slice(0, 200) : null;
+    const rawRole = body?.invited_role ? String(body.invited_role).trim() : null;
+    const HOSP_ROLES = ["hospital_admin", "coordinator", "doctor", "nurse", "admin"];
+    const AMB_ROLES = ["er_admin", "paramedic", "admin"];
+    const allowed = provider_type === "hospital" ? HOSP_ROLES : AMB_ROLES;
+    const invited_role = rawRole && allowed.includes(rawRole) ? rawRole : "admin";
 
     if (!provider_id || (provider_type !== "hospital" && provider_type !== "ambulance"))
       return json({ error: "provider_id and provider_type required" }, 400);
@@ -80,7 +85,7 @@ serve(async (req) => {
     const inviteToken = crypto.randomUUID();
     const row: Record<string, unknown> = {
       [fkCol]: provider_id,
-      role: "admin",
+      role: invited_role,
       invited_email: email,
       invited_name: name,
       invited_by: callerId,
