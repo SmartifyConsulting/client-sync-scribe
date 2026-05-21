@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../../components/ProviderGate";
-import { Users, UserCheck, UserX } from "lucide-react";
+import { InviteStaffDialog } from "../../../components/InviteStaffDialog";
+import { Button } from "@/components/ui/button";
+import { Users, UserCheck, UserX, UserPlus } from "lucide-react";
 
 type Member = { id: string; user_id: string; role?: string | null; full_name?: string | null };
 
@@ -12,9 +15,22 @@ const readShifts = (): Record<string, boolean> => {
 };
 
 export default function TeamStatusScreen() {
+  const { user } = useAuth();
   const { providerId } = useProviderAccess();
   const [members, setMembers] = useState<Member[]>([]);
   const [shifts, setShifts] = useState<Record<string, boolean>>(readShifts);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  useEffect(() => {
+    if (!providerId || !user) return;
+    (async () => {
+      const { data: ok } = await supabase.rpc("is_ambulance_admin" as any, {
+        _provider_id: providerId, _user_id: user.id,
+      } as any);
+      setIsAdmin(!!ok);
+    })();
+  }, [providerId, user?.id]);
 
   useEffect(() => {
     if (!providerId) return;
@@ -49,9 +65,16 @@ export default function TeamStatusScreen() {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
           <h1 className="text-2xl font-extrabold">Team Status</h1>
         </div>
-        <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">
-          <Users className="mr-1 inline h-3.5 w-3.5 text-primary" /> {onShift} / {members.length} on shift
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">
+            <Users className="mr-1 inline h-3.5 w-3.5 text-primary" /> {onShift} / {members.length} on shift
+          </span>
+          {isAdmin && (
+            <Button size="sm" onClick={() => setInviteOpen(true)}>
+              <UserPlus className="mr-1 h-4 w-4" /> Invite
+            </Button>
+          )}
+        </div>
       </header>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
@@ -79,6 +102,15 @@ export default function TeamStatusScreen() {
           {!members.length && <li className="p-8 text-center text-xs text-muted-foreground">No crew members on roster yet.</li>}
         </ul>
       </div>
+
+      {providerId && (
+        <InviteStaffDialog
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+          orgType="ambulance"
+          orgId={providerId}
+        />
+      )}
     </div>
   );
 }
