@@ -56,6 +56,8 @@ interface UserRecord {
   holarchelp_enabled?: boolean;
   company?: string | null;
   country?: string | null;
+  phone?: string | null;
+  address?: string | null;
 }
 
 interface EditState {
