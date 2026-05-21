@@ -351,9 +351,6 @@ export default function HolarcHelpProviders() {
           <TabsTrigger value="accountability" className={`${adminTabsTriggerClass} gap-1.5`}>
             <BarChart3 className="h-3.5 w-3.5" />Accountability
           </TabsTrigger>
-          <TabsTrigger value="voice-clip" className={`${adminTabsTriggerClass} gap-1.5`}>
-            <Mic2 className="h-3.5 w-3.5" />SOS Voice Clip
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4 space-y-3">
