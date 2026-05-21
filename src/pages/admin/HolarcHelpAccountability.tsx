@@ -177,7 +177,7 @@ export function AccountabilityPanel() {
   return (
     <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
       <TabsList className={flatTabsList}>
-        <TabsTrigger value="ambulances" className={flatTrigger}>Ambulance</TabsTrigger>
+        <TabsTrigger value="ambulances" className={flatTrigger}>Emergency Response</TabsTrigger>
         <TabsTrigger value="hospitals" className={flatTrigger}>Hospitals</TabsTrigger>
       </TabsList>
       <TabsContent value="ambulances" className="mt-4">{renderTable("ambulance")}</TabsContent>
