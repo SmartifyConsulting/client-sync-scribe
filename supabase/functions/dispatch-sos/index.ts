@@ -99,15 +99,13 @@ Deno.serve(async (req) => {
       onConflict: "incident_id,provider_id", ignoreDuplicates: true,
     });
 
-    // Paramedic-direct offers: expand each ER candidate to its paramedics.
+    // Paramedic-direct offers: only paramedics with an open + available shift in eligible providers.
     const ambCandidateIds = candidates.filter((p) => p._kind === "ambulance").map((p) => p.id);
     let paramedicOffered = 0;
     if (ambCandidateIds.length) {
-      const { data: paramedics } = await sb.from("holarchelp_ambulance_members")
-        .select("provider_id, user_id")
-        .in("provider_id", ambCandidateIds)
-        .eq("role", "paramedic")
-        .not("user_id", "is", null);
+      const { data: paramedics } = await sb.rpc("holarchelp_eligible_paramedics", {
+        _provider_ids: ambCandidateIds,
+      });
 
       if (paramedics?.length) {
         const distByProvider = new Map<string, number>(
