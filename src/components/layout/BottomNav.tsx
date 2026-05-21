@@ -36,8 +36,8 @@ const adminNavItems = [
   { icon: Users, label: "Users", to: "/admin/users" },
   { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
   { icon: Gift, label: "Rewards", to: "/admin/gamification" },
-  { icon: LayoutDashboard, label: "Hub", to: "/admin", exact: true },
-  { icon: Home, label: "Exit Admin", to: "/doctor-dashboard" },
+  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
+  { icon: Home, label: "Exit", to: "/doctor-dashboard" },
 ];
 
 export function BottomNav() {
@@ -57,7 +57,7 @@ export function BottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
         <div className="flex items-center justify-around px-2 py-2">
           {adminNavItems.map((item) => {
-            const isActive = item.exact
+            const isActive = (item as any).exact
               ? location.pathname === item.to
               : location.pathname.startsWith(item.to);
             return (

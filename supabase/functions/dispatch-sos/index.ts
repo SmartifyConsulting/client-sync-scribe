@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
     const all = [...tag(ambList, "ambulance"), ...tag(hospList, "hospital")];
 
     let candidates: any[] = [];
-    for (const radius of [50, 150, 500, 5000]) {
+    for (const radius of [50, 150]) {
       candidates = all.filter((p: any) => p._d <= radius);
       if (candidates.length > 0) break;
     }

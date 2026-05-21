@@ -26,6 +26,7 @@ import { StatusDot, statusToTone } from "@/pages/admin/_shared/StatusDot";
 import { EmptyState } from "@/pages/admin/_shared/EmptyState";
 import { RowSkeleton } from "@/pages/admin/_shared/RowSkeleton";
 import { Toolbar } from "@/pages/admin/_shared/Toolbar";
+import { CreateTestUserDialog } from "@/features/admin/components/CreateTestUserDialog";
 
 type RawRole = "doctor" | "patient" | "admin" | "hospital_staff" | "ambulance_staff" | "blood_bank" | "pharmacy_staff" | "nurse";
 type RoleEnum = RawRole | "none";
@@ -426,11 +427,14 @@ export default function UsersTab({ kind }: UsersTabProps) {
         description={kind === "emergency" ? "Grouped by provider type. Expand to manage." : "Grouped by country. Expand to view, edit, or remove."}
         bodyClassName="p-0"
         actions={
-          <Toolbar
-            searchValue={search}
-            onSearchChange={setSearch}
-            searchPlaceholder={`Search ${noun}…`}
-          />
+          <div className="flex items-center gap-2">
+            <Toolbar
+              searchValue={search}
+              onSearchChange={setSearch}
+              searchPlaceholder={`Search ${noun}…`}
+            />
+            <CreateTestUserDialog onCreated={fetchUsers} />
+          </div>
         }
       >
         {loading ? (
