@@ -170,11 +170,11 @@ export default function PricingAdmin() {
     });
   };
 
-  const handleSave = async () => {
-    if (!user) return;
-    setSaving(true);
-    try {
-      for (const config of pricing) {
+  const { status: autosaveStatus, error: autosaveError } = useAutosave(
+    pricing,
+    async (snapshot) => {
+      if (!user || snapshot.length === 0) return;
+      for (const config of snapshot) {
         const { error } = await supabase
           .from("pricing_config")
           .update({
@@ -185,21 +185,10 @@ export default function PricingAdmin() {
           .eq("id", config.id);
         if (error) throw error;
       }
-      toast({
-        title: "Pricing Updated",
-        description: "Subscription pricing has been updated successfully",
-      });
-    } catch (error: any) {
-      console.error("Error saving pricing:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update pricing",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+    { delay: 700, enabled: !loading },
+  );
+
 
   if (roleLoading || loading) {
     return (
@@ -231,12 +220,7 @@ export default function PricingAdmin() {
       eyebrow="Admin"
       title="Subscription Pricing"
       description="Define monthly and annual rates for providers, patients, and emergency services."
-      actions={
-        <Button size="sm" onClick={handleSave} disabled={saving} className="h-8 px-3 text-[12px]">
-          {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : null}
-          Publish changes
-        </Button>
-      }
+      actions={<AutosaveIndicator status={autosaveStatus} error={autosaveError} />}
     >
       <div className="space-y-3">
         <RoleSection title="Tier 01 — Healthcare Providers" badgeLabel="Doctor"     monthly={doctorMonthly}    annual={doctorAnnual}    onChange={handleChange} />

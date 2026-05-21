@@ -36,7 +36,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
   const isProvider = variant === "provider";
   const [reportOpen, setReportOpen] = useState(false);
   const { profile } = useProfile();
-  const { isDoctor } = useUserRole();
+  const { isDoctor, isEmergency } = useUserRole();
   const queryClient = useQueryClient();
   const location = useLocation();
   const navigate = useNavigate();
@@ -271,12 +271,22 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
               </button>
             </div>
           )}
-          {!isDoctor && (
-            <div className="px-2 py-1.5 border-b border-border mb-1">
-              <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-              <p className="text-[10px] text-muted-foreground capitalize">Patient</p>
-            </div>
-          )}
+          {!isDoctor && (() => {
+            const path = location.pathname;
+            const roleLabel = path.startsWith("/provider/ambulance")
+              ? "ER"
+              : path.startsWith("/provider/hospital")
+                ? "Hospital"
+                : isEmergency
+                  ? "ER"
+                  : "Patient";
+            return (
+              <div className="px-2 py-1.5 border-b border-border mb-1">
+                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                <p className="text-[10px] text-muted-foreground">{roleLabel}</p>
+              </div>
+            );
+          })()}
           {isDoctor && !isOnPatientRoute && (
             <Link to="/doctor/rewards" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
               <Gift className="h-3.5 w-3.5" /> My Rewards

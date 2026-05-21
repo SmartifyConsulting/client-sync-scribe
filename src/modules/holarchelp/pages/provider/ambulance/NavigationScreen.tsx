@@ -92,7 +92,7 @@ export default function NavigationScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Dispatch · Navigation</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch · Navigation</p>
           <h1 className="text-xl font-extrabold">Mission #{activeId.slice(0,8)}</h1>
         </div>
         <div className="flex items-center gap-2">

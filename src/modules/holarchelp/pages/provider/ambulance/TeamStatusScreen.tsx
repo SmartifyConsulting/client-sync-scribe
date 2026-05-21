@@ -46,7 +46,7 @@ export default function TeamStatusScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Dispatch</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
           <h1 className="text-2xl font-extrabold">Team Status</h1>
         </div>
         <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">

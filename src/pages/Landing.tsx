@@ -202,7 +202,7 @@ export default function Landing() {
                 { icon: ClipboardList, label: "Auto-Tasks" },
                 { icon: Calendar, label: "Unified Calendar" },
                 { icon: Siren, label: "Emergency SOS" },
-                { icon: Ambulance, label: "Ambulance Dispatch" },
+                { icon: Ambulance, label: "Emergency Response Dispatch" },
                 { icon: Building2, label: "Hospital Network" },
               ].map((p) => (
                 <span
