@@ -1,37 +1,38 @@
-# Early Release Notice, Auth Hardening & Support Link
+## Diagnose & fix password-reset email delivery
 
-## 1. Post-login "Early Release" notice
-- Add a dismissible dialog/banner shown once per user after successful login.
-- Copy (verbatim): *"You are participating in an early release of Holarc Health. As we continue to expand functionality and improve the platform, some features may evolve and occasional issues may occur. Your feedback is invaluable and can be submitted through the Bug Log feature found next to the notification button."*
-- Persist dismissal in `localStorage` keyed by user id (`holarc_early_release_seen_<uid>`) so it only appears on first login per device/account.
-- Mount inside `AppLayout` (and patient layout) so it covers both doctor and patient roles.
+### Findings so far
+- Recovery link was generated successfully (auth log confirms).
+- Edge function returned 200, meaning Resend accepted the email.
+- Domain `holarchealth.com` is verified in Resend.
+- Email never arrived (inbox or spam) for `info@georgiaadams.co.za`.
 
-## 2. Disable public sign-ups
-- In `src/pages/Auth.tsx`: remove/hide the "Sign up" tab and any signup CTA — keep Sign In + Forgot Password only.
-- Call `supabase--configure_auth` with `disable_signup: true` so the backend also rejects signups.
-- Provider/patient signup routes already gated; leave landing CTAs pointing to contact panel (already done).
+Conclusion: Resend accepted the email but it was either bounced/blocked by the recipient mail server, or silently dropped due to missing DMARC/SPF. Current code doesn't log the Resend message ID, so we can't trace it.
 
-## 3. Password reset (verify + ensure email delivery)
-- `/forgot-password` and `/reset-password` pages already exist and work via the `send-password-reset` edge function (uses shared Resend sender).
-- Verify the flow end-to-end:
-  - Forgot Password page calls `send-password-reset` with `redirectTo = ${origin}/reset-password`.
-  - Confirm `RESEND_API_KEY` + `EMAIL_FROM` secrets are set; if missing, prompt user to add them.
-  - Confirm `send-password-reset` is deployed.
-- No template/UX changes unless verification reveals an issue.
+### Steps
 
-## 4. "Contact Support" footer link
-- Add a `Contact Support` link in `src/components/layout/Footer.tsx` (desktop) and as a small line in `BottomNav` area / mobile footer strip so it appears app-wide.
-- `href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"`.
+**1. Add success logging**
+- `supabase/functions/_shared/email.ts` — log Resend response (message `id`, status) on success, plus `from` and `to` addresses.
+- `supabase/functions/send-password-reset/index.ts` — log the Resend message ID and recipient after send.
+- Redeploy `send-password-reset`.
 
-## Files touched
-- New: `src/components/EarlyReleaseNotice.tsx`
-- Edit: `src/components/layout/AppLayout.tsx`, patient layout (mount notice)
-- Edit: `src/pages/Auth.tsx` (remove signup tab)
-- Edit: `src/components/layout/Footer.tsx` (+ mobile equivalent) — add support mailto
-- Backend: `supabase--configure_auth` → disable signups; verify `send-password-reset` deploy + Resend secret
+**2. Re-trigger the reset** for `info@georgiaadams.co.za` and read the edge function logs to capture the Resend message ID.
 
-## Acceptance
-- [ ] First login shows the early-release dialog; dismiss persists.
-- [ ] `/auth` shows only Sign In + Forgot Password (no signup form).
-- [ ] Forgot password email arrives via Resend; reset link lands on `/reset-password` and updates password.
-- [ ] Footer "Contact Support" opens mail client to support@holarchealth.com.
+**3. Inspect delivery status in Resend dashboard**
+With that message ID, check Resend → Emails for one of: `delivered`, `bounced`, `complained`, `blocked`, or stuck in queue. This tells us exactly where it failed.
+
+**4. Apply the right fix based on what we find**
+- **Bounced/blocked at recipient** → the `co.za` mail server is filtering. Almost always fixed by adding/strengthening **DMARC + SPF** on `holarchealth.com`:
+  - SPF (TXT on `holarchealth.com`): `v=spf1 include:_spf.resend.com ~all`
+  - DMARC (TXT on `_dmarc.holarchealth.com`): `v=DMARC1; p=none; rua=mailto:postmaster@holarchealth.com`
+  - Confirm DKIM is published (Resend dashboard shows the records).
+- **Delivered** → email is being filtered at the mailbox level; try sending to a Gmail test address to confirm sender reputation is fine, then ask the recipient to whitelist `no-reply@holarchealth.com`.
+- **Suppressed** → recipient is on Resend's suppression list (prior bounce). Remove from suppression in Resend dashboard.
+
+### Files changed
+- `supabase/functions/_shared/email.ts`
+- `supabase/functions/send-password-reset/index.ts`
+
+### What I'll report back after step 2
+- The Resend message ID from the new logs.
+- The exact status from your Resend dashboard for that message.
+- The specific DNS or suppression fix required (no guessing).
