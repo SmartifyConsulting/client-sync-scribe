@@ -9,7 +9,7 @@ import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { TopBarIcons } from "./TopBarIcons";
-import { InstallMobileStrip } from "./InstallMobileStrip";
+
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
 
 
