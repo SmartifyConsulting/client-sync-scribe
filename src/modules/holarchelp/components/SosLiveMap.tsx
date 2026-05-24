@@ -202,6 +202,34 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     };
   }, [incidentId]);
 
+  // Re-run nearest-ER lookup once patient location is known and no ER is assigned yet.
+  // Covers the realtime case where patient coords arrive after the initial load.
+  useEffect(() => {
+    if (!patient || provider || assignedProviderId) return;
+    let cancelled = false;
+    (async () => {
+      const { data: ambs } = await supabase
+        .from("holarchelp_ambulance_providers" as any)
+        .select("latitude, longitude, status, subscription_status, accepting_patients")
+        .eq("status", "approved")
+        .eq("subscription_status", "active")
+        .eq("accepting_patients", true)
+        .not("latitude", "is", null)
+        .not("longitude", "is", null);
+      if (cancelled) return;
+      const list = ((ambs as any[]) ?? []);
+      if (!list.length) return;
+      let best: any = null, bestD = Infinity;
+      for (const a of list) {
+        const d = haversineKm(patient, { lat: a.latitude, lng: a.longitude });
+        if (d < bestD) { bestD = d; best = a; }
+      }
+      if (best) setProvider({ lat: best.latitude, lng: best.longitude, kind: "ambulance" });
+    })();
+    return () => { cancelled = true; };
+  }, [patient?.lat, patient?.lng, provider, assignedProviderId]);
+
+
   // Phase
   const phase: "selecting" | "pickup" | "transport" = !hospital
     ? "selecting"
