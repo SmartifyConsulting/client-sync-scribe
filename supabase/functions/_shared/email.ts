@@ -103,6 +103,15 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     let data: unknown = text;
     try { data = text ? JSON.parse(text) : null; } catch { /* keep as text */ }
 
+    console.log("[email] resend response", {
+      status: resp.status,
+      ok: resp.ok,
+      from: payload.from,
+      to: payload.to,
+      subject: input.subject,
+      body: text,
+    });
+
     if (!resp.ok) {
       console.error("Email send failed", resp.status, text);
       let message = `Email provider error ${resp.status}`;
