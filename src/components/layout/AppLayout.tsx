@@ -10,7 +10,9 @@ import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useUserRole } from "@/hooks/useUserRole";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, LifeBuoy } from "lucide-react";
+import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
+
 
 export function AppLayout() {
   const location = useLocation();
@@ -29,7 +31,8 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
-      {/* Subscription gate disabled during MVP phase */}
+      <EarlyReleaseNotice />
+
 
       {/* Sidebar - hidden on mobile */}
       <div className="hidden md:block">
@@ -55,6 +58,16 @@ export function AppLayout() {
         </div>
       </main>
 
+      {/* Mobile support link (footer hidden on mobile) */}
+      <div className="md:hidden px-4 pb-24 -mt-4">
+        <a
+          href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
+          className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
+        >
+          <LifeBuoy className="h-3.5 w-3.5" /> Contact Support
+        </a>
+      </div>
+
       {/* Footer - hidden on mobile due to bottom nav */}
       <div className="hidden md:block md:ml-[var(--sidebar-width)]">
         <Footer />
@@ -62,6 +75,7 @@ export function AppLayout() {
 
       {/* Mobile bottom navigation */}
       <BottomNav />
+
     </div>
   );
 }
