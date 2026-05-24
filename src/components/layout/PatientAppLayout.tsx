@@ -31,8 +31,6 @@ export function PatientAppLayout() {
       </div>
       {/* Subscription gate disabled during MVP phase */}
 
-      {/* Mobile install strip */}
-      <InstallMobileStrip />
 
 
       {/* Top Bar - only on mobile */}
