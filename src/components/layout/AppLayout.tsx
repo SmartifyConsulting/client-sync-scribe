@@ -5,7 +5,7 @@ import { Sidebar } from "./Sidebar";
 import { PageTransition } from "./PageTransition";
 import { Footer } from "./Footer";
 import { TopBarIcons } from "./TopBarIcons";
-import { InstallMobileStrip } from "./InstallMobileStrip";
+
 import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -39,8 +39,7 @@ export function AppLayout() {
         <Sidebar />
       </div>
 
-      {/* Mobile install strip + header */}
-      <InstallMobileStrip />
+      {/* Mobile header */}
       <MobileHeader />
       
       {/* Main content */}
