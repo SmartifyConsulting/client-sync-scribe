@@ -305,12 +305,18 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
   const points = useMemo<LiveMapPoint[]>(() => {
     const out: LiveMapPoint[] = [];
     if (patient) out.push({ kind: "patient", latitude: patient.lat, longitude: patient.lng, label: "You" });
-    if (phase !== "selecting" && provider) {
+    if (provider) {
+      const label =
+        provider.kind === "hospital"
+          ? "Responder"
+          : assignedProviderId
+            ? "Ambulance"
+            : "Nearest ER";
       out.push({
         kind: provider.kind,
         latitude: provider.lat,
         longitude: provider.lng,
-        label: provider.kind === "ambulance" ? "Ambulance" : "Responder",
+        label,
       });
     }
     if (hospital) {
@@ -331,17 +337,17 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     hospital?.lat,
     hospital?.lng,
     hospital?.name,
-    phase,
+    assignedProviderId,
   ]);
 
   // Lines
   const routes = useMemo<LiveMapRoute[]>(() => {
     const rs: LiveMapRoute[] = [];
-    if (phase === "selecting") return rs;
     if (hospital && patient) {
       rs.push({ from: patient, to: { lat: hospital.lat, lng: hospital.lng }, color: "teal" });
     }
-    if (phase === "pickup" && provider && patient) {
+    // Red patient↔ambulance line: shown during selecting AND pickup phases
+    if (phase !== "transport" && provider && patient && provider.kind === "ambulance") {
       rs.push({ from: patient, to: { lat: provider.lat, lng: provider.lng }, color: "red" });
     }
     if (phase === "transport" && provider && hospital) {
@@ -352,7 +358,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       });
     }
     return rs;
-  }, [phase, patient?.lat, patient?.lng, provider?.lat, provider?.lng, hospital?.lat, hospital?.lng]);
+  }, [phase, patient?.lat, patient?.lng, provider?.lat, provider?.lng, provider?.kind, hospital?.lat, hospital?.lng]);
 
   return (
     <div className="relative">
