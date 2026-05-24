@@ -796,6 +796,8 @@ export default function Auth() {
                   Sign-ups are currently invite-only. Please contact an administrator for access.
                 </p>
               </div>
+              <DevErLoginButton>
+              </DevErLoginButton>
             </div>
           </div>
         </div>
