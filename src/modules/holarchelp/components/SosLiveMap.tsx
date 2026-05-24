@@ -383,6 +383,9 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       <LiveMap points={points} routes={routes} height={height} />
 
       <div className="pointer-events-none absolute left-2 top-2 z-[400] flex flex-col gap-1.5">
+        {phase === "selecting" && (
+          <CountdownBadge label="NEAREST ER" eta={searchEta} arriveText="ER nearby" />
+        )}
         {phase === "pickup" && (
           <CountdownBadge label="PICKUP" eta={pickupEta} arriveText="Arriving at you" />
         )}
