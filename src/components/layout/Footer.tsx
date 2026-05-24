@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { LifeBuoy } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -29,6 +30,15 @@ export function Footer() {
             </span>
           ))}
         </nav>
+        <div className="flex justify-center">
+          <a
+            href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            <LifeBuoy className="h-3.5 w-3.5" />
+            Contact Support
+          </a>
+        </div>
       </div>
     </footer>
   );

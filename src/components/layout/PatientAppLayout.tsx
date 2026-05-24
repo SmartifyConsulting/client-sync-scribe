@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, LifeBuoy } from "lucide-react";
 import { PageTransition } from "./PageTransition";
 import { BottomNav } from "./BottomNav";
 import { Footer } from "./Footer";
@@ -10,6 +10,8 @@ import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { TopBarIcons } from "./TopBarIcons";
 import { InstallMobileStrip } from "./InstallMobileStrip";
+import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
+
 
 
 export function PatientAppLayout() {
@@ -21,6 +23,8 @@ export function PatientAppLayout() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
+      <EarlyReleaseNotice />
+
       {/* Sidebar for tablet/web */}
       <div className="hidden md:block">
         <Sidebar />
@@ -58,6 +62,16 @@ export function PatientAppLayout() {
         </div>
       </main>
 
+      {/* Mobile support link */}
+      <div className="md:hidden px-4 pb-24 -mt-4">
+        <a
+          href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
+          className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
+        >
+          <LifeBuoy className="h-3.5 w-3.5" /> Contact Support
+        </a>
+      </div>
+
       {/* Footer - hidden on mobile due to bottom nav */}
       <div className="hidden md:block md:ml-[var(--sidebar-width)]">
         <Footer />
@@ -67,3 +81,4 @@ export function PatientAppLayout() {
     </div>
   );
 }
+

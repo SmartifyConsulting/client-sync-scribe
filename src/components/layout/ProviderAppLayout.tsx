@@ -1,12 +1,15 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
 import { AnimatePresence } from "framer-motion";
+import { LifeBuoy } from "lucide-react";
 import { ProviderSidebar } from "./ProviderSidebar";
 import { TopBarIcons } from "./TopBarIcons";
 import { Footer } from "./Footer";
 import { PageTransition } from "./PageTransition";
+import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import holarcHelpLogo from "@/assets/holarc-help-logo.png";
+
 
 interface ProviderAppLayoutProps {
   portal: "hospital" | "ambulance";
@@ -20,10 +23,12 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-hidden">
+      <EarlyReleaseNotice />
       {/* Desktop sidebar */}
       <div className="hidden md:block">
         <ProviderSidebar portal={portal} />
       </div>
+
 
       {/* Mobile header (no sidebar drawer for providers yet — Holarc logo + TopBarIcons) */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
@@ -53,6 +58,16 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
         </div>
       </main>
 
+      {/* Mobile support link */}
+      <div className="md:hidden px-4 pb-4">
+        <a
+          href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
+          className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
+        >
+          <LifeBuoy className="h-3.5 w-3.5" /> Contact Support
+        </a>
+      </div>
+
       {/* Footer */}
       <div className="hidden md:block md:ml-[210px]">
         <Footer />
@@ -60,3 +75,4 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
     </div>
   );
 }
+
