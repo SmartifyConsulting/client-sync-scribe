@@ -50,6 +50,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       if (cancelled) return;
       const i: any = inc;
       if (i?.status) setStatus(i.status);
+      setAssignedProviderId(i?.assigned_provider_id ?? null);
 
       const { data: loc } = await supabase
         .from("holarchelp_locations" as any)
