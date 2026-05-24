@@ -243,6 +243,24 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     };
   }, [phase, provider?.lat, provider?.lng, hospital?.lat, hospital?.lng]);
 
+  // ETA while still searching/awaiting an ER (nearest ambulance → patient)
+  useEffect(() => {
+    if (phase !== "selecting" || !provider || !patient || provider.kind !== "ambulance") {
+      setSearchEta(null);
+      return;
+    }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const e = await fetchEta(provider, patient);
+      if (!cancelled) setSearchEta(e);
+    }, 1000);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [phase, provider?.lat, provider?.lng, provider?.kind, patient?.lat, patient?.lng]);
+
+
   // Arrival event emission — only the patient view writes these (to avoid duplicates)
   const arrivedSceneRef = useRef(false);
   const arrivedDestRef = useRef(false);
