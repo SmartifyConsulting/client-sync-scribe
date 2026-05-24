@@ -30,9 +30,11 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
   const [provider, setProvider] = useState<(LatLng & { kind: "ambulance" | "hospital" }) | null>(null);
   const [hospital, setHospital] = useState<(LatLng & { name?: string }) | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [assignedProviderId, setAssignedProviderId] = useState<string | null>(null);
 
   const [pickupEta, setPickupEta] = useState<Eta>(null);
   const [transportEta, setTransportEta] = useState<Eta>(null);
+  const [searchEta, setSearchEta] = useState<Eta>(null);
 
   // Load initial state
   useEffect(() => {
@@ -48,6 +50,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       if (cancelled) return;
       const i: any = inc;
       if (i?.status) setStatus(i.status);
+      setAssignedProviderId(i?.assigned_provider_id ?? null);
 
       const { data: loc } = await supabase
         .from("holarchelp_locations" as any)
@@ -181,6 +184,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         async (p) => {
           const n: any = p.new;
           if (n?.status) setStatus(n.status);
+          if ("assigned_provider_id" in (n ?? {})) setAssignedProviderId(n.assigned_provider_id ?? null);
           if (n?.destination_hospital_id) {
             const { data: h } = await supabase
               .from("holarchelp_hospitals" as any)
@@ -198,6 +202,34 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       supabase.removeChannel(ch);
     };
   }, [incidentId]);
+
+  // Re-run nearest-ER lookup once patient location is known and no ER is assigned yet.
+  // Covers the realtime case where patient coords arrive after the initial load.
+  useEffect(() => {
+    if (!patient || provider || assignedProviderId) return;
+    let cancelled = false;
+    (async () => {
+      const { data: ambs } = await supabase
+        .from("holarchelp_ambulance_providers" as any)
+        .select("latitude, longitude, status, subscription_status, accepting_patients")
+        .eq("status", "approved")
+        .eq("subscription_status", "active")
+        .eq("accepting_patients", true)
+        .not("latitude", "is", null)
+        .not("longitude", "is", null);
+      if (cancelled) return;
+      const list = ((ambs as any[]) ?? []);
+      if (!list.length) return;
+      let best: any = null, bestD = Infinity;
+      for (const a of list) {
+        const d = haversineKm(patient, { lat: a.latitude, lng: a.longitude });
+        if (d < bestD) { bestD = d; best = a; }
+      }
+      if (best) setProvider({ lat: best.latitude, lng: best.longitude, kind: "ambulance" });
+    })();
+    return () => { cancelled = true; };
+  }, [patient?.lat, patient?.lng, provider, assignedProviderId]);
+
 
   // Phase
   const phase: "selecting" | "pickup" | "transport" = !hospital
@@ -239,6 +271,24 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       clearTimeout(t);
     };
   }, [phase, provider?.lat, provider?.lng, hospital?.lat, hospital?.lng]);
+
+  // ETA while still searching/awaiting an ER (nearest ambulance → patient)
+  useEffect(() => {
+    if (phase !== "selecting" || !provider || !patient || provider.kind !== "ambulance") {
+      setSearchEta(null);
+      return;
+    }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const e = await fetchEta(provider, patient);
+      if (!cancelled) setSearchEta(e);
+    }, 1000);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [phase, provider?.lat, provider?.lng, provider?.kind, patient?.lat, patient?.lng]);
+
 
   // Arrival event emission — only the patient view writes these (to avoid duplicates)
   const arrivedSceneRef = useRef(false);
@@ -302,12 +352,18 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
   const points = useMemo<LiveMapPoint[]>(() => {
     const out: LiveMapPoint[] = [];
     if (patient) out.push({ kind: "patient", latitude: patient.lat, longitude: patient.lng, label: "You" });
-    if (phase !== "selecting" && provider) {
+    if (provider) {
+      const label =
+        provider.kind === "hospital"
+          ? "Responder"
+          : assignedProviderId
+            ? "Ambulance"
+            : "Nearest ER";
       out.push({
         kind: provider.kind,
         latitude: provider.lat,
         longitude: provider.lng,
-        label: provider.kind === "ambulance" ? "Ambulance" : "Responder",
+        label,
       });
     }
     if (hospital) {
@@ -328,17 +384,17 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     hospital?.lat,
     hospital?.lng,
     hospital?.name,
-    phase,
+    assignedProviderId,
   ]);
 
   // Lines
   const routes = useMemo<LiveMapRoute[]>(() => {
     const rs: LiveMapRoute[] = [];
-    if (phase === "selecting") return rs;
     if (hospital && patient) {
       rs.push({ from: patient, to: { lat: hospital.lat, lng: hospital.lng }, color: "teal" });
     }
-    if (phase === "pickup" && provider && patient) {
+    // Red patient↔ambulance line: shown during selecting AND pickup phases
+    if (phase !== "transport" && provider && patient && provider.kind === "ambulance") {
       rs.push({ from: patient, to: { lat: provider.lat, lng: provider.lng }, color: "red" });
     }
     if (phase === "transport" && provider && hospital) {
@@ -349,13 +405,16 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       });
     }
     return rs;
-  }, [phase, patient?.lat, patient?.lng, provider?.lat, provider?.lng, hospital?.lat, hospital?.lng]);
+  }, [phase, patient?.lat, patient?.lng, provider?.lat, provider?.lng, provider?.kind, hospital?.lat, hospital?.lng]);
 
   return (
     <div className="relative">
       <LiveMap points={points} routes={routes} height={height} />
 
       <div className="pointer-events-none absolute left-2 top-2 z-[400] flex flex-col gap-1.5">
+        {phase === "selecting" && (
+          <CountdownBadge label="NEAREST ER" eta={searchEta} arriveText="ER nearby" />
+        )}
         {phase === "pickup" && (
           <CountdownBadge label="PICKUP" eta={pickupEta} arriveText="Arriving at you" />
         )}
