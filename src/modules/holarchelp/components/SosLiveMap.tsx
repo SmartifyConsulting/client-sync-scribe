@@ -184,6 +184,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         async (p) => {
           const n: any = p.new;
           if (n?.status) setStatus(n.status);
+          if ("assigned_provider_id" in (n ?? {})) setAssignedProviderId(n.assigned_provider_id ?? null);
           if (n?.destination_hospital_id) {
             const { data: h } = await supabase
               .from("holarchelp_hospitals" as any)
