@@ -30,9 +30,11 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
   const [provider, setProvider] = useState<(LatLng & { kind: "ambulance" | "hospital" }) | null>(null);
   const [hospital, setHospital] = useState<(LatLng & { name?: string }) | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [assignedProviderId, setAssignedProviderId] = useState<string | null>(null);
 
   const [pickupEta, setPickupEta] = useState<Eta>(null);
   const [transportEta, setTransportEta] = useState<Eta>(null);
+  const [searchEta, setSearchEta] = useState<Eta>(null);
 
   // Load initial state
   useEffect(() => {
