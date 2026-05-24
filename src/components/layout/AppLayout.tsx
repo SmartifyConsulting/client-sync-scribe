@@ -39,8 +39,7 @@ export function AppLayout() {
         <Sidebar />
       </div>
 
-      {/* Mobile install strip + header */}
-      <InstallMobileStrip />
+      {/* Mobile header */}
       <MobileHeader />
       
       {/* Main content */}
