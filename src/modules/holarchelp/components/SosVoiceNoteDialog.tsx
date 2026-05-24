@@ -40,6 +40,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
   const timerRef = useRef<number | null>(null);
   const startedAtRef = useRef<number>(0);
   const lastVoiceAtRef = useRef<number>(0);
+  const closedRef = useRef(false);
 
   const cleanup = () => {
     try { recorderRef.current?.state === "recording" && recorderRef.current.stop(); } catch {}
@@ -119,6 +120,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
 
   useEffect(() => {
     if (open) {
+      closedRef.current = false;
       setPhase("recording");
       setSeconds(0);
       setLevel(0);
@@ -132,6 +134,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
   }, [open]);
 
   const handleStop = async () => {
+    if (closedRef.current) return;
     setPhase("uploading");
     try {
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
@@ -141,6 +144,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       if (blob.size < 500) {
         // Practically empty — keep critical default and skip
         toast.message("No voice note captured — severity kept as Critical");
+        closedRef.current = true;
         cleanup();
         onClose();
         return;
@@ -207,6 +211,14 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
   };
 
   const cancel = () => {
+    closedRef.current = true;
+    // Detach handlers BEFORE stopping so onstop -> handleStop can't re-fire onClose
+    try {
+      if (recorderRef.current) {
+        recorderRef.current.onstop = null as any;
+        recorderRef.current.ondataavailable = null as any;
+      }
+    } catch {}
     cleanup();
     onClose();
   };

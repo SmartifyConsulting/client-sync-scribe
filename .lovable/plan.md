@@ -1,30 +1,43 @@
-# SOS: Call ER Providers Only (No Hospitals)
+# Three small SOS fixes
 
-When a patient taps SOS, the "Available responders" list and the 30-second auto-assignment currently include both ER (ambulance) providers and hospitals. The patient should only ever be calling an ER provider to come collect them — the ER provider then selects the destination hospital.
+## 1. Severity dialog appears twice after cancelling the voice note
 
-## What changes
+**Cause:** In `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx`, `cancel()` calls `cleanup()` which stops the `MediaRecorder`. The recorder's `onstop` handler (`handleStop`) then fires asynchronously, hits the `blob.size < 500` branch, and calls `onClose()` a second time. Each `onClose` in `HolarcHelpIncidentDetail` sets `severityOpen=true`, so after the user dismisses the picker once, the second `onClose` re-opens it.
 
-### 1. Patient-facing responder list — ambulances only
-`src/modules/holarchelp/components/AvailableResponders.tsx`
-- Filter the offers returned by `holarchelp_get_incident_offers` to `provider_kind === "ambulance"` before rendering.
-- Update header label from "Available responders" to "Available ER providers".
-- Remove the `Hospital` icon branch (only the red `Ambulance` icon is needed).
-- Empty-state copy: "No ER providers available nearby yet — keep this screen open."
+**Fix:** In `SosVoiceNoteDialog.tsx`, make `cancel()` detach the `onstop` handler before stopping so `handleStop` cannot re-fire `onClose`:
+- Set `recorderRef.current.onstop = null` (and clear `mr.ondataavailable`) inside `cancel()` before invoking `cleanup()`.
+- Also guard with a `closedRef = useRef(false)` flag — set true in both `cancel()` and at the end of `handleStop()` — and bail out of `handleStop` if it's already true. This protects against any other async path firing `onClose` twice.
 
-### 2. Auto-assign — ambulance only
-New migration updating `public.holarchelp_auto_assign_incident(_incident_id uuid)`:
-- Add `AND provider_kind = 'ambulance'` to the `SELECT … FROM holarchelp_incident_offers` candidate query so the 30-second fallback can only ever assign an ER provider, never a hospital.
-- Everything else (race guard, offer supersede, event log) unchanged.
+No change to `HolarcHelpIncidentDetail.tsx`.
 
-### 3. Patient pick guard
-`src/modules/holarchelp/components/AvailableResponders.tsx`
-- Since hospitals are filtered out of the UI, no extra guard is needed in the pick handler. Server-side, `holarchelp_patient_pick_provider` already accepts the kind passed in; the patient UI will only ever send `"ambulance"`.
+## 2. After cancel, the incident screen shows no ER options
 
-### 4. Dispatch — leave hospital offers intact (server-side)
-`supabase/functions/dispatch-sos/index.ts` continues to write hospital offers as well, because the ER provider/admin views still need that pool to choose a receiving hospital later. The patient simply never sees or auto-picks them.
+This is the same screen the screenshot shows. The `AvailableResponders` panel only renders when there's at least one ambulance offer in `holarchelp_incident_offers`. Right now there are zero offers because none of the Johannesburg ER providers have `latitude`/`longitude` populated — `dispatch-sos` filters with `.not("latitude", "is", null)`, so the candidate set is empty and no offers are written. The map then also has nothing to show beyond the patient pin.
+
+**Fix:** Seed coordinates for ER providers around Randburg and Sandton so dispatch can offer them. See migration in section 3 — it doubles as the data fix for this issue.
+
+No frontend changes needed; once offers exist, `AvailableResponders` will render the list and `SosLiveMap` will plot the red ambulance markers.
+
+## 3. Rename "Emergency Users" → "ER Providers" + seed Randburg/Sandton ER providers
+
+**Rename** in `src/pages/admin/HolarcHelpProviders.tsx`:
+- Line 377: tab label `Emergency Users` → `ER Providers` (keep the `value="emergency-users"` key unchanged so routing/tab state still works).
+
+**Seed data** — new migration that:
+- `UPDATE`s the existing JoBurg ER providers that already have `subscription_status='active'` and `accepting_patients=true` but no coordinates, giving them realistic Randburg / Sandton lat-lngs:
+  - Randburg cluster (around -26.0936, 27.9737): ER24 Joburg Central, Medi Response, Emer-G-Med EMS, Inter City Ambulance Service, High Care EMS (Pty) Ltd, National Emergency Medical Services.
+  - Sandton cluster (around -26.1076, 28.0567): ER24 Joburg South, Rescue 786, Ralmed, St John EMS - Jhb Base.
+- Sets `city` to `Randburg` or `Sandton` accordingly.
+- Inserts 4 additional fictitious providers (so the list feels well-populated) with `gen_random_uuid()` owner_ids, status `approved`, subscription `active`, `accepting_patients=true`, ownership `private`, valid emergency_phone, and small lat-lng jitter inside each suburb:
+  - Randburg: "Randburg Rapid Medics", "Ferndale Emergency Response".
+  - Sandton: "Sandton Med Evac", "Rivonia ER Services".
+
+Each row also gets `dispatch_priority=0` and `tier='tier_2'` so they qualify for dispatch.
 
 ## Files touched
-- `src/modules/holarchelp/components/AvailableResponders.tsx` — filter to ambulance, relabel, drop hospital icon branch.
-- `supabase/migrations/<new>.sql` — replace `holarchelp_auto_assign_incident` with ambulance-only candidate selection.
 
-No changes to dispatch edge function, hospital tables, or `SosLiveMap` (already correctly hides the destination hospital marker until an ER provider sets it).
+- `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx` — guard against double `onClose` on cancel.
+- `src/pages/admin/HolarcHelpProviders.tsx` — relabel tab to "ER Providers".
+- `supabase/migrations/<new>.sql` — update JoBurg ER provider coordinates and insert four fictitious Randburg/Sandton providers.
+
+No changes to `HolarcHelpIncidentDetail`, `AvailableResponders`, `dispatch-sos`, `SosLiveMap`, or the auto-assign function — fixing the data unblocks the existing UI.
