@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface PatientTodo {
   id: string;
@@ -109,6 +109,18 @@ export default function PatientTasks() {
     taskRecorderRef.current?.stop();
     setIsRecordingTask(false);
   }, []);
+
+  // Auto-trigger recording when arrived from "Record Task" button on dashboard
+  const [searchParams, setSearchParams] = useSearchParams();
+  const autoRecordTriggered = useRef(false);
+  useEffect(() => {
+    if (loading || autoRecordTriggered.current) return;
+    if (searchParams.get("autoRecord") === "true") {
+      autoRecordTriggered.current = true;
+      setSearchParams({}, { replace: true });
+      setTimeout(() => { startTaskRecording(); }, 300);
+    }
+  }, [loading, searchParams, setSearchParams, startTaskRecording]);
 
   const handleAddTask = async () => {
     if (!taskText.trim() || !user) return;

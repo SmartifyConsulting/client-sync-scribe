@@ -53,8 +53,14 @@ export function HospitalPicker({
     setPicking(h.id);
     const { error } = await supabase.from("holarchelp_incidents" as any)
       .update({ destination_hospital_id: h.id } as any).eq("id", incidentId);
+    if (error) { setPicking(null); return toast.error(error.message); }
+    // Verify the write actually persisted (RLS can silently no-op).
+    const { data: check } = await supabase.from("holarchelp_incidents" as any)
+      .select("destination_hospital_id").eq("id", incidentId).maybeSingle();
     setPicking(null);
-    if (error) return toast.error(error.message);
+    if ((check as any)?.destination_hospital_id !== h.id) {
+      return toast.error("Could not set destination — please try again");
+    }
     toast.success(`${h.name} notified`);
   };
 

@@ -305,7 +305,7 @@ export default function PatientDashboard() {
               <Calendar className="h-3.5 w-3.5" /> Calendar
             </Button>
           </Link>
-          <Link to="/todos?autoRecord=true">
+          <Link to="/patient/tasks?autoRecord=true">
             <Button size="sm" className="gap-1.5 text-xs bg-primary">
               <Mic className="h-3.5 w-3.5" /> Record Task
             </Button>
