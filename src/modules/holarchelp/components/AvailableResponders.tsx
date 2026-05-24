@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Ambulance, Hospital, Loader2 } from "lucide-react";
+import { Ambulance, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
 
 type Offer = {
   provider_id: string;
@@ -30,6 +31,9 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
       const { data, error } = await supabase.rpc("holarchelp_get_incident_offers" as any, { _incident_id: incidentId });
       if (error) { setOffers([]); return; }
       const merged: Offer[] = ((data as any[]) ?? [])
+        // Patient SOS only ever calls an ER (ambulance) provider — the ER
+        // provider then selects the receiving hospital.
+        .filter((r) => r?.provider_kind === "ambulance")
         // Defensive: drop any row missing a real display name
         .filter((r) => r?.name && String(r.name).trim().length > 0)
         .map((r: any) => ({
@@ -40,6 +44,7 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
           ownership: r.ownership ?? null,
         }))
         .sort((a, b) => (a.distance_km ?? 999) - (b.distance_km ?? 999));
+
       setOffers(merged);
     };
     load();
@@ -79,15 +84,14 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
   return (
     <div className="mb-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">Available responders ({offers.length})</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-primary">Available ER providers ({offers.length})</p>
         <p className="text-xs font-mono tabular-nums text-muted-foreground">Auto-assign in {fmt(remainingSec)}</p>
       </div>
       <ul className="space-y-2">
         {offers.map((o) => (
           <li key={o.provider_id} className="flex items-center gap-2 rounded-xl border bg-background p-2.5">
-            {o.provider_kind === "ambulance"
-              ? <Ambulance className="h-5 w-5 shrink-0 text-red-600" />
-              : <Hospital className="h-5 w-5 shrink-0 text-blue-600" />}
+            <Ambulance className="h-5 w-5 shrink-0 text-red-600" />
+
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{o.name}</p>
               <p className="text-[11px] text-muted-foreground">
