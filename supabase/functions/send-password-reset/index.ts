@@ -124,6 +124,14 @@ Deno.serve(async (req) => {
       subject: "Reset your Holarc Health password",
       html: brandedHtml(actionUrl),
     });
+    const resendId =
+      (result.data && typeof result.data === "object" && (result.data as any).id) || null;
+    console.log("[send-password-reset] dispatch", {
+      to: email,
+      ok: result.ok,
+      status: result.status,
+      resend_id: resendId,
+    });
     if (!result.ok) {
       console.error("Resend send failed:", result.status, result.error);
       return new Response(JSON.stringify({ error: "Email send failed" }), {
