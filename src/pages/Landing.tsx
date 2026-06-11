@@ -35,6 +35,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
 import { SecurityBadges } from "@/components/landing/SecurityBadges";
 import { Testimonials } from "@/components/landing/Testimonials";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 const patientBenefits = [
   {
@@ -137,6 +138,7 @@ export default function Landing() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3" />
             <div className="flex items-center gap-2 sm:gap-3">
+              <InstallAppButton variant="compact" className="hidden sm:inline-flex" />
               <Button
                 size="lg"
                 variant="ghost"
