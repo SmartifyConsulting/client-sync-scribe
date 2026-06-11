@@ -355,7 +355,25 @@ export default function CalendarView() {
     }
     if (!user) return;
 
+    // Reject past dates
+    const picked = new Date(`${newAppointment.date}T00:00:00`);
+    if (picked < startOfToday()) {
+      toast({ title: "Invalid date", description: "Cannot schedule appointments in the past", variant: "destructive" });
+      return;
+    }
+
     const selectedPatient = patients.find(p => p.id === newAppointment.patientId);
+
+    // Re-check conflicts at submit time
+    if (conflicts.has(newAppointment.time)) {
+      toast({
+        title: "Time conflict",
+        description: `${selectedPatient?.name || "Patient"} already has an appointment at ${formatTimeSlot(newAppointment.time)}. Please select a different time.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const startISO = new Date(`${newAppointment.date}T${newAppointment.time}:00`).toISOString();
     const endISO = new Date(new Date(startISO).getTime() + 30 * 60000).toISOString();
 
