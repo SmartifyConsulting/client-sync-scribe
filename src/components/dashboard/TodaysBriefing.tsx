@@ -602,7 +602,7 @@ export function TodaysBriefing() {
   const briefingTitle = isToday ? "Today's Briefing" : `Briefing for ${format(selectedDate, 'EEEE')}`;
 
   return (
-    <div className="rounded-xl border border-primary bg-card shadow-sm">
+    <div data-tour="doctor-briefing" className="rounded-xl border border-primary bg-card shadow-sm">
       <div className="rounded-t-xl bg-primary p-3 md:p-5 flex items-center justify-between gap-1 md:gap-2">
         <div className="flex items-center gap-1 md:gap-3">
           <Button

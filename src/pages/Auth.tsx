@@ -291,11 +291,17 @@ export default function Auth() {
           },
         });
       } else {
+        // Phone sign-up without SMS: use a synthetic email derived from the
+        // normalized phone number so Supabase never invokes an SMS provider.
+        // The real phone is stored on profiles.phone and the user logs in
+        // either with this synthetic email or by entering their phone number
+        // (we re-derive the same synthetic email on login).
         const e164 = normalizePhone(phoneInput);
+        const syntheticEmail = phoneToSyntheticEmail(e164);
         result = await supabase.auth.signUp({
-          phone: e164,
+          email: syntheticEmail,
           password,
-          options: { data: { full_name: fullName, role: userRole } },
+          options: { data: { full_name: fullName, role: userRole, phone: e164 } },
         });
       }
       const { data, error } = result;
@@ -468,6 +474,16 @@ export default function Auth() {
     return `${countryCode}${digits}`.replace(/\s+/g, "");
   };
 
+  // SMS is not used anywhere in this app — phone-as-identifier is mapped to
+  // a deterministic synthetic email so the Supabase Auth server never tries
+  // to dispatch an SMS. Authenticator-app TOTP (handled by MfaGate) is the
+  // single second factor for every user.
+  const phoneToSyntheticEmail = (e164: string) => {
+    const digits = e164.replace(/\D/g, "");
+    return `${digits}@phone.holarc.local`;
+  };
+
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const id = loginId.trim();
@@ -480,8 +496,9 @@ export default function Auth() {
       const isEmail = id.includes("@");
       const credentials = isEmail
         ? { email: id, password }
-        : { phone: normalizePhone(id), password };
+        : { email: phoneToSyntheticEmail(normalizePhone(id)), password };
       const { data, error } = await supabase.auth.signInWithPassword(credentials as any);
+
       if (error) {
         const msg = (error.message || "").toLowerCase();
         if (msg.includes("invalid") || msg.includes("credentials")) {
