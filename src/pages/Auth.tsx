@@ -930,7 +930,7 @@ export default function Auth() {
     );
   }
 
-  // Signup disabled for MVP — invite-only
+  // Signup wizard
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center p-4">
@@ -939,15 +939,37 @@ export default function Auth() {
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
               <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
             </button>
+            <p className="text-muted-foreground mt-2">Create your account</p>
+            <div className="mt-3"><Progress value={progress} className="h-1.5" /></div>
+            <p className="text-[10px] text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm text-center space-y-4">
-            <h2 className="text-lg font-semibold">Sign-ups are invite-only</h2>
-            <p className="text-sm text-muted-foreground">
-              Account creation is currently disabled while we run the MVP. Please contact an administrator to be granted access.
-            </p>
-            <Button onClick={() => setIsLogin(true)} className="w-full">
-              Back to Sign In
-            </Button>
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
+            {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
+            <div className="flex gap-2 mt-6">
+              {currentStep > 0 && (
+                <Button type="button" variant="outline" onClick={handlePrev} disabled={loading} className="flex-1">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Back
+                </Button>
+              )}
+              {!isLastStep ? (
+                <Button type="button" onClick={handleNext} disabled={loading} className="flex-1">
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Next <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" onClick={handleFinalSubmit} disabled={loading} className="flex-1">
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Create account
+                </Button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline mt-4 text-center"
+            >
+              Already have an account? Sign in
+            </button>
           </div>
         </div>
       </div>
