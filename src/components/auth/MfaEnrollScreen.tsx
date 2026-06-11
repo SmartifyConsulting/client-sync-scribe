@@ -113,9 +113,15 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
       <div className="flex-1 flex items-start sm:items-center justify-center p-3 sm:p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-5 sm:mb-6 px-1">
+            <div className="flex justify-center mb-3">
+              <img src={holarcLogo} alt="Holarc Health" className="h-10 w-auto" />
+            </div>
             <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
               <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
             </div>
+            <p className="text-[11px] uppercase tracking-wider text-primary font-semibold mb-1">
+              Account security · One-time setup
+            </p>
             <h1 className="text-lg sm:text-xl font-semibold text-foreground">Set up Two-Factor Authentication</h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-2">
               This account holds sensitive health information. 2FA is required for every user — please enrol an
