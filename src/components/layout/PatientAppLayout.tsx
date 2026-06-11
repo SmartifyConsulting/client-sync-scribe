@@ -34,7 +34,7 @@ export function PatientAppLayout() {
 
 
       {/* Top Bar - only on mobile */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border md:hidden">
+      <header className="sticky top-0 z-50 bg-background border-b border-border md:hidden">
         <div className="px-4 py-3 flex items-center justify-between max-w-7xl mx-auto w-full">
           {/* Left: Logo */}
           <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">

@@ -6,7 +6,7 @@ export function SubscriptionGateModal() {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] bg-background/95 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-card border border-border rounded-xl shadow-2xl p-8 text-center space-y-6">
         <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
           <Lock className="h-8 w-8 text-destructive" />
