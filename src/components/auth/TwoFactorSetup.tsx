@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Shield, Loader2, CheckCircle, Copy, AlertTriangle } from "lucide-react";
+import { Shield, Loader2, CheckCircle, Copy, AlertTriangle, Check, Download, Apple } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import holarcLogo from "@/assets/holarc-logo-clear.png";
 
 interface TwoFactorSetupProps {
   open: boolean;
@@ -27,6 +29,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
   const [secret, setSecret] = useState<string | null>(null);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [verifyCode, setVerifyCode] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (open && step === "setup") {
@@ -37,17 +40,30 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
   const enrollMFA = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.mfa.enroll({
-        factorType: "totp",
-        friendlyName: "Holarc Authenticator",
-      });
+      // Reuse any existing unverified TOTP factor instead of creating a new one
+      const { data: factorList } = await supabase.auth.mfa.listFactors();
+      const existingUnverified = (factorList?.all || []).find(
+        (f) => f.factor_type === "totp" && f.status !== "verified"
+      );
 
-      if (error) throw error;
-
-      if (data) {
-        setQrCode(data.totp.qr_code);
-        setSecret(data.totp.secret);
-        setFactorId(data.id);
+      if (existingUnverified && (existingUnverified as any).totp?.qr_code) {
+        setQrCode((existingUnverified as any).totp.qr_code);
+        setSecret((existingUnverified as any).totp.secret);
+        setFactorId(existingUnverified.id);
+      } else {
+        if (existingUnverified) {
+          await supabase.auth.mfa.unenroll({ factorId: existingUnverified.id });
+        }
+        const { data, error } = await supabase.auth.mfa.enroll({
+          factorType: "totp",
+          friendlyName: "Holarc Authenticator",
+        });
+        if (error) throw error;
+        if (data) {
+          setQrCode(data.totp.qr_code);
+          setSecret(data.totp.secret);
+          setFactorId(data.id);
+        }
       }
     } catch (error: any) {
       toast({
@@ -95,8 +111,9 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
       onSuccess?.();
     } catch (error: any) {
       toast({
-        title: "Verification failed",
-        description: error.message || "Invalid verification code",
+        title: "That code didn't work",
+        description:
+          "Codes refresh every 30 seconds — open your authenticator app and try the newest 6-digit code.",
         variant: "destructive",
       });
     } finally {
@@ -104,13 +121,15 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
     }
   };
 
-  const copySecret = () => {
-    if (secret) {
-      navigator.clipboard.writeText(secret);
-      toast({
-        title: "Copied",
-        description: "Secret key copied to clipboard",
-      });
+  const copySecret = async () => {
+    if (!secret) return;
+    try {
+      await navigator.clipboard.writeText(secret);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+      toast({ title: "Copied", description: "Secret key copied to clipboard" });
+    } catch {
+      toast({ title: "Copy failed", description: "Long-press the key to copy it manually.", variant: "destructive" });
     }
   };
 
@@ -125,16 +144,27 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <div className="flex items-center justify-center mb-2">
+            <img src={holarcLogo} alt="Holarc Health" className="h-8 w-auto" />
+          </div>
+          <p className="text-center text-[11px] uppercase tracking-wider text-muted-foreground">
+            Account security · One-time setup
+          </p>
+          <DialogTitle className="flex items-center justify-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
             Two-Factor Authentication
           </DialogTitle>
-          <DialogDescription>
-            {step === "setup" && "Scan the QR code with your authenticator app"}
+          <DialogDescription className="text-center">
+            {step === "setup" && (
+              <>
+                <span className="sm:hidden">Tap below to set up your authenticator app</span>
+                <span className="hidden sm:inline">Click below to set up your authenticator app</span>
+              </>
+            )}
             {step === "verify" && "Enter the code from your authenticator app"}
-            {step === "success" && "2FA has been successfully enabled"}
+            {step === "success" && "Your account is now protected"}
           </DialogDescription>
         </DialogHeader>
 
@@ -144,13 +174,44 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
           </div>
         ) : step === "setup" ? (
           <div className="space-y-4">
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+              <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
+              <div className="grid grid-cols-1 gap-2">
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                >
+                  <Download className="h-4 w-4 text-primary" /> Google Authenticator
+                </a>
+                <a
+                  href="https://authy.com/download/"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                >
+                  <Download className="h-4 w-4 text-primary" /> Authy
+                </a>
+                <a
+                  href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                >
+                  <Apple className="h-4 w-4 text-primary" /> Microsoft Authenticator
+                </a>
+              </div>
+            </div>
+
             {qrCode && (
-              <div className="flex flex-col items-center gap-4">
-                <div className="bg-white p-4 rounded-lg">
-                  <img src={qrCode} alt="QR Code" className="w-48 h-48" />
+              <div className="flex flex-col items-center gap-3">
+                <div className="bg-white p-3 rounded-lg border border-border">
+                  <img
+                    src={qrCode}
+                    alt="QR code for two-factor authentication setup. Scan with your authenticator app."
+                    className="w-[min(70vw,200px)] h-[min(70vw,200px)] sm:w-48 sm:h-48"
+                  />
                 </div>
-                <p className="text-sm text-muted-foreground text-center">
-                  Scan this QR code with Google Authenticator, Authy, or any TOTP app
+                <p className="text-xs text-muted-foreground text-center">
+                  Scan with Google Authenticator, Authy, or any TOTP app
                 </p>
               </div>
             )}
@@ -160,14 +221,16 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                 <Label className="text-xs text-muted-foreground">
                   Can't scan? Enter this code manually:
                 </Label>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all">
-                    {secret}
-                  </code>
-                  <Button variant="outline" size="icon" onClick={copySecret}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
+                <code className="block bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
+                  {secret}
+                </code>
+                <Button variant="outline" onClick={copySecret} className="w-full min-h-11">
+                  {copied ? (
+                    <><Check className="h-4 w-4 mr-2 text-primary" /> Copied!</>
+                  ) : (
+                    <><Copy className="h-4 w-4 mr-2" /> Copy Setup Key</>
+                  )}
+                </Button>
               </div>
             )}
 
@@ -178,9 +241,16 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
               </p>
             </div>
 
-            <Button onClick={() => setStep("verify")} className="w-full">
+            <Button onClick={() => setStep("verify")} className="w-full min-h-12">
               Continue
             </Button>
+
+            <a
+              href="mailto:support@holarchealth.com"
+              className="block text-center text-xs text-muted-foreground hover:text-primary"
+            >
+              Need help? Contact support
+            </a>
           </div>
         ) : step === "verify" ? (
           <div className="space-y-4">
@@ -189,10 +259,12 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
               <Input
                 id="verifyCode"
                 type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
                 placeholder="000000"
                 value={verifyCode}
                 onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="text-center text-2xl tracking-widest font-mono"
+                className="text-center text-2xl tracking-widest font-mono h-14"
                 maxLength={6}
               />
               <p className="text-xs text-muted-foreground text-center">
@@ -201,30 +273,43 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep("setup")} className="flex-1">
+              <Button variant="outline" onClick={() => setStep("setup")} className="flex-1 min-h-12">
                 Back
               </Button>
-              <Button onClick={verifyMFA} disabled={loading || verifyCode.length !== 6} className="flex-1">
+              <Button onClick={verifyMFA} disabled={loading || verifyCode.length !== 6} className="flex-1 min-h-12">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Verify
               </Button>
             </div>
+            <a
+              href="mailto:support@holarchealth.com"
+              className="block text-center text-xs text-muted-foreground hover:text-primary"
+            >
+              Need help? Contact support
+            </a>
           </div>
         ) : (
-          <div className="text-center py-4">
-            <div className="flex justify-center mb-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <CheckCircle className="h-8 w-8 text-primary" />
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 18 }}
+              className="text-center py-4"
+            >
+              <div className="flex justify-center mb-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                  <CheckCircle className="h-8 w-8 text-primary" />
+                </div>
               </div>
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">2FA Enabled</h3>
-            <p className="text-muted-foreground mb-4">
-              Your account is now protected with two-factor authentication
-            </p>
-            <Button onClick={handleClose} className="w-full">
-              Done
-            </Button>
-          </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">You're all set!</h3>
+              <p className="text-muted-foreground mb-4">
+                Your account is now protected with two-factor authentication.
+              </p>
+              <Button onClick={handleClose} className="w-full min-h-12">
+                Continue to Dashboard
+              </Button>
+            </motion.div>
+          </AnimatePresence>
         )}
       </DialogContent>
     </Dialog>
