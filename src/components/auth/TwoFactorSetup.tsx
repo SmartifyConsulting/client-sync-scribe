@@ -250,15 +250,6 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                 </Button>
               </div>
             )}
-                <Button variant="outline" onClick={copySecret} className="w-full min-h-11">
-                  {copied ? (
-                    <><Check className="h-4 w-4 mr-2 text-primary" /> Copied!</>
-                  ) : (
-                    <><Copy className="h-4 w-4 mr-2" /> Copy Setup Key</>
-                  )}
-                </Button>
-              </div>
-            )}
 
             <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg">
               <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
