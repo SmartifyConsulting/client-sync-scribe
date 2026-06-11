@@ -304,6 +304,37 @@ export default function UsersTab({ kind }: UsersTabProps) {
     }
   };
 
+  const resetUserAccess = async () => {
+    if (!pendingMfaReset) return;
+    setMfaResetting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-reset-mfa", {
+        body: { user_id: pendingMfaReset.user_id },
+      });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Reset failed");
+      setMfaResetResult({ email: pendingMfaReset.email, tempPassword: data.temp_password });
+      setPendingMfaReset(null);
+      toast({ title: "Access reset", description: `Share the temporary password with ${pendingMfaReset.email} securely.` });
+    } catch (e: any) {
+      toast({ title: "Reset failed", description: e.message, variant: "destructive" });
+    } finally {
+      setMfaResetting(false);
+    }
+  };
+
+  const copyTempPassword = async () => {
+    if (!mfaResetResult) return;
+    try {
+      await navigator.clipboard.writeText(mfaResetResult.tempPassword);
+      setCopiedTemp(true);
+      setTimeout(() => setCopiedTemp(false), 1800);
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
+
+
   const showCompany = kind === "doctor";
   const showAddress = kind === "emergency";
   const noun =
