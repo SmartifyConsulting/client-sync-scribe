@@ -1264,7 +1264,7 @@ export default function CalendarView() {
                             <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditMode(true)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="destructive" size="icon" className="h-11 w-11" onClick={handleDeleteEvent}>
+                            <Button variant="destructive" size="icon" className="h-11 w-11" onClick={requestDeleteEvent}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                             {selectedEvent.type !== "internal" && selectedEvent.patientId && (
@@ -1280,7 +1280,7 @@ export default function CalendarView() {
                               <Pencil className="h-3.5 w-3.5 mr-1" />
                               Edit
                             </Button>
-                            <Button variant="destructive" onClick={handleDeleteEvent}>
+                            <Button variant="destructive" onClick={requestDeleteEvent}>
                               <Trash2 className="h-3.5 w-3.5 mr-1" />
                               Delete
                             </Button>
