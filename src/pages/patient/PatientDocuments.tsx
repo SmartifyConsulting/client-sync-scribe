@@ -319,6 +319,11 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const filteredDocs =
     filter === "all" ? documents : documents.filter((d) => d.type === filter);
 
+  const DOC_PAGE_SIZE = 10;
+  const [visibleDocCount, setVisibleDocCount] = useState(DOC_PAGE_SIZE);
+  useEffect(() => { setVisibleDocCount(DOC_PAGE_SIZE); }, [filter]);
+  const pagedDocs = filteredDocs.slice(0, visibleDocCount);
+
   const usagePercent = Math.min((storageMB / STORAGE_LIMIT_MB) * 100, 100);
   const isNearLimit = usagePercent >= 80;
   const isOverLimit = usagePercent >= 100;
