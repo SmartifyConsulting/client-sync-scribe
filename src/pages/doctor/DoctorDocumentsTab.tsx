@@ -53,38 +53,50 @@ export default function DoctorDocumentsTab() {
           No documents yet.
         </div>
       ) : (
-        <ul className="divide-y rounded-lg border bg-card">
-          {filtered.map((doc) => {
-            const target = doc.patient_id
-              ? `/patients/${doc.patient_id}?tab=documents&doc=${doc.id}`
-              : `/documents`;
-            return (
-              <li key={doc.id}>
-                <Link
-                  to={target}
-                  className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-accent"
-                >
-                  <FileText className="h-4 w-4 text-primary shrink-0" />
-                  <span className="flex-1 truncate text-sm font-medium text-foreground">{doc.name}</span>
-                  {doc.patient_name && (
-                    <span className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground min-w-0 truncate max-w-[180px]">
-                      <User className="h-3 w-3" />
-                      {doc.patient_name}
+        <>
+          <ul className="divide-y rounded-lg border bg-card">
+            {filtered.slice(0, visibleCount).map((doc) => {
+              const target = doc.patient_id
+                ? `/patients/${doc.patient_id}?tab=documents&doc=${doc.id}`
+                : `/documents`;
+              return (
+                <li key={doc.id}>
+                  <Link
+                    to={target}
+                    className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-accent"
+                  >
+                    <FileText className="h-4 w-4 text-primary shrink-0" />
+                    <span className="flex-1 truncate text-sm font-medium text-foreground">{doc.name}</span>
+                    {doc.patient_name && (
+                      <span className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground min-w-0 truncate max-w-[180px]">
+                        <User className="h-3 w-3" />
+                        {doc.patient_name}
+                      </span>
+                    )}
+                    {doc.template_name && (
+                      <span className="hidden md:inline text-xs text-muted-foreground truncate max-w-[160px]">
+                        {doc.template_name}
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {format(new Date(doc.updated_at || doc.created_at), "d MMM yyyy")}
                     </span>
-                  )}
-                  {doc.template_name && (
-                    <span className="hidden md:inline text-xs text-muted-foreground truncate max-w-[160px]">
-                      {doc.template_name}
-                    </span>
-                  )}
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {format(new Date(doc.updated_at || doc.created_at), "d MMM yyyy")}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          {visibleCount < filtered.length && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              >
+                Load more ({visibleCount} of {filtered.length})
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
