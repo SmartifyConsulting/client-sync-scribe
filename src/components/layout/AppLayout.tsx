@@ -67,8 +67,8 @@ export function AppLayout() {
         </a>
       </div>
 
-      {/* Footer - hidden on mobile due to bottom nav */}
-      <div className="hidden md:block md:ml-[var(--sidebar-width)]">
+      {/* Footer - hidden on mobile due to bottom nav (full-width so divider spans the whole viewport) */}
+      <div className="hidden md:block">
         <Footer />
       </div>
 
