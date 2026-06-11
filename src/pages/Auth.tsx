@@ -728,12 +728,36 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
+              <Label>Sign up with</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  <Mail className="h-4 w-4 mx-auto mb-1" /> Email
+                </button>
+                <button type="button" onClick={() => !accountCreated && setSignupMethod("phone")} disabled={accountCreated}
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  <Phone className="h-4 w-4 mx-auto mb-1" /> Phone Number
+                </button>
               </div>
             </div>
+            {signupMethod === "email" ? (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Phone Number (used to sign in)</Label>
+                <div className="flex gap-2">
+                  <CountrySelector />
+                  <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" required disabled={accountCreated} />
+                </div>
+                {phone && <p className="text-[10px] text-muted-foreground">Account ID: {normalizePhone(phone)}</p>}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
