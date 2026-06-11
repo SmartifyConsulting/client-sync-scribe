@@ -80,10 +80,7 @@ supabase.auth.onAuthStateChange(() => {
 if (typeof window !== "undefined" && !(window as any).__holarcNoticeShown) {
   (window as any).__holarcNoticeShown = true;
   // eslint-disable-next-line no-console
-  console.log(
-    "%c⚠ Stop!",
-    "color:#E01837;font-size:32px;font-weight:bold;"
-  );
+  console.log("%c⚠ Stop!", "color:#E01837;font-size:32px;font-weight:bold;");
   // eslint-disable-next-line no-console
   console.log(
     "%cThis is a private application owned by Holarc Health (Pty) Ltd.\n" +
@@ -91,7 +88,7 @@ if (typeof window !== "undefined" && !(window as any).__holarcNoticeShown) {
       "copy, clone, or white-label this service is strictly prohibited and\n" +
       "may result in legal action.\n\n" +
       "See https://holarchealth.com/intellectual-property",
-    "color:#0F766E;font-size:13px;line-height:1.5;"
+    "color:#0F766E;font-size:13px;line-height:1.5;",
   );
 }
 
@@ -161,100 +158,128 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SosAlertListener />
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/provider-signup" element={<ProviderSignup />} />
-          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-          <Route path="/intellectual-property" element={<Navigate to="/terms-and-conditions#intellectual-property" replace />} />
-          <Route path="/patient-consent" element={<PatientConsent />} />
-          <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
-          <Route path="/legal" element={<Legal />} />
-          <Route path="/vula/wallet" element={<VulaWallet />} />
-          <Route path="/track/:token" element={<PublicTrack />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          
-          {/* Patient routes - using PatientAppLayout (no sidebar/bottom nav) */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <PatientAppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/patient/doctors" element={<MyDoctors />} />
-            <Route path="/patient/calendar" element={<PatientCalendar />} />
-            <Route path="/patient/documentation" element={<Documentation />} />
-            <Route path="/patient/invoices" element={<Invoices />} />
-            <Route path="/patient/invites" element={<PatientAccessManagement />} />
-            <Route path="/patient/rewards" element={<MyRewards />} />
-            <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/patient/tasks" element={<PatientTasks />} />
-            <Route path="/patient/documents" element={<PatientDocuments />} />
-            <Route path="/patient/round-table" element={<PatientRoundTable />} />
-            <Route path="/patient/details" element={<MyDetails />} />
-            <Route path="/sessions/:id" element={<SessionDetail />} />
-            <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
-            <Route path="/doctor/holarchelp/*" element={<HolarcHelpRoutes />} />
-            <Route path="/patient/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
-            <Route path="/doctor/incidents" element={<Navigate to="/doctor/holarchelp/incidents" replace />} />
-            <Route path="/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
+        {/* FIX 5: Skip-to-main-content link for keyboard accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-teal-700 focus:text-white focus:rounded-lg focus:font-medium"
+        >
+          Skip to main content
+        </a>
 
-          {/* Protected routes with full layout (doctors/admins + shared) */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* Doctor dashboard */}
-            <Route path="/doctor-dashboard" element={<Dashboard />} />
-            
-            {/* Doctor routes */}
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/patients/:id" element={<PatientProfile />} />
-            <Route path="/calendar" element={<CalendarView />} />
-            <Route path="/todos" element={<TodoList />} />
-            <Route path="/sessions" element={<Sessions />} />
-            <Route path="/sessions/:id" element={<SessionDetail />} />
-            <Route path="/documents" element={<DoctorDocumentsPage />} />
-            <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
-            <Route path="/invoices" element={<DoctorInvoices />} />
-            <Route path="/practice" element={<MyPractice />} />
-            <Route path="/doctor/rewards" element={<DoctorRewards />} />
-            <Route path="/referral-doctors" element={<ReferralDoctors />} />
-            <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
-            <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
-            <Route path="/connections" element={<Connections />} />
-            
-            {/* Admin routes */}
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/pricing" element={<PricingAdmin />} />
-            <Route path="/admin/gamification" element={<GamificationAdmin />} />
-            <Route path="/admin/users" element={<HolarcHelpProviders />} />
-            <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
-            <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
-            <Route path="/admin/holarchelp-providers/:type/:id/incidents" element={<HolarcHelpProviderIncidents />} />
-            
-            {/* Common routes */}
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-          
-          {/* HolarcHelp provider portal (its own layout, gated by hospital_staff/ambulance_staff role) */}
-          <Route path="/provider/*" element={<ProtectedRoute><ProviderRoutes /></ProtectedRoute>} />
+        {/* FIX 5: Wrap all routes in main-content div */}
+        <div id="main-content">
+          <SosAlertListener />
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/provider-signup" element={<ProviderSignup />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route
+              path="/intellectual-property"
+              element={<Navigate to="/terms-and-conditions#intellectual-property" replace />}
+            />
+            <Route path="/patient-consent" element={<PatientConsent />} />
+            <Route path="/business-associate-agreement" element={<BusinessAssociateAgreement />} />
+            <Route path="/legal" element={<Legal />} />
+            <Route path="/vula/wallet" element={<VulaWallet />} />
+            <Route path="/track/:token" element={<PublicTrack />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Role-based redirect for /dashboard */}
-          <Route path="/dashboard" element={<ProtectedRoute><RoleBasedRedirect /></ProtectedRoute>} />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            {/* Patient routes - using PatientAppLayout (no sidebar/bottom nav) */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <PatientAppLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/patient/doctors" element={<MyDoctors />} />
+              <Route path="/patient/calendar" element={<PatientCalendar />} />
+              <Route path="/patient/documentation" element={<Documentation />} />
+              <Route path="/patient/invoices" element={<Invoices />} />
+              <Route path="/patient/invites" element={<PatientAccessManagement />} />
+              <Route path="/patient/rewards" element={<MyRewards />} />
+              <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/patient/tasks" element={<PatientTasks />} />
+              <Route path="/patient/documents" element={<PatientDocuments />} />
+              <Route path="/patient/round-table" element={<PatientRoundTable />} />
+              <Route path="/patient/details" element={<MyDetails />} />
+              <Route path="/sessions/:id" element={<SessionDetail />} />
+              <Route path="/patient/holarchelp/*" element={<HolarcHelpRoutes />} />
+              <Route path="/doctor/holarchelp/*" element={<HolarcHelpRoutes />} />
+              <Route path="/patient/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
+              <Route path="/doctor/incidents" element={<Navigate to="/doctor/holarchelp/incidents" replace />} />
+              <Route path="/incidents" element={<Navigate to="/patient/holarchelp/incidents" replace />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
+
+            {/* Protected routes with full layout (doctors/admins + shared) */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
+              {/* Doctor dashboard */}
+              <Route path="/doctor-dashboard" element={<Dashboard />} />
+
+              {/* Doctor routes */}
+              <Route path="/patients" element={<Patients />} />
+              <Route path="/patients/:id" element={<PatientProfile />} />
+              <Route path="/calendar" element={<CalendarView />} />
+              <Route path="/todos" element={<TodoList />} />
+              <Route path="/sessions" element={<Sessions />} />
+              <Route path="/sessions/:id" element={<SessionDetail />} />
+              <Route path="/documents" element={<DoctorDocumentsPage />} />
+              <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
+              <Route path="/invoices" element={<DoctorInvoices />} />
+              <Route path="/practice" element={<MyPractice />} />
+              <Route path="/doctor/rewards" element={<DoctorRewards />} />
+              <Route path="/referral-doctors" element={<ReferralDoctors />} />
+              <Route path="/cpd-certificates" element={<Navigate to="/profile" replace />} />
+              <Route path="/expiring-recordings" element={<ExpiringRecordings />} />
+              <Route path="/connections" element={<Connections />} />
+
+              {/* Admin routes */}
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/pricing" element={<PricingAdmin />} />
+              <Route path="/admin/gamification" element={<GamificationAdmin />} />
+              <Route path="/admin/users" element={<HolarcHelpProviders />} />
+              <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
+              <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
+              <Route path="/admin/holarchelp-providers/:type/:id/incidents" element={<HolarcHelpProviderIncidents />} />
+
+              {/* Common routes */}
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+
+            {/* HolarcHelp provider portal (its own layout, gated by hospital_staff/ambulance_staff role) */}
+            <Route
+              path="/provider/*"
+              element={
+                <ProtectedRoute>
+                  <ProviderRoutes />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Role-based redirect for /dashboard */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <RoleBasedRedirect />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
