@@ -455,21 +455,21 @@ export default function MyRewards() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-primary">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+        <TabsList className="bg-primary flex w-full flex-nowrap overflow-x-auto justify-start">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             Overview
           </TabsTrigger>
           {patientRecord?.is_chronic && (
-            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-              <Pill className="h-4 w-4 mr-1" />
+            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+              <Pill className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Chronic Meds
             </TabsTrigger>
           )}
-          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
-            <Trophy className="h-4 w-4 mr-1" />
+          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+            <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Wins and Streaks
           </TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
              Redeem
            </TabsTrigger>
          </TabsList>
