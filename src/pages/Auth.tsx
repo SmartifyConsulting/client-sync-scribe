@@ -263,23 +263,49 @@ export default function Auth() {
   };
 
   const handleCreateAccount = async () => {
-    if (!email || !password) {
-      toast({ title: "Required", description: "Email and password are required", variant: "destructive" });
+    if (!password || password.length < 6) {
+      toast({ title: "Password too short", description: "Password must be at least 6 characters", variant: "destructive" });
+      return false;
+    }
+    if (signupMethod === "email" && !email) {
+      toast({ title: "Email required", variant: "destructive" });
+      return false;
+    }
+    const phoneInput = userRole === "doctor" ? mobileNumber : phone;
+    if (signupMethod === "phone" && !phoneInput.trim()) {
+      toast({ title: "Phone number required", variant: "destructive" });
       return false;
     }
     setLoading(true);
     try {
-      const { data, error } = await signUp(email, password, { full_name: fullName, role: userRole });
+      let result;
+      if (signupMethod === "email") {
+        result = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+            data: { full_name: fullName, role: userRole },
+          },
+        });
+      } else {
+        const e164 = normalizePhone(phoneInput);
+        result = await supabase.auth.signUp({
+          phone: e164,
+          password,
+          options: { data: { full_name: fullName, role: userRole } },
+        });
+      }
+      const { data, error } = result;
       if (error) throw error;
       if (data?.user) {
         setCreatedUserId(data.user.id);
         setAccountCreated(true);
-        // Role and profile are created server-side by handle_new_user trigger.
         return true;
       }
       return false;
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Sign-up failed", description: error.message, variant: "destructive" });
       return false;
     } finally {
       setLoading(false);
