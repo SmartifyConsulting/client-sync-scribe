@@ -409,6 +409,13 @@ export type Database = {
             referencedRelation: "holarchelp_ambulance_providers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ambulance_coverage_areas_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ambulance_fleet: {
@@ -445,6 +452,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambulance_fleet_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -489,10 +503,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ambulance_hospital_affiliations_ambulance_provider_id_fkey"
+            columns: ["ambulance_provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ambulance_hospital_affiliations_hospital_id_fkey"
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambulance_hospital_affiliations_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
             referencedColumns: ["id"]
           },
         ]
@@ -540,6 +568,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambulances_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1134,6 +1169,13 @@ export type Database = {
             referencedRelation: "holarchelp_hospitals"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "doctor_hospital_affiliations_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       doctor_patient_access: {
@@ -1509,6 +1551,13 @@ export type Database = {
             referencedRelation: "holarchelp_ambulance_providers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "guardian_ambulance_members_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       holarchelp_ambulance_providers: {
@@ -1689,6 +1738,13 @@ export type Database = {
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardian_hospital_members_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2151,6 +2207,13 @@ export type Database = {
             referencedRelation: "holarchelp_hospitals"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "holarchelp_incidents_destination_hospital_id_fkey"
+            columns: ["destination_hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       holarchelp_locations: {
@@ -2488,6 +2551,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "hospital_admissions_hospital_provider_id_fkey"
+            columns: ["hospital_provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "hospital_admissions_patient_id_fkey"
             columns: ["patient_id"]
             isOneToOne: false
@@ -2540,6 +2610,13 @@ export type Database = {
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_doctor_affiliations_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2596,6 +2673,13 @@ export type Database = {
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_nurses_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
             referencedColumns: ["id"]
           },
           {
@@ -3023,6 +3107,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_ambulance_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paramedic_shifts_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_providers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -4707,6 +4798,273 @@ export type Database = {
           doctor_id?: string | null
           end_time?: string | null
           start_time?: string | null
+        }
+        Relationships: []
+      }
+      holarchelp_ambulance_providers_public: {
+        Row: {
+          accepting_patients: boolean | null
+          approved_at: string | null
+          at_capacity: boolean | null
+          base_address: string | null
+          city: string | null
+          company_name: string | null
+          country: string | null
+          created_at: string | null
+          credential_score: number | null
+          credential_score_updated_at: string | null
+          dispatch_priority: number | null
+          fleet_size: number | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          owner_id: string | null
+          ownership: string | null
+          registration_number: string | null
+          sos_voice_clip_path: string | null
+          state: string | null
+          status:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          subscription_status:
+            | Database["public"]["Enums"]["holarchelp_subscription_status"]
+            | null
+          tier: Database["public"]["Enums"]["holarchelp_ambulance_tier"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepting_patients?: boolean | null
+          approved_at?: string | null
+          at_capacity?: boolean | null
+          base_address?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
+          dispatch_priority?: number | null
+          fleet_size?: number | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          owner_id?: string | null
+          ownership?: string | null
+          registration_number?: string | null
+          sos_voice_clip_path?: string | null
+          state?: string | null
+          status?:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["holarchelp_subscription_status"]
+            | null
+          tier?: Database["public"]["Enums"]["holarchelp_ambulance_tier"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepting_patients?: boolean | null
+          approved_at?: string | null
+          at_capacity?: boolean | null
+          base_address?: string | null
+          city?: string | null
+          company_name?: string | null
+          country?: string | null
+          created_at?: string | null
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
+          dispatch_priority?: number | null
+          fleet_size?: number | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          owner_id?: string | null
+          ownership?: string | null
+          registration_number?: string | null
+          sos_voice_clip_path?: string | null
+          state?: string | null
+          status?:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["holarchelp_subscription_status"]
+            | null
+          tier?: Database["public"]["Enums"]["holarchelp_ambulance_tier"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      holarchelp_hospitals_public: {
+        Row: {
+          accepting_patients: boolean | null
+          address: string | null
+          approved_at: string | null
+          at_capacity: boolean | null
+          bed_capacity: number | null
+          beds_available: number | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          credential_score: number | null
+          credential_score_updated_at: string | null
+          dispatch_priority: number | null
+          er_beds_available: number | null
+          er_capacity_status: string | null
+          icu_available: number | null
+          icu_capacity: number | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          name: string | null
+          owner_id: string | null
+          ownership: string | null
+          registration_number: string | null
+          services: string[] | null
+          state: string | null
+          status:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          subscription_status:
+            | Database["public"]["Enums"]["holarchelp_subscription_status"]
+            | null
+          tier: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepting_patients?: boolean | null
+          address?: string | null
+          approved_at?: string | null
+          at_capacity?: boolean | null
+          bed_capacity?: number | null
+          beds_available?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
+          dispatch_priority?: number | null
+          er_beds_available?: number | null
+          er_capacity_status?: string | null
+          icu_available?: number | null
+          icu_capacity?: number | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          owner_id?: string | null
+          ownership?: string | null
+          registration_number?: string | null
+          services?: string[] | null
+          state?: string | null
+          status?:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["holarchelp_subscription_status"]
+            | null
+          tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepting_patients?: boolean | null
+          address?: string | null
+          approved_at?: string | null
+          at_capacity?: boolean | null
+          bed_capacity?: number | null
+          beds_available?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          credential_score?: number | null
+          credential_score_updated_at?: string | null
+          dispatch_priority?: number | null
+          er_beds_available?: number | null
+          er_capacity_status?: string | null
+          icu_available?: number | null
+          icu_capacity?: number | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          owner_id?: string | null
+          ownership?: string | null
+          registration_number?: string | null
+          services?: string[] | null
+          state?: string | null
+          status?:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          subscription_status?:
+            | Database["public"]["Enums"]["holarchelp_subscription_status"]
+            | null
+          tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      holarchelp_pharmacies_public: {
+        Row: {
+          accepting_patients: boolean | null
+          address: string | null
+          approved_at: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          credential_score: number | null
+          dispatch_priority: number | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          name: string | null
+          owner_id: string | null
+          registration_number: string | null
+          status:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          tier: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepting_patients?: boolean | null
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          credential_score?: number | null
+          dispatch_priority?: number | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          owner_id?: string | null
+          registration_number?: string | null
+          status?:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepting_patients?: boolean | null
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          credential_score?: number | null
+          dispatch_priority?: number | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          owner_id?: string | null
+          registration_number?: string | null
+          status?:
+            | Database["public"]["Enums"]["holarchelp_provider_status"]
+            | null
+          tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
+          updated_at?: string | null
         }
         Relationships: []
       }
