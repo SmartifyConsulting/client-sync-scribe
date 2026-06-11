@@ -114,7 +114,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   });
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-[calc(100vh-var(--footer-height,140px))] w-[210px] bg-sidebar border-r border-sidebar-border">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
         <div className="flex h-20 items-center gap-3 px-6">
           <img src={holarcLogo} alt="Holarc Health" className="h-12 w-auto object-contain" />
