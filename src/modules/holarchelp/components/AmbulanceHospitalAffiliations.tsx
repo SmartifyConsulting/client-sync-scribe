@@ -40,7 +40,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
     if (!search.trim()) { setResults([]); return; }
     const t = setTimeout(async () => {
       const { data } = await supabase
-        .from("holarchelp_hospitals" as any)
+        .from("holarchelp_hospitals_public" as any)
         .select("id, name, city, status")
         .ilike("name", `%${search}%`)
         .limit(8);

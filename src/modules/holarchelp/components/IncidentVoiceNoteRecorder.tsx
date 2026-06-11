@@ -33,7 +33,7 @@ export function IncidentVoiceNoteRecorder({
     const provIds = Array.from(new Set(rows.map((r) => r.provider_id).filter(Boolean)));
     const [{ data: profs }, { data: provs }] = await Promise.all([
       userIds.length ? supabase.from("profiles").select("id, full_name").in("id", userIds) : Promise.resolve({ data: [] as any[] }) as any,
-      provIds.length ? supabase.from("holarchelp_ambulance_providers" as any).select("id, company_name").in("id", provIds) : Promise.resolve({ data: [] as any[] }) as any,
+      provIds.length ? supabase.from("holarchelp_ambulance_providers_public" as any).select("id, company_name").in("id", provIds) : Promise.resolve({ data: [] as any[] }) as any,
     ]);
     const pMap = new Map((profs ?? []).map((p: any) => [p.id, p.full_name]));
     const cMap = new Map((provs ?? []).map((p: any) => [p.id, p.company_name]));

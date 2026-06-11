@@ -25,8 +25,8 @@ export default function HolarcHelpIncidents() {
       const autoSet = new Set<string>();
       if (providerIds.length) {
         const [{ data: hs }, { data: as_ }] = await Promise.all([
-          supabase.from("holarchelp_hospitals" as any).select("id, name").in("id", providerIds),
-          supabase.from("holarchelp_ambulance_providers" as any).select("id, company_name").in("id", providerIds),
+          supabase.from("holarchelp_hospitals_public" as any).select("id, name").in("id", providerIds),
+          supabase.from("holarchelp_ambulance_providers_public" as any).select("id, company_name").in("id", providerIds),
         ]);
         for (const h of (hs as any[]) ?? []) names[h.id] = h.name;
         for (const a of (as_ as any[]) ?? []) names[a.id] = a.company_name;

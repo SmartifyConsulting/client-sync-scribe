@@ -37,9 +37,8 @@ export function HospitalPicker({
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("holarchelp_hospitals" as any)
-        .select("id, name, ownership, accepting_patients, er_capacity_status, er_beds_available, latitude, longitude")
-        .eq("status", "approved");
+      const { data } = await supabase.from("holarchelp_hospitals_public" as any)
+        .select("id, name, ownership, accepting_patients, er_capacity_status, er_beds_available, latitude, longitude");
       const origin = originLat && originLng ? { lat: originLat, lng: originLng } : null;
       const enriched: H[] = ((data as any) ?? []).map((h: any) => ({
         ...h,
