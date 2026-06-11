@@ -50,6 +50,7 @@ import DoctorRewards from "./pages/doctor/DoctorRewards";
 import MyPractice from "./pages/MyPractice";
 import PricingAdmin from "./pages/admin/PricingAdmin";
 import GamificationAdmin from "./pages/admin/GamificationAdmin";
+import BulkPasswordReset from "./pages/admin/BulkPasswordReset";
 
 import ReferralDoctors from "./pages/ReferralDoctors";
 import ExpiringRecordings from "./pages/ExpiringRecordings";
@@ -247,6 +248,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/pricing" element={<PricingAdmin />} />
             <Route path="/admin/gamification" element={<GamificationAdmin />} />
+            <Route path="/admin/bulk-password-reset" element={<BulkPasswordReset />} />
             <Route path="/admin/users" element={<HolarcHelpProviders />} />
             <Route path="/admin/holarchelp-providers" element={<Navigate to="/admin/users" replace />} />
             <Route path="/admin/holarchelp-accountability" element={<HolarcHelpAccountability />} />
