@@ -268,13 +268,23 @@ export default function Landing() {
                   </p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
-                  <Button asChild size="sm" variant="outline" className="btn-pill flex-1 sm:flex-initial border-primary/40">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="btn-pill flex-1 sm:flex-initial border-primary/40"
+                  >
                     <a href="#" aria-label="Download on the App Store">
                       <Apple className="mr-1.5 h-4 w-4" />
                       App Store
                     </a>
                   </Button>
-                  <Button asChild size="sm" variant="outline" className="btn-pill flex-1 sm:flex-initial border-primary/40">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="btn-pill flex-1 sm:flex-initial border-primary/40"
+                  >
                     <a href="#" aria-label="Get it on Google Play">
                       <Play className="mr-1.5 h-4 w-4" />
                       Google Play
@@ -337,7 +347,7 @@ export default function Landing() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E01837]/10 mb-2">
                   <Video className="h-5 w-5 text-[#E01837]" />
                 </div>
-                <p className="text-sm font-semibold text-foreground">Video adherence</p>
+                <p className="text-sm font-semibold text-foreground">Medication adherence</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
                   Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.
                 </p>
@@ -388,8 +398,8 @@ export default function Landing() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground text-sm">HolarcHelp SOS</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full
-                      medical context shared on arrival.
+                      One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking,
+                      and full medical context shared on arrival.
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {["Emergency responders", "Hospitals", "Blood banks"].map((b) => (
@@ -560,7 +570,9 @@ export default function Landing() {
                 <Ambulance className="h-7 w-7 text-[#E01837]" />
               </div>
               <span className="text-base font-semibold text-foreground">Hospital or ER Provider</span>
-              <span className="text-xs text-muted-foreground mt-1 text-center">Contact us to onboard your organisation</span>
+              <span className="text-xs text-muted-foreground mt-1 text-center">
+                Contact us to onboard your organisation
+              </span>
             </button>
           </div>
         </DialogContent>
