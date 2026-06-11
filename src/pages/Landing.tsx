@@ -380,7 +380,7 @@ export default function Landing() {
                     <Brain className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">AI clinical assistant</p>
+                    <p className="text-sm font-semibold text-foreground">AI Clinical Assistant</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                       Patient history summaries · medication conflict alerts · imaging analysis · auto-generated
                       documents.
