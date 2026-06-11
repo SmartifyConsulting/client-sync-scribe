@@ -1301,6 +1301,29 @@ export default function CalendarView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this appointment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedEvent
+                ? `Are you sure you want to delete this appointment with ${selectedEvent.title} on ${selectedDate.toLocaleDateString("en-US", { month: "long" })} ${selectedEvent.day}, ${selectedDate.getFullYear()} at ${selectedEvent.time}? This action cannot be undone.`
+                : "This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteEvent}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
