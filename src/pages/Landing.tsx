@@ -396,7 +396,7 @@ export default function Landing() {
                     <Siren className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm">HolarcHelp SOS</p>
+                    <p className="font-semibold text-foreground text-sm">Holarc Help (SOS)</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                       One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking,
                       and full medical context shared on arrival.
