@@ -355,7 +355,7 @@ export default function Auth() {
             if (invitation.patient_id) {
               await supabase.from("patients").update({
                 patient_user_id: userId,
-                email,
+                email: email || null,
                 phone: fullPhone,
               }).eq("id", invitation.patient_id);
             }
@@ -396,7 +396,7 @@ export default function Auth() {
             user_id: userId,
             patient_user_id: userId,
             name: fullName,
-            email,
+            email: email || null,
             phone: fullPhone,
           });
         }
