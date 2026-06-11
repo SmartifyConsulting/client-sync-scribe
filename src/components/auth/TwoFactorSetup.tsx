@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shield, Loader2, CheckCircle, Copy, AlertTriangle, Check, Download, Apple } from "lucide-react";
+import { Shield, Loader2, CheckCircle, Copy, AlertTriangle, Check, Download, Apple, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,8 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
   const [factorId, setFactorId] = useState<string | null>(null);
   const [verifyCode, setVerifyCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [secretVisible, setSecretVisible] = useState(false);
+  const isMobile = typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (open && step === "setup") {
@@ -158,10 +160,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
           </DialogTitle>
           <DialogDescription className="text-center">
             {step === "setup" && (
-              <>
-                <span className="sm:hidden">Tap below to set up your authenticator app</span>
-                <span className="hidden sm:inline">Click below to set up your authenticator app</span>
-              </>
+              <>{isMobile ? "Tap" : "Click"} below to set up your authenticator app</>
             )}
             {step === "verify" && "Enter the code from your authenticator app"}
             {step === "success" && "Your account is now protected"}
@@ -176,13 +175,20 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
           <div className="space-y-4">
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
               <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <a
                   href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
                   target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
-                  <Download className="h-4 w-4 text-primary" /> Google Authenticator
+                  <Download className="h-4 w-4 text-primary" /> Google Authenticator — Android
+                </a>
+                <a
+                  href="https://apps.apple.com/app/google-authenticator/id388497605"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                >
+                  <Apple className="h-4 w-4 text-primary" /> Google Authenticator — iPhone
                 </a>
                 <a
                   href="https://authy.com/download/"
@@ -196,7 +202,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                   target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
-                  <Apple className="h-4 w-4 text-primary" /> Microsoft Authenticator
+                  <Shield className="h-4 w-4 text-primary" /> Microsoft Authenticator
                 </a>
               </div>
             </div>
@@ -221,9 +227,20 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                 <Label className="text-xs text-muted-foreground">
                   Can't scan? Enter this code manually:
                 </Label>
-                <code className="block bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
-                  {secret}
-                </code>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
+                    {secretVisible ? secret : "•".repeat(secret.length)}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => setSecretVisible((v) => !v)}
+                    aria-label={secretVisible ? "Hide setup key" : "Show setup key"}
+                    aria-pressed={secretVisible}
+                    className="p-2 rounded-lg border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
+                  >
+                    {secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 <Button variant="outline" onClick={copySecret} className="w-full min-h-11">
                   {copied ? (
                     <><Check className="h-4 w-4 mr-2 text-primary" /> Copied!</>

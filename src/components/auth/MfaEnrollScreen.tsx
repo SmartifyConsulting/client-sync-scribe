@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone, Download, Apple, CheckCircle2, Check } from "lucide-react";
+import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone, Download, Apple, CheckCircle2, Check, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import holarcLogo from "@/assets/holarc-logo-clear.png";
+
+const isMobileUA = () =>
+  typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent);
 
 interface Props {
   onEnrolled: () => void;
@@ -21,6 +25,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
   const [factorId, setFactorId] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [secretVisible, setSecretVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -108,9 +113,15 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
       <div className="flex-1 flex items-start sm:items-center justify-center p-3 sm:p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-5 sm:mb-6 px-1">
+            <div className="flex justify-center mb-3">
+              <img src={holarcLogo} alt="Holarc Health" className="h-10 w-auto" />
+            </div>
             <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
               <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
             </div>
+            <p className="text-[11px] uppercase tracking-wider text-primary font-semibold mb-1">
+              Account security · One-time setup
+            </p>
             <h1 className="text-lg sm:text-xl font-semibold text-foreground">Set up Two-Factor Authentication</h1>
             <p className="text-xs sm:text-sm text-muted-foreground mt-2">
               This account holds sensitive health information. 2FA is required for every user — please enrol an
@@ -168,8 +179,17 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                         <Label className="text-xs text-muted-foreground">Setup key (for manual entry)</Label>
                         <div className="flex items-center gap-2">
                           <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
-                            {secret}
+                            {secretVisible ? secret : "•".repeat(secret.length)}
                           </code>
+                          <button
+                            type="button"
+                            onClick={() => setSecretVisible((v) => !v)}
+                            aria-label={secretVisible ? "Hide setup key" : "Show setup key"}
+                            aria-pressed={secretVisible}
+                            className="p-2 rounded-lg border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
+                          >
+                            {secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
                         </div>
                         <Button
                           type="button"
@@ -282,7 +302,7 @@ function AuthenticatorDownload() {
       className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Download className="h-4 w-4 text-primary" />
-      <span>Android — Google Play</span>
+      <span>Google Authenticator — Android</span>
     </a>
   );
   const iosBtn = (
@@ -293,15 +313,39 @@ function AuthenticatorDownload() {
       className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Apple className="h-4 w-4 text-primary" />
-      <span>iPhone — App Store</span>
+      <span>Google Authenticator — iPhone</span>
     </a>
   );
+  const authyBtn = (
+    <a
+      href="https://authy.com/download/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+    >
+      <Download className="h-4 w-4 text-primary" />
+      <span>Authy</span>
+    </a>
+  );
+  const msBtn = (
+    <a
+      href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+    >
+      <Shield className="h-4 w-4 text-primary" />
+      <span>Microsoft Authenticator</span>
+    </a>
+  );
+
+  const verb = isMobileUA() ? "Tap" : "Click";
 
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
       <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
       <p className="text-[11px] text-muted-foreground">
-        Tap below to install Google Authenticator on your phone, then come back here to scan the code.
+        {verb} below to install one of these authenticator apps, then come back here to scan the code.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {platform === "ios" ? (
@@ -315,6 +359,8 @@ function AuthenticatorDownload() {
             {iosBtn}
           </>
         )}
+        {authyBtn}
+        {msBtn}
       </div>
     </div>
   );

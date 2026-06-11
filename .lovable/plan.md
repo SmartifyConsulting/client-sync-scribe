@@ -1,92 +1,36 @@
-# UX Audit Fixes 1–9
 
-Additive only. No deletions, no new tables, no schema changes.
+# Phase 1 — 2FA UX Fixes
 
-## 1. 2FA secret persistence (safer approach)
+Apply consistently to `src/components/auth/MfaEnrollScreen.tsx` (primary gate) and `src/components/auth/TwoFactorSetup.tsx` (legacy dialog). Pure additive/in-place edits — no deletions of existing logic.
 
-Skip building a `totp_secrets` table — Supabase Auth already stores TOTP secrets in its hardened `auth` schema. Instead, change enrollment to **reuse** any existing unverified factor rather than unenroll + recreate, so the QR/secret stays stable when a user abandons and returns.
+## Current state (already done — will be left intact)
+- **Issue #1 (factor reuse):** Already implemented in both files via `listFactors()` + `existingUnverified` check.
+- **TwoFactorSetup** already has: Holarc logo, progress label, 3 authenticator links, success step, copy-confirm, support link, factor reuse.
+- **MfaEnrollScreen** already has: copy-confirm, success animation, support link, factor reuse, sign-out escape.
 
-Files:
-- `src/components/auth/MfaEnrollScreen.tsx`
-- `src/components/auth/TwoFactorSetup.tsx`
+## Changes per file
 
-Logic in both:
-1. Call `supabase.auth.mfa.listFactors()`.
-2. If an `unverified` TOTP factor exists → reuse its `id`, `qr_code`, `secret`.
-3. Only if none exists → `supabase.auth.mfa.enroll({ factorType: 'totp' })`.
-4. Keep the existing verify flow untouched.
+### MfaEnrollScreen.tsx
+1. Import `holarcLogo` from `@/assets/holarc-logo-clear.png`; render `<img>` (h-10) above the shield circle in the header.
+2. Add small uppercase teal label `Account security · One-time setup` above the H1.
+3. Add `isMobile` (UA test: `/Mobi|Android/i.test(navigator.userAgent)`); use it to toggle "Tap"/"Click" copy in `AuthenticatorDownload` intro line.
+4. Secret reveal toggle: add `secretVisible` state (default `false`); render dots (`•` × secret.length) when hidden, real secret when shown; add Eye/EyeOff icon button beside the `<code>` block. Keep existing Copy Setup Key button untouched (it copies the real secret regardless of visibility).
+5. Expand `AuthenticatorDownload` to 4 buttons in a 2-col grid: Google Authenticator (Android), Google Authenticator (iOS), Authy (`https://authy.com/download/`), Microsoft Authenticator (`https://www.microsoft.com/en-us/security/mobile-authenticator-app`). Preserve existing platform-ordering so the user's native store appears first.
 
-## 2. 2FA UI redesign (both screens)
+### TwoFactorSetup.tsx
+1. Add the same secret reveal toggle (Eye/EyeOff) — currently the secret is always plaintext.
+2. Replace UA-agnostic `sm:hidden`/`sm:inline` Tap/Click pair with a single line driven by `isMobile` (UA detection) for parity with MfaEnrollScreen.
+3. Fix the Microsoft Authenticator row to use a non-Apple icon (use `Shield` or `Download`) — the current `Apple` icon is misleading.
+4. Add an Android Google Play row distinct from the generic "Google Authenticator" entry, so the list shows: Google Authenticator (Android), Google Authenticator (iOS), Authy, Microsoft Authenticator (matches MfaEnrollScreen).
 
-Apply consistently to `MfaEnrollScreen.tsx` and `TwoFactorSetup.tsx`:
-- Holarc Health logo at top
-- Label: "Account security · One-time setup"
-- Responsive copy: "Tap below" (mobile) / "Click below" (desktop) via Tailwind `sm:` breakpoints
-- Three authenticator download buttons: Google Authenticator, Authy, Microsoft Authenticator (platform-aware iOS/Android links — extend existing `AuthenticatorDownload` helper)
-- "Need help? Contact support" → `mailto:support@holarchealth.com`
-- Descriptive `alt` on QR image for screen readers
-- Success state: green check in circle (Framer Motion, already imported), "You're all set!" heading, explanatory text, "Continue to Dashboard" button
+## Non-goals (already satisfied; will NOT re-touch)
+- Issue #1 logic (factor reuse), success screen, copy-confirm, support email link, mobile sizing of inputs/QR — all already present.
+- No routing, no backend, no auth-flow logic changes.
 
-## 3. Branded 404 (`src/pages/NotFound.tsx`)
-
-- Holarc Health logo
-- "404" display + "Page not found" heading
-- Friendly copy
-- Two CTAs: primary teal "Back to Home" → `/`, outline "Contact Support" → `mailto:support@holarchealth.com`
-- Use semantic tokens (`bg-primary`, `text-primary-foreground`, etc.) — no hardcoded hex
-- Keep existing route-logging `useEffect` intact
-
-## 4. Route aliases (`src/App.tsx`)
-
-Add (do not remove anything):
-```tsx
-<Route path="/login" element={<Auth />} />
-<Route path="/signup" element={<Auth />} />
-<Route path="/onboarding" element={<Auth />} />
-```
-
-## 5. Skip-to-content link (`src/App.tsx`)
-
-Right after `<BrowserRouter>`:
-```tsx
-<a href="#main-content"
-   className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md">
-  Skip to main content
-</a>
-```
-Wrap existing `<Routes>` in `<main id="main-content">` (or a `div` if `main` conflicts with nested layouts — will verify on read).
-
-## 6. OG / Twitter meta (`index.html`)
-
-Add (keep all existing meta):
-```html
-<meta property="og:url" content="https://www.holarchealth.com/" />
-<meta property="og:image" content="https://www.holarchealth.com/og-preview.png" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="https://www.holarchealth.com/og-preview.png" />
-```
-Note: `public/og-preview.png` (1200×630) must be added separately by user — flagging, not blocking.
-
-## 7. Favicon (`index.html`)
-
-Ensure explicit `<link rel="icon" type="image/x-icon" href="/favicon.ico" />` is present. Add only if missing.
-
-## 8. Landing page 390px audit (`src/pages/Landing.tsx`)
-
-Read-only verification at mobile width. Only patch if a real overflow/clipping issue is found. No structural changes planned.
-
-## 9. Deferred
-
-- #10 Code splitting — separate turn (requires bundle analysis)
-- #11 PWA manifest — separate turn (icons, theme color decisions)
-
-## Files touched
-
-- `src/components/auth/MfaEnrollScreen.tsx` (modify)
-- `src/components/auth/TwoFactorSetup.tsx` (modify)
-- `src/pages/NotFound.tsx` (modify)
-- `src/App.tsx` (additive routes + skip link)
-- `index.html` (additive meta)
-- `src/pages/Landing.tsx` (only if 390px audit finds issue)
-
-No file deletions. No new dependencies. No backend changes.
+## Test plan
+1. `/auth` → trigger 2FA enrollment → verify logo + progress label + 4 app links visible.
+2. Refresh mid-setup → QR/secret unchanged (existing factor reuse).
+3. Secret dots by default; Eye icon toggles to reveal; Copy still copies real key.
+4. Resize to 390px → buttons stack, QR scales, inputs ≥48px.
+5. Desktop UA shows "Click", mobile UA shows "Tap".
+6. Enter valid TOTP → success state shown before redirect.
