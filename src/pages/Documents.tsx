@@ -604,7 +604,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
             <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
               {filteredDocuments.length > 0 ? (
-                filteredDocuments.map((doc) => (
+                filteredDocuments.slice(0, visibleDocCount).map((doc) => (
                   <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                       <FileText className="h-5 w-5 text-accent-foreground" />
