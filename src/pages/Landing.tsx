@@ -324,7 +324,7 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-foreground text-sm">Live consultation</p>
+                      <p className="font-semibold text-foreground text-sm">Live Consultation</p>
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium text-destructive">
                         <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> REC
                       </span>
