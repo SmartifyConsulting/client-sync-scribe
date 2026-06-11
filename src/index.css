@@ -25,6 +25,7 @@
   :root {
     /* Layout */
     --sidebar-width: 210px;
+    --footer-height: 140px;
 
     /* Holarc design system - light surfaces */
     --background: 0 0% 98%;          /* #FAFAFA page bg */
