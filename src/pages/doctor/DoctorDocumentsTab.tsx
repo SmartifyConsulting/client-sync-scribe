@@ -1,13 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FileText, Loader2, Search, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDocuments } from "@/hooks/useDocuments";
 import { format } from "date-fns";
 
+const PAGE_SIZE = 10;
+
 export default function DoctorDocumentsTab() {
   const { documents, loading } = useDocuments();
   const [q, setQ] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [q]);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
