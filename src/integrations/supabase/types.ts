@@ -945,6 +945,13 @@ export type Database = {
             referencedRelation: "blood_bank_providers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blood_donations_blood_bank_id_fkey"
+            columns: ["blood_bank_id"]
+            isOneToOne: false
+            referencedRelation: "blood_bank_providers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       bug_reports: {
@@ -4783,6 +4790,57 @@ export type Database = {
       }
     }
     Views: {
+      blood_bank_providers_public: {
+        Row: {
+          address: string | null
+          approved_at: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          id: string | null
+          latitude: number | null
+          longitude: number | null
+          name: string | null
+          owner_id: string | null
+          registration_number: string | null
+          state: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          owner_id?: string | null
+          registration_number?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          approved_at?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          name?: string | null
+          owner_id?: string | null
+          registration_number?: string | null
+          state?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       doctor_busy_slots: {
         Row: {
           doctor_id: string | null
