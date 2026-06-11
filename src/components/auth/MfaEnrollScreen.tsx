@@ -104,6 +104,9 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
               </div>
             ) : (
               <>
+                {/* Authenticator download helpers */}
+                <AuthenticatorDownload />
+
                 {qrCode && (
                   <div className="flex flex-col items-center gap-3">
                     <div className="bg-white p-3 rounded-lg border border-border">
@@ -135,9 +138,9 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                   </div>
                 )}
 
-                <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg">
-                  <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-warning-foreground">
+                <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/40 rounded-lg">
+                  <AlertTriangle className="h-4 w-4 text-yellow-700 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground font-medium">
                     Save this key somewhere safe. You'll need it if you lose access to your authenticator app.
                   </p>
                 </div>
