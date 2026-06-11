@@ -1414,7 +1414,7 @@ export function PatientDetailsEditor({
     const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
     const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
     const triggerClass =
-      "data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap";
+      "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5";
 
     // Self-service (mobile + tablet + web): tabs filtered by current section
     if (isSelfService && section) {
@@ -1474,13 +1474,13 @@ export function PatientDetailsEditor({
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
         <TabsTrigger
           value="personal"
-          className="text-xs whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
           Personal Information
         </TabsTrigger>
         <TabsTrigger
           value="medical"
-          className="text-xs whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
           Medical Information
         </TabsTrigger>
