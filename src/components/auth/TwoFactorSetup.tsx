@@ -227,9 +227,29 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                 <Label className="text-xs text-muted-foreground">
                   Can't scan? Enter this code manually:
                 </Label>
-                <code className="block bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
-                  {secret}
-                </code>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
+                    {secretVisible ? secret : "•".repeat(secret.length)}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => setSecretVisible((v) => !v)}
+                    aria-label={secretVisible ? "Hide setup key" : "Show setup key"}
+                    aria-pressed={secretVisible}
+                    className="p-2 rounded-lg border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
+                  >
+                    {secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <Button variant="outline" onClick={copySecret} className="w-full min-h-11">
+                  {copied ? (
+                    <><Check className="h-4 w-4 mr-2 text-primary" /> Copied!</>
+                  ) : (
+                    <><Copy className="h-4 w-4 mr-2" /> Copy Setup Key</>
+                  )}
+                </Button>
+              </div>
+            )}
                 <Button variant="outline" onClick={copySecret} className="w-full min-h-11">
                   {copied ? (
                     <><Check className="h-4 w-4 mr-2 text-primary" /> Copied!</>
