@@ -54,7 +54,7 @@ export function BottomNav() {
   // Admin variant — shown whenever an admin is on an /admin/* route
   if (isAdmin && isOnAdminRoute) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-area-pb font-size-preserve md:hidden">
         <div className="flex items-center justify-around px-2 py-2">
           {adminNavItems.map((item) => {
             const isActive = (item as any).exact
@@ -93,7 +93,7 @@ export function BottomNav() {
 
   if (!showPatientNav) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-area-pb font-size-preserve md:hidden">
         <div className="flex items-center justify-around px-2 py-2">
           {doctorNavItems.map((item) => {
             const isActive = location.pathname.startsWith(item.to);
@@ -146,7 +146,7 @@ export function BottomNav() {
   const items = patientSections;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg safe-area-pb font-size-preserve md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-area-pb font-size-preserve md:hidden">
       <div className="flex items-center justify-around px-2 py-2">
         {items.map((item) => {
           const isActive =

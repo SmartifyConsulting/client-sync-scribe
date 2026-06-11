@@ -31,7 +31,7 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
 
 
       {/* Mobile header (no sidebar drawer for providers yet — Holarc logo + TopBarIcons) */}
-      <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border md:hidden">
+      <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background border-b border-border md:hidden">
         <img src={logo} alt={logoAlt} className="h-10 w-auto object-contain" />
         <TopBarIcons variant="provider" />
       </header>
