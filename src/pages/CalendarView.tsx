@@ -1089,7 +1089,7 @@ export default function CalendarView() {
         setIsEventDetailOpen(open);
         if (!open) setIsEditMode(false);
       }}>
-        <DialogContent className="bg-card">
+        <DialogContent className="bg-card max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           {selectedEvent && editedEvent && (
             <>
               {isEditMode ? (
@@ -1106,14 +1106,27 @@ export default function CalendarView() {
                         onChange={(e) => setEditedEvent({ ...editedEvent, title: e.target.value })}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="text-sm font-medium text-foreground">Time</label>
-                        <Input
-                          value={editedEvent.time}
-                          onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })}
-                          placeholder="e.g., 9:00 AM"
-                        />
+                        <Select
+                          value={timeLabelToValue(editedEvent.time)}
+                          onValueChange={(value) => setEditedEvent({ ...editedEvent, time: formatTimeSlot(value) })}
+                        >
+                          <SelectTrigger className="min-h-11">
+                            <SelectValue placeholder="Select time" />
+                          </SelectTrigger>
+                          <SelectContent className="z-[100] bg-popover max-h-[60vh]">
+                            {TIME_SLOTS.map((slot) => {
+                              const isBlocked = editConflicts.has(slot);
+                              return (
+                                <SelectItem key={slot} value={slot} disabled={isBlocked}>
+                                  {formatTimeSlot(slot)}{isBlocked ? " — booked" : ""}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-foreground">Day</label>
