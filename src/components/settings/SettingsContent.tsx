@@ -406,7 +406,7 @@ export function SettingsContent() {
                   </div>
                 </div>
                 {loadingMfa ? null : mfaFactors.length > 0 ? (
-                  <Button variant="outline" onClick={() => disableMfa(mfaFactors[0].id)} disabled={disablingMfa} className="text-destructive hover:text-destructive">{disablingMfa ? "Disabling..." : "Disable"}</Button>
+                  <Badge variant="secondary" className="text-xs">Required</Badge>
                 ) : (
                   <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
                 )}
