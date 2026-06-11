@@ -33,6 +33,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
+import { SecurityBadges } from "@/components/landing/SecurityBadges";
+import { Testimonials } from "@/components/landing/Testimonials";
 
 const patientBenefits = [
   {
@@ -490,6 +492,12 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Security & Compliance */}
+      <SecurityBadges />
+
+      {/* Social proof */}
+      <Testimonials />
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-secondary/30">
