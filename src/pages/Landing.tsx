@@ -389,7 +389,7 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* HolarcHelp SOS — Emergency Services */}
+              {/* Holarc Help (SOS) — Emergency Services */}
               <div className="col-span-2 card-modern p-4 border border-[#E01837]/30 bg-gradient-to-br from-[#E01837]/5 to-[#E01837]/10">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#E01837] text-white shrink-0">
