@@ -35,6 +35,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
 import { SecurityBadges } from "@/components/landing/SecurityBadges";
 import { Testimonials } from "@/components/landing/Testimonials";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 const patientBenefits = [
   {
