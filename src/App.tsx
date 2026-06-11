@@ -96,6 +96,7 @@ if (typeof window !== "undefined" && !(window as any).__holarcNoticeShown) {
 }
 
 import { MfaGate } from "@/components/auth/MfaGate";
+import { TourProvider } from "@/components/tour/TourProvider";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -112,7 +113,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/auth" replace />;
   }
 
-  return <MfaGate>{children}</MfaGate>;
+  return (
+    <MfaGate>
+      <TourProvider>{children}</TourProvider>
+    </MfaGate>
+  );
 }
 
 function RoleBasedRedirect() {

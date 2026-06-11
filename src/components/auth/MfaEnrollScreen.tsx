@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone, Download, Apple } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -104,6 +104,9 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
               </div>
             ) : (
               <>
+                {/* Authenticator download helpers */}
+                <AuthenticatorDownload />
+
                 {qrCode && (
                   <div className="flex flex-col items-center gap-3">
                     <div className="bg-white p-3 rounded-lg border border-border">
@@ -135,9 +138,9 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                   </div>
                 )}
 
-                <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg">
-                  <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-warning-foreground">
+                <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/40 rounded-lg">
+                  <AlertTriangle className="h-4 w-4 text-yellow-700 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground font-medium">
                     Save this key somewhere safe. You'll need it if you lose access to your authenticator app.
                   </p>
                 </div>
@@ -176,6 +179,53 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AuthenticatorDownload() {
+  const platform = useMemo(() => {
+    if (typeof navigator === "undefined") return "other";
+    const ua = navigator.userAgent || "";
+    if (/android/i.test(ua)) return "android";
+    if (/iphone|ipad|ipod/i.test(ua)) return "ios";
+    return "other";
+  }, []);
+
+  const androidBtn = (
+    <a
+      href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+    >
+      <Download className="h-4 w-4 text-primary" />
+      <span>Android — Google Play</span>
+    </a>
+  );
+  const iosBtn = (
+    <a
+      href="https://apps.apple.com/app/google-authenticator/id388497605"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted transition-colors"
+    >
+      <Apple className="h-4 w-4 text-primary" />
+      <span>iPhone — App Store</span>
+    </a>
+  );
+
+  return (
+    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+      <p className="text-xs font-semibold text-foreground">
+        Don't have an authenticator app yet?
+      </p>
+      <p className="text-[11px] text-muted-foreground">
+        Tap below to install Google Authenticator on your phone, then come back here to scan the code.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {platform === "ios" ? <>{iosBtn}{androidBtn}</> : <>{androidBtn}{iosBtn}</>}
       </div>
     </div>
   );

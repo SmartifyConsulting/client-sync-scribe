@@ -32,26 +32,26 @@ interface NavItem {
   danger?: boolean;
 }
 
-const doctorNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
-  { icon: Users, label: "My Patients", to: "/patients" },
-  { icon: Settings2, label: "My Practice", to: "/practice" },
+const doctorNavItems: (NavItem & { tour?: string })[] = [
+  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard", tour: "doctor-home" },
+  { icon: Users, label: "My Patients", to: "/patients", tour: "import-patients" },
+  { icon: Settings2, label: "My Practice", to: "/practice", tour: "practice-settings" },
   { icon: Calendar, label: "My Calendar", to: "/calendar" },
-  { icon: ListChecks, label: "My Tasks", to: "/todos" },
+  { icon: ListChecks, label: "My Tasks", to: "/todos", tour: "doctor-tasks" },
   { icon: FolderOpen, label: "My Documents", to: "/documents" },
   { icon: Users2, label: "My Round Tables", to: "/doctor/round-tables" },
   { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
   { icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true },
 ];
 
-const patientNavItems: NavItem[] = [
-  { icon: User, label: "My Profile", to: "/patient/details?section=health" },
-  { icon: Users, label: "My Holarchy", to: "/patient/details?section=care" },
+const patientNavItems: (NavItem & { tour?: string })[] = [
+  { icon: User, label: "My Profile", to: "/patient/details?section=health", tour: "patient-profile" },
+  { icon: Users, label: "My Holarchy", to: "/patient/details?section=care", tour: "patient-holarchy" },
   { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
-  { icon: ListChecks, label: "My Tasks", to: "/patient/tasks" },
+  { icon: ListChecks, label: "My Tasks", to: "/patient/tasks", tour: "patient-tasks" },
   { icon: FolderOpen, label: "My Documents", to: "/patient/documents" },
   { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
-  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
+  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -145,6 +145,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   key={item.to}
                   to={item.to}
                   onClick={onNavigate}
+                  data-tour={(item as any).tour}
                   className={() =>
                     cn(
                       "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",

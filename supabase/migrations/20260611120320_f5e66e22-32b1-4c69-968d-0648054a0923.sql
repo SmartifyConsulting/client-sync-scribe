@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS tour_completed_at timestamptz; ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS tour_skipped_at timestamptz;
