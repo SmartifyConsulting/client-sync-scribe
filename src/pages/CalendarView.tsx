@@ -122,6 +122,11 @@ export default function CalendarView() {
     type: "session",
     notes: "",
   });
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [editDatePickerOpen, setEditDatePickerOpen] = useState(false);
+  const [conflicts, setConflicts] = useState<Set<string>>(new Set());
+  const [editConflicts, setEditConflicts] = useState<Set<string>>(new Set());
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [calendarView, setCalendarViewState] = useState<CalendarViewMode>(
     () => (localStorage.getItem("calendar-view") as CalendarViewMode) || "month"
   );
