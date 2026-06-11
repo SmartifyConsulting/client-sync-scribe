@@ -316,7 +316,7 @@ export default function Landing() {
             className="lg:col-span-5 relative"
           >
             <div className="relative grid grid-cols-2 gap-3 sm:gap-4">
-              {/* Live consultation */}
+              {/* Live Consultation */}
               <div className="col-span-2 card-modern p-5 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
