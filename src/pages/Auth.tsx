@@ -88,6 +88,8 @@ export default function Auth() {
   
   const [isLogin, setIsLogin] = useState(modeParam !== "signup");
   const [email, setEmail] = useState("");
+  // Unified login field: email OR phone (no '@' => phone)
+  const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -98,6 +100,8 @@ export default function Auth() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpCooldown, setOtpCooldown] = useState(0);
+  // Signup: pick email or phone identifier
+  const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
 
   useEffect(() => {
     if (otpCooldown <= 0) return;
@@ -259,23 +263,49 @@ export default function Auth() {
   };
 
   const handleCreateAccount = async () => {
-    if (!email || !password) {
-      toast({ title: "Required", description: "Email and password are required", variant: "destructive" });
+    if (!password || password.length < 6) {
+      toast({ title: "Password too short", description: "Password must be at least 6 characters", variant: "destructive" });
+      return false;
+    }
+    if (signupMethod === "email" && !email) {
+      toast({ title: "Email required", variant: "destructive" });
+      return false;
+    }
+    const phoneInput = userRole === "doctor" ? mobileNumber : phone;
+    if (signupMethod === "phone" && !phoneInput.trim()) {
+      toast({ title: "Phone number required", variant: "destructive" });
       return false;
     }
     setLoading(true);
     try {
-      const { data, error } = await signUp(email, password, { full_name: fullName, role: userRole });
+      let result;
+      if (signupMethod === "email") {
+        result = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/dashboard`,
+            data: { full_name: fullName, role: userRole },
+          },
+        });
+      } else {
+        const e164 = normalizePhone(phoneInput);
+        result = await supabase.auth.signUp({
+          phone: e164,
+          password,
+          options: { data: { full_name: fullName, role: userRole } },
+        });
+      }
+      const { data, error } = result;
       if (error) throw error;
       if (data?.user) {
         setCreatedUserId(data.user.id);
         setAccountCreated(true);
-        // Role and profile are created server-side by handle_new_user trigger.
         return true;
       }
       return false;
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Sign-up failed", description: error.message, variant: "destructive" });
       return false;
     } finally {
       setLoading(false);
@@ -325,7 +355,7 @@ export default function Auth() {
             if (invitation.patient_id) {
               await supabase.from("patients").update({
                 patient_user_id: userId,
-                email,
+                email: email || null,
                 phone: fullPhone,
               }).eq("id", invitation.patient_id);
             }
@@ -366,7 +396,7 @@ export default function Auth() {
             user_id: userId,
             patient_user_id: userId,
             name: fullName,
-            email,
+            email: email || null,
             phone: fullPhone,
           });
         }
@@ -429,12 +459,37 @@ export default function Auth() {
     );
   };
 
+  const normalizePhone = (raw: string) => {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith("+")) return "+" + trimmed.slice(1).replace(/\D/g, "");
+    const digits = trimmed.replace(/\D/g, "").replace(/^0+/, "");
+    return `${countryCode}${digits}`.replace(/\s+/g, "");
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const id = loginId.trim();
+    if (!id || !password) {
+      toast({ title: "Required", description: "Enter your email or phone and password", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
-      const { data, error } = await signIn(email, password);
-      if (error) throw error;
+      const isEmail = id.includes("@");
+      const credentials = isEmail
+        ? { email: id, password }
+        : { phone: normalizePhone(id), password };
+      const { data, error } = await supabase.auth.signInWithPassword(credentials as any);
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("invalid") || msg.includes("credentials")) {
+          throw new Error("Invalid credentials");
+        }
+        if (msg.includes("not found") || msg.includes("does not exist")) {
+          throw new Error("Account does not exist");
+        }
+        throw error;
+      }
       toast({ title: "Welcome back!", description: "Successfully signed in" });
       const userId = data?.user?.id;
       if (userId) {
@@ -443,7 +498,7 @@ export default function Auth() {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Sign-in failed", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -564,12 +619,36 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
+              <Label>Sign up with</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  <Mail className="h-4 w-4 mx-auto mb-1" /> Email
+                </button>
+                <button type="button" onClick={() => !accountCreated && setSignupMethod("phone")} disabled={accountCreated}
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  <Phone className="h-4 w-4 mx-auto mb-1" /> Phone Number
+                </button>
               </div>
             </div>
+            {signupMethod === "email" ? (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Phone Number (used to sign in)</Label>
+                <div className="flex gap-2">
+                  <CountrySelector />
+                  <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" required disabled={accountCreated} />
+                </div>
+                {mobileNumber && <p className="text-[10px] text-muted-foreground">Account ID: {normalizePhone(mobileNumber)}</p>}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -649,12 +728,36 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
+              <Label>Sign up with</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  <Mail className="h-4 w-4 mx-auto mb-1" /> Email
+                </button>
+                <button type="button" onClick={() => !accountCreated && setSignupMethod("phone")} disabled={accountCreated}
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  <Phone className="h-4 w-4 mx-auto mb-1" /> Phone Number
+                </button>
               </div>
             </div>
+            {signupMethod === "email" ? (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Phone Number (used to sign in)</Label>
+                <div className="flex gap-2">
+                  <CountrySelector />
+                  <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" required disabled={accountCreated} />
+                </div>
+                {phone && <p className="text-[10px] text-muted-foreground">Account ID: {normalizePhone(phone)}</p>}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -703,11 +806,29 @@ export default function Auth() {
               {!useOtp ? (
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+                    <Label htmlFor="loginId">Email or Phone Number</Label>
+                    <div className="flex gap-2">
+                      {!loginId.includes("@") && <CountrySelector />}
+                      <div className="relative flex-1">
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="loginId"
+                          type="text"
+                          inputMode={loginId.includes("@") ? "email" : "tel"}
+                          autoComplete="username"
+                          placeholder="you@example.com or 82 123 4567"
+                          value={loginId}
+                          onChange={(e) => setLoginId(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
                     </div>
+                    {!loginId.includes("@") && loginId.trim() && (
+                      <p className="text-[10px] text-muted-foreground">
+                        Will sign in as {normalizePhone(loginId)}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -792,9 +913,13 @@ export default function Auth() {
                 >
                   {useOtp ? "Sign in with password instead" : "Email me a sign-in code instead"}
                 </button>
-                <p className="block w-full text-xs text-muted-foreground">
-                  Sign-ups are currently invite-only. Please contact an administrator for access.
-                </p>
+                <button
+                  type="button"
+                  onClick={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }}
+                  className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline"
+                >
+                  Don't have an account? Sign up
+                </button>
               </div>
               <DevErLoginButton />
             </div>
@@ -805,7 +930,7 @@ export default function Auth() {
     );
   }
 
-  // Signup disabled for MVP — invite-only
+  // Signup wizard
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center p-4">
@@ -814,15 +939,37 @@ export default function Auth() {
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
               <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
             </button>
+            <p className="text-muted-foreground mt-2">Create your account</p>
+            <div className="mt-3"><Progress value={progress} className="h-1.5" /></div>
+            <p className="text-[10px] text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
-          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm text-center space-y-4">
-            <h2 className="text-lg font-semibold">Sign-ups are invite-only</h2>
-            <p className="text-sm text-muted-foreground">
-              Account creation is currently disabled while we run the MVP. Please contact an administrator to be granted access.
-            </p>
-            <Button onClick={() => setIsLogin(true)} className="w-full">
-              Back to Sign In
-            </Button>
+          <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
+            {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
+            <div className="flex gap-2 mt-6">
+              {currentStep > 0 && (
+                <Button type="button" variant="outline" onClick={handlePrev} disabled={loading} className="flex-1">
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Back
+                </Button>
+              )}
+              {!isLastStep ? (
+                <Button type="button" onClick={handleNext} disabled={loading} className="flex-1">
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Next <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button type="button" onClick={handleFinalSubmit} disabled={loading} className="flex-1">
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Create account
+                </Button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline mt-4 text-center"
+            >
+              Already have an account? Sign in
+            </button>
           </div>
         </div>
       </div>
