@@ -433,12 +433,37 @@ export default function Auth() {
     );
   };
 
+  const normalizePhone = (raw: string) => {
+    const trimmed = raw.trim();
+    if (trimmed.startsWith("+")) return "+" + trimmed.slice(1).replace(/\D/g, "");
+    const digits = trimmed.replace(/\D/g, "").replace(/^0+/, "");
+    return `${countryCode}${digits}`.replace(/\s+/g, "");
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    const id = loginId.trim();
+    if (!id || !password) {
+      toast({ title: "Required", description: "Enter your email or phone and password", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     try {
-      const { data, error } = await signIn(email, password);
-      if (error) throw error;
+      const isEmail = id.includes("@");
+      const credentials = isEmail
+        ? { email: id, password }
+        : { phone: normalizePhone(id), password };
+      const { data, error } = await supabase.auth.signInWithPassword(credentials as any);
+      if (error) {
+        const msg = (error.message || "").toLowerCase();
+        if (msg.includes("invalid") || msg.includes("credentials")) {
+          throw new Error("Invalid credentials");
+        }
+        if (msg.includes("not found") || msg.includes("does not exist")) {
+          throw new Error("Account does not exist");
+        }
+        throw error;
+      }
       toast({ title: "Welcome back!", description: "Successfully signed in" });
       const userId = data?.user?.id;
       if (userId) {
@@ -447,7 +472,7 @@ export default function Auth() {
         navigate("/dashboard");
       }
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: "Sign-in failed", description: error.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
