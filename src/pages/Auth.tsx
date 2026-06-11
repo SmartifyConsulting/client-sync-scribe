@@ -23,7 +23,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Progress } from "@/components/ui/progress";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { DevErLoginButton } from "@/components/auth/DevErLoginButton";
-import { InstallAppPrompt } from "@/components/InstallAppPrompt";
+
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { ShieldCheck, KeyRound } from "lucide-react";
 
@@ -294,10 +294,23 @@ export default function Auth() {
       } else {
         // Phone sign-up without SMS: use a synthetic email derived from the
         // normalized phone number so Supabase never invokes an SMS provider.
-        // The real phone is stored on profiles.phone and the user logs in
-        // either with this synthetic email or by entering their phone number
-        // (we re-derive the same synthetic email on login).
         const e164 = normalizePhone(phoneInput);
+        const fullPhone = `${countryCode}${phoneInput.replace(/\s+/g, "")}`;
+        // Pre-check: prevent duplicate phone numbers
+        const { data: existingPhone } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("mobile_number", fullPhone)
+          .maybeSingle();
+        if (existingPhone) {
+          toast({
+            title: "Phone number already registered",
+            description: "This phone number is already in use. Please sign in instead.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return false;
+        }
         const syntheticEmail = phoneToSyntheticEmail(e164);
         result = await supabase.auth.signUp({
           email: syntheticEmail,
@@ -314,7 +327,10 @@ export default function Auth() {
       }
       return false;
     } catch (error: any) {
-      toast({ title: "Sign-up failed", description: error.message, variant: "destructive" });
+      const msg = /duplicate|unique|already/i.test(error?.message || "")
+        ? "This phone number or email is already registered. Please sign in instead."
+        : error.message;
+      toast({ title: "Sign-up failed", description: msg, variant: "destructive" });
       return false;
     } finally {
       setLoading(false);
@@ -414,7 +430,12 @@ export default function Auth() {
       // MVP: no trial/subscription row created at signup — users get full access without countdowns.
 
       clearDraft();
-      toast({ title: "Account created!", description: "Check your inbox to confirm your email before signing in." });
+      toast({
+        title: "Account created!",
+        description: signupMethod === "phone"
+          ? "You can sign in with your phone number and password."
+          : "Check your inbox to confirm your email before signing in.",
+      });
       await routeAfterLogin(userId);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -955,9 +976,6 @@ export default function Auth() {
                 </button>
               </div>
               <DevErLoginButton />
-              <div className="mt-4">
-                <InstallAppPrompt />
-              </div>
             </div>
           </div>
         </div>
@@ -1006,11 +1024,6 @@ export default function Auth() {
             >
               Already have an account? Sign in
             </button>
-            {isLastStep && (
-              <div className="mt-4">
-                <InstallAppPrompt />
-              </div>
-            )}
           </div>
         </div>
       </div>

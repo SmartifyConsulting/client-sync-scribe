@@ -1,56 +1,48 @@
 ## Problem
 
-On Android **and iOS**, no "Install app" message appears near the Login button. Causes:
-
-1. `InstallAppButton` is not placed on the Auth page — only on Landing and the mobile header.
-2. The Android button only renders after Chrome fires `beforeinstallprompt`. That event does NOT fire inside the Lovable preview iframe, in in-app browsers (Facebook, Instagram, LinkedIn), in some Android browsers (Firefox, Samsung Internet, Opera), or before Chrome's engagement heuristics are satisfied.
-3. iOS Safari never fires `beforeinstallprompt`. The existing component already detects iOS, but with no placement on Auth there is nothing to tap.
-
-Result: nothing shows on either platform near the Login button.
+1. After phone signup, the toast still says "Check your inbox to confirm your email" — incorrect for phone users (no email is sent).
+2. Nothing prevents two accounts from being created with the same phone number.
+3. The "Install Holarc on your phone" card is on the Auth screen; the user wants it on the Landing hero instead.
 
 ## Fix
 
-### 1. Place an install block on the Auth page (iOS + Android + desktop)
+### 1. Conditional success toast in `src/pages/Auth.tsx`
 
-Add an `InstallAppPrompt` block directly below the **Login** button (and below the Sign Up button on the signup variant) with copy like:
+In `handleFinalSubmit` (line 417), branch on `signupMethod`:
+- `email`: keep "Check your inbox to confirm your email before signing in."
+- `phone`: "Account created! You can sign in with your phone number and password."
 
-> 📱 **Install Holarc on your phone** — get one-tap access from your home screen.
-> [ Install app ]
+### 2. Enforce unique phone numbers
 
-Visible on all viewports. Same block renders for iOS (Safari + Chrome on iPhone/iPad) and Android — only the dialog content differs by platform when tapped.
+Two layers:
 
-### 2. Make the button work everywhere — even without `beforeinstallprompt`
+**a. Database (authoritative)** — new migration:
+- Add a partial unique index on `public.profiles(mobile_number)` where `mobile_number IS NOT NULL`.
+- Normalize before insert: create a `BEFORE INSERT/UPDATE` trigger that strips spaces from `mobile_number` so `+27 82 123 4567` and `+27821234567` collide.
+- (Synthetic-email path in `auth.users` already gives uniqueness on the phone-derived email, but profiles is the user-facing source of truth and the trigger guarantees collisions.)
 
-Update `src/components/InstallAppButton.tsx`:
+**b. Client pre-check in `Auth.tsx` `createAccount`** — before calling `supabase.auth.signUp` for the phone path:
+- Query `profiles` for an existing row with the same normalized `mobile_number` (compare on `e164` digits).
+- If found, toast "This phone number is already registered. Sign in instead." and abort.
+- Catch the unique-violation error from the DB as a fallback and show the same message.
 
-- Keep current behavior: if `beforeinstallprompt` fires, tapping triggers the native Android install sheet.
-- iOS (already handled): tapping opens the existing 3-step Safari "Share → Add to Home Screen → Add" dialog. Keep this exactly as-is.
-- New Android fallback: when no native prompt is captured AND the device is Android (UA contains `Android`) AND not already standalone, still render the button. Tap opens an instruction dialog mirroring the iOS one:
-  - **Chrome / Edge:** "Tap the ⋮ menu → **Install app** (or **Add to Home screen**)."
-  - **Samsung Internet:** "Tap the ☰ menu → **Add page to** → **Home screen**."
-  - **Firefox:** "Tap the ⋮ menu → **Install**."
-  - **In-app browser (FB / Instagram / LinkedIn / TikTok):** "Tap ⋯ → **Open in Chrome** first, then follow the steps above."
-- iOS in-app browsers (FB / Instagram / LinkedIn / TikTok / Gmail): existing iOS dialog already has the "Open in Safari first" branch — verify the copy is shown and keep it.
-- Hide entirely only when `isStandalone()` is true (already installed). Drop the early `return null` that hides on desktop non-iOS so desktop Chrome/Edge users also get the dialog fallback.
+Email path is unchanged (Supabase already enforces unique emails).
 
-### 3. Add a new `InstallAppPrompt` wrapper component
+### 3. Move install prompt from Auth to Landing hero
 
-`src/components/InstallAppPrompt.tsx` — a card-style block with icon, heading, one-line description, and `<InstallAppButton variant="primary" />`. Hidden when `isStandalone()` is true. Reusable so we can drop it on Landing later if desired.
+- `src/pages/Auth.tsx`: remove both `<InstallAppPrompt />` renders (lines 959 and 1011) and the import on line 26.
+- `src/pages/Landing.tsx`: import `InstallAppPrompt` and render it as a slim banner at the very top of the hero section (above the headline), full-width on mobile, max-width container on desktop. It self-hides when the app is already installed (`isStandalone()`), so installed users see nothing.
 
-### 4. Auth page placement
+## Technical details
 
-In `src/pages/Auth.tsx`, render `<InstallAppPrompt />`:
-- Below the Login submit button on the sign-in view.
-- Below the final Sign Up step's submit button on the signup view.
-
-No layout shuffling beyond inserting the block. Visible identically on iOS and Android.
+- Normalization helper `normalizePhone` already exists in `Auth.tsx`; reuse it for the client pre-check.
+- Migration file: `ALTER TABLE public.profiles` + `CREATE UNIQUE INDEX CONCURRENTLY`-style (use plain `CREATE UNIQUE INDEX` inside a migration; concurrent isn't allowed in transactions). Index name: `profiles_mobile_number_unique_idx`.
+- Trigger: `profiles_normalize_mobile_number` — `NEW.mobile_number := regexp_replace(NEW.mobile_number, '\s+', '', 'g')` when not null.
+- No RLS changes needed (profiles policies unchanged).
+- No changes to `InstallAppButton` itself.
 
 ## Out of scope
 
-- No service worker / offline mode changes.
-- No manifest changes (already correct: `display: standalone`, `theme_color: #2DB0A6`, icons 192/512 + maskable).
-- No native (Capacitor) wrapper.
-
-## Why iOS will always show instructions (not a one-tap button)
-
-Apple does not expose a programmatic install API. Every iOS PWA (Twitter, Starbucks, Pinterest) uses the same Share → Add to Home Screen instructional pattern. This is the iOS-correct behavior, not a limitation we can engineer around.
+- No SMS OTP (phone signup remains password-based via synthetic email).
+- No changes to login flow.
+- No manifest or service-worker changes.
