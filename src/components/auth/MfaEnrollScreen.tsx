@@ -25,6 +25,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
   const [factorId, setFactorId] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [secretVisible, setSecretVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
