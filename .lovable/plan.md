@@ -1,68 +1,41 @@
-## Goal
+# Plan: Revert navigation + child-screen tabs to pre-design-system styling
 
-Make TOTP 2FA mandatory: every user must enroll an authenticator app and pass a 6-digit code on every sign-in. Phone-signup users additionally get 8 one-time backup codes (email users do not — they can recover via email reset).
+## Scope
+Undo only the navigation and tab-styling parts of the 17:30 design-system overhaul (messages #3055–#3058). Leave the token retune (colors, radius, typography base) and the non-nav primitives (Button, Input, Dialog, Card, etc.) alone so the rest of the app keeps its current look.
 
-## Why TOTP and not SMS
+## Files to revert
 
-Supabase Auth supports TOTP and Phone-OTP factors. SMS factors require a configured SMS provider, which this project intentionally avoids (phone signup uses synthetic email, no SMS). TOTP works for every user, online or offline, no carrier dependency, no per-message cost.
+1. **`src/components/ui/tabs.tsx`** — restore the previous filled/pill TabsList + bold active TabsTrigger styling (the one the project's Tab Styling memory describes: "Teal `bg-primary` TabsList, high-contrast active triggers"). The current underline-only variant (`border-b-[3px] border-transparent` / `data-[state=active]:border-primary`) is the new one introduced in #3058 and is what's causing tabs across Admin, DoctorDocumentsPage, ProvidersScreen, patient pages etc. to look flat and washed-out.
 
-## Flow
+2. **`src/components/layout/Sidebar.tsx`** (doctor) and **`src/components/layout/PatientSidebar.tsx`** + **`src/components/layout/ProviderSidebar.tsx`** — restore the prior active-item styling (filled teal pill / bold text) and prior hover state. The 17:36 batch changed active items to `text-primary bg-accent` with `bg-muted` hover, which made the active route harder to read.
 
-### Signup (new users)
-1. User completes existing signup wizard → account created.
-2. Immediately routed to **new** `/mfa-setup` screen instead of dashboard:
-   - QR code + manual secret (Supabase `mfa.enroll({ factorType: "totp" })`).
-   - User scans in Google Authenticator / Authy / 1Password / etc.
-   - Enters first 6-digit code → `mfa.challengeAndVerify(...)`.
-3. If `signupMethod === "phone"`: show 8 single-use backup codes, force "I've saved these" checkbox + downloadable .txt. Codes hashed (bcrypt) and stored in existing `mfa_backup_codes` table.
-4. Redirect to dashboard. Session is now AAL2.
+3. **`src/components/layout/BottomNav.tsx`** — restore prior active-item color/weight if changed in the batch.
 
-### Sign-in (every time)
-1. Email/phone + password → `signInWithPassword` → AAL1 session.
-2. Client checks `mfa.getAuthenticatorAssuranceLevel()`:
-   - `nextLevel === "aal2"` and `currentLevel === "aal1"` → route to `/mfa-verify` (full screen).
-   - User enters 6-digit code → `mfa.challengeAndVerify(...)` → AAL2 → dashboard.
-   - "Lost your authenticator? Use a backup code" link (phone users only) → 8-char code path that consumes one row from `mfa_backup_codes` via a SECURITY DEFINER RPC, then admin-resets the factor.
-3. If no factor enrolled yet (existing users), route to `/mfa-setup` instead (forced enrollment).
+4. **`src/components/layout/MobileHeader.tsx`** — only if its nav-related classes were touched in the batch (likely just background + border tweaks; revert those).
 
-### App-wide guard
-`ProtectedRoute` (or equivalent) checks AAL on every render. If `aal1` and user has factors → redirect to `/mfa-verify`. If `aal1` and no factors → redirect to `/mfa-setup`. Only `/auth`, `/mfa-setup`, `/mfa-verify`, `/forgot-password`, `/reset-password` are exempt.
+## What stays
+- `src/index.css` token values (teal `#2DB0A6`, border `#E0E0E0`, radii, typography base) — these are app-wide and reverting them would undo unrelated parts of the design refresh.
+- Button, Input, Textarea, Select, Dialog, Label, Card, Popover, DropdownMenu primitives — out of scope for "navigation + tabs".
+- Page-level pages (Admin.tsx, DoctorDocumentsPage.tsx, ProvidersScreen.tsx, etc.) — they already pass the old `bg-primary` / `data-[state=active]:bg-white` classes; once `tabs.tsx` is reverted those classes will render correctly again with no per-page edits.
 
-## Files
+## Method
+For each file above I'll fetch the git history of that file (via `git log -p` in build mode) to find the commit immediately before the 17:30 batch, and restore its `cn(...)` class strings verbatim — no guessing, no re-design. If git doesn't expose that timestamp, I'll reconstruct from the chat-recorded `old_content`/`new_content` of message #3058 (which captured the exact diffs).
 
-### New
-- `src/pages/MfaSetup.tsx` — QR + verify + (phone-only) backup-codes section. Uses `qrcode.react` (already a common dep; bun add if missing).
-- `src/pages/MfaVerify.tsx` — 6-digit input + "use backup code" link for phone users.
-- `src/lib/mfa.ts` — helpers: `getAal()`, `getFirstUnverifiedFactor()`, `enrollTotp()`, `verifyChallenge(code)`, `generateBackupCodes()`, `consumeBackupCode(code)`.
-- `supabase/functions/mfa-backup-recover/index.ts` — edge function, validates user JWT, hashes input, finds + marks-used a backup code row, then `admin.mfa.deleteFactor()` so the user can re-enroll on next login. Requires SERVICE_ROLE (admin Supabase client).
-
-### Edited
-- `src/pages/Auth.tsx` — after `handleFinalSubmit` success, `navigate("/mfa-setup")` instead of `routeAfterLogin`. After `handleLogin` success, check AAL and route to `/mfa-verify` or `/mfa-setup` instead of dashboard.
-- `src/components/ProtectedRoute.tsx` (or wherever the auth gate lives — confirm during build) — add AAL2 enforcement.
-- `src/App.tsx` — register `/mfa-setup` and `/mfa-verify` routes (public, but require an active session).
-
-### Database (migration)
-- `mfa_backup_codes` already exists (5 cols, 1 policy) — verify columns: `user_id`, `code_hash`, `used_at`, `created_at`. Add missing columns/index if needed.
-- New SECURITY DEFINER function `public.consume_mfa_backup_code(_code_hash text)` returning boolean — atomic mark-used.
-- No new tables for the factor itself; Supabase manages factors in `auth.mfa_factors`.
-
-## Backup-code mechanics (phone users only)
-
-- 8 codes, format `XXXX-XXXX` (8 chars, base32-ish, no ambiguous chars).
-- Generated client-side at enrollment, **shown once**, sent to edge function which bcrypt-hashes and inserts 8 rows.
-- Recovery: user enters one code on `/mfa-verify` → edge function `mfa-backup-recover` checks each unused hash, on match marks `used_at = now()`, deletes the user's TOTP factor via admin API, returns success. Client then routes to `/mfa-setup` to re-enroll a fresh authenticator (since the device is presumably lost).
-- Email users see no backup-code UI; if they lose their authenticator they go through password reset → admin support (out of scope to automate).
+## Verification
+- Visit `/admin`, `/documents`, `/holarchelp/provider/hospital/providers`, `/patient/details`, `/settings` at 390 px and 1296 px and confirm tabs match the prior filled-pill look.
+- Confirm the active sidebar item is again clearly highlighted in both Doctor and Patient layouts.
+- No console/build errors.
 
 ## Out of scope
+- Reverting design tokens or non-nav primitives.
+- Touching the 2FA flow, provider PII migration, install button, or any other non-styling work from today.
+- Any new styling — strictly a like-for-like revert of nav + tab classes.
 
-- WebAuthn / passkeys (could be a later upgrade).
-- Per-device "remember this device for 30 days" — every sign-in re-prompts as you requested.
-- SMS-based MFA.
-- Bulk-resetting MFA for existing users via admin UI (admin can delete factors via existing edge function pattern if needed).
-- Skipping MFA for the `dev_er@…` test login button — it will also need MFA. Confirm during build whether to exempt it.
+## Safer alternative
+If you'd rather not risk a partial revert, use the **History** panel to roll back to the message immediately before #3056 — that wipes the entire 17:30 batch in one click and you can then re-apply any non-nav changes you want to keep.
 
-## Open verification items (resolved during build, not blockers)
-
-- Whether the project already has `qrcode.react`; if not, install it.
-- Locate the existing route guard (likely `ProtectedRoute` or inside `App.tsx`).
-- Confirm `mfa_backup_codes` column names before writing the recover RPC.
+```xml
+<presentation-actions>
+  <presentation-open-history>View History</presentation-open-history>
+</presentation-actions>
+```
