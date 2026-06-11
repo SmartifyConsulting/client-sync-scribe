@@ -751,6 +751,60 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_recovery_attempts: {
+        Row: {
+          code_hash: string | null
+          created_at: string
+          id: number
+          identifier_hash: string | null
+          ip: string | null
+          success: boolean
+        }
+        Insert: {
+          code_hash?: string | null
+          created_at?: string
+          id?: never
+          identifier_hash?: string | null
+          ip?: string | null
+          success?: boolean
+        }
+        Update: {
+          code_hash?: string | null
+          created_at?: string
+          id?: never
+          identifier_hash?: string | null
+          ip?: string | null
+          success?: boolean
+        }
+        Relationships: []
+      }
+      auth_recovery_audit: {
+        Row: {
+          created_at: string
+          id: number
+          ip: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          ip?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          ip?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       blood_bank_providers: {
         Row: {
           address: string | null
