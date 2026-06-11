@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
+import { TwoFactorSetup } from "@/components/auth/TwoFactorSetup";
 import { format } from "date-fns";
 import { useSearchParams } from "react-router-dom";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
@@ -508,7 +508,7 @@ export function SettingsContent() {
         </TabsContent>
       </Tabs>
 
-      
+      <TwoFactorSetup open={show2FASetup} onOpenChange={setShow2FASetup} onSuccess={fetchMfaFactors} />
 
       <Dialog open={showManagePlan} onOpenChange={setShowManagePlan}>
         <DialogContent className="sm:max-w-lg">

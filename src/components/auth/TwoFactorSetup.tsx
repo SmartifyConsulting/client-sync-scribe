@@ -1,207 +1,232 @@
-// src/pages/TwoFactorSetup.tsx  (or wherever your 2FA setup component lives)
-import { useState } from "react";
-import { Eye, EyeOff, Copy, Check, ShieldCheck, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Shield, Loader2, CheckCircle, Copy, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface TwoFactorSetupProps {
-  secret: string; // pass in from your existing hook/query — do NOT generate here
-  qrCodeUrl: string; // the otpauth:// QR data URL
-  onVerify: (code: string) => Promise<void>;
-  onSignOut: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
-export default function TwoFactorSetup({ secret, qrCodeUrl, onVerify, onSignOut }: TwoFactorSetupProps) {
-  const [code, setCode] = useState("");
-  const [secretVisible, setSecretVisible] = useState(false);
-  const [copied, setCopied] = useState(false);
+export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetupProps) {
+  const { toast } = useToast();
+  const [step, setStep] = useState<"setup" | "verify" | "success">("setup");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [secret, setSecret] = useState<string | null>(null);
+  const [factorId, setFactorId] = useState<string | null>(null);
+  const [verifyCode, setVerifyCode] = useState("");
 
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  useEffect(() => {
+    if (open && step === "setup") {
+      enrollMFA();
+    }
+  }, [open]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const enrollMFA = async () => {
     setLoading(true);
     try {
-      await onVerify(code);
-      setDone(true);
-    } catch {
-      setError("That code didn't match. Please try again.");
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: "totp",
+        friendlyName: "Holarc Authenticator",
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        setQrCode(data.totp.qr_code);
+        setSecret(data.totp.secret);
+        setFactorId(data.id);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to set up 2FA",
+        variant: "destructive",
+      });
+      onOpenChange(false);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  function handleCopy() {
-    navigator.clipboard.writeText(secret);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
+  const verifyMFA = async () => {
+    if (!factorId || verifyCode.length !== 6) {
+      toast({
+        title: "Invalid code",
+        description: "Please enter a 6-digit verification code",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  // ── Success screen ─────────────────────────────────────────
-  if (done) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
-        <img src="/logo.png" alt="Holarc Health" className="h-10 mb-8" />
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-sm w-full text-center">
-          <div className="flex justify-center mb-4">
-            <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-teal-50">
-              <ShieldCheck className="w-7 h-7 text-teal-700" />
-            </span>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">You're all set!</h2>
-          <p className="text-gray-500 text-sm mb-6">Two-factor authentication is now active on your account.</p>
-          <a
-            href="/dashboard"
-            className="block w-full py-2.5 rounded-lg bg-teal-700 text-white font-medium hover:bg-teal-800 transition-colors"
-          >
-            Continue to Dashboard
-          </a>
-        </div>
-      </div>
-    );
-  }
+    setLoading(true);
+    try {
+      const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId,
+      });
 
-  // ── Setup screen ────────────────────────────────────────────
+      if (challengeError) throw challengeError;
+
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId: challengeData.id,
+        code: verifyCode,
+      });
+
+      if (verifyError) throw verifyError;
+
+      setStep("success");
+      toast({
+        title: "2FA Enabled",
+        description: "Two-factor authentication has been enabled for your account",
+      });
+      onSuccess?.();
+    } catch (error: any) {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid verification code",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copySecret = () => {
+    if (secret) {
+      navigator.clipboard.writeText(secret);
+      toast({
+        title: "Copied",
+        description: "Secret key copied to clipboard",
+      });
+    }
+  };
+
+  const handleClose = () => {
+    setStep("setup");
+    setQrCode(null);
+    setSecret(null);
+    setFactorId(null);
+    setVerifyCode("");
+    onOpenChange(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
-      {/* Logo */}
-      <img src="/logo.png" alt="Holarc Health" className="h-10 mb-6" />
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-primary" />
+            Two-Factor Authentication
+          </DialogTitle>
+          <DialogDescription>
+            {step === "setup" && "Scan the QR code with your authenticator app"}
+            {step === "verify" && "Enter the code from your authenticator app"}
+            {step === "success" && "2FA has been successfully enabled"}
+          </DialogDescription>
+        </DialogHeader>
 
-      {/* Step indicator */}
-      <p className="text-xs text-teal-700 font-semibold tracking-wide uppercase mb-1">
-        Account security · One-time setup
-      </p>
-
-      <h1 className="text-2xl font-semibold text-gray-900 mb-1 text-center">Set up Two-Factor Authentication</h1>
-      <p className="text-sm text-gray-500 mb-8 text-center max-w-sm">
-        This account holds sensitive health information. 2FA is required for every user — please enrol an authenticator
-        app to continue.
-      </p>
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 w-full max-w-md space-y-6">
-        {/* Step 1: Install app */}
-        <div className="bg-gray-50 rounded-xl p-4">
-          <p className="text-sm font-semibold text-gray-800 mb-1">Don't have an authenticator app yet?</p>
-          <p className="text-xs text-gray-500 mb-3">
-            {isMobile ? "Tap" : "Click"} below to install one, then come back here to scan the code.
-          </p>
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <a
-              href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
-            >
-              Google Auth
-            </a>
-            <a
-              href="https://authy.com/download/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
-            >
-              Authy
-            </a>
-            <a
-              href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
-            >
-              Microsoft
-            </a>
+        {loading && step === "setup" ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        </div>
+        ) : step === "setup" ? (
+          <div className="space-y-4">
+            {qrCode && (
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-white p-4 rounded-lg">
+                  <img src={qrCode} alt="QR Code" className="w-48 h-48" />
+                </div>
+                <p className="text-sm text-muted-foreground text-center">
+                  Scan this QR code with Google Authenticator, Authy, or any TOTP app
+                </p>
+              </div>
+            )}
 
-        {/* QR Code */}
-        <div className="flex flex-col items-center gap-2">
-          <img
-            src={qrCodeUrl}
-            alt="Scan this QR code with your authenticator app to set up two-factor authentication. Use the setup key below if scanning is not possible."
-            className="w-44 h-44 rounded-lg border border-gray-100"
-          />
-          <p className="text-xs text-gray-400 text-center">
-            Scan with Google Authenticator, Authy, Microsoft Authenticator, or any TOTP app.
-          </p>
-        </div>
+            {secret && (
+              <div className="space-y-2">
+                <Label className="text-xs text-muted-foreground">
+                  Can't scan? Enter this code manually:
+                </Label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all">
+                    {secret}
+                  </code>
+                  <Button variant="outline" size="icon" onClick={copySecret}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
 
-        {/* Manual setup key */}
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1.5">Setup key (for manual entry)</label>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-mono text-sm tracking-wider text-gray-800 select-all overflow-hidden">
-              {secretVisible ? secret : "•".repeat(secret.length)}
+            <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg">
+              <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-warning-foreground">
+                Save this secret key in a safe place. You'll need it if you lose access to your authenticator app.
+              </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setSecretVisible((v) => !v)}
-              className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors"
-              aria-label={secretVisible ? "Hide secret key" : "Reveal secret key"}
-            >
-              {secretVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors"
-              aria-label="Copy secret key"
-            >
-              {copied ? <Check className="w-4 h-4 text-teal-600" /> : <Copy className="w-4 h-4" />}
-            </button>
+
+            <Button onClick={() => setStep("verify")} className="w-full">
+              Continue
+            </Button>
           </div>
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mt-2">
-            Save this key somewhere safe. You'll need it if you lose access to your authenticator app.
-          </p>
-        </div>
+        ) : step === "verify" ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="verifyCode">Verification Code</Label>
+              <Input
+                id="verifyCode"
+                type="text"
+                placeholder="000000"
+                value={verifyCode}
+                onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                className="text-center text-2xl tracking-widest font-mono"
+                maxLength={6}
+              />
+              <p className="text-xs text-muted-foreground text-center">
+                Enter the 6-digit code from your authenticator app
+              </p>
+            </div>
 
-        {/* Verify form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label htmlFor="totp-code" className="block text-xs font-medium text-gray-600 mb-1.5">
-              Enter the 6-digit code from your app
-            </label>
-            <input
-              id="totp-code"
-              type="text"
-              inputMode="numeric"
-              pattern="\d{6}"
-              maxLength={6}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="000000"
-              className="w-full text-center tracking-[0.5em] text-lg font-mono border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              autoComplete="one-time-code"
-            />
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setStep("setup")} className="flex-1">
+                Back
+              </Button>
+              <Button onClick={verifyMFA} disabled={loading || verifyCode.length !== 6} className="flex-1">
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Verify
+              </Button>
+            </div>
           </div>
-
-          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={code.length !== 6 || loading}
-            className="w-full py-3 rounded-lg bg-teal-700 text-white font-medium hover:bg-teal-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? "Verifying…" : "Verify & enable 2FA"}
-          </button>
-        </form>
-
-        {/* Support + sign out */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-sm">
-          <a href="mailto:support@holarchealth.com" className="text-teal-700 hover:underline">
-            Need help? Contact support
-          </a>
-          <button
-            type="button"
-            onClick={onSignOut}
-            className="flex items-center gap-1.5 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign out
-          </button>
-        </div>
-      </div>
-    </div>
+        ) : (
+          <div className="text-center py-4">
+            <div className="flex justify-center mb-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle className="h-8 w-8 text-primary" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">2FA Enabled</h3>
+            <p className="text-muted-foreground mb-4">
+              Your account is now protected with two-factor authentication
+            </p>
+            <Button onClick={handleClose} className="w-full">
+              Done
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
