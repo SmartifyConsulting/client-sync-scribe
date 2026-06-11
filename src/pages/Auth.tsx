@@ -913,9 +913,13 @@ export default function Auth() {
                 >
                   {useOtp ? "Sign in with password instead" : "Email me a sign-in code instead"}
                 </button>
-                <p className="block w-full text-xs text-muted-foreground">
-                  Sign-ups are currently invite-only. Please contact an administrator for access.
-                </p>
+                <button
+                  type="button"
+                  onClick={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }}
+                  className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline"
+                >
+                  Don't have an account? Sign up
+                </button>
               </div>
               <DevErLoginButton />
             </div>
