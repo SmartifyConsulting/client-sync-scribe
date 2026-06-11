@@ -13,7 +13,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-border bg-card/50 h-[var(--footer-height)] flex items-center">
-      <div className="md:ml-[var(--sidebar-width)]">
+      <div className="md:ml-[var(--sidebar-width)] w-full">
         <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-3">
         <p className="text-center text-xs text-muted-foreground">
           © {currentYear} Holarc Health (Pty) Ltd. All rights reserved.
