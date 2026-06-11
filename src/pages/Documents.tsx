@@ -686,8 +686,15 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             </div>
           </div>
         )}
+        {visibleDocCount < filteredDocuments.length && (
+          <div className="flex justify-center mt-3">
+            <Button variant="outline" onClick={() => setVisibleDocCount((c) => c + DOC_PAGE_SIZE)}>
+              Load more ({visibleDocCount} of {filteredDocuments.length})
+            </Button>
+          </div>
+        )}
         <p className="text-[11px] text-muted-foreground mt-2">
-          Showing {filteredDocuments.length} of {documents.length} documents
+          Showing {Math.min(visibleDocCount, filteredDocuments.length)} of {filteredDocuments.length} documents
         </p>
       </div>
 
