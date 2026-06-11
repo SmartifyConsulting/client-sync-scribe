@@ -732,11 +732,29 @@ export default function Auth() {
               {!useOtp ? (
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
+                    <Label htmlFor="loginId">Email or Phone Number</Label>
+                    <div className="flex gap-2">
+                      {!loginId.includes("@") && <CountrySelector />}
+                      <div className="relative flex-1">
+                        <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="loginId"
+                          type="text"
+                          inputMode={loginId.includes("@") ? "email" : "tel"}
+                          autoComplete="username"
+                          placeholder="you@example.com or 82 123 4567"
+                          value={loginId}
+                          onChange={(e) => setLoginId(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
                     </div>
+                    {!loginId.includes("@") && loginId.trim() && (
+                      <p className="text-[10px] text-muted-foreground">
+                        Will sign in as {normalizePhone(loginId)}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
