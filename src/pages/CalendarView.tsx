@@ -436,14 +436,44 @@ export default function CalendarView() {
       toast({ title: "Read-only", description: "Only the owner can edit this appointment.", variant: "destructive" });
       return;
     }
+
+    // Derive a date string from selectedDate's month + editedEvent.day
+    const dateStr = format(
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), editedEvent.day),
+      "yyyy-MM-dd"
+    );
+    const picked = new Date(`${dateStr}T00:00:00`);
+    if (picked < startOfToday()) {
+      toast({ title: "Invalid date", description: "Cannot schedule appointments in the past", variant: "destructive" });
+      return;
+    }
+
+    const timeValue = timeLabelToValue(editedEvent.time);
+    if (timeValue && editConflicts.has(timeValue)) {
+      toast({
+        title: "Time conflict",
+        description: `This patient already has an appointment at ${editedEvent.time}. Please select a different time.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updates: any = {
+      title: editedEvent.title,
+      type: editedEvent.type,
+      location: editedEvent.location || null,
+      description: editedEvent.notes || null,
+    };
+    if (timeValue) {
+      const startISO = new Date(`${dateStr}T${timeValue}:00`).toISOString();
+      const endISO = new Date(new Date(startISO).getTime() + 30 * 60000).toISOString();
+      updates.start_time = startISO;
+      updates.end_time = endISO;
+    }
+
     const { error } = await supabase
       .from('appointments')
-      .update({
-        title: editedEvent.title,
-        type: editedEvent.type,
-        location: editedEvent.location || null,
-        description: editedEvent.notes || null,
-      })
+      .update(updates)
       .eq('id', editedEvent.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
