@@ -36,6 +36,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SecurityBadges } from "@/components/landing/SecurityBadges";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { InstallAppButton } from "@/components/InstallAppButton";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 
 const patientBenefits = [
   {
@@ -162,6 +163,10 @@ export default function Landing() {
           <div className="absolute top-20 -left-24 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
           <div className="absolute top-40 right-0 h-80 w-80 rounded-full bg-[#E01837]/10 blur-3xl" />
           <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto mb-8">
+          <InstallAppPrompt />
         </div>
 
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 items-center">
