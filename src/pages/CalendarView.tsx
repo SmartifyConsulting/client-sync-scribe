@@ -253,6 +253,97 @@ export default function CalendarView() {
 
   const todayEvents = events.filter((e) => e.day === currentDate.getDate());
 
+  // Convert "10:00 AM" -> "10:00", "2:30 PM" -> "14:30"
+  const timeLabelToValue = (label: string): string => {
+    const m = label.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return "";
+    let h = parseInt(m[1]);
+    const min = m[2];
+    const ampm = m[3].toUpperCase();
+    if (ampm === "PM" && h < 12) h += 12;
+    if (ampm === "AM" && h === 12) h = 0;
+    return `${h.toString().padStart(2, "0")}:${min}`;
+  };
+
+  // Fetch existing appointments for a patient on a date; returns Set of "HH:MM" blocked slots.
+  // Each existing 30-min appointment blocks its own slot + the surrounding 15-min slot.
+  const computeBlocked = (dateStr: string, existing: { start: Date }[], ignoreId?: string): Set<string> => {
+    const blocked = new Set<string>();
+    for (const e of existing) {
+      const d = e.start;
+      const h = d.getHours();
+      const min = d.getMinutes();
+      // Block this slot and any slot whose start falls within [start, start+30min)
+      for (let offset = -15; offset < 30; offset += 15) {
+        const total = h * 60 + min + offset;
+        if (total < 0) continue;
+        const bh = Math.floor(total / 60);
+        const bm = total % 60;
+        blocked.add(`${bh.toString().padStart(2, "0")}:${bm.toString().padStart(2, "0")}`);
+      }
+    }
+    return blocked;
+  };
+
+  // Conflict detection for the create modal
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!newAppointment.patientId || !newAppointment.date) {
+        setConflicts(new Set());
+        return;
+      }
+      const dayStart = new Date(`${newAppointment.date}T00:00:00`).toISOString();
+      const dayEnd = new Date(`${newAppointment.date}T23:59:59`).toISOString();
+      const { data } = await supabase
+        .from("appointments")
+        .select("id, start_time")
+        .eq("patient_id", newAppointment.patientId)
+        .gte("start_time", dayStart)
+        .lte("start_time", dayEnd);
+      if (cancelled) return;
+      const list = (data || []).map((r: any) => ({ start: new Date(r.start_time) }));
+      setConflicts(computeBlocked(newAppointment.date, list));
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [newAppointment.patientId, newAppointment.date]);
+
+  // Conflict detection for the edit modal
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!editedEvent || !editedEvent.patientId) {
+        setEditConflicts(new Set());
+        return;
+      }
+      const dateStr = format(
+        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), editedEvent.day),
+        "yyyy-MM-dd"
+      );
+      const dayStart = new Date(`${dateStr}T00:00:00`).toISOString();
+      const dayEnd = new Date(`${dateStr}T23:59:59`).toISOString();
+      const { data } = await supabase
+        .from("appointments")
+        .select("id, start_time")
+        .eq("patient_id", editedEvent.patientId)
+        .gte("start_time", dayStart)
+        .lte("start_time", dayEnd);
+      if (cancelled) return;
+      const list = (data || [])
+        .filter((r: any) => r.id !== editedEvent.id)
+        .map((r: any) => ({ start: new Date(r.start_time) }));
+      setEditConflicts(computeBlocked(dateStr, list));
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [editedEvent?.patientId, editedEvent?.day, editedEvent?.id, selectedDate]);
+
+
   const handleCreateAppointment = async () => {
     if (!newAppointment.patientId || !newAppointment.date || !newAppointment.time) {
       toast({
