@@ -1,25 +1,27 @@
 ## Goal
 
-The desktop sidebar currently spans the full viewport height (`h-screen`), so its right-edge border runs past the footer's horizontal divider. Make the sidebar end exactly where the footer's top border begins, so the sidebar's bottom edge meets the footer divider in a clean "L" join.
+Collapse the footer to a single horizontal line containing the copyright, legal links, and Contact Support, and shrink the footer's height so it tightly fits that one line. The sidebar (capped at `100vh − var(--footer-height)`) will automatically follow.
 
-## Approach
-
-Expose the footer's height as a CSS variable, then constrain each fixed sidebar to `100vh − footer-height`.
+## Changes
 
 ### 1. `src/components/layout/Footer.tsx`
-- Replace `py-6` with an explicit fixed height (e.g. `h-[var(--footer-height)]`) and define `--footer-height` on `:root` in `src/index.css` (value ≈ `132px` to match current footer content).
-- Keep `border-t` and inner content unchanged.
+Replace the stacked layout (three rows: copyright / legal nav / support) with one flex row:
+
+- Outer `<footer>`: keep `border-t border-border bg-card/50 h-[var(--footer-height)] flex items-center`.
+- Inner container: keep `md:ml-[var(--sidebar-width)] w-full`.
+- Inside: one `<div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">` containing, in order, separated by `·` dots:
+  1. `© {year} Holarc Health (Pty) Ltd. All rights reserved.`
+  2. Terms and Conditions
+  3. Privacy & Consent
+  4. Compliance
+  5. Legal Center
+  6. Contact Support (with the `LifeBuoy` icon, mailto link, primary hover)
+
+Remove the old `space-y-3`, the separate nav block, and the separate Contact Support block.
 
 ### 2. `src/index.css`
-- Add `:root { --footer-height: 132px; }` so the value is available globally.
+Reduce `--footer-height` from `132px` to `44px` so the bar tightly fits one line of `text-xs` content with comfortable vertical padding. This also raises the sidebar's bottom edge to meet the new, thinner footer divider.
 
-### 3. Sidebar height cap — apply the same change to all three fixed sidebars:
-- `src/components/layout/Sidebar.tsx` — change `h-screen` → `h-[calc(100vh-var(--footer-height))]`.
-- `src/components/layout/ProviderSidebar.tsx` — same change.
-- `src/components/layout/PatientSidebar.tsx` (if present) — same change.
-
-This keeps the sidebar `fixed left-0 top-0`, but its bottom edge now lines up with the footer's top border across `AppLayout`, `PatientAppLayout`, and `ProviderAppLayout`. Mobile is unaffected (sidebar is hidden under `md`).
-
-### Out of scope
-- No changes to footer content, links, or styling beyond height.
-- No changes to tabs, main content padding, or bottom nav.
+## Out of scope
+- No changes to mobile (footer is hidden under `md`; mobile support link stays as-is).
+- No changes to sidebar markup — it already reads `--footer-height`.
