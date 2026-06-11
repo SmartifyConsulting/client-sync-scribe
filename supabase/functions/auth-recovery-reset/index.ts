@@ -71,45 +71,41 @@ Deno.serve(async (req) => {
   const userAgent = req.headers.get("user-agent") || "";
 
   try {
-    const { identifier, code, newPassword } = await req.json();
+    const { identifier, code, newPassword, code_type } = await req.json();
     if (typeof identifier !== "string" || typeof code !== "string" || typeof newPassword !== "string") {
       return json({ ok: false, error: "Missing fields" }, 400);
     }
-    const cleanCode = code.replace(/\D/g, "");
-    if (cleanCode.length !== 6) return json({ ok: false, error: "Enter the 6-digit code" }, 400);
+    const codeType: "totp" | "backup" = code_type === "backup" ? "backup" : "totp";
+
+    const cleanCode =
+      codeType === "totp"
+        ? code.replace(/\D/g, "")
+        : code.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (codeType === "totp" && cleanCode.length !== 6) {
+      return json({ ok: false, error: "Enter the 6-digit code" }, 400);
+    }
+    if (codeType === "backup" && cleanCode.length !== 8) {
+      return json({ ok: false, error: "Backup codes are 8 characters (letters + numbers)" }, 400);
+    }
     const pwErr = validPassword(newPassword);
     if (pwErr) return json({ ok: false, error: pwErr }, 400);
 
     const email = normalizeIdentifier(identifier);
     const idHash = await sha256(email);
-    const codeHash = await sha256(`${email}:${cleanCode}`);
+    const codeHash = await sha256(`${email}:${codeType}:${cleanCode}`);
 
     if (await rateLimited(ip, idHash)) {
       return json({ ok: false, error: "Too many attempts. Please wait 15 minutes." }, 429);
     }
 
-    // Look up user + verified TOTP factor secret. Generic error if either missing.
     const userId = await findUserIdByEmail(email);
-    let totpSecret: string | null = null;
-    if (userId) {
-      const { data: factors } = await admin
-        .schema("auth" as any)
-        .from("mfa_factors")
-        .select("secret,status,factor_type")
-        .eq("user_id", userId)
-        .eq("factor_type", "totp")
-        .eq("status", "verified")
-        .limit(1);
-      const factor = (factors as Array<{ secret: string }> | null)?.[0];
-      totpSecret = factor?.secret ?? null;
-    }
 
     const recordFailure = async () => {
       await admin.from("auth_recovery_attempts").insert({ ip, identifier_hash: idHash, code_hash: codeHash, success: false });
       await admin.from("auth_recovery_audit").insert({ user_id: userId, ip, user_agent: userAgent, success: false });
     };
 
-    if (!userId || !totpSecret) {
+    if (!userId) {
       await recordFailure();
       return json({ ok: false, error: "That didn't match. Check your code and try again." }, 400);
     }
@@ -127,21 +123,52 @@ Deno.serve(async (req) => {
       return json({ ok: false, error: "Code already used. Wait for the next one and try again." }, 400);
     }
 
-    // Verify TOTP with ±1 step window for clock skew.
-    const totp = new OTPAuth.TOTP({
-      issuer: "Holarc Health",
-      algorithm: "SHA1",
-      digits: 6,
-      period: 30,
-      secret: OTPAuth.Secret.fromBase32(totpSecret),
-    });
-    const delta = totp.validate({ token: cleanCode, window: 1 });
-    if (delta === null) {
+    let verified = false;
+
+    if (codeType === "totp") {
+      const { data: factors } = await admin
+        .schema("auth" as any)
+        .from("mfa_factors")
+        .select("secret,status,factor_type")
+        .eq("user_id", userId)
+        .eq("factor_type", "totp")
+        .eq("status", "verified")
+        .limit(1);
+      const factor = (factors as Array<{ secret: string }> | null)?.[0];
+      const totpSecret = factor?.secret ?? null;
+      if (!totpSecret) {
+        await recordFailure();
+        return json({ ok: false, error: "That didn't match. Check your code and try again." }, 400);
+      }
+      const totp = new OTPAuth.TOTP({
+        issuer: "Holarc Health",
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        secret: OTPAuth.Secret.fromBase32(totpSecret),
+      });
+      const delta = totp.validate({ token: cleanCode, window: 1 });
+      verified = delta !== null;
+    } else {
+      // Backup code path: atomic mark-as-used so a code can't be used twice concurrently.
+      const backupHash = await sha256(cleanCode);
+      const { data: consumed } = await admin
+        .from("mfa_backup_codes")
+        .update({ used_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .eq("code_hash", backupHash)
+        .is("used_at", null)
+        .select("id")
+        .maybeSingle();
+      verified = !!consumed;
+    }
+
+    if (!verified) {
       await recordFailure();
       return json({ ok: false, error: "That didn't match. Check your code and try again." }, 400);
     }
 
-    // TOTP verified — update password.
+    // Verified — update password.
     const { error: updErr } = await admin.auth.admin.updateUserById(userId, { password: newPassword });
     if (updErr) {
       await recordFailure();
@@ -151,6 +178,7 @@ Deno.serve(async (req) => {
     await admin.from("auth_recovery_attempts").insert({ ip, identifier_hash: idHash, code_hash: codeHash, success: true });
     await admin.from("auth_recovery_audit").insert({ user_id: userId, ip, user_agent: userAgent, success: true });
     return json({ ok: true });
+
   } catch (e) {
     return json({ ok: false, error: (e as Error).message }, 500);
   }
