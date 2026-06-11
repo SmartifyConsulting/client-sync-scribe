@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, X, Shield, Trash2, Users } from "lucide-react";
+import { Loader2, Pencil, X, Shield, Trash2, Users, KeyRound, Copy, Check } from "lucide-react";
 import { useAutosave } from "@/features/admin/hooks/useAutosave";
 import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import {
@@ -83,6 +83,11 @@ export default function UsersTab({ kind }: UsersTabProps) {
   const [deleting, setDeleting] = useState(false);
   const [pendingRoleChange, setPendingRoleChange] = useState<{ user: UserRecord; newRole: RawRole } | null>(null);
   const [roleSaving, setRoleSaving] = useState<string | null>(null);
+  const [pendingMfaReset, setPendingMfaReset] = useState<UserRecord | null>(null);
+  const [mfaResetting, setMfaResetting] = useState(false);
+  const [mfaResetResult, setMfaResetResult] = useState<{ email: string; tempPassword: string } | null>(null);
+  const [copiedTemp, setCopiedTemp] = useState(false);
+
 
   useEffect(() => {
     if (isAdmin) fetchUsers();
@@ -299,6 +304,37 @@ export default function UsersTab({ kind }: UsersTabProps) {
     }
   };
 
+  const resetUserAccess = async () => {
+    if (!pendingMfaReset) return;
+    setMfaResetting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-reset-mfa", {
+        body: { user_id: pendingMfaReset.user_id },
+      });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "Reset failed");
+      setMfaResetResult({ email: pendingMfaReset.email, tempPassword: data.temp_password });
+      setPendingMfaReset(null);
+      toast({ title: "Access reset", description: `Share the temporary password with ${pendingMfaReset.email} securely.` });
+    } catch (e: any) {
+      toast({ title: "Reset failed", description: e.message, variant: "destructive" });
+    } finally {
+      setMfaResetting(false);
+    }
+  };
+
+  const copyTempPassword = async () => {
+    if (!mfaResetResult) return;
+    try {
+      await navigator.clipboard.writeText(mfaResetResult.tempPassword);
+      setCopiedTemp(true);
+      setTimeout(() => setCopiedTemp(false), 1800);
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
+    }
+  };
+
+
   const showCompany = kind === "doctor";
   const showAddress = kind === "emergency";
   const noun =
@@ -403,14 +439,18 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     </div>
                   ) : (
                     <div className="flex justify-end gap-0.5">
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-[hsl(var(--admin-text-primary))]" onClick={() => startEditing(u)}>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-[hsl(var(--admin-text-primary))]" onClick={() => startEditing(u)} title="Edit user">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-destructive" onClick={() => setPendingDelete(u)}>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-primary" onClick={() => setPendingMfaReset(u)} title="Reset access (clear authenticator + set temporary password)">
+                        <KeyRound className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-destructive" onClick={() => setPendingDelete(u)} title="Delete user">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   )}
+
                 </TableCell>
               </TableRow>
             );
@@ -510,6 +550,69 @@ export default function UsersTab({ kind }: UsersTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!pendingMfaReset} onOpenChange={(o) => !mfaResetting && !o && setPendingMfaReset(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset access for {pendingMfaReset?.email}?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>This will:</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>Unenrol the user's authenticator app</li>
+                  <li>Wipe their backup codes</li>
+                  <li>Set a temporary password that you'll share with them</li>
+                </ol>
+                <p>
+                  They'll set a new password and enrol a new authenticator at next sign-in.
+                  <strong> Only do this after verifying their identity</strong> (ID document,
+                  video call, or known clinical details).
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={mfaResetting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={resetUserAccess} disabled={mfaResetting}>
+              {mfaResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset access"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!mfaResetResult} onOpenChange={(o) => !o && setMfaResetResult(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Temporary password generated</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm">
+                <p>
+                  Share this with <strong>{mfaResetResult?.email}</strong> through a secure
+                  channel (in person, encrypted message). They must sign in with it and choose
+                  a new password.
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-muted px-3 py-2 rounded font-mono text-base select-all">
+                    {mfaResetResult?.tempPassword}
+                  </code>
+                  <Button size="icon" variant="outline" onClick={copyTempPassword} title="Copy">
+                    {copiedTemp ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This password won't be shown again. Their authenticator and backup codes have
+                  been cleared — they'll be prompted to set up a new authenticator after they
+                  sign in.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setMfaResetResult(null)}>Done</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
+
   );
 }
