@@ -1,41 +1,71 @@
-# Plan: Revert navigation + child-screen tabs to pre-design-system styling
-
-## Scope
-Undo only the navigation and tab-styling parts of the 17:30 design-system overhaul (messages #3055–#3058). Leave the token retune (colors, radius, typography base) and the non-nav primitives (Button, Input, Dialog, Card, etc.) alone so the rest of the app keeps its current look.
-
-## Files to revert
-
-1. **`src/components/ui/tabs.tsx`** — restore the previous filled/pill TabsList + bold active TabsTrigger styling (the one the project's Tab Styling memory describes: "Teal `bg-primary` TabsList, high-contrast active triggers"). The current underline-only variant (`border-b-[3px] border-transparent` / `data-[state=active]:border-primary`) is the new one introduced in #3058 and is what's causing tabs across Admin, DoctorDocumentsPage, ProvidersScreen, patient pages etc. to look flat and washed-out.
-
-2. **`src/components/layout/Sidebar.tsx`** (doctor) and **`src/components/layout/PatientSidebar.tsx`** + **`src/components/layout/ProviderSidebar.tsx`** — restore the prior active-item styling (filled teal pill / bold text) and prior hover state. The 17:36 batch changed active items to `text-primary bg-accent` with `bg-muted` hover, which made the active route harder to read.
-
-3. **`src/components/layout/BottomNav.tsx`** — restore prior active-item color/weight if changed in the batch.
-
-4. **`src/components/layout/MobileHeader.tsx`** — only if its nav-related classes were touched in the batch (likely just background + border tweaks; revert those).
-
-## What stays
-- `src/index.css` token values (teal `#2DB0A6`, border `#E0E0E0`, radii, typography base) — these are app-wide and reverting them would undo unrelated parts of the design refresh.
-- Button, Input, Textarea, Select, Dialog, Label, Card, Popover, DropdownMenu primitives — out of scope for "navigation + tabs".
-- Page-level pages (Admin.tsx, DoctorDocumentsPage.tsx, ProvidersScreen.tsx, etc.) — they already pass the old `bg-primary` / `data-[state=active]:bg-white` classes; once `tabs.tsx` is reverted those classes will render correctly again with no per-page edits.
-
-## Method
-For each file above I'll fetch the git history of that file (via `git log -p` in build mode) to find the commit immediately before the 17:30 batch, and restore its `cn(...)` class strings verbatim — no guessing, no re-design. If git doesn't expose that timestamp, I'll reconstruct from the chat-recorded `old_content`/`new_content` of message #3058 (which captured the exact diffs).
-
-## Verification
-- Visit `/admin`, `/documents`, `/holarchelp/provider/hospital/providers`, `/patient/details`, `/settings` at 390 px and 1296 px and confirm tabs match the prior filled-pill look.
-- Confirm the active sidebar item is again clearly highlighted in both Doctor and Patient layouts.
-- No console/build errors.
+## Goals
+1. Make the horizontal divider above the footer / sidebar account section run unbroken across the full viewport width (currently the sidebar's account-section top border and the footer's top border render at different y positions and don't visually connect).
+2. Modernize the "selected tab" look on the inner/child screens that use Tabs (e.g. `ProvidersScreen`, hospital `IncomingAmbulancesScreen`, doctor `Invoices`, `Sessions`, `Patients`, `PatientCalendar`, `TodoList`, etc.) so the active state reads as polished and current, not a flat teal block.
 
 ## Out of scope
-- Reverting design tokens or non-nav primitives.
-- Touching the 2FA flow, provider PII migration, install button, or any other non-styling work from today.
-- Any new styling — strictly a like-for-like revert of nav + tab classes.
+- Sidebar nav active-item styling (untouched).
+- Design tokens, layout shell paddings, footer content/links.
+- Any data, auth, or backend behaviour.
 
-## Safer alternative
-If you'd rather not risk a partial revert, use the **History** panel to roll back to the message immediately before #3056 — that wipes the entire 17:30 batch in one click and you can then re-apply any non-nav changes you want to keep.
+---
 
-```xml
-<presentation-actions>
-  <presentation-open-history>View History</presentation-open-history>
-</presentation-actions>
+## Part A — Footer divider alignment
+
+### Problem
+In `src/components/layout/AppLayout.tsx`:
+```tsx
+<div className="hidden md:block md:ml-[var(--sidebar-width)]">
+  <Footer />
+</div>
 ```
+`Footer` renders `<footer class="border-t border-border ...">`. Because the wrapper is offset by `ml-[var(--sidebar-width)]`, the border only spans the content column. Meanwhile `Sidebar` renders its account section with its own `border-t border-sidebar-border` at a different y-coordinate, so the two top-borders never line up.
+
+### Fix
+1. In `AppLayout.tsx`, drop the `md:ml-[var(--sidebar-width)]` wrapper so `<Footer />` is rendered full-width.
+2. In `src/components/layout/Footer.tsx`, keep the `border-t border-border` on the `<footer>` (now spans full viewport) and shift the inner content container so legal links still sit in the content column:
+   ```tsx
+   <footer className="border-t border-border bg-card/50 py-6">
+     <div className="md:ml-[var(--sidebar-width)]">
+       <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-3"> ... </div>
+     </div>
+   </footer>
+   ```
+3. In `Sidebar.tsx`, remove the `border-t border-sidebar-border` on the account section wrapper (line ~176) so the only horizontal rule on the bottom strip is the footer's `border-t`, which now runs unbroken from x=0 to x=100vw across both sidebar and content.
+4. Apply the equivalent change to `PatientAppLayout` / `ProviderSidebar`-using layouts if they have the same split (will confirm during build by reading those two files; if they already render `<Footer />` full-width, no change needed).
+
+Result: one continuous `1px` divider across the whole screen, with the sidebar's avatar/Settings/Sign Out tucked just above it.
+
+---
+
+## Part B — Modernize child-screen tab styling
+
+### Approach
+Rather than touch every page individually, modernize the **default** `TabsList` / `TabsTrigger` in `src/components/ui/tabs.tsx` and then strip the per-page `bg-primary text-primary-foreground` / `data-[state=active]:bg-background data-[state=active]:text-foreground` overrides on the child screens so they inherit the new look.
+
+### New default in `tabs.tsx`
+- `TabsList`: `inline-flex h-10 items-center gap-1 rounded-full bg-muted/60 p-1 text-muted-foreground border border-border/60 backdrop-blur-sm` — pill container, subtle border, soft surface.
+- `TabsTrigger`: `inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 text-muted-foreground hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-[0_1px_2px_rgba(0,0,0,0.06),0_2px_6px_rgba(45,176,166,0.18)] data-[state=active]:ring-1 data-[state=active]:ring-primary/20` — rounded pill, primary-tinted text + soft elevated shadow when active.
+
+This gives a "macOS / Linear"-style segmented control with a clear, modern selected state in teal, while staying neutral when inactive.
+
+### Per-page cleanup (remove obsolete overrides only)
+For each of these files, delete the `className="bg-primary text-primary-foreground"` on `TabsList` and the `className="data-[state=active]:bg-background data-[state=active]:text-foreground"` on each `TabsTrigger`, so the new default applies:
+- `src/modules/holarchelp/pages/provider/hospital/ProvidersScreen.tsx`
+- `src/modules/holarchelp/pages/provider/hospital/IncomingAmbulancesScreen.tsx`
+- `src/pages/doctor/Invoices.tsx`
+- `src/pages/Sessions.tsx`
+- `src/pages/SessionDetail.tsx`
+- `src/pages/Patients.tsx`
+- `src/pages/TodoList.tsx`
+- `src/pages/CalendarView.tsx`
+- `src/pages/patient/PatientCalendar.tsx`
+
+Admin pages keep their underline variant (they don't use these overrides — they go through `adminTabsListClass` in `src/pages/admin/_shared/AdminTabs.tsx`, which I won't touch).
+
+### Verification
+- Visit `/provider/hospital/providers`, `/sessions`, `/patients`, `/calendar`, `/todos`, `/patient/calendar`, `/doctor/invoices` at 1296×1007 and 390×844; confirm:
+  - The selected tab is a soft white pill with teal text and a gentle drop-shadow, not a hard teal block.
+  - Inactive tabs are muted gray and lift to foreground on hover.
+  - The footer divider runs unbroken across the sidebar + content area on every page.
+- Spot-check `/admin` to confirm the admin underline tabs are unchanged.
+- No console / build errors.
