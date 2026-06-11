@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, X, Shield, Trash2, Users } from "lucide-react";
+import { Loader2, Pencil, X, Shield, Trash2, Users, KeyRound, Copy, Check } from "lucide-react";
 import { useAutosave } from "@/features/admin/hooks/useAutosave";
 import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import {
@@ -83,6 +83,11 @@ export default function UsersTab({ kind }: UsersTabProps) {
   const [deleting, setDeleting] = useState(false);
   const [pendingRoleChange, setPendingRoleChange] = useState<{ user: UserRecord; newRole: RawRole } | null>(null);
   const [roleSaving, setRoleSaving] = useState<string | null>(null);
+  const [pendingMfaReset, setPendingMfaReset] = useState<UserRecord | null>(null);
+  const [mfaResetting, setMfaResetting] = useState(false);
+  const [mfaResetResult, setMfaResetResult] = useState<{ email: string; tempPassword: string } | null>(null);
+  const [copiedTemp, setCopiedTemp] = useState(false);
+
 
   useEffect(() => {
     if (isAdmin) fetchUsers();
@@ -403,14 +408,18 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     </div>
                   ) : (
                     <div className="flex justify-end gap-0.5">
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-[hsl(var(--admin-text-primary))]" onClick={() => startEditing(u)}>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-[hsl(var(--admin-text-primary))]" onClick={() => startEditing(u)} title="Edit user">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-destructive" onClick={() => setPendingDelete(u)}>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-primary" onClick={() => setPendingMfaReset(u)} title="Reset access (clear authenticator + set temporary password)">
+                        <KeyRound className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-destructive" onClick={() => setPendingDelete(u)} title="Delete user">
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   )}
+
                 </TableCell>
               </TableRow>
             );
