@@ -927,6 +927,13 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           })}
         </ul>
       )}
+      {visibleDocCount < filteredDocs.length && (
+        <div className="flex justify-center mt-3">
+          <Button variant="outline" onClick={() => setVisibleDocCount((c) => c + DOC_PAGE_SIZE)}>
+            Load more ({visibleDocCount} of {filteredDocs.length})
+          </Button>
+        </div>
+      )}
 
       {/* AI Analysis Dialog */}
       <Dialog open={!!analysisDialog} onOpenChange={(open) => !open && setAnalysisDialog(null)}>
