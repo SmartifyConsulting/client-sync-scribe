@@ -3753,6 +3753,8 @@ export type Database = {
           signature_url: string | null
           specialty: string | null
           status: string | null
+          tour_completed_at: string | null
+          tour_skipped_at: string | null
           updated_at: string
         }
         Insert: {
@@ -3790,6 +3792,8 @@ export type Database = {
           signature_url?: string | null
           specialty?: string | null
           status?: string | null
+          tour_completed_at?: string | null
+          tour_skipped_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -3827,6 +3831,8 @@ export type Database = {
           signature_url?: string | null
           specialty?: string | null
           status?: string | null
+          tour_completed_at?: string | null
+          tour_skipped_at?: string | null
           updated_at?: string
         }
         Relationships: []
