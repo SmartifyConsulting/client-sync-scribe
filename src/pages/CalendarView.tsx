@@ -630,7 +630,7 @@ export default function CalendarView() {
                 Book
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle>
                 {scope === 'practice' ? 'Schedule on Practice Calendar' : 'Schedule New Appointment'}
@@ -648,10 +648,10 @@ export default function CalendarView() {
                   value={newAppointment.patientId}
                   onValueChange={(value) => setNewAppointment({ ...newAppointment, patientId: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="min-h-11">
                     <SelectValue placeholder="Select a patient" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100] bg-popover max-h-[60vh]">
                     {[...patients]
                       .sort((a, b) => {
                         const surnameA = a.name.split(' ').slice(-1)[0] || '';
@@ -672,23 +672,34 @@ export default function CalendarView() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Date *</Label>
-                  <Popover>
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !newAppointment.date && "text-muted-foreground")}>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal min-h-11", !newAppointment.date && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newAppointment.date ? format(new Date(newAppointment.date + 'T00:00:00'), "PPP") : <span>Pick a date</span>}
+                        {newAppointment.date ? format(new Date(newAppointment.date + 'T00:00:00'), "MM/dd/yyyy") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-[100] bg-popover" align="start">
                       <Calendar
                         mode="single"
                         selected={newAppointment.date ? new Date(newAppointment.date + 'T00:00:00') : undefined}
                         onSelect={(date) => {
-                          if (date) setNewAppointment({ ...newAppointment, date: format(date, 'yyyy-MM-dd') });
+                          if (!date) return;
+                          if (date < startOfToday()) {
+                            toast({
+                              title: "Invalid date",
+                              description: "Cannot schedule appointments in the past",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          setNewAppointment({ ...newAppointment, date: format(date, 'yyyy-MM-dd') });
+                          setDatePickerOpen(false);
                         }}
+                        disabled={{ before: startOfToday() }}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />
@@ -697,14 +708,23 @@ export default function CalendarView() {
                 </div>
                 <div>
                   <Label>Time *</Label>
-                  <Select value={newAppointment.time} onValueChange={(value) => setNewAppointment({ ...newAppointment, time: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select time" />
+                  <Select
+                    value={newAppointment.time}
+                    onValueChange={(value) => setNewAppointment({ ...newAppointment, time: value })}
+                    disabled={!newAppointment.date}
+                  >
+                    <SelectTrigger className="min-h-11">
+                      <SelectValue placeholder={newAppointment.date ? "Select time" : "Pick a date first"} />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[200px]">
-                      {TIME_SLOTS.map((slot) => (
-                        <SelectItem key={slot} value={slot}>{formatTimeSlot(slot)}</SelectItem>
-                      ))}
+                    <SelectContent className="z-[100] bg-popover max-h-[60vh]">
+                      {TIME_SLOTS.map((slot) => {
+                        const isBlocked = conflicts.has(slot);
+                        return (
+                          <SelectItem key={slot} value={slot} disabled={isBlocked}>
+                            {formatTimeSlot(slot)}{isBlocked ? " — booked" : ""}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -715,10 +735,10 @@ export default function CalendarView() {
                   value={newAppointment.type}
                   onValueChange={(value) => setNewAppointment({ ...newAppointment, type: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="min-h-11">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100] bg-popover">
                     {serviceColors.length > 0 ? (
                       serviceColors.map((sc) => (
                         <SelectItem key={sc.service_name} value={sc.service_name}>{sc.service_name}</SelectItem>
@@ -741,7 +761,7 @@ export default function CalendarView() {
                   onChange={(e) => setNewAppointment({ ...newAppointment, notes: e.target.value })}
                 />
               </div>
-              <Button onClick={handleCreateAppointment} className="w-full">
+              <Button onClick={handleCreateAppointment} className="w-full min-h-11">
                 Create Appointment
               </Button>
             </div>
