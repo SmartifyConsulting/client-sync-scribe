@@ -831,7 +831,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         </Card>
       ) : (
         <ul className="divide-y rounded-lg border bg-card">
-          {filteredDocs.map((doc) => {
+          {pagedDocs.map((doc) => {
             const config = DOC_TYPE_CONFIG[doc.type];
             const IconComponent = config.icon;
             const isAnalyzing = analyzingDocId === doc.id;
