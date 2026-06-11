@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import holarcLogo from "@/assets/holarc-logo-clear.png";
+import { BackupCodesScreen } from "./BackupCodesScreen";
+
 
 const isMobileUA = () =>
   typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent);
@@ -26,6 +28,16 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
   const [code, setCode] = useState("");
   const [copied, setCopied] = useState(false);
   const [secretVisible, setSecretVisible] = useState(false);
+  const [showBackupCodes, setShowBackupCodes] = useState(false);
+  const [isPhoneUser, setIsPhoneUser] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const email = data.user?.email || "";
+      setIsPhoneUser(email.endsWith("@phone.holarc.local"));
+    });
+  }, []);
+
 
   useEffect(() => {
     (async () => {
