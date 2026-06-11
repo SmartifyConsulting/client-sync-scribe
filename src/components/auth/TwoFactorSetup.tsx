@@ -30,6 +30,8 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
   const [factorId, setFactorId] = useState<string | null>(null);
   const [verifyCode, setVerifyCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [secretVisible, setSecretVisible] = useState(false);
+  const isMobile = typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (open && step === "setup") {
