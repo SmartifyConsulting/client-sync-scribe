@@ -161,11 +161,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <SosAlertListener />
+        <div id="main-content">
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/signup" element={<Auth />} />
+          <Route path="/onboarding" element={<Auth />} />
           <Route path="/provider-signup" element={<ProviderSignup />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/intellectual-property" element={<Navigate to="/terms-and-conditions#intellectual-property" replace />} />
@@ -255,6 +265,7 @@ const App = () => (
           
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

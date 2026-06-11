@@ -25,20 +25,31 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
   useEffect(() => {
     (async () => {
       try {
+        // Reuse any existing unverified TOTP factor so the QR/secret stays stable
+        // if the user abandons and returns. Only create a new factor when none exists.
         const { data: factorList } = await supabase.auth.mfa.listFactors();
-        const unverified = (factorList?.all || []).filter((f) => f.status !== "verified");
-        for (const f of unverified) {
-          await supabase.auth.mfa.unenroll({ factorId: f.id });
-        }
-        const { data, error } = await supabase.auth.mfa.enroll({
-          factorType: "totp",
-          friendlyName: "Holarc Authenticator",
-        });
-        if (error) throw error;
-        if (data) {
-          setQrCode(data.totp.qr_code);
-          setSecret(data.totp.secret);
-          setFactorId(data.id);
+        const existingUnverified = (factorList?.all || []).find(
+          (f) => f.factor_type === "totp" && f.status !== "verified"
+        );
+        if (existingUnverified && (existingUnverified as any).totp?.qr_code) {
+          setQrCode((existingUnverified as any).totp.qr_code);
+          setSecret((existingUnverified as any).totp.secret);
+          setFactorId(existingUnverified.id);
+        } else {
+          // listFactors doesn't always return qr_code; if missing, unenroll + re-enroll once.
+          if (existingUnverified) {
+            await supabase.auth.mfa.unenroll({ factorId: existingUnverified.id });
+          }
+          const { data, error } = await supabase.auth.mfa.enroll({
+            factorType: "totp",
+            friendlyName: "Holarc Authenticator",
+          });
+          if (error) throw error;
+          if (data) {
+            setQrCode(data.totp.qr_code);
+            setSecret(data.totp.secret);
+            setFactorId(data.id);
+          }
         }
       } catch (err: any) {
         toast({ title: "Could not start 2FA setup", description: err.message, variant: "destructive" });
@@ -142,7 +153,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                         <div className="bg-white p-3 rounded-lg border border-border">
                           <img
                             src={qrCode}
-                            alt="2FA QR code"
+                            alt="QR code for two-factor authentication setup. Scan with your authenticator app."
                             className="w-[min(80vw,280px)] h-[min(80vw,280px)] sm:w-44 sm:h-44"
                           />
                         </div>
@@ -228,16 +239,24 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
             )}
 
             {!verified && (
-              <button
-                type="button"
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  window.location.href = "/auth";
-                }}
-                className="flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground hover:text-destructive py-2"
-              >
-                <LogOut className="h-3.5 w-3.5" /> Sign out
-              </button>
+              <>
+                <a
+                  href="mailto:support@holarchealth.com"
+                  className="block text-center text-xs text-muted-foreground hover:text-primary py-1"
+                >
+                  Need help? Contact support
+                </a>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = "/auth";
+                  }}
+                  className="flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground hover:text-destructive py-2"
+                >
+                  <LogOut className="h-3.5 w-3.5" /> Sign out
+                </button>
+              </>
             )}
           </div>
         </div>
