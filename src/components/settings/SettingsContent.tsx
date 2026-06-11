@@ -508,7 +508,7 @@ export function SettingsContent() {
         </TabsContent>
       </Tabs>
 
-      <TwoFactorSetup open={show2FASetup} onOpenChange={setShow2FASetup} onSuccess={fetchMfaFactors} />
+      
 
       <Dialog open={showManagePlan} onOpenChange={setShowManagePlan}>
         <DialogContent className="sm:max-w-lg">
