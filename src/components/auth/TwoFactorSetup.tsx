@@ -175,13 +175,20 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
           <div className="space-y-4">
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
               <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <a
                   href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
                   target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
-                  <Download className="h-4 w-4 text-primary" /> Google Authenticator
+                  <Download className="h-4 w-4 text-primary" /> Google Authenticator — Android
+                </a>
+                <a
+                  href="https://apps.apple.com/app/google-authenticator/id388497605"
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                >
+                  <Apple className="h-4 w-4 text-primary" /> Google Authenticator — iPhone
                 </a>
                 <a
                   href="https://authy.com/download/"
@@ -195,7 +202,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                   target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
                 >
-                  <Apple className="h-4 w-4 text-primary" /> Microsoft Authenticator
+                  <Shield className="h-4 w-4 text-primary" /> Microsoft Authenticator
                 </a>
               </div>
             </div>
