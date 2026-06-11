@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone, Download, Apple, CheckCircle2, Check } from "lucide-react";
+import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone, Download, Apple, CheckCircle2, Check, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import holarcLogo from "@/assets/holarc-logo-clear.png";
+
+const isMobileUA = () =>
+  typeof navigator !== "undefined" && /Mobi|Android/i.test(navigator.userAgent);
 
 interface Props {
   onEnrolled: () => void;
