@@ -79,7 +79,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       let assignedAmb: any = null;
       if (i?.assigned_provider_id) {
         const { data: amb } = await supabase
-          .from("holarchelp_ambulance_providers" as any)
+          .from("holarchelp_ambulance_providers_public" as any)
           .select("latitude, longitude")
           .eq("id", i.assigned_provider_id)
           .maybeSingle();
@@ -98,10 +98,8 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         // No assigned ER provider yet — show the nearest available ER provider
         // as a visual hint to the patient. No DB write; dispatch will confirm.
         const { data: ambs } = await supabase
-          .from("holarchelp_ambulance_providers" as any)
+          .from("holarchelp_ambulance_providers_public" as any)
           .select("latitude, longitude, status, subscription_status, accepting_patients")
-          .eq("status", "approved")
-          .eq("subscription_status", "active")
           .eq("accepting_patients", true)
           .not("latitude", "is", null)
           .not("longitude", "is", null);
@@ -121,7 +119,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       // --- Destination hospital --- only if ER provider has chosen one.
       if (i?.destination_hospital_id) {
         const { data: h } = await supabase
-          .from("holarchelp_hospitals" as any)
+          .from("holarchelp_hospitals_public" as any)
           .select("name, latitude, longitude")
           .eq("id", i.destination_hospital_id)
           .maybeSingle();
@@ -187,7 +185,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
           if ("assigned_provider_id" in (n ?? {})) setAssignedProviderId(n.assigned_provider_id ?? null);
           if (n?.destination_hospital_id) {
             const { data: h } = await supabase
-              .from("holarchelp_hospitals" as any)
+              .from("holarchelp_hospitals_public" as any)
               .select("name, latitude, longitude")
               .eq("id", n.destination_hospital_id)
               .maybeSingle();
@@ -210,10 +208,8 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     let cancelled = false;
     (async () => {
       const { data: ambs } = await supabase
-        .from("holarchelp_ambulance_providers" as any)
+        .from("holarchelp_ambulance_providers_public" as any)
         .select("latitude, longitude, status, subscription_status, accepting_patients")
-        .eq("status", "approved")
-        .eq("subscription_status", "active")
         .eq("accepting_patients", true)
         .not("latitude", "is", null)
         .not("longitude", "is", null);

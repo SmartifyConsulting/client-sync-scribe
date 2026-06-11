@@ -76,8 +76,8 @@ export default function HolarcHelpIncidentDetail() {
     const pid = incident.assigned_provider_id;
     (async () => {
       const [{ data: amb }, { data: hosp }, { data: ev }] = await Promise.all([
-        supabase.from("holarchelp_ambulance_providers" as any).select("company_name, latitude, longitude").eq("id", pid).maybeSingle(),
-        supabase.from("holarchelp_hospitals" as any).select("name, latitude, longitude").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_ambulance_providers_public" as any).select("company_name, latitude, longitude").eq("id", pid).maybeSingle(),
+        supabase.from("holarchelp_hospitals_public" as any).select("name, latitude, longitude").eq("id", pid).maybeSingle(),
         supabase.from("holarchelp_incident_events" as any)
           .select("event_type").eq("incident_id", id)
           .in("event_type", ["auto_assigned", "patient_picked", "accepted"])

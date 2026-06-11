@@ -45,7 +45,7 @@ export default function HospitalAffiliations() {
     if (!search.trim()) { setResults([]); return; }
     const t = setTimeout(async () => {
       const { data } = await supabase
-        .from("holarchelp_hospitals")
+        .from("holarchelp_hospitals_public" as any)
         .select("id, name, city, status")
         .ilike("name", `%${search}%`)
         .limit(8);

@@ -82,12 +82,12 @@ export default function HolarcHelpNearby() {
     (async () => {
       setLoadingProviders(true);
       const [{ data: hs }, { data: as_ }] = await Promise.all([
-        supabase.from("holarchelp_hospitals" as any)
+        supabase.from("holarchelp_hospitals_public" as any)
           .select("id, name, latitude, longitude, city, status, ownership")
-          .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
-        supabase.from("holarchelp_ambulance_providers" as any)
+          .not("latitude", "is", null).not("longitude", "is", null),
+        supabase.from("holarchelp_ambulance_providers_public" as any)
           .select("id, company_name, latitude, longitude, city, status, ownership")
-          .eq("status", "approved").not("latitude", "is", null).not("longitude", "is", null),
+          .not("latitude", "is", null).not("longitude", "is", null),
       ]);
       if (cancelled) return;
       const list = [
