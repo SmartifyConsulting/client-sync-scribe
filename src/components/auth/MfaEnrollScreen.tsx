@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone, Download, Apple } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
