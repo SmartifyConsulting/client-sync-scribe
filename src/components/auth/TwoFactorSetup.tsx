@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shield, Loader2, CheckCircle, Copy, AlertTriangle, Check, Download, Apple } from "lucide-react";
+import { Shield, Loader2, CheckCircle, Copy, AlertTriangle, Check, Download, Apple, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
