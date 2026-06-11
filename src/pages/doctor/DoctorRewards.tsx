@@ -212,12 +212,12 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
 
       {/* Tabs — same as patient view */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-primary">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Overview</TabsTrigger>
-          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Milestones</TabsTrigger>
-          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Streaks</TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">History</TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">Redeem</TabsTrigger>
+        <TabsList className="bg-primary flex w-full flex-nowrap overflow-x-auto justify-start">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Overview</TabsTrigger>
+          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Milestones</TabsTrigger>
+          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Streaks</TabsTrigger>
+          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">History</TabsTrigger>
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Redeem</TabsTrigger>
          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
