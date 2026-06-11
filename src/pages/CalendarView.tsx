@@ -508,13 +508,16 @@ export default function CalendarView() {
       return;
     }
     setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
+    setDeleteConfirmOpen(false);
     setIsEventDetailOpen(false);
     setSelectedEvent(null);
     toast({
-      title: "Event Deleted",
+      title: "Appointment deleted",
       description: "The appointment has been removed from your calendar.",
     });
   };
+
+  const requestDeleteEvent = () => setDeleteConfirmOpen(true);
 
   const handleStartSession = () => {
     if (selectedEvent?.patientId) {
