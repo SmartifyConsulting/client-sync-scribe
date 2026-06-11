@@ -23,6 +23,8 @@ import { Footer } from "@/components/layout/Footer";
 import { Progress } from "@/components/ui/progress";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { DevErLoginButton } from "@/components/auth/DevErLoginButton";
+import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { ShieldCheck, KeyRound } from "lucide-react";
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner", "Cardiologist", "Dermatologist", "Endocrinologist",
@@ -767,6 +769,7 @@ export default function Auth() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <PasswordStrength password={password} />
             </div>
             <div className="space-y-2">
               <Label>Mobile Number</Label>
@@ -801,6 +804,18 @@ export default function Auth() {
                 <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
               </button>
               <p className="text-muted-foreground mt-2">Sign In</p>
+            </div>
+            {/* Trust band */}
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+                <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+                <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
+              </span>
             </div>
             <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               {!useOtp ? (
