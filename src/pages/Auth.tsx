@@ -88,6 +88,8 @@ export default function Auth() {
   
   const [isLogin, setIsLogin] = useState(modeParam !== "signup");
   const [email, setEmail] = useState("");
+  // Unified login field: email OR phone (no '@' => phone)
+  const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -98,6 +100,8 @@ export default function Auth() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpCooldown, setOtpCooldown] = useState(0);
+  // Signup: pick email or phone identifier
+  const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
 
   useEffect(() => {
     if (otpCooldown <= 0) return;
