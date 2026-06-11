@@ -116,8 +116,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
       <div className="flex h-full flex-col">
-        <div className="flex h-20 items-center gap-3 px-6">
-          <img src={holarcLogo} alt="Holarc Health" className="h-12 w-auto object-contain" />
+        <div className="flex h-24 items-center gap-3 px-6">
+          <img src={holarcLogo} alt="Holarc Health" className="h-[82px] w-auto object-contain" />
         </div>
 
         {/* Navigation */}
@@ -148,7 +148,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   data-tour={(item as any).tour}
                   className={() =>
                     cn(
-                      "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",
+                      "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
                       isItemActive
                         ? item.danger
                           ? "bg-red-600 text-white shadow-sm"
@@ -181,7 +181,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 src={profile?.avatar_url || undefined}
                 alt={profile?.full_name || "User"}
               />
-              <AvatarFallback className="bg-primary/20 text-primary text-xs">
+              <AvatarFallback className="bg-primary/20 text-primary text-sm">
                 {profile?.full_name
                   ?.split(" ")
                   .map((n) => n[0])
@@ -193,7 +193,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               {loading ? (
                 <div className="h-3 w-20 rounded bg-muted animate-pulse" />
               ) : (
-                <p className="text-xs font-medium text-primary truncate">{profile?.full_name || "My Profile"}</p>
+                <p className="text-sm font-medium text-primary truncate">{profile?.full_name || "My Profile"}</p>
               )}
             </div>
           </div>
@@ -203,7 +203,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-200",
+                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -219,7 +219,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 await supabase.auth.signOut();
                 window.location.href = "/auth";
               }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
             >
               <LogOut className="h-4 w-4" />
               Sign Out
