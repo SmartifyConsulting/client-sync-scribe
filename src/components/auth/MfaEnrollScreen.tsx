@@ -302,7 +302,7 @@ function AuthenticatorDownload() {
       className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Download className="h-4 w-4 text-primary" />
-      <span>Android — Google Play</span>
+      <span>Google Authenticator — Android</span>
     </a>
   );
   const iosBtn = (
@@ -313,15 +313,39 @@ function AuthenticatorDownload() {
       className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Apple className="h-4 w-4 text-primary" />
-      <span>iPhone — App Store</span>
+      <span>Google Authenticator — iPhone</span>
     </a>
   );
+  const authyBtn = (
+    <a
+      href="https://authy.com/download/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+    >
+      <Download className="h-4 w-4 text-primary" />
+      <span>Authy</span>
+    </a>
+  );
+  const msBtn = (
+    <a
+      href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+    >
+      <Shield className="h-4 w-4 text-primary" />
+      <span>Microsoft Authenticator</span>
+    </a>
+  );
+
+  const verb = isMobileUA() ? "Tap" : "Click";
 
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
       <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
       <p className="text-[11px] text-muted-foreground">
-        Tap below to install Google Authenticator on your phone, then come back here to scan the code.
+        {verb} below to install one of these authenticator apps, then come back here to scan the code.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {platform === "ios" ? (
@@ -335,6 +359,8 @@ function AuthenticatorDownload() {
             {iosBtn}
           </>
         )}
+        {authyBtn}
+        {msBtn}
       </div>
     </div>
   );
