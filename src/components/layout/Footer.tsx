@@ -40,6 +40,7 @@ export function Footer() {
             Contact Support
           </a>
         </div>
+        </div>
       </div>
     </footer>
   );
