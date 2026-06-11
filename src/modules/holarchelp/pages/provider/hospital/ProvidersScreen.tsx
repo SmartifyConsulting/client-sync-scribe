@@ -22,14 +22,14 @@ export default function ProvidersScreen() {
   return (
     <div className="space-y-4">
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="bg-primary text-primary-foreground">
-          <TabsTrigger value="doctors" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+        <TabsList>
+          <TabsTrigger value="doctors">
             Doctors
           </TabsTrigger>
-          <TabsTrigger value="nurses" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+          <TabsTrigger value="nurses">
             Nurses
           </TabsTrigger>
-          <TabsTrigger value="er" className="data-[state=active]:bg-background data-[state=active]:text-foreground">
+          <TabsTrigger value="er">
             ER Providers
           </TabsTrigger>
         </TabsList>
