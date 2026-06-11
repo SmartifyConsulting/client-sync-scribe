@@ -550,6 +550,69 @@ export default function UsersTab({ kind }: UsersTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!pendingMfaReset} onOpenChange={(o) => !mfaResetting && !o && setPendingMfaReset(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset access for {pendingMfaReset?.email}?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>This will:</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>Unenrol the user's authenticator app</li>
+                  <li>Wipe their backup codes</li>
+                  <li>Set a temporary password that you'll share with them</li>
+                </ol>
+                <p>
+                  They'll set a new password and enrol a new authenticator at next sign-in.
+                  <strong> Only do this after verifying their identity</strong> (ID document,
+                  video call, or known clinical details).
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={mfaResetting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={resetUserAccess} disabled={mfaResetting}>
+              {mfaResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset access"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!mfaResetResult} onOpenChange={(o) => !o && setMfaResetResult(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Temporary password generated</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm">
+                <p>
+                  Share this with <strong>{mfaResetResult?.email}</strong> through a secure
+                  channel (in person, encrypted message). They must sign in with it and choose
+                  a new password.
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 bg-muted px-3 py-2 rounded font-mono text-base select-all">
+                    {mfaResetResult?.tempPassword}
+                  </code>
+                  <Button size="icon" variant="outline" onClick={copyTempPassword} title="Copy">
+                    {copiedTemp ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  This password won't be shown again. Their authenticator and backup codes have
+                  been cleared — they'll be prompted to set up a new authenticator after they
+                  sign in.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setMfaResetResult(null)}>Done</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
+
   );
 }
