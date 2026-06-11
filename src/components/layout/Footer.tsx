@@ -13,7 +13,8 @@ export function Footer() {
 
   return (
     <footer className="border-t border-border bg-card/50 py-6">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-3">
+      <div className="md:ml-[var(--sidebar-width)]">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-3">
         <p className="text-center text-xs text-muted-foreground">
           © {currentYear} Holarc Health (Pty) Ltd. All rights reserved.
         </p>
@@ -38,6 +39,7 @@ export function Footer() {
             <LifeBuoy className="h-3.5 w-3.5" />
             Contact Support
           </a>
+        </div>
         </div>
       </div>
     </footer>

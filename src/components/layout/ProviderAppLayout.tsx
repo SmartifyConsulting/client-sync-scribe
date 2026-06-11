@@ -68,8 +68,8 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
         </a>
       </div>
 
-      {/* Footer */}
-      <div className="hidden md:block md:ml-[210px]">
+      {/* Footer (full-width so divider spans the whole viewport) */}
+      <div className="hidden md:block">
         <Footer />
       </div>
     </div>

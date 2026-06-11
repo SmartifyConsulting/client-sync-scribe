@@ -173,7 +173,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </nav>
 
         {/* Bottom Section - Account */}
-        <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
+        <div className="mt-auto bg-sidebar-accent/30">
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
             <Avatar className="h-8 w-8 border-2 border-primary">
               <AvatarImage
