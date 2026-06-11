@@ -28,6 +28,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
@@ -35,7 +45,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePractice } from "@/hooks/usePractice";
 import { Label } from "@/components/ui/label";
-import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn } from "date-fns";
+import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn, startOfToday } from "date-fns";
 
 // Generate 15-min time slots from 7:00 AM to 6:00 PM
 const TIME_SLOTS: string[] = [];
@@ -112,6 +122,11 @@ export default function CalendarView() {
     type: "session",
     notes: "",
   });
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [editDatePickerOpen, setEditDatePickerOpen] = useState(false);
+  const [conflicts, setConflicts] = useState<Set<string>>(new Set());
+  const [editConflicts, setEditConflicts] = useState<Set<string>>(new Set());
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [calendarView, setCalendarViewState] = useState<CalendarViewMode>(
     () => (localStorage.getItem("calendar-view") as CalendarViewMode) || "month"
   );
@@ -238,6 +253,97 @@ export default function CalendarView() {
 
   const todayEvents = events.filter((e) => e.day === currentDate.getDate());
 
+  // Convert "10:00 AM" -> "10:00", "2:30 PM" -> "14:30"
+  const timeLabelToValue = (label: string): string => {
+    const m = label.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return "";
+    let h = parseInt(m[1]);
+    const min = m[2];
+    const ampm = m[3].toUpperCase();
+    if (ampm === "PM" && h < 12) h += 12;
+    if (ampm === "AM" && h === 12) h = 0;
+    return `${h.toString().padStart(2, "0")}:${min}`;
+  };
+
+  // Fetch existing appointments for a patient on a date; returns Set of "HH:MM" blocked slots.
+  // Each existing 30-min appointment blocks its own slot + the surrounding 15-min slot.
+  const computeBlocked = (dateStr: string, existing: { start: Date }[], ignoreId?: string): Set<string> => {
+    const blocked = new Set<string>();
+    for (const e of existing) {
+      const d = e.start;
+      const h = d.getHours();
+      const min = d.getMinutes();
+      // Block this slot and any slot whose start falls within [start, start+30min)
+      for (let offset = -15; offset < 30; offset += 15) {
+        const total = h * 60 + min + offset;
+        if (total < 0) continue;
+        const bh = Math.floor(total / 60);
+        const bm = total % 60;
+        blocked.add(`${bh.toString().padStart(2, "0")}:${bm.toString().padStart(2, "0")}`);
+      }
+    }
+    return blocked;
+  };
+
+  // Conflict detection for the create modal
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!newAppointment.patientId || !newAppointment.date) {
+        setConflicts(new Set());
+        return;
+      }
+      const dayStart = new Date(`${newAppointment.date}T00:00:00`).toISOString();
+      const dayEnd = new Date(`${newAppointment.date}T23:59:59`).toISOString();
+      const { data } = await supabase
+        .from("appointments")
+        .select("id, start_time")
+        .eq("patient_id", newAppointment.patientId)
+        .gte("start_time", dayStart)
+        .lte("start_time", dayEnd);
+      if (cancelled) return;
+      const list = (data || []).map((r: any) => ({ start: new Date(r.start_time) }));
+      setConflicts(computeBlocked(newAppointment.date, list));
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [newAppointment.patientId, newAppointment.date]);
+
+  // Conflict detection for the edit modal
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (!editedEvent || !editedEvent.patientId) {
+        setEditConflicts(new Set());
+        return;
+      }
+      const dateStr = format(
+        new Date(selectedDate.getFullYear(), selectedDate.getMonth(), editedEvent.day),
+        "yyyy-MM-dd"
+      );
+      const dayStart = new Date(`${dateStr}T00:00:00`).toISOString();
+      const dayEnd = new Date(`${dateStr}T23:59:59`).toISOString();
+      const { data } = await supabase
+        .from("appointments")
+        .select("id, start_time")
+        .eq("patient_id", editedEvent.patientId)
+        .gte("start_time", dayStart)
+        .lte("start_time", dayEnd);
+      if (cancelled) return;
+      const list = (data || [])
+        .filter((r: any) => r.id !== editedEvent.id)
+        .map((r: any) => ({ start: new Date(r.start_time) }));
+      setEditConflicts(computeBlocked(dateStr, list));
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [editedEvent?.patientId, editedEvent?.day, editedEvent?.id, selectedDate]);
+
+
   const handleCreateAppointment = async () => {
     if (!newAppointment.patientId || !newAppointment.date || !newAppointment.time) {
       toast({
@@ -249,7 +355,25 @@ export default function CalendarView() {
     }
     if (!user) return;
 
+    // Reject past dates
+    const picked = new Date(`${newAppointment.date}T00:00:00`);
+    if (picked < startOfToday()) {
+      toast({ title: "Invalid date", description: "Cannot schedule appointments in the past", variant: "destructive" });
+      return;
+    }
+
     const selectedPatient = patients.find(p => p.id === newAppointment.patientId);
+
+    // Re-check conflicts at submit time
+    if (conflicts.has(newAppointment.time)) {
+      toast({
+        title: "Time conflict",
+        description: `${selectedPatient?.name || "Patient"} already has an appointment at ${formatTimeSlot(newAppointment.time)}. Please select a different time.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const startISO = new Date(`${newAppointment.date}T${newAppointment.time}:00`).toISOString();
     const endISO = new Date(new Date(startISO).getTime() + 30 * 60000).toISOString();
 
@@ -312,14 +436,44 @@ export default function CalendarView() {
       toast({ title: "Read-only", description: "Only the owner can edit this appointment.", variant: "destructive" });
       return;
     }
+
+    // Derive a date string from selectedDate's month + editedEvent.day
+    const dateStr = format(
+      new Date(selectedDate.getFullYear(), selectedDate.getMonth(), editedEvent.day),
+      "yyyy-MM-dd"
+    );
+    const picked = new Date(`${dateStr}T00:00:00`);
+    if (picked < startOfToday()) {
+      toast({ title: "Invalid date", description: "Cannot schedule appointments in the past", variant: "destructive" });
+      return;
+    }
+
+    const timeValue = timeLabelToValue(editedEvent.time);
+    if (timeValue && editConflicts.has(timeValue)) {
+      toast({
+        title: "Time conflict",
+        description: `This patient already has an appointment at ${editedEvent.time}. Please select a different time.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updates: any = {
+      title: editedEvent.title,
+      type: editedEvent.type,
+      location: editedEvent.location || null,
+      description: editedEvent.notes || null,
+    };
+    if (timeValue) {
+      const startISO = new Date(`${dateStr}T${timeValue}:00`).toISOString();
+      const endISO = new Date(new Date(startISO).getTime() + 30 * 60000).toISOString();
+      updates.start_time = startISO;
+      updates.end_time = endISO;
+    }
+
     const { error } = await supabase
       .from('appointments')
-      .update({
-        title: editedEvent.title,
-        type: editedEvent.type,
-        location: editedEvent.location || null,
-        description: editedEvent.notes || null,
-      })
+      .update(updates)
       .eq('id', editedEvent.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -354,13 +508,16 @@ export default function CalendarView() {
       return;
     }
     setEvents(prev => prev.filter(e => e.id !== selectedEvent.id));
+    setDeleteConfirmOpen(false);
     setIsEventDetailOpen(false);
     setSelectedEvent(null);
     toast({
-      title: "Event Deleted",
+      title: "Appointment deleted",
       description: "The appointment has been removed from your calendar.",
     });
   };
+
+  const requestDeleteEvent = () => setDeleteConfirmOpen(true);
 
   const handleStartSession = () => {
     if (selectedEvent?.patientId) {
@@ -473,7 +630,7 @@ export default function CalendarView() {
                 Book
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle>
                 {scope === 'practice' ? 'Schedule on Practice Calendar' : 'Schedule New Appointment'}
@@ -491,10 +648,10 @@ export default function CalendarView() {
                   value={newAppointment.patientId}
                   onValueChange={(value) => setNewAppointment({ ...newAppointment, patientId: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="min-h-11">
                     <SelectValue placeholder="Select a patient" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100] bg-popover max-h-[60vh]">
                     {[...patients]
                       .sort((a, b) => {
                         const surnameA = a.name.split(' ').slice(-1)[0] || '';
@@ -515,23 +672,34 @@ export default function CalendarView() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Date *</Label>
-                  <Popover>
+                  <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !newAppointment.date && "text-muted-foreground")}>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal min-h-11", !newAppointment.date && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newAppointment.date ? format(new Date(newAppointment.date + 'T00:00:00'), "PPP") : <span>Pick a date</span>}
+                        {newAppointment.date ? format(new Date(newAppointment.date + 'T00:00:00'), "MM/dd/yyyy") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 z-[100] bg-popover" align="start">
                       <Calendar
                         mode="single"
                         selected={newAppointment.date ? new Date(newAppointment.date + 'T00:00:00') : undefined}
                         onSelect={(date) => {
-                          if (date) setNewAppointment({ ...newAppointment, date: format(date, 'yyyy-MM-dd') });
+                          if (!date) return;
+                          if (date < startOfToday()) {
+                            toast({
+                              title: "Invalid date",
+                              description: "Cannot schedule appointments in the past",
+                              variant: "destructive",
+                            });
+                            return;
+                          }
+                          setNewAppointment({ ...newAppointment, date: format(date, 'yyyy-MM-dd') });
+                          setDatePickerOpen(false);
                         }}
+                        disabled={{ before: startOfToday() }}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />
@@ -540,14 +708,23 @@ export default function CalendarView() {
                 </div>
                 <div>
                   <Label>Time *</Label>
-                  <Select value={newAppointment.time} onValueChange={(value) => setNewAppointment({ ...newAppointment, time: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select time" />
+                  <Select
+                    value={newAppointment.time}
+                    onValueChange={(value) => setNewAppointment({ ...newAppointment, time: value })}
+                    disabled={!newAppointment.date}
+                  >
+                    <SelectTrigger className="min-h-11">
+                      <SelectValue placeholder={newAppointment.date ? "Select time" : "Pick a date first"} />
                     </SelectTrigger>
-                    <SelectContent className="max-h-[200px]">
-                      {TIME_SLOTS.map((slot) => (
-                        <SelectItem key={slot} value={slot}>{formatTimeSlot(slot)}</SelectItem>
-                      ))}
+                    <SelectContent className="z-[100] bg-popover max-h-[60vh]">
+                      {TIME_SLOTS.map((slot) => {
+                        const isBlocked = conflicts.has(slot);
+                        return (
+                          <SelectItem key={slot} value={slot} disabled={isBlocked}>
+                            {formatTimeSlot(slot)}{isBlocked ? " — booked" : ""}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -558,10 +735,10 @@ export default function CalendarView() {
                   value={newAppointment.type}
                   onValueChange={(value) => setNewAppointment({ ...newAppointment, type: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="min-h-11">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100] bg-popover">
                     {serviceColors.length > 0 ? (
                       serviceColors.map((sc) => (
                         <SelectItem key={sc.service_name} value={sc.service_name}>{sc.service_name}</SelectItem>
@@ -584,7 +761,7 @@ export default function CalendarView() {
                   onChange={(e) => setNewAppointment({ ...newAppointment, notes: e.target.value })}
                 />
               </div>
-              <Button onClick={handleCreateAppointment} className="w-full">
+              <Button onClick={handleCreateAppointment} className="w-full min-h-11">
                 Create Appointment
               </Button>
             </div>
@@ -912,7 +1089,7 @@ export default function CalendarView() {
         setIsEventDetailOpen(open);
         if (!open) setIsEditMode(false);
       }}>
-        <DialogContent className="bg-card">
+        <DialogContent className="bg-card max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           {selectedEvent && editedEvent && (
             <>
               {isEditMode ? (
@@ -929,14 +1106,27 @@ export default function CalendarView() {
                         onChange={(e) => setEditedEvent({ ...editedEvent, title: e.target.value })}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="text-sm font-medium text-foreground">Time</label>
-                        <Input
-                          value={editedEvent.time}
-                          onChange={(e) => setEditedEvent({ ...editedEvent, time: e.target.value })}
-                          placeholder="e.g., 9:00 AM"
-                        />
+                        <Select
+                          value={timeLabelToValue(editedEvent.time)}
+                          onValueChange={(value) => setEditedEvent({ ...editedEvent, time: formatTimeSlot(value) })}
+                        >
+                          <SelectTrigger className="min-h-11">
+                            <SelectValue placeholder="Select time" />
+                          </SelectTrigger>
+                          <SelectContent className="z-[100] bg-popover max-h-[60vh]">
+                            {TIME_SLOTS.map((slot) => {
+                              const isBlocked = editConflicts.has(slot);
+                              return (
+                                <SelectItem key={slot} value={slot} disabled={isBlocked}>
+                                  {formatTimeSlot(slot)}{isBlocked ? " — booked" : ""}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-foreground">Day</label>
@@ -1074,7 +1264,7 @@ export default function CalendarView() {
                             <Button variant="outline" size="icon" className="h-11 w-11" onClick={() => setIsEditMode(true)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button variant="destructive" size="icon" className="h-11 w-11" onClick={handleDeleteEvent}>
+                            <Button variant="destructive" size="icon" className="h-11 w-11" onClick={requestDeleteEvent}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                             {selectedEvent.type !== "internal" && selectedEvent.patientId && (
@@ -1090,7 +1280,7 @@ export default function CalendarView() {
                               <Pencil className="h-3.5 w-3.5 mr-1" />
                               Edit
                             </Button>
-                            <Button variant="destructive" onClick={handleDeleteEvent}>
+                            <Button variant="destructive" onClick={requestDeleteEvent}>
                               <Trash2 className="h-3.5 w-3.5 mr-1" />
                               Delete
                             </Button>
@@ -1111,6 +1301,29 @@ export default function CalendarView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this appointment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {selectedEvent
+                ? `Are you sure you want to delete this appointment with ${selectedEvent.title} on ${selectedDate.toLocaleDateString("en-US", { month: "long" })} ${selectedEvent.day}, ${selectedDate.getFullYear()} at ${selectedEvent.time}? This action cannot be undone.`
+                : "This action cannot be undone."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteEvent}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

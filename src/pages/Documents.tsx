@@ -111,6 +111,9 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const [activeTab, setActiveTab] = useState("content");
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
+  const DOC_PAGE_SIZE = 10;
+  const [visibleDocCount, setVisibleDocCount] = useState(DOC_PAGE_SIZE);
+  useEffect(() => { setVisibleDocCount(DOC_PAGE_SIZE); }, [documentSearchQuery]);
   const [selectedTemplate, setSelectedTemplate] = useState<DisplayTemplate | null>(null);
   const [isNewTemplateOpen, setIsNewTemplateOpen] = useState(false);
   const [isNewHFTemplateOpen, setIsNewHFTemplateOpen] = useState(false);
@@ -601,7 +604,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
             <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
               {filteredDocuments.length > 0 ? (
-                filteredDocuments.map((doc) => (
+                filteredDocuments.slice(0, visibleDocCount).map((doc) => (
                   <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                       <FileText className="h-5 w-5 text-accent-foreground" />
@@ -683,8 +686,15 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             </div>
           </div>
         )}
+        {visibleDocCount < filteredDocuments.length && (
+          <div className="flex justify-center mt-3">
+            <Button variant="outline" onClick={() => setVisibleDocCount((c) => c + DOC_PAGE_SIZE)}>
+              Load more ({visibleDocCount} of {filteredDocuments.length})
+            </Button>
+          </div>
+        )}
         <p className="text-[11px] text-muted-foreground mt-2">
-          Showing {filteredDocuments.length} of {documents.length} documents
+          Showing {Math.min(visibleDocCount, filteredDocuments.length)} of {filteredDocuments.length} documents
         </p>
       </div>
 

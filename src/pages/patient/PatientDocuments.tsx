@@ -319,6 +319,11 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const filteredDocs =
     filter === "all" ? documents : documents.filter((d) => d.type === filter);
 
+  const DOC_PAGE_SIZE = 10;
+  const [visibleDocCount, setVisibleDocCount] = useState(DOC_PAGE_SIZE);
+  useEffect(() => { setVisibleDocCount(DOC_PAGE_SIZE); }, [filter]);
+  const pagedDocs = filteredDocs.slice(0, visibleDocCount);
+
   const usagePercent = Math.min((storageMB / STORAGE_LIMIT_MB) * 100, 100);
   const isNearLimit = usagePercent >= 80;
   const isOverLimit = usagePercent >= 100;
@@ -826,7 +831,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         </Card>
       ) : (
         <ul className="divide-y rounded-lg border bg-card">
-          {filteredDocs.map((doc) => {
+          {pagedDocs.map((doc) => {
             const config = DOC_TYPE_CONFIG[doc.type];
             const IconComponent = config.icon;
             const isAnalyzing = analyzingDocId === doc.id;
@@ -921,6 +926,13 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             );
           })}
         </ul>
+      )}
+      {visibleDocCount < filteredDocs.length && (
+        <div className="flex justify-center mt-3">
+          <Button variant="outline" onClick={() => setVisibleDocCount((c) => c + DOC_PAGE_SIZE)}>
+            Load more ({visibleDocCount} of {filteredDocs.length})
+          </Button>
+        </div>
       )}
 
       {/* AI Analysis Dialog */}
