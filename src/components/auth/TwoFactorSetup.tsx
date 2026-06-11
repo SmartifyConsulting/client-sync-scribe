@@ -160,10 +160,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
           </DialogTitle>
           <DialogDescription className="text-center">
             {step === "setup" && (
-              <>
-                <span className="sm:hidden">Tap below to set up your authenticator app</span>
-                <span className="hidden sm:inline">Click below to set up your authenticator app</span>
-              </>
+              <>{isMobile ? "Tap" : "Click"} below to set up your authenticator app</>
             )}
             {step === "verify" && "Enter the code from your authenticator app"}
             {step === "success" && "Your account is now protected"}
