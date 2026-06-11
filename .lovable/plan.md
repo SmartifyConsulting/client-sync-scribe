@@ -1,38 +1,61 @@
-## Why the app freezes after login / navigation
+# Plan: Briefing onboarding tip + remove SMS (keep phone as identifier)
 
-Every authenticated layout (`PatientAppLayout`, `ProviderAppLayout`, `AppLayout`, `MobileHeader`, `BottomNav`) uses `backdrop-blur` on sticky/fixed bars, and wraps the page content in `<AnimatePresence mode="wait">` + `PageTransition` (a `motion.div` that fades + translates on every route change).
+## 1. Add "Today's Briefing" onboarding tip
 
-`backdrop-blur` forces the browser to re-sample and blur every pixel underneath on each frame. While `PageTransition` is animating the underlying content (opacity + translate), the blurred header/footer must recompute on every frame — across the whole viewport, on three layers (top header, sticky header, bottom nav). On lower-powered devices this produces the multi-second freeze the user is seeing right after login (when the first authenticated route mounts and animates in).
+In `src/components/tour/tourSteps.ts`, insert a new step in `doctorTourSteps` before `doctor-tasks`:
 
-The 2FA QR code itself is a static `<img>` from a data URL and is not the cause; the MfaEnrollScreen success animation is a one-off spring and also not the cause.
+```ts
+{
+  target: "doctor-briefing",
+  title: "Today's Briefing",
+  message:
+    "Your morning briefing summarises overnight patient activity. Tap play to hear it narrated, or read it inline. Use Skip on any item that isn't relevant — it won't come back tomorrow. Change Language in My Practice settings.",
+}
+```
 
-## Fix (frontend / presentation only)
+Add `data-tour="doctor-briefing"` to the briefing card container on the doctor home dashboard (the component in `doctor-dashboard/briefing-and-activity-layout`). `TourProvider`/`ArrowCallout` already no-op when a target isn't mounted.
 
-1. **Drop `backdrop-blur` from layout chrome.** Replace the translucent + blur combo with a solid token background so the GPU stops re-blurring every frame:
-   - `src/components/layout/PatientAppLayout.tsx` header
-   - `src/components/layout/ProviderAppLayout.tsx` header
-   - `src/components/layout/AppLayout.tsx` (if it has the same pattern — confirm in build)
-   - `src/components/layout/MobileHeader.tsx`
-   - `src/components/layout/BottomNav.tsx` (3 occurrences)
-   - `src/components/auth/SubscriptionGateModal.tsx` overlay
-   
-   Swap `bg-background/95 backdrop-blur* supports-[backdrop-filter]:bg-background/60` → `bg-background border-…` (keep existing border + sticky/fixed positioning + z-index). Visual difference is minimal; perf difference is large.
+## 2. Remove SMS — keep phone as a sign-in identifier, verify via authenticator app
 
-2. **Lighten `PageTransition`.** Keep the fade for polish but remove the `y` translate and shorten the duration to ~150ms so the underlying composite work is brief. This also avoids janky interaction with the now-solid bars.
+Standardise on **TOTP (QR/authenticator) as the only second factor**, regardless of whether the user signs up with email or phone. No SMS provider is configured and none will be invoked.
 
-3. **Keep `AnimatePresence mode="wait"`** — it's cheap once the blurred layers are gone. No structural changes to routes/layouts.
+### Sign-up (`src/pages/Auth.tsx`)
+- **Keep** the Email / Phone toggle on the sign-up step (both doctor and patient branches).
+- **Email branch** — unchanged: `supabase.auth.signUp({ email, password, options })`.
+- **Phone branch** — change behaviour:
+  - Continue collecting `phone` (+ country code) and `password`.
+  - Call `supabase.auth.signUp({ phone, password })` **only after disabling Supabase's phone confirmation** so it never tries to send an SMS (see §3). The account is created in an unconfirmed-phone state, but our app treats the phone purely as a login identifier — not a verified channel.
+  - Immediately sign the user in with `signInWithPassword({ phone, password })`, then send them through the existing `MfaGate` → `MfaEnrollScreen` flow, which enrolls a TOTP factor (QR code) as the *only* form of second-factor verification.
+  - Remove any "We just texted you a code" / phone-OTP entry UI from the signup step.
 
-4. **No changes to MfaEnrollScreen / TwoFactorSetup / MfaGate / auth flow.** QR rendering, factor reuse, secret reveal, and verification stay exactly as they are.
+### Sign-in (`src/pages/Auth.tsx`)
+- Keep the unified identifier field that accepts **either email or phone**.
+- Always use password sign-in: `signInWithPassword({ email | phone, password })`.
+- Remove every `signInWithOtp({ phone })` / `verifyOtp({ phone })` call path and the associated "Send code" / "Enter code" UI.
+- After password sign-in, `MfaGate` enforces TOTP via authenticator app — same flow for email and phone users.
 
-## Verification
+### `src/hooks/useAuth.ts`
+- Leave `signInWithOtp(email)` and `verifyOtp(email)` in place only if other screens still use them for *email* magic-link flows; remove if unused. No phone variants are added.
 
-- Sign in as a test user → land on dashboard → confirm no freeze, headers still look correct.
-- Navigate between 3–4 routes back-to-back → transitions are smooth, no main-thread stalls.
-- Mobile viewport (390px): bottom nav + mobile header still visually distinct against scrolled content.
-- 2FA enroll page still shows QR + secret + verify flow unchanged.
+### 2FA screens
+- `MfaEnrollScreen`, `TwoFactorSetup`, `MfaChallengeScreen`, `MfaGate` — **untouched**. QR code + 6-digit TOTP remains the single second-factor method for everyone.
 
-## Non-goals
+## 3. Backend auth settings
 
-- No backend, auth, or RLS changes.
-- No removal of framer-motion.
-- No changes to the QR generation / `supabase.auth.mfa.enroll` logic.
+Use `supabase--configure_auth` (or equivalent) to ensure phone-confirmation / SMS provider is **off** so `signUp({ phone })` does not attempt to dispatch an SMS. Email confirmation setting stays as-is. No SMS provider, no Twilio, no edge function for SMS.
+
+If Supabase still rejects `signUp({ phone })` without an SMS provider when phone confirmation is disabled, fall back to creating the account via email-as-identifier and storing the phone on `profiles.phone` only — but the first attempt is the cleaner phone-as-identifier path above.
+
+## Files touched
+
+- `src/components/tour/tourSteps.ts` — add briefing step.
+- Doctor home dashboard briefing component — add `data-tour="doctor-briefing"`.
+- `src/pages/Auth.tsx` — remove SMS OTP UI/code paths, keep phone identifier + password, route to TOTP enroll.
+- `src/hooks/useAuth.ts` — trim only if exports are unused after the cleanup.
+- Auth settings — disable phone confirmation so no SMS is ever sent.
+
+## Out of scope
+
+- Configuring an SMS provider (explicitly not wanted).
+- Changes to TOTP enroll/challenge screens (already finalised in Phase 1).
+- Forgot-password / reset-password flows (unchanged).
