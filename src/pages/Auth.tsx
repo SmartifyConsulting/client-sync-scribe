@@ -23,6 +23,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Progress } from "@/components/ui/progress";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { DevErLoginButton } from "@/components/auth/DevErLoginButton";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { ShieldCheck, KeyRound } from "lucide-react";
 
@@ -954,6 +955,9 @@ export default function Auth() {
                 </button>
               </div>
               <DevErLoginButton />
+              <div className="mt-4">
+                <InstallAppPrompt />
+              </div>
             </div>
           </div>
         </div>
@@ -1002,6 +1006,11 @@ export default function Auth() {
             >
               Already have an account? Sign in
             </button>
+            {isLastStep && (
+              <div className="mt-4">
+                <InstallAppPrompt />
+              </div>
+            )}
           </div>
         </div>
       </div>
