@@ -24,6 +24,12 @@ export const doctorTourSteps: TourStep[] = [
       "From your Home dashboard you can start a recorded patient session — the AI will transcribe and summarise it — and listen to your Daily Digest of patient activity.",
   },
   {
+    target: "doctor-briefing",
+    title: "Today's Briefing",
+    message:
+      "Your morning briefing summarises overnight patient activity. Tap play to hear it narrated, or read it inline. Use Skip on any item that isn't relevant — it won't come back tomorrow. Change Language in My Practice settings.",
+  },
+  {
     target: "doctor-tasks",
     title: "Your Tasks",
     message:
