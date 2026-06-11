@@ -1,65 +1,67 @@
-## Patient SOS map + ER provider test-login
+## Goal
 
-### Part A — Show ambulance marker + distance while waiting for ER pickup
+Mobile-friendly **email OR phone** auth with **mandatory** TOTP MFA. Every user must enroll a TOTP factor; any session without a verified factor is blocked from the app until enrollment completes. SMS verification stays bypassed (project setting).
 
-**Problem.** In `SosLiveMap.tsx`, both the ambulance marker and the distance/ETA badge are gated on a destination hospital being set:
+---
 
-- `phase = "selecting"` whenever `hospital` is null (before the ER picks one).
-- `points` hides the provider in selecting: `if (phase !== "selecting" && provider)`.
-- The countdown/distance badge only renders for `pickup` / `transport`.
+## Part A — Unified Login ("Email or Phone Number")
 
-So the patient sees only their own pin and no km/ETA, even though the code already resolves the nearest available ER provider.
+**File:** `src/pages/Auth.tsx` (login view only)
 
-**Fix (frontend only, `src/modules/holarchelp/components/SosLiveMap.tsx`):**
+1. Replace the Email input with one field labeled **"Email or Phone Number"** + Password (keep eye toggle + `tabIndex={-1}` forgot link).
+2. Country-code picker (reuses existing `COUNTRIES`) auto-hides when input contains `@`.
+3. Submit: `@` present → `signInWithPassword({ email, password })`; else normalize to E.164 → `signInWithPassword({ phone, password })`.
+4. Errors: `invalid_credentials` → "Invalid credentials"; missing user → "Account does not exist"; otherwise raw message.
 
-1. Render the ambulance marker during `selecting` — drop the `phase !== "selecting"` guard in the `points` memo. Label it `"Nearest ER"` until `assigned_provider_id` exists, then `"Ambulance"`.
-2. Draw the red patient↔ambulance line during `selecting` too — remove the `if (phase === "selecting") return rs;` early-return in the `routes` memo (hospital/transport routes stay gated as today).
-3. Add a `searchEta` effect mirroring the existing pickup/transport ETA effects: when `phase === "selecting"` with both `provider` and `patient`, call `fetchEta` (1 s debounce, `routes-eta` → `fallbackEta`). Render a `CountdownBadge` with `label="NEAREST ER"`, `arriveText="ER nearby"` so the patient sees live km + minutes.
-4. Re-run the nearest-ER lookup when the realtime `holarchelp_locations` INSERT first delivers `patient`, gated on `assigned_provider_id IS NULL` and no live `provider`. Extract the existing block into a small helper. No behaviour change once assigned.
+## Part B — Phone option on Signup
 
-### Part B — Test-login for "National Emergency Medical Services"
+**File:** `src/pages/Auth.tsx` (Account step of existing wizard)
 
-Goal: let the developer one-click sign in as an ER provider account so they can pick up an SOS, see the patient incident, and select a destination hospital (which then shows on the patient app via existing realtime).
+1. Toggle at top of step 0: **"Sign up with Email"** / **"Sign up with Phone"** (default Email).
+2. Phone path: country picker + phone + password → `signUp({ phone: e164, password, options: { data: { full_name, role } } })`. Existing `handle_new_user` trigger creates the profile row.
+3. `handleFinalSubmit` skips email-only side effects when signup was phone-based (patient insert uses `null` email).
 
-**B1. Seed a real ER provider account + membership (migration + seed data).**
+## Part C — Mandatory MFA gate (the core change)
 
-- Pick the existing `holarchelp_ambulance_providers` row whose `company_name = 'National Emergency Medical Services'` (one of the seeded Johannesburg providers). If absent, insert it (Randburg coords, `status='approved'`, `subscription_status='active'`, `accepting_patients=true`, `tier='tier_2'`, `dispatch_priority=0`).
-- In a one-off `supabase--insert` (no auth context), provision an auth user `ner.test@holarchealth.test` / password `ErTest1234!` via direct insert into `auth.users` is not possible — instead handle this through an edge function: add a tiny admin-only edge function `seed-test-er-user` that uses the service-role client to:
-  - `auth.admin.createUser({ email, password, email_confirm: true })` (idempotent: if user exists, fetch them).
-  - Insert into `public.profiles` with `full_name='NEMS Dispatcher'`, country `South Africa`.
-  - Insert into `public.user_roles` with `role='ambulance_staff'`.
-  - Insert into `public.holarchelp_ambulance_members` (`provider_id` = NEMS provider id, `user_id`, `role='admin'`) on conflict do nothing.
-  - Returns `{ user_id, provider_id, email }`.
-- Function deploys automatically; no secrets needed beyond `SUPABASE_SERVICE_ROLE_KEY` (already provisioned).
+**New file:** `src/components/auth/MfaGate.tsx` — a top-level guard wrapping `<App />`'s authenticated routes.
 
-**B2. One-click "Sign in as NEMS dispatcher" button.**
+Behavior on every authenticated session:
+1. Call `supabase.auth.mfa.getAuthenticatorAssuranceLevel()` + `mfa.listFactors()`.
+2. Three states:
+   - **No verified TOTP factor** → render `<MfaEnrollScreen />` full-screen. User cannot reach the dashboard until they enroll + verify. "Sign out" button available; nothing else.
+   - **Verified factor exists AND `nextLevel === 'aal2'` AND `currentLevel !== 'aal2'`** → render `<MfaChallengeScreen />` full-screen asking for 6-digit code (`mfa.challenge` + `mfa.verify`). Cancel = `signOut()`.
+   - **`currentLevel === 'aal2'`** → render children (the app).
+3. Re-checks on `onAuthStateChange` so freshly-signed-in users hit the gate before any route renders.
 
-- Add a small dev-only button on `/auth` (visible only when `import.meta.env.DEV` or when `?devLogin=1`) that:
-  1. Calls `seed-test-er-user` once (idempotent) to guarantee the account exists.
-  2. Calls `supabase.auth.signInWithPassword({ email: 'ner.test@holarchealth.test', password: 'ErTest1234!' })`.
-  3. On success navigates to `/emergency` (existing ambulance dispatcher route).
-- File: new `src/components/auth/DevErLoginButton.tsx`; mounted in the existing `Auth` page below the normal form, in a `Dev only` callout. No other auth UX changes.
+**Wire-in:** wrap the existing authenticated route tree in `src/App.tsx` so every protected page sits behind `<MfaGate>`. Public routes (`/auth`, `/reset-password`, `/forgot-password`, `/legal`, `/track/...`) stay outside the gate.
 
-**B3. Verify the ER pickup → hospital select flow already wires through.**
+**MfaEnrollScreen** reuses the existing `TwoFactorSetup` flow logic (enroll → QR + secret + verify) but rendered as a full page (not a dialog). Includes:
+- QR image from `data.totp.qr_code`.
+- Plain-text secret + **"Copy Secret Key"** button.
+- Mobile helper: *"On a mobile phone? Copy this key and paste it into Google Authenticator under 'Enter a setup key'."*
+- 6-digit input → `mfa.challenge` + `mfa.verify`. On success → gate re-evaluates → app loads.
 
-Already in place — only call out so the user knows what to expect after logging in:
+**MfaChallengeScreen**: lists verified factors, runs `mfa.challenge({ factorId })`, accepts 6-digit code → `mfa.verify`. Toasts on failure, allows retry.
 
-- `/emergency` shows open incidents with `AvailableResponders` accept buttons (ambulance-only after recent migration).
-- After accept, `holarchelp_accept_incident` flips `status='assigned'` and writes `assigned_provider_id`.
-- The ER provider opens the incident and uses the existing `HospitalPicker` to set `destination_hospital_id`.
-- `notify_hospital_inbound` trigger + the patient's `SosLiveMap` realtime subscription on `holarchelp_incidents` UPDATE already pick up `destination_hospital_id` and render the red hospital marker + teal line on the patient screen, exactly as designed in Part A.
+## Part D — Settings "Disable 2FA" removed
 
-No changes needed to `dispatch-sos`, `holarchelp_auto_assign_incident`, `HospitalPicker`, or hospital RLS.
+**File:** `src/components/settings/SettingsContent.tsx`
 
-### Files
+Because MFA is mandatory, replace the existing Disable button + `mfa.unenroll` call with a static badge: **"2FA is required for all accounts."** Keep the status row showing "Enabled". The setup dialog stays available only for re-enrolling a replacement device after admin unenroll (out of scope).
 
-- `src/modules/holarchelp/components/SosLiveMap.tsx` — Part A edits.
-- `supabase/functions/seed-test-er-user/index.ts` — new admin edge function (service role).
-- `src/components/auth/DevErLoginButton.tsx` — new dev button.
-- `src/pages/Auth.tsx` (or whichever auth page is current) — mount the dev button.
-- Optional migration: ensure the NEMS provider row exists with the correct coords/status (idempotent `INSERT ... ON CONFLICT`).
+## Out of scope
 
-### Out of scope
+- Google/OAuth login (Google flow already exempt from password but `MfaGate` still enforces TOTP on the resulting session).
+- Recovery codes / admin unenroll tooling.
+- Magic-link OTP, password reset, dev ER login, multi-step wizard beyond step 0 toggle.
+- SMS provider configuration.
+- No DB migrations, no RLS changes, no new edge functions.
 
-- Production user provisioning, password rotation, MFA. The seeded account is for dev/QA only and is gated behind a DEV/`?devLogin=1` check on the UI.
-- `AvailableResponders.tsx`, auto-assign, dispatch-sos, severity dialog double-fire — already shipped in earlier turns.
+## Files touched
+
+- `src/pages/Auth.tsx` — unified login + phone signup toggle.
+- `src/App.tsx` — wrap authenticated routes in `<MfaGate>`.
+- `src/components/auth/MfaGate.tsx` — new mandatory gate.
+- `src/components/auth/MfaEnrollScreen.tsx` — new full-page enrollment.
+- `src/components/auth/MfaChallengeScreen.tsx` — new full-page challenge.
+- `src/components/settings/SettingsContent.tsx` — remove Disable, show "Required" badge.
