@@ -179,8 +179,17 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                         <Label className="text-xs text-muted-foreground">Setup key (for manual entry)</Label>
                         <div className="flex items-center gap-2">
                           <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
-                            {secret}
+                            {secretVisible ? secret : "•".repeat(secret.length)}
                           </code>
+                          <button
+                            type="button"
+                            onClick={() => setSecretVisible((v) => !v)}
+                            aria-label={secretVisible ? "Hide setup key" : "Show setup key"}
+                            aria-pressed={secretVisible}
+                            className="p-2 rounded-lg border border-border hover:bg-muted transition-colors min-h-11 min-w-11 flex items-center justify-center"
+                          >
+                            {secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </button>
                         </div>
                         <Button
                           type="button"
