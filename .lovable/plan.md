@@ -1,39 +1,56 @@
-# Make Holarc Health installable on iOS & Android
+## Problem
 
-The app already ships a valid `manifest.webmanifest` plus `icon-192`, `icon-512`, and `apple-touch-icon.png`, so Android browsers technically already offer "Add to Home Screen" via their menu. The problem is there is no visible cue in the app, and iOS Safari never auto-prompts — users have to know to tap Share → Add to Home Screen. This plan adds clear, in-app install affordances for both platforms without touching any backend logic.
+On Android **and iOS**, no "Install app" message appears near the Login button. Causes:
 
-## What I'll build
+1. `InstallAppButton` is not placed on the Auth page — only on Landing and the mobile header.
+2. The Android button only renders after Chrome fires `beforeinstallprompt`. That event does NOT fire inside the Lovable preview iframe, in in-app browsers (Facebook, Instagram, LinkedIn), in some Android browsers (Firefox, Samsung Internet, Opera), or before Chrome's engagement heuristics are satisfied.
+3. iOS Safari never fires `beforeinstallprompt`. The existing component already detects iOS, but with no placement on Auth there is nothing to tap.
 
-1. **`InstallAppButton` component** (new, `src/components/InstallAppButton.tsx`)
-   - Listens for the `beforeinstallprompt` event (Android/Chrome/Edge) and, when fired, shows an "Install app" button that triggers the native install prompt.
-   - On iOS Safari (detected via UA + `navigator.standalone`), shows an "Add to Home Screen" button that opens a small dialog with illustrated steps: tap the Share icon → "Add to Home Screen" → "Add".
-   - Hides itself entirely when the app is already running standalone (`display-mode: standalone` or `navigator.standalone === true`) or after a successful install (`appinstalled` event).
-   - Remembers a "dismiss for 7 days" choice in `localStorage` so it isn't nagging.
+Result: nothing shows on either platform near the Login button.
 
-2. **Placement** — two entry points so users always find it:
-   - **Landing page** (`src/pages/Landing.tsx`): a teal pill button in the hero/CTA area, "📱 Install the app".
-   - **Top bar / mobile header** (`src/components/layout/MobileHeader.tsx` and the desktop sidebar footer): a compact icon button visible only when installable, so logged-in users can install later.
+## Fix
 
-3. **Manifest tidy-up** (`public/manifest.webmanifest`)
-   - Update `theme_color` to the brand teal `#2DB0A6` (currently `#0F766E`).
-   - Add `"id": "/"` and `"display_override": ["standalone", "minimal-ui"]` for better cross-browser behavior.
-   - Confirm existing 192/512 + maskable icons cover Android install requirements (they do).
+### 1. Place an install block on the Auth page (iOS + Android + desktop)
 
-4. **Head tags** (`index.html`) — already has `manifest`, `apple-touch-icon`, `theme-color`, `apple-mobile-web-app-capable`, `apple-mobile-web-app-title`. Only change: align `theme-color` to `#2DB0A6` to match the manifest.
+Add an `InstallAppPrompt` block directly below the **Login** button (and below the Sign Up button on the signup variant) with copy like:
 
-5. **No service worker, no offline mode.** Per the PWA skill, manifest-only is the correct scope for "let me install it on my phone". I won't add `vite-plugin-pwa`, Workbox, or any SW — those would risk breaking the Lovable preview and aren't needed for home-screen install.
+> 📱 **Install Holarc on your phone** — get one-tap access from your home screen.
+> [ Install app ]
 
-## Platform behavior the user should expect
+Visible on all viewports. Same block renders for iOS (Safari + Chrome on iPhone/iPad) and Android — only the dialog content differs by platform when tapped.
 
-- **Android (Chrome/Edge/Samsung Internet):** the in-app "Install app" button triggers the real OS install sheet. One tap, app icon lands on the home screen.
-- **iOS (Safari 16.4+):** Apple does not allow programmatic install. The button opens an instructional sheet showing the Share → Add to Home Screen flow. This is the standard, App Store-compliant pattern every iOS PWA uses (Twitter, Starbucks, etc.).
-- **iOS in-app browsers** (Instagram, Facebook, LinkedIn webviews): install is impossible there; the sheet will tell the user to "Open in Safari" first.
-- **Desktop Chrome/Edge:** the same Android path works — they get a desktop install prompt.
+### 2. Make the button work everywhere — even without `beforeinstallprompt`
+
+Update `src/components/InstallAppButton.tsx`:
+
+- Keep current behavior: if `beforeinstallprompt` fires, tapping triggers the native Android install sheet.
+- iOS (already handled): tapping opens the existing 3-step Safari "Share → Add to Home Screen → Add" dialog. Keep this exactly as-is.
+- New Android fallback: when no native prompt is captured AND the device is Android (UA contains `Android`) AND not already standalone, still render the button. Tap opens an instruction dialog mirroring the iOS one:
+  - **Chrome / Edge:** "Tap the ⋮ menu → **Install app** (or **Add to Home screen**)."
+  - **Samsung Internet:** "Tap the ☰ menu → **Add page to** → **Home screen**."
+  - **Firefox:** "Tap the ⋮ menu → **Install**."
+  - **In-app browser (FB / Instagram / LinkedIn / TikTok):** "Tap ⋯ → **Open in Chrome** first, then follow the steps above."
+- iOS in-app browsers (FB / Instagram / LinkedIn / TikTok / Gmail): existing iOS dialog already has the "Open in Safari first" branch — verify the copy is shown and keep it.
+- Hide entirely only when `isStandalone()` is true (already installed). Drop the early `return null` that hides on desktop non-iOS so desktop Chrome/Edge users also get the dialog fallback.
+
+### 3. Add a new `InstallAppPrompt` wrapper component
+
+`src/components/InstallAppPrompt.tsx` — a card-style block with icon, heading, one-line description, and `<InstallAppButton variant="primary" />`. Hidden when `isStandalone()` is true. Reusable so we can drop it on Landing later if desired.
+
+### 4. Auth page placement
+
+In `src/pages/Auth.tsx`, render `<InstallAppPrompt />`:
+- Below the Login submit button on the sign-in view.
+- Below the final Sign Up step's submit button on the signup view.
+
+No layout shuffling beyond inserting the block. Visible identically on iOS and Android.
 
 ## Out of scope
 
-- Offline support / service worker (not requested).
-- Push notifications (separate flow, would need backend work).
-- App Store / Play Store submission (that's the Capacitor native path — happy to plan separately if you want a true native app).
+- No service worker / offline mode changes.
+- No manifest changes (already correct: `display: standalone`, `theme_color: #2DB0A6`, icons 192/512 + maskable).
+- No native (Capacitor) wrapper.
 
-After implementation, you'll see the "Install app" button on the landing page and in the header whenever the browser supports install — open the preview on your phone to test.
+## Why iOS will always show instructions (not a one-tap button)
+
+Apple does not expose a programmatic install API. Every iOS PWA (Twitter, Starbucks, Pinterest) uses the same Share → Add to Home Screen instructional pattern. This is the iOS-correct behavior, not a limitation we can engineer around.
