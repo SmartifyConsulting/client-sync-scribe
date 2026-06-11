@@ -179,7 +179,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-size: 14px;
+    font-size: 17px;
   }
 
   body {
@@ -196,7 +196,7 @@
   /* Prevent iOS zoom on inputs while keeping desktop scale */
   input, textarea, select { font-size: 16px; }
   @media (min-width: 600px) {
-    input, textarea, select { font-size: 14px; }
+    input, textarea, select { font-size: 17px; }
   }
 
   /* Required field indicator */
@@ -205,10 +205,14 @@
     color: hsl(var(--destructive));
   }
 
-  /* Preserve original font size for nav and to-do sections */
+  /* Preserve original nav font sizes (do not scale with global bump) */
   .font-size-preserve {
     font-size: 15px;
   }
+  .font-size-preserve .text-sm { font-size: 12.25px; }
+  .font-size-preserve .text-xs { font-size: 10.5px; }
+  .font-size-preserve .text-base { font-size: 14px; }
+
 
   /* Smooth focus states */
   *:focus-visible {
