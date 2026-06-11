@@ -347,7 +347,7 @@ export default function Landing() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E01837]/10 mb-2">
                   <Video className="h-5 w-5 text-[#E01837]" />
                 </div>
-                <p className="text-sm font-semibold text-foreground">Medication adherence</p>
+                <p className="text-sm font-semibold text-foreground">Medication Adherence</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
                   Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.
                 </p>
