@@ -106,8 +106,15 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
       if (vErr) throw vErr;
       setVerified(true);
       toast({ title: "2FA enabled", description: "Your account is now protected." });
-      // Brief success animation before continuing
-      setTimeout(() => onEnrolled(), 1100);
+      // Phone-only users get backup codes shown next (their only self-service recovery).
+      // Email users have email-based password reset, so we skip straight to onEnrolled.
+      setTimeout(() => {
+        if (isPhoneUser) {
+          setShowBackupCodes(true);
+        } else {
+          onEnrolled();
+        }
+      }, 1100);
     } catch (err: any) {
       toast({
         title: "That code didn't work",
@@ -119,6 +126,12 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
       setVerifying(false);
     }
   };
+
+  if (showBackupCodes) {
+    return <BackupCodesScreen onContinue={onEnrolled} />;
+  }
+
+
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
