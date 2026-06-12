@@ -35,6 +35,10 @@ interface PricingPlans { monthly: PlanConfig; annual: PlanConfig; }
 interface Subscription { id: string; user_id: string; plan_type: string; billing_cycle: string; status: string; paypal_subscription_id: string | null; current_period_start: string | null; current_period_end: string | null; created_at: string; }
 interface PaymentHistoryItem { id: string; user_id: string; subscription_id: string | null; paypal_transaction_id: string | null; amount: number; currency: string; description: string; status: string; created_at: string; }
 
+// MVP: temporarily disable MFA UI (TOTP enroll, disable, and login-code toggle).
+// Flip to false to restore.
+const MVP_MFA_DISABLED = true;
+
 export function SettingsContent() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -439,41 +443,45 @@ export function SettingsContent() {
             </div>
             <p className="text-[12px] text-muted-foreground">Manage your authentication and account protection</p>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {loadingMfa ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : mfaFactors.length > 0 ? <ShieldCheck className="h-5 w-5 text-success" /> : <ShieldOff className="h-5 w-5 text-muted-foreground" />}
-                  <div>
-                    <p className="font-medium text-foreground">Two-Factor Authentication</p>
-                    <p className="text-sm text-muted-foreground">{loadingMfa ? "Checking status..." : mfaFactors.length > 0 ? "Enabled - Your account is protected" : "Add an extra layer of security"}</p>
+              {!MVP_MFA_DISABLED && (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {loadingMfa ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : mfaFactors.length > 0 ? <ShieldCheck className="h-5 w-5 text-success" /> : <ShieldOff className="h-5 w-5 text-muted-foreground" />}
+                      <div>
+                        <p className="font-medium text-foreground">Two-Factor Authentication</p>
+                        <p className="text-sm text-muted-foreground">{loadingMfa ? "Checking status..." : mfaFactors.length > 0 ? "Enabled - Your account is protected" : "Add an extra layer of security"}</p>
+                      </div>
+                    </div>
+                    {loadingMfa ? null : mfaFactors.length > 0 ? (
+                      <Button
+                        variant="outline"
+                        disabled={disablingMfa}
+                        onClick={() => disableMfa(mfaFactors[0].id)}
+                      >
+                        {disablingMfa ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disable"}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
+                    )}
                   </div>
-                </div>
-                {loadingMfa ? null : mfaFactors.length > 0 ? (
-                  <Button
-                    variant="outline"
-                    disabled={disablingMfa}
-                    onClick={() => disableMfa(mfaFactors[0].id)}
-                  >
-                    {disablingMfa ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disable"}
-                  </Button>
-                ) : (
-                  <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
-                )}
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-foreground">Ask for a login code every time I sign in</p>
-                  <p className="text-sm text-muted-foreground">
-                    When off, you'll only enter your password. When on, you'll also enter a 6-digit code from your authenticator app at every sign-in.
-                  </p>
-                </div>
-                <Switch
-                  checked={mfaRequired}
-                  disabled={savingMfaRequired || loadingMfa}
-                  onCheckedChange={handleToggleMfaRequired}
-                />
-              </div>
-              <Separator />
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground">Ask for a login code every time I sign in</p>
+                      <p className="text-sm text-muted-foreground">
+                        When off, you'll only enter your password. When on, you'll also enter a 6-digit code from your authenticator app at every sign-in.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={mfaRequired}
+                      disabled={savingMfaRequired || loadingMfa}
+                      onCheckedChange={handleToggleMfaRequired}
+                    />
+                  </div>
+                  <Separator />
+                </>
+              )}
               <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
               <Separator />
               <div>

@@ -1,41 +1,25 @@
 ## Goal
-Stop forcing TOTP MFA on every login. Make MFA opt-in per user, controlled from Settings.
+Temporarily turn off both email verification and TOTP authentication code prompts while the MVP is being tested. Users sign in with email + password only; no confirmation email, no 6-digit code, no enrollment screen.
 
-## Current behavior
-`src/components/auth/MfaGate.tsx` wraps every authenticated route and forces:
-- Enrollment if the user has no verified TOTP factor
-- A challenge (6-digit code) on every new session if a factor exists
+## Changes
 
-That's why users see "authenticate" on every login.
+### 1. Disable email confirmation (Supabase auth)
+Call `supabase--configure_auth` with `auto_confirm_email: true`. New signups become active immediately — no "check your inbox" step. Existing users are unaffected.
+- `disable_signup: false`
+- `external_anonymous_users_enabled: false`
+- `auto_confirm_email: true`
+- `password_hibp_enabled: true` (leave the leaked-password check on)
 
-## Proposed change
+### 2. Disable the MFA gate
+In `src/components/auth/MfaGate.tsx`, short-circuit `evaluate()` to always set status to `"ok"`. No enrollment, no challenge, no profile lookup. Keep the file (and the `mfa_required` preference) in place so re-enabling later is a one-line revert.
 
-### 1. Add a per-user preference
-- New column `profiles.mfa_required boolean not null default false`
-- Migration to add the column; no backfill needed (default false = off)
+### 3. Hide the MFA controls in Settings
+In `src/components/settings/SettingsContent.tsx` (Security section), wrap the 2FA row and the "Ask for a login code every time I sign in" toggle in a `MVP_MFA_DISABLED` constant set to `true`, so they don't render. "Change Password" and "Replay app tour" stay visible.
 
-### 2. Update `MfaGate`
-- Read `profiles.mfa_required` for the current user
-- If `false` (default): always render children — never trigger enroll or challenge
-- If `true`: keep existing behavior (challenge on aal1 sessions, enroll if no factor)
-- Signup / password reset flows are unaffected — those are normal Supabase auth, not MFA
-
-### 3. Add a Settings toggle
-In `src/components/settings/SettingsContent.tsx` (Security section), add:
-- **"Require authentication code at every login"** switch, bound to `profiles.mfa_required`
-- When turning ON: prompt user to enroll a TOTP factor immediately (reuse `MfaEnrollScreen` in a dialog). Only persist `mfa_required=true` after a factor is verified.
-- When turning OFF: unenroll existing factors via `supabase.auth.mfa.unenroll()` for each verified factor, then set `mfa_required=false`. Show a confirm dialog ("This will reduce your account security").
-
-### 4. Clean up existing forced enrollments
-- Users who were force-enrolled keep their factor but `mfa_required=false`, so they won't be challenged. They can remove it from Settings.
+## Re-enable later
+Flip three things back: re-run `configure_auth` with `auto_confirm_email: false`, remove the early return in `MfaGate.tsx`, and set `MVP_MFA_DISABLED = false` in `SettingsContent.tsx`.
 
 ## Out of scope
-- No changes to password reset (`/reset-password` still works as today)
-- No changes to signup, Google OAuth, or session persistence
-- No changes to Supabase auth provider settings (HIBP stays on)
-
-## Files touched
-- `supabase/migrations/<new>.sql` — add `mfa_required` column
-- `src/components/auth/MfaGate.tsx` — gate on preference
-- `src/components/settings/SettingsContent.tsx` — add toggle + enroll/unenroll flow
-- `src/hooks/useProfile.ts` (or equivalent) — expose `mfa_required`
+- No database migration (the `profiles.mfa_required` column stays)
+- No changes to password reset, Google OAuth, or session persistence
+- No changes to existing verified users' MFA factors (they're just never challenged)
