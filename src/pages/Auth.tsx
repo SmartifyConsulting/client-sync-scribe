@@ -25,6 +25,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { DevErLoginButton } from "@/components/auth/DevErLoginButton";
 
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { cn } from "@/lib/utils";
 import { ShieldCheck, KeyRound } from "lucide-react";
 
 const DOCTOR_SPECIALTIES = [
@@ -99,6 +100,7 @@ export default function Auth() {
   const [accountCreated, setAccountCreated] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [breachedPassword, setBreachedPassword] = useState(false);
   const [useOtp, setUseOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
@@ -327,9 +329,26 @@ export default function Auth() {
       }
       return false;
     } catch (error: any) {
-      const msg = /duplicate|unique|already/i.test(error?.message || "")
+      const raw = error?.message || "";
+      const code = error?.code || "";
+      const isBreached =
+        code === "weak_password" ||
+        /known to be weak|pwned|breach|leaked/i.test(raw);
+      if (isBreached) {
+        setBreachedPassword(true);
+        setPassword("");
+        setTimeout(() => document.getElementById("password")?.focus(), 0);
+        toast({
+          title: "Choose a different password",
+          description:
+            "This password has appeared in a known data breach. Even though it looks strong, it's unsafe to reuse. Please pick a unique password you haven't used elsewhere.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      const msg = /duplicate|unique|already/i.test(raw)
         ? "This phone number or email is already registered. Please sign in instead."
-        : error.message;
+        : raw;
       toast({ title: "Sign-up failed", description: msg, variant: "destructive" });
       return false;
     } finally {
@@ -694,7 +713,7 @@ export default function Auth() {
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} disabled={accountCreated} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -803,12 +822,12 @@ export default function Auth() {
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} disabled={accountCreated} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <PasswordStrength password={password} />
+              <PasswordStrength password={password} breached={breachedPassword} />
             </div>
             <div className="space-y-2">
               <Label>Mobile Number</Label>
