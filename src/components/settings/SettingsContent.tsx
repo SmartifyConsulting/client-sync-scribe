@@ -52,6 +52,8 @@ export function SettingsContent() {
   const [mfaFactors, setMfaFactors] = useState<any[]>([]);
   const [loadingMfa, setLoadingMfa] = useState(true);
   const [disablingMfa, setDisablingMfa] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [savingMfaRequired, setSavingMfaRequired] = useState(false);
   const [showManagePlan, setShowManagePlan] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [selectedBillingCycle, setSelectedBillingCycle] = useState<"monthly" | "annual">("monthly");
@@ -119,8 +121,48 @@ export function SettingsContent() {
     try {
       const { data, error } = await supabase.auth.mfa.listFactors();
       if (!error && data) setMfaFactors(data.totp.filter((f) => f.status === "verified"));
+      if (user) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("mfa_required")
+          .eq("id", user.id)
+          .maybeSingle();
+        setMfaRequired(Boolean((prof as any)?.mfa_required));
+      }
     } catch (error) { console.error("Error fetching MFA factors:", error); } finally { setLoadingMfa(false); }
   };
+
+  const handleToggleMfaRequired = async (next: boolean) => {
+    if (!user) return;
+    if (next && mfaFactors.length === 0) {
+      toast({
+        title: "Set up Two-Factor Authentication first",
+        description: "Enable 2FA below, then turn this on.",
+      });
+      setShow2FASetup(true);
+      return;
+    }
+    setSavingMfaRequired(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ mfa_required: next } as any)
+        .eq("id", user.id);
+      if (error) throw error;
+      setMfaRequired(next);
+      toast({
+        title: next ? "Login code required" : "Login code disabled",
+        description: next
+          ? "You'll be asked for a 6-digit code each time you sign in."
+          : "You'll only enter your password at sign-in.",
+      });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setSavingMfaRequired(false);
+    }
+  };
+
 
   const fetchInactiveThreshold = async () => {
     if (!user) return;
@@ -406,10 +448,30 @@ export function SettingsContent() {
                   </div>
                 </div>
                 {loadingMfa ? null : mfaFactors.length > 0 ? (
-                  <Badge variant="secondary" className="text-xs">Required</Badge>
+                  <Button
+                    variant="outline"
+                    disabled={disablingMfa}
+                    onClick={() => disableMfa(mfaFactors[0].id)}
+                  >
+                    {disablingMfa ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disable"}
+                  </Button>
                 ) : (
                   <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
                 )}
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Ask for a login code every time I sign in</p>
+                  <p className="text-sm text-muted-foreground">
+                    When off, you'll only enter your password. When on, you'll also enter a 6-digit code from your authenticator app at every sign-in.
+                  </p>
+                </div>
+                <Switch
+                  checked={mfaRequired}
+                  disabled={savingMfaRequired || loadingMfa}
+                  onCheckedChange={handleToggleMfaRequired}
+                />
               </div>
               <Separator />
               <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
