@@ -121,8 +121,48 @@ export function SettingsContent() {
     try {
       const { data, error } = await supabase.auth.mfa.listFactors();
       if (!error && data) setMfaFactors(data.totp.filter((f) => f.status === "verified"));
+      if (user) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("mfa_required")
+          .eq("id", user.id)
+          .maybeSingle();
+        setMfaRequired(Boolean((prof as any)?.mfa_required));
+      }
     } catch (error) { console.error("Error fetching MFA factors:", error); } finally { setLoadingMfa(false); }
   };
+
+  const handleToggleMfaRequired = async (next: boolean) => {
+    if (!user) return;
+    if (next && mfaFactors.length === 0) {
+      toast({
+        title: "Set up Two-Factor Authentication first",
+        description: "Enable 2FA below, then turn this on.",
+      });
+      setShow2FASetup(true);
+      return;
+    }
+    setSavingMfaRequired(true);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ mfa_required: next } as any)
+        .eq("id", user.id);
+      if (error) throw error;
+      setMfaRequired(next);
+      toast({
+        title: next ? "Login code required" : "Login code disabled",
+        description: next
+          ? "You'll be asked for a 6-digit code each time you sign in."
+          : "You'll only enter your password at sign-in.",
+      });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setSavingMfaRequired(false);
+    }
+  };
+
 
   const fetchInactiveThreshold = async () => {
     if (!user) return;
