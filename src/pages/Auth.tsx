@@ -328,9 +328,26 @@ export default function Auth() {
       }
       return false;
     } catch (error: any) {
-      const msg = /duplicate|unique|already/i.test(error?.message || "")
+      const raw = error?.message || "";
+      const code = error?.code || "";
+      const isBreached =
+        code === "weak_password" ||
+        /known to be weak|pwned|breach|leaked/i.test(raw);
+      if (isBreached) {
+        setBreachedPassword(true);
+        setPassword("");
+        setTimeout(() => document.getElementById("password")?.focus(), 0);
+        toast({
+          title: "Choose a different password",
+          description:
+            "This password has appeared in a known data breach. Even though it looks strong, it's unsafe to reuse. Please pick a unique password you haven't used elsewhere.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      const msg = /duplicate|unique|already/i.test(raw)
         ? "This phone number or email is already registered. Please sign in instead."
-        : error.message;
+        : raw;
       toast({ title: "Sign-up failed", description: msg, variant: "destructive" });
       return false;
     } finally {
