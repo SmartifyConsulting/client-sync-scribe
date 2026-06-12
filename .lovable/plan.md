@@ -1,28 +1,41 @@
-## Why the error happens
+## Goal
+Stop forcing TOTP MFA on every login. Make MFA opt-in per user, controlled from Settings.
 
-Supabase Auth has **Leaked Password Protection** enabled. On signup it hashes the password and checks the prefix against the Have I Been Pwned (HIBP) breached-password corpus. `Stargirl1$` meets all local strength rules (length, mixed case, number, symbol — hence "Excellent") but it exists in known breaches, so Supabase returns:
+## Current behavior
+`src/components/auth/MfaGate.tsx` wraps every authenticated route and forces:
+- Enrollment if the user has no verified TOTP factor
+- A challenge (6-digit code) on every new session if a factor exists
 
-> Password is known to be weak and easy to guess, please choose a different one.
+That's why users see "authenticate" on every login.
 
-This is not a bug — it's the security control working. The fix is UX, not disabling the check.
+## Proposed change
 
-## Changes
+### 1. Add a per-user preference
+- New column `profiles.mfa_required boolean not null default false`
+- Migration to add the column; no backfill needed (default false = off)
 
-### 1. `src/pages/Auth.tsx` (signup form)
-- Detect the HIBP error from Supabase (`error.code === "weak_password"` or message contains "known to be weak") and show a friendlier, more actionable toast/inline message:
-  > "This password has appeared in a known data breach. Even though it looks strong, it's unsafe to reuse. Please choose a unique password you haven't used elsewhere."
-- Keep the red banner, but also highlight the Password field (red border + helper text) so the user knows exactly which field to change, instead of scrolling back up.
-- Auto-focus the password field and clear it on this specific error.
+### 2. Update `MfaGate`
+- Read `profiles.mfa_required` for the current user
+- If `false` (default): always render children — never trigger enroll or challenge
+- If `true`: keep existing behavior (challenge on aal1 sessions, enroll if no factor)
+- Signup / password reset flows are unaffected — those are normal Supabase auth, not MFA
 
-### 2. Password strength helper (same file / strength component)
-- Add a 5th checklist row under the strength meter: **"Not found in known data breaches"** — neutral by default, ✓ after a successful submit attempt, ✗ red after an HIBP rejection. (Purely client-side state flip from the server error — we do not call HIBP ourselves.)
-- Add a one-line hint under the meter: *"Tip: avoid names, dictionary words, and passwords you've used on other sites — even with numbers/symbols added."*
+### 3. Add a Settings toggle
+In `src/components/settings/SettingsContent.tsx` (Security section), add:
+- **"Require authentication code at every login"** switch, bound to `profiles.mfa_required`
+- When turning ON: prompt user to enroll a TOTP factor immediately (reuse `MfaEnrollScreen` in a dialog). Only persist `mfa_required=true` after a factor is verified.
+- When turning OFF: unenroll existing factors via `supabase.auth.mfa.unenroll()` for each verified factor, then set `mfa_required=false`. Show a confirm dialog ("This will reduce your account security").
 
-### 3. No backend changes
-- Leave `password_hibp_enabled: true`. Do **not** disable the check.
-- No DB migration, no edge function changes.
+### 4. Clean up existing forced enrollments
+- Users who were force-enrolled keep their factor but `mfa_required=false`, so they won't be challenged. They can remove it from Settings.
 
 ## Out of scope
-- Not changing Supabase auth settings.
-- Not adding a custom HIBP pre-check (Supabase already does it server-side; duplicating client-side wastes a round-trip).
-- Not touching other pages (ResetPassword already uses `updateUser` which will surface the same error — happy to mirror the UX there in a follow-up if you want).
+- No changes to password reset (`/reset-password` still works as today)
+- No changes to signup, Google OAuth, or session persistence
+- No changes to Supabase auth provider settings (HIBP stays on)
+
+## Files touched
+- `supabase/migrations/<new>.sql` — add `mfa_required` column
+- `src/components/auth/MfaGate.tsx` — gate on preference
+- `src/components/settings/SettingsContent.tsx` — add toggle + enroll/unenroll flow
+- `src/hooks/useProfile.ts` (or equivalent) — expose `mfa_required`

@@ -3913,6 +3913,7 @@ export type Database = {
           logo_url: string | null
           mailbox_alias: string | null
           mailbox_id: string
+          mfa_required: boolean
           mobile_number: string | null
           narration_voice: string | null
           practice_address: string | null
@@ -3952,6 +3953,7 @@ export type Database = {
           logo_url?: string | null
           mailbox_alias?: string | null
           mailbox_id?: string
+          mfa_required?: boolean
           mobile_number?: string | null
           narration_voice?: string | null
           practice_address?: string | null
@@ -3991,6 +3993,7 @@ export type Database = {
           logo_url?: string | null
           mailbox_alias?: string | null
           mailbox_id?: string
+          mfa_required?: boolean
           mobile_number?: string | null
           narration_voice?: string | null
           practice_address?: string | null
