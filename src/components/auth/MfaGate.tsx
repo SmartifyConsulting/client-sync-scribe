@@ -18,40 +18,8 @@ export function MfaGate({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
 
   const evaluate = useCallback(async () => {
-    if (!user) {
-      setStatus("ok"); // ProtectedRoute will redirect; nothing to gate
-      return;
-    }
-    setStatus("loading");
-    try {
-      // MFA is opt-in per user via profiles.mfa_required.
-      // If the user has not enabled it, never prompt for enrollment or a code.
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("mfa_required")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (!profile?.mfa_required) {
-        setStatus("ok");
-        return;
-      }
-
-      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aal?.currentLevel === "aal2") {
-        setStatus("ok");
-        return;
-      }
-      const { data: factors } = await supabase.auth.mfa.listFactors();
-      const hasVerified = (factors?.totp || []).some((f) => f.status === "verified");
-      if (!hasVerified) {
-        setStatus("enroll");
-      } else {
-        setStatus("challenge");
-      }
-    } catch {
-      // On error, fail open — don't lock users out because of MFA infra issues.
-      setStatus("ok");
-    }
+    // MVP: MFA is temporarily disabled. Never prompt for enrollment or a code.
+    setStatus("ok");
   }, [user]);
 
   useEffect(() => {
