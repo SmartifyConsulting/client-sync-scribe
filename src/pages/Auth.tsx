@@ -887,18 +887,41 @@ export default function Auth() {
             <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               {!useOtp ? (
                 <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="loginId">Email or Phone Number</Label>
-                    <div className="flex gap-2">
-                      {!loginId.includes("@") && <CountrySelector />}
-                      <div className="relative flex-1">
+                  {/* Email / Phone tab switch */}
+                  <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+                    <button
+                      type="button"
+                      onClick={() => setLoginTab("email")}
+                      className={cn(
+                        "flex items-center justify-center gap-1.5 rounded-md py-1.5 text-sm font-medium transition-colors",
+                        loginTab === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Mail className="h-3.5 w-3.5" /> Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLoginTab("phone")}
+                      className={cn(
+                        "flex items-center justify-center gap-1.5 rounded-md py-1.5 text-sm font-medium transition-colors",
+                        loginTab === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Phone className="h-3.5 w-3.5" /> Phone
+                    </button>
+                  </div>
+
+                  {loginTab === "email" ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="loginId">Email address</Label>
+                      <div className="relative">
                         <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           id="loginId"
-                          type="text"
-                          inputMode={loginId.includes("@") ? "email" : "tel"}
+                          type="email"
+                          inputMode="email"
                           autoComplete="username"
-                          placeholder="you@example.com or 82 123 4567"
+                          placeholder="you@example.com"
                           value={loginId}
                           onChange={(e) => setLoginId(e.target.value)}
                           className="pl-10"
@@ -906,12 +929,34 @@ export default function Auth() {
                         />
                       </div>
                     </div>
-                    {!loginId.includes("@") && loginId.trim() && (
-                      <p className="text-[10px] text-muted-foreground">
-                        Will sign in as {normalizePhone(loginId)}
-                      </p>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="loginPhone">Phone number</Label>
+                      <div className="flex gap-2">
+                        <CountrySelector />
+                        <div className="relative flex-1">
+                          <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            id="loginPhone"
+                            type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            placeholder="82 123 4567"
+                            value={loginPhone}
+                            onChange={(e) => setLoginPhone(e.target.value)}
+                            className="pl-10"
+                            required
+                          />
+                        </div>
+                      </div>
+                      {loginPhone.trim() && (
+                        <p className="text-[10px] text-muted-foreground">
+                          You'll sign in as {normalizePhone(`${countryCode}${loginPhone}`)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password">Password</Label>
