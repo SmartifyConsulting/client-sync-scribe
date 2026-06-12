@@ -107,6 +107,9 @@ export default function Auth() {
   const [otpCooldown, setOtpCooldown] = useState(0);
   // Signup: pick email or phone identifier
   const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
+  // Sign-in: pick email or phone
+  const [loginTab, setLoginTab] = useState<"email" | "phone">("email");
+  const [loginPhone, setLoginPhone] = useState("");
 
   useEffect(() => {
     if (otpCooldown <= 0) return;
@@ -527,15 +530,21 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const id = loginId.trim();
-    if (!id || !password) {
-      toast({ title: "Required", description: "Enter your email or phone and password", variant: "destructive" });
+    const isPhone = loginTab === "phone";
+    const id = isPhone
+      ? `${countryCode}${loginPhone.replace(/\s+/g, "")}`
+      : loginId.trim();
+    if ((isPhone ? !loginPhone.trim() : !id) || !password) {
+      toast({
+        title: "Required",
+        description: isPhone ? "Enter your phone number and password" : "Enter your email and password",
+        variant: "destructive",
+      });
       return;
     }
     setLoading(true);
     try {
-      const isEmail = id.includes("@");
-      const credentials = isEmail
+      const credentials = !isPhone
         ? { email: id, password }
         : { email: phoneToSyntheticEmail(normalizePhone(id)), password };
       const { data, error } = await supabase.auth.signInWithPassword(credentials as any);
@@ -878,18 +887,41 @@ export default function Auth() {
             <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
               {!useOtp ? (
                 <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="loginId">Email or Phone Number</Label>
-                    <div className="flex gap-2">
-                      {!loginId.includes("@") && <CountrySelector />}
-                      <div className="relative flex-1">
+                  {/* Email / Phone tab switch */}
+                  <div className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+                    <button
+                      type="button"
+                      onClick={() => setLoginTab("email")}
+                      className={cn(
+                        "flex items-center justify-center gap-1.5 rounded-md py-1.5 text-sm font-medium transition-colors",
+                        loginTab === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Mail className="h-3.5 w-3.5" /> Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLoginTab("phone")}
+                      className={cn(
+                        "flex items-center justify-center gap-1.5 rounded-md py-1.5 text-sm font-medium transition-colors",
+                        loginTab === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Phone className="h-3.5 w-3.5" /> Phone
+                    </button>
+                  </div>
+
+                  {loginTab === "email" ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="loginId">Email address</Label>
+                      <div className="relative">
                         <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                           id="loginId"
-                          type="text"
-                          inputMode={loginId.includes("@") ? "email" : "tel"}
+                          type="email"
+                          inputMode="email"
                           autoComplete="username"
-                          placeholder="you@example.com or 82 123 4567"
+                          placeholder="you@example.com"
                           value={loginId}
                           onChange={(e) => setLoginId(e.target.value)}
                           className="pl-10"
@@ -897,12 +929,34 @@ export default function Auth() {
                         />
                       </div>
                     </div>
-                    {!loginId.includes("@") && loginId.trim() && (
-                      <p className="text-[10px] text-muted-foreground">
-                        Will sign in as {normalizePhone(loginId)}
-                      </p>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="loginPhone">Phone number</Label>
+                      <div className="flex gap-2">
+                        <CountrySelector />
+                        <div className="relative flex-1">
+                          <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            id="loginPhone"
+                            type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            placeholder="82 123 4567"
+                            value={loginPhone}
+                            onChange={(e) => setLoginPhone(e.target.value)}
+                            className="pl-10"
+                            required
+                          />
+                        </div>
+                      </div>
+                      {loginPhone.trim() && (
+                        <p className="text-[10px] text-muted-foreground">
+                          You'll sign in as {normalizePhone(`${countryCode}${loginPhone}`)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password">Password</Label>
@@ -982,9 +1036,9 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => { setUseOtp(!useOtp); setOtpSent(false); setOtpCode(""); setPassword(""); }}
-                  className="block w-full text-sm text-primary hover:underline"
+                  className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline"
                 >
-                  {useOtp ? "Sign in with password instead" : "Email me a sign-in code instead"}
+                  {useOtp ? "Sign in with password instead" : "Prefer a one-time code? Email it to me"}
                 </button>
                 <button
                   type="button"
