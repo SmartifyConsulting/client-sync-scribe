@@ -827,7 +827,7 @@ export default function Auth() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              <PasswordStrength password={password} />
+              <PasswordStrength password={password} breached={breachedPassword} />
             </div>
             <div className="space-y-2">
               <Label>Mobile Number</Label>
