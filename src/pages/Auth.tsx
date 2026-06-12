@@ -1036,9 +1036,9 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => { setUseOtp(!useOtp); setOtpSent(false); setOtpCode(""); setPassword(""); }}
-                  className="block w-full text-sm text-primary hover:underline"
+                  className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline"
                 >
-                  {useOtp ? "Sign in with password instead" : "Email me a sign-in code instead"}
+                  {useOtp ? "Sign in with password instead" : "Prefer a one-time code? Email it to me"}
                 </button>
                 <button
                   type="button"
