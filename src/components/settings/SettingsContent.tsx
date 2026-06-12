@@ -448,10 +448,30 @@ export function SettingsContent() {
                   </div>
                 </div>
                 {loadingMfa ? null : mfaFactors.length > 0 ? (
-                  <Badge variant="secondary" className="text-xs">Required</Badge>
+                  <Button
+                    variant="outline"
+                    disabled={disablingMfa}
+                    onClick={() => disableMfa(mfaFactors[0].id)}
+                  >
+                    {disablingMfa ? <Loader2 className="h-4 w-4 animate-spin" /> : "Disable"}
+                  </Button>
                 ) : (
                   <Button variant="outline" onClick={() => setShow2FASetup(true)}>Enable</Button>
                 )}
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Ask for a login code every time I sign in</p>
+                  <p className="text-sm text-muted-foreground">
+                    When off, you'll only enter your password. When on, you'll also enter a 6-digit code from your authenticator app at every sign-in.
+                  </p>
+                </div>
+                <Switch
+                  checked={mfaRequired}
+                  disabled={savingMfaRequired || loadingMfa}
+                  onCheckedChange={handleToggleMfaRequired}
+                />
               </div>
               <Separator />
               <div><Button variant="outline" onClick={() => (window.location.href = "/forgot-password")}>Change Password</Button></div>
