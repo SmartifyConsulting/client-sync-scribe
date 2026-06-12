@@ -25,6 +25,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { DevErLoginButton } from "@/components/auth/DevErLoginButton";
 
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { cn } from "@/lib/utils";
 import { ShieldCheck, KeyRound } from "lucide-react";
 
 const DOCTOR_SPECIALTIES = [
