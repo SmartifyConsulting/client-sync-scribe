@@ -99,6 +99,7 @@ export default function Auth() {
   const [accountCreated, setAccountCreated] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [breachedPassword, setBreachedPassword] = useState(false);
   const [useOtp, setUseOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
