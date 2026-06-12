@@ -530,15 +530,21 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const id = loginId.trim();
-    if (!id || !password) {
-      toast({ title: "Required", description: "Enter your email or phone and password", variant: "destructive" });
+    const isPhone = loginTab === "phone";
+    const id = isPhone
+      ? `${countryCode}${loginPhone.replace(/\s+/g, "")}`
+      : loginId.trim();
+    if ((isPhone ? !loginPhone.trim() : !id) || !password) {
+      toast({
+        title: "Required",
+        description: isPhone ? "Enter your phone number and password" : "Enter your email and password",
+        variant: "destructive",
+      });
       return;
     }
     setLoading(true);
     try {
-      const isEmail = id.includes("@");
-      const credentials = isEmail
+      const credentials = !isPhone
         ? { email: id, password }
         : { email: phoneToSyntheticEmail(normalizePhone(id)), password };
       const { data, error } = await supabase.auth.signInWithPassword(credentials as any);
