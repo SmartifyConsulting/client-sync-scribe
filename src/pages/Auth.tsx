@@ -107,6 +107,9 @@ export default function Auth() {
   const [otpCooldown, setOtpCooldown] = useState(0);
   // Signup: pick email or phone identifier
   const [signupMethod, setSignupMethod] = useState<"email" | "phone">("email");
+  // Sign-in: pick email or phone
+  const [loginTab, setLoginTab] = useState<"email" | "phone">("email");
+  const [loginPhone, setLoginPhone] = useState("");
 
   useEffect(() => {
     if (otpCooldown <= 0) return;
