@@ -24,6 +24,18 @@ export function MfaGate({ children }: { children: React.ReactNode }) {
     }
     setStatus("loading");
     try {
+      // MFA is opt-in per user via profiles.mfa_required.
+      // If the user has not enabled it, never prompt for enrollment or a code.
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("mfa_required")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!profile?.mfa_required) {
+        setStatus("ok");
+        return;
+      }
+
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal?.currentLevel === "aal2") {
         setStatus("ok");
@@ -37,8 +49,8 @@ export function MfaGate({ children }: { children: React.ReactNode }) {
         setStatus("challenge");
       }
     } catch {
-      // If MFA APIs fail, force enroll to be safe.
-      setStatus("enroll");
+      // On error, fail open — don't lock users out because of MFA infra issues.
+      setStatus("ok");
     }
   }, [user]);
 
