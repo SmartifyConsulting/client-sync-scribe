@@ -52,6 +52,8 @@ export function SettingsContent() {
   const [mfaFactors, setMfaFactors] = useState<any[]>([]);
   const [loadingMfa, setLoadingMfa] = useState(true);
   const [disablingMfa, setDisablingMfa] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [savingMfaRequired, setSavingMfaRequired] = useState(false);
   const [showManagePlan, setShowManagePlan] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [selectedBillingCycle, setSelectedBillingCycle] = useState<"monthly" | "annual">("monthly");
