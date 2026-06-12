@@ -35,6 +35,10 @@ interface PricingPlans { monthly: PlanConfig; annual: PlanConfig; }
 interface Subscription { id: string; user_id: string; plan_type: string; billing_cycle: string; status: string; paypal_subscription_id: string | null; current_period_start: string | null; current_period_end: string | null; created_at: string; }
 interface PaymentHistoryItem { id: string; user_id: string; subscription_id: string | null; paypal_transaction_id: string | null; amount: number; currency: string; description: string; status: string; created_at: string; }
 
+// MVP: temporarily disable MFA UI (TOTP enroll, disable, and login-code toggle).
+// Flip to false to restore.
+const MVP_MFA_DISABLED = true;
+
 export function SettingsContent() {
   const { toast } = useToast();
   const { user } = useAuth();
