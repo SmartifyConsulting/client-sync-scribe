@@ -209,8 +209,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .eq("id", uninviteTarget.id);
 
       // Intentionally do NOT notify the doctor when a patient revokes access.
-      toast({ title: "Doctor removed", description: "Access has been revoked." });
-      queryClient.invalidateQueries({ queryKey: ["patient-doctors"] });
+      toast({ title: "Doctor deactivated", description: "They no longer have live access. Historic records are preserved." });
+      queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
       setUninviteTarget(null);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -219,7 +219,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     }
   };
 
-  const DoctorTableRow = ({ access, doctor, permissions }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[] }) => {
+  const DoctorTableRow = ({ access, doctor, permissions, mode }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[]; mode: "active" | "hidden" }) => {
     const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information') || [];
 
     return (
@@ -237,6 +237,11 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               {doctor.practice_number && (
                 <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
               )}
+              {mode === "hidden" && (
+                <span className="text-[10px] text-muted-foreground italic">
+                  {!access.is_active ? "Deactivated" : "Hidden"}
+                </span>
+              )}
             </div>
           </div>
         </TableCell>
@@ -249,7 +254,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            {filteredPermissions.length > 0 && (
+            {mode === "active" && filteredPermissions.length > 0 && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -266,14 +271,51 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 </Tooltip>
               </TooltipProvider>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() => setUninviteTarget(access)}
-            >
-              <UserMinus className="h-3.5 w-3.5" />
-            </Button>
+            {mode === "active" ? (
+              <>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleHide(access)}
+                        aria-label="Hide doctor"
+                      >
+                        <EyeOff className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">Hide from your active list (keeps history)</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setUninviteTarget(access)}
+                        aria-label="Deactivate doctor"
+                      >
+                        <UserMinus className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">Deactivate (revoke live access, keep history)</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => handleRestore(access)}
+              >
+                <Eye className="h-3.5 w-3.5" /> Restore
+              </Button>
+            )}
           </div>
         </TableCell>
       </TableRow>
