@@ -1,78 +1,37 @@
-## Prescription Renewal Reminders & Doctor Hide/Deactivate
+## Update Sign-Up & Authenticate skill
 
-Two related patient features:
+Add a new section to `.workspace/skills/sign-up-and-authenticate/SKILL.md` (via draft at `.agents/skills/sign-up-and-authenticate/SKILL.md`, then `skills--apply_draft`) that codifies the install-app banner as an always-on auth-shell requirement.
 
-### 1. Repeat-prescription renewal reminders
+### New section: "10. Install-app banner on every sign-in"
 
-**Detection (client-side, no schema changes):**
-- A prescription needs renewing when `status='active'` AND any of:
-  - `end_date` is within the next 7 days (or already passed)
-  - `refills_remaining = 0` AND `end_date` is null (chronic refill exhausted)
-- Use `refill_reminder_days` (already on the table) as the lead window when present, else default 7.
+Rules to encode:
 
-**Where the patient sees it:**
-- New "Renewals due" card on `src/pages/patient/PatientDashboard.tsx` listing each medication with: name, dosage, frequency, days-until-expiry, original prescribing doctor's name.
-- Also a "Needs renewal" badge + button on `PrescriptionHistory.tsx`.
-- One `notifications` row per prescription per renewal window (dedupe via `metadata.prescription_id` + `metadata.window_start`).
+- Every authenticated session must render an **install-app banner** at the very top of the app shell (above the header/nav), on every page, until the user either installs or dismisses it.
+- Reuse the existing `InstallAppPrompt` styling pattern (`src/components/InstallAppPrompt.tsx`) — teal-tinted card, Smartphone icon, "Install Holarc on your phone / Works on iPhone and Android — one-tap access from your home screen.", and the `InstallAppButton variant="primary"` action. Add a right-aligned dismiss (X) button.
+- Visibility logic (in order):
+  1. Hidden if `isStandalone()` is true (already installed).
+  2. Hidden if `appinstalled` has fired this session.
+  3. Hidden if `localStorage["holarc-install-banner-dismissed"] === "1"` (permanent dismiss — survives sign-out/sign-in by design; only cleared by the user reinstalling the browser profile or via a future "show install tips again" entry).
+  4. Otherwise shown on every authenticated route, including after each fresh sign-in.
+- Key name: `holarc-install-banner-dismissed`. Do not reuse `holarc-install-dismissed-until` (that one is the 7-day soft-dismiss for the compact header button and stays as-is).
+- Dismiss button: sets the key to `"1"`, hides the banner, no toast.
+- Install button: delegates to existing `InstallAppButton` (handles `beforeinstallprompt`, iOS Safari sheet, Android browser-specific sheet). On successful `appinstalled`, banner hides automatically.
+- Mount point: top of the authenticated layout wrapper (the same layout that hosts `AppHeader` / `MobileHeader`), so it appears on every signed-in page and immediately after redirect from `/auth` → `/dashboard` / onboarding. Do **not** mount it on `/auth`, `/verify-email`, `/forgot-password`, `/reset-password`, or `/auth/challenge` — those screens stay focused on the auth task.
+- Accessibility: banner is a `<div role="region" aria-label="Install app">`; dismiss button has `aria-label="Dismiss install banner"` and `tabIndex={-1}` so it doesn't interfere with the §8 auth-form tab order on pages that contain forms.
 
-**Renewal action — request via task:**
-- "Request renewal" button opens a dialog with three sections:
-  1. **Prescription summary (read-only)** — medication, dosage, frequency, instructions, refills remaining, end date. Visually styled as a disabled/read-only block so the patient cannot edit the original prescription.
-  2. **Doctor selector** — defaults to the original prescribing `doctor_id`. Dropdown lists the patient's active+non-hidden doctors (see feature 2). An "Other doctor…" option opens the existing doctor search.
-  3. **Patient comment (optional, free text)** — labelled clearly, e.g. *"Anything you'd like changed? (dose, frequency, side-effects, switch medication, etc.)"* with placeholder examples. Multi-line textarea, ~500 char limit. This is the only editable field — the patient never mutates the prescription itself; the comment is the channel for requesting adjustments.
-- On submit, insert a `todos` row assigned to the chosen doctor:
-  - `user_id` = chosen doctor's id
-  - `patient_id` = patient id
-  - `task_type = 'prescription_renewal'`
-  - `title` = "Renew prescription: {medication} {dosage}" (suffix " — adjustment requested" when the patient added a comment, so the doctor sees at a glance it's not a plain renewal)
-  - `description` = read-only prescription summary + a clearly delimited **"Patient comment"** block containing the free text (empty section omitted when no comment)
-  - `priority` = `'high'` when already expired OR a comment was provided, else `'normal'`
-  - `due_date` = prescription `end_date` (or +7 days)
-- Also write a `notifications` row to the chosen doctor. When a comment is present, the notification title reads "Renewal + adjustment request" so the doctor knows to read before re-prescribing.
-- Persist the request in `prescription_renewal_requests` (see Technical) including the comment, so the patient's button flips to "Renewal requested" and we can show the comment back to them.
+### Implementation notes embedded in the skill
 
-### 2. Hide / deactivate doctors on the patient side
+- New component `src/components/InstallAppBanner.tsx` that wraps `InstallAppPrompt` content with the dismiss control + localStorage gate + `appinstalled` listener.
+- Mount in the authenticated layout (e.g. the wrapper used by `RequireEmailVerified`/dashboard routes). The skill will name the file but leave the exact layout file to whoever implements it, since this skill is a contract not a patch.
 
-- On `src/pages/patient/MyDoctors.tsx`, add per-doctor actions: **Deactivate** and **Hide**, plus **Active** / **Hidden** tabs with **Restore** in the Hidden tab.
-- Hiding/deactivating only affects the patient's view and the patient-side doctor lists (renewal selector, round table participants, share targets). Historic data (sessions, prescriptions, documents, notes) remains visible in their respective history views.
-- Doctors are not notified when hidden/deactivated.
+### File map update
 
-**Semantics:**
-- *Deactivate*: ends the working relationship — sets `doctor_patient_access.is_active = false` and `revoked_at = now()`. Doctor loses live access going forward.
-- *Hide*: pure visual filter for the patient. Stored in a new patient-owned mapping table so the patient can hide and restore independently of active/inactive state.
+Add to the existing File map table:
+
+| Persistent install banner | `src/components/InstallAppBanner.tsx` (mounted in authed layout) |
 
 ### Out of scope
-- No doctor-side UI changes beyond receiving the new `todo` + notification.
-- No SMS/email — in-app notification bell only.
-- No new medications/dosing/AI logic.
-- No automatic deactivation based on inactivity.
 
----
-
-### Technical section
-
-**Schema additions (one migration):**
-
-1. `public.patient_hidden_doctors`
-   - `id uuid pk`, `patient_user_id uuid`, `doctor_id uuid`, `hidden_at timestamptz`, unique `(patient_user_id, doctor_id)`.
-   - GRANT select/insert/delete to `authenticated`; ALL to `service_role`.
-   - RLS: `patient_user_id = auth.uid()`.
-
-2. `public.prescription_renewal_requests`
-   - `id uuid pk`, `prescription_id uuid` (fk), `patient_user_id uuid`, `requested_doctor_id uuid`, `original_doctor_id uuid`, `todo_id uuid null`, `status text default 'pending'`, `patient_comment text null`, `created_at`, `updated_at`.
-   - GRANT to `authenticated` + `service_role`.
-   - RLS: patient (owner) can select/insert/update their own; `requested_doctor_id` can select/update; admin via `has_role`.
-   - `updated_at` trigger.
-
-**Files to add/edit:**
-- `supabase/migrations/<ts>_renewals_and_hide_doctors.sql` — both tables + RLS + GRANTs + trigger.
-- `src/features/patients/hooks/usePrescriptionRenewals.ts` — derive `needsRenewal`, join existing renewal requests.
-- `src/features/patients/components/RenewalRequestDialog.tsx` — read-only prescription summary, doctor selector (default = original prescriber), optional patient comment textarea, submit handler that composes the todo description with a "Patient comment" block when present.
-- `src/features/patients/components/RenewalsDueCard.tsx` — used on `PatientDashboard.tsx`.
-- Update `src/pages/patient/PrescriptionHistory.tsx` — "Needs renewal" badge + button to open the dialog.
-- `src/pages/patient/MyDoctors.tsx` — Active/Hidden tabs, Deactivate/Hide/Restore actions.
-- `src/features/patients/lib/visibleDoctors.ts` — returns the patient's active+non-hidden doctors; reused everywhere "my doctors" is listed.
-
-**Notification dedupe:** insert a `notifications` row with `metadata = { prescription_id, window_start }` and skip when one already exists.
-
-**No edits to** auto-generated Supabase types/client; no edge functions needed.
+- No changes to `InstallAppButton` or `InstallAppPrompt` behavior.
+- No analytics, no server-side tracking of dismissals.
+- No re-prompt schedule — dismiss is permanent until the user clears site data.
