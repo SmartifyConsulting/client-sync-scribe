@@ -496,13 +496,23 @@ Only return JSON.`;
         proof_url: status === 'completed' ? null : firstFrameUrl,
         ...extras,
       };
+      let adherenceId: string | null = existing?.id ?? null;
       if (existing?.id) {
         await supabase.from('medication_adherence').update(payload).eq('id', existing.id);
       } else {
-        await supabase.from('medication_adherence').insert({
+        const { data: ins } = await supabase.from('medication_adherence').insert({
           patient_id: patientId, prescription_id: prescriptionId, scheduled_date: today,
           ...payload,
-        });
+        }).select('id').maybeSingle();
+        adherenceId = (ins as any)?.id ?? null;
+      }
+      // Fan out "taken" alert to opted-in contacts (idempotent on adherence row).
+      if (adherenceId && (status === 'taken' || status === 'auto_approved')) {
+        try {
+          await supabase.functions.invoke('notify-contacts-medication-taken', {
+            body: { adherence_id: adherenceId },
+          });
+        } catch (_) { /* swallow */ }
       }
     };
 

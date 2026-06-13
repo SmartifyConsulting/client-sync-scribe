@@ -403,6 +403,52 @@ export function SettingsContent() {
                 <div><p className="font-medium text-foreground">Follow-up Alerts</p><p className="text-sm text-muted-foreground">Reminders for scheduled follow-ups</p></div>
                 <Switch defaultChecked />
               </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Alert my Emergency Contacts if I miss medication</p>
+                  <p className="text-sm text-muted-foreground">Master switch — per-contact and per-medication opt-ins must also be on.</p>
+                </div>
+                <Switch
+                  checked={(profile as any)?.notify_contacts_on_missed_meds ?? true}
+                  onCheckedChange={async (v) => {
+                    await updateProfile({ notify_contacts_on_missed_meds: v } as any);
+                    toast({ title: "Saved" });
+                  }}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Alert my Emergency Contacts when I take medication</p>
+                  <p className="text-sm text-muted-foreground">Only contacts you've opted in for each medication will be notified.</p>
+                </div>
+                <Switch
+                  checked={(profile as any)?.notify_contacts_on_taken_meds ?? false}
+                  onCheckedChange={async (v) => {
+                    await updateProfile({ notify_contacts_on_taken_meds: v } as any);
+                    toast({ title: "Saved" });
+                  }}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-foreground">Screen tips</p>
+                  <p className="text-sm text-muted-foreground">Show the first-visit orientation tip on every screen again.</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    const { resetAllScreenTips } = await import("@/hooks/useScreenTip");
+                    const { error } = await resetAllScreenTips();
+                    toast({ title: error ? "Failed" : "Tips reset", description: error ?? "You'll see them again on each screen." });
+                  }}
+                >
+                  Reset tips
+                </Button>
+              </div>
               {isDoctor && (
                 <>
                   <Separator />

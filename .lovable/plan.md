@@ -1,37 +1,137 @@
-## Update Sign-Up & Authenticate skill
+## Goal
+1. Notify Next of Kin / Emergency Contacts when a patient misses a chronic or daily medication dose.
+2. Optionally also alert them when the patient **does** take the dose.
+3. Show a one-time navigation tip on every screen the first time a user visits it (never again after that).
 
-Add a new section to `.workspace/skills/sign-up-and-authenticate/SKILL.md` (via draft at `.agents/skills/sign-up-and-authenticate/SKILL.md`, then `skills--apply_draft`) that codifies the install-app banner as an always-on auth-shell requirement.
+---
 
-### New section: "10. Install-app banner on every sign-in"
+## Part A — Missed-medication notifications
 
-Rules to encode:
+### 1. Per-medication alert settings (at setup time)
+When a medication is added or edited (`PrescriptionEditor`, `DailyMedsInline`), the existing fields (times, dose, frequency) get two new inputs in the same form:
 
-- Every authenticated session must render an **install-app banner** at the very top of the app shell (above the header/nav), on every page, until the user either installs or dismisses it.
-- Reuse the existing `InstallAppPrompt` styling pattern (`src/components/InstallAppPrompt.tsx`) — teal-tinted card, Smartphone icon, "Install Holarc on your phone / Works on iPhone and Android — one-tap access from your home screen.", and the `InstallAppButton variant="primary"` action. Add a right-aligned dismiss (X) button.
-- Visibility logic (in order):
-  1. Hidden if `isStandalone()` is true (already installed).
-  2. Hidden if `appinstalled` has fired this session.
-  3. Hidden if `localStorage["holarc-install-banner-dismissed"] === "1"` (permanent dismiss — survives sign-out/sign-in by design; only cleared by the user reinstalling the browser profile or via a future "show install tips again" entry).
-  4. Otherwise shown on every authenticated route, including after each fresh sign-in.
-- Key name: `holarc-install-banner-dismissed`. Do not reuse `holarc-install-dismissed-until` (that one is the 7-day soft-dismiss for the compact header button and stays as-is).
-- Dismiss button: sets the key to `"1"`, hides the banner, no toast.
-- Install button: delegates to existing `InstallAppButton` (handles `beforeinstallprompt`, iOS Safari sheet, Android browser-specific sheet). On successful `appinstalled`, banner hides automatically.
-- Mount point: top of the authenticated layout wrapper (the same layout that hosts `AppHeader` / `MobileHeader`), so it appears on every signed-in page and immediately after redirect from `/auth` → `/dashboard` / onboarding. Do **not** mount it on `/auth`, `/verify-email`, `/forgot-password`, `/reset-password`, or `/auth/challenge` — those screens stay focused on the auth task.
-- Accessibility: banner is a `<div role="region" aria-label="Install app">`; dismiss button has `aria-label="Dismiss install banner"` and `tabIndex={-1}` so it doesn't interfere with the §8 auth-form tab order on pages that contain forms.
+- **"Alert if missed after"** — number input + unit selector (minutes / hours). Default 30 min. Stored as `prescriptions.missed_alert_after_minutes integer default 30`.
+- **"Also alert contacts when I take this dose"** — checkbox, default off. Stored as `prescriptions.alert_contacts_on_taken boolean default false`.
 
-### Implementation notes embedded in the skill
+### 2. Per-contact opt-in
+In `EmergencyContactsSection.tsx` and the NOK editor, two toggles per contact:
+- **"Alert when I miss medication"** (`notify_on_missed_medication`, default off)
+- **"Alert when I take medication"** (`notify_on_taken_medication`, default off)
 
-- New component `src/components/InstallAppBanner.tsx` that wraps `InstallAppPrompt` content with the dismiss control + localStorage gate + `appinstalled` listener.
-- Mount in the authenticated layout (e.g. the wrapper used by `RequireEmailVerified`/dashboard routes). The skill will name the file but leave the exact layout file to whoever implements it, since this skill is a contract not a patch.
+Stored inside the existing `patients.emergency_contacts` / `next_of_kin_members` jsonb.
 
-### File map update
+### 3. Patient master switches (Settings → Notifications)
+- "Alert my Emergency Contacts if I miss medication" (default on) → `profiles.notify_contacts_on_missed_meds`
+- "Alert my Emergency Contacts when I take medication" (default off) → `profiles.notify_contacts_on_taken_meds`
 
-Add to the existing File map table:
+Master + per-contact + per-med must all be on for the alert to fire.
 
-| Persistent install banner | `src/components/InstallAppBanner.tsx` (mounted in authed layout) |
+### 4. Missed-dose detection (backend)
+Scheduled edge function `check-missed-medications`, cron every 5 min.
 
-### Out of scope
+For each active chronic/daily `prescriptions` row, for each `reminder_times` slot whose scheduled datetime is ≥ `missed_alert_after_minutes` in the past (within a 10-min lookback window):
+- If `medication_adherence` for `(prescription_id, scheduled_date)` is missing or `status='pending'`, upsert with `status='missed'`, set `missed_alert_sent_at=now()`.
+- Patient gets in-app notification.
+- Each opted-in contact gets in-app notification (if linked user) + email via `send-email` + optional SMS.
 
-- No changes to `InstallAppButton` or `InstallAppPrompt` behavior.
-- No analytics, no server-side tracking of dismissals.
-- No re-prompt schedule — dismiss is permanent until the user clears site data.
+`missed_alert_sent_at` prevents duplicates.
+
+### 5. Taken-dose notification
+DB trigger on `medication_adherence`: when status transitions to `taken`/`auto_approved` and all opt-in conditions are true, notify opted-in contacts. `taken_alert_sent_at` prevents duplicates.
+
+### 6. Notification types
+- `medication_missed_self`, `medication_missed_contact`, `medication_taken_contact` — surface in bell dropdown and `/notifications`.
+
+### 7. `is_chronic` flag
+Add `prescriptions.is_chronic boolean default false` and a checkbox in `PrescriptionEditor`.
+
+### Migration
+```text
+ALTER TABLE prescriptions
+  ADD COLUMN IF NOT EXISTS is_chronic boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS missed_alert_after_minutes integer DEFAULT 30,
+  ADD COLUMN IF NOT EXISTS alert_contacts_on_taken boolean DEFAULT false;
+
+ALTER TABLE medication_adherence
+  ADD COLUMN IF NOT EXISTS missed_alert_sent_at timestamptz,
+  ADD COLUMN IF NOT EXISTS taken_alert_sent_at timestamptz,
+  ADD COLUMN IF NOT EXISTS contact_alerts_sent jsonb DEFAULT '[]'::jsonb;
+
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS notify_contacts_on_missed_meds boolean DEFAULT true,
+  ADD COLUMN IF NOT EXISTS notify_contacts_on_taken_meds boolean DEFAULT false;
+```
+
+---
+
+## Part B — First-visit navigation tips
+
+### Behaviour
+The first time an authenticated user lands on any route, a small **tip card** (popover-style, anchored to the page header / main nav item for that screen) fades in. It contains:
+- Screen name (e.g. "My Holarchive")
+- 1–2 sentence orientation: what this screen does and the main action
+- A **"Got it"** button that dismisses and marks the screen as seen forever
+- An auto-dismiss after 8 s also marks it seen
+
+Once marked seen, the tip never appears for that user again — even after logout, new device, or browser change.
+
+### Tip content registry
+Single file `src/lib/screenTips.ts` exporting a typed map:
+```text
+{ routePattern: '/patient/details', title: 'My Holarchive', body: '...' }
+```
+One entry per top-level screen (~25 entries: Dashboard, My Holarchive, My Doctors, Prescriptions, Sessions, Documents, Calendar, Tasks, Rewards, SOS, Settings, Doctor Dashboard, Patients, Invoices, Admin, etc.). Each entry has a stable `id` (the storage key).
+
+### Persistence — cross-device, never repeat
+Server-side per user: new table `public.user_screen_tips_seen`.
+
+```text
+CREATE TABLE public.user_screen_tips_seen (
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  tip_id text NOT NULL,
+  seen_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, tip_id)
+);
+GRANT SELECT, INSERT, DELETE ON public.user_screen_tips_seen TO authenticated;
+GRANT ALL ON public.user_screen_tips_seen TO service_role;
+ALTER TABLE public.user_screen_tips_seen ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage their own tip flags"
+  ON public.user_screen_tips_seen FOR ALL TO authenticated
+  USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+```
+
+DELETE permission lets a "Reset tips" button in Settings re-show all tips.
+
+### Implementation
+- New hook `useScreenTip(tipId)` — on mount, queries `user_screen_tips_seen` once (React Query, cached for session); returns `{ shouldShow, dismiss }`. `dismiss()` inserts the row (upsert ignore conflict) and updates cache.
+- New component `ScreenTip.tsx` — small dismissible popover/card with teal border (matches Style Manifest), "Got it" + close (X) buttons, 8 s auto-dismiss timer.
+- Mounting strategy: a single `<RouteTipHost />` placed inside the authed layout wrapper. It reads `useLocation()`, looks up the matching tip in `screenTips.ts`, and renders `<ScreenTip />` if found and `shouldShow`. No per-page wiring required.
+- Hidden on `/auth`, `/verify-email`, `/forgot-password`, `/reset-password`, `/auth/challenge`, public SOS tracking pages.
+- "Reset all tips" button in Settings → Preferences → deletes all rows for the user from `user_screen_tips_seen`.
+
+### Out of scope (tips)
+- Multi-step product tours (existing `DashboardTour` stays untouched and unrelated).
+- Per-element tooltips inside a screen — only one orientation tip per route.
+- Localised translations (English only for v1; copy lives in `screenTips.ts` and can be translated later).
+
+---
+
+## Files touched
+
+**Migrations** — one for med columns + master switches, one for `user_screen_tips_seen`.
+
+**Edge functions** — `check-missed-medications` (+ pg_cron `*/5 * * * *`), optional `notify-contacts-medication-taken` (or pure trigger fanout).
+
+**Frontend**
+- `PrescriptionEditor.tsx`, `DailyMedsInline.tsx` — add `is_chronic`, `missed_alert_after_minutes`, `alert_contacts_on_taken`.
+- `EmergencyContactsSection.tsx` + NOK editor — two new per-contact toggles.
+- Settings notifications panel — two master switches + "Reset tips" button.
+- `src/lib/screenTips.ts` — tip registry.
+- `src/hooks/useScreenTip.ts` — hook.
+- `src/components/ScreenTip.tsx` + `src/components/RouteTipHost.tsx` — UI.
+- Authed layout wrapper — mount `<RouteTipHost />`.
+
+## Out of scope (overall)
+- Native push notifications (uses in-app + email).
+- SMS gateway changes (reuse existing).
+- Per-contact custom miss-windows (window is per-medication).

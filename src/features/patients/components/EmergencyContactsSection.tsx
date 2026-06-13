@@ -16,6 +16,8 @@ export interface EmergencyContact {
   relationship?: string;
   can_view_profile?: boolean;
   can_view_live_tracking?: boolean;
+  notify_on_missed_medication?: boolean;
+  notify_on_taken_medication?: boolean;
 }
 
 interface Props {
@@ -53,6 +55,8 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
         relationship: "",
         can_view_profile: false,
         can_view_live_tracking: true, // EC default = true
+        notify_on_missed_medication: false,
+        notify_on_taken_medication: false,
       },
     ]);
   };
@@ -73,7 +77,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
           Emergency Contacts
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Notified by default when you trigger an SOS. Toggle whether they can view your profile or live tracking.
+          Notified by default when you trigger an SOS. Toggle whether they can view your profile or live tracking, or get alerted on missed/taken medication.
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -130,6 +134,20 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
                   onCheckedChange={(v) => updateContact(c.id, { can_view_live_tracking: v })}
                 />
                 Receive my SOS live tracking
+              </label>
+              <label className="flex items-center gap-2 text-xs">
+                <Switch
+                  checked={!!c.notify_on_missed_medication}
+                  onCheckedChange={(v) => updateContact(c.id, { notify_on_missed_medication: v })}
+                />
+                Alert when I miss medication
+              </label>
+              <label className="flex items-center gap-2 text-xs">
+                <Switch
+                  checked={!!c.notify_on_taken_medication}
+                  onCheckedChange={(v) => updateContact(c.id, { notify_on_taken_medication: v })}
+                />
+                Alert when I take medication
               </label>
               <Button
                 variant="ghost"

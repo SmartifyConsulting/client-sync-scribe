@@ -12,6 +12,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
 import { AlertCircle, LifeBuoy } from "lucide-react";
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
+import { RouteTipHost } from "@/components/RouteTipHost";
 
 
 export function AppLayout() {
@@ -75,6 +76,7 @@ export function AppLayout() {
       {/* Mobile bottom navigation */}
       <BottomNav />
 
+      <RouteTipHost />
     </div>
   );
 }

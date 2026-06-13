@@ -2806,8 +2806,10 @@ export type Database = {
         Row: {
           auto_approved_at: string | null
           confidence_score: number | null
+          contact_alerts_sent: Json
           created_at: string
           id: string
+          missed_alert_sent_at: string | null
           patient_id: string
           prescription_id: string
           proof_url: string | null
@@ -2816,13 +2818,16 @@ export type Database = {
           status: string
           tablet_count_detected: number | null
           tablet_count_expected: number | null
+          taken_alert_sent_at: string | null
           taken_at: string | null
         }
         Insert: {
           auto_approved_at?: string | null
           confidence_score?: number | null
+          contact_alerts_sent?: Json
           created_at?: string
           id?: string
+          missed_alert_sent_at?: string | null
           patient_id: string
           prescription_id: string
           proof_url?: string | null
@@ -2831,13 +2836,16 @@ export type Database = {
           status?: string
           tablet_count_detected?: number | null
           tablet_count_expected?: number | null
+          taken_alert_sent_at?: string | null
           taken_at?: string | null
         }
         Update: {
           auto_approved_at?: string | null
           confidence_score?: number | null
+          contact_alerts_sent?: Json
           created_at?: string
           id?: string
+          missed_alert_sent_at?: string | null
           patient_id?: string
           prescription_id?: string
           proof_url?: string | null
@@ -2846,6 +2854,7 @@ export type Database = {
           status?: string
           tablet_count_detected?: number | null
           tablet_count_expected?: number | null
+          taken_alert_sent_at?: string | null
           taken_at?: string | null
         }
         Relationships: [
@@ -3815,6 +3824,7 @@ export type Database = {
       }
       prescriptions: {
         Row: {
+          alert_contacts_on_taken: boolean
           approved_medication_id: string | null
           created_at: string
           doctor_id: string
@@ -3823,7 +3833,9 @@ export type Database = {
           frequency: string
           id: string
           instructions: string | null
+          is_chronic: boolean
           medication: string
+          missed_alert_after_minutes: number
           patient_id: string
           quantity_per_dose: number
           refill_reminder_days: number | null
@@ -3838,6 +3850,7 @@ export type Database = {
           with_food: string | null
         }
         Insert: {
+          alert_contacts_on_taken?: boolean
           approved_medication_id?: string | null
           created_at?: string
           doctor_id: string
@@ -3846,7 +3859,9 @@ export type Database = {
           frequency: string
           id?: string
           instructions?: string | null
+          is_chronic?: boolean
           medication: string
+          missed_alert_after_minutes?: number
           patient_id: string
           quantity_per_dose?: number
           refill_reminder_days?: number | null
@@ -3861,6 +3876,7 @@ export type Database = {
           with_food?: string | null
         }
         Update: {
+          alert_contacts_on_taken?: boolean
           approved_medication_id?: string | null
           created_at?: string
           doctor_id?: string
@@ -3869,7 +3885,9 @@ export type Database = {
           frequency?: string
           id?: string
           instructions?: string | null
+          is_chronic?: boolean
           medication?: string
+          missed_alert_after_minutes?: number
           patient_id?: string
           quantity_per_dose?: number
           refill_reminder_days?: number | null
@@ -3984,6 +4002,8 @@ export type Database = {
           mfa_required: boolean
           mobile_number: string | null
           narration_voice: string | null
+          notify_contacts_on_missed_meds: boolean
+          notify_contacts_on_taken_meds: boolean
           practice_address: string | null
           practice_color: string | null
           practice_number: string | null
@@ -4024,6 +4044,8 @@ export type Database = {
           mfa_required?: boolean
           mobile_number?: string | null
           narration_voice?: string | null
+          notify_contacts_on_missed_meds?: boolean
+          notify_contacts_on_taken_meds?: boolean
           practice_address?: string | null
           practice_color?: string | null
           practice_number?: string | null
@@ -4064,6 +4086,8 @@ export type Database = {
           mfa_required?: boolean
           mobile_number?: string | null
           narration_voice?: string | null
+          notify_contacts_on_missed_meds?: boolean
+          notify_contacts_on_taken_meds?: boolean
           practice_address?: string | null
           practice_color?: string | null
           practice_number?: string | null
@@ -4701,6 +4725,24 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_screen_tips_seen: {
+        Row: {
+          seen_at: string
+          tip_id: string
+          user_id: string
+        }
+        Insert: {
+          seen_at?: string
+          tip_id: string
+          user_id: string
+        }
+        Update: {
+          seen_at?: string
+          tip_id?: string
           user_id?: string
         }
         Relationships: []

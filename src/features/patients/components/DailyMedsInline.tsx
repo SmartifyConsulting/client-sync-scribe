@@ -54,6 +54,9 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
   const [customName, setCustomName] = useState("");
   const [customCategory, setCustomCategory] = useState<"vitamin" | "supplement" | "otc">("vitamin");
   const [remindMe, setRemindMe] = useState(true);
+  const [isChronic, setIsChronic] = useState(false);
+  const [missedAfter, setMissedAfter] = useState(30); // minutes
+  const [alertContactsTaken, setAlertContactsTaken] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -97,6 +100,9 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
       source: "self",
       approved_medication_id: approvedId,
       reminders_enabled: remindMe,
+      is_chronic: isChronic,
+      missed_alert_after_minutes: missedAfter,
+      alert_contacts_on_taken: alertContactsTaken,
     } as any);
     if (error) {
       toast({ title: "Couldn't add", description: error.message, variant: "destructive" });
@@ -197,6 +203,27 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
           <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
             <Switch checked={remindMe} onCheckedChange={setRemindMe} className="scale-75" />
             Remind me
+          </label>
+          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Switch checked={isChronic} onCheckedChange={setIsChronic} className="scale-75" />
+            Chronic
+          </label>
+          <div className="flex items-center gap-1">
+            <Label className="text-[10px]">Alert if missed after</Label>
+            <Input
+              type="number"
+              min={5}
+              max={1440}
+              step={5}
+              value={missedAfter}
+              onChange={(e) => setMissedAfter(Math.max(5, parseInt(e.target.value || "30", 10)))}
+              className="h-8 w-20 text-xs"
+            />
+            <span className="text-[10px] text-muted-foreground">min</span>
+          </div>
+          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Switch checked={alertContactsTaken} onCheckedChange={setAlertContactsTaken} className="scale-75" />
+            Alert contacts when taken
           </label>
           <Button variant="ghost" size="sm" className="h-7 text-[11px]" onClick={() => setShowCustom((s) => !s)}>
             {showCustom ? "Pick from list" : "+ Add custom"}

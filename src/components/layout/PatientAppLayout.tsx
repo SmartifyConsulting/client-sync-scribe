@@ -11,6 +11,7 @@ import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { TopBarIcons } from "./TopBarIcons";
 
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
+import { RouteTipHost } from "@/components/RouteTipHost";
 
 
 
@@ -76,6 +77,7 @@ export function PatientAppLayout() {
       </div>
 
       <BottomNav />
+      <RouteTipHost />
     </div>
   );
 }
