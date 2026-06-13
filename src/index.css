@@ -236,14 +236,14 @@
 @layer components {
   /* Airbnb-style cards */
   .card-modern {
-    @apply rounded-2xl bg-card border-0 transition-all duration-300;
-    box-shadow: var(--shadow-card);
+    @apply rounded-lg bg-card border border-border transition-colors duration-200;
   }
 
+
   .card-modern:hover {
-    box-shadow: var(--shadow-card-hover);
-    transform: translateY(-2px);
+    @apply border-primary bg-muted;
   }
+
 
   /* Clean stat cards */
   .stat-card {
@@ -276,12 +276,14 @@
   }
 
   .nav-item:hover {
-    @apply bg-secondary;
+    @apply text-primary;
   }
 
+
   .nav-item.active {
-    @apply bg-primary text-primary-foreground;
+    @apply text-primary border-b-2 border-primary rounded-none bg-transparent;
   }
+
 }
 
 @layer utilities {
@@ -321,9 +323,9 @@
   }
 
   .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    border-color: hsl(var(--primary));
   }
+
 
   /* Safe area for mobile devices with notches/home indicators */
   .safe-area-pb {
