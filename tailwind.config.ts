@@ -15,7 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        display: ["Inter", "system-ui", "sans-serif"],
+        display: ["Poppins", "Inter", "system-ui", "sans-serif"],
+        poppins: ["Poppins", "system-ui", "sans-serif"],
         lora: ["Lora", "serif"],
         merriweather: ["Merriweather", "serif"],
         "open-sans": ["Open Sans", "sans-serif"],

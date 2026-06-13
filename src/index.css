@@ -2,6 +2,11 @@
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
 @import "@fontsource/inter/700.css";
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+
 
 @tailwind base;
 @tailwind components;
@@ -27,85 +32,83 @@
     --sidebar-width: 210px;
     --footer-height: 44px;
 
-    /* Holarc design system - light surfaces */
-    --background: 0 0% 98%;          /* #FAFAFA page bg */
-    --foreground: 0 0% 20%;          /* #333 primary text */
+    /* Holarc Health rebrand — flat, elegant, trustworthy */
+    --background: 0 0% 100%;              /* #FFFFFF */
+    --foreground: 0 0% 7%;                /* #111111 */
 
-    --card: 0 0% 100%;               /* #FFF card/modal */
-    --card-foreground: 0 0% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 0 0% 7%;
 
-    /* Holarc teal #2DB0A6 */
-    --primary: 175 59% 43%;
+    /* Primary teal #17AFA0 */
+    --primary: 174 77% 39%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 175 59% 55%;
-    --primary-dark: 175 64% 30%;     /* #1C7B74 active */
+    --primary-glow: 174 70% 50%;
+    --primary-dark: 174 78% 31%;          /* darker teal hover */
 
-    /* Neutral grays - secondary surfaces */
-    --secondary: 0 0% 96%;           /* #F5F5F5 */
-    --secondary-foreground: 0 0% 20%;
+    --secondary: 0 0% 96%;                /* #F5F5F5 */
+    --secondary-foreground: 0 0% 7%;
 
-    --muted: 0 0% 96%;               /* #F5F5F5 hover surface */
-    --muted-foreground: 0 0% 40%;    /* #666 secondary text */
+    --muted: 0 0% 96%;                    /* #F5F5F5 */
+    --muted-foreground: 0 0% 33%;         /* #555 */
 
-    --accent: 175 60% 93%;           /* #E8F5F4 selected bg */
-    --accent-foreground: 175 59% 35%;
+    --accent: 173 39% 94%;                /* #E8F7F5 soft teal tint */
+    --accent-foreground: 174 78% 28%;
 
-    /* Status colors */
-    --destructive: 0 64% 50%;        /* #D32F2F */
+    /* Crimson #E31D3A — sparingly */
+    --destructive: 352 78% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 69% 45%;
+    --success: 152 60% 40%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Holarc red accent (logo heart) — #E01837 */
-    --terracotta: 356 67% 42%;
+    /* Crimson token (logo / key highlights) */
+    --terracotta: 352 78% 50%;
     --terracotta-foreground: 0 0% 100%;
-    --terracotta-light: 356 67% 52%;
-    --terracotta-dark: 356 67% 32%;
+    --terracotta-light: 352 78% 60%;
+    --terracotta-dark: 352 78% 40%;
 
-    /* Guardian SOS */
-    --sos: 354 84% 54%;
+    /* Guardian SOS — flat crimson */
+    --sos: 352 78% 50%;
     --sos-foreground: 0 0% 100%;
-    --gradient-sos: linear-gradient(135deg, hsl(354 84% 54%), hsl(0 75% 45%));
+    --gradient-sos: hsl(352 78% 50%);
 
-    /* Borders */
-    --border: 0 0% 88%;              /* #E0E0E0 */
-    --input: 0 0% 88%;
-    --ring: 175 59% 43%;
+    --border: 0 0% 90%;                   /* #E5E5E5 */
+    --input: 0 0% 90%;
+    --ring: 174 77% 39%;
 
-    /* Tertiary/disabled text helpers */
-    --text-tertiary: 0 0% 60%;       /* #999 */
-    --text-disabled: 0 0% 80%;       /* #CCC */
+    --text-tertiary: 0 0% 55%;
+    --text-disabled: 0 0% 80%;
 
-    --radius: 0.5rem;                /* 8px per spec */
+    --radius: 0.5rem;
 
-    /* Shadows */
-    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-    --shadow-glow: 0 0 0 3px hsl(175 59% 43% / 0.1);
-    --shadow-modal: 0 4px 16px rgb(0 0 0 / 0.1);
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 6px 16px rgb(0 0 0 / 0.04);
-    --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 12px 24px rgb(0 0 0 / 0.08);
+    /* Flat design — no shadows */
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-glow: 0 0 0 1px hsl(174 77% 39% / 0.35);
+    --shadow-modal: 0 0 0 1px hsl(0 0% 90%);
+    --shadow-card: none;
+    --shadow-card-hover: none;
 
-    /* Sidebar - clean white */
+    /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 40%;
-    --sidebar-primary: 175 59% 43%;
+    --sidebar-foreground: 0 0% 33%;
+    --sidebar-primary: 174 77% 39%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 175 60% 93%;
-    --sidebar-accent-foreground: 175 59% 35%;
-    --sidebar-border: 0 0% 88%;
-    --sidebar-ring: 175 59% 43%;
+    --sidebar-accent: 173 39% 94%;
+    --sidebar-accent-foreground: 174 78% 28%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 174 77% 39%;
   }
+
 
   .dark {
     --background: 0 0% 7%;
@@ -150,14 +153,15 @@
     --input: 0 0% 18%;
     --ring: 172 60% 55%;
 
-    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
-    --shadow-glow: 0 0 0 3px hsl(172 60% 55% / 0.2);
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
-    --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-glow: 0 0 0 1px hsl(172 60% 55% / 0.35);
+    --shadow-card: none;
+    --shadow-card-hover: none;
+
 
     --sidebar-background: 0 0% 8%;
     --sidebar-foreground: 0 0% 75%;
@@ -188,10 +192,12 @@
     line-height: 1.5;
   }
 
-  /* Typographic hierarchy per Holarc design system */
-  h1 { @apply text-[28px] md:text-[32px] font-bold leading-[1.2] text-foreground; }
+  /* Typographic hierarchy — Poppins display, Inter body */
+  h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', 'Inter', system-ui, sans-serif; }
+  h1 { @apply text-[28px] md:text-[32px] font-semibold leading-[1.2] text-foreground; }
   h2 { @apply text-[20px] md:text-[24px] font-semibold leading-[1.2] text-foreground; }
   h3 { @apply text-[16px] md:text-[18px] font-semibold leading-[1.2] text-foreground; }
+  body { line-height: 1.7; }
 
   /* Prevent iOS zoom on inputs while keeping desktop scale */
   input, textarea, select { font-size: 16px; }
@@ -230,14 +236,14 @@
 @layer components {
   /* Airbnb-style cards */
   .card-modern {
-    @apply rounded-2xl bg-card border-0 transition-all duration-300;
-    box-shadow: var(--shadow-card);
+    @apply rounded-lg bg-card border border-border transition-colors duration-200;
   }
 
+
   .card-modern:hover {
-    box-shadow: var(--shadow-card-hover);
-    transform: translateY(-2px);
+    @apply border-primary bg-muted;
   }
+
 
   /* Clean stat cards */
   .stat-card {
@@ -270,12 +276,14 @@
   }
 
   .nav-item:hover {
-    @apply bg-secondary;
+    @apply text-primary;
   }
 
+
   .nav-item.active {
-    @apply bg-primary text-primary-foreground;
+    @apply text-primary border-b-2 border-primary rounded-none bg-transparent;
   }
+
 }
 
 @layer utilities {
@@ -315,9 +323,9 @@
   }
 
   .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    border-color: hsl(var(--primary));
   }
+
 
   /* Safe area for mobile devices with notches/home indicators */
   .safe-area-pb {
