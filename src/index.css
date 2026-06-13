@@ -153,14 +153,15 @@
     --input: 0 0% 18%;
     --ring: 172 60% 55%;
 
-    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
-    --shadow-glow: 0 0 0 3px hsl(172 60% 55% / 0.2);
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 6px 16px rgb(0 0 0 / 0.3);
-    --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.4), 0 12px 24px rgb(0 0 0 / 0.4);
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-glow: 0 0 0 1px hsl(172 60% 55% / 0.35);
+    --shadow-card: none;
+    --shadow-card-hover: none;
+
 
     --sidebar-background: 0 0% 8%;
     --sidebar-foreground: 0 0% 75%;
@@ -191,10 +192,12 @@
     line-height: 1.5;
   }
 
-  /* Typographic hierarchy per Holarc design system */
-  h1 { @apply text-[28px] md:text-[32px] font-bold leading-[1.2] text-foreground; }
+  /* Typographic hierarchy — Poppins display, Inter body */
+  h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', 'Inter', system-ui, sans-serif; }
+  h1 { @apply text-[28px] md:text-[32px] font-semibold leading-[1.2] text-foreground; }
   h2 { @apply text-[20px] md:text-[24px] font-semibold leading-[1.2] text-foreground; }
   h3 { @apply text-[16px] md:text-[18px] font-semibold leading-[1.2] text-foreground; }
+  body { line-height: 1.7; }
 
   /* Prevent iOS zoom on inputs while keeping desktop scale */
   input, textarea, select { font-size: 16px; }
