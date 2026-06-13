@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        display: ["Plus Jakarta Sans", "Inter", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        display: ["Inter", "system-ui", "sans-serif"],
         lora: ["Lora", "serif"],
         merriweather: ["Merriweather", "serif"],
         "open-sans": ["Open Sans", "sans-serif"],

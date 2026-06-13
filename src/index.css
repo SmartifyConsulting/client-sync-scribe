@@ -1,4 +1,7 @@
-/* Plus Jakarta Sans loaded via Google Fonts in index.html */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 
 @tailwind base;
 @tailwind components;
@@ -186,8 +189,8 @@
   }
 
   /* Typographic hierarchy per Holarc design system */
-  h1 { @apply text-[28px] md:text-[32px] font-extrabold leading-[1.2] text-foreground; }
-  h2 { @apply text-[20px] md:text-[24px] font-bold leading-[1.2] text-foreground; }
+  h1 { @apply text-[28px] md:text-[32px] font-bold leading-[1.2] text-foreground; }
+  h2 { @apply text-[20px] md:text-[24px] font-semibold leading-[1.2] text-foreground; }
   h3 { @apply text-[16px] md:text-[18px] font-semibold leading-[1.2] text-foreground; }
 
   /* Prevent iOS zoom on inputs while keeping desktop scale */
