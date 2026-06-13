@@ -57,6 +57,16 @@ export default function Documentation() {
     setLoading(true);
 
     try {
+      // Resolve the patient record id for this user (needed for renewals).
+      const { data: patient } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setPatientId(patient?.id ?? null);
+
       const { data, error } = await supabase
         .from("prescriptions")
         .select("*")
@@ -110,6 +120,11 @@ export default function Documentation() {
         <h1 className="text-2xl font-bold text-foreground">Documentation</h1>
         <p className="text-muted-foreground text-[12px]">View and manage your documents</p>
       </div>
+
+      {patientId && user?.id && (
+        <RenewalsDueCard patientId={patientId} patientUserId={user.id} />
+      )}
+
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
