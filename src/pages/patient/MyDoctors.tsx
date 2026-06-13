@@ -6,8 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star, EyeOff, Eye } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -66,22 +67,30 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: doctors, isLoading } = useQuery({
-    queryKey: ["patient-doctors"],
+  const { data: doctorsData, isLoading } = useQuery({
+    queryKey: ["patient-doctors-with-hidden"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      if (!user) return { active: [] as DoctorAccess[], hidden: [] as DoctorAccess[], hiddenIds: new Set<string>() };
 
-      const { data: accessData, error: accessError } = await supabase
-        .from("doctor_patient_access")
-        .select("*")
-        .eq("patient_user_id", user.id)
-        .eq("is_active", true);
+      const [{ data: accessData, error: accessError }, { data: hiddenRows }] = await Promise.all([
+        supabase
+          .from("doctor_patient_access")
+          .select("*")
+          .eq("patient_user_id", user.id),
+        supabase
+          .from("patient_hidden_doctors")
+          .select("doctor_id")
+          .eq("patient_user_id", user.id),
+      ]);
 
       if (accessError) throw accessError;
-      if (!accessData || accessData.length === 0) return [];
+      const hiddenIds = new Set<string>((hiddenRows ?? []).map((r: any) => r.doctor_id));
+      if (!accessData || accessData.length === 0) {
+        return { active: [], hidden: [], hiddenIds };
+      }
 
-      const doctorIds = accessData.map((a) => a.doctor_id);
+      const doctorIds = accessData.map((a: any) => a.doctor_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number, about_me, preferred_language")
@@ -89,12 +98,55 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
       if (profilesError) throw profilesError;
 
-      return accessData.map((access) => ({
+      const enriched = accessData.map((access: any) => ({
         ...access,
-        doctor: profilesData?.find((p) => p.id === access.doctor_id),
+        doctor: profilesData?.find((p: any) => p.id === access.doctor_id),
       })) as DoctorAccess[];
+
+      const active = enriched.filter((d) => d.is_active && !hiddenIds.has(d.doctor_id));
+      const hidden = enriched.filter((d) => hiddenIds.has(d.doctor_id) || !d.is_active);
+      return { active, hidden, hiddenIds };
     },
   });
+
+  const doctors = doctorsData?.active ?? [];
+  const hiddenDoctors = doctorsData?.hidden ?? [];
+  const hiddenIds = doctorsData?.hiddenIds ?? new Set<string>();
+
+  const handleHide = async (access: DoctorAccess) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await supabase.from("patient_hidden_doctors").insert({
+      patient_user_id: user.id,
+      doctor_id: access.doctor_id,
+    } as any);
+    if (error && !error.message.includes("duplicate")) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Doctor hidden", description: "They won't appear in your active list. Historic records remain." });
+    queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
+  };
+
+  const handleRestore = async (access: DoctorAccess) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    // Unhide
+    await supabase
+      .from("patient_hidden_doctors")
+      .delete()
+      .eq("patient_user_id", user.id)
+      .eq("doctor_id", access.doctor_id);
+    // If deactivated, re-activate
+    if (!access.is_active) {
+      await supabase
+        .from("doctor_patient_access")
+        .update({ is_active: true, revoked_at: null } as any)
+        .eq("id", access.id);
+    }
+    toast({ title: "Doctor restored", description: "They're back in your active list." });
+    queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
+  };
 
   const handleSearch = useCallback(async () => {
     const name = nameQuery.trim();
