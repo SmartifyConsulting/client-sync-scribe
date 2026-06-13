@@ -6,8 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star, EyeOff, Eye } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -66,22 +67,30 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: doctors, isLoading } = useQuery({
-    queryKey: ["patient-doctors"],
+  const { data: doctorsData, isLoading } = useQuery({
+    queryKey: ["patient-doctors-with-hidden"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      if (!user) return { active: [] as DoctorAccess[], hidden: [] as DoctorAccess[], hiddenIds: new Set<string>() };
 
-      const { data: accessData, error: accessError } = await supabase
-        .from("doctor_patient_access")
-        .select("*")
-        .eq("patient_user_id", user.id)
-        .eq("is_active", true);
+      const [{ data: accessData, error: accessError }, { data: hiddenRows }] = await Promise.all([
+        supabase
+          .from("doctor_patient_access")
+          .select("*")
+          .eq("patient_user_id", user.id),
+        supabase
+          .from("patient_hidden_doctors")
+          .select("doctor_id")
+          .eq("patient_user_id", user.id),
+      ]);
 
       if (accessError) throw accessError;
-      if (!accessData || accessData.length === 0) return [];
+      const hiddenIds = new Set<string>((hiddenRows ?? []).map((r: any) => r.doctor_id));
+      if (!accessData || accessData.length === 0) {
+        return { active: [], hidden: [], hiddenIds };
+      }
 
-      const doctorIds = accessData.map((a) => a.doctor_id);
+      const doctorIds = accessData.map((a: any) => a.doctor_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
         .select("id, full_name, specialty, practice_address, mobile_number, avatar_url, practice_number, doctor_number, about_me, preferred_language")
@@ -89,12 +98,55 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
       if (profilesError) throw profilesError;
 
-      return accessData.map((access) => ({
+      const enriched = accessData.map((access: any) => ({
         ...access,
-        doctor: profilesData?.find((p) => p.id === access.doctor_id),
+        doctor: profilesData?.find((p: any) => p.id === access.doctor_id),
       })) as DoctorAccess[];
+
+      const active = enriched.filter((d) => d.is_active && !hiddenIds.has(d.doctor_id));
+      const hidden = enriched.filter((d) => hiddenIds.has(d.doctor_id) || !d.is_active);
+      return { active, hidden, hiddenIds };
     },
   });
+
+  const doctors = doctorsData?.active ?? [];
+  const hiddenDoctors = doctorsData?.hidden ?? [];
+  const hiddenIds = doctorsData?.hiddenIds ?? new Set<string>();
+
+  const handleHide = async (access: DoctorAccess) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await supabase.from("patient_hidden_doctors").insert({
+      patient_user_id: user.id,
+      doctor_id: access.doctor_id,
+    } as any);
+    if (error && !error.message.includes("duplicate")) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Doctor hidden", description: "They won't appear in your active list. Historic records remain." });
+    queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
+  };
+
+  const handleRestore = async (access: DoctorAccess) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    // Unhide
+    await supabase
+      .from("patient_hidden_doctors")
+      .delete()
+      .eq("patient_user_id", user.id)
+      .eq("doctor_id", access.doctor_id);
+    // If deactivated, re-activate
+    if (!access.is_active) {
+      await supabase
+        .from("doctor_patient_access")
+        .update({ is_active: true, revoked_at: null } as any)
+        .eq("id", access.id);
+    }
+    toast({ title: "Doctor restored", description: "They're back in your active list." });
+    queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
+  };
 
   const handleSearch = useCallback(async () => {
     const name = nameQuery.trim();
@@ -157,8 +209,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .eq("id", uninviteTarget.id);
 
       // Intentionally do NOT notify the doctor when a patient revokes access.
-      toast({ title: "Doctor removed", description: "Access has been revoked." });
-      queryClient.invalidateQueries({ queryKey: ["patient-doctors"] });
+      toast({ title: "Doctor deactivated", description: "They no longer have live access. Historic records are preserved." });
+      queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
       setUninviteTarget(null);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -167,7 +219,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     }
   };
 
-  const DoctorTableRow = ({ access, doctor, permissions }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[] }) => {
+  const DoctorTableRow = ({ access, doctor, permissions, mode }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[]; mode: "active" | "hidden" }) => {
     const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information') || [];
 
     return (
@@ -185,6 +237,11 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               {doctor.practice_number && (
                 <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
               )}
+              {mode === "hidden" && (
+                <span className="text-[10px] text-muted-foreground italic">
+                  {!access.is_active ? "Deactivated" : "Hidden"}
+                </span>
+              )}
             </div>
           </div>
         </TableCell>
@@ -197,7 +254,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
-            {filteredPermissions.length > 0 && (
+            {mode === "active" && filteredPermissions.length > 0 && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -214,14 +271,51 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 </Tooltip>
               </TooltipProvider>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() => setUninviteTarget(access)}
-            >
-              <UserMinus className="h-3.5 w-3.5" />
-            </Button>
+            {mode === "active" ? (
+              <>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleHide(access)}
+                        aria-label="Hide doctor"
+                      >
+                        <EyeOff className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">Hide from your active list (keeps history)</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setUninviteTarget(access)}
+                        aria-label="Deactivate doctor"
+                      >
+                        <UserMinus className="h-3.5 w-3.5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">Deactivate (revoke live access, keep history)</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs gap-1"
+                onClick={() => handleRestore(access)}
+              >
+                <Eye className="h-3.5 w-3.5" /> Restore
+              </Button>
+            )}
           </div>
         </TableCell>
       </TableRow>
@@ -391,12 +485,12 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </CardContent>
       </Card>
 
-      {/* Connected Doctors */}
+      {/* Connected Doctors — Active / Hidden tabs */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : !doctors || doctors.length === 0 ? (
+      ) : doctors.length === 0 && hiddenDoctors.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
@@ -407,26 +501,64 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-             <Table className="table-fixed w-full">
-              <TableHeader>
-                 <TableRow>
-                    <TableHead className="w-[45%]">Provider</TableHead>
-                    <TableHead className="w-[35%]">Specialty</TableHead>
-                    <TableHead className="w-[20%]">Access</TableHead>
-                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {doctors.map((access) =>
-                  access.doctor ? (
-                    <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} />
-                  ) : null
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="active" className="w-full">
+          <TabsList>
+            <TabsTrigger value="active">Active ({doctors.length})</TabsTrigger>
+            <TabsTrigger value="hidden">Hidden ({hiddenDoctors.length})</TabsTrigger>
+          </TabsList>
+          <TabsContent value="active">
+            {doctors.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <Table className="table-fixed w-full">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[45%]">Provider</TableHead>
+                        <TableHead className="w-[35%]">Specialty</TableHead>
+                        <TableHead className="w-[20%]">Access</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {doctors.map((access) =>
+                        access.doctor ? (
+                          <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="active" />
+                        ) : null
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+          <TabsContent value="hidden">
+            {hiddenDoctors.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <Table className="table-fixed w-full">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[45%]">Provider</TableHead>
+                        <TableHead className="w-[35%]">Specialty</TableHead>
+                        <TableHead className="w-[20%]">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {hiddenDoctors.map((access) =>
+                        access.doctor ? (
+                          <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="hidden" />
+                        ) : null
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
 
       {/* Uninvite Confirmation Dialog */}
