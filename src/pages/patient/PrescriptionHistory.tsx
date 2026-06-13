@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { format, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { RenewalsDueCard } from "@/features/patients/components/RenewalsDueCard";
+
 
 interface Prescription {
   id: string;
@@ -39,6 +41,7 @@ const statusLabels: Record<string, string> = {
 export default function Documentation() {
   const { user } = useAuth();
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [patientId, setPatientId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
