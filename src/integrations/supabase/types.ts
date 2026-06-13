@@ -3125,6 +3125,27 @@ export type Database = {
           },
         ]
       }
+      patient_hidden_doctors: {
+        Row: {
+          doctor_id: string
+          hidden_at: string
+          id: string
+          patient_user_id: string
+        }
+        Insert: {
+          doctor_id: string
+          hidden_at?: string
+          id?: string
+          patient_user_id: string
+        }
+        Update: {
+          doctor_id?: string
+          hidden_at?: string
+          id?: string
+          patient_user_id?: string
+        }
+        Relationships: []
+      }
       patient_invitations: {
         Row: {
           created_at: string
@@ -3740,6 +3761,53 @@ export type Database = {
             foreignKeyName: "prescription_pill_references_prescription_id_fkey"
             columns: ["prescription_id"]
             isOneToOne: true
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescription_renewal_requests: {
+        Row: {
+          created_at: string
+          id: string
+          original_doctor_id: string | null
+          patient_comment: string | null
+          patient_user_id: string
+          prescription_id: string
+          requested_doctor_id: string
+          status: string
+          todo_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          original_doctor_id?: string | null
+          patient_comment?: string | null
+          patient_user_id: string
+          prescription_id: string
+          requested_doctor_id: string
+          status?: string
+          todo_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          original_doctor_id?: string | null
+          patient_comment?: string | null
+          patient_user_id?: string
+          prescription_id?: string
+          requested_doctor_id?: string
+          status?: string
+          todo_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_renewal_requests_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
             referencedRelation: "prescriptions"
             referencedColumns: ["id"]
           },
