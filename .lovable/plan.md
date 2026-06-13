@@ -1,30 +1,78 @@
-## Goal
-Make the Sign In screen clearer so users aren't confused about whether to enter an email or a phone number.
+## Prescription Renewal Reminders & Doctor Hide/Deactivate
 
-## Problem today
-- One combined "Email or Phone Number" field with placeholder `you@example.com or 82 123 4567`.
-- Country code selector appears/disappears based on whether the field contains `@`.
-- A small helper line ("Will sign in as +27…") only shows for phone.
-- A separate "Email me a sign-in code instead" link adds a third pathway, making the choice feel cluttered.
+Two related patient features:
 
-## Proposed change (UI only, `src/pages/Auth.tsx`, sign-in view only)
+### 1. Repeat-prescription renewal reminders
 
-1. **Add a simple 2-tab switch** at the top of the sign-in card: **Email** | **Phone**. Default = Email. Use the existing tab/segmented style already used elsewhere (teal active, muted inactive) for visual consistency.
+**Detection (client-side, no schema changes):**
+- A prescription needs renewing when `status='active'` AND any of:
+  - `end_date` is within the next 7 days (or already passed)
+  - `refills_remaining = 0` AND `end_date` is null (chronic refill exhausted)
+- Use `refill_reminder_days` (already on the table) as the lead window when present, else default 7.
 
-2. **Email tab** — single email field (icon + `you@example.com`) + password + Sign In. No country selector. No phone helper text.
+**Where the patient sees it:**
+- New "Renewals due" card on `src/pages/patient/PatientDashboard.tsx` listing each medication with: name, dosage, frequency, days-until-expiry, original prescribing doctor's name.
+- Also a "Needs renewal" badge + button on `PrescriptionHistory.tsx`.
+- One `notifications` row per prescription per renewal window (dedupe via `metadata.prescription_id` + `metadata.window_start`).
 
-3. **Phone tab** — country selector (flag + code) + phone number field (`82 123 4567`) + password + Sign In. Show the normalized-number helper ("You'll sign in as +27 82 123 4567") under the field only on this tab.
+**Renewal action — request via task:**
+- "Request renewal" button opens a dialog with three sections:
+  1. **Prescription summary (read-only)** — medication, dosage, frequency, instructions, refills remaining, end date. Visually styled as a disabled/read-only block so the patient cannot edit the original prescription.
+  2. **Doctor selector** — defaults to the original prescribing `doctor_id`. Dropdown lists the patient's active+non-hidden doctors (see feature 2). An "Other doctor…" option opens the existing doctor search.
+  3. **Patient comment (optional, free text)** — labelled clearly, e.g. *"Anything you'd like changed? (dose, frequency, side-effects, switch medication, etc.)"* with placeholder examples. Multi-line textarea, ~500 char limit. This is the only editable field — the patient never mutates the prescription itself; the comment is the channel for requesting adjustments.
+- On submit, insert a `todos` row assigned to the chosen doctor:
+  - `user_id` = chosen doctor's id
+  - `patient_id` = patient id
+  - `task_type = 'prescription_renewal'`
+  - `title` = "Renew prescription: {medication} {dosage}" (suffix " — adjustment requested" when the patient added a comment, so the doctor sees at a glance it's not a plain renewal)
+  - `description` = read-only prescription summary + a clearly delimited **"Patient comment"** block containing the free text (empty section omitted when no comment)
+  - `priority` = `'high'` when already expired OR a comment was provided, else `'normal'`
+  - `due_date` = prescription `end_date` (or +7 days)
+- Also write a `notifications` row to the chosen doctor. When a comment is present, the notification title reads "Renewal + adjustment request" so the doctor knows to read before re-prescribing.
+- Persist the request in `prescription_renewal_requests` (see Technical) including the comment, so the patient's button flips to "Renewal requested" and we can show the comment back to them.
 
-4. **Internally** keep using the existing `loginId` state — when the user types in the Email tab we store the raw email; in the Phone tab we store the raw digits and prepend the country code on submit. `handleLogin` logic stays the same (it already branches on `@`).
+### 2. Hide / deactivate doctors on the patient side
 
-5. **Demote the magic-link option.** Move "Email me a sign-in code instead" into a smaller secondary link under the Sign In button (same place, but smaller and labelled "Prefer a one-time code? Email it to me"). Still toggles `useOtp` exactly like today. No change to the OTP form.
+- On `src/pages/patient/MyDoctors.tsx`, add per-doctor actions: **Deactivate** and **Hide**, plus **Active** / **Hidden** tabs with **Restore** in the Hidden tab.
+- Hiding/deactivating only affects the patient's view and the patient-side doctor lists (renewal selector, round table participants, share targets). Historic data (sessions, prescriptions, documents, notes) remains visible in their respective history views.
+- Doctors are not notified when hidden/deactivated.
 
-6. Keep everything else as-is: trust band, Forgot password link (still `tabIndex={-1}`), show/hide password toggle, Google/Dev buttons, "Don't have an account? Sign up".
+**Semantics:**
+- *Deactivate*: ends the working relationship — sets `doctor_patient_access.is_active = false` and `revoked_at = now()`. Doctor loses live access going forward.
+- *Hide*: pure visual filter for the patient. Stored in a new patient-owned mapping table so the patient can hide and restore independently of active/inactive state.
 
-## Out of scope
-- No backend, auth, or routing changes.
-- No changes to the sign-up flow, password reset, MFA, or OTP verification UI.
-- No new dependencies.
+### Out of scope
+- No doctor-side UI changes beyond receiving the new `todo` + notification.
+- No SMS/email — in-app notification bell only.
+- No new medications/dosing/AI logic.
+- No automatic deactivation based on inactivity.
 
-## Files touched
-- `src/pages/Auth.tsx` — sign-in render block only (≈ lines 855-1000).
+---
+
+### Technical section
+
+**Schema additions (one migration):**
+
+1. `public.patient_hidden_doctors`
+   - `id uuid pk`, `patient_user_id uuid`, `doctor_id uuid`, `hidden_at timestamptz`, unique `(patient_user_id, doctor_id)`.
+   - GRANT select/insert/delete to `authenticated`; ALL to `service_role`.
+   - RLS: `patient_user_id = auth.uid()`.
+
+2. `public.prescription_renewal_requests`
+   - `id uuid pk`, `prescription_id uuid` (fk), `patient_user_id uuid`, `requested_doctor_id uuid`, `original_doctor_id uuid`, `todo_id uuid null`, `status text default 'pending'`, `patient_comment text null`, `created_at`, `updated_at`.
+   - GRANT to `authenticated` + `service_role`.
+   - RLS: patient (owner) can select/insert/update their own; `requested_doctor_id` can select/update; admin via `has_role`.
+   - `updated_at` trigger.
+
+**Files to add/edit:**
+- `supabase/migrations/<ts>_renewals_and_hide_doctors.sql` — both tables + RLS + GRANTs + trigger.
+- `src/features/patients/hooks/usePrescriptionRenewals.ts` — derive `needsRenewal`, join existing renewal requests.
+- `src/features/patients/components/RenewalRequestDialog.tsx` — read-only prescription summary, doctor selector (default = original prescriber), optional patient comment textarea, submit handler that composes the todo description with a "Patient comment" block when present.
+- `src/features/patients/components/RenewalsDueCard.tsx` — used on `PatientDashboard.tsx`.
+- Update `src/pages/patient/PrescriptionHistory.tsx` — "Needs renewal" badge + button to open the dialog.
+- `src/pages/patient/MyDoctors.tsx` — Active/Hidden tabs, Deactivate/Hide/Restore actions.
+- `src/features/patients/lib/visibleDoctors.ts` — returns the patient's active+non-hidden doctors; reused everywhere "my doctors" is listed.
+
+**Notification dedupe:** insert a `notifications` row with `metadata = { prescription_id, window_start }` and skip when one already exists.
+
+**No edits to** auto-generated Supabase types/client; no edge functions needed.
