@@ -485,12 +485,12 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </CardContent>
       </Card>
 
-      {/* Connected Doctors */}
+      {/* Connected Doctors — Active / Hidden tabs */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : !doctors || doctors.length === 0 ? (
+      ) : doctors.length === 0 && hiddenDoctors.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
@@ -501,26 +501,64 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-             <Table className="table-fixed w-full">
-              <TableHeader>
-                 <TableRow>
-                    <TableHead className="w-[45%]">Provider</TableHead>
-                    <TableHead className="w-[35%]">Specialty</TableHead>
-                    <TableHead className="w-[20%]">Access</TableHead>
-                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {doctors.map((access) =>
-                  access.doctor ? (
-                    <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} />
-                  ) : null
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="active" className="w-full">
+          <TabsList>
+            <TabsTrigger value="active">Active ({doctors.length})</TabsTrigger>
+            <TabsTrigger value="hidden">Hidden ({hiddenDoctors.length})</TabsTrigger>
+          </TabsList>
+          <TabsContent value="active">
+            {doctors.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <Table className="table-fixed w-full">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[45%]">Provider</TableHead>
+                        <TableHead className="w-[35%]">Specialty</TableHead>
+                        <TableHead className="w-[20%]">Access</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {doctors.map((access) =>
+                        access.doctor ? (
+                          <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="active" />
+                        ) : null
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+          <TabsContent value="hidden">
+            {hiddenDoctors.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <Table className="table-fixed w-full">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[45%]">Provider</TableHead>
+                        <TableHead className="w-[35%]">Specialty</TableHead>
+                        <TableHead className="w-[20%]">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {hiddenDoctors.map((access) =>
+                        access.doctor ? (
+                          <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="hidden" />
+                        ) : null
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
 
       {/* Uninvite Confirmation Dialog */}
