@@ -145,7 +145,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      const newUserId: string | undefined = data?.userId;
+      const newUserId: string | undefined = data?.user_id;
       if (!newUserId) throw new Error("User created but ID missing");
 
       // 2. Upload license
