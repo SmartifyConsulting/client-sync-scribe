@@ -112,12 +112,19 @@ export default function UsersTab({ kind }: UsersTabProps) {
     const ids = baseUsers.map((u) => u.user_id);
 
     if (ids.length) {
-      const [profsRes, doctorPracticeRes, hospitalsRes, hospMembersRes] = await Promise.all([
+      const [profsRes, doctorPracticeRes, hospitalsRes, hospMembersRes, ambProvRes] = await Promise.all([
         supabase.from("profiles").select("id, holarchelp_enabled, specialty, country, mobile_number" as any).in("id", ids),
         supabase.from("practice_members" as any).select("doctor_id, practices(name)").in("doctor_id", ids),
-        supabase.from("holarchelp_hospitals" as any).select("owner_id, address, city, country").in("owner_id", ids),
+        supabase.from("holarchelp_hospitals" as any).select("owner_id, address, city, country, status").in("owner_id", ids),
         supabase.from("holarchelp_hospital_members" as any).select("user_id, hospital_id, holarchelp_hospitals(address, city, country)").in("user_id", ids),
+        supabase.from("holarchelp_ambulance_providers" as any).select("owner_id, status").in("owner_id", ids),
       ]);
+
+      const statusMap = new Map<string, string>();
+      (hospitalsRes.data || []).forEach((h: any) => { if (h.owner_id && h.status) statusMap.set(h.owner_id, h.status); });
+      (ambProvRes.data || []).forEach((a: any) => { if (a.owner_id && a.status) statusMap.set(a.owner_id, a.status); });
+      setPendingStatusMap(statusMap);
+
 
       const helpMap = new Map<string, boolean>();
       const countryMap = new Map<string, string | null>();
