@@ -95,8 +95,8 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
       if (data?.error) throw new Error(data.error);
 
       // Assign role
-      if (kind && data?.action === "created" && data?.userId) {
-        await supabase.from("user_roles").insert({ user_id: data.userId, role: KIND_TO_ROLE[kind] as any });
+      if (kind && data?.action === "created" && data?.user_id) {
+        await supabase.from("user_roles").insert({ user_id: data.user_id, role: KIND_TO_ROLE[kind] as any });
       }
 
       setResult({ email: data.email, password: data.password, emailed: !!data.emailed });
