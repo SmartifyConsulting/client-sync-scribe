@@ -86,9 +86,11 @@ interface Props {
   onChange: (v: ProviderVettingValues) => void;
   showAccountOptions?: boolean;
   disabled?: boolean;
+  mode?: "public" | "admin";
 }
 
-export function ProviderVettingForm({ kind, values, onChange, showAccountOptions = true, disabled }: Props) {
+export function ProviderVettingForm({ kind, values, onChange, showAccountOptions = true, disabled, mode = "admin" }: Props) {
+
   const [fileError, setFileError] = useState<string | null>(null);
   const orgLabel = kind === "hospital" ? "Hospital" : "ER / Ambulance service";
   const set = <K extends keyof ProviderVettingValues>(key: K, val: ProviderVettingValues[K]) =>
@@ -303,13 +305,16 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
                 onChange={(e) => set("manual_password", e.target.value)} placeholder="Min 8 chars" />
             </div>
           )}
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <p className="text-sm font-medium">Email credentials to administrator</p>
-              <p className="text-xs text-muted-foreground">Send the login + password by email</p>
+          {mode !== "public" && (
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div>
+                <p className="text-sm font-medium">Email credentials to administrator</p>
+                <p className="text-xs text-muted-foreground">Send the login + password by email</p>
+              </div>
+              <Switch checked={values.send_email} onCheckedChange={(c) => set("send_email", c)} disabled={disabled} />
             </div>
-            <Switch checked={values.send_email} onCheckedChange={(c) => set("send_email", c)} disabled={disabled} />
-          </div>
+          )}
+
         </section>
       )}
 
