@@ -1032,22 +1032,39 @@ export default function Auth() {
                   )}
                 </form>
               )}
-              <div className="mt-4 text-center space-y-2">
+              <div className="mt-4 space-y-3">
                 <button
                   type="button"
                   onClick={() => { setUseOtp(!useOtp); setOtpSent(false); setOtpCode(""); setPassword(""); }}
-                  className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline"
+                  className="block w-full text-center text-xs text-muted-foreground hover:text-primary hover:underline"
                 >
                   {useOtp ? "Sign in with password instead" : "Prefer a one-time code? Email it to me"}
                 </button>
-                <button
+
+                <div className="relative pt-2">
+                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                    <div className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-background px-3 text-xs uppercase tracking-wide text-muted-foreground">
+                      New here?
+                    </span>
+                  </div>
+                </div>
+
+                <Button
                   type="button"
+                  size="lg"
+                  className="w-full font-bold text-base shadow-md hover:shadow-lg transition-shadow"
                   onClick={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }}
-                  className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline"
                 >
-                  Don't have an account? Sign up
-                </button>
+                  Create your free account
+                </Button>
+                <p className="text-center text-xs text-muted-foreground">
+                  Sign up in under a minute — patient or practitioner.
+                </p>
               </div>
+
               <DevErLoginButton />
             </div>
           </div>

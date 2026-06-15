@@ -198,24 +198,8 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
         await supabase.from("user_roles").insert({ user_id: newUserId, role: KIND_TO_ROLE[kind] as any });
       }
 
-      // 5. Best-effort acknowledgement email to the requester (6-hour SLA notice).
-      //    Email infrastructure may not be provisioned yet — failure is non-blocking.
-      try {
-        await supabase.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "provider-vetting-received",
-            recipientEmail: vetting.admin_email.trim(),
-            idempotencyKey: `provider-vetting-received-${newUserId}-${Date.now()}`,
-            templateData: {
-              admin_full_name: vetting.admin_full_name.trim(),
-              organisation_name: vetting.org_name.trim(),
-              kind: providerKind === "hospital" ? "Hospital" : "Emergency Service Provider",
-            },
-          },
-        });
-      } catch (mailErr) {
-        console.warn("[CreateTestUserDialog] acknowledgement email failed (non-blocking):", mailErr);
-      }
+      // (Acknowledgement email intentionally removed — notify.nigeria.holarchealth.com is abandoned.)
+
 
       setResult({
         email: data.email,
