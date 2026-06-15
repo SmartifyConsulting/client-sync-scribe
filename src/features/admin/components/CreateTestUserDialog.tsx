@@ -55,7 +55,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
   const [vetting, setVetting] = useState<ProviderVettingValues>(defaultProviderVettingValues());
 
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ email: string; password: string; emailed: boolean } | null>(null);
+  const [result, setResult] = useState<{ email: string; password: string; emailed: boolean; pending?: boolean; adminEmail?: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const reset = () => {
