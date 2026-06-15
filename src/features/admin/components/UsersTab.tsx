@@ -439,7 +439,17 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     className="scale-90"
                   />
                 </TableCell>
-                <TableCell><StatusDot tone={statusToTone(u.status)} /></TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1.5">
+                    <StatusDot tone={statusToTone(u.status)} />
+                    {pendingStatusMap.get(u.user_id) === "pending" && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-400 text-amber-700 dark:text-amber-300">Pending approval</Badge>
+                    )}
+                    {pendingStatusMap.get(u.user_id) === "rejected" && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-destructive text-destructive">Rejected</Badge>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="text-[hsl(var(--admin-text-tertiary))]">{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
                 <TableCell className="text-right">
                   {isEditing ? (
@@ -451,6 +461,11 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     </div>
                   ) : (
                     <div className="flex justify-end gap-0.5">
+                      {pendingStatusMap.has(u.user_id) && (
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-amber-600 hover:text-amber-700" onClick={() => setReviewUserId(u.user_id)} title="Review submission">
+                          <FileSearch className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-[hsl(var(--admin-text-primary))]" onClick={() => startEditing(u)} title="Edit user">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -462,6 +477,8 @@ export default function UsersTab({ kind }: UsersTabProps) {
                       </Button>
                     </div>
                   )}
+
+
 
                 </TableCell>
               </TableRow>
