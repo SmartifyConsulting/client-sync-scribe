@@ -1,110 +1,72 @@
-## Goal
 
-1. Add a "What kind of user?" step before the create-user form in Admin.
-2. When the chosen type is **Hospital** or **Emergency Service Provider (ER / ambulance)**, show a vetting form that captures everything needed to review the organisation, including a **certified copy of the license** upload.
-3. Submissions land in **User Admin** as **Pending Approval**, with a review dialog that shows all submitted info + a viewable license file before approving / rejecting.
-4. Rename the existing **"Live Consultation"** label to **"Transcribed Sessions"** everywhere in the UI.
+# Hospital/ER Vetting Form — Revisions (cumulative)
 
-## Part A — Type picker (step 1 of Create User)
+All previously-approved scope stays (type picker, license upload, pending approval review dialog, rename "Live Consultation" → "Transcribed Sessions", schema migration, storage bucket, country-code phone inputs, reversed "Same as" direction, green-framed sections). The additions below are layered on top.
 
-`CreateTestUserDialog` becomes two-step. Step 1 = "What type of user are you creating?" with 4 radio-cards:
+## 1. Submission acknowledgement email to the requester
 
-- **Patient** → role `patient`
-- **Hospital** → role `hospital_staff` (+ vetting form)
-- **Emergency Service Provider** → role `ambulance_staff` (+ vetting form)
-- **Pharmacy** → role `pharmacy_staff`
+When a Hospital or ER vetting submission is created (from either the admin Create-User dialog OR the public hospital/ER signup page):
 
-Step 2 = chosen-type label + Back, then the simple form (Patient / Pharmacy) or the vetting form (Hospital / ESP). The same vetting form is also used on the public hospital/ER signup page.
+- Send a confirmation email to the **Hospital Administrator email** captured on the form.
+- Single recipient, triggered by their own action → app email (transactional), not marketing.
+- Template name: `provider-vetting-received`
+- Subject: "We received your application — approval within 6 hours"
+- Body content:
+  - Greeting using `admin_full_name`
+  - Confirmation that the application for `{organisation_name}` was received
+  - Plain-English statement that the team reviews submissions and approval is normally completed **within 6 hours**
+  - What happens next: a follow-up email on approval or with any questions
+  - Footer signature (Holarc Health team)
+- Brand styling pulled from existing `src/index.css` / Tailwind tokens; body bg `#ffffff`.
+- Idempotency key: `provider-vetting-received-{provider_row_id}` so retries don't duplicate.
+- Invoked via `supabase.functions.invoke('send-transactional-email', …)` right after the provider row + license upload succeed. Email failure does NOT roll back the submission — log a warning and continue (user still sees the in-app confirmation).
 
-## Part B — Hospital / ER vetting form
+### Email infrastructure prerequisites
+Before this email can send, the project needs:
+1. An email domain
+2. Email infrastructure set up
+3. The transactional email scaffolding
+4. The `provider-vetting-received` template registered
 
-Fields (all required unless noted):
+If any of those are missing at implementation time, set them up first (silently, no extra approval needed during build) and only then wire the trigger.
 
-**Administrator (becomes the user account)**
+## 2. In-form "approval within 6 hours" notice
 
-- Administrator full name
-- Administrator email
-- Administrator contact number
+Inside `ProviderVettingForm.tsx`, above the submit button (and visible on both admin dialog and public signup page):
 
-**Organisation**
+- A subtle info banner (icon + short text), not a toast:
+  - Icon: `Clock` (lucide)
+  - Text: **"We aim to approve all applications within 6 hours. You'll receive a confirmation email once submitted and a follow-up email once approved."**
+  - Styling: `rounded-md border border-emerald-500/40 bg-emerald-50/60 text-emerald-900 text-sm p-3 flex gap-2 items-start` (dark mode: `dark:border-emerald-400/30 dark:bg-emerald-950/30 dark:text-emerald-200`) — matches the green-frame palette of the two sections.
+- After successful submit, the existing success state on the dialog/page also displays the same 6-hour message + "Check your inbox at `{admin_email}` for confirmation."
 
-- Organisation name ("Hospital name" / "ER / Ambulance service name")
-- Physical address (multi-line text)
-- License / registration number
-- Directors — repeatable `{ full_name, role? }`, ≥1 required
-- Organisation contact number — "Same as administrator" checkbox
-- Organisation email — "Same as administrator" checkbox
+## 3. Field order, country-code inputs, "Same as Hospital", green frames
 
-**License attachment**
+Unchanged from the previously-approved revision:
 
-- "Upload certified copy of license"
-- Accepts `application/pdf, image/jpeg, image/png` — max 10MB — required
-- Stored in private bucket `provider-licenses` at `pending/{owner_user_id}/{ts}-{safe-filename}`
+- Hospital / Organisation section first (green frame, `Building2` icon header)
+- Hospital Administrator section second (green frame, `UserCog` icon header)
+- `PhoneNumberInput` (country code + number, E.164) for both hospital and administrator contact numbers
+- Admin email and admin phone each have a "Same as Hospital …" checkbox that mirrors-and-locks the hospital value
+- Frame styling: `rounded-lg border-2 border-emerald-500/60 bg-emerald-50/40 p-4 sm:p-5 space-y-4` (dark variants applied)
 
-**Account options** (admin dialog only; hidden on public signup)
+## 4. Out of scope (unchanged)
 
-- Auto-generate password / manual password
-- Email credentials to administrator
+- Patient/Pharmacy simple form
+- Pending Approval review dialog internals
+- Schema migration & storage bucket
+- "Live Consultation" → "Transcribed Sessions" rename
+- Approval-notification email (separate template, not part of this submission flow)
 
-## Submission flow
+## Technical notes
 
-1. Zod validation (incl. file size + mime + ≥1 director).
-2. Create / find auth user — admin path: `admin-set-user-password`; public path: standard `signUp`.
-3. Upload license to `provider-licenses/pending/{user_id}/...`.
-4. Insert pending row into matching provider table (`holarchelp_hospitals` or `holarchelp_ambulance_providers`) with new columns populated.
-5. Insert role row in `user_roles`. Existing `holarchelp_approve_hospital` / `holarchelp_approve_ambulance` RPCs handle final approval.
-
-## Part C — Pending Approval in User Admin
-
-- New **"Pending approval"** badge on rows owning a hospital / ESP record with `status='pending'`.
-- **Review** button opens `PendingProviderReviewDialog`:
-  - All submitted fields, directors list, admin + org contacts.
-  - License: image thumbnail or PDF icon + **"Open license"** → short-lived signed URL from private bucket.
-  - **Approve** (existing RPC) / **Reject** (sets `status='rejected'` + optional `rejection_reason`).
-- After action: dialog closes, list refetches, badge updates.
-- `usePendingProviderSubmission(userId)` hook fetches the provider row by `owner_id`.
-
-## Schema changes (single migration)
-
-Add to BOTH `public.holarchelp_hospitals` and `public.holarchelp_ambulance_providers`:
-
-- `directors jsonb not null default '[]'::jsonb`
-- `license_file_path text`, `license_file_mime text`, `license_file_size_bytes integer`
-- `admin_full_name text`, `admin_email text`, `admin_phone text`
-- `rejection_reason text`
-
-## Storage
-
-- Private bucket `provider-licenses` (via `supabase--storage_create_bucket`).
-- RLS on `storage.objects` for `bucket_id='provider-licenses'`:
-  - INSERT: authenticated, path must start `pending/{auth.uid()}/`.
-  - SELECT / DELETE: file owner OR admin.
-- Admin opens files via short-lived signed URLs.
-
-## Part D — Rename "Live Consultation" → "Transcribed Sessions"
-
-UI/copy-only rename — no DB / route / type changes.
-
-- Find every user-facing occurrence of the string `Live Consultation` (and variants: `Live consultation`, `live-consultation`-style headings, related descriptions like "Start a live consultation") across `src/**` and replace with `Transcribed Sessions` (singular form `Transcribed Session` where currently singular).
-- Includes: sidebar / nav items, page headings, buttons, empty-state copy, tooltips, toasts, dashboard cards, dialog titles, tour / screen-tip copy in `src/lib/screenTips.ts`.
-- Do **not** rename: file names, component names, routes, database tables/columns, `sessions` table fields, event/log type strings, edge function names, or i18n keys — only the displayed text.
-- Use `rg -n "Live [Cc]onsultation"` to enumerate hits before editing; verify with the same search after edits.
-
-## Files touched
-
-- `src/features/admin/components/CreateTestUserDialog.tsx`
-- `src/features/admin/components/ProviderVettingForm.tsx` (new)
-- `src/features/admin/components/PendingProviderReviewDialog.tsx` (new)
-- `src/features/admin/components/UsersTab.tsx`
-- `src/features/admin/hooks/usePendingProviderSubmission.ts` (new)
-- Public hospital / ER signup page — swap in `ProviderVettingForm`
-- Migration adding the new columns + storage policies
-- Various UI files for the "Live Consultation" → "Transcribed Sessions" rename (enumerated via ripgrep at edit time)
-
-## Out of scope
-
-- Pharmacy vetting form / license upload.
-- Multiple license files or versioning.
-- Editing pending submissions after creation (reject + resubmit instead).
-- Structured address / map autocomplete.
-- Renaming routes, components, DB fields, or i18n keys related to "Live Consultation" — display copy only.
+- New: `src/components/forms/PhoneNumberInput.tsx`, `src/lib/countryDialCodes.ts` (only if no existing source)
+- New template: `supabase/functions/_shared/transactional-email-templates/provider-vetting-received.tsx` + registry entry in `registry.ts`
+- `ProviderVettingForm.tsx`:
+  - Two green-framed `<section>` blocks with reordered fields
+  - `PhoneNumberInput` on both phone fields
+  - "Same as Hospital" checkboxes with mirror-and-lock via react-hook-form `watch`/`setValue`
+  - `Clock` info banner above submit
+  - On successful submit: call `send-transactional-email` with `templateName: 'provider-vetting-received'`, `recipientEmail: admin_email`, `idempotencyKey`, and `templateData: { admin_full_name, organisation_name }`. Wrap in try/catch — never block submission on email failure.
+  - Updated success-state copy referencing 6-hour SLA and confirmation email
+- No DB schema, RLS, or new edge functions beyond the shared `send-transactional-email` (existing)

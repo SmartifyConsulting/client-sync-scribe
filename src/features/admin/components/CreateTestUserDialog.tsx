@@ -55,7 +55,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
   const [vetting, setVetting] = useState<ProviderVettingValues>(defaultProviderVettingValues());
 
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ email: string; password: string; emailed: boolean } | null>(null);
+  const [result, setResult] = useState<{ email: string; password: string; emailed: boolean; pending?: boolean; adminEmail?: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const reset = () => {
@@ -198,10 +198,35 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
         await supabase.from("user_roles").insert({ user_id: newUserId, role: KIND_TO_ROLE[kind] as any });
       }
 
-      setResult({ email: data.email, password: data.password, emailed: !!data.emailed });
+      // 5. Best-effort acknowledgement email to the requester (6-hour SLA notice).
+      //    Email infrastructure may not be provisioned yet — failure is non-blocking.
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "provider-vetting-received",
+            recipientEmail: vetting.admin_email.trim(),
+            idempotencyKey: `provider-vetting-received-${newUserId}-${Date.now()}`,
+            templateData: {
+              admin_full_name: vetting.admin_full_name.trim(),
+              organisation_name: vetting.org_name.trim(),
+              kind: providerKind === "hospital" ? "Hospital" : "Emergency Service Provider",
+            },
+          },
+        });
+      } catch (mailErr) {
+        console.warn("[CreateTestUserDialog] acknowledgement email failed (non-blocking):", mailErr);
+      }
+
+      setResult({
+        email: data.email,
+        password: data.password,
+        emailed: !!data.emailed,
+        pending: true,
+        adminEmail: vetting.admin_email.trim(),
+      });
       toast({
         title: "Submission received",
-        description: "Pending approval — visible in User Admin.",
+        description: "Pending approval — visible in User Admin. Approval is typically completed within 6 hours.",
       });
       onCreated?.();
     } catch (e: any) {
@@ -245,6 +270,15 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
 
         {result ? (
           <div className="space-y-3">
+            {result.pending && (
+              <div className="rounded-lg border-2 border-emerald-500/60 bg-emerald-50/60 dark:border-emerald-400/40 dark:bg-emerald-950/30 p-3 text-sm text-emerald-900 dark:text-emerald-200">
+                <p className="font-semibold">Application received — pending approval</p>
+                <p className="mt-1 text-xs">
+                  We aim to approve all applications within <strong>6 hours</strong>.
+                  {result.adminEmail ? <> A confirmation email has been sent to <strong>{result.adminEmail}</strong>.</> : null}
+                </p>
+              </div>
+            )}
             <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
               <p className="font-bold text-amber-900 dark:text-amber-200">This password is shown only once</p>
               <p className="text-amber-900/80 dark:text-amber-200/80">
