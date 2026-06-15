@@ -1,72 +1,65 @@
+# Plan: Public Provider Signup + Drop Failed Email Domain + Nav Font Bump + Admin-Type User + Prominent Sign-Up Button
 
-# Hospital/ER Vetting Form — Revisions (cumulative)
+Cumulative plan covering all outstanding requests.
 
-All previously-approved scope stays (type picker, license upload, pending approval review dialog, rename "Live Consultation" → "Transcribed Sessions", schema migration, storage bucket, country-code phone inputs, reversed "Same as" direction, green-framed sections). The additions below are layered on top.
+## 1. Make `/provider-signup` a real public vetting form
 
-## 1. Submission acknowledgement email to the requester
+`src/pages/ProviderSignup.tsx` currently shows a disabled "Onboard your organisation" screen with only a `mailto:` link. Prospective Hospitals / Emergency Response providers must be able to complete the vetting form themselves.
 
-When a Hospital or ER vetting submission is created (from either the admin Create-User dialog OR the public hospital/ER signup page):
+- Rewrite `src/pages/ProviderSignup.tsx` to embed `ProviderVettingForm` (Hospital / ER variant) inline inside a card on the public page.
+- Keep the page header, hero icon, and title "Onboard your organisation". Replace the disabled-state body with a one-sentence intro stating the team reviews submissions within 6 hours.
+- The existing in-form `Clock` "approval within 6 hours" banner stays above submit.
+- On success, show the form's built-in green success state (6-hour SLA + inbox reminder) plus a `Return to Home` button. No redirect to `/admin/users`.
+- Remove the `mailto:onboarding@holarchealth.com` block. Keep the bottom `I already have an account — sign in` button.
+- `ProviderVettingForm` gains an optional `mode: "public" | "admin"` prop so it can render standalone and branch its submit logic.
+- Public submissions write to `pending_providers` as `anon`. New migration adds:
+  - `GRANT INSERT ON public.pending_providers TO anon`
+  - INSERT policy `WITH CHECK (status = 'pending')`
+  - Storage policy on the license bucket allowing `anon` INSERT scoped to a generated uuid prefix.
+- Admin review in `/admin/users` via `PendingProviderReviewDialog` is unchanged.
 
-- Send a confirmation email to the **Hospital Administrator email** captured on the form.
-- Single recipient, triggered by their own action → app email (transactional), not marketing.
-- Template name: `provider-vetting-received`
-- Subject: "We received your application — approval within 6 hours"
-- Body content:
-  - Greeting using `admin_full_name`
-  - Confirmation that the application for `{organisation_name}` was received
-  - Plain-English statement that the team reviews submissions and approval is normally completed **within 6 hours**
-  - What happens next: a follow-up email on approval or with any questions
-  - Footer signature (Holarc Health team)
-- Brand styling pulled from existing `src/index.css` / Tailwind tokens; body bg `#ffffff`.
-- Idempotency key: `provider-vetting-received-{provider_row_id}` so retries don't duplicate.
-- Invoked via `supabase.functions.invoke('send-transactional-email', …)` right after the provider row + license upload succeed. Email failure does NOT roll back the submission — log a warning and continue (user still sees the in-app confirmation).
+## 2. Abandon `notify.nigeria.holarchealth.com`
 
-### Email infrastructure prerequisites
-Before this email can send, the project needs:
-1. An email domain
-2. Email infrastructure set up
-3. The transactional email scaffolding
-4. The `provider-vetting-received` template registered
+- Remove the `supabase.functions.invoke("send-transactional-email", { templateName: "provider-vetting-received", ... })` call (and surrounding `try/catch`) from `src/features/admin/components/CreateTestUserDialog.tsx`.
+- Public `/provider-signup` does not call any email function either; confirmation is on-screen only.
+- The unused `provider-vetting-received` template is left in place (harmless). The workspace domain entry can be removed by the user in Cloud → Emails. No DNS work.
 
-If any of those are missing at implementation time, set them up first (silently, no extra approval needed during build) and only then wire the trigger.
+## 3. Bump laptop/desktop nav menu item font by one step
 
-## 2. In-form "approval within 6 hours" notice
+- Desktop sidebar nav items currently render at `text-sm`. Increase to `text-base` at `lg:` and above for primary nav links in both Doctor and Patient sidebars.
+- Icons bump proportionally (`h-4 w-4` → `h-5 w-5`); row padding adjusted so the 44px touch target remains.
+- Mobile bottom-nav typography is untouched.
 
-Inside `ProviderVettingForm.tsx`, above the submit button (and visible on both admin dialog and public signup page):
+## 4. Allow Admin to create another Admin-type user
 
-- A subtle info banner (icon + short text), not a toast:
-  - Icon: `Clock` (lucide)
-  - Text: **"We aim to approve all applications within 6 hours. You'll receive a confirmation email once submitted and a follow-up email once approved."**
-  - Styling: `rounded-md border border-emerald-500/40 bg-emerald-50/60 text-emerald-900 text-sm p-3 flex gap-2 items-start` (dark mode: `dark:border-emerald-400/30 dark:bg-emerald-950/30 dark:text-emerald-200`) — matches the green-frame palette of the two sections.
-- After successful submit, the existing success state on the dialog/page also displays the same 6-hour message + "Check your inbox at `{admin_email}` for confirmation."
+In `src/features/admin/components/CreateTestUserDialog.tsx` the role selector offers patient/doctor/nurse/hospital/er variants. Add an `Admin` option.
 
-## 3. Field order, country-code inputs, "Same as Hospital", green frames
+- When `admin` is chosen, hide patient/doctor/vetting-specific fields; show only Full name, Email, Password.
+- After creating the auth user, insert a row into `user_roles` with `role = 'admin'` for that user_id.
+- Gate the new option client-side via `useIsAdmin()`. Server enforcement relies on existing `user_roles` RLS; if no admin-INSERT policy exists, add it in the same migration as step 1:
+  - `CREATE POLICY "Admins can grant roles" ON public.user_roles FOR INSERT TO authenticated WITH CHECK (has_role(auth.uid(), 'admin'))`
+- Success toast: "Admin user created. They can now sign in with full admin access."
 
-Unchanged from the previously-approved revision:
+## 5. Make the Sign Up button more prominent on the login page (NEW)
 
-- Hospital / Organisation section first (green frame, `Building2` icon header)
-- Hospital Administrator section second (green frame, `UserCog` icon header)
-- `PhoneNumberInput` (country code + number, E.164) for both hospital and administrator contact numbers
-- Admin email and admin phone each have a "Same as Hospital …" checkbox that mirrors-and-locks the hospital value
-- Frame styling: `rounded-lg border-2 border-emerald-500/60 bg-emerald-50/40 p-4 sm:p-5 space-y-4` (dark variants applied)
+On `src/pages/Auth.tsx` the Sign Up affordance is currently a low-visibility text link beneath the Sign In form. Promote it so new users can find it instantly.
 
-## 4. Out of scope (unchanged)
+- Replace the inline "Don't have an account? Sign up" text with a dedicated full-width **Sign Up** button styled as a high-contrast secondary CTA: solid teal background (`bg-primary`), white text, large size (`size="lg"`), bold weight, rendered directly below the Sign In submit button with a clear divider ("New here?") above it.
+- Add a small supporting line ("Create your free Holarc Health account in under a minute") in muted text under the button.
+- Tab order: Email → Password → Sign In → Sign Up. Forgot password link keeps `tabIndex={-1}`.
+- Behaviour unchanged: clicking switches the form to sign-up mode (or routes to the sign-up tab/view that already exists).
+- No change to sign-up logic, validation, or password-visibility toggles.
 
-- Patient/Pharmacy simple form
-- Pending Approval review dialog internals
-- Schema migration & storage bucket
-- "Live Consultation" → "Transcribed Sessions" rename
-- Approval-notification email (separate template, not part of this submission flow)
+## Out of scope
+- No email sending re-enabled anywhere.
+- No changes to vetting form field order, validation, green frames, country-code phone input, or "Same as Hospital" mirroring.
+- No changes to mobile bottom-nav typography.
+- No changes to Patient/Pharmacy signup flows.
 
-## Technical notes
-
-- New: `src/components/forms/PhoneNumberInput.tsx`, `src/lib/countryDialCodes.ts` (only if no existing source)
-- New template: `supabase/functions/_shared/transactional-email-templates/provider-vetting-received.tsx` + registry entry in `registry.ts`
-- `ProviderVettingForm.tsx`:
-  - Two green-framed `<section>` blocks with reordered fields
-  - `PhoneNumberInput` on both phone fields
-  - "Same as Hospital" checkboxes with mirror-and-lock via react-hook-form `watch`/`setValue`
-  - `Clock` info banner above submit
-  - On successful submit: call `send-transactional-email` with `templateName: 'provider-vetting-received'`, `recipientEmail: admin_email`, `idempotencyKey`, and `templateData: { admin_full_name, organisation_name }`. Wrap in try/catch — never block submission on email failure.
-  - Updated success-state copy referencing 6-hour SLA and confirmation email
-- No DB schema, RLS, or new edge functions beyond the shared `send-transactional-email` (existing)
+## Files changed
+- `src/pages/ProviderSignup.tsx` — rewritten to embed `ProviderVettingForm` for public use.
+- `src/features/admin/components/ProviderVettingForm.tsx` — add `mode` prop; branch submit between public-anon and admin-authenticated paths.
+- `src/features/admin/components/CreateTestUserDialog.tsx` — remove email invoke; add Admin role option + conditional fields and role-grant insert.
+- Desktop sidebar nav components (Doctor + Patient) — bump `text-sm` → `text-base` and icon sizing at `lg:`.
+- `src/pages/Auth.tsx` — promote Sign Up to a prominent full-width CTA button with divider and supporting copy.
+- New migration: `pending_providers` anon INSERT policy + GRANT, license-bucket storage policy, and (if missing) `user_roles` admin-grant INSERT policy.

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, UserPlus, Copy, Check, ArrowLeft, User, Building2, Siren, Pill } from "lucide-react";
+import { Loader2, UserPlus, Copy, Check, ArrowLeft, User, Building2, Siren, Pill, ShieldCheck } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -22,13 +22,14 @@ interface CreateTestUserDialogProps {
   onCreated?: () => void;
 }
 
-type UserKind = "patient" | "hospital" | "esp" | "pharmacy";
+type UserKind = "patient" | "hospital" | "esp" | "pharmacy" | "admin";
 
 const KIND_OPTIONS: Array<{ kind: UserKind; label: string; description: string; icon: React.ComponentType<any> }> = [
   { kind: "patient", label: "Patient", description: "Standard patient account.", icon: User },
   { kind: "hospital", label: "Hospital", description: "Hospital — requires vetting.", icon: Building2 },
   { kind: "esp", label: "Emergency Service Provider", description: "ER / Ambulance — requires vetting.", icon: Siren },
   { kind: "pharmacy", label: "Pharmacy", description: "Pharmacy account.", icon: Pill },
+  { kind: "admin", label: "Admin", description: "Full platform admin access.", icon: ShieldCheck },
 ];
 
 const KIND_TO_ROLE: Record<UserKind, string> = {
@@ -36,7 +37,9 @@ const KIND_TO_ROLE: Record<UserKind, string> = {
   hospital: "hospital_staff",
   esp: "ambulance_staff",
   pharmacy: "pharmacy_staff",
+  admin: "admin",
 };
+
 
 export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
   const { toast } = useToast();
@@ -198,24 +201,8 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
         await supabase.from("user_roles").insert({ user_id: newUserId, role: KIND_TO_ROLE[kind] as any });
       }
 
-      // 5. Best-effort acknowledgement email to the requester (6-hour SLA notice).
-      //    Email infrastructure may not be provisioned yet — failure is non-blocking.
-      try {
-        await supabase.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "provider-vetting-received",
-            recipientEmail: vetting.admin_email.trim(),
-            idempotencyKey: `provider-vetting-received-${newUserId}-${Date.now()}`,
-            templateData: {
-              admin_full_name: vetting.admin_full_name.trim(),
-              organisation_name: vetting.org_name.trim(),
-              kind: providerKind === "hospital" ? "Hospital" : "Emergency Service Provider",
-            },
-          },
-        });
-      } catch (mailErr) {
-        console.warn("[CreateTestUserDialog] acknowledgement email failed (non-blocking):", mailErr);
-      }
+      // (Acknowledgement email intentionally removed — notify.nigeria.holarchealth.com is abandoned.)
+
 
       setResult({
         email: data.email,
