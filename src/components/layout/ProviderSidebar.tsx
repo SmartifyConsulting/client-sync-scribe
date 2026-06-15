@@ -100,7 +100,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                 end={item.end}
                 onClick={onNavigate}
                 className={cn(
-                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2.5 rounded-xl px-3 py-2 text-base font-medium transition-all duration-200",
                   isActive
                     ? item.danger
                       ? "bg-red-600 text-white shadow-sm"
@@ -110,7 +110,8 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                       : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                 )}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-5 w-5" />
+
                 <span className="flex-1">{item.label}</span>
               </NavLink>
             );
