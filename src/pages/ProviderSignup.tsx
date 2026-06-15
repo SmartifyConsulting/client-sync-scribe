@@ -1,15 +1,173 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Building2, Mail, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Building2, CheckCircle2, Copy, Check, Loader2, Clock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ProviderVettingForm,
+  defaultProviderVettingValues,
+  providerVettingSchema,
+  type ProviderVettingValues,
+  type ProviderKind,
+} from "@/features/admin/components/ProviderVettingForm";
+import {
+  Tabs, TabsContent, TabsList, TabsTrigger,
+} from "@/components/ui/tabs";
 
-/**
- * Public organisation self-signup is intentionally disabled.
- * Hospitals and Emergency Response providers are onboarded by Holarc admins;
- * individual staff are then invited from the organisation's admin console.
- */
+function generatePassword(): string {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghjkmnpqrstuvwxyz";
+  const digits = "23456789";
+  const symbols = "!@#$%&*?";
+  const all = upper + lower + digits + symbols;
+  const pick = (s: string) => s[Math.floor(Math.random() * s.length)];
+  const base = [pick(upper), pick(lower), pick(digits), pick(symbols)];
+  for (let i = 0; i < 10; i++) base.push(pick(all));
+  return base.sort(() => Math.random() - 0.5).join("");
+}
+
 export default function ProviderSignup() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [kind, setKind] = useState<ProviderKind>("hospital");
+  const [vetting, setVetting] = useState<ProviderVettingValues>(defaultProviderVettingValues());
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ email: string; password: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const kindLabel = kind === "hospital" ? "Hospital" : "Emergency Service Provider";
+
+  const submit = async () => {
+    const parsed = providerVettingSchema.safeParse(vetting);
+    if (!parsed.success) {
+      const first = Object.values(parsed.error.flatten().fieldErrors)[0]?.[0] || "Please fill in all required fields";
+      toast({ title: "Form incomplete", description: first, variant: "destructive" });
+      return;
+    }
+    if (!vetting.license_file) {
+      toast({ title: "License required", description: "Upload a certified copy of the license.", variant: "destructive" });
+      return;
+    }
+    if (!vetting.auto_gen_password && vetting.manual_password.length < 8) {
+      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
+
+    setBusy(true);
+    try {
+      // 1. Duplicate guard
+      const { data: dup } = await supabase.rpc("check_provider_duplicate", {
+        _type: kind === "hospital" ? "hospital" : "ambulance",
+        _reg_no: vetting.license_number.trim(),
+        _name: vetting.org_name.trim(),
+        _city: "",
+      });
+      if (dup && typeof dup === "object" && (dup as any).exists) {
+        toast({
+          title: "Application already exists",
+          description: `A matching application is already on file (${(dup as any).name}). Please contact onboarding@holarchealth.com.`,
+          variant: "destructive",
+        });
+        setBusy(false);
+        return;
+      }
+
+      // 2. Sign the administrator up (auto-confirm is on)
+      const password = vetting.auto_gen_password ? generatePassword() : vetting.manual_password;
+      const { data: authData, error: authErr } = await supabase.auth.signUp({
+        email: vetting.admin_email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`,
+          data: { full_name: vetting.admin_full_name.trim() },
+        },
+      });
+      if (authErr) {
+        if (/already|registered|exists/i.test(authErr.message)) {
+          toast({
+            title: "Email already registered",
+            description: "An account with this administrator email exists. Sign in first, then submit the application from your dashboard.",
+            variant: "destructive",
+          });
+        } else {
+          toast({ title: "Sign-up failed", description: authErr.message, variant: "destructive" });
+        }
+        setBusy(false);
+        return;
+      }
+      const newUserId = authData?.user?.id;
+      if (!newUserId) throw new Error("Sign-up succeeded but no user id was returned");
+
+      // 3. Upload license (authenticated by the fresh session)
+      const file = vetting.license_file;
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `pending/${newUserId}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("provider-licenses")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw new Error(`License upload failed: ${upErr.message}`);
+
+      // 4. Insert the pending provider row with owner_id = administrator
+      const directors = vetting.directors
+        .filter((d) => d.full_name.trim())
+        .map((d) => ({ full_name: d.full_name.trim(), role: d.role?.trim() || null }));
+
+      const common = {
+        owner_id: newUserId,
+        registration_number: vetting.license_number.trim(),
+        contact_email: vetting.org_email.trim(),
+        contact_phone: vetting.org_phone.trim(),
+        admin_full_name: vetting.admin_full_name.trim(),
+        admin_email: vetting.admin_email.trim(),
+        admin_phone: vetting.admin_phone.trim(),
+        directors,
+        license_file_path: path,
+        license_file_mime: file.type,
+        license_file_size_bytes: file.size,
+        status: "pending" as const,
+      };
+
+      if (kind === "hospital") {
+        const { error: insErr } = await supabase.from("holarchelp_hospitals" as any).insert({
+          ...common,
+          name: vetting.org_name.trim(),
+          address: vetting.address.trim(),
+        } as any);
+        if (insErr) throw new Error(`Hospital insert failed: ${insErr.message}`);
+      } else {
+        const { error: insErr } = await supabase.from("holarchelp_ambulance_providers" as any).insert({
+          ...common,
+          company_name: vetting.org_name.trim(),
+          base_address: vetting.address.trim(),
+        } as any);
+        if (insErr) throw new Error(`Provider insert failed: ${insErr.message}`);
+      }
+
+      // 5. Sign out — no role granted until admin approval
+      await supabase.auth.signOut();
+
+      setResult({ email: vetting.admin_email.trim(), password });
+      toast({
+        title: "Application received",
+        description: "Pending approval — typically within 6 hours.",
+      });
+    } catch (e: any) {
+      toast({ title: "Submission failed", description: e.message, variant: "destructive" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const copyCreds = async () => {
+    if (!result) return;
+    await navigator.clipboard.writeText(`${result.email}\n${result.password}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -20,48 +178,80 @@ export default function ProviderSignup() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-12">
+      <main className="mx-auto max-w-3xl px-4 py-10">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
           <Building2 className="h-8 w-8 text-primary" />
         </div>
         <h1 className="text-center text-3xl font-extrabold">Onboard your organisation</h1>
         <p className="mt-3 text-center text-muted-foreground">
-          Hospitals and Emergency Response providers are onboarded directly by the Holarc Health team.
-          Public self-signup for organisations has been disabled to protect the SOS network.
+          Submit your hospital or emergency-response credentials below. Our team reviews applications within 6 hours.
         </p>
 
-        <Card className="mt-8">
-          <CardContent className="space-y-4 p-6">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 h-5 w-5 text-primary" />
-              <div>
-                <p className="font-semibold">How onboarding works</p>
-                <ol className="mt-1 list-decimal pl-4 text-sm text-muted-foreground space-y-1">
-                  <li>Contact us with your organisation details and credentials.</li>
-                  <li>Holarc creates your organisation and assigns your first admin account.</li>
-                  <li>That admin invites paramedics, doctors, nurses and coordinators from inside the portal.</li>
-                </ol>
+        {result ? (
+          <Card className="mt-8 border-2 border-emerald-500/60">
+            <CardContent className="space-y-4 p-6">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
+                <div>
+                  <h2 className="text-xl font-semibold">Application received</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    We aim to approve all applications within <strong>6 hours</strong>. You'll be able to sign in
+                    once your administrator account is approved.
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="rounded-lg border bg-muted/30 p-4">
-              <p className="flex items-center gap-2 text-sm font-semibold">
-                <Mail className="h-4 w-4" /> Reach the onboarding team
-              </p>
-              <a
-                href="mailto:onboarding@holarchealth.com?subject=Organisation%20onboarding%20request"
-                className="mt-1 inline-block text-primary underline"
-              >
-                onboarding@holarchealth.com
-              </a>
-            </div>
+              <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
+                <p className="font-bold text-amber-900 dark:text-amber-200">Save your password now</p>
+                <p className="text-amber-900/80 dark:text-amber-200/80">
+                  This password is shown only once. Your administrator will need it to sign in after approval.
+                </p>
+              </div>
 
-            <p className="text-xs text-muted-foreground">
-              Already invited? Check your email for an invitation link from your administrator and follow it to
-              create your individual staff account.
-            </p>
-          </CardContent>
-        </Card>
+              <div className="rounded-lg border bg-card p-3 font-mono text-sm space-y-1.5">
+                <div><span className="text-muted-foreground">Email:</span> {result.email}</div>
+                <div><span className="text-muted-foreground">Password:</span> <span className="font-bold">{result.password}</span></div>
+              </div>
+
+              <Button onClick={copyCreds} variant="outline" className="w-full gap-2">
+                {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                {copied ? "Copied" : "Copy email + password"}
+              </Button>
+
+              <Button className="w-full" onClick={() => navigate("/")}>Return to Home</Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mt-8">
+            <CardContent className="space-y-5 p-6">
+              <Tabs value={kind} onValueChange={(v) => setKind(v as ProviderKind)}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="hospital">Hospital</TabsTrigger>
+                  <TabsTrigger value="esp">Emergency Service Provider</TabsTrigger>
+                </TabsList>
+                <TabsContent value={kind} className="mt-4">
+                  <ProviderVettingForm
+                    kind={kind}
+                    values={vetting}
+                    onChange={setVetting}
+                    disabled={busy}
+                    mode="public"
+                  />
+                </TabsContent>
+              </Tabs>
+
+              <div className="rounded-md border border-emerald-500/40 bg-emerald-50/60 text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-950/30 dark:text-emerald-200 text-sm p-3 flex gap-2 items-start">
+                <Clock className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>The administrator email you supply becomes the account used to sign in once approved.</span>
+              </div>
+
+              <Button onClick={submit} disabled={busy} size="lg" className="w-full">
+                {busy ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                Submit {kindLabel} application
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="mt-6 text-center">
           <Button variant="outline" onClick={() => navigate("/auth")}>I already have an account — sign in</Button>
