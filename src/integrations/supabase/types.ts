@@ -1570,6 +1570,9 @@ export type Database = {
       holarchelp_ambulance_providers: {
         Row: {
           accepting_patients: boolean
+          admin_email: string | null
+          admin_full_name: string | null
+          admin_phone: string | null
           approved_at: string | null
           at_capacity: boolean
           base_address: string | null
@@ -1581,15 +1584,20 @@ export type Database = {
           created_at: string
           credential_score: number | null
           credential_score_updated_at: string | null
+          directors: Json
           dispatch_priority: number
           emergency_phone: string | null
           fleet_size: number | null
           id: string
           latitude: number | null
+          license_file_mime: string | null
+          license_file_path: string | null
+          license_file_size_bytes: number | null
           longitude: number | null
           owner_id: string
           ownership: string
           registration_number: string | null
+          rejection_reason: string | null
           sos_voice_clip_path: string | null
           state: string | null
           status: Database["public"]["Enums"]["holarchelp_provider_status"]
@@ -1599,6 +1607,9 @@ export type Database = {
         }
         Insert: {
           accepting_patients?: boolean
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
           approved_at?: string | null
           at_capacity?: boolean
           base_address?: string | null
@@ -1610,15 +1621,20 @@ export type Database = {
           created_at?: string
           credential_score?: number | null
           credential_score_updated_at?: string | null
+          directors?: Json
           dispatch_priority?: number
           emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
           latitude?: number | null
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
           longitude?: number | null
           owner_id: string
           ownership?: string
           registration_number?: string | null
+          rejection_reason?: string | null
           sos_voice_clip_path?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["holarchelp_provider_status"]
@@ -1628,6 +1644,9 @@ export type Database = {
         }
         Update: {
           accepting_patients?: boolean
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
           approved_at?: string | null
           at_capacity?: boolean
           base_address?: string | null
@@ -1639,15 +1658,20 @@ export type Database = {
           created_at?: string
           credential_score?: number | null
           credential_score_updated_at?: string | null
+          directors?: Json
           dispatch_priority?: number
           emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
           latitude?: number | null
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
           longitude?: number | null
           owner_id?: string
           ownership?: string
           registration_number?: string | null
+          rejection_reason?: string | null
           sos_voice_clip_path?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["holarchelp_provider_status"]
@@ -1760,6 +1784,9 @@ export type Database = {
         Row: {
           accepting_patients: boolean
           address: string | null
+          admin_email: string | null
+          admin_full_name: string | null
+          admin_phone: string | null
           approved_at: string | null
           at_capacity: boolean
           bed_capacity: number | null
@@ -1771,6 +1798,7 @@ export type Database = {
           created_at: string
           credential_score: number | null
           credential_score_updated_at: string | null
+          directors: Json
           dispatch_priority: number
           er_beds_available: number | null
           er_capacity_status: string
@@ -1778,11 +1806,15 @@ export type Database = {
           icu_capacity: number | null
           id: string
           latitude: number | null
+          license_file_mime: string | null
+          license_file_path: string | null
+          license_file_size_bytes: number | null
           longitude: number | null
           name: string
           owner_id: string
           ownership: string
           registration_number: string | null
+          rejection_reason: string | null
           services: string[] | null
           state: string | null
           status: Database["public"]["Enums"]["holarchelp_provider_status"]
@@ -1793,6 +1825,9 @@ export type Database = {
         Insert: {
           accepting_patients?: boolean
           address?: string | null
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
           approved_at?: string | null
           at_capacity?: boolean
           bed_capacity?: number | null
@@ -1804,6 +1839,7 @@ export type Database = {
           created_at?: string
           credential_score?: number | null
           credential_score_updated_at?: string | null
+          directors?: Json
           dispatch_priority?: number
           er_beds_available?: number | null
           er_capacity_status?: string
@@ -1811,11 +1847,15 @@ export type Database = {
           icu_capacity?: number | null
           id?: string
           latitude?: number | null
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
           longitude?: number | null
           name: string
           owner_id: string
           ownership?: string
           registration_number?: string | null
+          rejection_reason?: string | null
           services?: string[] | null
           state?: string | null
           status?: Database["public"]["Enums"]["holarchelp_provider_status"]
@@ -1826,6 +1866,9 @@ export type Database = {
         Update: {
           accepting_patients?: boolean
           address?: string | null
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
           approved_at?: string | null
           at_capacity?: boolean
           bed_capacity?: number | null
@@ -1837,6 +1880,7 @@ export type Database = {
           created_at?: string
           credential_score?: number | null
           credential_score_updated_at?: string | null
+          directors?: Json
           dispatch_priority?: number
           er_beds_available?: number | null
           er_capacity_status?: string
@@ -1844,11 +1888,15 @@ export type Database = {
           icu_capacity?: number | null
           id?: string
           latitude?: number | null
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
           longitude?: number | null
           name?: string
           owner_id?: string
           ownership?: string
           registration_number?: string | null
+          rejection_reason?: string | null
           services?: string[] | null
           state?: string | null
           status?: Database["public"]["Enums"]["holarchelp_provider_status"]
@@ -5395,6 +5443,10 @@ export type Database = {
           status: string
           tier: string
         }[]
+      }
+      holarchelp_reject_provider: {
+        Args: { _kind: string; _provider_id: string; _reason?: string }
+        Returns: undefined
       }
       holarchelp_release_incident: {
         Args: { _incident_id: string; _reason?: string }
