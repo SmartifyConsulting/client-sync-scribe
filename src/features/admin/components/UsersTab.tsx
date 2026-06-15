@@ -89,6 +89,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
   const [mfaResetting, setMfaResetting] = useState(false);
   const [mfaResetResult, setMfaResetResult] = useState<{ email: string; tempPassword: string } | null>(null);
   const [copiedTemp, setCopiedTemp] = useState(false);
+  const [pendingStatusMap, setPendingStatusMap] = useState<Map<string, string>>(new Map());
+  const [reviewUserId, setReviewUserId] = useState<string | null>(null);
+
 
 
   useEffect(() => {
