@@ -198,10 +198,35 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
         await supabase.from("user_roles").insert({ user_id: newUserId, role: KIND_TO_ROLE[kind] as any });
       }
 
-      setResult({ email: data.email, password: data.password, emailed: !!data.emailed });
+      // 5. Best-effort acknowledgement email to the requester (6-hour SLA notice).
+      //    Email infrastructure may not be provisioned yet — failure is non-blocking.
+      try {
+        await supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "provider-vetting-received",
+            recipientEmail: vetting.admin_email.trim(),
+            idempotencyKey: `provider-vetting-received-${newUserId}-${Date.now()}`,
+            templateData: {
+              admin_full_name: vetting.admin_full_name.trim(),
+              organisation_name: vetting.org_name.trim(),
+              kind: providerKind === "hospital" ? "Hospital" : "Emergency Service Provider",
+            },
+          },
+        });
+      } catch (mailErr) {
+        console.warn("[CreateTestUserDialog] acknowledgement email failed (non-blocking):", mailErr);
+      }
+
+      setResult({
+        email: data.email,
+        password: data.password,
+        emailed: !!data.emailed,
+        pending: true,
+        adminEmail: vetting.admin_email.trim(),
+      });
       toast({
         title: "Submission received",
-        description: "Pending approval — visible in User Admin.",
+        description: "Pending approval — visible in User Admin. Approval is typically completed within 6 hours.",
       });
       onCreated?.();
     } catch (e: any) {
