@@ -160,7 +160,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     )
                   }
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="h-5 w-5" />
                   <span className="flex-1">{item.label}</span>
                   {item.label === "Notifications" && unreadCount > 0 && (
                     <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
