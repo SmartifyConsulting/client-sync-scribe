@@ -641,6 +641,13 @@ export default function UsersTab({ kind }: UsersTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <PendingProviderReviewDialog
+        open={!!reviewUserId}
+        ownerUserId={reviewUserId}
+        onClose={() => setReviewUserId(null)}
+        onActioned={fetchUsers}
+      />
     </>
 
   );
