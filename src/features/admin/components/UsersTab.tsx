@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, X, Shield, Trash2, Users, KeyRound, Copy, Check } from "lucide-react";
+import { Loader2, Pencil, X, Shield, Trash2, Users, KeyRound, Copy, Check, FileSearch } from "lucide-react";
+import { PendingProviderReviewDialog } from "@/features/admin/components/PendingProviderReviewDialog";
+import { Badge } from "@/components/ui/badge";
 import { useAutosave } from "@/features/admin/hooks/useAutosave";
 import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import {
