@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Pencil, X, Shield, Trash2, Users, KeyRound, Copy, Check } from "lucide-react";
+import { Loader2, Pencil, X, Shield, Trash2, Users, KeyRound, Copy, Check, FileSearch } from "lucide-react";
+import { PendingProviderReviewDialog } from "@/features/admin/components/PendingProviderReviewDialog";
+import { Badge } from "@/components/ui/badge";
 import { useAutosave } from "@/features/admin/hooks/useAutosave";
 import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
 import {
@@ -87,6 +89,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
   const [mfaResetting, setMfaResetting] = useState(false);
   const [mfaResetResult, setMfaResetResult] = useState<{ email: string; tempPassword: string } | null>(null);
   const [copiedTemp, setCopiedTemp] = useState(false);
+  const [pendingStatusMap, setPendingStatusMap] = useState<Map<string, string>>(new Map());
+  const [reviewUserId, setReviewUserId] = useState<string | null>(null);
+
 
 
   useEffect(() => {
@@ -107,12 +112,19 @@ export default function UsersTab({ kind }: UsersTabProps) {
     const ids = baseUsers.map((u) => u.user_id);
 
     if (ids.length) {
-      const [profsRes, doctorPracticeRes, hospitalsRes, hospMembersRes] = await Promise.all([
+      const [profsRes, doctorPracticeRes, hospitalsRes, hospMembersRes, ambProvRes] = await Promise.all([
         supabase.from("profiles").select("id, holarchelp_enabled, specialty, country, mobile_number" as any).in("id", ids),
         supabase.from("practice_members" as any).select("doctor_id, practices(name)").in("doctor_id", ids),
-        supabase.from("holarchelp_hospitals" as any).select("owner_id, address, city, country").in("owner_id", ids),
+        supabase.from("holarchelp_hospitals" as any).select("owner_id, address, city, country, status").in("owner_id", ids),
         supabase.from("holarchelp_hospital_members" as any).select("user_id, hospital_id, holarchelp_hospitals(address, city, country)").in("user_id", ids),
+        supabase.from("holarchelp_ambulance_providers" as any).select("owner_id, status").in("owner_id", ids),
       ]);
+
+      const statusMap = new Map<string, string>();
+      (hospitalsRes.data || []).forEach((h: any) => { if (h.owner_id && h.status) statusMap.set(h.owner_id, h.status); });
+      (ambProvRes.data || []).forEach((a: any) => { if (a.owner_id && a.status) statusMap.set(a.owner_id, a.status); });
+      setPendingStatusMap(statusMap);
+
 
       const helpMap = new Map<string, boolean>();
       const countryMap = new Map<string, string | null>();
@@ -427,7 +439,17 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     className="scale-90"
                   />
                 </TableCell>
-                <TableCell><StatusDot tone={statusToTone(u.status)} /></TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1.5">
+                    <StatusDot tone={statusToTone(u.status)} />
+                    {pendingStatusMap.get(u.user_id) === "pending" && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-400 text-amber-700 dark:text-amber-300">Pending approval</Badge>
+                    )}
+                    {pendingStatusMap.get(u.user_id) === "rejected" && (
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-destructive text-destructive">Rejected</Badge>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="text-[hsl(var(--admin-text-tertiary))]">{format(new Date(u.created_at), "dd MMM yyyy")}</TableCell>
                 <TableCell className="text-right">
                   {isEditing ? (
@@ -439,6 +461,11 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     </div>
                   ) : (
                     <div className="flex justify-end gap-0.5">
+                      {pendingStatusMap.has(u.user_id) && (
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-amber-600 hover:text-amber-700" onClick={() => setReviewUserId(u.user_id)} title="Review submission">
+                          <FileSearch className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       <Button size="icon" variant="ghost" className="h-7 w-7 text-[hsl(var(--admin-text-tertiary))] hover:text-[hsl(var(--admin-text-primary))]" onClick={() => startEditing(u)} title="Edit user">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -450,6 +477,8 @@ export default function UsersTab({ kind }: UsersTabProps) {
                       </Button>
                     </div>
                   )}
+
+
 
                 </TableCell>
               </TableRow>
@@ -612,6 +641,13 @@ export default function UsersTab({ kind }: UsersTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <PendingProviderReviewDialog
+        open={!!reviewUserId}
+        ownerUserId={reviewUserId}
+        onClose={() => setReviewUserId(null)}
+        onActioned={fetchUsers}
+      />
     </>
 
   );

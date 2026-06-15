@@ -321,7 +321,7 @@ export default function Landing() {
             className="lg:col-span-5 relative"
           >
             <div className="relative grid grid-cols-2 gap-3 sm:gap-4">
-              {/* Live Consultation */}
+              {/* Transcribed Sessions */}
               <div className="col-span-2 card-modern p-5 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shrink-0">
@@ -329,7 +329,7 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-foreground text-sm">Live Consultation</p>
+                      <p className="font-semibold text-foreground text-sm">Transcribed Sessions</p>
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium text-destructive">
                         <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> REC
                       </span>
