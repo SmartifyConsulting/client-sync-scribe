@@ -22,13 +22,14 @@ interface CreateTestUserDialogProps {
   onCreated?: () => void;
 }
 
-type UserKind = "patient" | "hospital" | "esp" | "pharmacy";
+type UserKind = "patient" | "hospital" | "esp" | "pharmacy" | "admin";
 
 const KIND_OPTIONS: Array<{ kind: UserKind; label: string; description: string; icon: React.ComponentType<any> }> = [
   { kind: "patient", label: "Patient", description: "Standard patient account.", icon: User },
   { kind: "hospital", label: "Hospital", description: "Hospital — requires vetting.", icon: Building2 },
   { kind: "esp", label: "Emergency Service Provider", description: "ER / Ambulance — requires vetting.", icon: Siren },
   { kind: "pharmacy", label: "Pharmacy", description: "Pharmacy account.", icon: Pill },
+  { kind: "admin", label: "Admin", description: "Full platform admin access.", icon: ShieldCheck },
 ];
 
 const KIND_TO_ROLE: Record<UserKind, string> = {
@@ -36,7 +37,9 @@ const KIND_TO_ROLE: Record<UserKind, string> = {
   hospital: "hospital_staff",
   esp: "ambulance_staff",
   pharmacy: "pharmacy_staff",
+  admin: "admin",
 };
+
 
 export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
   const { toast } = useToast();
