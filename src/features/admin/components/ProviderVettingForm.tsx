@@ -7,9 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 
-export type ProviderKind = "hospital" | "esp";
+export type ProviderKind = "hospital" | "esp" | "insurance";
+
+export type InsuranceType = "life" | "disability_income" | "both" | "other";
 
 export interface Director {
   full_name: string;
@@ -35,6 +38,8 @@ export interface ProviderVettingValues {
   auto_gen_password: boolean;
   manual_password: string;
   send_email: boolean;
+  // Insurance-only
+  insurance_type: InsuranceType;
 }
 
 const directorSchema = z.object({
@@ -75,6 +80,7 @@ export const defaultProviderVettingValues = (): ProviderVettingValues => ({
   auto_gen_password: true,
   manual_password: "",
   send_email: true,
+  insurance_type: "other",
 });
 
 const ACCEPTED_MIME = ["application/pdf", "image/jpeg", "image/png"];
@@ -92,7 +98,14 @@ interface Props {
 export function ProviderVettingForm({ kind, values, onChange, showAccountOptions = true, disabled, mode = "admin" }: Props) {
 
   const [fileError, setFileError] = useState<string | null>(null);
-  const orgLabel = kind === "hospital" ? "Hospital" : "ER / Ambulance service";
+  const orgLabel =
+    kind === "hospital" ? "Hospital"
+    : kind === "insurance" ? "Insurance Company"
+    : "ER / Ambulance service";
+  const adminLabel =
+    kind === "hospital" ? "Hospital Administrator"
+    : kind === "insurance" ? "Insurer Administrator"
+    : "Service Administrator";
   const set = <K extends keyof ProviderVettingValues>(key: K, val: ProviderVettingValues[K]) =>
     onChange({ ...values, [key]: val });
 
@@ -176,6 +189,25 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
             onChange={(e) => set("license_number", e.target.value)} />
         </div>
 
+        {kind === "insurance" && (
+          <div className="space-y-1.5">
+            <Label htmlFor="insurance_type">Insurance type</Label>
+            <Select
+              value={values.insurance_type}
+              onValueChange={(v) => set("insurance_type", v as InsuranceType)}
+              disabled={disabled}
+            >
+              <SelectTrigger id="insurance_type"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="life">Life insurance</SelectItem>
+                <SelectItem value="disability_income">Disability income</SelectItem>
+                <SelectItem value="both">Life & disability income</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Directors */}
         <div className="space-y-2">
           <Label>Directors</Label>
@@ -240,11 +272,11 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
         </div>
       </section>
 
-      {/* 2. HOSPITAL ADMINISTRATOR */}
+      {/* 2. ADMINISTRATOR */}
       <section className={frameClass}>
         <h3 className={sectionHeaderClass}>
           <UserCog className="h-4 w-4" />
-          Hospital Administrator
+          {adminLabel}
         </h3>
 
         <div className="space-y-1.5">
@@ -264,7 +296,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
               onCheckedChange={(c) => toggleAdminEmailSame(!!c)}
               disabled={disabled}
             />
-            Same as Hospital email
+            Same as {orgLabel} email
           </label>
         </div>
 
@@ -282,7 +314,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
               onCheckedChange={(c) => toggleAdminPhoneSame(!!c)}
               disabled={disabled}
             />
-            Same as Hospital contact number
+            Same as {orgLabel} contact number
           </label>
         </div>
       </section>

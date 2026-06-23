@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,19 +25,36 @@ interface Props {
 
 /**
  * Country-code + local-number phone input.
- * Stores the combined E.164 string via `onChange`.
+ * The dial code is held locally so changing the country before typing a
+ * local number still persists (parent receives "" until a local exists, but
+ * the chosen flag/code stays visible).
  */
 export function PhoneNumberInput({ id, value, onChange, disabled, placeholder = "82 123 4567" }: Props) {
-  const { dial, local } = useMemo(() => splitE164(value), [value]);
-  const currentDial = dial || DEFAULT_DIAL;
+  const parsed = splitE164(value);
+  const [dial, setDial] = useState<string>(parsed.dial || DEFAULT_DIAL);
+
+  // If parent supplies an E.164 with a recognisable prefix, mirror it locally.
+  useEffect(() => {
+    const p = splitE164(value);
+    if (value && p.dial && p.dial !== dial) setDial(p.dial);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  const local = parsed.local;
+
+  const onDialChange = (d: string) => {
+    setDial(d);
+    // Re-emit so parent stays in sync once a local exists.
+    onChange(joinE164(d, local));
+  };
+
+  const onLocalChange = (next: string) => {
+    onChange(joinE164(dial, next));
+  };
 
   return (
     <div className="flex gap-2">
-      <Select
-        value={currentDial}
-        onValueChange={(d) => onChange(joinE164(d, local))}
-        disabled={disabled}
-      >
+      <Select value={dial} onValueChange={onDialChange} disabled={disabled}>
         <SelectTrigger className="w-[8.5rem] shrink-0">
           <SelectValue />
         </SelectTrigger>
@@ -59,7 +76,7 @@ export function PhoneNumberInput({ id, value, onChange, disabled, placeholder = 
         value={local}
         disabled={disabled}
         placeholder={placeholder}
-        onChange={(e) => onChange(joinE164(currentDial, e.target.value))}
+        onChange={(e) => onLocalChange(e.target.value)}
         className="flex-1"
       />
     </div>

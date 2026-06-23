@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface PendingProviderSubmission {
   id: string;
-  kind: "hospital" | "ambulance";
+  kind: "hospital" | "ambulance" | "insurance";
   status: string;
   org_name: string;
   registration_number: string | null;
@@ -19,6 +19,7 @@ export interface PendingProviderSubmission {
   license_file_size_bytes: number | null;
   rejection_reason: string | null;
   created_at: string;
+  insurance_type?: string | null;
 }
 
 export function usePendingProviderSubmission(ownerUserId: string | null | undefined) {
@@ -27,7 +28,7 @@ export function usePendingProviderSubmission(ownerUserId: string | null | undefi
     enabled: !!ownerUserId,
     queryFn: async (): Promise<PendingProviderSubmission | null> => {
       if (!ownerUserId) return null;
-      const [hospitalRes, ambRes] = await Promise.all([
+      const [hospitalRes, ambRes, insRes] = await Promise.all([
         supabase
           .from("holarchelp_hospitals" as any)
           .select("id, status, name, registration_number, address, contact_email, contact_phone, admin_full_name, admin_email, admin_phone, directors, license_file_path, license_file_mime, license_file_size_bytes, rejection_reason, created_at")
@@ -42,11 +43,18 @@ export function usePendingProviderSubmission(ownerUserId: string | null | undefi
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle(),
+        supabase
+          .from("holarchelp_insurance_providers" as any)
+          .select("id, status, company_name, registration_number, base_address, contact_email, contact_phone, admin_full_name, admin_email, admin_phone, directors, license_file_path, license_file_mime, license_file_size_bytes, rejection_reason, created_at, insurance_type")
+          .eq("owner_id", ownerUserId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
 
       const h = hospitalRes.data as any;
       const a = ambRes.data as any;
-      // Prefer the most recent record across both tables
+      const i = insRes.data as any;
       const candidates: PendingProviderSubmission[] = [];
       if (h) candidates.push({
         id: h.id, kind: "hospital", status: h.status, org_name: h.name,
@@ -67,6 +75,17 @@ export function usePendingProviderSubmission(ownerUserId: string | null | undefi
         license_file_path: a.license_file_path, license_file_mime: a.license_file_mime,
         license_file_size_bytes: a.license_file_size_bytes,
         rejection_reason: a.rejection_reason, created_at: a.created_at,
+      });
+      if (i) candidates.push({
+        id: i.id, kind: "insurance", status: i.status, org_name: i.company_name,
+        registration_number: i.registration_number, address: i.base_address,
+        contact_email: i.contact_email, contact_phone: i.contact_phone,
+        admin_full_name: i.admin_full_name, admin_email: i.admin_email, admin_phone: i.admin_phone,
+        directors: Array.isArray(i.directors) ? i.directors : [],
+        license_file_path: i.license_file_path, license_file_mime: i.license_file_mime,
+        license_file_size_bytes: i.license_file_size_bytes,
+        rejection_reason: i.rejection_reason, created_at: i.created_at,
+        insurance_type: i.insurance_type ?? null,
       });
       candidates.sort((x, y) => y.created_at.localeCompare(x.created_at));
       return candidates[0] || null;

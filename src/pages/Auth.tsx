@@ -669,7 +669,7 @@ export default function Auth() {
                     className="w-full flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground hover:border-primary cursor-pointer text-center"
                   >
                     <Building2 className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Emergency Service Provider</span>
+                    <span className="text-[11px] font-medium leading-tight">Hospital / Emergency / Insurance</span>
                   </button>
                 </div>
               </RadioGroup>
@@ -777,7 +777,7 @@ export default function Auth() {
                     className="w-full flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground hover:border-primary cursor-pointer text-center"
                   >
                     <Building2 className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Emergency Service Provider</span>
+                    <span className="text-[11px] font-medium leading-tight">Hospital / Emergency / Insurance</span>
                   </button>
                 </div>
               </RadioGroup>
@@ -1061,8 +1061,15 @@ export default function Auth() {
                   Create your free account
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
-                  Sign up in under a minute — patient or practitioner.
+                  Patients, practitioners and organisations welcome.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/provider-signup")}
+                  className="block w-full text-center text-xs font-medium text-primary hover:underline"
+                >
+                  Registering a hospital, emergency service or insurance company? Onboard your organisation →
+                </button>
               </div>
 
               <DevErLoginButton />

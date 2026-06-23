@@ -38,7 +38,10 @@ export default function ProviderSignup() {
   const [result, setResult] = useState<{ email: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const kindLabel = kind === "hospital" ? "Hospital" : "Emergency Service Provider";
+  const kindLabel =
+    kind === "hospital" ? "Hospital"
+    : kind === "insurance" ? "Insurance Company"
+    : "Emergency Service Provider";
 
   const submit = async () => {
     const parsed = providerVettingSchema.safeParse(vetting);
@@ -60,7 +63,7 @@ export default function ProviderSignup() {
     try {
       // 1. Duplicate guard
       const { data: dup } = await supabase.rpc("check_provider_duplicate", {
-        _type: kind === "hospital" ? "hospital" : "ambulance",
+        _type: kind === "hospital" ? "hospital" : kind === "insurance" ? "insurance" : "ambulance",
         _reg_no: vetting.license_number.trim(),
         _name: vetting.org_name.trim(),
         _city: "",
@@ -137,6 +140,14 @@ export default function ProviderSignup() {
           address: vetting.address.trim(),
         } as any);
         if (insErr) throw new Error(`Hospital insert failed: ${insErr.message}`);
+      } else if (kind === "insurance") {
+        const { error: insErr } = await supabase.from("holarchelp_insurance_providers" as any).insert({
+          ...common,
+          company_name: vetting.org_name.trim(),
+          base_address: vetting.address.trim(),
+          insurance_type: vetting.insurance_type,
+        } as any);
+        if (insErr) throw new Error(`Insurer insert failed: ${insErr.message}`);
       } else {
         const { error: insErr } = await supabase.from("holarchelp_ambulance_providers" as any).insert({
           ...common,
@@ -184,7 +195,7 @@ export default function ProviderSignup() {
         </div>
         <h1 className="text-center text-3xl font-extrabold">Onboard your organisation</h1>
         <p className="mt-3 text-center text-muted-foreground">
-          Submit your hospital or emergency-response credentials below. Our team reviews applications within 6 hours.
+          Register a hospital, emergency-response service or insurance company. Our team reviews applications within 6 hours.
         </p>
 
         {result ? (
@@ -225,9 +236,10 @@ export default function ProviderSignup() {
           <Card className="mt-8">
             <CardContent className="space-y-5 p-6">
               <Tabs value={kind} onValueChange={(v) => setKind(v as ProviderKind)}>
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="hospital">Hospital</TabsTrigger>
-                  <TabsTrigger value="esp">Emergency Service Provider</TabsTrigger>
+                  <TabsTrigger value="esp">Emergency Service</TabsTrigger>
+                  <TabsTrigger value="insurance">Insurance Company</TabsTrigger>
                 </TabsList>
                 <TabsContent value={kind} className="mt-4">
                   <ProviderVettingForm

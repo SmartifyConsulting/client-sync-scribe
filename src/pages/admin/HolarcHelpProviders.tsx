@@ -23,7 +23,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Hospital, Ambulance, ShieldAlert, Loader2, BarChart3, Plus, Pencil, Trash2, Users, Pill, Stethoscope, UserPlus } from "lucide-react";
+import { Hospital, Ambulance, ShieldAlert, Loader2, BarChart3, Plus, Pencil, Trash2, Users, Pill, Stethoscope, UserPlus, ShieldCheck } from "lucide-react";
 import { InviteStaffDialog, type OrgType } from "@/modules/holarchelp/components/InviteStaffDialog";
 import { useAutosave } from "@/features/admin/hooks/useAutosave";
 import { AutosaveIndicator } from "@/features/admin/components/AutosaveIndicator";
@@ -36,7 +36,7 @@ import { EmptyState } from "./_shared/EmptyState";
 import { RowSkeleton } from "./_shared/RowSkeleton";
 
 type Status = "all" | "active" | "inactive";
-type Kind = "hospital" | "ambulance" | "pharmacy";
+type Kind = "hospital" | "ambulance" | "pharmacy" | "insurance";
 
 const COUNTRY_FLAGS: Record<string, string> = {
   "South Africa": "🇿🇦", "ZA": "🇿🇦", "RSA": "🇿🇦",
@@ -80,9 +80,17 @@ function sortedCountries(grouped: Record<string, any>) {
 }
 
 const isActive = (s: string) => s === "approved";
-const tableFor = (k: Kind) => k === "hospital" ? "holarchelp_hospitals" : k === "ambulance" ? "holarchelp_ambulance_providers" : "holarchelp_pharmacies";
-const nameField = (k: Kind) => k === "ambulance" ? "company_name" : "name";
-const nounFor = (k: Kind) => k === "hospital" ? "hospitals" : k === "ambulance" ? "ambulances" : "pharmacies";
+const tableFor = (k: Kind) =>
+  k === "hospital" ? "holarchelp_hospitals"
+  : k === "ambulance" ? "holarchelp_ambulance_providers"
+  : k === "insurance" ? "holarchelp_insurance_providers"
+  : "holarchelp_pharmacies";
+const nameField = (k: Kind) => (k === "ambulance" || k === "insurance") ? "company_name" : "name";
+const nounFor = (k: Kind) =>
+  k === "hospital" ? "hospitals"
+  : k === "ambulance" ? "ambulances"
+  : k === "insurance" ? "insurers"
+  : "pharmacies";
 
 type EditState = { kind: Kind; row: any | null } | null;
 
@@ -93,35 +101,38 @@ export default function HolarcHelpProviders() {
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [ambulances, setAmbulances] = useState<any[]>([]);
   const [pharmacies, setPharmacies] = useState<any[]>([]);
+  const [insurers, setInsurers] = useState<any[]>([]);
   const [userEmails, setUserEmails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState<EditState>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ kind: Kind; id: string; name: string } | null>(null);
   const [chooserOpen, setChooserOpen] = useState(false);
   const [invite, setInvite] = useState<{ orgType: OrgType; id: string; name: string } | null>(null);
-  const [providerSearch, setProviderSearch] = useState<Record<Kind, string>>({ hospital: "", ambulance: "", pharmacy: "" });
+  const [providerSearch, setProviderSearch] = useState<Record<Kind, string>>({ hospital: "", ambulance: "", pharmacy: "", insurance: "" });
 
   const filterByStatus = (rows: any[]) =>
     status === "all" ? rows : status === "active" ? rows.filter((r) => isActive(r.status)) : rows.filter((r) => !isActive(r.status));
 
   const load = async () => {
     setLoading(true);
-    const [{ data: h }, { data: a }, { data: p }] = await Promise.all([
+    const [{ data: h }, { data: a }, { data: p }, { data: i }] = await Promise.all([
       supabase.from("holarchelp_hospitals" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("holarchelp_ambulance_providers" as any).select("*").order("created_at", { ascending: false }),
       supabase.from("holarchelp_pharmacies" as any).select("*").order("created_at", { ascending: false }),
+      supabase.from("holarchelp_insurance_providers" as any).select("*").order("created_at", { ascending: false }),
     ]);
     const hRows = filterByStatus((h as any) ?? []);
     const aRows = filterByStatus((a as any) ?? []);
     const pRows = filterByStatus((p as any) ?? []);
+    const iRows = filterByStatus((i as any) ?? []);
     setHospitals(hRows);
     setAmbulances(aRows);
     setPharmacies(pRows);
+    setInsurers(iRows);
     setLoading(false);
 
-    // Fetch linked user login emails (admin only)
     const userIds = Array.from(new Set(
-      [...hRows, ...aRows, ...pRows].map((r: any) => r.owner_id ?? r.user_id).filter(Boolean),
+      [...hRows, ...aRows, ...pRows, ...iRows].map((r: any) => r.owner_id ?? r.user_id).filter(Boolean),
     )) as string[];
     if (userIds.length) {
       const { data: emailRes } = await supabase.functions.invoke("admin-get-user-emails", { body: { user_ids: userIds } });
@@ -181,13 +192,17 @@ export default function HolarcHelpProviders() {
         </TableCell>
         <TableCell className="text-xs">{r.city ?? "—"}</TableCell>
         <TableCell>
-          <Select value={r.tier ?? "tier_3"} onValueChange={(v) => setTier(kind, r.id, v)}>
-            <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {(kind === "hospital" ? ["tier_1","tier_2","tier_3"] : ["tier_1","tier_2","tier_3","tier_4"]).map((t) =>
-                <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          {kind === "insurance" ? (
+            <span className="text-xs text-muted-foreground">—</span>
+          ) : (
+            <Select value={r.tier ?? "tier_3"} onValueChange={(v) => setTier(kind, r.id, v)}>
+              <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(kind === "hospital" ? ["tier_1","tier_2","tier_3"] : ["tier_1","tier_2","tier_3","tier_4"]).map((t) =>
+                  <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
@@ -283,7 +298,11 @@ export default function HolarcHelpProviders() {
   const providerKindNeedsAdd = (k: string) => k === "hospital" || k === "ambulance" || k === "pharmacy";
 
   const renderProviderPanel = (k: Kind) => {
-    const fullList = k === "hospital" ? hospitals : k === "ambulance" ? ambulances : pharmacies;
+    const fullList =
+      k === "hospital" ? hospitals
+      : k === "ambulance" ? ambulances
+      : k === "insurance" ? insurers
+      : pharmacies;
     const noun = nounFor(k);
     const q = providerSearch[k].trim().toLowerCase();
     const list = q
@@ -379,6 +398,9 @@ export default function HolarcHelpProviders() {
               <TabsTrigger value="pharmacy" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Pill className="h-3.5 w-3.5" />Pharmacies
               </TabsTrigger>
+              <TabsTrigger value="insurance" className={`${adminTabsTriggerClass} gap-1.5`}>
+                <ShieldCheck className="h-3.5 w-3.5" />Insurers
+              </TabsTrigger>
               <TabsTrigger value="admin" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <ShieldAlert className="h-3.5 w-3.5" />Admin
               </TabsTrigger>
@@ -398,7 +420,7 @@ export default function HolarcHelpProviders() {
               <UsersTab kind="admin" />
             </TabsContent>
 
-            {(["hospital", "pharmacy"] as Kind[]).map((k) => (
+            {(["hospital", "pharmacy", "insurance"] as Kind[]).map((k) => (
               <TabsContent key={k} value={k} className="mt-4">
                 {renderProviderPanel(k)}
               </TabsContent>
