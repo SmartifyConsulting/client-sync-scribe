@@ -394,6 +394,9 @@ export default function HolarcHelpProviders() {
               <TabsTrigger value="pharmacy" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Pill className="h-3.5 w-3.5" />Pharmacies
               </TabsTrigger>
+              <TabsTrigger value="insurance" className={`${adminTabsTriggerClass} gap-1.5`}>
+                <ShieldCheck className="h-3.5 w-3.5" />Insurers
+              </TabsTrigger>
               <TabsTrigger value="admin" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <ShieldAlert className="h-3.5 w-3.5" />Admin
               </TabsTrigger>
@@ -413,7 +416,7 @@ export default function HolarcHelpProviders() {
               <UsersTab kind="admin" />
             </TabsContent>
 
-            {(["hospital", "pharmacy"] as Kind[]).map((k) => (
+            {(["hospital", "pharmacy", "insurance"] as Kind[]).map((k) => (
               <TabsContent key={k} value={k} className="mt-4">
                 {renderProviderPanel(k)}
               </TabsContent>
