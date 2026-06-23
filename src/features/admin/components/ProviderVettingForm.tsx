@@ -189,6 +189,25 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
             onChange={(e) => set("license_number", e.target.value)} />
         </div>
 
+        {kind === "insurance" && (
+          <div className="space-y-1.5">
+            <Label htmlFor="insurance_type">Insurance type</Label>
+            <Select
+              value={values.insurance_type}
+              onValueChange={(v) => set("insurance_type", v as InsuranceType)}
+              disabled={disabled}
+            >
+              <SelectTrigger id="insurance_type"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="life">Life insurance</SelectItem>
+                <SelectItem value="disability_income">Disability income</SelectItem>
+                <SelectItem value="both">Life & disability income</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Directors */}
         <div className="space-y-2">
           <Label>Directors</Label>
@@ -253,11 +272,11 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
         </div>
       </section>
 
-      {/* 2. HOSPITAL ADMINISTRATOR */}
+      {/* 2. ADMINISTRATOR */}
       <section className={frameClass}>
         <h3 className={sectionHeaderClass}>
           <UserCog className="h-4 w-4" />
-          Hospital Administrator
+          {adminLabel}
         </h3>
 
         <div className="space-y-1.5">
@@ -277,7 +296,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
               onCheckedChange={(c) => toggleAdminEmailSame(!!c)}
               disabled={disabled}
             />
-            Same as Hospital email
+            Same as {orgLabel} email
           </label>
         </div>
 
