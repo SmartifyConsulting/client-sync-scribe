@@ -7,9 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 
-export type ProviderKind = "hospital" | "esp";
+export type ProviderKind = "hospital" | "esp" | "insurance";
+
+export type InsuranceType = "life" | "disability_income" | "both" | "other";
 
 export interface Director {
   full_name: string;
@@ -35,6 +38,8 @@ export interface ProviderVettingValues {
   auto_gen_password: boolean;
   manual_password: string;
   send_email: boolean;
+  // Insurance-only
+  insurance_type: InsuranceType;
 }
 
 const directorSchema = z.object({
@@ -75,6 +80,7 @@ export const defaultProviderVettingValues = (): ProviderVettingValues => ({
   auto_gen_password: true,
   manual_password: "",
   send_email: true,
+  insurance_type: "other",
 });
 
 const ACCEPTED_MIME = ["application/pdf", "image/jpeg", "image/png"];
@@ -92,7 +98,14 @@ interface Props {
 export function ProviderVettingForm({ kind, values, onChange, showAccountOptions = true, disabled, mode = "admin" }: Props) {
 
   const [fileError, setFileError] = useState<string | null>(null);
-  const orgLabel = kind === "hospital" ? "Hospital" : "ER / Ambulance service";
+  const orgLabel =
+    kind === "hospital" ? "Hospital"
+    : kind === "insurance" ? "Insurance Company"
+    : "ER / Ambulance service";
+  const adminLabel =
+    kind === "hospital" ? "Hospital Administrator"
+    : kind === "insurance" ? "Insurer Administrator"
+    : "Service Administrator";
   const set = <K extends keyof ProviderVettingValues>(key: K, val: ProviderVettingValues[K]) =>
     onChange({ ...values, [key]: val });
 
