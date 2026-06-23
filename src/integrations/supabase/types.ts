@@ -2271,6 +2271,87 @@ export type Database = {
           },
         ]
       }
+      holarchelp_insurance_providers: {
+        Row: {
+          admin_email: string | null
+          admin_full_name: string | null
+          admin_phone: string | null
+          approved_at: string | null
+          base_address: string | null
+          city: string | null
+          company_name: string
+          contact_email: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string
+          credential_score: number | null
+          directors: Json | null
+          id: string
+          insurance_type: string
+          license_file_mime: string | null
+          license_file_path: string | null
+          license_file_size_bytes: number | null
+          owner_id: string
+          ownership: string | null
+          registration_number: string | null
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["holarchelp_provider_status"]
+          updated_at: string
+        }
+        Insert: {
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
+          approved_at?: string | null
+          base_address?: string | null
+          city?: string | null
+          company_name: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          credential_score?: number | null
+          directors?: Json | null
+          id?: string
+          insurance_type?: string
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
+          owner_id: string
+          ownership?: string | null
+          registration_number?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["holarchelp_provider_status"]
+          updated_at?: string
+        }
+        Update: {
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
+          approved_at?: string | null
+          base_address?: string | null
+          city?: string | null
+          company_name?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string
+          credential_score?: number | null
+          directors?: Json | null
+          id?: string
+          insurance_type?: string
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
+          owner_id?: string
+          ownership?: string | null
+          registration_number?: string | null
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["holarchelp_provider_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       holarchelp_locations: {
         Row: {
           accuracy: number | null
@@ -5361,6 +5442,10 @@ export type Database = {
         Args: { _hospital_id: string }
         Returns: undefined
       }
+      holarchelp_approve_insurer: {
+        Args: { _provider_id: string }
+        Returns: undefined
+      }
       holarchelp_approve_pharmacy: {
         Args: { _provider_id: string }
         Returns: undefined
@@ -5561,6 +5646,7 @@ export type Database = {
         | "blood_bank"
         | "pharmacy_staff"
         | "nurse"
+        | "insurer_staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5718,6 +5804,7 @@ export const Constants = {
         "blood_bank",
         "pharmacy_staff",
         "nurse",
+        "insurer_staff",
       ],
     },
   },

@@ -1,47 +1,54 @@
-# Plan: Public `/provider-signup` — Administrator becomes the owner
+## Plan
 
-Resolves the blocker on item 1 of the cumulative plan. `holarchelp_hospitals.owner_id` and `holarchelp_ambulance_providers.owner_id` are `NOT NULL`, so anon can't insert a pending row. Fix: the **administrator signs up first**, then the pending provider record is inserted with `owner_id = administrator's auth.uid()`. No schema change needed.
+### 1. Fix country-code dropdown on the hospital / ESP onboarding form
+**Bug:** In `PhoneNumberInput`, changing the country code before typing a local number silently fails. `onChange` calls `joinE164(dial, local)`, and `joinE164` returns `""` when `local` is empty — so the selected dial is discarded, and on next render `splitE164("")` falls back to `DEFAULT_DIAL`. The dropdown appears to "do nothing".
 
-## Flow on `/provider-signup`
+**Fix:** Track the selected dial locally inside `PhoneNumberInput` (state seeded from `splitE164(value)`) so the chosen country persists even before the user types a local number. Only emit `onChange` with a real E.164 string once a local number exists; otherwise emit `""` but keep the visible dial. Apply to both org phone and admin phone on `ProviderVettingForm`.
 
-1. Public visitor lands on the rewritten page (form embedded in a card, hero icon, page title kept, `mailto:` removed).
-2. They fill the existing `ProviderVettingForm` (Hospital / ER variant) — green-framed Organisation + Administrator sections, "Same as Hospital" mirroring, license upload, 6-hour SLA banner. No changes to fields or validation.
-3. On submit (new `mode="public"` branch in `ProviderVettingForm` / new submit handler on the page):
-   a. `supabase.auth.signUp({ email: admin_email, password: auto-generated or manual, options: { data: { full_name: admin_full_name } } })` — administrator becomes the auth user. Email auto-confirm is already on, so a session is returned immediately.
-   b. With that session, upload the license to `provider-licenses` at `pending/<new uid>/<timestamp>-<file>`.
-   c. Insert the pending row into `holarchelp_hospitals` or `holarchelp_ambulance_providers` with `owner_id = data.user.id`, `status = 'pending'`, and all vetting fields exactly as `CreateTestUserDialog.createVetting` does today.
-   d. Immediately sign the user back out (`supabase.auth.signOut()`) so they don't land in an authed area before approval — they have no role yet, and approval grants `hospital_staff` / `ambulance_staff` via the existing `holarchelp_approve_*` RPCs.
-4. Show the form's green success state: "Application received — pending approval", 6-hour SLA, sign-in reminder using the password they chose, "Return to Home" button. No email is sent (notify domain abandoned).
+### 2. Cater for Hospitals, ESPs and Insurance Companies during sign-up
+**Today:** `/auth` only offers Doctor and Patient. Hospitals/ESPs are hidden behind `/provider-signup`, and Insurance has no path at all.
 
-## Why this works without a migration
+**Change:**
+- On the `/auth` sign-up screen, add an "Organisation" choice alongside Doctor/Patient. Selecting it routes the user to `/provider-signup` (preserving any `?invite=` / `?role=` params).
+- Add a prominent secondary card on the login view: "Registering a hospital, emergency service or insurance company? → Onboard your organisation" linking to `/provider-signup`.
+- Extend `/provider-signup` so the tabbed picker has **three** tabs: Hospital · Emergency Service Provider · Insurance Company.
 
-- Existing RLS on `holarchelp_hospitals` / `holarchelp_ambulance_providers` already lets an `authenticated` owner insert their own pending row (`owner_id = auth.uid()`). Confirmed by the admin-side flow in `CreateTestUserDialog` working today.
-- Existing `provider-licenses` bucket policy already lets authenticated users upload under `pending/<their uid>/...`.
-- `holarchelp_approve_hospital` / `holarchelp_approve_ambulance` already grant the correct role to `owner_id` on approval — no changes there.
-- No anon RLS, no nullable owner_id, no new table.
+### 3. Insurance Company provider type (new)
+Insurance companies (life / disability income insurers) need to register so they can later verify patient history. This step covers registration + admin approval only; the patient-consent / history-access flow is a follow-up.
 
-## Duplicate-prevention guardrail
+**Backend (one migration):**
+- New table `public.holarchelp_insurance_providers` mirroring the shape of `holarchelp_ambulance_providers` (org name, registration_number, contact_email/phone, base_address, city, country, ownership, owner_id, license_file_path/mime/size_bytes, admin_full_name/email/phone, directors jsonb, status `holarchelp_provider_status`, rejection_reason, credential_score, tier, dispatch_priority dropped — not relevant). Plus `insurance_type text` enum-ish ("life", "disability_income", "both", "other").
+- GRANTs: `SELECT, INSERT, UPDATE, DELETE` to `authenticated`, `ALL` to `service_role`. No anon.
+- RLS policies matching the hospital pattern:
+  - owner can insert their own pending row,
+  - owner can read/update their own row,
+  - admins can read/update all rows,
+  - approved rows are readable by `authenticated` (so search can find them).
+- Add `'insurer_staff'` to the `user_role` enum.
+- New RPC `holarchelp_approve_insurer(_provider_id uuid)` mirroring `holarchelp_approve_hospital` — sets status=approved and grants `insurer_staff` to the owner.
+- Extend `check_provider_duplicate` to handle `_type = 'insurance'`.
+- Storage: reuse the existing `provider-licenses` bucket; pending uploads go under `pending/<uid>/...` (existing policy already allows this).
 
-Before sign-up, call the existing `check_provider_duplicate(_type, _reg_no, _name, _city)` RPC (security-definer, callable without auth context for read). If a match is found, show a blocking message ("An application with this licence/name already exists — contact onboarding@holarchealth.com") and do NOT create the auth user. Prevents orphaned auth accounts from typo retries.
+**Frontend:**
+- `ProviderVettingForm`: extend `ProviderKind` to `"hospital" | "esp" | "insurance"`; label adjustments ("Insurance Company" / "Insurer Administrator"); "Insurance type" select (Life / Disability income / Both / Other) shown only when kind is insurance.
+- `ProviderSignup.tsx`: add the third tab and insert branch that writes to `holarchelp_insurance_providers`.
+- Admin review (`PendingProviderReviewDialog` + `HolarcHelpProviders` admin page): add a third section listing pending insurers and wire the new approve RPC. (Reject already takes `_kind`; extend it to accept `'insurance'`.)
 
-## Password UX on the public page
+**Out of scope (flagged for a follow-up):** the actual patient-history verification flow that grants an approved insurer read-only access to a specific patient's record under explicit patient consent.
 
-- Default to auto-generated password (existing form toggle), shown once on the success screen with copy-to-clipboard, plus a note: "Save this password — your administrator will use it to sign in once approved."
-- If user toggles off auto-gen, the existing manual password field is used (with the same eye/eye-off rules already in `PhoneNumberInput`/`Input` patterns — actually `Input` doesn't auto-add toggle; the form already shows manual_password as plain `Input`, matching the admin dialog, so we keep parity).
+### 4. Make Sign Up more prominent on the login page
+On the login view of `/auth` (not the existing `/provider-signup` page already done):
+- Below the "Sign In" button, replace the small "Don't have an account? Sign up" link with a full-width outline `Button` ("Create an account") sized `lg`, plus a one-line helper ("Patients, Doctors and Organisations welcome").
+- Keep tab order: Email → Password → Sign In → Create account → Forgot password (`tabIndex={-1}`).
+- Mirror the same prominent CTA into the mobile login layout if it diverges.
 
-## Failure handling
+### Files touched
+- `src/components/forms/PhoneNumberInput.tsx` — local dial state.
+- `src/features/admin/components/ProviderVettingForm.tsx` — third kind, insurance labels + insurance_type field.
+- `src/pages/ProviderSignup.tsx` — third tab, insurer insert branch, duplicate guard arg.
+- `src/pages/Auth.tsx` — Organisation choice on signup; prominent Create-account CTA on login; "Onboard your organisation" link.
+- `src/features/admin/components/PendingProviderReviewDialog.tsx` + `src/pages/admin/HolarcHelpProviders.tsx` — list & approve insurers.
+- One migration: `holarchelp_insurance_providers` table + GRANTs + RLS + `insurer_staff` enum value + `holarchelp_approve_insurer` RPC + `check_provider_duplicate` extension + `holarchelp_reject_provider` insurance branch.
 
-- Auth sign-up fails (e.g. email already used) → toast "An account with this email already exists. Sign in first, then submit the application from your dashboard." Do not insert.
-- Storage upload fails → delete the just-created auth user is not possible client-side; show error and instruct user to retry — the orphaned auth user can re-sign-in and resubmit.
-- Pending row insert fails → same as above.
-
-## Files changed
-
-- `src/pages/ProviderSignup.tsx` — rewrite: render `ProviderVettingForm` in a card, own the submit handler that does signUp → upload → insert → signOut → success state. Remove `mailto:` block. Keep header, hero icon, title, and bottom "I already have an account — sign in" button.
-- `src/features/admin/components/ProviderVettingForm.tsx` — add optional `mode?: "public" | "admin"` prop. When `public`, hide the "Email credentials to administrator" toggle (no email infra), keep everything else identical.
-- No migration. No edge function. No changes to `CreateTestUserDialog`, admin review dialog, or approval RPCs.
-
-## Out of scope
-
-- No email notifications (notify domain remains abandoned).
-- No changes to vetting form fields, green frames, country-code phone input, "Same as Hospital" mirroring, admin review, mobile nav, or any item already shipped from the previous plan.
+### Not changed
+No edits to existing approval flows for hospital/ambulance, no changes to `register-emergency-provider` edge function, no patient-consent / history-access logic yet.
