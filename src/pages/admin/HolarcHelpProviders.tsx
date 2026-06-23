@@ -192,13 +192,17 @@ export default function HolarcHelpProviders() {
         </TableCell>
         <TableCell className="text-xs">{r.city ?? "—"}</TableCell>
         <TableCell>
-          <Select value={r.tier ?? "tier_3"} onValueChange={(v) => setTier(kind, r.id, v)}>
-            <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {(kind === "hospital" ? ["tier_1","tier_2","tier_3"] : ["tier_1","tier_2","tier_3","tier_4"]).map((t) =>
-                <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          {kind === "insurance" ? (
+            <span className="text-xs text-muted-foreground">—</span>
+          ) : (
+            <Select value={r.tier ?? "tier_3"} onValueChange={(v) => setTier(kind, r.id, v)}>
+              <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(kind === "hospital" ? ["tier_1","tier_2","tier_3"] : ["tier_1","tier_2","tier_3","tier_4"]).map((t) =>
+                  <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">
