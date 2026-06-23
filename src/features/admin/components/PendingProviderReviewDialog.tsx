@@ -55,7 +55,10 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
     if (!submission) return;
     setBusy(true);
     try {
-      const rpcName = submission.kind === "hospital" ? "holarchelp_approve_hospital" : "holarchelp_approve_ambulance";
+      const rpcName =
+        submission.kind === "hospital" ? "holarchelp_approve_hospital"
+        : submission.kind === "insurance" ? "holarchelp_approve_insurer"
+        : "holarchelp_approve_ambulance";
       const { error } = await supabase.rpc(rpcName as any, { _provider_id: submission.id } as any);
       if (error) throw error;
       toast({ title: "Approved", description: `${submission.org_name} is now active.` });
@@ -106,7 +109,7 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
               <Badge variant={submission.status === "pending" ? "default" : "outline"}>
                 {submission.status}
               </Badge>
-              <Badge variant="outline">{submission.kind === "hospital" ? "Hospital" : "Emergency Response"}</Badge>
+              <Badge variant="outline">{submission.kind === "hospital" ? "Hospital" : submission.kind === "insurance" ? "Insurance Company" : "Emergency Response"}</Badge>
             </div>
 
             <Section title="Administrator">
