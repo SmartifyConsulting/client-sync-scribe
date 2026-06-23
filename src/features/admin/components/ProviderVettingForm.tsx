@@ -314,7 +314,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
               onCheckedChange={(c) => toggleAdminPhoneSame(!!c)}
               disabled={disabled}
             />
-            Same as Hospital contact number
+            Same as {orgLabel} contact number
           </label>
         </div>
       </section>
