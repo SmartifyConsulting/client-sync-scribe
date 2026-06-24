@@ -5196,109 +5196,58 @@ export type Database = {
       }
       holarchelp_hospitals_public: {
         Row: {
-          accepting_patients: boolean | null
           address: string | null
-          approved_at: string | null
-          at_capacity: boolean | null
-          bed_capacity: number | null
-          beds_available: number | null
           city: string | null
+          contact_email: string | null
+          contact_phone: string | null
           country: string | null
           created_at: string | null
           credential_score: number | null
-          credential_score_updated_at: string | null
-          dispatch_priority: number | null
-          er_beds_available: number | null
-          er_capacity_status: string | null
-          icu_available: number | null
-          icu_capacity: number | null
           id: string | null
           latitude: number | null
           longitude: number | null
           name: string | null
-          owner_id: string | null
           ownership: string | null
-          registration_number: string | null
-          services: string[] | null
-          state: string | null
           status:
             | Database["public"]["Enums"]["holarchelp_provider_status"]
             | null
-          subscription_status:
-            | Database["public"]["Enums"]["holarchelp_subscription_status"]
-            | null
           tier: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
-          updated_at: string | null
         }
         Insert: {
-          accepting_patients?: boolean | null
           address?: string | null
-          approved_at?: string | null
-          at_capacity?: boolean | null
-          bed_capacity?: number | null
-          beds_available?: number | null
           city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string | null
           credential_score?: number | null
-          credential_score_updated_at?: string | null
-          dispatch_priority?: number | null
-          er_beds_available?: number | null
-          er_capacity_status?: string | null
-          icu_available?: number | null
-          icu_capacity?: number | null
           id?: string | null
           latitude?: number | null
           longitude?: number | null
           name?: string | null
-          owner_id?: string | null
           ownership?: string | null
-          registration_number?: string | null
-          services?: string[] | null
-          state?: string | null
           status?:
             | Database["public"]["Enums"]["holarchelp_provider_status"]
             | null
-          subscription_status?:
-            | Database["public"]["Enums"]["holarchelp_subscription_status"]
-            | null
           tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
-          updated_at?: string | null
         }
         Update: {
-          accepting_patients?: boolean | null
           address?: string | null
-          approved_at?: string | null
-          at_capacity?: boolean | null
-          bed_capacity?: number | null
-          beds_available?: number | null
           city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           country?: string | null
           created_at?: string | null
           credential_score?: number | null
-          credential_score_updated_at?: string | null
-          dispatch_priority?: number | null
-          er_beds_available?: number | null
-          er_capacity_status?: string | null
-          icu_available?: number | null
-          icu_capacity?: number | null
           id?: string | null
           latitude?: number | null
           longitude?: number | null
           name?: string | null
-          owner_id?: string | null
           ownership?: string | null
-          registration_number?: string | null
-          services?: string[] | null
-          state?: string | null
           status?:
             | Database["public"]["Enums"]["holarchelp_provider_status"]
             | null
-          subscription_status?:
-            | Database["public"]["Enums"]["holarchelp_subscription_status"]
-            | null
           tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"] | null
-          updated_at?: string | null
         }
         Relationships: []
       }
