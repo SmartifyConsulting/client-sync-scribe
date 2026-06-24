@@ -101,10 +101,12 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
   const orgLabel =
     kind === "hospital" ? "Hospital"
     : kind === "insurance" ? "Insurance Company"
+    : kind === "pharmacy" ? "Pharmacy"
     : "ER / Ambulance service";
   const adminLabel =
     kind === "hospital" ? "Hospital Administrator"
     : kind === "insurance" ? "Insurer Administrator"
+    : kind === "pharmacy" ? "Pharmacy Administrator"
     : "Service Administrator";
   const set = <K extends keyof ProviderVettingValues>(key: K, val: ProviderVettingValues[K]) =>
     onChange({ ...values, [key]: val });
