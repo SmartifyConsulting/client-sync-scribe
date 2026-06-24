@@ -452,7 +452,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                     <div className="flex items-center gap-1">
                                       {doctor.kind === 'doctor' && (
                                         <InviteDoctorDialog
-                                          prefillDoctorId={doctor.doctor_id}
+                                          prefillDoctorId={doctor.id}
                                           prefillDoctorName={doctor.full_name || ""}
                                           prefillAvatarUrl={doctor.avatar_url || ""}
                                           prefillSpecialty={doctor.specialty || ""}
