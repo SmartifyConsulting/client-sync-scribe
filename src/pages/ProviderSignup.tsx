@@ -144,28 +144,62 @@ export default function ProviderSignup() {
         status: "pending" as const,
       };
 
+      let newProviderId: string | null = null;
       if (kind === "hospital") {
-        const { error: insErr } = await supabase.from("holarchelp_hospitals" as any).insert({
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_hospitals" as any).insert({
           ...common,
           name: vetting.org_name.trim(),
           address: vetting.address.trim(),
-        } as any);
+        } as any).select("id").single();
         if (insErr) throw new Error(`Hospital insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
       } else if (kind === "insurance") {
-        const { error: insErr } = await supabase.from("holarchelp_insurance_providers" as any).insert({
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_insurance_providers" as any).insert({
           ...common,
           company_name: vetting.org_name.trim(),
           base_address: vetting.address.trim(),
           insurance_type: vetting.insurance_type,
-        } as any);
+        } as any).select("id").single();
         if (insErr) throw new Error(`Insurer insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
+      } else if (kind === "pharmacy") {
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_pharmacies" as any).insert({
+          ...common,
+          name: vetting.org_name.trim(),
+          address: vetting.address.trim(),
+        } as any).select("id").single();
+        if (insErr) throw new Error(`Pharmacy insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
       } else {
-        const { error: insErr } = await supabase.from("holarchelp_ambulance_providers" as any).insert({
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_ambulance_providers" as any).insert({
           ...common,
           company_name: vetting.org_name.trim(),
           base_address: vetting.address.trim(),
-        } as any);
+        } as any).select("id").single();
         if (insErr) throw new Error(`Provider insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
+      }
+
+      // 4b. Notify admin (best-effort, fire-and-forget before sign-out)
+      if (newProviderId) {
+        try {
+          await supabase.functions.invoke("notify-provider-application", {
+            body: {
+              kind,
+              providerId: newProviderId,
+              orgName: vetting.org_name.trim(),
+              adminName: vetting.admin_full_name.trim(),
+              adminEmail: vetting.admin_email.trim(),
+              adminPhone: vetting.admin_phone.trim(),
+              registrationNumber: vetting.license_number.trim(),
+              address: vetting.address.trim(),
+              orgEmail: vetting.org_email.trim(),
+              orgPhone: vetting.org_phone.trim(),
+            },
+          });
+        } catch (notifyErr) {
+          console.warn("Admin notification failed (non-fatal)", notifyErr);
+        }
       }
 
       // 5. Sign out — no role granted until admin approval
