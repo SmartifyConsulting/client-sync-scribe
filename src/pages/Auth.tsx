@@ -390,14 +390,27 @@ export default function Auth() {
       const lastPart = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
       const baseAlias = (lastPart ? `${firstPart}-${lastPart}` : firstPart).replace(/[^a-z0-9-]/g, '');
 
+      // Make sure the freshly minted access token is attached before any storage upload.
+      await supabase.auth.getSession();
+
+      // Upload optional profile picture (now that the user is authenticated).
+      const avatarUrl = avatarFile ? await uploadAvatar(userId) : null;
+
       // Update profile with the few fields we collect at signup
-      await supabase.from("profiles").update({
+      const profileUpdate: Record<string, any> = {
         full_name: fullName,
         role: userRole,
         mailbox_alias: baseAlias,
         mobile_number: fullPhone,
         preferred_language: preferredLanguage,
-      }).eq("id", userId);
+      };
+      if (avatarUrl) profileUpdate.avatar_url = avatarUrl;
+      if (userRole === "doctor") {
+        profileUpdate.practice_number = practiceNumber.trim();
+        profileUpdate.doctor_number = doctorNumber.trim();
+      }
+      await supabase.from("profiles").update(profileUpdate).eq("id", userId);
+
 
       if (userRole === "patient") {
         if (inviteToken) {
