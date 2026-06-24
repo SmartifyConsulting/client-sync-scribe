@@ -240,8 +240,8 @@ export default function ProviderSignup() {
         </div>
         <h1 className="text-center text-3xl font-extrabold">Onboard your organisation</h1>
         <p className="mt-3 text-center text-muted-foreground">
-          Register a hospital, emergency-response service or insurance company. Our team reviews applications within
-          minutes.
+          Register a hospital, emergency-response service, insurance company or pharmacy. Our team reviews
+          applications within minutes.
         </p>
 
         {result ? (
