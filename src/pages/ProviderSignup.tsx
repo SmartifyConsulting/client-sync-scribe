@@ -73,7 +73,7 @@ export default function ProviderSignup() {
     try {
       // 1. Duplicate guard
       const { data: dup } = await supabase.rpc("check_provider_duplicate", {
-        _type: kind === "hospital" ? "hospital" : kind === "insurance" ? "insurance" : "ambulance",
+        _type: dupType,
         _reg_no: vetting.license_number.trim(),
         _name: vetting.org_name.trim(),
         _city: "",
