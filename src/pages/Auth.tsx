@@ -712,6 +712,54 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
+              <Label>Profile Picture (optional)</Label>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-16 w-16 border-2 border-primary/40">
+                  {avatarPreview && <AvatarImage src={avatarPreview} alt="Profile preview" />}
+                  <AvatarFallback>
+                    <Camera className="h-5 w-5 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
+                    {avatarPreview ? "Change photo" : "Upload photo"}
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground">Shown on your profile and to patients.</p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="practiceNumber">Practice Number <span className="text-destructive">*</span></Label>
+                <Input
+                  id="practiceNumber"
+                  placeholder="e.g. 0123456"
+                  value={practiceNumber}
+                  onChange={(e) => setPracticeNumber(e.target.value)}
+                  required
+                  disabled={accountCreated}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="doctorNumber">License / Registration No. <span className="text-destructive">*</span></Label>
+                <Input
+                  id="doctorNumber"
+                  placeholder="e.g. MP123456"
+                  value={doctorNumber}
+                  onChange={(e) => setDoctorNumber(e.target.value)}
+                  required
+                  disabled={accountCreated}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label>Sign up with</Label>
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
