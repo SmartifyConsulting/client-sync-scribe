@@ -30,8 +30,15 @@ function generatePassword(): string {
 export default function ProviderSignup() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
-  const [kind, setKind] = useState<ProviderKind>("hospital");
+  const initialKind: ProviderKind = (() => {
+    const k = searchParams.get("kind");
+    return k === "hospital" || k === "emergency" || k === "insurance" || k === "pharmacy"
+      ? (k as ProviderKind)
+      : "hospital";
+  })();
+  const [kind, setKind] = useState<ProviderKind>(initialKind);
   const [vetting, setVetting] = useState<ProviderVettingValues>(defaultProviderVettingValues());
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ email: string; password: string } | null>(null);
