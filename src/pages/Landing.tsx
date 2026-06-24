@@ -124,14 +124,16 @@ export default function Landing() {
     return null;
   }
 
-  const handleRoleSelect = (role: "doctor" | "patient" | "emergency") => {
+  const handleRoleSelect = (role: string) => {
     setShowRoleDialog(false);
-    if (role === "emergency") {
-      navigate("/provider-signup");
-    } else {
+    if (role === "patient" || role === "doctor") {
       navigate(`/auth?mode=signup&role=${role}`);
+    } else {
+      navigate(`/provider-signup?kind=${role}`);
     }
+    setSelectedRole("");
   };
+
 
   return (
     <div className="min-h-screen bg-background">
