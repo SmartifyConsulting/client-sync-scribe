@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { Footer } from "@/components/layout/Footer";
 import { SecurityBadges } from "@/components/landing/SecurityBadges";
@@ -115,6 +117,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
   // If user is already logged in, redirect to dashboard
   if (!loading && user) {
@@ -122,14 +125,16 @@ export default function Landing() {
     return null;
   }
 
-  const handleRoleSelect = (role: "doctor" | "patient" | "emergency") => {
+  const handleRoleSelect = (role: string) => {
     setShowRoleDialog(false);
-    if (role === "emergency") {
-      navigate("/provider-signup");
-    } else {
+    if (role === "patient" || role === "doctor") {
       navigate(`/auth?mode=signup&role=${role}`);
+    } else {
+      navigate(`/provider-signup?kind=${role}`);
     }
+    setSelectedRole("");
   };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -546,39 +551,31 @@ export default function Landing() {
             <DialogTitle className="text-center text-2xl">Join Holarc</DialogTitle>
             <DialogDescription className="text-center">How will you use the platform?</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-            <button
-              onClick={() => handleRoleSelect("doctor")}
-              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-5 hover:border-primary hover:bg-accent transition-all duration-200"
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="join-role">I am a...</Label>
+              <Select value={selectedRole} onValueChange={setSelectedRole}>
+                <SelectTrigger id="join-role">
+                  <SelectValue placeholder="Select user type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="patient">Patient</SelectItem>
+                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
+                  <SelectItem value="hospital">Hospital</SelectItem>
+                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
+                  <SelectItem value="insurance">Insurance Company</SelectItem>
+                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={!selectedRole}
+              onClick={() => selectedRole && handleRoleSelect(selectedRole)}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
-                <Stethoscope className="h-7 w-7 text-primary" />
-              </div>
-              <span className="text-base font-semibold text-foreground">Healthcare Provider</span>
-              <span className="text-xs text-muted-foreground mt-1 text-center">Manage patients & collaborate</span>
-            </button>
-            <button
-              onClick={() => handleRoleSelect("patient")}
-              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-5 hover:border-primary hover:bg-accent transition-all duration-200"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
-                <UserCircle className="h-7 w-7 text-primary" />
-              </div>
-              <span className="text-base font-semibold text-foreground">Patient</span>
-              <span className="text-xs text-muted-foreground mt-1 text-center">Own your health journey</span>
-            </button>
-            <button
-              onClick={() => handleRoleSelect("emergency")}
-              className="flex flex-col items-center justify-center rounded-2xl border-2 border-border bg-card p-5 hover:border-[#E01837] hover:bg-accent transition-all duration-200"
-            >
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#E01837]/10 mb-3">
-                <Ambulance className="h-7 w-7 text-[#E01837]" />
-              </div>
-              <span className="text-base font-semibold text-foreground">Hospital or ER Provider</span>
-              <span className="text-xs text-muted-foreground mt-1 text-center">
-                Contact us to onboard your organisation
-              </span>
-            </button>
+              Continue
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

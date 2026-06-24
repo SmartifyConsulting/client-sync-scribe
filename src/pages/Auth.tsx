@@ -670,33 +670,29 @@ export default function Auth() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>I am a...</Label>
-              <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-3 gap-2">
-                <div className="relative">
-                  <RadioGroupItem value="doctor" id="doctor" className="peer sr-only" />
-                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
-                    <Stethoscope className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Healthcare Provider</span>
-                  </Label>
-                </div>
-                <div className="relative">
-                  <RadioGroupItem value="patient" id="patient" className="peer sr-only" />
-                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
-                    <UserCircle className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Patient</span>
-                  </Label>
-                </div>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/provider-signup")}
-                    className="w-full flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground hover:border-primary cursor-pointer text-center"
-                  >
-                    <Building2 className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Hospital / Emergency / Insurance</span>
-                  </button>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="user-type-doctor-step">I am a...</Label>
+              <Select
+                value={userRole}
+                onValueChange={(v) => {
+                  if (v === "patient" || v === "doctor") {
+                    setUserRole(v as UserRole);
+                  } else {
+                    navigate(`/provider-signup?kind=${v}`);
+                  }
+                }}
+              >
+                <SelectTrigger id="user-type-doctor-step">
+                  <SelectValue placeholder="Select user type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="patient">Patient</SelectItem>
+                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
+                  <SelectItem value="hospital">Hospital</SelectItem>
+                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
+                  <SelectItem value="insurance">Insurance Company</SelectItem>
+                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -826,33 +822,30 @@ export default function Auth() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>I am a...</Label>
-              <RadioGroup value={userRole} onValueChange={(v) => setUserRole(v as UserRole)} className="grid grid-cols-3 gap-2" disabled={!!inviteToken}>
-                <div className="relative">
-                  <RadioGroupItem value="doctor" id="doctor" className="peer sr-only" />
-                  <Label htmlFor="doctor" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
-                    <Stethoscope className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Healthcare Provider</span>
-                  </Label>
-                </div>
-                <div className="relative">
-                  <RadioGroupItem value="patient" id="patient" className="peer sr-only" />
-                  <Label htmlFor="patient" className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:bg-accent peer-data-[state=checked]:text-accent-foreground peer-data-[state=checked]:border-primary cursor-pointer text-center">
-                    <UserCircle className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Patient</span>
-                  </Label>
-                </div>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/provider-signup")}
-                    className="w-full flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground hover:border-primary cursor-pointer text-center"
-                  >
-                    <Building2 className="mb-1 h-5 w-5" />
-                    <span className="text-[11px] font-medium leading-tight">Hospital / Emergency / Insurance</span>
-                  </button>
-                </div>
-              </RadioGroup>
+              <Label htmlFor="user-type-patient-step">I am a...</Label>
+              <Select
+                value={userRole}
+                disabled={!!inviteToken}
+                onValueChange={(v) => {
+                  if (v === "patient" || v === "doctor") {
+                    setUserRole(v as UserRole);
+                  } else {
+                    navigate(`/provider-signup?kind=${v}`);
+                  }
+                }}
+              >
+                <SelectTrigger id="user-type-patient-step">
+                  <SelectValue placeholder="Select user type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="patient">Patient</SelectItem>
+                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
+                  <SelectItem value="hospital">Hospital</SelectItem>
+                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
+                  <SelectItem value="insurance">Insurance Company</SelectItem>
+                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                </SelectContent>
+              </Select>
               {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a doctor's invitation</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">

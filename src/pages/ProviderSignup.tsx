@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Building2, CheckCircle2, Copy, Check, Loader2, Clock } from "lucide-react";
@@ -30,8 +30,15 @@ function generatePassword(): string {
 export default function ProviderSignup() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
-  const [kind, setKind] = useState<ProviderKind>("hospital");
+  const initialKind: ProviderKind = (() => {
+    const k = searchParams.get("kind");
+    return k === "hospital" || k === "emergency" || k === "insurance" || k === "pharmacy"
+      ? (k as ProviderKind)
+      : "hospital";
+  })();
+  const [kind, setKind] = useState<ProviderKind>(initialKind);
   const [vetting, setVetting] = useState<ProviderVettingValues>(defaultProviderVettingValues());
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ email: string; password: string } | null>(null);

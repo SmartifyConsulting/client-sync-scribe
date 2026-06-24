@@ -1,47 +1,30 @@
-## Brand your auth emails (no-reply@notify.holarchealth.com)
+## Unified "I am a..." dropdown across Auth + Landing
 
-Right now you can't brand them — the `no-reply@holarchealth.com` emails are Lovable's default templates. I'll set up the pieces so you can.
+Both surfaces ("Get Started" on Landing → **Join Holarc** dialog, and **Create your free account** on `/auth`) only expose 3 tiles and bury Pharmacy/Insurance/ER. Replace them with a single dropdown that lists every user type.
 
-### What I'll do
+### Dropdown options (same on both screens, in this order)
 
-1. **Set up email domain** — `notify.holarchealth.com`. You'll get a one-click DNS setup dialog; the subdomain keeps your main `holarchealth.com` mail untouched.
-2. **Provision email infrastructure** — queue, send log, suppression list, unsubscribe handling. One-time backend setup.
-3. **Scaffold 6 branded auth email templates** at `supabase/functions/_shared/email-templates/`:
-   - `signup.tsx` — confirm signup
-   - `recovery.tsx` — password reset
-   - `magic-link.tsx` — magic link sign-in
-   - `invite.tsx` — invitations
-   - `email-change.tsx` — email change confirmation
-   - `reauthentication.tsx` — reauth OTP
-4. **Apply Holarc Health branding** to each template:
-   - Pull palette from `src/index.css` (teal primary, red accents, foreground/background tokens)
-   - Pull typography from your Tailwind config
-   - Embed your existing logo (from `public/` or `src/assets/`) in the header
-   - Match button radius and spacing to the app
-   - Adapt copy tone to the app's voice (e.g. "Welcome to Holarc Health" rather than generic "Verify Email")
-5. **Deploy** `auth-email-hook` so the templates go live as soon as DNS verifies.
+1. Patient
+2. Healthcare Provider (Doctor)
+3. Hospital
+4. Emergency Service Provider (ER / Ambulance)
+5. Insurance Company
+6. Pharmacy
 
-### Where you'll edit branding afterwards
+### Behaviour
 
-After scaffolding, the answer to your question becomes:
+- **Patient** → continues current patient signup flow on `/auth?mode=signup&role=patient`.
+- **Healthcare Provider** → continues current doctor signup flow on `/auth?mode=signup&role=doctor`.
+- **Hospital / ER / Insurance / Pharmacy** → routes to `/provider-signup?kind=hospital|emergency|insurance|pharmacy`, which preselects the matching kind in the existing organisation signup form.
 
-```text
-supabase/functions/_shared/email-templates/
-├── signup.tsx            ← edit subject, copy, colors, logo
-├── recovery.tsx
-├── magic-link.tsx
-├── invite.tsx
-├── email-change.tsx
-└── reauthentication.tsx
-```
+### Files changed
 
-Each `.tsx` is a React Email component with inline styles. Change a hex, swap copy, move the logo — redeploy `auth-email-hook` and the next email reflects the change. You'll be able to preview each template directly from Cloud → Emails.
-
-### What I need from you
-
-Nothing more — once you approve this plan I'll run setup, scaffold + brand the templates, and deploy. You'll just complete the DNS step in the popup that appears (one-click for most registrars). Auth emails activate automatically once DNS verifies (usually minutes, up to 72 hours worst case). Until then default Lovable emails keep working so nobody is locked out.
+1. **`src/pages/Landing.tsx`** — replace the 3-card grid inside the "Join Holarc" dialog with a `<Select>` (Patient first) plus a Continue button. Keep title "Join Holarc" and subtitle "How will you use the platform?". `handleRoleSelect` extended to handle all 6 values.
+2. **`src/pages/Auth.tsx`** — replace **both** occurrences of the 3-tile `RadioGroup` (doctor signup step 0 and patient signup step 0) with the same Patient-first `<Select>`. Selecting an organisation type immediately navigates to `/provider-signup?kind=...`; selecting Patient/Healthcare Provider sets `userRole` and keeps the user in the existing form.
+3. **`src/pages/ProviderSignup.tsx`** — read `?kind=` query param on mount and preselect the dropdown so deep links from Landing/Auth land on the right form.
 
 ### Out of scope
 
-- Transactional/app emails (booking confirmations, contact form replies, etc.) — separate setup, ask me afterwards if you want it.
-- Marketing/newsletter sends — not supported by Lovable's email system.
+- No backend/schema changes.
+- No changes to the actual signup forms below the picker.
+- No changes to provider vetting form contents.
