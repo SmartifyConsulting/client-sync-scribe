@@ -59,17 +59,22 @@ export function InviteDoctorDialog({
 
     setIsLoading(true);
     try {
-      // Resolve target doctor profile
+      // Resolve target doctor via SECURITY DEFINER RPC (bypasses profiles RLS,
+      // which otherwise hides doctor profiles from patients without an existing link).
       let doctorRow: { id: string; practice_number: string | null; doctor_number: string | null } | null = null;
 
       if (prefillDoctorId) {
         const { data, error } = await supabase
-          .from("profiles")
-          .select("id, practice_number, doctor_number")
-          .eq("id", prefillDoctorId)
-          .maybeSingle();
+          .rpc("get_doctor_invite_card", { _doctor_id: prefillDoctorId });
         if (error) throw error;
-        doctorRow = data as any;
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row) {
+          doctorRow = {
+            id: (row as any).id,
+            practice_number: (row as any).practice_number ?? null,
+            doctor_number: (row as any).doctor_number ?? null,
+          };
+        }
       } else if (prefillPracticeNumber && prefillRegistrationNumber) {
         const { data, error } = await supabase
           .from("profiles")
@@ -89,6 +94,17 @@ export function InviteDoctorDialog({
 
       const practiceNum = doctorRow.practice_number ?? prefillPracticeNumber ?? null;
       const registrationNum = doctorRow.doctor_number ?? prefillRegistrationNumber ?? null;
+
+      if (!practiceNum || !registrationNum) {
+        toast({
+          title: "Missing registration details",
+          description: "This provider has no practice or registration number on file; please contact support to connect.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
 
       // Check for existing request (use doctor_id when available, fall back to numbers)
       let existingRequest: any = null;
