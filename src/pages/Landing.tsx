@@ -117,6 +117,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
   // If user is already logged in, redirect to dashboard
   if (!loading && user) {
