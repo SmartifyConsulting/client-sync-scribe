@@ -10,7 +10,7 @@ import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 
-export type ProviderKind = "hospital" | "esp" | "insurance";
+export type ProviderKind = "hospital" | "esp" | "insurance" | "pharmacy";
 
 export type InsuranceType = "life" | "disability_income" | "both" | "other";
 
@@ -101,10 +101,12 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
   const orgLabel =
     kind === "hospital" ? "Hospital"
     : kind === "insurance" ? "Insurance Company"
+    : kind === "pharmacy" ? "Pharmacy"
     : "ER / Ambulance service";
   const adminLabel =
     kind === "hospital" ? "Hospital Administrator"
     : kind === "insurance" ? "Insurer Administrator"
+    : kind === "pharmacy" ? "Pharmacy Administrator"
     : "Service Administrator";
   const set = <K extends keyof ProviderVettingValues>(key: K, val: ProviderVettingValues[K]) =>
     onChange({ ...values, [key]: val });

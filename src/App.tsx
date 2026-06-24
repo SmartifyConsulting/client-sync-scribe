@@ -58,6 +58,7 @@ import Admin from "./pages/Admin";
 import DoctorDocumentsPage from "./pages/doctor/DoctorDocumentsPage";
 import DoctorRoundTablesPage from "./pages/doctor/DoctorRoundTablesPage";
 import ProviderSignup from "./pages/ProviderSignup";
+import ProviderApprovalAction from "./pages/admin/ProviderApprovalAction";
 
 // HolarcHelp module
 import HolarcHelpRoutes from "./modules/holarchelp/routes";
@@ -178,6 +179,7 @@ const App = () => (
           <Route path="/signup" element={<Auth />} />
           <Route path="/onboarding" element={<Auth />} />
           <Route path="/provider-signup" element={<ProviderSignup />} />
+          <Route path="/admin/provider-approval" element={<ProviderApprovalAction />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/intellectual-property" element={<Navigate to="/terms-and-conditions#intellectual-property" replace />} />
           <Route path="/patient-consent" element={<PatientConsent />} />

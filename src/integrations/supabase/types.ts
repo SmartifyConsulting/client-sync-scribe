@@ -2439,6 +2439,9 @@ export type Database = {
         Row: {
           accepting_patients: boolean
           address: string | null
+          admin_email: string | null
+          admin_full_name: string | null
+          admin_phone: string | null
           approved_at: string | null
           city: string | null
           contact_email: string | null
@@ -2446,13 +2449,18 @@ export type Database = {
           country: string | null
           created_at: string
           credential_score: number | null
+          directors: Json | null
           dispatch_priority: number
           id: string
           latitude: number | null
+          license_file_mime: string | null
+          license_file_path: string | null
+          license_file_size_bytes: number | null
           longitude: number | null
           name: string
           owner_id: string
           registration_number: string | null
+          rejection_reason: string | null
           status: Database["public"]["Enums"]["holarchelp_provider_status"]
           tier: Database["public"]["Enums"]["holarchelp_hospital_tier"]
           updated_at: string
@@ -2460,6 +2468,9 @@ export type Database = {
         Insert: {
           accepting_patients?: boolean
           address?: string | null
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
           approved_at?: string | null
           city?: string | null
           contact_email?: string | null
@@ -2467,13 +2478,18 @@ export type Database = {
           country?: string | null
           created_at?: string
           credential_score?: number | null
+          directors?: Json | null
           dispatch_priority?: number
           id?: string
           latitude?: number | null
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
           longitude?: number | null
           name: string
           owner_id: string
           registration_number?: string | null
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["holarchelp_provider_status"]
           tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"]
           updated_at?: string
@@ -2481,6 +2497,9 @@ export type Database = {
         Update: {
           accepting_patients?: boolean
           address?: string | null
+          admin_email?: string | null
+          admin_full_name?: string | null
+          admin_phone?: string | null
           approved_at?: string | null
           city?: string | null
           contact_email?: string | null
@@ -2488,13 +2507,18 @@ export type Database = {
           country?: string | null
           created_at?: string
           credential_score?: number | null
+          directors?: Json | null
           dispatch_priority?: number
           id?: string
           latitude?: number | null
+          license_file_mime?: string | null
+          license_file_path?: string | null
+          license_file_size_bytes?: number | null
           longitude?: number | null
           name?: string
           owner_id?: string
           registration_number?: string | null
+          rejection_reason?: string | null
           status?: Database["public"]["Enums"]["holarchelp_provider_status"]
           tier?: Database["public"]["Enums"]["holarchelp_hospital_tier"]
           updated_at?: string
@@ -4237,6 +4261,39 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_approval_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          provider_id: string
+          provider_kind: string
+          token: string
+          used_action: string | null
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          provider_id: string
+          provider_kind: string
+          token?: string
+          used_action?: string | null
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          provider_id?: string
+          provider_kind?: string
+          token?: string
+          used_action?: string | null
+          used_at?: string | null
+        }
+        Relationships: []
+      }
       referral_doctors: {
         Row: {
           address: string | null
@@ -5541,6 +5598,10 @@ export type Database = {
         Returns: boolean
       }
       norm_text: { Args: { _t: string }; Returns: string }
+      process_provider_approval: {
+        Args: { _action: string; _token: string }
+        Returns: Json
+      }
       search_doctor_profiles: {
         Args: { _language?: string; _name?: string; _specialty?: string }
         Returns: {

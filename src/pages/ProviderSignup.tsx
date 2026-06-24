@@ -12,7 +12,8 @@ import {
   type ProviderVettingValues,
   type ProviderKind,
 } from "@/features/admin/components/ProviderVettingForm";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function generatePassword(): string {
   const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -37,7 +38,16 @@ export default function ProviderSignup() {
   const [copied, setCopied] = useState(false);
 
   const kindLabel =
-    kind === "hospital" ? "Hospital" : kind === "insurance" ? "Insurance Company" : "Emergency Service Provider";
+    kind === "hospital" ? "Hospital"
+    : kind === "insurance" ? "Insurance Company"
+    : kind === "pharmacy" ? "Pharmacy"
+    : "Emergency Service Provider";
+
+  const dupType =
+    kind === "hospital" ? "hospital"
+    : kind === "insurance" ? "insurance"
+    : kind === "pharmacy" ? "pharmacy"
+    : "ambulance";
 
   const submit = async () => {
     const parsed = providerVettingSchema.safeParse(vetting);
@@ -63,7 +73,7 @@ export default function ProviderSignup() {
     try {
       // 1. Duplicate guard
       const { data: dup } = await supabase.rpc("check_provider_duplicate", {
-        _type: kind === "hospital" ? "hospital" : kind === "insurance" ? "insurance" : "ambulance",
+        _type: dupType,
         _reg_no: vetting.license_number.trim(),
         _name: vetting.org_name.trim(),
         _city: "",
@@ -134,28 +144,62 @@ export default function ProviderSignup() {
         status: "pending" as const,
       };
 
+      let newProviderId: string | null = null;
       if (kind === "hospital") {
-        const { error: insErr } = await supabase.from("holarchelp_hospitals" as any).insert({
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_hospitals" as any).insert({
           ...common,
           name: vetting.org_name.trim(),
           address: vetting.address.trim(),
-        } as any);
+        } as any).select("id").single();
         if (insErr) throw new Error(`Hospital insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
       } else if (kind === "insurance") {
-        const { error: insErr } = await supabase.from("holarchelp_insurance_providers" as any).insert({
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_insurance_providers" as any).insert({
           ...common,
           company_name: vetting.org_name.trim(),
           base_address: vetting.address.trim(),
           insurance_type: vetting.insurance_type,
-        } as any);
+        } as any).select("id").single();
         if (insErr) throw new Error(`Insurer insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
+      } else if (kind === "pharmacy") {
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_pharmacies" as any).insert({
+          ...common,
+          name: vetting.org_name.trim(),
+          address: vetting.address.trim(),
+        } as any).select("id").single();
+        if (insErr) throw new Error(`Pharmacy insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
       } else {
-        const { error: insErr } = await supabase.from("holarchelp_ambulance_providers" as any).insert({
+        const { data: ins, error: insErr } = await supabase.from("holarchelp_ambulance_providers" as any).insert({
           ...common,
           company_name: vetting.org_name.trim(),
           base_address: vetting.address.trim(),
-        } as any);
+        } as any).select("id").single();
         if (insErr) throw new Error(`Provider insert failed: ${insErr.message}`);
+        newProviderId = (ins as any)?.id ?? null;
+      }
+
+      // 4b. Notify admin (best-effort, fire-and-forget before sign-out)
+      if (newProviderId) {
+        try {
+          await supabase.functions.invoke("notify-provider-application", {
+            body: {
+              kind,
+              providerId: newProviderId,
+              orgName: vetting.org_name.trim(),
+              adminName: vetting.admin_full_name.trim(),
+              adminEmail: vetting.admin_email.trim(),
+              adminPhone: vetting.admin_phone.trim(),
+              registrationNumber: vetting.license_number.trim(),
+              address: vetting.address.trim(),
+              orgEmail: vetting.org_email.trim(),
+              orgPhone: vetting.org_phone.trim(),
+            },
+          });
+        } catch (notifyErr) {
+          console.warn("Admin notification failed (non-fatal)", notifyErr);
+        }
       }
 
       // 5. Sign out — no role granted until admin approval
@@ -196,8 +240,8 @@ export default function ProviderSignup() {
         </div>
         <h1 className="text-center text-3xl font-extrabold">Onboard your organisation</h1>
         <p className="mt-3 text-center text-muted-foreground">
-          Register a hospital, emergency-response service or insurance company. Our team reviews applications within
-          minutes.
+          Register a hospital, emergency-response service, insurance company or pharmacy. Our team reviews
+          applications within minutes.
         </p>
 
         {result ? (
@@ -244,22 +288,26 @@ export default function ProviderSignup() {
         ) : (
           <Card className="mt-8">
             <CardContent className="space-y-5 p-6">
-              <Tabs value={kind} onValueChange={(v) => setKind(v as ProviderKind)}>
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="hospital">Hospital</TabsTrigger>
-                  <TabsTrigger value="esp">Emergency Service</TabsTrigger>
-                  <TabsTrigger value="insurance">Insurance Company</TabsTrigger>
-                </TabsList>
-                <TabsContent value={kind} className="mt-4">
-                  <ProviderVettingForm
-                    kind={kind}
-                    values={vetting}
-                    onChange={setVetting}
-                    disabled={busy}
-                    mode="public"
-                  />
-                </TabsContent>
-              </Tabs>
+              <div className="space-y-1.5">
+                <Label htmlFor="org_kind">Organisation type</Label>
+                <Select value={kind} onValueChange={(v) => setKind(v as ProviderKind)} disabled={busy}>
+                  <SelectTrigger id="org_kind"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hospital">Hospital</SelectItem>
+                    <SelectItem value="esp">Emergency Service Provider</SelectItem>
+                    <SelectItem value="insurance">Insurance Company</SelectItem>
+                    <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <ProviderVettingForm
+                kind={kind}
+                values={vetting}
+                onChange={setVetting}
+                disabled={busy}
+                mode="public"
+              />
 
               <div className="rounded-md border border-emerald-500/40 bg-emerald-50/60 text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-950/30 dark:text-emerald-200 text-sm p-3 flex gap-2 items-start">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0" />
