@@ -10,7 +10,7 @@ import { PhoneNumberInput } from "@/components/forms/PhoneNumberInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { z } from "zod";
 
-export type ProviderKind = "hospital" | "esp" | "insurance";
+export type ProviderKind = "hospital" | "esp" | "insurance" | "pharmacy";
 
 export type InsuranceType = "life" | "disability_income" | "both" | "other";
 
