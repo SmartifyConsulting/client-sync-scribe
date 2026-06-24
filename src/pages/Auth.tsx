@@ -284,6 +284,17 @@ export default function Auth() {
       toast({ title: "Phone number required", variant: "destructive" });
       return false;
     }
+    if (userRole === "doctor") {
+      if (!practiceNumber.trim() || !doctorNumber.trim()) {
+        toast({
+          title: "Registration details required",
+          description: "Please enter both your Practice Number and your License / Doctor Registration Number to continue.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+
     setLoading(true);
     try {
       let result;
