@@ -1,64 +1,82 @@
-# Doctor signup: require License + Practice Number, wire up profile-pic upload
+## Goals
 
-## What the user reported
+1. Replace the 3-tab picker on the organisation signup page with a single dropdown listing all four organisation types — including the new **Pharmacy** option.
+2. Email `info@georgiaadams.co.za` whenever a Hospital, Emergency Service, Insurance Company or Pharmacy applies, with one-click **Approve** and **Reject** buttons in the email.
 
-1. "Upload of profile pic failed (new row violates row-level security policy)" while on `/auth?mode=signup&role=doctor`.
-2. Doctor signup must collect **Practice Number** and **License / Doctor Registration Number** alongside name / email / password, so newly registered doctors are immediately discoverable and invite-able (the "Missing registration details" toast in the attached image happens because doctors signed up without these numbers).
+Out of scope: doctor/patient signup (those stay on `/auth`), changing the existing vetting fields, redesigning the admin panel.
 
-## Root cause
+## Changes
 
-### Avatar
-- `Auth.tsx` defines `uploadAvatar`, `handleAvatarChange`, `avatarInputRef`, and `avatarPreview` but never renders the UI nor calls `uploadAvatar` — so today there's no way to add a profile picture at signup.
-- The `avatars` bucket exists and is public; INSERT/UPDATE/DELETE policies are correct (`auth.uid()::text = (storage.foldername(name))[1]`), but there is **no public SELECT policy**, so `getPublicUrl` returns 400s after upload even though the bucket is marked public.
-- The actual RLS-violation toast comes from uploading while the freshly created auth session has not yet propagated to the storage client (no awaited `getSession()` between `signUp` and `upload`).
+### 1. Add Pharmacy as a provider kind
 
-### License / Practice Number
-- `Auth.tsx` already has `practiceNumber` / `doctorNumber` state (lines 127–128) and persists draft values (lines 196–197), but the doctor Account step UI (lines 643–740) never renders the two inputs, and `handleCompleteSignup`'s `profiles.update` (lines 383–389) never writes them.
+- Extend `ProviderKind` in `src/features/admin/components/ProviderVettingForm.tsx` to `"hospital" | "esp" | "insurance" | "pharmacy"`.
+- The pharmacy uses the same vetting fields (org name, registration/license number, address, contact email/phone, admin name/email/phone, directors, license file). The insurance-type field stays hidden for pharmacy.
+- Pharmacy applications insert into the existing `holarchelp_pharmacies` table.
 
-## Plan
+### 2. Pharmacy schema additions (migration)
 
-### 1. `src/pages/Auth.tsx` — Doctor Account step (case 0 of `renderDoctorStep`)
-- Add two required `<Input>`s under Last Name (before the Email/Phone block):
-  - **Practice Number** → `practiceNumber` / `setPracticeNumber`.
-  - **Doctor Registration / License Number** → `doctorNumber` / `setDoctorNumber`.
-- Add a circular **Profile Picture** uploader at the top of the step, using existing `avatarPreview` / `avatarInputRef` / `handleAvatarChange`. Use the project's standard Avatar + camera-icon overlay pattern (already used in MyPractice). Optional, not required.
+`holarchelp_pharmacies` is missing the columns the other provider tables already have. Migration adds:
 
-### 2. `src/pages/Auth.tsx` — Validation
-- In `handleCreateAccount` (for doctors only), after the name/email/phone checks, require non-empty `practiceNumber` and `doctorNumber`; toast and abort if either is blank.
-- Validation runs before the `supabase.auth.signUp` call so no orphan auth user is created.
+- `contact_email`, `contact_phone` (already there)
+- `admin_full_name`, `admin_email`, `admin_phone`
+- `directors jsonb`
+- `license_file_path`, `license_file_mime`, `license_file_size_bytes`
 
-### 3. `src/pages/Auth.tsx` — Persistence in `handleCompleteSignup`
-- After `supabase.auth.signUp` succeeds and `createdUserId` is set, await `supabase.auth.getSession()` once to make sure the access token is attached to the storage client before any upload.
-- Call `uploadAvatar(userId)` (only when `avatarFile` is set) and capture `avatar_url`.
-- Extend the existing `profiles.update` (around line 383) for doctors to also set:
-  - `practice_number: practiceNumber.trim()`
-  - `doctor_number: doctorNumber.trim()`
-  - `avatar_url` (only when a file was uploaded)
-- Clear `practiceNumber` / `doctorNumber` from the draft on `clearDraft`.
+Also extend `check_provider_duplicate` RPC to accept `'pharmacy'` and add a public-safe view + read policies mirroring the hospital pattern. No new tables, so RLS/grants are additive only.
 
-### 4. Migration — public read on `avatars`
-Add the missing SELECT policy so `getPublicUrl` works after upload:
+### 3. Replace tabs with a dropdown on `src/pages/ProviderSignup.tsx`
 
-```sql
-create policy "Public can view avatars"
-on storage.objects
-for select
-to public
-using (bucket_id = 'avatars');
-```
+- Swap `<Tabs>` for a single `<Select>` labelled "Organisation type" with four options: Hospital, Emergency Service, Insurance Company, Pharmacy.
+- Reuse the existing `ProviderVettingForm` below the dropdown.
+- Add the pharmacy branch in `submit()` (insert into `holarchelp_pharmacies` with `name`, `address`, `common` payload).
+- Update `kindLabel` and the duplicate-check call to handle `pharmacy`.
 
-No other storage policies change.
+### 4. Approval-notification edge function (`notify-provider-application`)
 
-### 5. Out of scope
-- `ProviderSignup.tsx` (hospitals / ambulances / insurance) — not mentioned by the user.
-- Patient signup — practice/license numbers don't apply.
-- Existing doctor accounts missing these numbers — they can fill them in via My Practice; we don't backfill.
+New function in `supabase/functions/notify-provider-application/`:
 
-## Verification
+- Invoked by `ProviderSignup.tsx` right after the provider row is inserted (before sign-out).
+- Inputs: `{ kind, providerId, orgName, adminName, adminEmail, adminPhone, registrationNumber, address }`.
+- Generates a single signed action token (random UUID stored in a new `provider_approval_tokens` table with `provider_id`, `kind`, `expires_at = now()+30 days`, `used_at`).
+- Sends one email via the existing `_shared/email.ts` (Resend connector already configured) to `info@georgiaadams.co.za`:
+  - Subject: `New {Kind} application — {Org name}`
+  - Body lists applicant details + two prominent buttons:
+    - **Approve** → `https://<app>/admin/provider-approval?token=...&action=approve`
+    - **Reject** → `...&action=reject`
+- Sets `verify_jwt = false` for this function (called immediately after sign-up before session attaches; the security gate is the token, not the JWT).
 
-1. Open `/auth?mode=signup&role=doctor`. Confirm:
-   - Profile-pic circle is present and previewing the chosen image.
-   - Practice Number and License Number inputs are required (form blocks "Continue" until filled).
-2. Complete signup with an avatar attached. After landing on `/dashboard`, the header avatar shows the uploaded image (`getPublicUrl` returns 200).
-3. Query `profiles` for the new user: `practice_number`, `doctor_number`, and `avatar_url` are populated.
-4. From a patient account, search the new doctor in My Doctors → click invite → "Send Request" succeeds (no "Missing registration details" toast) and Dr X receives the notification.
+### 5. Approval handler
+
+New public route `src/pages/admin/ProviderApprovalAction.tsx` (no admin login required — the token IS the auth):
+
+- Reads `token` + `action` from the URL.
+- Calls a new edge function `process-provider-approval` which:
+  - Validates the token (exists, not used, not expired).
+  - Looks up the provider row by `(kind, provider_id)`.
+  - On approve: sets `status='approved'`, grants the correct role (`hospital_admin` / `esp_admin` / `insurance_admin` / `pharmacy_staff`) by inserting into `user_roles` for the row's `owner_id`. Reuses existing `holarchelp_approve_*` RPCs where present; calls `holarchelp_approve_pharmacy` for pharmacy.
+  - On reject: sets `status='rejected'`.
+  - Marks token `used_at = now()`.
+- Page shows a success/failure card.
+
+### 6. Migration (single file)
+
+Adds in order:
+1. Pharmacy column additions + duplicate-check RPC update + read-only `holarchelp_pharmacies_public` view refresh.
+2. `provider_approval_tokens` table with RLS (no client access — service role only via the edge function), plus `GRANT` for `service_role`.
+3. RPC `process_provider_approval(_token uuid, _action text)` as `SECURITY DEFINER` so the edge function can run it without a user session.
+
+### Verification
+
+- Build typechecks.
+- Submit a Pharmacy application end-to-end; confirm row in `holarchelp_pharmacies`, email arrives at `info@georgiaadams.co.za` with two buttons, clicking Approve flips status and grants `pharmacy_staff` role, second click on the same link reports "already used".
+- Repeat for Hospital/ESP/Insurance to confirm no regression.
+
+## Files touched
+
+- `src/pages/ProviderSignup.tsx` — tabs → dropdown, pharmacy branch, invoke notification
+- `src/features/admin/components/ProviderVettingForm.tsx` — extend `ProviderKind`, hide insurance-only fields for pharmacy
+- `src/App.tsx` — new public route `/admin/provider-approval`
+- `src/pages/admin/ProviderApprovalAction.tsx` (new)
+- `supabase/functions/notify-provider-application/index.ts` (new)
+- `supabase/functions/process-provider-approval/index.ts` (new)
+- 1 new migration (pharmacy columns, approval-token table, approval RPC, duplicate-check update)
