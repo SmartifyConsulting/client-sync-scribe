@@ -1,60 +1,64 @@
-# Fix "Doctor not found" on invite
+# Doctor signup: require License + Practice Number, wire up profile-pic upload
+
+## What the user reported
+
+1. "Upload of profile pic failed (new row violates row-level security policy)" while on `/auth?mode=signup&role=doctor`.
+2. Doctor signup must collect **Practice Number** and **License / Doctor Registration Number** alongside name / email / password, so newly registered doctors are immediately discoverable and invite-able (the "Missing registration details" toast in the attached image happens because doctors signed up without these numbers).
 
 ## Root cause
 
-The `profiles` table's RLS only lets a patient SELECT a doctor's profile **after** a connection already exists (`doctor_patient_access` row, or accepted invitation). When the patient invites a new doctor, the dialog's `select id, practice_number, doctor_number from profiles where id = …` is filtered out by RLS, returns `null`, and the dialog (correctly per its current logic) shows "Doctor not found".
+### Avatar
+- `Auth.tsx` defines `uploadAvatar`, `handleAvatarChange`, `avatarInputRef`, and `avatarPreview` but never renders the UI nor calls `uploadAvatar` — so today there's no way to add a profile picture at signup.
+- The `avatars` bucket exists and is public; INSERT/UPDATE/DELETE policies are correct (`auth.uid()::text = (storage.foldername(name))[1]`), but there is **no public SELECT policy**, so `getPublicUrl` returns 400s after upload even though the bucket is marked public.
+- The actual RLS-violation toast comes from uploading while the freshly created auth session has not yet propagated to the storage client (no awaited `getSession()` between `signUp` and `upload`).
 
-The search list itself works because it runs through the `search_providers` security-definer RPC, which bypasses RLS. But that RPC only returns a single combined `registration` column — and `doctor_access_requests` requires **both** `doctor_practice_number` and `doctor_registration_number` (NOT NULL), so we can't insert from the search result alone.
+### License / Practice Number
+- `Auth.tsx` already has `practiceNumber` / `doctorNumber` state (lines 127–128) and persists draft values (lines 196–197), but the doctor Account step UI (lines 643–740) never renders the two inputs, and `handleCompleteSignup`'s `profiles.update` (lines 383–389) never writes them.
 
-## Changes
+## Plan
 
-### 1. Migration: add `get_doctor_invite_card` RPC
-New SECURITY DEFINER function that returns the small piece of doctor info needed to send an invite, regardless of RLS:
+### 1. `src/pages/Auth.tsx` — Doctor Account step (case 0 of `renderDoctorStep`)
+- Add two required `<Input>`s under Last Name (before the Email/Phone block):
+  - **Practice Number** → `practiceNumber` / `setPracticeNumber`.
+  - **Doctor Registration / License Number** → `doctorNumber` / `setDoctorNumber`.
+- Add a circular **Profile Picture** uploader at the top of the step, using existing `avatarPreview` / `avatarInputRef` / `handleAvatarChange`. Use the project's standard Avatar + camera-icon overlay pattern (already used in MyPractice). Optional, not required.
+
+### 2. `src/pages/Auth.tsx` — Validation
+- In `handleCreateAccount` (for doctors only), after the name/email/phone checks, require non-empty `practiceNumber` and `doctorNumber`; toast and abort if either is blank.
+- Validation runs before the `supabase.auth.signUp` call so no orphan auth user is created.
+
+### 3. `src/pages/Auth.tsx` — Persistence in `handleCompleteSignup`
+- After `supabase.auth.signUp` succeeds and `createdUserId` is set, await `supabase.auth.getSession()` once to make sure the access token is attached to the storage client before any upload.
+- Call `uploadAvatar(userId)` (only when `avatarFile` is set) and capture `avatar_url`.
+- Extend the existing `profiles.update` (around line 383) for doctors to also set:
+  - `practice_number: practiceNumber.trim()`
+  - `doctor_number: doctorNumber.trim()`
+  - `avatar_url` (only when a file was uploaded)
+- Clear `practiceNumber` / `doctorNumber` from the draft on `clearDraft`.
+
+### 4. Migration — public read on `avatars`
+Add the missing SELECT policy so `getPublicUrl` works after upload:
 
 ```sql
-create or replace function public.get_doctor_invite_card(_doctor_id uuid)
-returns table (
-  id uuid,
-  full_name text,
-  avatar_url text,
-  specialty text,
-  practice_number text,
-  doctor_number text
-)
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select p.id, p.full_name, p.avatar_url, p.specialty, p.practice_number, p.doctor_number
-  from public.profiles p
-  where p.id = _doctor_id
-    and p.role = 'doctor'::user_role
-    and auth.uid() is not null
-  limit 1;
-$$;
-
-grant execute on function public.get_doctor_invite_card(uuid) to authenticated;
+create policy "Public can view avatars"
+on storage.objects
+for select
+to public
+using (bucket_id = 'avatars');
 ```
 
-No schema/table changes, no RLS changes.
+No other storage policies change.
 
-### 2. `src/components/patient/InviteDoctorDialog.tsx`
-- Replace the existing `from("profiles").select(...).eq("id", prefillDoctorId)` lookup with `supabase.rpc("get_doctor_invite_card", { _doctor_id: prefillDoctorId })`.
-- If the RPC returns no row (and no fallback `prefillPracticeNumber`/`prefillRegistrationNumber` provided), keep the "Doctor not found" toast.
-- If the resolved row is missing `practice_number` or `doctor_number`, fall back to the prefill props before erroring, and only block if both sources are empty — toast: "This provider has no registration details on file; please contact support to connect."
-- Use the resolved `id` for the notification `user_id` (as today).
-
-### 3. No change to `MyDoctors.tsx`
-The page already passes `prefillDoctorId={doctor.id}`. No other props needed.
+### 5. Out of scope
+- `ProviderSignup.tsx` (hospitals / ambulances / insurance) — not mentioned by the user.
+- Patient signup — practice/license numbers don't apply.
+- Existing doctor accounts missing these numbers — they can fill them in via My Practice; we don't backfill.
 
 ## Verification
 
-1. Patient who has never connected to Dr Olisa opens search, clicks invite icon, sees the doctor card.
-2. Click "Send Request" → toast "Request sent". A row appears in `doctor_access_requests` with Dr Olisa's practice/doctor numbers; a `notifications` row appears for Dr Olisa's user_id.
-3. Log in as Dr Olisa → notification shows in the bell.
-
-## Out of scope
-
-- Changing `doctor_access_requests` to use a foreign key on `doctor_id` (would simplify this whole flow but requires a wider data migration).
-- Other invite paths (practice partners, ESP onboarding, etc.).
+1. Open `/auth?mode=signup&role=doctor`. Confirm:
+   - Profile-pic circle is present and previewing the chosen image.
+   - Practice Number and License Number inputs are required (form blocks "Continue" until filled).
+2. Complete signup with an avatar attached. After landing on `/dashboard`, the header avatar shows the uploaded image (`getPublicUrl` returns 200).
+3. Query `profiles` for the new user: `practice_number`, `doctor_number`, and `avatar_url` are populated.
+4. From a patient account, search the new doctor in My Doctors → click invite → "Send Request" succeeds (no "Missing registration details" toast) and Dr X receives the notification.
