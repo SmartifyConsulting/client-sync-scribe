@@ -38,7 +38,16 @@ export default function ProviderSignup() {
   const [copied, setCopied] = useState(false);
 
   const kindLabel =
-    kind === "hospital" ? "Hospital" : kind === "insurance" ? "Insurance Company" : "Emergency Service Provider";
+    kind === "hospital" ? "Hospital"
+    : kind === "insurance" ? "Insurance Company"
+    : kind === "pharmacy" ? "Pharmacy"
+    : "Emergency Service Provider";
+
+  const dupType =
+    kind === "hospital" ? "hospital"
+    : kind === "insurance" ? "insurance"
+    : kind === "pharmacy" ? "pharmacy"
+    : "ambulance";
 
   const submit = async () => {
     const parsed = providerVettingSchema.safeParse(vetting);
