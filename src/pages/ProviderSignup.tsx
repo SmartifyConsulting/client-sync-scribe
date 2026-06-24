@@ -288,22 +288,26 @@ export default function ProviderSignup() {
         ) : (
           <Card className="mt-8">
             <CardContent className="space-y-5 p-6">
-              <Tabs value={kind} onValueChange={(v) => setKind(v as ProviderKind)}>
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="hospital">Hospital</TabsTrigger>
-                  <TabsTrigger value="esp">Emergency Service</TabsTrigger>
-                  <TabsTrigger value="insurance">Insurance Company</TabsTrigger>
-                </TabsList>
-                <TabsContent value={kind} className="mt-4">
-                  <ProviderVettingForm
-                    kind={kind}
-                    values={vetting}
-                    onChange={setVetting}
-                    disabled={busy}
-                    mode="public"
-                  />
-                </TabsContent>
-              </Tabs>
+              <div className="space-y-1.5">
+                <Label htmlFor="org_kind">Organisation type</Label>
+                <Select value={kind} onValueChange={(v) => setKind(v as ProviderKind)} disabled={busy}>
+                  <SelectTrigger id="org_kind"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hospital">Hospital</SelectItem>
+                    <SelectItem value="esp">Emergency Service Provider</SelectItem>
+                    <SelectItem value="insurance">Insurance Company</SelectItem>
+                    <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <ProviderVettingForm
+                kind={kind}
+                values={vetting}
+                onChange={setVetting}
+                disabled={busy}
+                mode="public"
+              />
 
               <div className="rounded-md border border-emerald-500/40 bg-emerald-50/60 text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-950/30 dark:text-emerald-200 text-sm p-3 flex gap-2 items-start">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0" />
