@@ -5396,6 +5396,17 @@ export type Database = {
         Args: { patient_id: string }
         Returns: boolean
       }
+      get_doctor_invite_card: {
+        Args: { _doctor_id: string }
+        Returns: {
+          avatar_url: string
+          doctor_number: string
+          full_name: string
+          id: string
+          practice_number: string
+          specialty: string
+        }[]
+      }
       get_emergency_patient_context: {
         Args: { _incident_id: string }
         Returns: Json
