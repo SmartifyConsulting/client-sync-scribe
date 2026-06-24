@@ -12,9 +12,7 @@ import {
   type ProviderVettingValues,
   type ProviderKind,
 } from "@/features/admin/components/ProviderVettingForm";
-import {
-  Tabs, TabsContent, TabsList, TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function generatePassword(): string {
   const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -39,9 +37,7 @@ export default function ProviderSignup() {
   const [copied, setCopied] = useState(false);
 
   const kindLabel =
-    kind === "hospital" ? "Hospital"
-    : kind === "insurance" ? "Insurance Company"
-    : "Emergency Service Provider";
+    kind === "hospital" ? "Hospital" : kind === "insurance" ? "Insurance Company" : "Emergency Service Provider";
 
   const submit = async () => {
     const parsed = providerVettingSchema.safeParse(vetting);
@@ -51,7 +47,11 @@ export default function ProviderSignup() {
       return;
     }
     if (!vetting.license_file) {
-      toast({ title: "License required", description: "Upload a certified copy of the license.", variant: "destructive" });
+      toast({
+        title: "License required",
+        description: "Upload a certified copy of the license.",
+        variant: "destructive",
+      });
       return;
     }
     if (!vetting.auto_gen_password && vetting.manual_password.length < 8) {
@@ -92,7 +92,8 @@ export default function ProviderSignup() {
         if (/already|registered|exists/i.test(authErr.message)) {
           toast({
             title: "Email already registered",
-            description: "An account with this administrator email exists. Sign in first, then submit the application from your dashboard.",
+            description:
+              "An account with this administrator email exists. Sign in first, then submit the application from your dashboard.",
             variant: "destructive",
           });
         } else {
@@ -195,7 +196,8 @@ export default function ProviderSignup() {
         </div>
         <h1 className="text-center text-3xl font-extrabold">Onboard your organisation</h1>
         <p className="mt-3 text-center text-muted-foreground">
-          Register a hospital, emergency-response service or insurance company. Our team reviews applications within 6 hours.
+          Register a hospital, emergency-response service or insurance company. Our team reviews applications within
+          minutes.
         </p>
 
         {result ? (
@@ -206,8 +208,8 @@ export default function ProviderSignup() {
                 <div>
                   <h2 className="text-xl font-semibold">Application received</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    We aim to approve all applications within <strong>6 hours</strong>. You'll be able to sign in
-                    once your administrator account is approved.
+                    We aim to approve all applications within <strong>6 hours</strong>. You'll be able to sign in once
+                    your administrator account is approved.
                   </p>
                 </div>
               </div>
@@ -220,8 +222,13 @@ export default function ProviderSignup() {
               </div>
 
               <div className="rounded-lg border bg-card p-3 font-mono text-sm space-y-1.5">
-                <div><span className="text-muted-foreground">Email:</span> {result.email}</div>
-                <div><span className="text-muted-foreground">Password:</span> <span className="font-bold">{result.password}</span></div>
+                <div>
+                  <span className="text-muted-foreground">Email:</span> {result.email}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Password:</span>{" "}
+                  <span className="font-bold">{result.password}</span>
+                </div>
               </div>
 
               <Button onClick={copyCreds} variant="outline" className="w-full gap-2">
@@ -229,7 +236,9 @@ export default function ProviderSignup() {
                 {copied ? "Copied" : "Copy email + password"}
               </Button>
 
-              <Button className="w-full" onClick={() => navigate("/")}>Return to Home</Button>
+              <Button className="w-full" onClick={() => navigate("/")}>
+                Return to Home
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -266,7 +275,9 @@ export default function ProviderSignup() {
         )}
 
         <div className="mt-6 text-center">
-          <Button variant="outline" onClick={() => navigate("/auth")}>I already have an account — sign in</Button>
+          <Button variant="outline" onClick={() => navigate("/auth")}>
+            I already have an account — sign in
+          </Button>
         </div>
       </main>
     </div>
