@@ -284,6 +284,17 @@ export default function Auth() {
       toast({ title: "Phone number required", variant: "destructive" });
       return false;
     }
+    if (userRole === "doctor") {
+      if (!practiceNumber.trim() || !doctorNumber.trim()) {
+        toast({
+          title: "Registration details required",
+          description: "Please enter both your Practice Number and your License / Doctor Registration Number to continue.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+
     setLoading(true);
     try {
       let result;
@@ -379,14 +390,27 @@ export default function Auth() {
       const lastPart = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
       const baseAlias = (lastPart ? `${firstPart}-${lastPart}` : firstPart).replace(/[^a-z0-9-]/g, '');
 
+      // Make sure the freshly minted access token is attached before any storage upload.
+      await supabase.auth.getSession();
+
+      // Upload optional profile picture (now that the user is authenticated).
+      const avatarUrl = avatarFile ? await uploadAvatar(userId) : null;
+
       // Update profile with the few fields we collect at signup
-      await supabase.from("profiles").update({
+      const profileUpdate: Record<string, any> = {
         full_name: fullName,
         role: userRole,
         mailbox_alias: baseAlias,
         mobile_number: fullPhone,
         preferred_language: preferredLanguage,
-      }).eq("id", userId);
+      };
+      if (avatarUrl) profileUpdate.avatar_url = avatarUrl;
+      if (userRole === "doctor") {
+        profileUpdate.practice_number = practiceNumber.trim();
+        profileUpdate.doctor_number = doctorNumber.trim();
+      }
+      await supabase.from("profiles").update(profileUpdate).eq("id", userId);
+
 
       if (userRole === "patient") {
         if (inviteToken) {
@@ -685,6 +709,54 @@ export default function Auth() {
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input id="lastName" placeholder="Smith" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Profile Picture (optional)</Label>
+              <div className="flex items-center gap-3">
+                <Avatar className="h-16 w-16 border-2 border-primary/40">
+                  {avatarPreview && <AvatarImage src={avatarPreview} alt="Profile preview" />}
+                  <AvatarFallback>
+                    <Camera className="h-5 w-5 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
+                    {avatarPreview ? "Change photo" : "Upload photo"}
+                  </Button>
+                  <p className="text-[10px] text-muted-foreground">Shown on your profile and to patients.</p>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="practiceNumber">Practice Number <span className="text-destructive">*</span></Label>
+                <Input
+                  id="practiceNumber"
+                  placeholder="e.g. 0123456"
+                  value={practiceNumber}
+                  onChange={(e) => setPracticeNumber(e.target.value)}
+                  required
+                  disabled={accountCreated}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="doctorNumber">License / Registration No. <span className="text-destructive">*</span></Label>
+                <Input
+                  id="doctorNumber"
+                  placeholder="e.g. MP123456"
+                  value={doctorNumber}
+                  onChange={(e) => setDoctorNumber(e.target.value)}
+                  required
+                  disabled={accountCreated}
+                />
               </div>
             </div>
             <div className="space-y-2">
