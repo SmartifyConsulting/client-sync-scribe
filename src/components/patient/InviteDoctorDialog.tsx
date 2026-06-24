@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,7 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Loader2, Stethoscope } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 type AccessPermission = "patient_info" | "calendar" | "session_summaries" | "prescription_history";
 
 interface InviteDoctorDialogProps {
+  prefillDoctorId?: string;
   prefillPracticeNumber?: string;
   prefillRegistrationNumber?: string;
   prefillDoctorName?: string;
@@ -30,10 +30,15 @@ interface InviteDoctorDialogProps {
   prefillSpecialty?: string;
 }
 
-export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationNumber, prefillDoctorName, prefillAvatarUrl, prefillSpecialty }: InviteDoctorDialogProps = {}) {
+export function InviteDoctorDialog({
+  prefillDoctorId,
+  prefillPracticeNumber,
+  prefillRegistrationNumber,
+  prefillDoctorName,
+  prefillAvatarUrl,
+  prefillSpecialty,
+}: InviteDoctorDialogProps = {}) {
   const [open, setOpen] = useState(false);
-  const [practiceNumber, setPracticeNumber] = useState(prefillPracticeNumber || "");
-  const [registrationNumber, setRegistrationNumber] = useState(prefillRegistrationNumber || "");
   const [selectedPermissions, setSelectedPermissions] = useState<AccessPermission[]>([
     "patient_info", "calendar", "session_summaries", "prescription_history",
   ]);
@@ -42,18 +47,7 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
   const { user } = useAuth();
   const { profile } = useProfile();
 
-  useEffect(() => {
-    if (open) {
-      if (prefillPracticeNumber) setPracticeNumber(prefillPracticeNumber);
-      if (prefillRegistrationNumber) setRegistrationNumber(prefillRegistrationNumber);
-    }
-  }, [open, prefillPracticeNumber, prefillRegistrationNumber]);
-
   const handleSubmit = async () => {
-    if (!practiceNumber.trim() || !registrationNumber.trim()) {
-      toast({ title: "Missing information", description: "Please enter both practice number and registration number.", variant: "destructive" });
-      return;
-    }
     if (selectedPermissions.length === 0) {
       toast({ title: "No permissions selected", description: "Please select at least one permission to grant.", variant: "destructive" });
       return;
@@ -65,15 +59,52 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
 
     setIsLoading(true);
     try {
-      const { data: existingRequest, error: checkError } = await supabase
+      // Resolve target doctor profile
+      let doctorRow: { id: string; practice_number: string | null; doctor_number: string | null } | null = null;
+
+      if (prefillDoctorId) {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, practice_number, doctor_number")
+          .eq("id", prefillDoctorId)
+          .maybeSingle();
+        if (error) throw error;
+        doctorRow = data as any;
+      } else if (prefillPracticeNumber && prefillRegistrationNumber) {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, practice_number, doctor_number")
+          .eq("practice_number", prefillPracticeNumber.trim())
+          .eq("doctor_number", prefillRegistrationNumber.trim())
+          .maybeSingle();
+        if (error) throw error;
+        doctorRow = data as any;
+      }
+
+      if (!doctorRow) {
+        toast({ title: "Doctor not found", description: "We couldn't locate this provider's account.", variant: "destructive" });
+        setIsLoading(false);
+        return;
+      }
+
+      const practiceNum = doctorRow.practice_number ?? prefillPracticeNumber ?? null;
+      const registrationNum = doctorRow.doctor_number ?? prefillRegistrationNumber ?? null;
+
+      // Check for existing request (use doctor_id when available, fall back to numbers)
+      let existingRequest: any = null;
+      const baseQuery = supabase
         .from("doctor_access_requests")
         .select("*")
-        .eq("patient_user_id", user.id)
-        .eq("doctor_practice_number", practiceNumber.trim())
-        .eq("doctor_registration_number", registrationNumber.trim())
-        .maybeSingle();
+        .eq("patient_user_id", user.id);
 
-      if (checkError) throw checkError;
+      if (practiceNum && registrationNum) {
+        const { data, error } = await baseQuery
+          .eq("doctor_practice_number", practiceNum)
+          .eq("doctor_registration_number", registrationNum)
+          .maybeSingle();
+        if (error) throw error;
+        existingRequest = data;
+      }
 
       if (existingRequest) {
         if (existingRequest.status === "pending") {
@@ -91,8 +122,8 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
           .from("doctor_access_requests")
           .insert({
             patient_user_id: user.id,
-            doctor_practice_number: practiceNumber.trim(),
-            doctor_registration_number: registrationNumber.trim(),
+            doctor_practice_number: practiceNum,
+            doctor_registration_number: registrationNum,
             status: "pending",
             patient_name: profile?.full_name || null,
             patient_avatar_url: profile?.avatar_url || null,
@@ -102,29 +133,24 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
 
       // Create notification for the doctor
       try {
-        const { data: doctorProfile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("practice_number", practiceNumber.trim())
-          .eq("doctor_number", registrationNumber.trim())
-          .maybeSingle();
-
-        if (doctorProfile) {
-          await supabase.from("notifications").insert({
-            user_id: doctorProfile.id,
-            type: "access_request",
-            title: "Patient Invitation",
-            description: `${profile?.full_name || "A patient"} has invited you to their panel of healthcare providers.`,
-            is_read: false,
-          });
-        }
-      } catch (notifErr) {
+        const { error: notifErr } = await supabase.from("notifications").insert({
+          user_id: doctorRow.id,
+          type: "access_request",
+          title: "Patient Invitation",
+          description: `${profile?.full_name || "A patient"} has invited you to their panel of healthcare providers.`,
+          reference_id: user.id,
+          is_read: false,
+        });
+        if (notifErr) throw notifErr;
+      } catch (notifErr: any) {
         console.error("Failed to create notification:", notifErr);
+        toast({
+          title: "Request sent, notification delayed",
+          description: "The provider will see your request, but the in-app alert could not be created.",
+        });
       }
 
       toast({ title: "Request sent", description: "Your access request has been sent to the doctor." });
-      setPracticeNumber("");
-      setRegistrationNumber("");
       setSelectedPermissions(["patient_info", "calendar", "session_summaries", "prescription_history"]);
       setOpen(false);
     } catch (error: any) {
@@ -149,10 +175,10 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
             Invite a Healthcare Provider
           </DialogTitle>
           <DialogDescription>
-            Enter the doctor's practice and registration numbers to send an invitation.
+            Send an invitation to add this healthcare provider to your panel.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="grid gap-3 py-2">
           {/* Selected Doctor Info */}
           {prefillDoctorName && (
@@ -172,18 +198,6 @@ export function InviteDoctorDialog({ prefillPracticeNumber, prefillRegistrationN
               </div>
             </div>
           )}
-
-          {/* Doctor Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="practiceNumber">Practice Number</Label>
-              <Input id="practiceNumber" placeholder="e.g., PR123456" value={practiceNumber} onChange={(e) => setPracticeNumber(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="registrationNumber">Doctor Registration Number</Label>
-              <Input id="registrationNumber" placeholder="e.g., MP123456" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} />
-            </div>
-          </div>
 
           {/* Permission Transparency */}
           <div className="space-y-2">
