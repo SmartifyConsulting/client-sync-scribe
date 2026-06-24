@@ -1,82 +1,47 @@
-## Goals
+## Brand your auth emails (no-reply@notify.holarchealth.com)
 
-1. Replace the 3-tab picker on the organisation signup page with a single dropdown listing all four organisation types — including the new **Pharmacy** option.
-2. Email `info@georgiaadams.co.za` whenever a Hospital, Emergency Service, Insurance Company or Pharmacy applies, with one-click **Approve** and **Reject** buttons in the email.
+Right now you can't brand them — the `no-reply@holarchealth.com` emails are Lovable's default templates. I'll set up the pieces so you can.
 
-Out of scope: doctor/patient signup (those stay on `/auth`), changing the existing vetting fields, redesigning the admin panel.
+### What I'll do
 
-## Changes
+1. **Set up email domain** — `notify.holarchealth.com`. You'll get a one-click DNS setup dialog; the subdomain keeps your main `holarchealth.com` mail untouched.
+2. **Provision email infrastructure** — queue, send log, suppression list, unsubscribe handling. One-time backend setup.
+3. **Scaffold 6 branded auth email templates** at `supabase/functions/_shared/email-templates/`:
+   - `signup.tsx` — confirm signup
+   - `recovery.tsx` — password reset
+   - `magic-link.tsx` — magic link sign-in
+   - `invite.tsx` — invitations
+   - `email-change.tsx` — email change confirmation
+   - `reauthentication.tsx` — reauth OTP
+4. **Apply Holarc Health branding** to each template:
+   - Pull palette from `src/index.css` (teal primary, red accents, foreground/background tokens)
+   - Pull typography from your Tailwind config
+   - Embed your existing logo (from `public/` or `src/assets/`) in the header
+   - Match button radius and spacing to the app
+   - Adapt copy tone to the app's voice (e.g. "Welcome to Holarc Health" rather than generic "Verify Email")
+5. **Deploy** `auth-email-hook` so the templates go live as soon as DNS verifies.
 
-### 1. Add Pharmacy as a provider kind
+### Where you'll edit branding afterwards
 
-- Extend `ProviderKind` in `src/features/admin/components/ProviderVettingForm.tsx` to `"hospital" | "esp" | "insurance" | "pharmacy"`.
-- The pharmacy uses the same vetting fields (org name, registration/license number, address, contact email/phone, admin name/email/phone, directors, license file). The insurance-type field stays hidden for pharmacy.
-- Pharmacy applications insert into the existing `holarchelp_pharmacies` table.
+After scaffolding, the answer to your question becomes:
 
-### 2. Pharmacy schema additions (migration)
+```text
+supabase/functions/_shared/email-templates/
+├── signup.tsx            ← edit subject, copy, colors, logo
+├── recovery.tsx
+├── magic-link.tsx
+├── invite.tsx
+├── email-change.tsx
+└── reauthentication.tsx
+```
 
-`holarchelp_pharmacies` is missing the columns the other provider tables already have. Migration adds:
+Each `.tsx` is a React Email component with inline styles. Change a hex, swap copy, move the logo — redeploy `auth-email-hook` and the next email reflects the change. You'll be able to preview each template directly from Cloud → Emails.
 
-- `contact_email`, `contact_phone` (already there)
-- `admin_full_name`, `admin_email`, `admin_phone`
-- `directors jsonb`
-- `license_file_path`, `license_file_mime`, `license_file_size_bytes`
+### What I need from you
 
-Also extend `check_provider_duplicate` RPC to accept `'pharmacy'` and add a public-safe view + read policies mirroring the hospital pattern. No new tables, so RLS/grants are additive only.
+Nothing more — once you approve this plan I'll run setup, scaffold + brand the templates, and deploy. You'll just complete the DNS step in the popup that appears (one-click for most registrars). Auth emails activate automatically once DNS verifies (usually minutes, up to 72 hours worst case). Until then default Lovable emails keep working so nobody is locked out.
 
-### 3. Replace tabs with a dropdown on `src/pages/ProviderSignup.tsx`
+### Out of scope
 
-- Swap `<Tabs>` for a single `<Select>` labelled "Organisation type" with four options: Hospital, Emergency Service, Insurance Company, Pharmacy.
-- Reuse the existing `ProviderVettingForm` below the dropdown.
-- Add the pharmacy branch in `submit()` (insert into `holarchelp_pharmacies` with `name`, `address`, `common` payload).
-- Update `kindLabel` and the duplicate-check call to handle `pharmacy`.
-
-### 4. Approval-notification edge function (`notify-provider-application`)
-
-New function in `supabase/functions/notify-provider-application/`:
-
-- Invoked by `ProviderSignup.tsx` right after the provider row is inserted (before sign-out).
-- Inputs: `{ kind, providerId, orgName, adminName, adminEmail, adminPhone, registrationNumber, address }`.
-- Generates a single signed action token (random UUID stored in a new `provider_approval_tokens` table with `provider_id`, `kind`, `expires_at = now()+30 days`, `used_at`).
-- Sends one email via the existing `_shared/email.ts` (Resend connector already configured) to `info@georgiaadams.co.za`:
-  - Subject: `New {Kind} application — {Org name}`
-  - Body lists applicant details + two prominent buttons:
-    - **Approve** → `https://<app>/admin/provider-approval?token=...&action=approve`
-    - **Reject** → `...&action=reject`
-- Sets `verify_jwt = false` for this function (called immediately after sign-up before session attaches; the security gate is the token, not the JWT).
-
-### 5. Approval handler
-
-New public route `src/pages/admin/ProviderApprovalAction.tsx` (no admin login required — the token IS the auth):
-
-- Reads `token` + `action` from the URL.
-- Calls a new edge function `process-provider-approval` which:
-  - Validates the token (exists, not used, not expired).
-  - Looks up the provider row by `(kind, provider_id)`.
-  - On approve: sets `status='approved'`, grants the correct role (`hospital_admin` / `esp_admin` / `insurance_admin` / `pharmacy_staff`) by inserting into `user_roles` for the row's `owner_id`. Reuses existing `holarchelp_approve_*` RPCs where present; calls `holarchelp_approve_pharmacy` for pharmacy.
-  - On reject: sets `status='rejected'`.
-  - Marks token `used_at = now()`.
-- Page shows a success/failure card.
-
-### 6. Migration (single file)
-
-Adds in order:
-1. Pharmacy column additions + duplicate-check RPC update + read-only `holarchelp_pharmacies_public` view refresh.
-2. `provider_approval_tokens` table with RLS (no client access — service role only via the edge function), plus `GRANT` for `service_role`.
-3. RPC `process_provider_approval(_token uuid, _action text)` as `SECURITY DEFINER` so the edge function can run it without a user session.
-
-### Verification
-
-- Build typechecks.
-- Submit a Pharmacy application end-to-end; confirm row in `holarchelp_pharmacies`, email arrives at `info@georgiaadams.co.za` with two buttons, clicking Approve flips status and grants `pharmacy_staff` role, second click on the same link reports "already used".
-- Repeat for Hospital/ESP/Insurance to confirm no regression.
-
-## Files touched
-
-- `src/pages/ProviderSignup.tsx` — tabs → dropdown, pharmacy branch, invoke notification
-- `src/features/admin/components/ProviderVettingForm.tsx` — extend `ProviderKind`, hide insurance-only fields for pharmacy
-- `src/App.tsx` — new public route `/admin/provider-approval`
-- `src/pages/admin/ProviderApprovalAction.tsx` (new)
-- `supabase/functions/notify-provider-application/index.ts` (new)
-- `supabase/functions/process-provider-approval/index.ts` (new)
-- 1 new migration (pharmacy columns, approval-token table, approval RPC, duplicate-check update)
+- Transactional/app emails (booking confirmations, contact form replies, etc.) — separate setup, ask me afterwards if you want it.
+- Marketing/newsletter sends — not supported by Lovable's email system.
