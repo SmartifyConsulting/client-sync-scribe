@@ -58,6 +58,7 @@ import Admin from "./pages/Admin";
 import DoctorDocumentsPage from "./pages/doctor/DoctorDocumentsPage";
 import DoctorRoundTablesPage from "./pages/doctor/DoctorRoundTablesPage";
 import ProviderSignup from "./pages/ProviderSignup";
+import ProviderApprovalAction from "./pages/admin/ProviderApprovalAction";
 
 // HolarcHelp module
 import HolarcHelpRoutes from "./modules/holarchelp/routes";
