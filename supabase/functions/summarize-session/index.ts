@@ -131,6 +131,8 @@ IMPORTANT GUIDELINES:
 - For referrals: extract specialist_type, doctor_name (if mentioned), reason, urgency
 - Only include a document type if it was CLEARLY discussed in the session
 - Dates should be in YYYY-MM-DD format when possible
+- Today is ${localDow ? localDow + ", " : ""}${today}${clientTimezone ? ` (${clientTimezone})` : ""}. Resolve "today", "tomorrow", weekday names (e.g. "until Monday"), and partial dates like "3 July" against this local calendar date. NEVER shift the user's spoken date by a day to convert to UTC.
+- Weekday names refer to the NEXT occurrence of that weekday on or after today.
 
 Respond using the provided tool/function schema.`,
           },
