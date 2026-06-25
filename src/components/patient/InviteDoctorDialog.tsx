@@ -147,15 +147,14 @@ export function InviteDoctorDialog({
         if (insertError) throw insertError;
       }
 
-      // Create notification for the doctor
+      // Create notification for the doctor (via SECURITY DEFINER RPC — RLS blocks
+      // direct cross-user inserts on notifications)
       try {
-        const { error: notifErr } = await supabase.from("notifications").insert({
-          user_id: doctorRow.id,
-          type: "access_request",
-          title: "Patient Invitation",
-          description: `${profile?.full_name || "A patient"} has invited you to their panel of healthcare providers.`,
-          reference_id: user.id,
-          is_read: false,
+        const { error: notifErr } = await supabase.rpc("create_doctor_invite_notification" as any, {
+          _doctor_id: doctorRow.id,
+          _title: "Patient Invitation",
+          _description: `${profile?.full_name || "A patient"} has invited you to their panel of healthcare providers.`,
+          _reference_id: user.id,
         });
         if (notifErr) throw notifErr;
       } catch (notifErr: any) {

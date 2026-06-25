@@ -41,18 +41,28 @@ export default function HospitalAffiliations() {
   }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
 
+  // Preload all approved hospitals so the doctor can browse the registered list
+  // even before typing anything.
+  const [allHospitals, setAllHospitals] = useState<Hospital[]>([]);
   useEffect(() => {
-    if (!search.trim()) { setResults([]); return; }
-    const t = setTimeout(async () => {
+    (async () => {
       const { data } = await supabase
         .from("holarchelp_hospitals_public" as any)
         .select("id, name, city, status")
-        .ilike("name", `%${search}%`)
-        .limit(8);
-      setResults((data as any) || []);
-    }, 250);
-    return () => clearTimeout(t);
-  }, [search]);
+        .order("name", { ascending: true })
+        .limit(500);
+      setAllHospitals((data as any) || []);
+    })();
+  }, []);
+
+  useEffect(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) {
+      setResults(allHospitals);
+      return;
+    }
+    setResults(allHospitals.filter((h) => h.name.toLowerCase().includes(q)).slice(0, 20));
+  }, [search, allHospitals]);
 
   async function addExisting(h: Hospital) {
     if (!userId) return;
@@ -114,8 +124,12 @@ export default function HospitalAffiliations() {
 
       <div className="grid grid-cols-1 sm:grid-cols-[1fr,180px] gap-2">
         <div className="space-y-1.5">
-          <Label className="text-xs">Search hospital</Label>
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="e.g. Groote Schuur" />
+          <Label className="text-xs">Search or pick a registered hospital</Label>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Start typing or browse the list below…"
+          />
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">Your role</Label>
@@ -123,35 +137,38 @@ export default function HospitalAffiliations() {
         </div>
       </div>
 
-      {search.trim() && (
-        <div className="rounded-md border bg-card divide-y">
-          {results.map((h) => (
-            <button
-              key={h.id}
-              onClick={() => addExisting(h)}
-              disabled={loading}
-              className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-accent text-sm"
-            >
-              <span className="flex items-center gap-2">
-                <Building2 className="h-3.5 w-3.5 text-primary" />
-                <span>{h.name}</span>
-                {h.city && <span className="text-xs text-muted-foreground">· {h.city}</span>}
-              </span>
-              <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-[10px]">{h.status}</Badge>
-            </button>
-          ))}
-          {!hasExactMatch && (
-            <button
-              onClick={addNewInactive}
-              disabled={loading}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Add "{search.trim()}" as new hospital (pending admin activation)</span>
-            </button>
-          )}
-        </div>
-      )}
+      <div className="rounded-md border bg-card divide-y max-h-64 overflow-auto">
+        {results.length === 0 && (
+          <div className="px-3 py-2 text-xs text-muted-foreground">
+            {allHospitals.length === 0 ? "Loading hospitals…" : "No matching hospitals."}
+          </div>
+        )}
+        {results.map((h) => (
+          <button
+            key={h.id}
+            onClick={() => addExisting(h)}
+            disabled={loading}
+            className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-accent text-sm"
+          >
+            <span className="flex items-center gap-2">
+              <Building2 className="h-3.5 w-3.5 text-primary" />
+              <span>{h.name}</span>
+              {h.city && <span className="text-xs text-muted-foreground">· {h.city}</span>}
+            </span>
+            <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-[10px]">{h.status}</Badge>
+          </button>
+        ))}
+        {search.trim() && !hasExactMatch && (
+          <button
+            onClick={addNewInactive}
+            disabled={loading}
+            className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Add "{search.trim()}" as new hospital (pending admin activation)</span>
+          </button>
+        )}
+      </div>
 
       <div className="space-y-2">
         {affiliations.length === 0 && (
