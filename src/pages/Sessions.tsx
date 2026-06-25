@@ -914,8 +914,9 @@ export default function Sessions() {
                 {isRecording && !isTranscribing && (
                   <button
                     onClick={() => (isPaused ? resumeRecording() : pauseRecording())}
+                    aria-label={isPaused ? "Resume recording" : "Pause recording"}
                     className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 border-2",
+                      "flex h-12 items-center justify-center gap-2 rounded-full px-4 transition-all duration-300 border-2 text-sm font-medium",
                       isPaused
                         ? "bg-warning text-warning-foreground border-warning"
                         : "bg-card text-foreground border-border hover:bg-muted"
@@ -923,6 +924,7 @@ export default function Sessions() {
                     title={isPaused ? "Resume recording" : "Pause recording"}
                   >
                     {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+                    <span>{isPaused ? "Resume recording" : "Pause recording"}</span>
                   </button>
                 )}
               </div>
