@@ -31,7 +31,21 @@ serve(async (req) => {
     const body = await req.json();
     console.log("Request body received:", JSON.stringify(body).substring(0, 200));
     
-    const { notes, transcript, action, text, targetLanguage, language } = body;
+    const { notes, transcript, action, text, targetLanguage, language, clientDate, clientTimezone } = body;
+
+    // Resolve "today" from the caller's local calendar so AI-extracted dates
+    // (e.g. "until Monday") don't drift off-by-one due to UTC truncation.
+    const today = (clientDate && /^\d{4}-\d{2}-\d{2}$/.test(clientDate))
+      ? clientDate
+      : new Date().toISOString().split("T")[0];
+    const localDow = (() => {
+      try {
+        return new Intl.DateTimeFormat("en-US", {
+          weekday: "long",
+          timeZone: clientTimezone || "UTC",
+        }).format(new Date(`${today}T12:00:00Z`));
+      } catch { return ""; }
+    })();
 
     // Handle translation request
     if (action === 'translate' && text && targetLanguage) {
