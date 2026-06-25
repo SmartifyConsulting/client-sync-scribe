@@ -112,10 +112,31 @@ export function VisitCategoryDialog({
     .filter(c => selectedCategories.has(c.visit_category))
     .reduce((sum, c) => sum + c.lollipops_awarded, 0);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const cats = Array.from(selectedCategories);
-    if (customCategory.trim()) {
-      cats.push(customCategory.trim());
+    const otherText = customCategory.trim();
+    if (otherText) {
+      // "Other" suggestions are NOT awarded as a real Vula — they're sent to
+      // platform admins as a suggested new reward category for review.
+      try {
+        const { data: admins } = await supabase
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "admin");
+        const adminIds = (admins || []).map((a: any) => a.user_id).filter(Boolean);
+        if (adminIds.length > 0) {
+          await supabase.from("notifications").insert(
+            adminIds.map((uid: string) => ({
+              user_id: uid,
+              title: "Suggested Vula reward",
+              description: `A doctor suggested a new reward category: "${otherText}"${patientName ? ` (for ${patientName})` : ""}. Review and add to gamification config if appropriate.`,
+              type: "admin_suggestion",
+            }))
+          );
+        }
+      } catch (e) {
+        console.error("Failed to notify admins of Vula suggestion:", e);
+      }
     }
     onConfirm(cats.length > 0 ? cats : null);
     setSelectedCategories(new Set());
@@ -180,13 +201,16 @@ export function VisitCategoryDialog({
           )}
 
           <div className="pt-2 border-t border-border">
-            <Label className="text-xs text-muted-foreground">Other (specify)</Label>
+            <Label className="text-xs text-muted-foreground">Other (suggest a new category)</Label>
             <Input
-              placeholder="Enter custom visit type..."
+              placeholder="Suggest a new reward type..."
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
               className="mt-1"
             />
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Suggestions are sent to an admin for review — no Vula is awarded for "Other".
+            </p>
           </div>
         </div>
 

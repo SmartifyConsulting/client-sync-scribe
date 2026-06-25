@@ -54,6 +54,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
 
   const CURRENCIES = [
     { code: "ZAR", symbol: "R" },
+    { code: "NGN", symbol: "₦" },
     { code: "USD", symbol: "$" },
     { code: "EUR", symbol: "€" },
     { code: "GBP", symbol: "£" },
