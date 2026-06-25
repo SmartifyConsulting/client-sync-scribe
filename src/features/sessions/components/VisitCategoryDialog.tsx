@@ -201,13 +201,16 @@ export function VisitCategoryDialog({
           )}
 
           <div className="pt-2 border-t border-border">
-            <Label className="text-xs text-muted-foreground">Other (specify)</Label>
+            <Label className="text-xs text-muted-foreground">Other (suggest a new category)</Label>
             <Input
-              placeholder="Enter custom visit type..."
+              placeholder="Suggest a new reward type..."
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
               className="mt-1"
             />
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Suggestions are sent to an admin for review — no Vula is awarded for "Other".
+            </p>
           </div>
         </div>
 
