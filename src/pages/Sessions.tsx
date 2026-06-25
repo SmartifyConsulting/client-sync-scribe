@@ -1002,18 +1002,8 @@ export default function Sessions() {
               </div>
             )}
 
-            {/* End Session Button */}
-            <div className="p-3 border-t mt-auto">
-              <Button 
-                variant="outline" 
-                className="w-full gap-2" 
-                onClick={endSession} 
-                disabled={isTranscribing}
-              >
-                <Square className="h-4 w-4" />
-                End Session
-              </Button>
-            </div>
+            {/* Stop recording = ends session and triggers transcription pipeline.
+                Use the main Mic/Square button above — no duplicate End Session button here. */}
           </div>
 
         </div>
