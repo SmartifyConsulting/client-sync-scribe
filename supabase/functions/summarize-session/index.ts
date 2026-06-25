@@ -125,7 +125,7 @@ Your task is to analyze the session transcript or notes and provide:
 IMPORTANT GUIDELINES:
 - Actually read and analyze the transcript content thoroughly
 - Extract REAL action points mentioned in the conversation
-- For medical certificates: extract patient_name, start_date, end_date, reason/diagnosis
+- For medical certificates: extract patient_name, start_date, end_date, reason/diagnosis. Leave end-date rules: "until <weekday>" or "until <date>" → end_date is THAT day inclusive (the last day the patient is absent). "for N days" starting today → end_date = today + (N-1) days. "back at work on Tuesday" → end_date = the Monday before. Never set end_date earlier than start_date.
 - For prescriptions: extract each medication with name, dosage, frequency, duration, instructions
 - For invoices: extract service descriptions and amounts
 - For referrals: extract specialist_type, doctor_name (if mentioned), reason, urgency
