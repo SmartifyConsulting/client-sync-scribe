@@ -5398,6 +5398,15 @@ export type Database = {
         Args: { _city: string; _name: string; _reg_no: string; _type: string }
         Returns: Json
       }
+      create_doctor_invite_notification: {
+        Args: {
+          _description: string
+          _doctor_id: string
+          _reference_id: string
+          _title: string
+        }
+        Returns: undefined
+      }
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
