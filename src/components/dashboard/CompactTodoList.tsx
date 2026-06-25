@@ -268,7 +268,8 @@ export function CompactTodoList() {
     if (!text) return;
     setIsAiProcessing(true);
     try {
-      const { data, error } = await supabase.functions.invoke("process-todo-actions", { body: { text } });
+      const { clientDateContext } = await import("@/lib/clientDate");
+      const { data, error } = await supabase.functions.invoke("process-todo-actions", { body: { text, ...clientDateContext() } });
       if (error) throw new Error(error.message);
       if (data?.results) {
         setNewTaskText("");

@@ -31,7 +31,21 @@ serve(async (req) => {
     const body = await req.json();
     console.log("Request body received:", JSON.stringify(body).substring(0, 200));
     
-    const { notes, transcript, action, text, targetLanguage, language } = body;
+    const { notes, transcript, action, text, targetLanguage, language, clientDate, clientTimezone } = body;
+
+    // Resolve "today" from the caller's local calendar so AI-extracted dates
+    // (e.g. "until Monday") don't drift off-by-one due to UTC truncation.
+    const today = (clientDate && /^\d{4}-\d{2}-\d{2}$/.test(clientDate))
+      ? clientDate
+      : new Date().toISOString().split("T")[0];
+    const localDow = (() => {
+      try {
+        return new Intl.DateTimeFormat("en-US", {
+          weekday: "long",
+          timeZone: clientTimezone || "UTC",
+        }).format(new Date(`${today}T12:00:00Z`));
+      } catch { return ""; }
+    })();
 
     // Handle translation request
     if (action === 'translate' && text && targetLanguage) {
@@ -117,6 +131,8 @@ IMPORTANT GUIDELINES:
 - For referrals: extract specialist_type, doctor_name (if mentioned), reason, urgency
 - Only include a document type if it was CLEARLY discussed in the session
 - Dates should be in YYYY-MM-DD format when possible
+- Today is ${localDow ? localDow + ", " : ""}${today}${clientTimezone ? ` (${clientTimezone})` : ""}. Resolve "today", "tomorrow", weekday names (e.g. "until Monday"), and partial dates like "3 July" against this local calendar date. NEVER shift the user's spoken date by a day to convert to UTC.
+- Weekday names refer to the NEXT occurrence of that weekday on or after today.
 
 Respond using the provided tool/function schema.`,
           },
