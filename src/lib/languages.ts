@@ -28,6 +28,7 @@ export const LANGUAGES = [
   { code: "uk", name: "Ukrainian" },
   { code: "vi", name: "Vietnamese" },
   { code: "xh", name: "Xhosa" },
+  { code: "yo", name: "Yoruba" },
   { code: "zu", name: "Zulu" },
 ];
 
