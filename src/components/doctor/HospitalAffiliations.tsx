@@ -41,18 +41,28 @@ export default function HospitalAffiliations() {
   }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
 
+  // Preload all approved hospitals so the doctor can browse the registered list
+  // even before typing anything.
+  const [allHospitals, setAllHospitals] = useState<Hospital[]>([]);
   useEffect(() => {
-    if (!search.trim()) { setResults([]); return; }
-    const t = setTimeout(async () => {
+    (async () => {
       const { data } = await supabase
         .from("holarchelp_hospitals_public" as any)
         .select("id, name, city, status")
-        .ilike("name", `%${search}%`)
-        .limit(8);
-      setResults((data as any) || []);
-    }, 250);
-    return () => clearTimeout(t);
-  }, [search]);
+        .order("name", { ascending: true })
+        .limit(500);
+      setAllHospitals((data as any) || []);
+    })();
+  }, []);
+
+  useEffect(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) {
+      setResults(allHospitals);
+      return;
+    }
+    setResults(allHospitals.filter((h) => h.name.toLowerCase().includes(q)).slice(0, 20));
+  }, [search, allHospitals]);
 
   async function addExisting(h: Hospital) {
     if (!userId) return;
