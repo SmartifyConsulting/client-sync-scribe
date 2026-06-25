@@ -1279,6 +1279,9 @@ export default function Sessions() {
                       setIsNarrating(true);
                       try {
                         const textToNarrate = showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis;
+                        const { data: { session: authSession } } = await supabase.auth.getSession();
+                        const accessToken = authSession?.access_token;
+                        if (!accessToken) throw new Error('Not authenticated');
                         const response = await fetch(
                           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
                           {
@@ -1286,7 +1289,7 @@ export default function Sessions() {
                             headers: {
                               'Content-Type': 'application/json',
                               'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                              'Authorization': `Bearer ${accessToken}`,
                             },
                             body: JSON.stringify({ text: textToNarrate }),
                           }
