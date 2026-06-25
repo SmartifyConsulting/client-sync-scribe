@@ -256,7 +256,8 @@ export default function TodoList() {
     if (!text) return;
     setIsAiProcessing(true); setAiResults(null);
     try {
-      const { data, error } = await supabase.functions.invoke('process-todo-actions', { body: { text } });
+      const { clientDateContext } = await import('@/lib/clientDate');
+      const { data, error } = await supabase.functions.invoke('process-todo-actions', { body: { text, ...clientDateContext() } });
       if (error) throw new Error(error.message);
       if (data?.results) {
         setAiResults(data.results); setNewTaskText(""); await fetchTodos();
