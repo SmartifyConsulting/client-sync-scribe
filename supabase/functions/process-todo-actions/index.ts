@@ -60,7 +60,27 @@ serve(async (req) => {
     const profile = profileRes.data;
     const patientList = patients.map((p) => `${p.name} (ID: ${p.id})`).join(", ");
 
-    const today = new Date().toISOString().split("T")[0];
+    // Prefer the client's local date/timezone so relative phrases like
+    // "today", "tomorrow", "Monday", or "3 July" resolve to the user's
+    // calendar — not UTC, which is off-by-one for late-night entries in +HH zones.
+    const clientDate: string | undefined = (body as any).clientDate;
+    const clientTimezone: string | undefined = (body as any).clientTimezone;
+    const today = (clientDate && /^\d{4}-\d{2}-\d{2}$/.test(clientDate))
+      ? clientDate
+      : new Date().toISOString().split("T")[0];
+    const localDow = (() => {
+      try {
+        return new Intl.DateTimeFormat("en-US", {
+          weekday: "long",
+          timeZone: clientTimezone || "UTC",
+        }).format(new Date(`${today}T12:00:00Z`));
+      } catch { return ""; }
+    })();
+    const tomorrow = (() => {
+      const d = new Date(`${today}T12:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + 1);
+      return d.toISOString().split("T")[0];
+    })();
 
     // Call AI with tool-calling to parse the input
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
