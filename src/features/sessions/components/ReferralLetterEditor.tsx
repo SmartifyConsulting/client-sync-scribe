@@ -249,11 +249,36 @@ export function ReferralLetterEditor({
         <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
           <div className="space-y-2">
             <Label htmlFor="referred-to">Referred To (Specialist/Hospital) *</Label>
+            {referralOptions.length > 0 && (
+              <Select
+                value={selectedReferralId}
+                onValueChange={(id) => {
+                  setSelectedReferralId(id);
+                  const opt = referralOptions.find((o) => o.id === id);
+                  if (opt) {
+                    setReferredTo(
+                      [opt.label, opt.specialty].filter(Boolean).join(" — "),
+                    );
+                  }
+                }}
+              >
+                <SelectTrigger id="referred-to-picker">
+                  <SelectValue placeholder="Pick from your referral doctors…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {referralOptions.map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.label}{o.specialty ? ` — ${o.specialty}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Input
               id="referred-to"
               value={referredTo}
               onChange={(e) => setReferredTo(e.target.value)}
-              placeholder="e.g., Dr. Smith (Cardiologist) / City Hospital"
+              placeholder="Or type the name (e.g., Dr Smith — Cardiologist)"
             />
           </div>
 
