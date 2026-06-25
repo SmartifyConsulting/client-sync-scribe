@@ -305,18 +305,27 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       <div className="p-3 rounded-lg bg-muted/50 border border-border">
         <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
         <p className="text-xs text-muted-foreground mb-2">
-          Use these placeholders - they will be replaced with actual data when creating documents.
+          Drag a placeholder into the content area, or click to copy. They are replaced with real data when documents are created.
         </p>
         <div className="flex flex-wrap gap-2">
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientName]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorName]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorSignature]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeNumber]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[Date]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientAddress]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PatientDOB]</code>
+          {[
+            "[PatientName]","[DoctorName]","[DoctorSignature]","[PracticeNumber]",
+            "[DoctorNumber]","[PracticeAddress]","[Date]","[PatientAddress]","[PatientDOB]",
+          ].map((token) => (
+            <code
+              key={token}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.setData("text/plain", token);
+                e.dataTransfer.effectAllowed = "copy";
+              }}
+              onClick={() => { navigator.clipboard?.writeText(token); }}
+              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
+              title="Drag into content or click to copy"
+            >
+              {token}
+            </code>
+          ))}
         </div>
       </div>
 
