@@ -478,9 +478,7 @@ export default function Auth() {
       clearDraft();
       toast({
         title: "Account created!",
-        description: signupMethod === "phone"
-          ? "You can sign in with your phone number and password."
-          : "Check your inbox to confirm your email before signing in.",
+        description: "You're all set — let's continue.",
       });
       await routeAfterLogin(userId);
     } catch (error: any) {
