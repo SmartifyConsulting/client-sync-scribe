@@ -95,7 +95,7 @@ serve(async (req) => {
           {
             role: "system",
             content: `You are a medical practice assistant. Parse voice commands into structured tasks.
-Current date: ${today}
+Today is ${localDow ? localDow + ", " : ""}${today}${clientTimezone ? ` (${clientTimezone})` : ""}.
 Doctor: ${profile?.full_name || "Unknown"}, Practice #: ${profile?.practice_number || "N/A"}, Registration #: ${profile?.doctor_number || "N/A"}
 Doctor's patients: ${patientList || "None"}
 
@@ -109,7 +109,9 @@ Rules:
 - For referral letters: extract referring-to doctor name and reason
 - For general letters: extract subject and content
 - If a task cannot be auto-executed (too vague, no matching patient, unclear action), mark it as manual
-- "tomorrow" means ${new Date(Date.now() + 86400000).toISOString().split("T")[0]}
+- "today" means ${today}; "tomorrow" means ${tomorrow}
+- Day-of-week names (Monday, Tuesday, …) refer to the NEXT occurrence of that weekday on or after today (${today}). Do NOT pick the previous week.
+- Treat all dates the user speaks as their local calendar date — do not convert to UTC and do not move them by a day.
 - Use 24h time format for times`,
           },
           { role: "user", content: text },
