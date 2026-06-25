@@ -1143,54 +1143,6 @@ export default function Sessions() {
             </div>
           </div>
 
-          {/* Post-Session Actions: Create Documents */}
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Create Document</h3>
-            <div className="flex items-center gap-3">
-              <Select value={selectedDocType} onValueChange={setSelectedDocType}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select document type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="prescription">Prescription</SelectItem>
-                  <SelectItem value="invoice">Invoice</SelectItem>
-                  <SelectItem value="medical_certificate">Medical Certificate</SelectItem>
-                  <SelectItem value="referral_letter">Referral Letter</SelectItem>
-                  <SelectItem value="general_letter">General Letter</SelectItem>
-                  <SelectItem value="hospital_admission">Hospital Admission</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                disabled={!selectedDocType || !patientId}
-                onClick={() => {
-                  if (selectedDocType === 'prescription') setShowPrescriptionEditor(true);
-                  else if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
-                  else if (selectedDocType === 'medical_certificate') setShowMedicalCertificateEditor(true);
-                  else if (selectedDocType === 'referral_letter') setShowReferralLetterEditor(true);
-                  else if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
-                  else if (selectedDocType === 'hospital_admission') setShowHospitalAdmissionEditor(true);
-                }}
-              >
-                <FileText className="h-4 w-4 mr-1" />
-                Create
-              </Button>
-            </div>
-            {(prescription || invoice) && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {prescription && (
-                  <Badge variant="secondary" className="gap-1">
-                    <CheckCircle className="h-4 w-4 text-success" /> Prescription Saved
-                  </Badge>
-                )}
-                {invoice && (
-                  <Badge variant="secondary" className="gap-1">
-                    <CheckCircle className="h-4 w-4 text-success" /> Invoice R {invoice.amount.toFixed(2)}
-                  </Badge>
-                )}
-              </div>
-            )}
-          </div>
-
           {/* AI Clinician Decision Support */}
           <div className="rounded-xl border border-primary/30 bg-card p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -1279,6 +1231,9 @@ export default function Sessions() {
                       setIsNarrating(true);
                       try {
                         const textToNarrate = showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis;
+                        const { data: { session: authSession } } = await supabase.auth.getSession();
+                        const accessToken = authSession?.access_token;
+                        if (!accessToken) throw new Error('Not authenticated');
                         const response = await fetch(
                           `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/narrate-briefing`,
                           {
@@ -1286,7 +1241,7 @@ export default function Sessions() {
                             headers: {
                               'Content-Type': 'application/json',
                               'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                              'Authorization': `Bearer ${accessToken}`,
                             },
                             body: JSON.stringify({ text: textToNarrate }),
                           }
@@ -1315,6 +1270,54 @@ export default function Sessions() {
                   </pre>
                 </div>
               </>
+            )}
+          </div>
+
+          {/* Post-Session Actions: Create Documents */}
+          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Create Document</h3>
+            <div className="flex items-center gap-3">
+              <Select value={selectedDocType} onValueChange={setSelectedDocType}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select document type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="prescription">Prescription</SelectItem>
+                  <SelectItem value="invoice">Invoice</SelectItem>
+                  <SelectItem value="medical_certificate">Medical Certificate</SelectItem>
+                  <SelectItem value="referral_letter">Referral Letter</SelectItem>
+                  <SelectItem value="general_letter">General Letter</SelectItem>
+                  <SelectItem value="hospital_admission">Hospital Admission</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                disabled={!selectedDocType || !patientId}
+                onClick={() => {
+                  if (selectedDocType === 'prescription') setShowPrescriptionEditor(true);
+                  else if (selectedDocType === 'invoice') setShowInvoiceEditor(true);
+                  else if (selectedDocType === 'medical_certificate') setShowMedicalCertificateEditor(true);
+                  else if (selectedDocType === 'referral_letter') setShowReferralLetterEditor(true);
+                  else if (selectedDocType === 'general_letter') setShowGeneralLetterEditor(true);
+                  else if (selectedDocType === 'hospital_admission') setShowHospitalAdmissionEditor(true);
+                }}
+              >
+                <FileText className="h-4 w-4 mr-1" />
+                Create
+              </Button>
+            </div>
+            {(prescription || invoice) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {prescription && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle className="h-4 w-4 text-success" /> Prescription Saved
+                  </Badge>
+                )}
+                {invoice && (
+                  <Badge variant="secondary" className="gap-1">
+                    <CheckCircle className="h-4 w-4 text-success" /> Invoice R {invoice.amount.toFixed(2)}
+                  </Badge>
+                )}
+              </div>
             )}
           </div>
 
