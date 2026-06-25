@@ -80,6 +80,63 @@ export function ReferralLetterEditor({
 
   const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
 
+  const [referralOptions, setReferralOptions] = useState<
+    Array<{ id: string; label: string; specialty: string | null; address: string | null }>
+  >([]);
+  const [selectedReferralId, setSelectedReferralId] = useState<string>("");
+
+  // Load the doctor's saved referral doctors so the user can pick one
+  // instead of typing the name from scratch.
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("referral_doctors")
+        .select("id, first_name, last_name, specialty, address")
+        .eq("user_id", user.id)
+        .order("last_name", { ascending: true });
+      setReferralOptions(
+        (data || []).map((d: any) => ({
+          id: d.id,
+          label: `Dr ${[d.first_name, d.last_name].filter(Boolean).join(" ")}`.trim(),
+          specialty: d.specialty,
+          address: d.address,
+        })),
+      );
+    })();
+  }, []);
+
+  // Auto-populate a referral summary from the latest session for this patient.
+  useEffect(() => {
+    if (clinicalHistory || currentDiagnosis) return; // don't overwrite user input
+    (async () => {
+      const query = supabase
+        .from("sessions")
+        .select("started_at, summary, transcript, notes")
+        .eq("patient_id", patientId)
+        .order("started_at", { ascending: false })
+        .limit(1);
+      const { data } = sessionId
+        ? await supabase
+            .from("sessions")
+            .select("started_at, summary, transcript, notes")
+            .eq("id", sessionId)
+            .maybeSingle()
+            .then((r) => ({ data: r.data ? [r.data] : [] }))
+        : await query;
+      const s = (data || [])[0] as any;
+      if (!s) return;
+      const dateStr = s.started_at ? new Date(s.started_at).toLocaleDateString() : "";
+      const summary = s.summary || s.notes || (s.transcript ? String(s.transcript).slice(0, 600) : "");
+      if (!summary) return;
+      setClinicalHistory(
+        `Appointment on ${dateStr}.\n\n${summary}`.trim(),
+      );
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientId, sessionId]);
+
   const generateReferralContent = () => {
     let content = "";
     if (clinicalHistory) content += `Clinical History:\n${clinicalHistory}\n\n`;
