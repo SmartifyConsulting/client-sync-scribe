@@ -133,6 +133,19 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     SessionDate: todayLong,
     Today: todayLong,
     PrescriptionDate: todayLong,
+    SignatureDate: todayLong,
+    ConsultationDate: todayLong,
+    ReferralDate: todayLong,
+    AdmissionDate: todayLong,
+
+    // Signature — rendered as inline image when available
+    DoctorSignature: profile?.signature_url
+      ? `<img src="${profile.signature_url}" alt="Signature" style="max-height:60px;display:inline-block;" />`
+      : "",
+    Signature: profile?.signature_url
+      ? `<img src="${profile.signature_url}" alt="Signature" style="max-height:60px;display:inline-block;" />`
+      : "",
+
 
     // Invoice (optional)
     InvoiceNumber: invoice?.invoice_number || "",
