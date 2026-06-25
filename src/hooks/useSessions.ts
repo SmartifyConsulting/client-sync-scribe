@@ -180,8 +180,10 @@ const completeSession = async (
       const preferredLanguage = profileData?.preferred_language || undefined;
 
       // Generate AI summary from transcript/notes
+      const { clientDateContext } = await import('@/lib/clientDate');
+      const dateCtx = clientDateContext();
       const { data: summaryData, error: summaryError } = await supabase.functions.invoke('summarize-session', {
-        body: { notes: additionalNotes, transcript: content, language: preferredLanguage },
+        body: { notes: additionalNotes, transcript: content, language: preferredLanguage, ...dateCtx },
       });
 
       if (summaryError) {
