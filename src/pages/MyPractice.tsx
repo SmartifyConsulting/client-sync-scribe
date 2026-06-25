@@ -61,22 +61,13 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 // ── Constants ──────────────────────────────────────────────────────
-const COUNTRY_CODES = [
-  { code: "+27", country: "South Africa", flag: "🇿🇦" },
-  { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
-  { code: "+44", country: "United Kingdom", flag: "🇬🇧" },
-  { code: "+267", country: "Botswana", flag: "🇧🇼" },
-  { code: "+264", country: "Namibia", flag: "🇳🇦" },
-  { code: "+268", country: "Eswatini", flag: "🇸🇿" },
-  { code: "+266", country: "Lesotho", flag: "🇱🇸" },
-  { code: "+258", country: "Mozambique", flag: "🇲🇿" },
-  { code: "+263", country: "Zimbabwe", flag: "🇿🇼" },
-  { code: "+61", country: "Australia", flag: "🇦🇺" },
-  { code: "+91", country: "India", flag: "🇮🇳" },
-  { code: "+49", country: "Germany", flag: "🇩🇪" },
-  { code: "+33", country: "France", flag: "🇫🇷" },
-  { code: "+971", country: "UAE", flag: "🇦🇪" },
-];
+import { COUNTRY_DIAL_CODES as _COUNTRY_DIAL_CODES } from "@/lib/countryDialCodes";
+// Shape adapter so the existing JSX (which reads `code`/`country`/`flag`) keeps working.
+const COUNTRY_CODES = _COUNTRY_DIAL_CODES.map((c) => ({
+  code: c.dial,
+  country: c.name,
+  flag: c.flag,
+}));
 
 const DOCTOR_SPECIALTIES = [
   "General Practitioner",

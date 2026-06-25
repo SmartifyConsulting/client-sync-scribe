@@ -91,11 +91,26 @@ export function TemplateSectionEditor({
     e.stopPropagation();
     setIsDragging(false);
 
+    // Placeholder token drag (text/plain) - insert at cursor
+    const token = e.dataTransfer.getData("text/plain");
+    if (token && token.startsWith("[") && token.endsWith("]")) {
+      const textarea = textareaRef.current;
+      const pos = textarea?.selectionStart ?? value.text.length;
+      const next = value.text.slice(0, pos) + token + value.text.slice(pos);
+      onChange({ ...value, text: next });
+      setTimeout(() => {
+        textarea?.focus();
+        const newPos = pos + token.length;
+        textarea?.setSelectionRange(newPos, newPos);
+      }, 0);
+      return;
+    }
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       await handleFileUpload(files[0]);
     }
-  }, [user]);
+  }, [user, value, onChange]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -303,6 +318,23 @@ export function TemplateSectionEditor({
         rows={rows}
         className="text-sm resize-none"
         style={{ textAlign: value.alignment }}
+        onDragOver={(e) => {
+          if (e.dataTransfer.types.includes("text/plain")) e.preventDefault();
+        }}
+        onDrop={(e) => {
+          const token = e.dataTransfer.getData("text/plain");
+          if (!token || !token.startsWith("[") || !token.endsWith("]")) return;
+          e.preventDefault();
+          const ta = textareaRef.current;
+          const pos = ta?.selectionStart ?? value.text.length;
+          const next = value.text.slice(0, pos) + token + value.text.slice(pos);
+          onChange({ ...value, text: next });
+          setTimeout(() => {
+            ta?.focus();
+            const newPos = pos + token.length;
+            ta?.setSelectionRange(newPos, newPos);
+          }, 0);
+        }}
       />
     </div>
   );
