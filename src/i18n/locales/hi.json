@@ -61,7 +61,8 @@
     "emergencyQueue": "Emergency Queue",
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
-    "backToAdmin": "Back to Admin"
+    "backToAdmin": "Back to Admin",
+    "liveSOS": "लाइव SOS"
   },
   "topbar": {
     "reportBug": "बग रिपोर्ट करें",

@@ -61,7 +61,8 @@
     "emergencyQueue": "Cola de Urgencia",
     "activeIncidents": "Incidentes Activos",
     "providerProfile": "Perfil",
-    "backToAdmin": "Volver al Admin"
+    "backToAdmin": "Volver al Admin",
+    "liveSOS": "SOS en vivo"
   },
   "topbar": {
     "reportBug": "Reportar error",
