@@ -1,16 +1,49 @@
+import { useEffect } from "react";
 import { Check, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { SUPPORTED_LANGUAGES } from "@/i18n";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export function LanguageSwitcher() {
   const { i18n, t } = useTranslation();
+  const { user } = useAuth();
+
+  // On profile load / switch, adopt the user's saved language
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("preferred_language")
+        .eq("id", user.id)
+        .maybeSingle();
+      const lang = (data as any)?.preferred_language;
+      if (!cancelled && lang && lang !== i18n.language) {
+        i18n.changeLanguage(lang);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
   const current =
     SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ||
     SUPPORTED_LANGUAGES.find((l) => i18n.language?.startsWith(l.code)) ||
     SUPPORTED_LANGUAGES[0];
+
+  const pickLanguage = async (code: string) => {
+    i18n.changeLanguage(code);
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ preferred_language: code } as any)
+        .eq("id", user.id);
+    }
+  };
 
   return (
     <Popover>
@@ -20,9 +53,10 @@ export function LanguageSwitcher() {
             <PopoverTrigger asChild>
               <button
                 aria-label={t("common.changeLanguage", "Change language")}
-                className="h-9 w-9 rounded-full bg-white border border-border flex items-center justify-center hover:bg-accent transition-colors text-base leading-none overflow-hidden"
+                className="h-9 w-9 rounded-full flex items-center justify-center text-white font-semibold transition-colors overflow-hidden border border-white/20 shadow-sm hover:opacity-90"
+                style={{ backgroundColor: "hsl(225 73% 38%)" }}
               >
-                <span aria-hidden className="text-lg">
+                <span aria-hidden className="text-base leading-none">
                   {current?.flag || <Globe className="h-4 w-4" />}
                 </span>
               </button>
@@ -38,7 +72,7 @@ export function LanguageSwitcher() {
             return (
               <button
                 key={lang.code}
-                onClick={() => i18n.changeLanguage(lang.code)}
+                onClick={() => pickLanguage(lang.code)}
                 className={cn(
                   "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors",
                   active ? "bg-primary/10" : "hover:bg-accent",
