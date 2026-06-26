@@ -25,6 +25,7 @@ import IncidentHistoryScreen from "./pages/provider/ambulance/IncidentHistoryScr
 import TeamStatusScreen from "./pages/provider/ambulance/TeamStatusScreen";
 import FleetPage from "./pages/provider/ambulance/FleetPage";
 import TelematicsScreen from "./pages/provider/ambulance/TelematicsScreen";
+import LiveSOSScreen from "./pages/provider/ambulance/LiveSOSScreen";
 import AmbulanceIncidentConsole from "./pages/provider/AmbulanceIncidentConsole";
 
 function ProviderShell({ children }: { children: React.ReactNode }) {
