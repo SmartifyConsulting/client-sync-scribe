@@ -18,6 +18,8 @@ function AmbulanceStatsStrip() {
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [startOpen, setStartOpen] = useState(false);
   const [ending, setEnding] = useState(false);
+  useShiftTelematics(providerId, !!shift, (shift as any)?.vehicle_id ?? null);
+
 
   useEffect(() => {
     const on = () => setOnline(true);
