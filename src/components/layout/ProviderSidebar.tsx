@@ -20,7 +20,9 @@ import {
   HeartPulse,
   ArrowLeft,
   UserCheck,
+  Radar,
 } from "lucide-react";
+
 import { useProfile } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
