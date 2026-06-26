@@ -3533,6 +3533,7 @@ export type Database = {
           id: string
           id_passport_number: string | null
           is_chronic: boolean | null
+          is_sample: boolean
           last_name: string | null
           marital_status: string | null
           medical_aid: string | null
@@ -3595,6 +3596,7 @@ export type Database = {
           id?: string
           id_passport_number?: string | null
           is_chronic?: boolean | null
+          is_sample?: boolean
           last_name?: string | null
           marital_status?: string | null
           medical_aid?: string | null
@@ -3657,6 +3659,7 @@ export type Database = {
           id?: string
           id_passport_number?: string | null
           is_chronic?: boolean | null
+          is_sample?: boolean
           last_name?: string | null
           marital_status?: string | null
           medical_aid?: string | null
