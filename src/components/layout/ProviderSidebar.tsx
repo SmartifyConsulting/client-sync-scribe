@@ -151,7 +151,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               }
             >
               <UserCog className="h-4 w-4" />
-              Provider Profile
+              {t("nav.providerProfile")}
             </NavLink>
             <NavLink
               to="/settings"
@@ -166,7 +166,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               }
             >
               <Settings className="h-4 w-4" />
-              Settings
+              {t("common.settings")}
             </NavLink>
             <button
               onClick={async () => {
@@ -176,7 +176,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              {t("common.signOut")}
             </button>
           </div>
         </div>
