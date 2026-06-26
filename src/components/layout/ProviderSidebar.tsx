@@ -69,6 +69,7 @@ interface ProviderSidebarProps {
 export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const { profile } = useProfile();
   const { isAdmin } = useIsAdmin();
+  const { t } = useTranslation();
   const location = useLocation();
   const nav = portal === "hospital" ? hospitalNav : ambulanceNav;
   const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
