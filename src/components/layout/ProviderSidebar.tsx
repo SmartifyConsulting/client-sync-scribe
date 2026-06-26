@@ -116,8 +116,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                 )}
               >
                 <item.icon className="h-5 w-5" />
-
-                <span className="flex-1">{item.label}</span>
+                <span className="flex-1">{t(item.labelKey)}</span>
               </NavLink>
             );
           })}
