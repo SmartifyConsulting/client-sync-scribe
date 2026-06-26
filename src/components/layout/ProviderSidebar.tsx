@@ -89,7 +89,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
             onClick={onNavigate}
             className="mx-4 mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           >
-            <ArrowLeft className="h-3 w-3" /> Back to Admin
+            <ArrowLeft className="h-3 w-3" /> {t("nav.backToAdmin")}
           </NavLink>
         )}
 
