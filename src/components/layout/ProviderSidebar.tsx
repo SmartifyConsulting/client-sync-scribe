@@ -56,6 +56,7 @@ const ambulanceNav: NavItem[] = [
   { icon: History, label: "Incident History", to: "/provider/ambulance/history" },
   { icon: Users, label: "Team Status", to: "/provider/ambulance/team" },
   { icon: Ambulance, label: "Fleet", to: "/provider/ambulance/fleet" },
+  { icon: Radar, label: "Telematics", to: "/provider/ambulance/telematics" },
   { icon: UserCheck, label: "Administrators", to: "/provider/ambulance/admins" },
 ];
 
