@@ -28,6 +28,8 @@ import {
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { cn } from "@/lib/utils";
 import vulaSymbol from "@/assets/vula-symbol.png";
+import { SampleBadge } from "@/components/patients/SampleBadge";
+import { isSamplePatient } from "@/lib/samplePatients";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -253,6 +255,7 @@ export default function PatientProfile() {
             <div>
               <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
                 {patient.name}
+                {isSamplePatient(patient) && <SampleBadge size="md" />}
                 <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
               </h1>
               <div className="flex flex-wrap items-center gap-3 text-base text-muted-foreground mt-1">

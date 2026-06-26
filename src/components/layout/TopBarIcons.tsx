@@ -17,6 +17,7 @@ import { ReportFixSheet } from "@/components/feedback/ReportFixSheet";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
 const PROVIDER_PROFILE_NOTIF_TYPES = [
   "access_request",
@@ -132,6 +133,9 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
 
   return (
     <div className="flex items-center gap-2">
+      {/* Language switcher — sits immediately left of the bug-report icon */}
+      <LanguageSwitcher />
+
       {/* Bug/Fix Report */}
       <TooltipProvider>
         <Tooltip>

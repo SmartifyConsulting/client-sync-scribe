@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
+import { SampleBadge } from "@/components/patients/SampleBadge";
+import { isSamplePatient } from "@/lib/samplePatients";
 
 interface Activity {
   id: string;
@@ -135,9 +137,10 @@ export function RecentActivity() {
                     {activity.patientId && activity.patientName ? (
                       <Link
                         to={`/patients/${activity.patientId}`}
-                        className="text-xs text-primary hover:underline truncate block"
+                        className="text-xs text-primary hover:underline truncate inline-flex items-center gap-1"
                       >
                         {activity.patientName}
+                        {isSamplePatient({ name: activity.patientName }) && <SampleBadge />}
                       </Link>
                     ) : (
                       <p className="text-xs text-muted-foreground truncate">

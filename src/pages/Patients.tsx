@@ -45,6 +45,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
+import { SampleBadge } from "@/components/patients/SampleBadge";
+import { isSamplePatient } from "@/lib/samplePatients";
 
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
@@ -954,7 +956,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 </Tooltip>
                               </TooltipProvider>
                             )}
-                            <span className="font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap">
+                            <span className="font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap inline-flex items-center gap-1">
                               {patient.name.includes(',') ? patient.name : (() => {
                                 const parts = patient.name.trim().split(/\s+/);
                                 if (parts.length <= 1) return patient.name;
@@ -962,6 +964,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 const firstNames = parts.slice(0, -1).join(" ");
                                 return `${lastName}, ${firstNames}`;
                               })()}
+                              {isSamplePatient(patient) && <SampleBadge />}
                             </span>
                           </Link>
                         </td>
