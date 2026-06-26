@@ -50,6 +50,7 @@ const hospitalNav: NavItem[] = [
 
 const ambulanceNav: NavItem[] = [
   { icon: Siren, labelKey: "nav.activeIncidents", to: "/provider/ambulance", end: true, danger: true },
+  { icon: HeartPulse, labelKey: "nav.liveSOS", to: "/provider/ambulance/live-sos", danger: true },
   { icon: Ambulance, labelKey: "nav.incomingSos", to: "/provider/ambulance/incoming" },
   { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
   { icon: Hospital, labelKey: "nav.hospitals", to: "/provider/ambulance/hospitals" },
