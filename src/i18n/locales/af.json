@@ -1,0 +1,14 @@
+{
+  "common": {
+    "language": "Language",
+    "changeLanguage": "Change language",
+    "patients": "Patients",
+    "dashboard": "Dashboard",
+    "sessions": "Sessions",
+    "documents": "Documents",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}
