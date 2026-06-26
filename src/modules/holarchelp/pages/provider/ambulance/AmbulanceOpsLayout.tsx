@@ -5,7 +5,9 @@ import { ProviderAppLayout } from "@/components/layout/ProviderAppLayout";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useAmbulanceOpsStats } from "../../../hooks/useAmbulanceOpsStats";
 import { useParamedicShift } from "../../../hooks/useParamedicShift";
+import { useShiftTelematics } from "../../../hooks/useShiftTelematics";
 import { StartShiftDialog } from "../../../components/StartShiftDialog";
+
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
