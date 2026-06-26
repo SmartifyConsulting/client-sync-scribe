@@ -2,13 +2,42 @@
   "common": {
     "language": "Language",
     "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
     "signOut": "Sign Out",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "send": "Send",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "loading": "Loading...",
+    "settings": "Settings"
+  },
+  "nav": {
+    "home": "Home",
+    "myPatients": "My Patients",
+    "myPractice": "My Practice",
+    "myCalendar": "My Calendar",
+    "myTasks": "My Tasks",
+    "myDocuments": "My Documents",
+    "myRoundTables": "My Round Tables",
+    "myRewards": "My Rewards",
+    "sos": "SOS",
+    "myProfile": "My Profile",
+    "myHolarchy": "My Holarchy",
+    "admin": "Admin",
+    "users": "Users",
+    "pricing": "Pricing",
+    "rewards": "Rewards",
+    "hospitalPortal": "Hospital Portal",
+    "erPortal": "ER Portal"
+  },
+  "topbar": {
+    "reportBug": "Report Bug/Fix",
+    "calendar": "Calendar",
+    "recordTask": "Record a Task",
+    "notifications": "Notifications"
   }
 }

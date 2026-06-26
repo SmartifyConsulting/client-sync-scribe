@@ -1,0 +1,5 @@
+{
+  "common": {"language":"语言","changeLanguage":"更改语言","signOut":"退出","save":"保存","cancel":"取消","delete":"删除","edit":"编辑","add":"添加","send":"发送","confirm":"确认","close":"关闭","search":"搜索","loading":"加载中...","settings":"设置"},
+  "nav": {"home":"首页","myPatients":"我的患者","myPractice":"我的诊所","myCalendar":"我的日历","myTasks":"我的任务","myDocuments":"我的文档","myRoundTables":"我的圆桌","myRewards":"我的奖励","sos":"SOS","myProfile":"我的资料","myHolarchy":"我的Holarchy","admin":"管理员","users":"用户","pricing":"定价","rewards":"奖励","hospitalPortal":"医院门户","erPortal":"急诊门户"},
+  "topbar": {"reportBug":"报告问题","calendar":"日历","recordTask":"录制任务","notifications":"通知"}
+}

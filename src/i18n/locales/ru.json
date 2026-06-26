@@ -1,0 +1,5 @@
+{
+  "common": {"language":"Язык","changeLanguage":"Изменить язык","signOut":"Выйти","save":"Сохранить","cancel":"Отмена","delete":"Удалить","edit":"Изменить","add":"Добавить","send":"Отправить","confirm":"Подтвердить","close":"Закрыть","search":"Поиск","loading":"Загрузка...","settings":"Настройки"},
+  "nav": {"home":"Главная","myPatients":"Мои Пациенты","myPractice":"Моя Практика","myCalendar":"Мой Календарь","myTasks":"Мои Задачи","myDocuments":"Мои Документы","myRoundTables":"Круглые Столы","myRewards":"Мои Награды","sos":"SOS","myProfile":"Мой Профиль","myHolarchy":"Мой Holarchy","admin":"Админ","users":"Пользователи","pricing":"Цены","rewards":"Награды","hospitalPortal":"Портал Больницы","erPortal":"Портал Скорой"},
+  "topbar": {"reportBug":"Сообщить об ошибке","calendar":"Календарь","recordTask":"Записать задачу","notifications":"Уведомления"}
+}

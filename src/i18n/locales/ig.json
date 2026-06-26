@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Asụsụ","changeLanguage":"Gbanwee asụsụ","signOut":"Pụọ","save":"Chekwaa","cancel":"Kagbuo","delete":"Hichapụ","edit":"Dezie","add":"Tinye","send":"Zipu","confirm":"Kwado","close":"Mechie","search":"Chọọ","loading":"Na-ebugo...","settings":"Ntọala"},
+  "nav": {"home":"Ụlọ","myPatients":"Ndị Ọrịa M","myPractice":"Ọrụ M","myCalendar":"Kalenda M","myTasks":"Ọrụ M","myDocuments":"Akwụkwọ M","myRoundTables":"Tebụl Okirikiri M","myRewards":"Ụgwọ Ọrụ M","sos":"SOS","myProfile":"Profaịlụ M","myHolarchy":"Holarchy M","admin":"Onye Nchịkwa","users":"Ndị Ọrụ","pricing":"Ọnụahịa","rewards":"Ụgwọ Ọrụ","hospitalPortal":"Ọnụ Ụzọ Ụlọ Ọgwụ","erPortal":"Ọnụ Ụzọ Mberede"},
+  "topbar": {"reportBug":"Kọọ Nsogbu","calendar":"Kalenda","recordTask":"Dekọọ Ọrụ","notifications":"Ọkwa"}
 }

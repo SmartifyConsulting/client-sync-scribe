@@ -1,0 +1,5 @@
+{
+  "common": {"language":"भाषा","changeLanguage":"भाषा बदलें","signOut":"साइन आउट","save":"सहेजें","cancel":"रद्द करें","delete":"हटाएं","edit":"संपादित करें","add":"जोड़ें","send":"भेजें","confirm":"पुष्टि करें","close":"बंद करें","search":"खोजें","loading":"लोड हो रहा है...","settings":"सेटिंग्स"},
+  "nav": {"home":"होम","myPatients":"मेरे मरीज","myPractice":"मेरा क्लिनिक","myCalendar":"मेरा कैलेंडर","myTasks":"मेरे कार्य","myDocuments":"मेरे दस्तावेज़","myRoundTables":"मेरी गोलमेज","myRewards":"मेरे पुरस्कार","sos":"SOS","myProfile":"मेरी प्रोफ़ाइल","myHolarchy":"मेरा Holarchy","admin":"एडमिन","users":"उपयोगकर्ता","pricing":"मूल्य","rewards":"पुरस्कार","hospitalPortal":"अस्पताल पोर्टल","erPortal":"आपातकालीन पोर्टल"},
+  "topbar": {"reportBug":"बग रिपोर्ट करें","calendar":"कैलेंडर","recordTask":"कार्य रिकॉर्ड करें","notifications":"सूचनाएं"}
+}

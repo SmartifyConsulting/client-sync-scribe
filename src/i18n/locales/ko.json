@@ -1,0 +1,5 @@
+{
+  "common": {"language":"언어","changeLanguage":"언어 변경","signOut":"로그아웃","save":"저장","cancel":"취소","delete":"삭제","edit":"편집","add":"추가","send":"보내기","confirm":"확인","close":"닫기","search":"검색","loading":"로딩 중...","settings":"설정"},
+  "nav": {"home":"홈","myPatients":"내 환자","myPractice":"내 진료실","myCalendar":"내 캘린더","myTasks":"내 업무","myDocuments":"내 문서","myRoundTables":"원탁회의","myRewards":"내 보상","sos":"SOS","myProfile":"내 프로필","myHolarchy":"내 Holarchy","admin":"관리자","users":"사용자","pricing":"가격","rewards":"보상","hospitalPortal":"병원 포털","erPortal":"응급실 포털"},
+  "topbar": {"reportBug":"버그 신고","calendar":"캘린더","recordTask":"작업 녹음","notifications":"알림"}
+}

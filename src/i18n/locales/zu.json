@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Ulimi","changeLanguage":"Shintsha ulimi","signOut":"Phuma","save":"Londoloza","cancel":"Khansela","delete":"Susa","edit":"Hlela","add":"Engeza","send":"Thumela","confirm":"Qinisekisa","close":"Vala","search":"Sesha","loading":"Iyalayisha...","settings":"Izilungiselelo"},
+  "nav": {"home":"Ikhaya","myPatients":"Iziguli Zami","myPractice":"Umsebenzi Wami","myCalendar":"Ikhalenda Lami","myTasks":"Imisebenzi Yami","myDocuments":"Amadokhumenti Ami","myRoundTables":"Amatafula Ami Ayindilinga","myRewards":"Imivuzo Yami","sos":"SOS","myProfile":"Iphrofayela Yami","myHolarchy":"I-Holarchy Yami","admin":"Umlawuli","users":"Abasebenzisi","pricing":"Amanani","rewards":"Imivuzo","hospitalPortal":"Iziko Lesibhedlela","erPortal":"Iziko Lesimo Esiphuthumayo"},
+  "topbar": {"reportBug":"Bika Iphutha","calendar":"Ikhalenda","recordTask":"Qopha Umsebenzi","notifications":"Izaziso"}
 }

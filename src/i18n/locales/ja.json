@@ -1,0 +1,5 @@
+{
+  "common": {"language":"言語","changeLanguage":"言語を変更","signOut":"サインアウト","save":"保存","cancel":"キャンセル","delete":"削除","edit":"編集","add":"追加","send":"送信","confirm":"確認","close":"閉じる","search":"検索","loading":"読み込み中...","settings":"設定"},
+  "nav": {"home":"ホーム","myPatients":"私の患者","myPractice":"私のクリニック","myCalendar":"私のカレンダー","myTasks":"私のタスク","myDocuments":"私の書類","myRoundTables":"円卓","myRewards":"私の報酬","sos":"SOS","myProfile":"私のプロフィール","myHolarchy":"私のHolarchy","admin":"管理者","users":"ユーザー","pricing":"料金","rewards":"報酬","hospitalPortal":"病院ポータル","erPortal":"救急ポータル"},
+  "topbar": {"reportBug":"バグ報告","calendar":"カレンダー","recordTask":"タスク録音","notifications":"通知"}
+}

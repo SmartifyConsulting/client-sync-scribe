@@ -1,0 +1,5 @@
+{
+  "common": {"language":"Lugha","changeLanguage":"Badilisha lugha","signOut":"Toka","save":"Hifadhi","cancel":"Ghairi","delete":"Futa","edit":"Hariri","add":"Ongeza","send":"Tuma","confirm":"Thibitisha","close":"Funga","search":"Tafuta","loading":"Inapakia...","settings":"Mipangilio"},
+  "nav": {"home":"Nyumbani","myPatients":"Wagonjwa Wangu","myPractice":"Mazoezi Yangu","myCalendar":"Kalenda Yangu","myTasks":"Kazi Zangu","myDocuments":"Hati Zangu","myRoundTables":"Meza Zangu za Mviringo","myRewards":"Zawadi Zangu","sos":"SOS","myProfile":"Wasifu Wangu","myHolarchy":"Holarchy Yangu","admin":"Msimamizi","users":"Watumiaji","pricing":"Bei","rewards":"Zawadi","hospitalPortal":"Lango la Hospitali","erPortal":"Lango la Dharura"},
+  "topbar": {"reportBug":"Ripoti Hitilafu","calendar":"Kalenda","recordTask":"Rekodi Kazi","notifications":"Arifa"}
+}

@@ -1,0 +1,5 @@
+{
+  "common": {"language":"Mutauro","changeLanguage":"Chinja mutauro","signOut":"Buda","save":"Chengetedza","cancel":"Kanzura","delete":"Bvisa","edit":"Gadziridza","add":"Wedzera","send":"Tumira","confirm":"Simbisa","close":"Vhara","search":"Tsvaga","loading":"Zvichirongedzwa...","settings":"Marongero"},
+  "nav": {"home":"Kumba","myPatients":"Varwere Vangu","myPractice":"Basa Rangu","myCalendar":"Karenda Yangu","myTasks":"Mabasa Angu","myDocuments":"Magwaro Angu","myRoundTables":"Matafura Angu","myRewards":"Mibairo Yangu","sos":"SOS","myProfile":"Pulofiri Yangu","myHolarchy":"Holarchy Yangu","admin":"Mutariri","users":"Vashandisi","pricing":"Mitengo","rewards":"Mibairo","hospitalPortal":"Chipatara","erPortal":"Pakukurumidza"},
+  "topbar": {"reportBug":"Shuma Dambudziko","calendar":"Karenda","recordTask":"Rekodha Basa","notifications":"Zviziviso"}
+}
