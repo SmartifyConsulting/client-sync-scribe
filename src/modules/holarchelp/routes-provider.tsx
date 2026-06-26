@@ -66,6 +66,7 @@ export default function ProviderRoutes() {
       <Route path="ambulance" element={<ProviderShell><AmbulanceOpsLayout /></ProviderShell>}>
         <Route index element={<AmbulanceOpsDashboard />} />
         <Route path="incoming" element={<IncomingSosScreen />} />
+        <Route path="live-sos" element={<LiveSOSScreen />} />
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
         <Route path="hospitals" element={<HospitalsDirectoryScreen />} />
