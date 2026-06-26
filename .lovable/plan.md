@@ -1,56 +1,57 @@
-## 1. Make language selection actually translate the UI everywhere
 
-**Problem:** `LanguageSwitcher` updates `i18n.language` + persists to `profiles.preferred_language`, but most components render hardcoded English strings. So switching to FR for Renken only updates the few wired labels — everything else stays English.
+## Scope
 
-**Approach:**
-- Replace hardcoded strings with `t("...")` across high-traffic surfaces:
-  - `ProviderSidebar` (all nav items: Telematics, Team, Fleet, Dashboard, User Admin, etc.)
-  - `TopBarIcons` tooltips
-  - `AmbulanceOpsDashboard`, `TelematicsScreen`, `TeamStatusScreen`, `NavigationScreen`, `IncomingAmbulancesScreen`, `HospitalOpsDashboard`, `AmbulanceOpsLayout` page titles, tab labels, button labels, table headers, status badges, empty states.
-  - Common shared shells (page headers, "Loading…", "No data", Save/Cancel/Add).
-- Add new keys to every locale JSON under `nav.*`, `telematics.*`, `team.*`, `fleet.*`, `userAdmin.*`, `crew.*`, `common.*`. English source of truth; other locales translated.
-- Fix the persistence reload path: on login/profile switch, read `profiles.preferred_language` and call `i18n.changeLanguage(...)` before provider routes render, so Renken's selection sticks across sessions and profiles.
-- `LanguageSwitcher` already writes both `localStorage["app.language"]` and `profiles.preferred_language`; confirm reactivity via `i18n.on("languageChanged")`.
+1. **Languages** — waiting on the list you mentioned attaching. Once you upload it I'll diff it against `src/i18n/SUPPORTED_LANGUAGES`, add/remove locales, update flags, and regenerate the per-language JSON stubs in one follow-up pass. No language changes happen in this plan.
+2. **LIVE SOS Incident Feed** — implemented now, end-to-end, for ambulance providers (Renken).
 
-## 2. Rename "Administrators" → "User Admin" and manage Crew Members there
+## LIVE SOS Incident Feed
 
-- Rename the existing `/provider/ambulance/admins` route's label, page heading, and breadcrumbs from "Administrators" to **"User Admin"** (driven by `t("nav.userAdmin")`). Keep the URL stable to avoid breaking links.
-- Restructure the User Admin page as a tabbed screen:
-  - **Tab 1 — Admins** (existing list of provider admin users).
-  - **Tab 2 — Crew Members** (new — replaces the standalone screen idea).
-- Do NOT add a separate `/provider/ambulance/crew` sidebar entry. Crew management lives inside User Admin.
+### Where it appears
+- **Dashboard summary widget** on `/provider/ambulance` (top of the page, above existing KPIs): compact "Live SOS" card showing the 5 most recent active incidents with severity dot, patient name, suburb, "time since", and a "View all" link.
+- **Dedicated page** at `/provider/ambulance/live-sos` reached from a new sidebar item **Live SOS** (siren icon, red dot when active count > 0). Full-screen split view: incident list on the left, map + detail panel on the right.
 
-**Crew Members tab features** (backed by `holarchelp_ambulance_members`):
-- Table: avatar initial, full name, role badge (Paramedic / EMT / Driver / Dispatcher), phone, email, status.
-- "Add Crew Member" dialog: name, role dropdown, phone (uses existing `PhoneNumberInput` with country dial codes), email, optional shift pattern. Insert scoped to current provider.
-- Inline edit, deactivate (soft delete via `status='inactive'`).
-- Search box + role filter.
-- All labels via `t()`.
+### Feed behaviour
+- Reads from existing `holarchelp_incidents` table filtered by `provider_id = Renken` and `status IN ('pending','accepted','en_route','on_scene')`.
+- Subscribes via Realtime (`postgres_changes` on `holarchelp_incidents`) inside a `useEffect` with channel teardown, per the realtime guidance.
+- New incidents flash with a pulse + soft chime (mute toggle persisted to localStorage).
+- Each row shows: severity badge (Critical / High / Medium / Low — color-coded), chief complaint, patient name + age, pickup address, distance from base, elapsed time, assigned ambulance (or "Unassigned"), and quick actions: **Accept**, **Assign Ambulance**, **Decline**, **Open**.
+- Detail panel: full triage summary (AI-generated text already stored), vitals if present, NOK contact, map with pickup pin + nearest hospital, ETA estimate.
 
-## 3. Show crew member names on telematics
+### Dummy data (20 incidents)
+Seed via insert tool into `holarchelp_incidents` for Renken:
+- 6 **Active now** (status pending/accepted/en_route/on_scene, created in last 0–25 min) — mix of cardiac arrest, MVA, stroke, pediatric seizure, anaphylaxis, GSW.
+- 8 **Recent (last 6 h)** completed/transported — populate history rail.
+- 6 **Last 24 h** mix of cancelled, completed, declined — for filter testing.
+- Each linked to a seeded ambulance from RA-01…RA-06, with realistic Joburg coordinates (Sandton, Fourways, Rosebank, Soweto, Midrand, Bryanston), patient names, ages, chief complaints, and pre-filled AI emergency summaries.
+- Add matching `holarchelp_incident_events` rows (dispatched / accepted / en_route / on_scene / transported) so the timeline renders.
 
-- `TelematicsScreen` currently shows trips/stops by ambulance plate only.
-- Add columns to `holarchelp_telematics_trips`: `driver_member_id uuid`, `attendant_member_id uuid` (nullable FKs to `holarchelp_ambulance_members.id`).
-- Trip query joins members → display "Driver: Jane Doe · Attendant: John K." on each trip card.
-- Live Fleet view shows currently-assigned crew per ambulance.
+### Files
 
-## 4. Much more telematics demo data for Renken
+```text
+src/modules/holarchelp/pages/provider/ambulance/
+  LiveSOSScreen.tsx           NEW  full-page feed + map + detail
+  components/
+    SOSIncidentCard.tsx       NEW  list row
+    SOSDashboardWidget.tsx    NEW  dashboard summary (5 rows + View all)
+    SOSSeverityBadge.tsx      NEW  color-coded pill
+    SOSMuteToggle.tsx         NEW  bell / bell-off
+src/modules/holarchelp/hooks/
+  useLiveSOSFeed.ts           NEW  query + realtime subscription, returns active/recent
+src/modules/holarchelp/routes-provider.tsx   add /provider/ambulance/live-sos
+src/components/layout/ProviderSidebar.tsx    add Live SOS entry (siren icon, red badge)
+src/modules/holarchelp/pages/provider/AmbulanceDashboard.tsx   mount SOSDashboardWidget
+src/i18n/locales/*.json       add liveSOS.* keys (en/fr/es/pt/de minimum, others get English fallback)
+```
 
-- **8–10 additional historical trips** over the last 14 days across all 6 ambulances, with realistic Johannesburg routes (Sandton ↔ Mediclinic, Bryanston ↔ Netcare Olivedale, Fourways ↔ Life Fourways, Morningside ↔ Sunninghill, etc.).
-- **3–5 stops per trip** (dispatch, on-scene, hospital handover, refuel, base return) with realistic dwell times (2–25 min).
-- **15–25 GPS pings per trip** so the map shows route lines, not dots.
-- **12 named crew members** seeded in `holarchelp_ambulance_members` and assigned across trips so names render.
-- Mix of statuses: completed, in_progress, dispatched.
+### Technical notes (for the team)
+- Reuse existing `holarchelp_incidents` columns; no schema changes needed. Confirmed columns include `provider_id`, `status`, `chief_complaint`, `severity`, `pickup_lat/lng`, `patient_name`, `ai_emergency_summary`, `assigned_ambulance_id`.
+- If Realtime is not yet enabled on `holarchelp_incidents`, the hook falls back to a 10-second poll; we'll add a one-line `ALTER PUBLICATION supabase_realtime ADD TABLE holarchelp_incidents` migration only if needed.
+- Chime: small base64 wav, no asset download. Muted by default; user toggle persisted per profile.
+- Map: reuse the same map component already used in `TelematicsScreen.tsx` (no new map provider).
 
-## Technical notes
+## Out of scope (this plan)
+- Language list changes — handled in the next turn after you attach the list.
+- Real SOS dispatching logic for production patients (this is demo-only).
 
-- Sidebar nav key renamed: `nav.administrators` → `nav.userAdmin` across all locale JSONs.
-- Migration adds the two new trip columns; RLS unchanged (provider-scoped).
-- Crew form reuses `PhoneNumberInput`.
-- Language reload hooked into the existing profile bootstrap (`useUserRole` / profile fetch) — no new global provider.
-- Locale JSON additions are append-only.
-
-## Out of scope
-
-- Full HR/scheduling system — just CRUD on crew + trip assignment.
-- Translating long-form document templates and AI-generated text — UI chrome only.
+## What I need from you
+Please drop the language list into the chat (text, CSV, or image is fine). The SOS feed work above proceeds regardless.
