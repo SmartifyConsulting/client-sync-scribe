@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { cn } from "@/lib/utils";
 import {
@@ -28,40 +29,41 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface NavItem {
   icon: LucideIcon;
   label: string;
+  labelKey: string;
   to: string;
   danger?: boolean;
 }
 
 const doctorNavItems: (NavItem & { tour?: string })[] = [
-  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard", tour: "doctor-home" },
-  { icon: Users, label: "My Patients", to: "/patients", tour: "import-patients" },
-  { icon: Settings2, label: "My Practice", to: "/practice", tour: "practice-settings" },
-  { icon: Calendar, label: "My Calendar", to: "/calendar" },
-  { icon: ListChecks, label: "My Tasks", to: "/todos", tour: "doctor-tasks" },
-  { icon: FolderOpen, label: "My Documents", to: "/documents" },
-  { icon: Users2, label: "My Round Tables", to: "/doctor/round-tables" },
-  { icon: Gift, label: "My Rewards", to: "/doctor/rewards" },
-  { icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true },
+  { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard", tour: "doctor-home" },
+  { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+  { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
+  { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
+  { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
+  { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/documents" },
+  { icon: Users2, label: "My Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
+  { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
+  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
-  { icon: User, label: "My Profile", to: "/patient/details?section=health", tour: "patient-profile" },
-  { icon: Users, label: "My Holarchy", to: "/patient/details?section=care", tour: "patient-holarchy" },
-  { icon: Calendar, label: "My Calendar", to: "/patient/calendar" },
-  { icon: ListChecks, label: "My Tasks", to: "/patient/tasks", tour: "patient-tasks" },
-  { icon: FolderOpen, label: "My Documents", to: "/patient/documents" },
-  { icon: Gift, label: "My Rewards", to: "/patient/rewards" },
-  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
+  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health", tour: "patient-profile" },
+  { icon: Users, label: "My Holarchy", labelKey: "nav.myHolarchy", to: "/patient/details?section=care", tour: "patient-holarchy" },
+  { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
+  { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
+  { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
+  { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
+  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
 const adminNavItems: NavItem[] = [
-  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
-  { icon: Users, label: "Users", to: "/admin/users" },
-  { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
-  { icon: Gift, label: "Rewards", to: "/admin/gamification" },
-  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
-  { icon: Siren, label: "Hospital Portal", to: "/provider/hospital", danger: true },
-  { icon: Siren, label: "ER Portal", to: "/provider/ambulance", danger: true },
+  { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard" },
+  { icon: Users, label: "Users", labelKey: "nav.users", to: "/admin/users" },
+  { icon: DollarSign, label: "Pricing", labelKey: "nav.pricing", to: "/admin/pricing" },
+  { icon: Gift, label: "Rewards", labelKey: "nav.rewards", to: "/admin/gamification" },
+  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
+  { icon: Siren, label: "Hospital Portal", labelKey: "nav.hospitalPortal", to: "/provider/hospital", danger: true },
+  { icon: Siren, label: "ER Portal", labelKey: "nav.erPortal", to: "/provider/ambulance", danger: true },
 ];
 
 interface SidebarProps {
@@ -69,6 +71,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ onNavigate }: SidebarProps) {
+  const { t } = useTranslation();
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const loading = roleLoading;
   const { profile } = useProfile();
@@ -83,7 +86,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // For admins not currently on an admin route, surface an "Admin" entry so
   // they can always reach the admin section.
   const navItems = isAdmin && !isOnAdminRoute
-    ? [...baseNav, { icon: UserCog, label: "Admin", to: "/admin/users" }]
+    ? [...baseNav, { icon: UserCog, label: "Admin", labelKey: "nav.admin", to: "/admin/users" }]
     : baseNav;
 
   const { data: unreadCount = 0 } = useQuery({
@@ -161,7 +164,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   }
                 >
                   <item.icon className="h-5 w-5" />
-                  <span className="flex-1">{item.label}</span>
+                  <span className="flex-1">{t(item.labelKey, item.label)}</span>
                   {item.label === "Notifications" && unreadCount > 0 && (
                     <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
                       {unreadCount > 99 ? "99+" : unreadCount}
@@ -194,7 +197,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               {loading ? (
                 <div className="h-3 w-20 rounded bg-muted animate-pulse" />
               ) : (
-                <p className="text-sm font-medium text-primary truncate">{profile?.full_name || "My Profile"}</p>
+                <p className="text-sm font-medium text-primary truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
               )}
             </div>
           </div>
@@ -212,7 +215,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               }
             >
               <Settings className="h-4 w-4" />
-              Settings
+              {t("common.settings", "Settings")}
             </NavLink>
             <button
               onClick={async () => {
@@ -223,7 +226,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              {t("common.signOut", "Sign Out")}
             </button>
           </div>
         </div>
