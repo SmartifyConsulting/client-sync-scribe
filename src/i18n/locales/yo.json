@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Èdè","changeLanguage":"Yi èdè padà","signOut":"Jáde","save":"Fipamọ́","cancel":"Fagilee","delete":"Pa rẹ́","edit":"Ṣatúnṣe","add":"Fikun","send":"Firanṣẹ́","confirm":"Jẹrisi","close":"Pa","search":"Wa","loading":"N gbé...","settings":"Eto"},
+  "nav": {"home":"Ile","myPatients":"Awọn Aláìsàn Mi","myPractice":"Iṣẹ́ Mi","myCalendar":"Kalẹnda Mi","myTasks":"Awọn Iṣẹ́ Mi","myDocuments":"Awọn Iwe Mi","myRoundTables":"Awọn Tabili Yíká Mi","myRewards":"Awọn Ẹbun Mi","sos":"SOS","myProfile":"Profaili Mi","myHolarchy":"Holarchy Mi","admin":"Alabojuto","users":"Awọn Olumulo","pricing":"Idiyele","rewards":"Awọn Ẹbun","hospitalPortal":"Ẹnu-ọna Ile Iwosan","erPortal":"Ẹnu-ọna Pajawiri"},
+  "topbar": {"reportBug":"Jabọ Aṣiṣe","calendar":"Kalẹnda","recordTask":"Gbasilẹ Iṣẹ́","notifications":"Awọn Iwifunni"}
 }

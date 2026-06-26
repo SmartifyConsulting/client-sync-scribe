@@ -1,0 +1,5 @@
+{
+  "common": {"language":"Lingua","changeLanguage":"Cambia lingua","signOut":"Esci","save":"Salva","cancel":"Annulla","delete":"Elimina","edit":"Modifica","add":"Aggiungi","send":"Invia","confirm":"Conferma","close":"Chiudi","search":"Cerca","loading":"Caricamento...","settings":"Impostazioni"},
+  "nav": {"home":"Home","myPatients":"I Miei Pazienti","myPractice":"Il Mio Studio","myCalendar":"Il Mio Calendario","myTasks":"I Miei Compiti","myDocuments":"I Miei Documenti","myRoundTables":"Le Mie Tavole Rotonde","myRewards":"I Miei Premi","sos":"SOS","myProfile":"Il Mio Profilo","myHolarchy":"Il Mio Holarchy","admin":"Admin","users":"Utenti","pricing":"Prezzi","rewards":"Premi","hospitalPortal":"Portale Ospedale","erPortal":"Portale Pronto Soccorso"},
+  "topbar": {"reportBug":"Segnala bug","calendar":"Calendario","recordTask":"Registra attività","notifications":"Notifiche"}
+}

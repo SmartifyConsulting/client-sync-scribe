@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Idioma","changeLanguage":"Cambiar idioma","signOut":"Cerrar sesión","save":"Guardar","cancel":"Cancelar","delete":"Eliminar","edit":"Editar","add":"Añadir","send":"Enviar","confirm":"Confirmar","close":"Cerrar","search":"Buscar","loading":"Cargando...","settings":"Ajustes"},
+  "nav": {"home":"Inicio","myPatients":"Mis Pacientes","myPractice":"Mi Consulta","myCalendar":"Mi Calendario","myTasks":"Mis Tareas","myDocuments":"Mis Documentos","myRoundTables":"Mis Mesas Redondas","myRewards":"Mis Recompensas","sos":"SOS","myProfile":"Mi Perfil","myHolarchy":"Mi Holarchy","admin":"Admin","users":"Usuarios","pricing":"Precios","rewards":"Recompensas","hospitalPortal":"Portal Hospital","erPortal":"Portal Urgencias"},
+  "topbar": {"reportBug":"Reportar error","calendar":"Calendario","recordTask":"Grabar tarea","notifications":"Notificaciones"}
 }

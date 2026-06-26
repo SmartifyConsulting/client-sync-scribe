@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Ulwimi","changeLanguage":"Tshintsha ulwimi","signOut":"Phuma","save":"Gcina","cancel":"Rhoxisa","delete":"Cima","edit":"Hlela","add":"Yongeza","send":"Thumela","confirm":"Qinisekisa","close":"Vala","search":"Khangela","loading":"Iyalayisha...","settings":"Izicwangciso"},
+  "nav": {"home":"Ikhaya","myPatients":"Izigulane Zam","myPractice":"Inkqubo Yam","myCalendar":"Ikhalenda Yam","myTasks":"Imisebenzi Yam","myDocuments":"Amaxwebhu Am","myRoundTables":"Iitafile Zam Ezijikelezayo","myRewards":"Imivuzo Yam","sos":"SOS","myProfile":"Iprofayile Yam","myHolarchy":"I-Holarchy Yam","admin":"Umlawuli","users":"Abasebenzisi","pricing":"Amaxabiso","rewards":"Imivuzo","hospitalPortal":"Iziko Lesibhedlele","erPortal":"Iziko Longxamiseko"},
+  "topbar": {"reportBug":"Xela Impazamo","calendar":"Ikhalenda","recordTask":"Rekhoda Umsebenzi","notifications":"Izaziso"}
 }

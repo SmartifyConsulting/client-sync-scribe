@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"اللغة","changeLanguage":"تغيير اللغة","signOut":"تسجيل الخروج","save":"حفظ","cancel":"إلغاء","delete":"حذف","edit":"تعديل","add":"إضافة","send":"إرسال","confirm":"تأكيد","close":"إغلاق","search":"بحث","loading":"جارٍ التحميل...","settings":"الإعدادات"},
+  "nav": {"home":"الرئيسية","myPatients":"مرضاي","myPractice":"عيادتي","myCalendar":"تقويمي","myTasks":"مهامي","myDocuments":"مستنداتي","myRoundTables":"اجتماعاتي","myRewards":"مكافآتي","sos":"طوارئ","myProfile":"ملفي الشخصي","myHolarchy":"هولاركي","admin":"المسؤول","users":"المستخدمون","pricing":"الأسعار","rewards":"المكافآت","hospitalPortal":"بوابة المستشفى","erPortal":"بوابة الطوارئ"},
+  "topbar": {"reportBug":"الإبلاغ عن خطأ","calendar":"التقويم","recordTask":"تسجيل مهمة","notifications":"الإشعارات"}
 }

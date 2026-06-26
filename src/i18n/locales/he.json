@@ -1,0 +1,5 @@
+{
+  "common": {"language":"שפה","changeLanguage":"שנה שפה","signOut":"התנתק","save":"שמור","cancel":"בטל","delete":"מחק","edit":"ערוך","add":"הוסף","send":"שלח","confirm":"אשר","close":"סגור","search":"חיפוש","loading":"טוען...","settings":"הגדרות"},
+  "nav": {"home":"בית","myPatients":"המטופלים שלי","myPractice":"המרפאה שלי","myCalendar":"היומן שלי","myTasks":"המשימות שלי","myDocuments":"המסמכים שלי","myRoundTables":"שולחנות עגולים","myRewards":"התגמולים שלי","sos":"SOS","myProfile":"הפרופיל שלי","myHolarchy":"Holarchy שלי","admin":"מנהל","users":"משתמשים","pricing":"תמחור","rewards":"תגמולים","hospitalPortal":"פורטל בית חולים","erPortal":"פורטל חירום"},
+  "topbar": {"reportBug":"דווח על באג","calendar":"יומן","recordTask":"הקלט משימה","notifications":"התראות"}
+}

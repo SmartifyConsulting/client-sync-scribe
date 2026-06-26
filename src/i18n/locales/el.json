@@ -1,0 +1,5 @@
+{
+  "common": {"language":"Γλώσσα","changeLanguage":"Αλλαγή γλώσσας","signOut":"Αποσύνδεση","save":"Αποθήκευση","cancel":"Ακύρωση","delete":"Διαγραφή","edit":"Επεξεργασία","add":"Προσθήκη","send":"Αποστολή","confirm":"Επιβεβαίωση","close":"Κλείσιμο","search":"Αναζήτηση","loading":"Φόρτωση...","settings":"Ρυθμίσεις"},
+  "nav": {"home":"Αρχική","myPatients":"Οι Ασθενείς μου","myPractice":"Το Ιατρείο μου","myCalendar":"Το Ημερολόγιό μου","myTasks":"Οι Εργασίες μου","myDocuments":"Τα Έγγραφά μου","myRoundTables":"Στρογγυλές Τράπεζες","myRewards":"Οι Ανταμοιβές μου","sos":"SOS","myProfile":"Το Προφίλ μου","myHolarchy":"Το Holarchy μου","admin":"Διαχειριστής","users":"Χρήστες","pricing":"Τιμές","rewards":"Ανταμοιβές","hospitalPortal":"Πύλη Νοσοκομείου","erPortal":"Πύλη Επειγόντων"},
+  "topbar": {"reportBug":"Αναφορά σφάλματος","calendar":"Ημερολόγιο","recordTask":"Καταγραφή εργασίας","notifications":"Ειδοποιήσεις"}
+}

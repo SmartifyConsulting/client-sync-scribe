@@ -1,0 +1,5 @@
+{
+  "common": {"language":"Dil","changeLanguage":"Dili değiştir","signOut":"Çıkış","save":"Kaydet","cancel":"İptal","delete":"Sil","edit":"Düzenle","add":"Ekle","send":"Gönder","confirm":"Onayla","close":"Kapat","search":"Ara","loading":"Yükleniyor...","settings":"Ayarlar"},
+  "nav": {"home":"Ana Sayfa","myPatients":"Hastalarım","myPractice":"Muayenehanem","myCalendar":"Takvimim","myTasks":"Görevlerim","myDocuments":"Belgelerim","myRoundTables":"Yuvarlak Masalarım","myRewards":"Ödüllerim","sos":"SOS","myProfile":"Profilim","myHolarchy":"Holarchy'im","admin":"Yönetici","users":"Kullanıcılar","pricing":"Fiyatlandırma","rewards":"Ödüller","hospitalPortal":"Hastane Portalı","erPortal":"Acil Portalı"},
+  "topbar": {"reportBug":"Hata bildir","calendar":"Takvim","recordTask":"Görev kaydet","notifications":"Bildirimler"}
+}

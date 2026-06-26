@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Idioma","changeLanguage":"Mudar idioma","signOut":"Sair","save":"Salvar","cancel":"Cancelar","delete":"Excluir","edit":"Editar","add":"Adicionar","send":"Enviar","confirm":"Confirmar","close":"Fechar","search":"Pesquisar","loading":"A carregar...","settings":"Definições"},
+  "nav": {"home":"Início","myPatients":"Meus Pacientes","myPractice":"Minha Clínica","myCalendar":"Meu Calendário","myTasks":"Minhas Tarefas","myDocuments":"Meus Documentos","myRoundTables":"Minhas Mesas Redondas","myRewards":"Minhas Recompensas","sos":"SOS","myProfile":"Meu Perfil","myHolarchy":"Meu Holarchy","admin":"Admin","users":"Utilizadores","pricing":"Preços","rewards":"Recompensas","hospitalPortal":"Portal Hospital","erPortal":"Portal Emergência"},
+  "topbar": {"reportBug":"Reportar erro","calendar":"Calendário","recordTask":"Gravar tarefa","notifications":"Notificações"}
 }

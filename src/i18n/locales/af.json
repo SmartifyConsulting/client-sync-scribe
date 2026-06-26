@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Taal","changeLanguage":"Verander taal","signOut":"Teken Uit","save":"Stoor","cancel":"Kanselleer","delete":"Skrap","edit":"Wysig","add":"Voeg by","send":"Stuur","confirm":"Bevestig","close":"Sluit","search":"Soek","loading":"Laai...","settings":"Instellings"},
+  "nav": {"home":"Tuis","myPatients":"My Pasiënte","myPractice":"My Praktyk","myCalendar":"My Kalender","myTasks":"My Take","myDocuments":"My Dokumente","myRoundTables":"My Rondetafels","myRewards":"My Belonings","sos":"SOS","myProfile":"My Profiel","myHolarchy":"My Holarchy","admin":"Admin","users":"Gebruikers","pricing":"Pryse","rewards":"Belonings","hospitalPortal":"Hospitaal Portaal","erPortal":"Noodportaal"},
+  "topbar": {"reportBug":"Rapporteer Fout","calendar":"Kalender","recordTask":"Neem Taak Op","notifications":"Kennisgewings"}
 }

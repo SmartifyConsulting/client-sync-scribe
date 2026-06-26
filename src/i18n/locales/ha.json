@@ -1,14 +1,5 @@
 {
-  "common": {
-    "language": "Language",
-    "changeLanguage": "Change language",
-    "patients": "Patients",
-    "dashboard": "Dashboard",
-    "sessions": "Sessions",
-    "documents": "Documents",
-    "settings": "Settings",
-    "signOut": "Sign Out",
-    "save": "Save",
-    "cancel": "Cancel"
-  }
+  "common": {"language":"Harshe","changeLanguage":"Canza harshe","signOut":"Fita","save":"Ajiye","cancel":"Soke","delete":"Share","edit":"Gyara","add":"Ƙara","send":"Aika","confirm":"Tabbatar","close":"Rufe","search":"Bincika","loading":"Ana lodawa...","settings":"Saituna"},
+  "nav": {"home":"Gida","myPatients":"Marasa Lafiya Na","myPractice":"Aikina","myCalendar":"Kalanda Na","myTasks":"Ayyukana","myDocuments":"Takardun Na","myRoundTables":"Teburin Tattaunawa Na","myRewards":"Lada Na","sos":"SOS","myProfile":"Bayanin Na","myHolarchy":"Holarchy Na","admin":"Manaja","users":"Masu Amfani","pricing":"Farashi","rewards":"Lada","hospitalPortal":"Tashar Asibiti","erPortal":"Tashar Gaggawa"},
+  "topbar": {"reportBug":"Bayar da Rahoton Kuskure","calendar":"Kalanda","recordTask":"Rikodin Aiki","notifications":"Sanarwa"}
 }
