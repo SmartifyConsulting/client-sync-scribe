@@ -5,7 +5,9 @@ import { ProviderAppLayout } from "@/components/layout/ProviderAppLayout";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useAmbulanceOpsStats } from "../../../hooks/useAmbulanceOpsStats";
 import { useParamedicShift } from "../../../hooks/useParamedicShift";
+import { useShiftTelematics } from "../../../hooks/useShiftTelematics";
 import { StartShiftDialog } from "../../../components/StartShiftDialog";
+
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -16,6 +18,8 @@ function AmbulanceStatsStrip() {
   const [online, setOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   const [startOpen, setStartOpen] = useState(false);
   const [ending, setEnding] = useState(false);
+  useShiftTelematics(providerId, !!shift, (shift as any)?.vehicle_id ?? null);
+
 
   useEffect(() => {
     const on = () => setOnline(true);

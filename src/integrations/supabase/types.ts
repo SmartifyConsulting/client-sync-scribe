@@ -2581,6 +2581,156 @@ export type Database = {
           },
         ]
       }
+      holarchelp_telematics_pings: {
+        Row: {
+          accuracy_m: number | null
+          battery: number | null
+          created_at: string
+          heading: number | null
+          id: string
+          incident_id: string | null
+          lat: number
+          lng: number
+          provider_id: string
+          recorded_at: string
+          speed_kph: number | null
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          accuracy_m?: number | null
+          battery?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          incident_id?: string | null
+          lat: number
+          lng: number
+          provider_id: string
+          recorded_at?: string
+          speed_kph?: number | null
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          accuracy_m?: number | null
+          battery?: number | null
+          created_at?: string
+          heading?: number | null
+          id?: string
+          incident_id?: string | null
+          lat?: number
+          lng?: number
+          provider_id?: string
+          recorded_at?: string
+          speed_kph?: number | null
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: []
+      }
+      holarchelp_telematics_stops: {
+        Row: {
+          arrived_at: string
+          created_at: string
+          departed_at: string | null
+          dwell_seconds: number | null
+          id: string
+          incident_id: string | null
+          lat: number
+          lng: number
+          place_label: string
+          provider_id: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          arrived_at: string
+          created_at?: string
+          departed_at?: string | null
+          dwell_seconds?: number | null
+          id?: string
+          incident_id?: string | null
+          lat: number
+          lng: number
+          place_label?: string
+          provider_id: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          arrived_at?: string
+          created_at?: string
+          departed_at?: string | null
+          dwell_seconds?: number | null
+          id?: string
+          incident_id?: string | null
+          lat?: number
+          lng?: number
+          place_label?: string
+          provider_id?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: []
+      }
+      holarchelp_telematics_trips: {
+        Row: {
+          avg_speed_kph: number | null
+          created_at: string
+          distance_m: number | null
+          end_lat: number | null
+          end_lng: number | null
+          ended_at: string | null
+          id: string
+          idle_seconds: number | null
+          max_speed_kph: number | null
+          provider_id: string
+          returned_home: boolean | null
+          start_lat: number | null
+          start_lng: number | null
+          started_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          avg_speed_kph?: number | null
+          created_at?: string
+          distance_m?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          ended_at?: string | null
+          id?: string
+          idle_seconds?: number | null
+          max_speed_kph?: number | null
+          provider_id: string
+          returned_home?: boolean | null
+          start_lat?: number | null
+          start_lng?: number | null
+          started_at: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          avg_speed_kph?: number | null
+          created_at?: string
+          distance_m?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          ended_at?: string | null
+          id?: string
+          idle_seconds?: number | null
+          max_speed_kph?: number | null
+          provider_id?: string
+          returned_home?: boolean | null
+          start_lat?: number | null
+          start_lng?: number | null
+          started_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: []
+      }
       holarchelp_voice_clip_settings: {
         Row: {
           default_clip_path: string | null

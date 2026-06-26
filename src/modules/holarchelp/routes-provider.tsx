@@ -24,6 +24,7 @@ import AffiliatedHospitalsScreen from "./pages/provider/ambulance/AffiliatedHosp
 import IncidentHistoryScreen from "./pages/provider/ambulance/IncidentHistoryScreen";
 import TeamStatusScreen from "./pages/provider/ambulance/TeamStatusScreen";
 import FleetPage from "./pages/provider/ambulance/FleetPage";
+import TelematicsScreen from "./pages/provider/ambulance/TelematicsScreen";
 import AmbulanceIncidentConsole from "./pages/provider/AmbulanceIncidentConsole";
 
 function ProviderShell({ children }: { children: React.ReactNode }) {
@@ -71,6 +72,7 @@ export default function ProviderRoutes() {
         <Route path="history" element={<IncidentHistoryScreen />} />
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="fleet" element={<FleetPage />} />
+        <Route path="telematics" element={<TelematicsScreen />} />
         <Route path="incident/:id" element={<AmbulanceIncidentConsole />} />
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />

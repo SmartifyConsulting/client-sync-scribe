@@ -100,13 +100,21 @@ i18n
     },
   });
 
-const applyDir = (lng: string) => {
-  if (typeof document !== "undefined") {
-    document.documentElement.dir = RTL_LANGS.has(lng) ? "rtl" : "ltr";
-    document.documentElement.lang = lng;
-  }
+const LANG_SCALE: Record<string, number> = {
+  de: 0.94, nl: 0.94, ru: 0.94, el: 0.94, pl: 0.94, tr: 0.94, fr: 0.94, pt: 0.94, it: 0.94,
+  ha: 0.96, ig: 0.96, yo: 0.96, sw: 0.96, sn: 0.96, zu: 0.96, xh: 0.96, af: 0.96,
+  zh: 1.02, ja: 1.02, ko: 1.02,
 };
-applyDir(i18n.language || "en");
-i18n.on("languageChanged", applyDir);
+
+const applyLang = (lng: string) => {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  root.dir = RTL_LANGS.has(lng) ? "rtl" : "ltr";
+  root.lang = lng;
+  root.style.setProperty("--lang-scale", String(LANG_SCALE[lng] ?? 1));
+};
+applyLang(i18n.language || "en");
+i18n.on("languageChanged", applyLang);
+
 
 export default i18n;

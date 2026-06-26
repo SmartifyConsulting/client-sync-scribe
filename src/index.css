@@ -179,8 +179,10 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-size: 17px;
+    /* Fluid + per-language scaling. --lang-scale set by i18n on languageChanged. */
+    font-size: calc(clamp(13px, 0.6vw + 12px, 17px) * var(--lang-scale, 1));
   }
+
 
   body {
     @apply bg-background text-foreground font-sans;
