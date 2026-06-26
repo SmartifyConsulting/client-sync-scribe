@@ -67,9 +67,12 @@ function fmtDuration(sec: number) {
 
 export default function TelematicsScreen() {
   const { providerId } = useProviderAccess();
+  const { t } = useTranslation();
   const [pings, setPings] = useState<Ping[]>([]);
   const [loading, setLoading] = useState(true);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [crewNames, setCrewNames] = useState<Record<string, string>>({});
+  const [vehicleLabels, setVehicleLabels] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!providerId) return;
@@ -83,60 +86,116 @@ export default function TelematicsScreen() {
         .eq("provider_id", providerId)
         .gte("recorded_at", since)
         .order("recorded_at", { ascending: true })
-        .limit(5000);
+        .limit(10000);
       if (!mounted) return;
       const rows = (data ?? []) as unknown as Ping[];
       setPings(rows);
-      const ids = Array.from(new Set(rows.map((r) => r.user_id)));
-      if (ids.length) {
+
+      const userIds = Array.from(new Set(rows.map((r) => r.user_id).filter(Boolean)));
+      const crewIds = Array.from(
+        new Set(rows.map((r) => r.crew_member_id).filter(Boolean) as string[]),
+      );
+      const vehicleIds = Array.from(
+        new Set(rows.map((r) => r.vehicle_id).filter(Boolean) as string[]),
+      );
+
+      if (userIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
           .select("id,full_name")
-          .in("id", ids);
+          .in("id", userIds);
         const map: Record<string, string> = {};
-        (profs ?? []).forEach((p: any) => { map[p.id] = p.full_name ?? "Driver"; });
+        (profs ?? []).forEach((p: any) => {
+          map[p.id] = p.full_name ?? "Driver";
+        });
         if (mounted) setProfiles(map);
+      }
+      if (crewIds.length) {
+        const { data: crews } = await supabase
+          .from("holarchelp_ambulance_members" as any)
+          .select("id, invited_name, role")
+          .in("id", crewIds);
+        const cmap: Record<string, string> = {};
+        ((crews ?? []) as any[]).forEach((c) => {
+          cmap[c.id] = c.invited_name || c.role || "Crew";
+        });
+        if (mounted) setCrewNames(cmap);
+      }
+      if (vehicleIds.length) {
+        const { data: vehs } = await supabase
+          .from("ambulances" as any)
+          .select("id, vehicle_code, registration_number")
+          .in("id", vehicleIds);
+        const vmap: Record<string, string> = {};
+        ((vehs ?? []) as any[]).forEach((v) => {
+          vmap[v.id] = v.vehicle_code || v.registration_number || "Unit";
+        });
+        if (mounted) setVehicleLabels(vmap);
       }
       setLoading(false);
     })();
-    const ch = supabase.channel(`telematics-${providerId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "holarchelp_telematics_pings", filter: `provider_id=eq.${providerId}` },
-        (payload) => setPings((prev) => [...prev, payload.new as any]))
+    const ch = supabase
+      .channel(`telematics-${providerId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "holarchelp_telematics_pings",
+          filter: `provider_id=eq.${providerId}`,
+        },
+        (payload) => setPings((prev) => [...prev, payload.new as any]),
+      )
       .subscribe();
-    return () => { mounted = false; supabase.removeChannel(ch); };
+    return () => {
+      mounted = false;
+      supabase.removeChannel(ch);
+    };
   }, [providerId]);
+
+  // Group key prefers crew_member_id (named seeded crew) else user_id (real signed-in drivers)
+  const groupKey = (p: Ping) => p.crew_member_id || `u:${p.user_id}`;
+  const driverLabel = (key: string, sample: Ping) => {
+    if (sample.crew_member_id && crewNames[sample.crew_member_id])
+      return crewNames[sample.crew_member_id];
+    return profiles[sample.user_id] ?? t("telematics.driver");
+  };
 
   const byDriver = useMemo(() => {
     const m = new Map<string, Ping[]>();
     for (const p of pings) {
-      if (!m.has(p.user_id)) m.set(p.user_id, []);
-      m.get(p.user_id)!.push(p);
+      const k = groupKey(p);
+      if (!m.has(k)) m.set(k, []);
+      m.get(k)!.push(p);
     }
     return m;
   }, [pings]);
 
   const live = useMemo(() => {
-    const arr: { userId: string; name: string; last: Ping; idleSec: number; moving: boolean }[] = [];
-    byDriver.forEach((rows, userId) => {
+    const arr: {
+      key: string; name: string; vehicle: string; last: Ping; idleSec: number; moving: boolean;
+    }[] = [];
+    byDriver.forEach((rows, key) => {
       const last = rows[rows.length - 1];
       const idleSec = Math.round((Date.now() - new Date(last.recorded_at).getTime()) / 1000);
       arr.push({
-        userId,
-        name: profiles[userId] ?? "Driver",
+        key,
+        name: driverLabel(key, last),
+        vehicle: last.vehicle_id ? vehicleLabels[last.vehicle_id] ?? "" : "",
         last,
         idleSec,
         moving: (last.speed_kph ?? 0) > STOP_SPEED_KPH,
       });
     });
     return arr.sort((a, b) => +new Date(b.last.recorded_at) - +new Date(a.last.recorded_at));
-  }, [byDriver, profiles]);
+  }, [byDriver, profiles, crewNames, vehicleLabels]);
 
   const trips = useMemo(() => {
     const out: {
-      userId: string; name: string; pingsCount: number; first: string; last: string;
+      key: string; name: string; vehicle: string; pingsCount: number; first: string; last: string;
       distanceM: number; maxSpeed: number; stops: ReturnType<typeof groupStops>;
     }[] = [];
-    byDriver.forEach((rows, userId) => {
+    byDriver.forEach((rows, key) => {
       if (rows.length < 2) return;
       let dist = 0;
       let maxSpeed = 0;
@@ -144,9 +203,11 @@ export default function TelematicsScreen() {
         dist += haversineM(rows[i - 1], rows[i]);
         maxSpeed = Math.max(maxSpeed, rows[i].speed_kph ?? 0);
       }
+      const last = rows[rows.length - 1];
       out.push({
-        userId,
-        name: profiles[userId] ?? "Driver",
+        key,
+        name: driverLabel(key, last),
+        vehicle: last.vehicle_id ? vehicleLabels[last.vehicle_id] ?? "" : "",
         pingsCount: rows.length,
         first: rows[0].recorded_at,
         last: rows[rows.length - 1].recorded_at,
@@ -155,47 +216,75 @@ export default function TelematicsScreen() {
         stops: groupStops(rows),
       });
     });
-    return out;
-  }, [byDriver, profiles]);
+    return out.sort((a, b) => +new Date(b.last) - +new Date(a.last));
+  }, [byDriver, profiles, crewNames, vehicleLabels]);
 
   return (
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Fleet Telematics · Last 24h</p>
-          <h1 className="flex items-center gap-2 text-xl font-extrabold"><Radar className="h-5 w-5 text-primary" /> Driver Tracking</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {t("telematics.subtitle")}
+          </p>
+          <h1 className="flex items-center gap-2 text-xl font-extrabold">
+            <Radar className="h-5 w-5 text-primary" /> {t("telematics.title")}
+          </h1>
         </div>
         <span className="text-[11px] text-muted-foreground">
-          {loading ? "Loading…" : `${pings.length.toLocaleString()} pings · ${byDriver.size} driver(s)`}
+          {loading
+            ? t("common.loading")
+            : `${pings.length.toLocaleString()} ${t("telematics.pings")} · ${byDriver.size} ${t("telematics.drivers")}`}
         </span>
       </header>
 
       <Tabs defaultValue="live" className="w-full">
         <TabsList>
-          <TabsTrigger value="live">Live Fleet</TabsTrigger>
-          <TabsTrigger value="trips">Trips & Stops</TabsTrigger>
+          <TabsTrigger value="live">{t("telematics.liveFleet")}</TabsTrigger>
+          <TabsTrigger value="trips">{t("telematics.tripsStops")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="live" className="mt-3">
           {live.length === 0 ? (
             <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              No active drivers in the last 24 hours.
+              {t("telematics.noActive")}
             </p>
           ) : (
             <div className="grid gap-2 md:grid-cols-2">
               {live.map((d) => (
-                <div key={d.userId} className="rounded-xl border bg-card p-3">
+                <div key={d.key} className="rounded-xl border bg-card p-3">
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold">{d.name}</p>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${d.moving ? "bg-emerald-500/15 text-emerald-700" : "bg-amber-500/15 text-amber-700"}`}>
-                      {d.moving ? "Moving" : "Stopped"}
+                    <div>
+                      <p className="font-semibold">{d.name}</p>
+                      {d.vehicle && (
+                        <p className="text-[11px] text-muted-foreground">
+                          {t("telematics.vehicle")}: {d.vehicle}
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                        d.moving
+                          ? "bg-emerald-500/15 text-emerald-700"
+                          : "bg-amber-500/15 text-amber-700"
+                      }`}
+                    >
+                      {d.moving ? t("telematics.moving") : t("telematics.stopped")}
                     </span>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {d.last.lat.toFixed(4)}, {d.last.lng.toFixed(4)}</span>
-                    <span className="flex items-center gap-1"><Gauge className="h-3 w-3" /> {Math.round(d.last.speed_kph ?? 0)} km/h</span>
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatDistanceToNow(new Date(d.last.recorded_at))} ago</span>
-                    <span className="flex items-center gap-1"><Route className="h-3 w-3" /> {d.last.incident_id ? "On mission" : "Free roam"}</span>
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" /> {d.last.lat.toFixed(4)}, {d.last.lng.toFixed(4)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Gauge className="h-3 w-3" /> {Math.round(d.last.speed_kph ?? 0)} km/h
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> {formatDistanceToNow(new Date(d.last.recorded_at))} ago
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Route className="h-3 w-3" />{" "}
+                      {d.last.incident_id ? t("telematics.onMission") : t("telematics.freeRoam")}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -206,36 +295,54 @@ export default function TelematicsScreen() {
         <TabsContent value="trips" className="mt-3">
           {trips.length === 0 ? (
             <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              No trip data yet — start a shift to begin recording telematics.
+              {t("telematics.noTrips")}
             </p>
           ) : (
             <div className="space-y-3">
-              {trips.map((t) => (
-                <details key={t.userId} className="rounded-xl border bg-card">
+              {trips.map((tr) => (
+                <details key={tr.key} className="rounded-xl border bg-card">
                   <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 p-3 text-sm">
-                    <span className="font-semibold">{t.name}</span>
+                    <span className="font-semibold">
+                      {tr.name}
+                      {tr.vehicle && (
+                        <span className="ml-2 text-[11px] font-normal text-muted-foreground">
+                          · {tr.vehicle}
+                        </span>
+                      )}
+                    </span>
                     <span className="text-[11px] text-muted-foreground">
-                      {(t.distanceM / 1000).toFixed(1)} km · max {Math.round(t.maxSpeed)} km/h · {t.stops.length} stop(s) · {t.pingsCount} pings
+                      {(tr.distanceM / 1000).toFixed(1)} km · max {Math.round(tr.maxSpeed)} km/h ·{" "}
+                      {tr.stops.length} {tr.stops.length === 1 ? t("telematics.stop") : t("telematics.stops")} ·{" "}
+                      {tr.pingsCount} {t("telematics.pings")}
                     </span>
                   </summary>
                   <div className="border-t p-3 text-xs">
                     <p className="mb-2 text-muted-foreground">
-                      First ping: {new Date(t.first).toLocaleString()} · Last ping: {new Date(t.last).toLocaleString()}
+                      {new Date(tr.first).toLocaleString()} → {new Date(tr.last).toLocaleString()}
                     </p>
-                    {t.stops.length === 0 ? (
-                      <p className="text-muted-foreground">No qualifying stops (≥{STOP_MIN_SECONDS}s).</p>
+                    {tr.stops.length === 0 ? (
+                      <p className="text-muted-foreground">
+                        {t("telematics.noQualifyingStops")} (≥{STOP_MIN_SECONDS}s).
+                      </p>
                     ) : (
                       <table className="w-full text-left">
                         <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          <tr><th className="py-1">Arrived</th><th>Departed</th><th>Dwell</th><th>Location</th></tr>
+                          <tr>
+                            <th className="py-1">{t("telematics.arrived")}</th>
+                            <th>{t("telematics.departed")}</th>
+                            <th>{t("telematics.dwell")}</th>
+                            <th>{t("telematics.location")}</th>
+                          </tr>
                         </thead>
                         <tbody>
-                          {t.stops.map((s, i) => (
+                          {tr.stops.map((s, i) => (
                             <tr key={i} className="border-t">
                               <td className="py-1">{new Date(s.arrived).toLocaleTimeString()}</td>
                               <td>{new Date(s.departed).toLocaleTimeString()}</td>
                               <td>{fmtDuration(s.seconds)}</td>
-                              <td className="text-muted-foreground">{s.lat.toFixed(4)}, {s.lng.toFixed(4)}</td>
+                              <td className="text-muted-foreground">
+                                {s.lat.toFixed(4)}, {s.lng.toFixed(4)}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
