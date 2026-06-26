@@ -72,6 +72,7 @@ export default function ProviderRoutes() {
         <Route path="history" element={<IncidentHistoryScreen />} />
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="fleet" element={<FleetPage />} />
+        <Route path="telematics" element={<TelematicsScreen />} />
         <Route path="incident/:id" element={<AmbulanceIncidentConsole />} />
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
