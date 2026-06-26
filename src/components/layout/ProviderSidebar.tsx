@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import holarcHelpLogo from "@/assets/holarc-help-logo.png";
 import { cn } from "@/lib/utils";
@@ -30,34 +31,34 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface NavItem {
   icon: LucideIcon;
-  label: string;
+  labelKey: string;
   to: string;
   end?: boolean;
   danger?: boolean;
 }
 
 const hospitalNav: NavItem[] = [
-  { icon: Siren, label: "Emergency Queue", to: "/provider/hospital", end: true, danger: true },
-  { icon: Ambulance, label: "Incoming ER", to: "/provider/hospital/incoming" },
-  { icon: Stethoscope, label: "Triage", to: "/provider/hospital/triage" },
-  { icon: ClipboardList, label: "Admissions", to: "/provider/hospital/admissions" },
-  { icon: BedDouble, label: "ER Capacity", to: "/provider/hospital/capacity" },
-  { icon: Users, label: "Providers", to: "/provider/hospital/providers" },
-  { icon: Activity, label: "Incident Timeline", to: "/provider/hospital/timeline" },
-  { icon: UserCheck, label: "Administrators", to: "/provider/hospital/admins" },
+  { icon: Siren, labelKey: "nav.emergencyQueue", to: "/provider/hospital", end: true, danger: true },
+  { icon: Ambulance, labelKey: "nav.incomingEr", to: "/provider/hospital/incoming" },
+  { icon: Stethoscope, labelKey: "nav.triage", to: "/provider/hospital/triage" },
+  { icon: ClipboardList, labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
+  { icon: BedDouble, labelKey: "nav.erCapacity", to: "/provider/hospital/capacity" },
+  { icon: Users, labelKey: "nav.providers", to: "/provider/hospital/providers" },
+  { icon: Activity, labelKey: "nav.incidentTimeline", to: "/provider/hospital/timeline" },
+  { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/hospital/admins" },
 ];
 
 const ambulanceNav: NavItem[] = [
-  { icon: Siren, label: "Active Incidents", to: "/provider/ambulance", end: true, danger: true },
-  { icon: Ambulance, label: "Incoming SOS", to: "/provider/ambulance/incoming" },
-  { icon: NavIcon, label: "Navigation", to: "/provider/ambulance/navigation" },
-  { icon: Hospital, label: "Hospitals", to: "/provider/ambulance/hospitals" },
-  { icon: Hospital, label: "Affiliated Hospitals", to: "/provider/ambulance/affiliations" },
-  { icon: History, label: "Incident History", to: "/provider/ambulance/history" },
-  { icon: Users, label: "Team Status", to: "/provider/ambulance/team" },
-  { icon: Ambulance, label: "Fleet", to: "/provider/ambulance/fleet" },
-  { icon: Radar, label: "Telematics", to: "/provider/ambulance/telematics" },
-  { icon: UserCheck, label: "Administrators", to: "/provider/ambulance/admins" },
+  { icon: Siren, labelKey: "nav.activeIncidents", to: "/provider/ambulance", end: true, danger: true },
+  { icon: Ambulance, labelKey: "nav.incomingSos", to: "/provider/ambulance/incoming" },
+  { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
+  { icon: Hospital, labelKey: "nav.hospitals", to: "/provider/ambulance/hospitals" },
+  { icon: Hospital, labelKey: "nav.affiliatedHospitals", to: "/provider/ambulance/affiliations" },
+  { icon: History, labelKey: "nav.incidentHistory", to: "/provider/ambulance/history" },
+  { icon: Users, labelKey: "nav.teamStatus", to: "/provider/ambulance/team" },
+  { icon: Ambulance, labelKey: "nav.fleet", to: "/provider/ambulance/fleet" },
+  { icon: Radar, labelKey: "nav.telematics", to: "/provider/ambulance/telematics" },
+  { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/ambulance/admins" },
 ];
 
 interface ProviderSidebarProps {
@@ -68,6 +69,7 @@ interface ProviderSidebarProps {
 export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const { profile } = useProfile();
   const { isAdmin } = useIsAdmin();
+  const { t } = useTranslation();
   const location = useLocation();
   const nav = portal === "hospital" ? hospitalNav : ambulanceNav;
   const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
@@ -87,7 +89,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
             onClick={onNavigate}
             className="mx-4 mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           >
-            <ArrowLeft className="h-3 w-3" /> Back to Admin
+            <ArrowLeft className="h-3 w-3" /> {t("nav.backToAdmin")}
           </NavLink>
         )}
 
@@ -114,8 +116,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                 )}
               >
                 <item.icon className="h-5 w-5" />
-
-                <span className="flex-1">{item.label}</span>
+                <span className="flex-1">{t(item.labelKey)}</span>
               </NavLink>
             );
           })}
@@ -150,7 +151,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               }
             >
               <UserCog className="h-4 w-4" />
-              Provider Profile
+              {t("nav.providerProfile")}
             </NavLink>
             <NavLink
               to="/settings"
@@ -165,7 +166,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               }
             >
               <Settings className="h-4 w-4" />
-              Settings
+              {t("common.settings")}
             </NavLink>
             <button
               onClick={async () => {
@@ -175,7 +176,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              {t("common.signOut")}
             </button>
           </div>
         </div>

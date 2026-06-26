@@ -1520,8 +1520,11 @@ export type Database = {
           invited_by: string | null
           invited_email: string | null
           invited_name: string | null
+          phone: string | null
           provider_id: string
           role: string
+          shift_pattern: string | null
+          status: string
           user_id: string | null
         }
         Insert: {
@@ -1533,8 +1536,11 @@ export type Database = {
           invited_by?: string | null
           invited_email?: string | null
           invited_name?: string | null
+          phone?: string | null
           provider_id: string
           role?: string
+          shift_pattern?: string | null
+          status?: string
           user_id?: string | null
         }
         Update: {
@@ -1546,8 +1552,11 @@ export type Database = {
           invited_by?: string | null
           invited_email?: string | null
           invited_name?: string | null
+          phone?: string | null
           provider_id?: string
           role?: string
+          shift_pattern?: string | null
+          status?: string
           user_id?: string | null
         }
         Relationships: [
@@ -2586,6 +2595,7 @@ export type Database = {
           accuracy_m: number | null
           battery: number | null
           created_at: string
+          crew_member_id: string | null
           heading: number | null
           id: string
           incident_id: string | null
@@ -2601,6 +2611,7 @@ export type Database = {
           accuracy_m?: number | null
           battery?: number | null
           created_at?: string
+          crew_member_id?: string | null
           heading?: number | null
           id?: string
           incident_id?: string | null
@@ -2616,6 +2627,7 @@ export type Database = {
           accuracy_m?: number | null
           battery?: number | null
           created_at?: string
+          crew_member_id?: string | null
           heading?: number | null
           id?: string
           incident_id?: string | null
@@ -2627,12 +2639,21 @@ export type Database = {
           user_id?: string
           vehicle_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "holarchelp_telematics_pings_crew_member_id_fkey"
+            columns: ["crew_member_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       holarchelp_telematics_stops: {
         Row: {
           arrived_at: string
           created_at: string
+          crew_member_id: string | null
           departed_at: string | null
           dwell_seconds: number | null
           id: string
@@ -2647,6 +2668,7 @@ export type Database = {
         Insert: {
           arrived_at: string
           created_at?: string
+          crew_member_id?: string | null
           departed_at?: string | null
           dwell_seconds?: number | null
           id?: string
@@ -2661,6 +2683,7 @@ export type Database = {
         Update: {
           arrived_at?: string
           created_at?: string
+          crew_member_id?: string | null
           departed_at?: string | null
           dwell_seconds?: number | null
           id?: string
@@ -2672,12 +2695,22 @@ export type Database = {
           user_id?: string
           vehicle_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "holarchelp_telematics_stops_crew_member_id_fkey"
+            columns: ["crew_member_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       holarchelp_telematics_trips: {
         Row: {
+          attendant_member_id: string | null
           avg_speed_kph: number | null
           created_at: string
+          crew_member_id: string | null
           distance_m: number | null
           end_lat: number | null
           end_lng: number | null
@@ -2694,8 +2727,10 @@ export type Database = {
           vehicle_id: string | null
         }
         Insert: {
+          attendant_member_id?: string | null
           avg_speed_kph?: number | null
           created_at?: string
+          crew_member_id?: string | null
           distance_m?: number | null
           end_lat?: number | null
           end_lng?: number | null
@@ -2712,8 +2747,10 @@ export type Database = {
           vehicle_id?: string | null
         }
         Update: {
+          attendant_member_id?: string | null
           avg_speed_kph?: number | null
           created_at?: string
+          crew_member_id?: string | null
           distance_m?: number | null
           end_lat?: number | null
           end_lng?: number | null
@@ -2729,7 +2766,22 @@ export type Database = {
           user_id?: string
           vehicle_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "holarchelp_telematics_trips_attendant_member_id_fkey"
+            columns: ["attendant_member_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holarchelp_telematics_trips_crew_member_id_fkey"
+            columns: ["crew_member_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       holarchelp_voice_clip_settings: {
         Row: {
