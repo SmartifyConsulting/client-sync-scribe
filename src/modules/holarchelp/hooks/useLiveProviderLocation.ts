@@ -44,6 +44,20 @@ export function useLiveProviderLocation(
           _lat: lat,
           _lng: lng,
         });
+        // Telematics ping (provider-scoped audit trail)
+        if (providerId) {
+          supabase.from("holarchelp_telematics_pings" as any).insert({
+            provider_id: providerId,
+            user_id: user.id,
+            incident_id: incidentId,
+            lat,
+            lng,
+            speed_kph: pos.coords.speed != null ? Math.round(pos.coords.speed * 3.6) : null,
+            heading: pos.coords.heading ?? null,
+            accuracy_m: pos.coords.accuracy ?? null,
+          } as any);
+        }
+
       },
       () => {},
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
