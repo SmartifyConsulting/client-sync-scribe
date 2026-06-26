@@ -11,6 +11,7 @@ type Ping = {
   provider_id: string;
   vehicle_id: string | null;
   user_id: string;
+  crew_member_id: string | null;
   incident_id: string | null;
   lat: number;
   lng: number;
