@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDocuments } from "@/hooks/useDocuments";
 import { format } from "date-fns";
+import { SampleBadge } from "@/components/patients/SampleBadge";
+import { isSamplePatient } from "@/lib/samplePatients";
 
 const PAGE_SIZE = 10;
 
@@ -71,6 +73,7 @@ export default function DoctorDocumentsTab() {
                       <span className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground min-w-0 truncate max-w-[180px]">
                         <User className="h-3 w-3" />
                         {doc.patient_name}
+                        {isSamplePatient({ name: doc.patient_name }) && <SampleBadge />}
                       </span>
                     )}
                     {doc.template_name && (

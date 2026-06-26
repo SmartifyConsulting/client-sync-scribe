@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, endOfDay } from "date-fns";
+import { SampleBadge } from "@/components/patients/SampleBadge";
+import { isSamplePatient } from "@/lib/samplePatients";
 
 interface Appointment {
   id: string;
@@ -113,9 +115,10 @@ export function UpcomingAppointments() {
                 {appointment.patientId ? (
                   <Link
                     to={`/patients/${appointment.patientId}`}
-                    className="font-medium text-foreground hover:text-primary transition-colors"
+                    className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
                     {appointment.patientName}
+                    {isSamplePatient({ name: appointment.patientName }) && <SampleBadge />}
                   </Link>
                 ) : (
                   <span className="font-medium text-foreground">{appointment.patientName}</span>
