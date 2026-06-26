@@ -61,7 +61,8 @@
     "emergencyQueue": "File d'urgence",
     "activeIncidents": "Incidents Actifs",
     "providerProfile": "Profil Prestataire",
-    "backToAdmin": "Retour Admin"
+    "backToAdmin": "Retour Admin",
+    "liveSOS": "SOS en direct"
   },
   "topbar": {
     "reportBug": "Signaler un bug",
