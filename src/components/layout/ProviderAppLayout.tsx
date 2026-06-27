@@ -9,6 +9,7 @@ import { PageTransition } from "./PageTransition";
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import holarcHelpLogo from "@/assets/holarc-help-logo.png";
+import { useTranslation } from "react-i18next";
 
 
 interface ProviderAppLayoutProps {
@@ -17,6 +18,7 @@ interface ProviderAppLayoutProps {
 }
 
 export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const logo = portal === "ambulance" ? holarcHelpLogo : holarcLogo;
   const logoAlt = portal === "ambulance" ? "Holarc Help" : "Holarc Health";
@@ -64,7 +66,7 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
           href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
           className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
         >
-          <LifeBuoy className="h-3.5 w-3.5" /> Contact Support
+          <LifeBuoy className="h-3.5 w-3.5" /> {t("common.support")}
         </a>
       </div>
 
