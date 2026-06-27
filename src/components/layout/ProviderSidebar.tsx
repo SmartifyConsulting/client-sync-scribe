@@ -22,6 +22,7 @@ import {
   ArrowLeft,
   UserCheck,
   Radar,
+  AlertTriangle,
 } from "lucide-react";
 
 import { useProfile } from "@/hooks/useProfile";
@@ -58,6 +59,7 @@ const ambulanceNav: NavItem[] = [
   { icon: History, labelKey: "nav.incidentHistory", to: "/provider/ambulance/history" },
   { icon: Users, labelKey: "nav.teamStatus", to: "/provider/ambulance/team" },
   { icon: Ambulance, labelKey: "nav.fleet", to: "/provider/ambulance/fleet" },
+  { icon: AlertTriangle, labelKey: "nav.vehicleAbuse", to: "/provider/ambulance/abuse" },
   { icon: Radar, labelKey: "nav.telematics", to: "/provider/ambulance/telematics" },
   { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/ambulance/admins" },
 ];

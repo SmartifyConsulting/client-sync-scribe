@@ -28,6 +28,13 @@ import TelematicsScreen from "./pages/provider/ambulance/TelematicsScreen";
 import LiveSOSScreen from "./pages/provider/ambulance/LiveSOSScreen";
 import AmbulanceIncidentConsole from "./pages/provider/AmbulanceIncidentConsole";
 
+// Vehicle Abuse Prevention screens
+import VehicleAbuseScreen from "./pages/provider/ambulance/VehicleAbuseScreen";
+import GeofenceScreen from "./pages/provider/ambulance/GeofenceScreen";
+import RouteDeviationScreen from "./pages/provider/ambulance/RouteDeviationScreen";
+import AfterHoursScreen from "./pages/provider/ambulance/AfterHoursScreen";
+import UnlinkedTripsScreen from "./pages/provider/ambulance/UnlinkedTripsScreen";
+
 function ProviderShell({ children }: { children: React.ReactNode }) {
   return (
     <ProviderGate>
@@ -75,6 +82,11 @@ export default function ProviderRoutes() {
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="fleet" element={<FleetPage />} />
         <Route path="telematics" element={<TelematicsScreen />} />
+        <Route path="abuse" element={<VehicleAbuseScreen />} />
+        <Route path="abuse/geofence" element={<GeofenceScreen />} />
+        <Route path="abuse/routes" element={<RouteDeviationScreen />} />
+        <Route path="abuse/hours" element={<AfterHoursScreen />} />
+        <Route path="abuse/trips" element={<UnlinkedTripsScreen />} />
         <Route path="incident/:id" element={<AmbulanceIncidentConsole />} />
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
