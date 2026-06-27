@@ -4,13 +4,22 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { AmbulanceFormDialog, type AmbulanceRow } from "../../../components/AmbulanceFormDialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Ambulance, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Ambulance, Loader2, Wrench } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
+
+interface VehicleWithDetails extends AmbulanceRow {
+  make_model?: string;
+  location?: string;
+  mileage_km?: number;
+  last_service_date?: string;
+  next_service_date?: string;
+}
 
 const STATUS_TONE: Record<string, string> = {
   available: "bg-success/15 text-success border-success/40",
@@ -18,24 +27,103 @@ const STATUS_TONE: Record<string, string> = {
   out_of_service: "bg-muted text-muted-foreground border-border",
 };
 
+const STATUS_CONFIG = {
+  available: { icon: "✓", label: "AVAILABLE", color: "text-green-600", bg: "bg-green-50", badge: "bg-green-100 text-green-800" },
+  assigned: { icon: "🚑", label: "IN-SERVICE", color: "text-orange-600", bg: "bg-orange-50", badge: "bg-orange-100 text-orange-800" },
+  out_of_service: { icon: "⚙", label: "MAINTENANCE", color: "text-gray-600", bg: "bg-gray-50", badge: "bg-gray-100 text-gray-800" },
+};
+
+const MOCK_VEHICLE_DETAILS: Record<string, VehicleWithDetails> = {
+  "AMB-001": {
+    id: "1",
+    vehicle_code: "AMB-001",
+    registration_number: "REG-2023-001",
+    status: "available",
+    notes: "",
+    make_model: "Mercedes-Benz Sprinter",
+    location: "Central Depot",
+    mileage_km: 45230,
+    last_service_date: "2026-06-15",
+    next_service_date: "2026-09-15",
+  },
+  "AMB-002": {
+    id: "2",
+    vehicle_code: "AMB-002",
+    registration_number: "REG-2023-002",
+    status: "assigned",
+    notes: "",
+    make_model: "Mercedes-Benz Sprinter",
+    location: "North District",
+    mileage_km: 52150,
+    last_service_date: "2026-05-20",
+    next_service_date: "2026-08-20",
+  },
+  "AMB-003": {
+    id: "3",
+    vehicle_code: "AMB-003",
+    registration_number: "REG-2023-003",
+    status: "out_of_service",
+    notes: "",
+    make_model: "Volkswagen Transporter",
+    location: "Workshop",
+    mileage_km: 38900,
+    last_service_date: "2026-04-10",
+    next_service_date: "2026-07-10",
+  },
+};
+
 export default function FleetPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { providerId } = useProviderAccess();
-  const [rows, setRows] = useState<AmbulanceRow[]>([]);
+  const [rows, setRows] = useState<VehicleWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [edit, setEdit] = useState<AmbulanceRow | null>(null);
   const [open, setOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<AmbulanceRow | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "available" | "assigned" | "out_of_service">("all");
 
   const load = async () => {
     if (!providerId) return;
     setLoading(true);
     const { data } = await supabase.from("ambulances" as any)
       .select("*").eq("provider_id", providerId).order("vehicle_code");
-    setRows(((data as any) ?? []) as AmbulanceRow[]);
+    const vehicles = ((data as any) ?? []) as AmbulanceRow[];
+    const withDetails = vehicles.map(v => ({
+      ...v,
+      ...MOCK_VEHICLE_DETAILS[v.vehicle_code],
+    })) as VehicleWithDetails[];
+    setRows(withDetails);
     setLoading(false);
+  };
+
+  const filteredRows = statusFilter === "all"
+    ? rows
+    : rows.filter(r => r.status === statusFilter);
+
+  const stats = {
+    total: rows.length,
+    available: rows.filter(r => r.status === "available").length,
+    assigned: rows.filter(r => r.status === "assigned").length,
+    maintenance: rows.filter(r => r.status === "out_of_service").length,
+    avgMileage: rows.length > 0
+      ? Math.round(rows.reduce((sum, r) => sum + (r.mileage_km || 0), 0) / rows.length)
+      : 0,
+    overdue: rows.filter(r => {
+      if (!r.next_service_date) return false;
+      const nextService = new Date(r.next_service_date);
+      const today = new Date();
+      return nextService < today;
+    }).length,
+  };
+
+  const calculateDaysUntilService = (nextServiceDate?: string) => {
+    if (!nextServiceDate) return null;
+    const next = new Date(nextServiceDate);
+    const today = new Date();
+    const diff = Math.ceil((next.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return diff;
   };
 
   useEffect(() => {
@@ -47,7 +135,6 @@ export default function FleetPage() {
       setIsAdmin(!!ok);
     })();
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerId, user?.id]);
 
   const remove = async () => {
@@ -64,68 +151,153 @@ export default function FleetPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <header className="flex items-end justify-between">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
-          <h1 className="text-2xl font-extrabold">{t("fleet.title")}</h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            {isAdmin ? t("fleet.adminSubtitle") : t("fleet.viewerSubtitle")}
-          </p>
-        </div>
-        {isAdmin && (
-          <Button size="sm" onClick={() => { setEdit(null); setOpen(true); }}>
-            <Plus className="mr-1 h-4 w-4" /> {t("fleet.addAmbulance")}
-          </Button>
-        )}
+    <div className="space-y-6">
+      <header>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Operations</p>
+        <h1 className="text-3xl font-extrabold">Fleet Management</h1>
+        <p className="text-sm text-muted-foreground mt-2">
+          {stats.total} vehicles total • {stats.available} available • {stats.assigned} in-service • {stats.maintenance} maintenance
+        </p>
       </header>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        {loading ? (
-          <div className="flex justify-center p-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
-        ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground">
-            <Ambulance className="mx-auto mb-2 h-5 w-5 opacity-50" />
-            {t("fleet.noAmbulances")}
-          </div>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-left">{t("fleet.vehicle")}</th>
-                <th className="px-3 py-2 text-left">{t("fleet.registration")}</th>
-                <th className="px-3 py-2 text-left">{t("common.status")}</th>
-                <th className="px-3 py-2 text-left">{t("fleet.notes")}</th>
-                {isAdmin && <th className="px-3 py-2 text-right">{t("common.actions")}</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {rows.map((r) => (
-                <tr key={r.id} className="hover:bg-muted/40">
-                  <td className="px-3 py-2 font-semibold">{r.vehicle_code}</td>
-                  <td className="px-3 py-2 text-xs">{r.registration_number ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${STATUS_TONE[r.status ?? "available"] ?? STATUS_TONE.available}`}>
-                      {t(`status.${r.status ?? "available"}`, (r.status ?? "available").replace(/_/g, " "))}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-[11px] text-muted-foreground">{r.notes ?? ""}</td>
-                  {isAdmin && (
-                    <td className="px-3 py-2 text-right space-x-1">
-                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEdit(r); setOpen(true); }}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => setConfirmDelete(r)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      {/* Filter Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {(["all", "available", "assigned", "out_of_service"] as const).map((f) => (
+          <Button
+            key={f}
+            variant={statusFilter === f ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter(f)}
+            className="capitalize whitespace-nowrap"
+          >
+            {f === "all" ? "All" : f === "out_of_service" ? "Maintenance" : f === "assigned" ? "In-Service" : "Available"}
+          </Button>
+        ))}
       </div>
+
+      {/* Fleet Statistics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-xs text-muted-foreground">Average Mileage</p>
+          <p className="text-2xl font-bold mt-1">{stats.avgMileage.toLocaleString()} km</p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-xs text-muted-foreground">Fleet Age</p>
+          <p className="text-2xl font-bold mt-1">3.2 years</p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-xs text-muted-foreground">Maintenance Overdue</p>
+          <p className={`text-2xl font-bold mt-1 ${stats.overdue > 0 ? "text-red-600" : "text-green-600"}`}>{stats.overdue}</p>
+        </div>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-xs text-muted-foreground">Next 30 Days</p>
+          <p className="text-2xl font-bold mt-1">{rows.filter(r => {
+            const days = calculateDaysUntilService(r.next_service_date);
+            return days !== null && days > 0 && days <= 30;
+          }).length}</p>
+        </div>
+      </div>
+
+      {/* Vehicles Grid */}
+      {loading ? (
+        <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
+      ) : filteredRows.length === 0 ? (
+        <div className="rounded-2xl border bg-muted p-12 text-center">
+          <Ambulance className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">No vehicles found</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredRows.map((vehicle) => {
+            const config = STATUS_CONFIG[vehicle.status || "available"];
+            const daysUntilService = calculateDaysUntilService(vehicle.next_service_date);
+            const isServiceOverdue = daysUntilService !== null && daysUntilService < 0;
+            const isServiceSoon = daysUntilService !== null && daysUntilService > 0 && daysUntilService <= 30;
+
+            return (
+              <div
+                key={vehicle.id}
+                className={cn(
+                  "rounded-xl border-2 p-4 space-y-3",
+                  config.bg,
+                  "border-current"
+                )}
+                style={{ borderColor: config.color }}
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg">{vehicle.vehicle_code}</h3>
+                      <span className={`text-lg font-bold ${config.color}`}>{config.icon}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{vehicle.make_model || "—"}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.badge}`}>
+                    {config.label}
+                  </span>
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Location</p>
+                    <p className="font-semibold text-sm mt-1">{vehicle.location || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Mileage</p>
+                    <p className="font-semibold text-sm mt-1">{vehicle.mileage_km?.toLocaleString()} km</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Last Service</p>
+                    <p className="font-semibold text-sm mt-1">{vehicle.last_service_date || "—"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Next Service</p>
+                    <p className={`font-semibold text-sm mt-1 ${isServiceOverdue ? "text-red-600" : isServiceSoon ? "text-orange-600" : ""}`}>
+                      {vehicle.next_service_date || "—"}
+                      {daysUntilService !== null && daysUntilService !== 0 && (
+                        <span className="text-xs ml-1">
+                          ({isServiceOverdue ? "OVERDUE" : `${daysUntilService} days`})
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" className="flex-1">View Profile</Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Wrench className="h-4 w-4 mr-1" />
+                    Service
+                  </Button>
+                  {isAdmin && (
+                    <>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9"
+                        onClick={() => { setEdit(vehicle); setOpen(true); }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-9 w-9 text-destructive"
+                        onClick={() => setConfirmDelete(vehicle)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {providerId && (
         <AmbulanceFormDialog

@@ -147,5 +147,33 @@
       "cannotReach": "Cannot reach location in required time",
       "other": "Other"
     }
+  },
+  "fleet": {
+    "title": "Fleet Management",
+    "adminSubtitle": "Manage vehicles, assign units, track maintenance",
+    "viewerSubtitle": "View fleet status and vehicle information",
+    "addAmbulance": "Add Vehicle",
+    "vehicle": "Vehicle",
+    "registration": "Registration",
+    "notes": "Notes",
+    "noAmbulances": "No vehicles in fleet",
+    "removeTitle": "Remove Vehicle",
+    "removeDescription": "Are you sure you want to remove {{vehicle}}? This cannot be undone.",
+    "cannotDeleteAssigned": "Cannot remove vehicle that is currently assigned",
+    "removed": "Vehicle removed successfully",
+    "location": "Location",
+    "mileage": "Mileage",
+    "lastService": "Last Service",
+    "nextService": "Next Service",
+    "averageMileage": "Average Mileage",
+    "fleetAge": "Fleet Age",
+    "maintenanceOverdue": "Maintenance Overdue",
+    "next30Days": "Next 30 Days",
+    "viewProfile": "View Profile",
+    "scheduleService": "Schedule Service",
+    "serviceDetails": "Service Details",
+    "returnToFleet": "Return to Fleet",
+    "overdue": "OVERDUE",
+    "days": "days"
   }
 }
