@@ -21,7 +21,7 @@ const ago = (iso: string | null, t: (key: string) => string) => {
   return `${Math.floor(s / 3600)}h`;
 };
 
-const statusLabel = (status: string | null | undefined, t: (key: string) => string) =>
+const statusLabel = (status: string | null | undefined, t: (key: string, options?: any) => string) =>
   t(`admissionStatus.${status ?? "incoming"}`, { defaultValue: (status ?? "incoming").replace(/_/g, " ") });
 
 export default function AdmissionsScreen() {
