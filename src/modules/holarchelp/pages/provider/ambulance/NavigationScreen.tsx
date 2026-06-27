@@ -9,19 +9,21 @@ import { EtaCountdown } from "../../../components/EtaCountdown";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Siren, Navigation as NavIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Inc = any;
 
 const STEPS = [
-  { v: "en_route", label: "En Route" },
-  { v: "arrived", label: "Arrived" },
-  { v: "patient_collected", label: "Patient Loaded" },
-  { v: "en_route_to_hospital", label: "→ Hospital" },
-  { v: "at_hospital", label: "Arrived At Hospital" },
-  { v: "completed", label: "Resolve Incident" },
+  { v: "en_route", labelKey: "navigationScreen.enRoute" },
+  { v: "arrived", labelKey: "navigationScreen.arrived" },
+  { v: "patient_collected", labelKey: "navigationScreen.patientLoaded" },
+  { v: "en_route_to_hospital", labelKey: "navigationScreen.toHospital" },
+  { v: "at_hospital", labelKey: "navigationScreen.arrivedAtHospital" },
+  { v: "completed", labelKey: "navigationScreen.resolveIncident" },
 ];
 
 export default function NavigationScreen() {
+  const { t } = useTranslation();
   const { id: paramId } = useParams<{ id: string }>();
   const { providerId } = useProviderAccess();
   const navigate = useNavigate();
@@ -71,7 +73,7 @@ export default function NavigationScreen() {
       _incident_id: activeId, _status: status, _payload: {},
     });
     if (error) return toast.error(error.message);
-    toast.success(`Status: ${status.replace(/_/g," ")}`);
+    toast.success(t("navigationScreen.status", { status: status.replace(/_/g," ") }));
     if (status === "completed") navigate("/provider/ambulance");
   };
 
@@ -79,21 +81,21 @@ export default function NavigationScreen() {
     return (
       <div className="rounded-2xl border border-dashed p-10 text-center">
         <NavIcon className="mx-auto h-8 w-8 text-muted-foreground" />
-        <p className="mt-3 text-sm font-semibold">No active mission</p>
-        <p className="mt-1 text-xs text-muted-foreground">Accept an incident from Incoming SOS to start navigation.</p>
-        <Button asChild className="mt-4"><Link to="/provider/ambulance/incoming">Open Incoming SOS</Link></Button>
+        <p className="mt-3 text-sm font-semibold">{t("navigationScreen.noActiveMission")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t("navigationScreen.acceptToStart")}</p>
+        <Button asChild className="mt-4"><Link to="/provider/ambulance/incoming">{t("navigationScreen.openIncomingSos")}</Link></Button>
       </div>
     );
   }
 
-  if (!incident) return <div className="text-sm text-muted-foreground">Loading mission…</div>;
+  if (!incident) return <div className="text-sm text-muted-foreground">{t("navigationScreen.loadingMission")}</div>;
 
   return (
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch · Navigation</p>
-          <h1 className="text-xl font-extrabold">Mission #{activeId.slice(0,8)}</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")} · {t("navigationScreen.navigation")}</p>
+          <h1 className="text-xl font-extrabold">{t("navigationScreen.mission")} #{activeId.slice(0,8)}</h1>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full border border-sos/40 bg-sos/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-sos">
@@ -101,7 +103,7 @@ export default function NavigationScreen() {
           </span>
           {incident.eta_minutes != null && (
             <span className="rounded-full border bg-card px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
-              ETA <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
+              {t("navigationScreen.eta")} <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
             </span>
           )}
         </div>
@@ -114,7 +116,7 @@ export default function NavigationScreen() {
 
         <aside className="space-y-3">
           <div className="rounded-2xl border bg-card p-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Incident Action Panel</p>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t("navigationScreen.actionPanel")}</p>
             <div className="mt-2 grid grid-cols-2 gap-1.5">
               {STEPS.map((s) => (
                 <Button
@@ -125,7 +127,7 @@ export default function NavigationScreen() {
                   onClick={() => setStatus(s.v)}
                   disabled={!isAssigned}
                 >
-                  {s.label}
+                  {t(s.labelKey)}
                 </Button>
               ))}
             </div>
@@ -140,7 +142,7 @@ export default function NavigationScreen() {
 
           <Link to={`/provider/ambulance/incident/${activeId}`}
                 className="block rounded-2xl border bg-card p-3 text-center text-xs font-semibold hover:bg-muted">
-            Open full incident console →
+            {t("navigationScreen.fullConsole")}
           </Link>
         </aside>
       </div>
