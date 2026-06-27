@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
-import { 
-  User, 
-  Shield, 
-  Loader2, 
-  CheckCircle, 
+import {
+  User,
+  Loader2,
+  CheckCircle,
   XCircle,
-  Clock,
-  UserCheck,
-  UserX
+  Calendar as CalendarIcon,
+  FileText,
+  Pill,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +19,6 @@ import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -44,12 +39,19 @@ interface AccessRequest {
   };
 }
 
-const permissionLabels: Record<AccessPermission, string> = {
-  session_summaries: "Session Summaries",
-  patient_info: "Patient Information",
-  calendar: "Calendar",
-  prescription_history: "Documentation",
-};
+const FULL_PERMISSIONS: AccessPermission[] = [
+  "patient_info",
+  "calendar",
+  "session_summaries",
+  "prescription_history",
+];
+
+const ACCESS_ITEMS = [
+  { icon: User, label: "Patient Information", desc: "Contact details, demographics and clinical profile." },
+  { icon: CalendarIcon, label: "Calendar", desc: "Their upcoming appointments and availability." },
+  { icon: FileText, label: "Session Summaries", desc: "AI-generated summaries of past consultations." },
+  { icon: Pill, label: "Documentation", desc: "Prescriptions, results and other shared documents." },
+];
 
 export function DoctorAccessRequests() {
   const { user } = useAuth();
@@ -57,14 +59,8 @@ export function DoctorAccessRequests() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<AccessRequest[]>([]);
-  const [acceptingRequest, setAcceptingRequest] = useState<AccessRequest | null>(null);
-  const [selectedPermissions, setSelectedPermissions] = useState<AccessPermission[]>([
-    "patient_info",
-    "calendar",
-    "session_summaries",
-    "prescription_history",
-  ]);
-  const [processing, setProcessing] = useState(false);
+  const [grantedInfo, setGrantedInfo] = useState<{ patientName: string } | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && profile) {
