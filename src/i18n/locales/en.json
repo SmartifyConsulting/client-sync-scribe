@@ -64,7 +64,8 @@
     "backToAdmin": "Back to Admin",
     "liveSOS": "Live SOS",
     "vehicleAbuse": "Vehicle Abuse",
-    "dispatchManagement": "Dispatch Management"
+    "dispatchManagement": "Dispatch Management",
+    "incidentManagement": "Incident Management"
   },
   "topbar": {
     "reportBug": "Report Bug/Fix",
@@ -111,5 +112,40 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "incidentManagement": {
+    "title": "Incident Management",
+    "subtitle": "All incidents (self-created and from affiliated hospitals)",
+    "erProviderOperations": "ER Provider Operations",
+    "selfCreated": "Self-Created",
+    "fromHospital": "FROM:",
+    "accept": "Accept",
+    "decline": "Decline",
+    "selectDeclineReason": "Select Decline Reason:",
+    "declineReason": "Decline Reason",
+    "chooseReason": "-- Choose a reason --",
+    "submit": "Submit Decline",
+    "cancel": "Cancel",
+    "declinedAt": "Declined at",
+    "hospitalSelectingAlternative": "Hospital is selecting alternative provider",
+    "viewDetails": "View Details",
+    "trackLive": "Track Live",
+    "markArrived": "Mark Arrived",
+    "accepting": "Accepting...",
+    "declining": "Declining...",
+    "incidentAccepted": "Incident accepted! Dispatching ambulance...",
+    "incidentDeclined": "Incident declined. Hospital will be notified to select alternative.",
+    "selectDeclineReasonPrompt": "Please select a decline reason",
+    "noIncidents": "No incidents",
+    "declineReasons": {
+      "noCapacity": "No capacity at this time",
+      "serviceAreaTooFar": "Service area too far",
+      "lackEquipment": "Lack of required equipment/specialization",
+      "unitsOnEmergency": "All units currently on emergency",
+      "maintenance": "Maintenance/vehicle issue",
+      "staffShortage": "Staff shortage",
+      "cannotReach": "Cannot reach location in required time",
+      "other": "Other"
+    }
   }
 }

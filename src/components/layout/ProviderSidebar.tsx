@@ -58,6 +58,7 @@ const ambulanceNav: NavItem[] = [
   { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
   { icon: Hospital, labelKey: "nav.hospitals", to: "/provider/ambulance/hospitals" },
   { icon: Hospital, labelKey: "nav.affiliatedHospitals", to: "/provider/ambulance/affiliations" },
+  { icon: ClipboardList, labelKey: "nav.incidentManagement", to: "/provider/ambulance/incident-management" },
   { icon: History, labelKey: "nav.incidentHistory", to: "/provider/ambulance/history" },
   { icon: Users, labelKey: "nav.teamStatus", to: "/provider/ambulance/team" },
   { icon: Ambulance, labelKey: "nav.fleet", to: "/provider/ambulance/fleet" },

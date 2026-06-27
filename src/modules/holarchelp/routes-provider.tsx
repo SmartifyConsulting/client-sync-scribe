@@ -35,6 +35,9 @@ import RouteDeviationScreen from "./pages/provider/ambulance/RouteDeviationScree
 import AfterHoursScreen from "./pages/provider/ambulance/AfterHoursScreen";
 import UnlinkedTripsScreen from "./pages/provider/ambulance/UnlinkedTripsScreen";
 
+// ER Provider - Incident Management
+import IncidentManagementScreen from "./pages/provider/ambulance/IncidentManagementScreen";
+
 // Incident & Dispatch Management screens
 import CreateIncidentScreen from "./pages/provider/hospital/CreateIncidentScreen";
 import IncidentLocationScreen from "./pages/provider/hospital/IncidentLocationScreen";
@@ -111,6 +114,7 @@ export default function ProviderRoutes() {
         <Route path="history" element={<IncidentHistoryScreen />} />
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="fleet" element={<FleetPage />} />
+        <Route path="incident-management" element={<IncidentManagementScreen />} />
         <Route path="telematics" element={<TelematicsScreen />} />
         <Route path="abuse" element={<VehicleAbuseScreen />} />
         <Route path="abuse/geofence" element={<GeofenceScreen />} />
