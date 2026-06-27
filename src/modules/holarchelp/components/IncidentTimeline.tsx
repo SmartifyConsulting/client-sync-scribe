@@ -19,9 +19,9 @@ const labelFor = (e: EventRow, t: (key: string, options?: any) => string) => {
     case "declined": return t("timeline.declined");
     case "reassigned": return t("timeline.reassigned");
     case "released": return t("timeline.released");
-    case "en_route": return t("status.en_route");
+    case "en_route": return t("status.enRoute");
     case "arrived": return t("timeline.arrivedScene");
-    case "patient_collected": return t("status.patient_collected");
+    case "patient_collected": return t("status.patientCollected");
     case "at_hospital": return t("timeline.arrivedHospital");
     case "completed": return t("timeline.completed");
     case "voice_note": return t("timeline.voiceNote");
