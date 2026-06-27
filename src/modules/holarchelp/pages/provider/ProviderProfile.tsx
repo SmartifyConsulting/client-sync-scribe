@@ -12,8 +12,10 @@ import { Switch } from "@/components/ui/switch";
 import { AddressAutocomplete } from "@/features/patients/components/AddressAutocomplete";
 import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export default function ProviderProfile() {
+  const { t } = useTranslation();
   const { providerType, providerId, loading } = useProviderAccess();
   const table = providerType === "hospital" ? "holarchelp_hospitals" : "holarchelp_ambulance_providers";
   const addressField = providerType === "hospital" ? "address" : "base_address";
@@ -42,13 +44,13 @@ export default function ProviderProfile() {
       if (error) throw error;
       if (data?.latitude && data?.longitude) {
         setRow((prev: any) => prev && ({ ...prev, latitude: data.latitude, longitude: data.longitude }));
-        toast.success("Location pin updated");
+        toast.success(t("providerProfile.pinUpdated"));
       } else {
-        toast.error("Could not find a location for that address");
+        toast.error(t("providerProfile.notFoundAddress"));
       }
     } catch (e: any) {
       console.error("Geocoding failed", e);
-      toast.error("Could not look up that address");
+      toast.error(t("providerProfile.lookupFailed"));
     } finally {
       setGeocoding(false);
     }
@@ -82,41 +84,41 @@ export default function ProviderProfile() {
         };
     const { error } = await supabase.from(table as any).update(patch as any).eq("id", providerId);
     if (error) return toast.error(error.message);
-    toast.success("Profile saved");
+    toast.success(t("providerProfile.saved"));
   };
 
-  if (loading || !row) return <div className="text-muted-foreground">Loading…</div>;
+  if (loading || !row) return <div className="text-muted-foreground">{t("common.loading")}</div>;
 
   const hasPin = typeof row.latitude === "number" && typeof row.longitude === "number";
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-extrabold">Provider profile</h1>
+        <h1 className="text-2xl font-extrabold">{t("providerProfile.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          Status: <span className="font-semibold">{row.status}</span> · Tier: <span className="font-semibold">{row.tier}</span>
-          {" · "}Subscription: <span className="font-semibold">{row.subscription_status}</span>
+          {t("providerProfile.status")}: <span className="font-semibold">{row.status}</span> · {t("providerProfile.tier")}: <span className="font-semibold">{row.tier}</span>
+          {" · "}{t("providerProfile.subscription")}: <span className="font-semibold">{row.subscription_status}</span>
         </p>
       </div>
 
       <div className="grid gap-3 rounded-2xl border bg-card p-4">
         {providerType === "hospital" ? (
           <>
-            <Field label="Hospital name" value={row.name} onChange={(v) => setRow({ ...row, name: v })} />
-            <Field label="Contact email" type="email" value={row.contact_email} onChange={(v) => setRow({ ...row, contact_email: v })} />
-            <Field label="Contact phone" value={row.contact_phone ?? ""} onChange={(v) => setRow({ ...row, contact_phone: v })} />
+            <Field label={t("providerProfile.hospitalName")} value={row.name} onChange={(v) => setRow({ ...row, name: v })} />
+            <Field label={t("providerProfile.contactEmail")} type="email" value={row.contact_email} onChange={(v) => setRow({ ...row, contact_email: v })} />
+            <Field label={t("providerProfile.contactPhone")} value={row.contact_phone ?? ""} onChange={(v) => setRow({ ...row, contact_phone: v })} />
           </>
         ) : (
           <>
-            <Field label="Company name" value={row.company_name} onChange={(v) => setRow({ ...row, company_name: v })} />
-            <Field label="Contact email" type="email" value={row.contact_email} onChange={(v) => setRow({ ...row, contact_email: v })} />
-            <Field label="Contact phone" value={row.contact_phone ?? ""} onChange={(v) => setRow({ ...row, contact_phone: v })} />
+            <Field label={t("providerProfile.companyName")} value={row.company_name} onChange={(v) => setRow({ ...row, company_name: v })} />
+            <Field label={t("providerProfile.contactEmail")} type="email" value={row.contact_email} onChange={(v) => setRow({ ...row, contact_email: v })} />
+            <Field label={t("providerProfile.contactPhone")} value={row.contact_phone ?? ""} onChange={(v) => setRow({ ...row, contact_phone: v })} />
           </>
         )}
 
         <div className="grid gap-1.5">
           <Label className="text-xs">
-            {providerType === "hospital" ? "Address" : "Base address"}
+            {providerType === "hospital" ? t("providerProfile.address") : t("providerProfile.baseAddress")}
             {geocoding && <Loader2 className="inline ml-2 h-3 w-3 animate-spin text-muted-foreground" />}
           </Label>
           <AddressAutocomplete
@@ -130,44 +132,44 @@ export default function ProviderProfile() {
                 void geocode(v);
               }
             }}
-            placeholder="Start typing your address…"
+            placeholder={t("providerProfile.addressPlaceholder")}
             rows={2}
           />
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
             <MapPin className="h-3 w-3" />
             {hasPin
-              ? <span>Saved pin: {Number(row.latitude).toFixed(5)}, {Number(row.longitude).toFixed(5)}</span>
-              : <span>No pin saved yet — pick a suggestion or save to drop a pin.</span>}
+              ? <span>{t("providerProfile.savedPin")}: {Number(row.latitude).toFixed(5)}, {Number(row.longitude).toFixed(5)}</span>
+              : <span>{t("providerProfile.noPin")}</span>}
           </div>
         </div>
 
         <PinMap latitude={row.latitude} longitude={row.longitude} />
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="City" value={row.city ?? ""} onChange={(v) => setRow({ ...row, city: v })} />
-          <Field label="State" value={row.state ?? ""} onChange={(v) => setRow({ ...row, state: v })} />
+          <Field label={t("providerProfile.city")} value={row.city ?? ""} onChange={(v) => setRow({ ...row, city: v })} />
+          <Field label={t("providerProfile.state")} value={row.state ?? ""} onChange={(v) => setRow({ ...row, state: v })} />
         </div>
 
         {providerType === "hospital" ? (
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Bed capacity" type="number" value={String(row.bed_capacity ?? 0)} onChange={(v) => setRow({ ...row, bed_capacity: v })} />
-            <Field label="Beds available" type="number" value={String(row.beds_available ?? 0)} onChange={(v) => setRow({ ...row, beds_available: v })} />
-            <Field label="ICU capacity" type="number" value={String(row.icu_capacity ?? 0)} onChange={(v) => setRow({ ...row, icu_capacity: v })} />
-            <Field label="ICU available" type="number" value={String(row.icu_available ?? 0)} onChange={(v) => setRow({ ...row, icu_available: v })} />
+            <Field label={t("providerProfile.bedCapacity")} type="number" value={String(row.bed_capacity ?? 0)} onChange={(v) => setRow({ ...row, bed_capacity: v })} />
+            <Field label={t("providerProfile.bedsAvailable")} type="number" value={String(row.beds_available ?? 0)} onChange={(v) => setRow({ ...row, beds_available: v })} />
+            <Field label={t("providerProfile.icuCapacity")} type="number" value={String(row.icu_capacity ?? 0)} onChange={(v) => setRow({ ...row, icu_capacity: v })} />
+            <Field label={t("providerProfile.icuAvailable")} type="number" value={String(row.icu_available ?? 0)} onChange={(v) => setRow({ ...row, icu_available: v })} />
           </div>
         ) : (
-          <Field label="Fleet size" type="number" value={String(row.fleet_size ?? 1)} onChange={(v) => setRow({ ...row, fleet_size: v })} />
+          <Field label={t("providerProfile.fleetSize")} type="number" value={String(row.fleet_size ?? 1)} onChange={(v) => setRow({ ...row, fleet_size: v })} />
         )}
 
         <div className="flex items-center justify-between rounded-xl border p-3">
           <div>
-            <p className="text-sm font-semibold">At capacity</p>
-            <p className="text-xs text-muted-foreground">Pause incoming dispatches</p>
+            <p className="text-sm font-semibold">{t("providerProfile.atCapacity")}</p>
+            <p className="text-xs text-muted-foreground">{t("providerProfile.pauseDispatches")}</p>
           </div>
           <Switch checked={!!row.at_capacity} onCheckedChange={(v) => setRow({ ...row, at_capacity: v })} />
         </div>
 
-        <Button onClick={save} className="h-12 rounded-xl">Save changes</Button>
+        <Button onClick={save} className="h-12 rounded-xl">{t("providerProfile.saveChanges")}</Button>
       </div>
     </div>
   );

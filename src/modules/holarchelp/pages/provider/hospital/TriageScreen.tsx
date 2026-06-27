@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { toast } from "sonner";
 import { ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -12,18 +13,19 @@ type Row = {
   eta_minutes: number | null; created_at: string;
 };
 
-const COLUMNS: { key: string; label: string; statuses: string[]; admit?: string }[] = [
-  { key: "incoming", label: "Incoming", statuses: ["assigned","en_route","patient_collected","en_route_to_hospital"] },
-  { key: "awaiting", label: "Awaiting arrival", statuses: ["arrived"] },
-  { key: "arrived", label: "Arrived", statuses: ["at_hospital"], admit: "arrived" },
-  { key: "triage", label: "In triage", statuses: ["at_hospital"], admit: "in_triage" },
-  { key: "admitted", label: "Admitted", statuses: ["at_hospital","completed"], admit: "admitted" },
+const COLUMNS: { key: string; labelKey: string; statuses: string[]; admit?: string }[] = [
+  { key: "incoming", labelKey: "triageBoard.incoming", statuses: ["assigned","en_route","patient_collected","en_route_to_hospital"] },
+  { key: "awaiting", labelKey: "triageBoard.awaiting", statuses: ["arrived"] },
+  { key: "arrived", labelKey: "triageBoard.arrived", statuses: ["at_hospital"], admit: "arrived" },
+  { key: "triage", labelKey: "triageBoard.inTriage", statuses: ["at_hospital"], admit: "in_triage" },
+  { key: "admitted", labelKey: "status.admitted", statuses: ["at_hospital","completed"], admit: "admitted" },
 ];
 
 const sevDot = (s: string | null) =>
   s === "critical" ? "bg-destructive" : s === "high" ? "bg-warning" : s === "moderate" ? "bg-warning" : "bg-muted-foreground";
 
 export default function TriageScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [rows, setRows] = useState<Row[]>([]);
 
@@ -58,14 +60,14 @@ export default function TriageScreen() {
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: r.id, event_type: `admission_${next}`, payload: {},
     } as any);
-    toast.success(`Moved to ${next.replace(/_/g," ")}`);
+    toast.success(t("triageBoard.moved", { status: t(`admissionStatus.${next}`, { defaultValue: next.replace(/_/g," ") }) }));
   };
 
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hospital Emergency Operations</p>
-        <h1 className="text-2xl font-extrabold">Triage Board</h1>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
+        <h1 className="text-2xl font-extrabold">{t("triageBoard.title")}</h1>
       </header>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
@@ -74,7 +76,7 @@ export default function TriageScreen() {
           return (
             <div key={col.key} className="flex min-h-[300px] flex-col rounded-2xl border bg-card">
               <div className="flex items-center justify-between border-b px-3 py-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{col.label}</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t(col.labelKey)}</p>
                 <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold">{items.length}</span>
               </div>
               <div className="flex-1 space-y-1.5 overflow-auto p-2">
@@ -84,18 +86,18 @@ export default function TriageScreen() {
                     <div key={r.id} className="rounded-xl border bg-background p-2 text-xs hover:border-primary/40">
                       <div className="flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${sevDot(r.severity)}`} />
-                        <p className="flex-1 truncate font-semibold">Incident {r.id.slice(0,8)}</p>
+                        <p className="flex-1 truncate font-semibold">{t("ambulance.incident")} {r.id.slice(0,8)}</p>
                       </div>
                       <p className="mt-0.5 text-[10px] text-muted-foreground">
-                        {r.triage_priority ? `Priority ${r.triage_priority}` : "No triage yet"}
+                        {r.triage_priority ? `${t("admissions.priority")} ${r.triage_priority}` : t("triageBoard.noTriage")}
                       </p>
                       <div className="mt-1.5 flex items-center gap-1">
                         <Link to={`/provider/hospital/incident/${r.id}`} className="flex-1 truncate rounded-md border bg-card px-1.5 py-1 text-center text-[10px] font-semibold hover:bg-muted">
-                          Open
+                          {t("common.open")}
                         </Link>
                         {nextKey && (
                           <button onClick={() => advance(r, nextKey)} className="inline-flex items-center gap-0.5 rounded-md bg-primary px-1.5 py-1 text-[10px] font-bold text-primary-foreground">
-                            Advance <ChevronRight className="h-3 w-3" />
+                            {t("triageBoard.advance")} <ChevronRight className="h-3 w-3" />
                           </button>
                         )}
                       </div>

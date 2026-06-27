@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -9,6 +10,7 @@ type BeforeInstallPromptEvent = Event & {
 const DISMISS_KEY = "install-strip-dismissed";
 
 export function InstallMobileStrip() {
+  const { t } = useTranslation();
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -42,7 +44,7 @@ export function InstallMobileStrip() {
       await deferred.userChoice;
       setDeferred(null);
     } else if (isIOS) {
-      alert("To install: tap the Share button, then 'Add to Home Screen'.");
+      alert(t("install.iosInstructions"));
     }
   };
 
@@ -58,11 +60,11 @@ export function InstallMobileStrip() {
         className="flex items-center gap-1.5 flex-1 text-left font-medium"
       >
         <Download className="h-3.5 w-3.5 shrink-0" />
-        <span>Install HolarcHealth on your phone</span>
+        <span>{t("install.installPhone")}</span>
       </button>
       <button
         onClick={handleDismiss}
-        aria-label="Dismiss"
+        aria-label={t("common.dismiss")}
         className="p-1 hover:bg-primary-foreground/10 rounded"
       >
         <X className="h-3.5 w-3.5" />

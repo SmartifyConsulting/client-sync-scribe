@@ -6,6 +6,7 @@ import { Loader2, Truck, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useParamedicShift } from "../hooks/useParamedicShift";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   incidentId: string | null;
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedShift }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { shift } = useParamedicShift();
   const [accepting, setAccepting] = useState(false);
@@ -28,11 +30,11 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
     });
     setAccepting(false);
     if (error) {
-      toast.error(error.message === "Incident already taken" ? "Another paramedic accepted first" : error.message);
+      toast.error(error.message === "Incident already taken" ? t("ambulance.anotherCrewAccepted") : error.message);
       onOpenChange(false);
       return;
     }
-    toast.success("Incident locked — head out!");
+    toast.success(t("paramedicAccept.lockedHeadOut"));
     onOpenChange(false);
     navigate(`/provider/ambulance/incident/${incidentId}`);
   };
@@ -44,37 +46,37 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5 text-primary" /> Accept SOS
+            <Truck className="h-5 w-5 text-primary" /> {t("paramedicAccept.acceptSos")}
           </DialogTitle>
         </DialogHeader>
 
         {noShift ? (
           <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm">
             <p className="flex items-center gap-2 font-semibold text-destructive">
-              <AlertCircle className="h-4 w-4" /> You're not on an available shift
+              <AlertCircle className="h-4 w-4" /> {t("paramedicAccept.notAvailableShift")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Start your shift and pick an ambulance before accepting an incident.
+              {t("paramedicAccept.startBeforeAccept")}
             </p>
           </div>
         ) : (
           <div className="rounded-lg border bg-muted/30 p-4 text-sm">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Responding with</p>
-            <p className="mt-1 text-lg font-bold">Ambulance · {shift.ambulance_id.slice(0, 8)}</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("paramedicAccept.respondingWith")}</p>
+            <p className="mt-1 text-lg font-bold">{t("liveSos.ambulance")} · {shift.ambulance_id.slice(0, 8)}</p>
             <p className="mt-2 text-xs text-muted-foreground">
-              You and your ambulance will be marked <strong>Busy</strong> until this incident is completed.
+              {t("paramedicAccept.busyUntilCompleted")}
             </p>
           </div>
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
           {noShift ? (
-            <Button onClick={() => { onOpenChange(false); onNeedShift?.(); }}>Start shift</Button>
+            <Button onClick={() => { onOpenChange(false); onNeedShift?.(); }}>{t("shift.startTitle")}</Button>
           ) : (
             <Button onClick={accept} disabled={accepting}>
               {accepting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Accept incident
+              {t("incomingSos.acceptIncident")}
             </Button>
           )}
         </DialogFooter>

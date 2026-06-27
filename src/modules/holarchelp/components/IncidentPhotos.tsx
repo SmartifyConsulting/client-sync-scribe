@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Camera, ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const BUCKET = "holarchelp-incident-photos";
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -44,6 +45,7 @@ export function IncidentPhotos({
   incidentId: string;
   readOnly?: boolean;
 }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,12 +90,12 @@ export function IncidentPhotos({
     for (const file of Array.from(files)) {
       try {
         if (file.size > MAX_BYTES * 4) {
-          toast.error(`${file.name} is too large`);
+          toast.error(t("incidentPhotos.tooLarge", { name: file.name }));
           continue;
         }
         const blob = await compressImage(file);
         if (blob.size > MAX_BYTES) {
-          toast.error(`${file.name} still over 5MB after compression`);
+          toast.error(t("incidentPhotos.stillTooLarge", { name: file.name }));
           continue;
         }
         const ext = (file.name.split(".").pop() ?? "jpg").toLowerCase();
@@ -112,12 +114,12 @@ export function IncidentPhotos({
         success++;
       } catch (e: any) {
         console.error(e);
-        toast.error(e?.message ?? "Upload failed");
+        toast.error(e?.message ?? t("incidentPhotos.uploadFailed"));
       }
     }
     setUploading(false);
     if (success > 0) {
-      toast.success(`${success} photo${success === 1 ? "" : "s"} added`);
+      toast.success(t("incidentPhotos.added", { count: success }));
       refresh();
     }
     if (fileRef.current) fileRef.current.value = "";
@@ -125,7 +127,7 @@ export function IncidentPhotos({
   };
 
   const removePhoto = async (p: Photo) => {
-    if (!confirm("Delete this photo?")) return;
+    if (!confirm(t("incidentPhotos.deleteConfirm"))) return;
     const { error } = await supabase
       .from("holarchelp_incident_photos" as any)
       .delete()
@@ -135,7 +137,7 @@ export function IncidentPhotos({
       return;
     }
     await supabase.storage.from(BUCKET).remove([p.storage_path]).catch(() => {});
-    toast.success("Photo removed");
+    toast.success(t("incidentPhotos.removed"));
     refresh();
   };
 
@@ -143,7 +145,7 @@ export function IncidentPhotos({
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-          Incident photos
+          {t("incidentPhotos.title")}
         </h3>
         {!readOnly && (
           <div className="flex gap-2">
@@ -154,7 +156,7 @@ export function IncidentPhotos({
               disabled={uploading}
               onClick={() => galleryRef.current?.click()}
             >
-              <ImagePlus className="h-4 w-4" /> Upload
+              <ImagePlus className="h-4 w-4" /> {t("incidentPhotos.upload")}
             </Button>
             <Button
               size="sm"
@@ -167,7 +169,7 @@ export function IncidentPhotos({
               ) : (
                 <Camera className="h-4 w-4" />
               )}
-              {uploading ? "Uploading…" : "Camera"}
+              {uploading ? t("incidentPhotos.uploading") : t("incidentPhotos.camera")}
             </Button>
           </div>
         )}
@@ -201,7 +203,7 @@ export function IncidentPhotos({
         </div>
       ) : photos.length === 0 ? (
         <div className="rounded-2xl border border-dashed bg-muted/30 p-6 text-center text-xs text-muted-foreground">
-          No photos yet. {!readOnly && "Tap Camera to add a photo of the scene or injuries."}
+          {t("incidentPhotos.none")} {!readOnly && t("incidentPhotos.tapCamera")}
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2">
@@ -215,13 +217,13 @@ export function IncidentPhotos({
               {p.url ? (
                 <img
                   src={p.url}
-                  alt={p.caption ?? "Incident photo"}
+                  alt={p.caption ?? t("incidentPhotos.photoAlt")}
                   className="h-full w-full object-cover transition group-hover:scale-105"
                   loading="lazy"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">
-                  Loading…
+                  {t("common.loading")}
                 </div>
               )}
             </button>
@@ -235,13 +237,13 @@ export function IncidentPhotos({
             <div className="relative bg-black">
               <img
                 src={preview.url}
-                alt={preview.caption ?? "Incident photo"}
+                alt={preview.caption ?? t("incidentPhotos.photoAlt")}
                 className="max-h-[80vh] w-full object-contain"
               />
               <button
                 onClick={() => setPreview(null)}
                 className="absolute right-2 top-2 rounded-full bg-black/60 p-1.5 text-white"
-                aria-label="Close"
+                aria-label={t("common.close")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -254,7 +256,7 @@ export function IncidentPhotos({
                   }}
                   className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground"
                 >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                  <Trash2 className="h-3.5 w-3.5" /> {t("common.delete")}
                 </button>
               )}
             </div>

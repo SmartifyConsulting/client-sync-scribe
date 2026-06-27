@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useParamedicShift } from "../hooks/useParamedicShift";
+import { useTranslation } from "react-i18next";
 
 type Ambulance = { id: string; vehicle_code: string; registration_number: string | null; status: string };
 
@@ -19,6 +20,7 @@ export function StartShiftDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const { startShift } = useParamedicShift();
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState<Ambulance[]>([]);
@@ -49,10 +51,10 @@ export function StartShiftDialog({
     setBusy(true);
     try {
       await startShift(selected);
-      toast.success("Shift started — you are now available");
+      toast.success(t("shift.started"));
       onOpenChange(false);
     } catch (e: any) {
-      toast.error(e.message ?? "Could not start shift");
+      toast.error(e.message ?? t("shift.couldNotStart"));
     } finally {
       setBusy(false);
     }
@@ -63,7 +65,7 @@ export function StartShiftDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <PlayCircle className="h-5 w-5 text-primary" /> Start shift
+            <PlayCircle className="h-5 w-5 text-primary" /> {t("shift.startTitle")}
           </DialogTitle>
         </DialogHeader>
 
@@ -71,13 +73,13 @@ export function StartShiftDialog({
           <div className="flex items-center justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
         ) : list.length === 0 ? (
           <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
-            No available ambulances. Ask your ER admin to add one or free up a vehicle.
+            {t("shift.noAvailable")}
           </div>
         ) : (
           <div className="space-y-2">
-            <Label>Pick your ambulance for this shift</Label>
+            <Label>{t("shift.pickAmbulance")}</Label>
             <Select value={selected} onValueChange={setSelected}>
-              <SelectTrigger><SelectValue placeholder="Select a vehicle" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("shift.selectVehicle")} /></SelectTrigger>
               <SelectContent>
                 {list.map(a => (
                   <SelectItem key={a.id} value={a.id}>
@@ -87,16 +89,16 @@ export function StartShiftDialog({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              You'll be marked <strong>Available</strong> and start receiving SOS notifications.
+              {t("shift.availableMessage")}
             </p>
           </div>
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
           <Button onClick={start} disabled={!selected || busy || list.length === 0}>
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Start shift
+            {t("shift.startTitle")}
           </Button>
         </DialogFooter>
       </DialogContent>

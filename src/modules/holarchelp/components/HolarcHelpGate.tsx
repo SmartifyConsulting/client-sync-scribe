@@ -2,8 +2,10 @@ import { useHolarcHelpAccess } from "../hooks/useHolarcHelpAccess";
 import { Shield, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export function HolarcHelpGate({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { enabled, loading } = useHolarcHelpAccess();
   const navigate = useNavigate();
 
@@ -21,19 +23,17 @@ export function HolarcHelpGate({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-sos/10">
           <Shield className="h-8 w-8 text-sos" />
         </div>
-        <h1 className="mt-4 text-2xl font-extrabold">HolarcHelp</h1>
+        <h1 className="mt-4 text-2xl font-extrabold">{t("helpGate.title")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Emergency SOS, live location sharing, and instant responder dispatch — an optional
-          subscription module on top of your Holarc account.
+          {t("helpGate.description")}
         </p>
         <div className="mt-6 rounded-2xl border bg-card p-4 text-left text-sm">
-          <p className="flex items-center gap-2 font-semibold"><Lock className="h-4 w-4" /> Not enabled yet</p>
+          <p className="flex items-center gap-2 font-semibold"><Lock className="h-4 w-4" /> {t("helpGate.notEnabled")}</p>
           <p className="mt-1 text-muted-foreground">
-            HolarcHelp is currently activated by an administrator. Contact your administrator to
-            request access.
+            {t("helpGate.notEnabledBody")}
           </p>
         </div>
-        <Button variant="outline" className="mt-6" onClick={() => navigate(-1)}>Go back</Button>
+        <Button variant="outline" className="mt-6" onClick={() => navigate(-1)}>{t("helpGate.goBack")}</Button>
       </div>
     );
   }

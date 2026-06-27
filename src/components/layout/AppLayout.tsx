@@ -10,12 +10,14 @@ import { AnimatePresence } from "framer-motion";
 import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { useUserRole } from "@/hooks/useUserRole";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
-import { AlertCircle, LifeBuoy } from "lucide-react";
+import { LifeBuoy } from "lucide-react";
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
 import { RouteTipHost } from "@/components/RouteTipHost";
+import { useTranslation } from "react-i18next";
 
 
 export function AppLayout() {
+  const { t } = useTranslation();
   const location = useLocation();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
   const { isPatient, isAdmin, loading: roleLoading } = useUserRole();
@@ -64,7 +66,7 @@ export function AppLayout() {
           href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
           className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
         >
-          <LifeBuoy className="h-3.5 w-3.5" /> Contact Support
+          <LifeBuoy className="h-3.5 w-3.5" /> {t("common.support")}
         </a>
       </div>
 

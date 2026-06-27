@@ -9,17 +9,22 @@ import { EmergencyPatientContext } from "../../components/EmergencyPatientContex
 import { TriageControls } from "../../components/TriageControls";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const ADMISSION_STEPS = [
-  { v: "incoming", label: "Incoming" },
-  { v: "awaiting_arrival", label: "Awaiting arrival" },
-  { v: "arrived", label: "Arrived" },
-  { v: "in_triage", label: "In triage" },
-  { v: "admitted", label: "Admitted" },
-  { v: "escalated", label: "Escalated" },
+  { v: "incoming", labelKey: "admissionStatus.incoming" },
+  { v: "awaiting_arrival", labelKey: "admissionStatus.awaiting_arrival" },
+  { v: "arrived", labelKey: "admissionStatus.arrived" },
+  { v: "in_triage", labelKey: "admissionStatus.in_triage" },
+  { v: "admitted", labelKey: "status.admitted" },
+  { v: "escalated", labelKey: "admissionStatus.escalated" },
 ];
 
+const statusLabel = (status: string | null | undefined, t: (key: string, options?: any) => string) =>
+  t(`transportStatus.${status ?? ""}`, { defaultValue: (status ?? "").replace(/_/g, " ") });
+
 export default function HospitalIncidentConsole() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [incident, setIncident] = useState<any | null>(null);
@@ -62,10 +67,10 @@ export default function HospitalIncidentConsole() {
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: id, event_type: `admission_${next}`, payload: {},
     } as any);
-    toast.success(`Admission status: ${next.replace(/_/g," ")}`);
+    toast.success(`${t("admissions.admission")}: ${t(`admissionStatus.${next}`, { defaultValue: next.replace(/_/g," ") })}`);
   };
 
-  if (!incident) return <div className="text-muted-foreground">Loading…</div>;
+  if (!incident) return <div className="text-muted-foreground">{t("common.loading")}</div>;
 
   const mapPoints: import("../../components/LiveMap").LiveMapPoint[] = [];
   if (locations[0]) mapPoints.push({ kind: "patient", latitude: locations[0].latitude, longitude: locations[0].longitude });
@@ -77,30 +82,30 @@ export default function HospitalIncidentConsole() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => navigate("/provider/hospital")} className="text-xs text-muted-foreground hover:text-foreground">← Back to Emergency Queue</button>
-          <h1 className="mt-1 text-xl font-extrabold">Inbound patient console</h1>
+          <button onClick={() => navigate("/provider/hospital")} className="text-xs text-muted-foreground hover:text-foreground">{t("hospitalConsole.backToQueue")}</button>
+          <h1 className="mt-1 text-xl font-extrabold">{t("hospitalConsole.title")}</h1>
         </div>
         <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-          {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
+          {statusLabel(incident.status, t).toUpperCase()}
         </span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="ER ETA" value={<EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />} />
-        <Stat label="Transport" value={(incident.status ?? "").replace(/_/g," ")} />
-        <Stat label="Admission" value={incident.hospital_admission_status ?? "incoming"} />
-        <Stat label="Triage" value={incident.triage_priority ?? "—"} />
+        <Stat label={t("hospitalConsole.erEta")} value={<EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />} />
+        <Stat label={t("hospitalConsole.transport")} value={statusLabel(incident.status, t)} />
+        <Stat label={t("admissions.admission")} value={t(`admissionStatus.${incident.hospital_admission_status ?? "incoming"}`)} />
+        <Stat label={t("nav.triage")} value={incident.triage_priority ?? "—"} />
       </div>
 
       {crew && (
         <div className="rounded-xl border bg-muted/30 p-2.5 text-xs">
-          <span className="font-semibold">Crew:</span> {crew}
+          <span className="font-semibold">{t("common.crew")}:</span> {crew}
         </div>
       )}
 
       {incident.pre_arrival_notes && (
         <div className="rounded-2xl border-2 border-warning/30 bg-warning/10 p-3 dark:bg-warning/10">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-warning dark:text-warning">Pre-arrival notes from crew</p>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-warning dark:text-warning">{t("hospitalConsole.preArrivalFromCrew")}</p>
           <p className="mt-1 whitespace-pre-wrap text-sm">{incident.pre_arrival_notes}</p>
         </div>
       )}
@@ -109,13 +114,13 @@ export default function HospitalIncidentConsole() {
         <div className="space-y-3">
           <SosLiveMap incidentId={id!} mode="hospital" height={320} />
           <div className="rounded-2xl border bg-card p-3 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Admission stepper</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("hospitalConsole.admissionStepper")}</p>
             <div className="flex flex-wrap gap-1.5">
               {ADMISSION_STEPS.map((s) => (
                 <Button key={s.v} size="sm"
                         variant={incident.hospital_admission_status === s.v ? "default" : "outline"}
                         onClick={() => setAdmissionStatus(s.v)}>
-                  {s.label}
+                  {t(s.labelKey)}
                 </Button>
               ))}
             </div>

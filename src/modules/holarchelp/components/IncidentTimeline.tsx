@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Ambulance, Hospital } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 type EventRow = {
   id: string; event_type: string; created_at: string; provider_id: string | null;
@@ -9,22 +10,22 @@ type EventRow = {
 
 type ProviderInfo = { name: string; kind: "ambulance" | "hospital" };
 
-const labelFor = (e: EventRow) => {
+const labelFor = (e: EventRow, t: (key: string, options?: any) => string) => {
   switch (e.event_type) {
-    case "sos_triggered": return "SOS triggered";
-    case "auto_assigned": return "🤖 Auto-assigned";
-    case "patient_picked": return "✋ You picked";
-    case "accepted": return "✋ Selected the call";
-    case "declined": return "Responder declined";
-    case "reassigned": return "Re-assigned";
-    case "released": return "Responder released — finding next";
-    case "en_route": return "En route";
-    case "arrived": return "Emergency responder arrived at SOS scene";
-    case "patient_collected": return "Patient collected";
-    case "at_hospital": return "Emergency responder arrived at destination hospital";
-    case "completed": return "Incident completed";
-    case "voice_note": return "Voice note added";
-    case "eta_set": return `ETA set${e.payload?.eta_minutes ? `: ${e.payload.eta_minutes} min` : ""}`;
+    case "sos_triggered": return t("timeline.sosTriggered");
+    case "auto_assigned": return t("timeline.autoAssigned");
+    case "patient_picked": return t("timeline.patientPicked");
+    case "accepted": return t("timeline.accepted");
+    case "declined": return t("timeline.declined");
+    case "reassigned": return t("timeline.reassigned");
+    case "released": return t("timeline.released");
+    case "en_route": return t("status.enRoute");
+    case "arrived": return t("timeline.arrivedScene");
+    case "patient_collected": return t("status.patientCollected");
+    case "at_hospital": return t("timeline.arrivedHospital");
+    case "completed": return t("timeline.completed");
+    case "voice_note": return t("timeline.voiceNote");
+    case "eta_set": return `${t("timeline.etaSet")}${e.payload?.eta_minutes ? `: ${e.payload.eta_minutes} min` : ""}`;
     default: return e.event_type;
   }
 };
@@ -34,6 +35,7 @@ const PROVIDER_EVENTS = new Set([
 ]);
 
 export function IncidentTimeline({ incidentId }: { incidentId: string }) {
+  const { t } = useTranslation();
   const [events, setEvents] = useState<EventRow[]>([]);
   const [providers, setProviders] = useState<Record<string, ProviderInfo>>({});
 
@@ -85,7 +87,7 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
   if (events.length === 0) return null;
   return (
     <div className="rounded-2xl border bg-card p-4">
-      <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Timeline</p>
+      <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("timeline.title")}</p>
       <ol className="relative space-y-3 border-l-2 border-primary/20 pl-4">
         {events.map((e) => {
           const pid = e.provider_id || e.payload?.provider_id;
@@ -93,15 +95,15 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
           const showProvider = prov && PROVIDER_EVENTS.has(e.event_type);
           const suffix =
             e.event_type === "auto_assigned"
-              ? "auto-assigned"
+              ? t("timeline.autoAssigned").replace(/^🤖\s*/, "").toLowerCase()
               : e.event_type === "accepted" || e.event_type === "patient_picked"
-                ? "responded & picked the call"
+                ? t("timeline.respondedPicked")
                 : null;
           const Icon = prov?.kind === "hospital" ? Hospital : Ambulance;
           return (
             <li key={e.id} className="relative">
               <span className="absolute -left-[22px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
-              <p className="text-sm font-semibold">{labelFor(e)}</p>
+              <p className="text-sm font-semibold">{labelFor(e, t)}</p>
               <p className="text-xs text-muted-foreground">
                 {new Date(e.created_at).toLocaleString([], { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
               </p>

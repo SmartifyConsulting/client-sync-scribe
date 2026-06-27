@@ -10,6 +10,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const STATUS_TONE: Record<string, string> = {
   available: "bg-success/15 text-success border-success/40",
@@ -18,6 +19,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export default function FleetPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { providerId } = useProviderAccess();
   const [rows, setRows] = useState<AmbulanceRow[]>([]);
@@ -51,12 +53,12 @@ export default function FleetPage() {
   const remove = async () => {
     if (!confirmDelete?.id) return;
     if (confirmDelete.status === "assigned") {
-      toast.error("Can't delete an ambulance that's currently assigned");
+      toast.error(t("fleet.cannotDeleteAssigned"));
       setConfirmDelete(null); return;
     }
     const { error } = await supabase.from("ambulances" as any).delete().eq("id", confirmDelete.id);
     if (error) { toast.error(error.message); return; }
-    toast.success("Ambulance removed");
+    toast.success(t("fleet.removed"));
     setConfirmDelete(null);
     load();
   };
@@ -65,15 +67,15 @@ export default function FleetPage() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
-          <h1 className="text-2xl font-extrabold">Fleet</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+          <h1 className="text-2xl font-extrabold">{t("fleet.title")}</h1>
           <p className="text-xs text-muted-foreground mt-1">
-            {isAdmin ? "Manage your ambulances and operational status." : "View your team's ambulance fleet."}
+            {isAdmin ? t("fleet.adminSubtitle") : t("fleet.viewerSubtitle")}
           </p>
         </div>
         {isAdmin && (
           <Button size="sm" onClick={() => { setEdit(null); setOpen(true); }}>
-            <Plus className="mr-1 h-4 w-4" /> Add ambulance
+            <Plus className="mr-1 h-4 w-4" /> {t("fleet.addAmbulance")}
           </Button>
         )}
       </header>
@@ -84,17 +86,17 @@ export default function FleetPage() {
         ) : rows.length === 0 ? (
           <div className="p-8 text-center text-xs text-muted-foreground">
             <Ambulance className="mx-auto mb-2 h-5 w-5 opacity-50" />
-            No ambulances yet.
+            {t("fleet.noAmbulances")}
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 text-left">Vehicle</th>
-                <th className="px-3 py-2 text-left">Registration</th>
-                <th className="px-3 py-2 text-left">Status</th>
-                <th className="px-3 py-2 text-left">Notes</th>
-                {isAdmin && <th className="px-3 py-2 text-right">Actions</th>}
+                <th className="px-3 py-2 text-left">{t("fleet.vehicle")}</th>
+                <th className="px-3 py-2 text-left">{t("fleet.registration")}</th>
+                <th className="px-3 py-2 text-left">{t("common.status")}</th>
+                <th className="px-3 py-2 text-left">{t("fleet.notes")}</th>
+                {isAdmin && <th className="px-3 py-2 text-right">{t("common.actions")}</th>}
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -104,7 +106,7 @@ export default function FleetPage() {
                   <td className="px-3 py-2 text-xs">{r.registration_number ?? "—"}</td>
                   <td className="px-3 py-2">
                     <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${STATUS_TONE[r.status ?? "available"] ?? STATUS_TONE.available}`}>
-                      {(r.status ?? "available").replace(/_/g, " ")}
+                      {t(`status.${r.status ?? "available"}`, (r.status ?? "available").replace(/_/g, " "))}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-[11px] text-muted-foreground">{r.notes ?? ""}</td>
@@ -138,15 +140,15 @@ export default function FleetPage() {
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove ambulance?</AlertDialogTitle>
+            <AlertDialogTitle>{t("fleet.removeTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmDelete?.vehicle_code} will be removed from your fleet. This can't be undone.
+              {t("fleet.removeDescription", { vehicle: confirmDelete?.vehicle_code })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={remove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Remove
+              {t("common.remove")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

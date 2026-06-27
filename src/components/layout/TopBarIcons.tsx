@@ -18,6 +18,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 const PROVIDER_PROFILE_NOTIF_TYPES = [
   "access_request",
@@ -34,6 +35,7 @@ export interface TopBarIconsProps {
 }
 
 export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
+  const { t } = useTranslation();
   const isProvider = variant === "provider";
   const [reportOpen, setReportOpen] = useState(false);
   const { profile } = useProfile();
@@ -147,7 +149,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
               <Bug className="h-4 w-4 text-white" />
             </button>
           </TooltipTrigger>
-          <TooltipContent>Report Bug/Fix</TooltipContent>
+          <TooltipContent>{t("topbar.reportBug")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <ReportFixSheet open={reportOpen} onOpenChange={setReportOpen} />
@@ -164,7 +166,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                   </div>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>Calendar</TooltipContent>
+              <TooltipContent>{t("topbar.calendar")}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
@@ -178,7 +180,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                   </div>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>Record a Task</TooltipContent>
+              <TooltipContent>{t("topbar.recordTask")}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </>
@@ -198,16 +200,16 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
         </PopoverTrigger>
         <PopoverContent className="w-72 p-0" align="end">
           <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-            <p className="text-xs font-semibold">Notifications</p>
+            <p className="text-xs font-semibold">{t("topbar.notifications")}</p>
             {recentNotifications.length > 0 && (
               <Button variant="ghost" size="sm" className="text-[10px] h-6 text-destructive hover:text-destructive" onClick={clearAllNotifications}>
-                Clear All
+                {t("topbar.clearAll")}
               </Button>
             )}
           </div>
           <div className="max-h-56 overflow-y-auto">
             {recentNotifications.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-4">No notifications</p>
+              <p className="text-xs text-muted-foreground text-center py-4">{t("topbar.noNotifications")}</p>
             ) : (
               recentNotifications.map((n: any) => (
                 <div key={n.id} className="px-3 py-2 border-b border-border/50 text-xs bg-primary/5 flex items-start justify-between gap-2">
@@ -216,7 +218,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                     {n.description && <p className="text-[10px] text-muted-foreground mt-0.5">{n.description}</p>}
                   </div>
                   <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px] text-muted-foreground hover:text-destructive shrink-0" onClick={() => clearNotification(n.id)}>
-                    Clear
+                    {t("common.close")}
                   </Button>
                 </div>
               ))
@@ -257,7 +259,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                 <Stethoscope className="h-3.5 w-3.5 text-primary" />
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                  <p className="text-[10px] text-muted-foreground">Doctor</p>
+                  <p className="text-[10px] text-muted-foreground">{t("topbar.doctor")}</p>
                 </div>
               </button>
               <button
@@ -270,7 +272,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                 <HeartPulse className="h-3.5 w-3.5 text-primary" />
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                  <p className="text-[10px] text-muted-foreground">Patient</p>
+                  <p className="text-[10px] text-muted-foreground">{t("topbar.patient")}</p>
                 </div>
               </button>
             </div>
@@ -278,12 +280,12 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           {!isDoctor && (() => {
             const path = location.pathname;
             const roleLabel = path.startsWith("/provider/ambulance")
-              ? "ER"
+              ? t("topbar.er")
               : path.startsWith("/provider/hospital")
-                ? "Hospital"
+                ? t("topbar.hospital")
                 : isEmergency
-                  ? "ER"
-                  : "Patient";
+                  ? t("topbar.er")
+                  : t("topbar.patient");
             return (
               <div className="px-2 py-1.5 border-b border-border mb-1">
                 <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
@@ -293,13 +295,13 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           })()}
           {isDoctor && !isOnPatientRoute && (
             <Link to="/doctor/rewards" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-              <Gift className="h-3.5 w-3.5" /> My Rewards
+              <Gift className="h-3.5 w-3.5" /> {t("topbar.myRewards")}
             </Link>
           )}
           {isAdmin && (
             <div className="border-t border-border mt-1 pt-1">
               <div className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                <UserCog className="h-3 w-3" /> Switch profile (admin)
+                <UserCog className="h-3 w-3" /> {t("topbar.switchProfile")}
               </div>
               <div className="max-h-64 overflow-y-auto">
                 {TEST_PROFILES.map((p) => {
@@ -345,7 +347,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                   <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">Switch to Admin</p>
+                  <p className="text-xs font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
                   <p className="text-[10px] text-muted-foreground truncate">Georgia Adams · info@georgiaadams.co.za</p>
                 </div>
               </button>
@@ -353,22 +355,22 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           )}
           {isAdmin && (
             <Link to="/admin/users" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-              <ShieldCheck className="h-3.5 w-3.5" /> Admin
+              <ShieldCheck className="h-3.5 w-3.5" /> {t("topbar.admin")}
             </Link>
           )}
           <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-            <Settings className="h-3.5 w-3.5" /> Settings
+            <Settings className="h-3.5 w-3.5" /> {t("common.settings")}
           </Link>
           <Link to="/legal" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-            <Scale className="h-3.5 w-3.5" /> Legal Terms
+            <Scale className="h-3.5 w-3.5" /> {t("topbar.legalTerms")}
           </Link>
           <ShareAppDialog trigger={
             <button className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full">
-              <Share2 className="h-3.5 w-3.5" /> Share App
+              <Share2 className="h-3.5 w-3.5" /> {t("topbar.shareApp")}
             </button>
           } />
           <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
-            <LogOut className="h-3.5 w-3.5" /> Sign Out
+            <LogOut className="h-3.5 w-3.5" /> {t("common.signOut")}
           </button>
         </PopoverContent>
       </Popover>
