@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, Send, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const MAX_SECONDS = 60;
 const SILENCE_MS = 4000;
@@ -28,6 +29,7 @@ const blobToBase64 = (blob: Blob) =>
   });
 
 export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<"recording" | "uploading">("recording");
   const [seconds, setSeconds] = useState(0);
   const [level, setLevel] = useState(0);
@@ -113,7 +115,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       }, 1000);
       rafRef.current = requestAnimationFrame(tick);
     } catch (e: any) {
-      toast.error("Microphone access denied");
+      toast.error(t("sosVoice.micDenied"));
       onClose();
     }
   };
@@ -143,7 +145,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       if (!incidentId) throw new Error("No incident");
       if (blob.size < 500) {
         // Practically empty — keep critical default and skip
-        toast.message("No voice note captured — severity kept as Critical");
+        toast.message(t("sosVoice.noneCaptured"));
         closedRef.current = true;
         cleanup();
         onClose();
@@ -165,7 +167,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
         voice_note_audio_url: path,
       } as any).eq("id", incidentId);
 
-      toast.success("Voice note shared with responders");
+      toast.success(t("sosVoice.shared"));
       cleanup();
       onClose();
 
@@ -189,7 +191,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
           }
         }
         await supabase.from("holarchelp_incidents" as any).update({
-          voice_note_transcript: transcript || "(Transcription unavailable — tap Retry below)",
+          voice_note_transcript: transcript || t("sosVoice.transcriptionUnavailable"),
         } as any).eq("id", incidentId);
         // Log voice-note event for the timeline
         try {
@@ -204,7 +206,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       }
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "Failed to save voice note");
+      toast.error(e?.message || t("voiceNotes.failedSave"));
       cleanup();
       onClose();
     }
@@ -228,11 +230,11 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-red-600 flex items-center gap-2">
-            <Mic className="h-5 w-5" /> Describe the emergency
+            <Mic className="h-5 w-5" /> {t("sosVoice.title")}
           </DialogTitle>
           <DialogDescription className="text-base text-foreground pt-2">
-            Recording started automatically. Tell us what happened, <strong>how many people are injured</strong>, and{" "}
-            <strong>how serious</strong> it is. We'll auto-send after 4 seconds of silence.
+            {t("sosVoice.descriptionStart")} <strong>{t("sosVoice.howMany")}</strong> {t("common.and", { defaultValue: "and" })}{" "}
+            <strong>{t("sosVoice.howSerious")}</strong>. {t("sosVoice.autoSend")}
           </DialogDescription>
         </DialogHeader>
 
@@ -250,10 +252,10 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
             </div>
             <div className="grid grid-cols-2 gap-2 w-full">
               <Button onClick={cancel} variant="outline" className="h-11">
-                <X className="h-4 w-4 mr-2" /> Cancel
+                <X className="h-4 w-4 mr-2" /> {t("common.cancel")}
               </Button>
               <Button onClick={stopAndSend} className="bg-red-600 hover:bg-red-700 text-white h-11">
-                <Send className="h-4 w-4 mr-2" /> Send now
+                <Send className="h-4 w-4 mr-2" /> {t("sosVoice.sendNow")}
               </Button>
             </div>
           </div>
@@ -262,7 +264,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
         {phase === "uploading" && (
           <div className="flex flex-col items-center gap-3 py-6">
             <Loader2 className="h-8 w-8 animate-spin text-red-600" />
-            <div className="text-sm text-muted-foreground">Sharing voice note…</div>
+            <div className="text-sm text-muted-foreground">{t("sosVoice.sharing")}</div>
           </div>
         )}
       </DialogContent>
