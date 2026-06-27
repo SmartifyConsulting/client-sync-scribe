@@ -175,14 +175,17 @@ export default function DispatchReassignmentScreen() {
                 </span>
               </div>
               <div className="pt-2 border-t">
-                <p className="text-xs text-blue-700">
-                  ℹ️ The new ambulance will arrive{" "}
-                  {
+                {(() => {
+                  const diff =
                     AVAILABLE_AMBULANCES.find((a) => a.code === selectedAmbulance)!.eta -
-                    CURRENT_AMBULANCE.eta
-                  }{" "}
-                  minute(s) {"later" || "earlier"}
-                </p>
+                    CURRENT_AMBULANCE.eta;
+                  return (
+                    <p className="text-xs text-blue-700">
+                      ℹ️ The new ambulance will arrive {Math.abs(diff)} minute(s){" "}
+                      {diff >= 0 ? "later" : "earlier"}
+                    </p>
+                  );
+                })()}
               </div>
             </div>
           </div>
