@@ -1,28 +1,23 @@
-## Plan: make language switching apply across the whole interface
+## Goal
+Stop the preview experience from repeatedly sending you back to login while you are testing changes on the same preview URL.
 
-1. **Centralize the translation keys**
-   - Expand the locale files beyond nav/sidebar text to include common app sections: top bar, footer, settings, patient pages, doctor pages, admin screens, provider/hospital/ER screens, dialogs, buttons, empty states, tab headings, badges, tooltips, and toast messages.
-   - Keep English as the source language and add equivalent keys to all supported language files so missing keys do not fall back to English unexpectedly.
+## Plan
+1. **Preserve the existing auth session**
+   - Keep the current backend auth client using `localStorage`, `persistSession: true`, and token auto-refresh.
+   - Do not change the generated auth client file.
 
-2. **Replace hardcoded UI text with `t()` everywhere visible**
-   - Convert high-visibility layouts first: `TopBarIcons`, `Footer`, `MobileHeader`, `BottomNav`, `Settings`, provider layouts, ER screens, hospital screens, and patient/doctor/admin dashboards.
-   - Convert screen-level headings, tab labels, card titles, action buttons, placeholders, empty states, alerts, modal titles, tooltip text, and status labels.
-   - Ensure current examples like **Live SOS Incident Feed**, **Affiliated Hospitals**, **Settings**, **Contact Support**, **Notifications**, provider stats strips, and tab headings change immediately when the selected language changes.
+2. **Add a preview-safe session restore guard**
+   - Update the shared `useAuth` hook so it waits for the initial stored session to finish loading before protected routes redirect to `/auth`.
+   - If `getSession()` briefly returns empty during a Vite hot reload or preview refresh, retry once before treating the user as signed out.
 
-3. **Make profile language persistence reliable for every user type**
-   - Ensure the same `LanguageSwitcher` behavior is used across doctor, patient, admin, hospital, ER, insurance/pharmacy/provider layouts.
-   - When switching profiles, load that profile’s saved language and call `i18n.changeLanguage()` so the flag and UI update together.
-   - Keep local browser language and `profiles.preferred_language` in sync after every selection.
+3. **Handle token refresh failures more gently**
+   - Listen for real `SIGNED_OUT` events, but avoid immediately clearing the UI during transient startup/refresh timing.
+   - Only redirect to login after auth has conclusively settled with no valid session.
 
-4. **Add translation helpers for repeated dynamic labels**
-   - Add small helpers/maps for statuses and roles such as `Active`, `Pending`, `Critical`, `Incoming`, `Assigned`, `Hospital Ops`, `ER Provider`, `Doctor`, `Patient`, etc.
-   - Keep user-generated or clinical content unchanged by default: patient names, doctor names, notes, transcripts, AI summaries, addresses, and uploaded/sample records should not be machine-translated unless explicitly requested later.
+4. **Keep manual logout unchanged**
+   - The actual Sign Out button will still sign you out immediately.
+   - No changes to password, roles, onboarding, or navigation behavior.
 
-5. **Prevent layout breakage in longer languages**
-   - Use the existing language scale/autofit approach on tab headings, compact nav items, buttons, and status chips where translated strings can be longer.
-   - Keep text wrapping/truncation controlled so labels do not overlap on desktop or mobile.
-
-6. **Validate the fix**
-   - Test switching to French, Greek, isiZulu, Hausa, and Arabic/RTL from the live UI.
-   - Confirm nav, top bar, settings, provider/ER screens, hospital screens, patient screens, dialogs, and tab headings update without refresh.
-   - Confirm the selected language persists after refresh and changes correctly when switching profiles.
+5. **Verify in preview**
+   - Sign in once, refresh the preview, and confirm the app remains authenticated.
+   - Navigate to a protected page after refresh and confirm it does not flash/redirect to login unless the user manually signed out.

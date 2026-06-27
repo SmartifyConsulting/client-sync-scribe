@@ -4,6 +4,42 @@ import { supabase } from '@/integrations/supabase/client';
 
 const SIGNIN_COUNT_PREFIX = 'holarc.signinCount.';
 const LAST_TOKEN_PREFIX = 'holarc.lastTokenSeen.';
+const SESSION_RESTORE_RETRY_MS = 350;
+const SESSION_RESTORE_RETRIES = 2;
+
+let manualSignOutRequested = false;
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function hasStoredAuthSession(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('sb-') && key.endsWith('-auth-token')) {
+        return true;
+      }
+    }
+  } catch {
+    // If storage is temporarily unavailable, avoid an eager signed-out redirect.
+    return true;
+  }
+  return false;
+}
+
+async function getSessionWithRetry(): Promise<Session | null> {
+  const attempts = hasStoredAuthSession() ? SESSION_RESTORE_RETRIES + 1 : 1;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) return session;
+    if (attempt < attempts - 1) await wait(SESSION_RESTORE_RETRY_MS);
+  }
+
+  return null;
+}
 
 function bumpSigninCount(session: Session | null) {
   try {
@@ -28,8 +64,11 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let mounted = true;
+
+    // Get initial session, allowing preview/HMR storage hydration to settle first.
+    getSessionWithRetry().then((session) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -39,13 +78,32 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'SIGNED_IN') bumpSigninCount(session);
+
+        if (event === 'SIGNED_OUT' && !manualSignOutRequested) {
+          setLoading(true);
+          getSessionWithRetry().then((restoredSession) => {
+            if (!mounted) return;
+            setSession(restoredSession);
+            setUser(restoredSession?.user ?? null);
+            setLoading(false);
+          });
+          return;
+        }
+
+        if (event === 'SIGNED_OUT') {
+          manualSignOutRequested = false;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (
@@ -70,7 +128,9 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    manualSignOutRequested = true;
     const { error } = await supabase.auth.signOut();
+    if (error) manualSignOutRequested = false;
     return { error };
   };
 
