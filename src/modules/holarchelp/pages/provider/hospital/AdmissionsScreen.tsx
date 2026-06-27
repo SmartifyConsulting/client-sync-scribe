@@ -13,7 +13,7 @@ type Row = {
   triage_bay: string | null; triage_nurse: string | null;
 };
 
-const ago = (iso: string | null, t: (key: string) => string) => {
+const ago = (iso: string | null) => {
   if (!iso) return "—";
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (s < 60) return `${s}s`;
@@ -82,7 +82,7 @@ export default function AdmissionsScreen() {
                 <td className="px-3 py-2 text-xs">
                   {r.triage_bay ?? "—"}{r.triage_nurse ? ` · ${r.triage_nurse}` : ""}
                 </td>
-                <td className="px-3 py-2 text-xs text-muted-foreground">{ago(r.admitted_at ?? r.completed_at, t)} {t("common.ago")}</td>
+                <td className="px-3 py-2 text-xs text-muted-foreground">{ago(r.admitted_at ?? r.completed_at)} {t("common.ago")}</td>
                 <td className="px-3 py-2 text-right">
                   <Link to={`/provider/hospital/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted">
                     {t("common.open")} <ChevronRight className="h-3 w-3" />
