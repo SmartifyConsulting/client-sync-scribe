@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { ChevronRight, CheckCircle2, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -13,6 +14,7 @@ type Row = {
 const fmt = (iso: string | null) => iso ? new Date(iso).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "—";
 
 export default function IncidentHistoryScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [hosp, setHosp] = useState<Record<string,string>>({});
@@ -40,19 +42,19 @@ export default function IncidentHistoryScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
-        <h1 className="text-2xl font-extrabold">Incident History</h1>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+        <h1 className="text-2xl font-extrabold">{t("incidentHistory.title")}</h1>
       </header>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left">Incident</th>
-              <th className="px-3 py-2 text-left">Outcome</th>
-              <th className="px-3 py-2 text-left">Destination</th>
-              <th className="px-3 py-2 text-left">Triggered</th>
-              <th className="px-3 py-2 text-left">Closed</th>
+              <th className="px-3 py-2 text-left">{t("ambulance.incident")}</th>
+              <th className="px-3 py-2 text-left">{t("incidentHistory.outcome")}</th>
+              <th className="px-3 py-2 text-left">{t("incidentHistory.destination")}</th>
+              <th className="px-3 py-2 text-left">{t("ambulance.triggered")}</th>
+              <th className="px-3 py-2 text-left">{t("incidentHistory.closed")}</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -62,20 +64,20 @@ export default function IncidentHistoryScreen() {
                 <td className="px-3 py-2 text-xs font-bold">#{r.id.slice(0,8)}</td>
                 <td className="px-3 py-2 text-xs">
                   {r.status === "completed"
-                    ? <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 className="h-3.5 w-3.5" /> Completed</span>
-                    : <span className="inline-flex items-center gap-1 text-destructive"><XCircle className="h-3.5 w-3.5" /> Cancelled</span>}
+                    ? <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 className="h-3.5 w-3.5" /> {t("status.completed")}</span>
+                    : <span className="inline-flex items-center gap-1 text-destructive"><XCircle className="h-3.5 w-3.5" /> {t("status.cancelled")}</span>}
                 </td>
                 <td className="px-3 py-2 text-xs">{hosp[r.destination_hospital_id ?? ""] ?? "—"}</td>
                 <td className="px-3 py-2 text-[11px] text-muted-foreground">{fmt(r.created_at)}</td>
                 <td className="px-3 py-2 text-[11px] text-muted-foreground">{fmt(r.completed_at)}</td>
                 <td className="px-3 py-2 text-right">
                   <Link to={`/provider/ambulance/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted">
-                    Review <ChevronRight className="h-3 w-3" />
+                    {t("common.review")} <ChevronRight className="h-3 w-3" />
                   </Link>
                 </td>
               </tr>
             ))}
-            {!rows.length && <tr><td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">No closed incidents yet.</td></tr>}
+            {!rows.length && <tr><td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">{t("incidentHistory.noClosed")}</td></tr>}
           </tbody>
         </table>
       </div>
