@@ -5,11 +5,13 @@ import { useProviderAccess } from "../../../components/ProviderGate";
 import { InviteStaffDialog } from "../../../components/InviteStaffDialog";
 import { Button } from "@/components/ui/button";
 import { Users, UserCheck, UserX, UserPlus, Truck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Member = { id: string; user_id: string; role?: string | null; full_name?: string | null };
 type Shift = { user_id: string; status: string; ambulance_id: string; vehicle_code?: string | null };
 
 export default function TeamStatusScreen() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { providerId } = useProviderAccess();
   const [members, setMembers] = useState<Member[]>([]);
@@ -51,7 +53,7 @@ export default function TeamStatusScreen() {
         const { data: profs } = await supabase.from("profiles" as any).select("id, full_name").in("id", ids);
         ((profs as any) ?? []).forEach((p: any) => { profMap[p.id] = p.full_name; });
       }
-      setMembers(list.map(x => ({ ...x, full_name: profMap[x.user_id] ?? "Crew member" })));
+      setMembers(list.map(x => ({ ...x, full_name: profMap[x.user_id] ?? t("common.crewMember") })));
     })();
     loadShifts(providerId);
     const ch = supabase.channel(`shifts-${providerId}`)
@@ -68,17 +70,17 @@ export default function TeamStatusScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
-          <h1 className="text-2xl font-extrabold">Team Status</h1>
-          <p className="text-xs text-muted-foreground">Live shift + ambulance status. Synced with active incidents.</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+          <h1 className="text-2xl font-extrabold">{t("team.title")}</h1>
+          <p className="text-xs text-muted-foreground">{t("team.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">
-            <Users className="mr-1 inline h-3.5 w-3.5 text-primary" /> {onShift} / {members.length} on shift
+            <Users className="mr-1 inline h-3.5 w-3.5 text-primary" /> {onShift} / {members.length} {t("team.onShift")}
           </span>
           {isAdmin && (
             <Button size="sm" onClick={() => setInviteOpen(true)}>
-              <UserPlus className="mr-1 h-4 w-4" /> Invite
+              <UserPlus className="mr-1 h-4 w-4" /> {t("common.invite")}
             </Button>
           )}
         </div>
@@ -98,7 +100,7 @@ export default function TeamStatusScreen() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">{m.full_name}</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {m.role ?? "Paramedic"}
+                    {m.role ?? t("team.paramedic")}
                     {s?.vehicle_code && <> · <Truck className="inline h-3 w-3" /> {s.vehicle_code}</>}
                   </p>
                 </div>
@@ -109,12 +111,12 @@ export default function TeamStatusScreen() {
                     : "border-border bg-background text-muted-foreground"
                   }`}
                 >
-                  {busy ? "Busy" : active ? "Available" : "Off shift"}
+                  {busy ? t("status.busy") : active ? t("status.available") : t("status.offShift")}
                 </span>
               </li>
             );
           })}
-          {!members.length && <li className="p-8 text-center text-xs text-muted-foreground">No crew members on roster yet.</li>}
+          {!members.length && <li className="p-8 text-center text-xs text-muted-foreground">{t("team.noCrew")}</li>}
         </ul>
       </div>
 

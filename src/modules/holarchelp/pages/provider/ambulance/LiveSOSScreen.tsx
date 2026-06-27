@@ -5,6 +5,7 @@ import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { Bell, BellOff, ChevronRight, HeartPulse, MapPin, Siren, Activity, Clock, Ambulance } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type Incident = {
   id: string;
@@ -44,6 +45,7 @@ const CHIME =
   "data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YRwAAACAgICAgICAgICAgICAgICAgICAgICAgICAgIA=";
 
 export default function LiveSOSScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [rows, setRows] = useState<Incident[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -113,17 +115,17 @@ export default function LiveSOSScreen() {
             <HeartPulse className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Real-time dispatch</p>
-            <h1 className="text-2xl font-extrabold leading-tight">Live SOS Incident Feed</h1>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("liveSos.subtitle")}</p>
+            <h1 className="text-2xl font-extrabold leading-tight">{t("liveSos.title")}</h1>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <KPI icon={Siren} label="Active" value={active.length} tone="text-destructive" />
-          <KPI icon={Activity} label="Critical" value={criticalCount} tone="text-destructive" />
-          <KPI icon={Clock} label="Recent" value={recent.length} tone="text-muted-foreground" />
+          <KPI icon={Siren} label={t("liveSos.active")} value={active.length} tone="text-destructive" />
+          <KPI icon={Activity} label={t("liveSos.critical")} value={criticalCount} tone="text-destructive" />
+          <KPI icon={Clock} label={t("liveSos.recent")} value={recent.length} tone="text-muted-foreground" />
           <Button variant="outline" size="sm" onClick={() => setMuted((m) => !m)} className="h-9">
             {muted ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-            <span className="ml-1.5 text-xs">{muted ? "Muted" : "Alerts on"}</span>
+            <span className="ml-1.5 text-xs">{muted ? t("liveSos.muted") : t("liveSos.alertsOn")}</span>
           </Button>
         </div>
       </header>
@@ -131,8 +133,8 @@ export default function LiveSOSScreen() {
       <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr]">
         {/* List */}
         <div className="space-y-2">
-          <SectionLabel count={active.length}>Active now</SectionLabel>
-          {active.length === 0 && <EmptyRow>All clear — no active incidents.</EmptyRow>}
+          <SectionLabel count={active.length}>{t("liveSos.activeNow")}</SectionLabel>
+          {active.length === 0 && <EmptyRow>{t("liveSos.allClear")}</EmptyRow>}
           {active.map((r) => (
             <IncidentRow
               key={r.id}
@@ -145,7 +147,7 @@ export default function LiveSOSScreen() {
 
           {recent.length > 0 && (
             <>
-              <SectionLabel count={recent.length}>Recent</SectionLabel>
+              <SectionLabel count={recent.length}>{t("liveSos.recent")}</SectionLabel>
               {recent.map((r) => (
                 <IncidentRow
                   key={r.id}
@@ -163,7 +165,7 @@ export default function LiveSOSScreen() {
         {/* Detail */}
         <aside className="rounded-2xl border bg-card p-4">
           {!selected && (
-            <p className="text-sm text-muted-foreground">Select an incident to see details.</p>
+            <p className="text-sm text-muted-foreground">{t("liveSos.selectIncident")}</p>
           )}
           {selected && (
             <div className="space-y-4">
@@ -172,7 +174,7 @@ export default function LiveSOSScreen() {
                   <span className={cn("inline-block rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase", sevTone(selected.severity))}>
                     {selected.severity ?? "—"}
                   </span>
-                  <h2 className="mt-2 text-lg font-bold leading-tight">{selected.ai_emergency_summary ?? "SOS incident"}</h2>
+                  <h2 className="mt-2 text-lg font-bold leading-tight">{selected.ai_emergency_summary ?? t("liveSos.sosIncident")}</h2>
                   <p className="mt-1 text-xs text-muted-foreground">
                     #{selected.tracking_token} · {ago(selected.created_at)} · {selected.status.replace(/_/g, " ")}
                   </p>
@@ -180,16 +182,16 @@ export default function LiveSOSScreen() {
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <Stat label="Consciousness" value={selected.conscious === false ? "Unconscious" : "Responsive"} bad={selected.conscious === false} />
-                <Stat label="Breathing" value={selected.breathing === false ? "Not breathing" : "Adequate"} bad={selected.breathing === false} />
-                <Stat label="Ambulance" value={selected.assigned_ambulance_id ? ambMap[selected.assigned_ambulance_id] ?? "Assigned" : "Unassigned"} icon={Ambulance} />
-                <Stat label="ETA" value={selected.eta_minutes ? `${selected.eta_minutes} min` : "—"} icon={Clock} />
+                <Stat label={t("liveSos.consciousness")} value={selected.conscious === false ? t("ambulance.unconscious") : t("liveSos.responsive")} bad={selected.conscious === false} />
+                <Stat label={t("incomingSos.breathing")} value={selected.breathing === false ? t("ambulance.notBreathing") : t("liveSos.adequate")} bad={selected.breathing === false} />
+                <Stat label={t("liveSos.ambulance")} value={selected.assigned_ambulance_id ? ambMap[selected.assigned_ambulance_id] ?? t("status.assigned") : t("status.unassigned")} icon={Ambulance} />
+                <Stat label={t("liveSos.eta")} value={selected.eta_minutes ? `${selected.eta_minutes} min` : "—"} icon={Clock} />
               </div>
 
               {selected.provider_latitude != null && selected.provider_longitude != null && (
                 <div className="rounded-xl border bg-muted/40 p-3">
                   <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    <MapPin className="h-3 w-3" /> Location
+                    <MapPin className="h-3 w-3" /> {t("liveSos.location")}
                   </p>
                   <p className="mt-1 text-xs font-mono">
                     {selected.provider_latitude.toFixed(4)}, {selected.provider_longitude.toFixed(4)}
@@ -200,7 +202,7 @@ export default function LiveSOSScreen() {
                     href={`https://www.google.com/maps?q=${selected.provider_latitude},${selected.provider_longitude}`}
                     className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
                   >
-                    Open in Maps <ChevronRight className="h-3 w-3" />
+                    {t("liveSos.openInMaps")} <ChevronRight className="h-3 w-3" />
                   </a>
                 </div>
               )}
@@ -209,7 +211,7 @@ export default function LiveSOSScreen() {
                 to={`/provider/ambulance/incident/${selected.id}`}
                 className="inline-flex w-full items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
               >
-                Open incident console <ChevronRight className="h-4 w-4" />
+                {t("liveSos.openConsole")} <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
           )}
@@ -232,6 +234,7 @@ function IncidentRow({
   onClick: () => void;
   dim?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <button
       onClick={onClick}
@@ -246,7 +249,7 @@ function IncidentRow({
           {i.severity ?? "—"}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold">{i.ai_emergency_summary ?? "SOS incident"}</p>
+          <p className="truncate text-sm font-semibold">{i.ai_emergency_summary ?? t("liveSos.sosIncident")}</p>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
             <span>{ago(i.created_at)}</span>
             <span>·</span>
@@ -260,7 +263,7 @@ function IncidentRow({
             {!ambCode && i.status === "open" && (
               <>
                 <span>·</span>
-                <span className="font-semibold text-destructive">Unassigned</span>
+                <span className="font-semibold text-destructive">{t("status.unassigned")}</span>
               </>
             )}
           </p>

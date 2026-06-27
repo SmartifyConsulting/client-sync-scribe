@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { EtaCountdown } from "../../../components/EtaCountdown";
 import { Ambulance, ChevronRight, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -33,6 +34,7 @@ const ago = (iso: string) => {
 };
 
 export default function HospitalOpsDashboard() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [rows, setRows] = useState<Row[]>([]);
   const [crews, setCrews] = useState<Record<string,string>>({});
@@ -80,22 +82,22 @@ export default function HospitalOpsDashboard() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hospital Emergency Operations</p>
-          <h1 className="text-2xl font-extrabold leading-tight">Live Emergency Queue</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
+          <h1 className="text-2xl font-extrabold leading-tight">{t("hospital.liveQueue")}</h1>
         </div>
-        <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">{rows.length} active</span>
+        <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">{rows.length} {t("hospital.active")}</span>
       </header>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left">Patient</th>
-              <th className="px-3 py-2 text-left">Severity</th>
-              <th className="px-3 py-2 text-left">Incident</th>
-              <th className="px-3 py-2 text-left">ER</th>
-              <th className="px-3 py-2 text-right">ETA</th>
-              <th className="px-3 py-2 text-left">Status</th>
+              <th className="px-3 py-2 text-left">{t("common.patient")}</th>
+              <th className="px-3 py-2 text-left">{t("hospital.severity")}</th>
+              <th className="px-3 py-2 text-left">{t("ambulance.incident")}</th>
+              <th className="px-3 py-2 text-left">{t("hospital.er")}</th>
+              <th className="px-3 py-2 text-right">{t("hospital.eta")}</th>
+              <th className="px-3 py-2 text-left">{t("common.status")}</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -103,11 +105,11 @@ export default function HospitalOpsDashboard() {
             {rows.map((r) => (
               <tr key={r.id} className="transition hover:bg-muted/40">
                 <td className="px-3 py-2">
-                  <p className="font-semibold">{r.user_id ? (patients[r.user_id] ?? `Patient ${r.id.slice(0,6)}`) : `Incident ${r.id.slice(0,6)}`}</p>
+                  <p className="font-semibold">{r.user_id ? (patients[r.user_id] ?? `${t("common.patient")} ${r.id.slice(0,6)}`) : `${t("ambulance.incident")} ${r.id.slice(0,6)}`}</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {r.conscious === false && <span className="text-destructive font-semibold">Unconscious · </span>}
-                    {r.breathing === false && <span className="text-destructive font-semibold">Not breathing · </span>}
-                    Triggered {ago(r.created_at)} ago
+                    {r.conscious === false && <span className="text-destructive font-semibold">{t("ambulance.unconscious")} · </span>}
+                    {r.breathing === false && <span className="text-destructive font-semibold">{t("ambulance.notBreathing")} · </span>}
+                    {t("ambulance.triggered")} {ago(r.created_at)} {t("common.ago")}
                   </p>
                 </td>
                 <td className="px-3 py-2">
@@ -115,7 +117,7 @@ export default function HospitalOpsDashboard() {
                     {(r.severity ?? "—").toUpperCase()}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-xs">{r.incident_type ?? "Emergency"}</td>
+                <td className="px-3 py-2 text-xs">{r.incident_type ?? t("ambulance.emergency")}</td>
                 <td className="px-3 py-2 text-xs">
                   <span className="inline-flex items-center gap-1"><Ambulance className="h-3.5 w-3.5 text-destructive" />
                     {crews[r.assigned_provider_id ?? ""] ?? "—"}
@@ -133,7 +135,7 @@ export default function HospitalOpsDashboard() {
                 </td>
                 <td className="px-3 py-2 text-right">
                   <Link to={`/provider/hospital/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted">
-                    Open <ChevronRight className="h-3 w-3" />
+                    {t("common.open")} <ChevronRight className="h-3 w-3" />
                   </Link>
                 </td>
               </tr>
@@ -142,7 +144,7 @@ export default function HospitalOpsDashboard() {
               <tr>
                 <td colSpan={7} className="p-8 text-center text-xs text-muted-foreground">
                   <AlertTriangle className="mx-auto mb-1 h-4 w-4 opacity-50" />
-                  No active emergencies in your queue.
+                  {t("hospital.noActive")}
                 </td>
               </tr>
             )}

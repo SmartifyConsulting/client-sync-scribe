@@ -16,19 +16,24 @@ import { toast } from "sonner";
 import { useProviderAccess } from "../../components/ProviderGate";
 import { useLiveProviderLocation } from "../../hooks/useLiveProviderLocation";
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Loc = { latitude: number; longitude: number; recorded_at: string };
 
 const STEPS = [
-  { v: "en_route", label: "En route" },
-  { v: "arrived", label: "On scene" },
-  { v: "patient_collected", label: "Patient loaded" },
-  { v: "en_route_to_hospital", label: "→ Hospital" },
-  { v: "at_hospital", label: "At hospital" },
-  { v: "completed", label: "Complete" },
+  { v: "en_route", labelKey: "status.enRoute" },
+  { v: "arrived", labelKey: "incidentConsole.onScene" },
+  { v: "patient_collected", labelKey: "status.patientCollected" },
+  { v: "en_route_to_hospital", labelKey: "status.enRouteToHospital" },
+  { v: "at_hospital", labelKey: "status.atHospital" },
+  { v: "completed", labelKey: "incidentConsole.complete" },
 ];
 
+const statusLabel = (status: string | null | undefined, t: (key: string, options?: any) => string) =>
+  t(`transportStatus.${status ?? ""}`, { defaultValue: (status ?? "").replace(/_/g, " ") });
+
 export default function AmbulanceIncidentConsole() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { providerId } = useProviderAccess();
@@ -74,7 +79,7 @@ export default function AmbulanceIncidentConsole() {
       _incident_id: id, _status: status, _payload: {},
     });
     if (error) return toast.error(error.message);
-    toast.success(`Status: ${status.replace(/_/g, " ")}`);
+    toast.success(`${t("common.status")}: ${statusLabel(status, t)}`);
   };
 
   const setEtaMinutes = async () => {
@@ -85,7 +90,7 @@ export default function AmbulanceIncidentConsole() {
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: id, provider_id: providerId, event_type: "eta_set", payload: { eta_minutes: Number(eta) },
     } as any);
-    toast.success("ETA shared with hospital");
+    toast.success(t("incidentConsole.etaShared"));
   };
 
   const saveNotes = async () => {
@@ -97,20 +102,20 @@ export default function AmbulanceIncidentConsole() {
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: id, provider_id: providerId, event_type: "pre_arrival_notes_updated", payload: { length: notes.length },
     } as any);
-    toast.success("Notes saved");
+    toast.success(t("incidentConsole.notesSaved"));
   };
 
   const release = async () => {
     if (!id) return;
-    const reason = window.prompt("Reason for unable to continue?") || "unable_to_continue";
+    const reason = window.prompt(t("incidentConsole.unableReason")) || "unable_to_continue";
     const { error } = await supabase.rpc("holarchelp_release_incident" as any, { _incident_id: id, _reason: reason });
     if (error) return toast.error(error.message);
     supabase.functions.invoke("dispatch-sos", { body: { incident_id: id, exclude_provider_ids: [providerId] } });
-    toast.success("Released — incident reopened");
+    toast.success(t("incidentConsole.released"));
     navigate("/provider/ambulance");
   };
 
-  if (!incident) return <div className="text-muted-foreground">Loading…</div>;
+  if (!incident) return <div className="text-muted-foreground">{t("incidentConsole.loading")}</div>;
 
   const mapPoints: import("../../components/LiveMap").LiveMapPoint[] = [];
   if (locations[0]) mapPoints.push({ kind: "patient", latitude: locations[0].latitude, longitude: locations[0].longitude });
@@ -122,17 +127,17 @@ export default function AmbulanceIncidentConsole() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => navigate("/provider/ambulance")} className="text-xs text-muted-foreground hover:text-foreground">← Back to dispatch</button>
-          <h1 className="mt-1 text-xl font-extrabold">Emergency response console</h1>
+          <button onClick={() => navigate("/provider/ambulance")} className="text-xs text-muted-foreground hover:text-foreground">{t("incidentConsole.backToDispatch")}</button>
+          <h1 className="mt-1 text-xl font-extrabold">{t("incidentConsole.title")}</h1>
         </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
-          {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
+          {statusLabel(incident.status, t).toUpperCase()}
         </span>
       </div>
 
       {!isAssignedParamedic && !isAssignedProvider && incident.assigned_provider_id && (
         <div className="rounded-2xl border-2 border-amber-500/40 bg-amber-50 p-3 text-sm dark:bg-amber-950/20">
-          <p className="font-semibold text-amber-800 dark:text-amber-300">This incident has been locked by another responder.</p>
+          <p className="font-semibold text-amber-800 dark:text-amber-300">{t("incidentConsole.locked")}</p>
         </div>
       )}
 
@@ -144,14 +149,14 @@ export default function AmbulanceIncidentConsole() {
           {(isAssignedParamedic || isAssignedProvider) && (
             <>
               <div className="rounded-2xl border bg-card p-3 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status stepper</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("incidentConsole.statusStepper")}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {STEPS.map((s) => (
                     <Button key={s.v}
                             size="sm"
                             variant={incident.status === s.v ? "default" : "outline"}
                             onClick={() => setStatus(s.v)}>
-                      {s.label}
+                      {t(s.labelKey)}
                     </Button>
                   ))}
                 </div>
@@ -159,13 +164,13 @@ export default function AmbulanceIncidentConsole() {
 
               <div className="rounded-2xl border bg-card p-3 space-y-2">
                 <div className="grid gap-1.5">
-                  <Label htmlFor="eta" className="text-xs">ETA to hospital (minutes)</Label>
+                  <Label htmlFor="eta" className="text-xs">{t("incidentConsole.etaToHospital")}</Label>
                   <div className="flex gap-2">
                     <Input id="eta" type="number" value={eta} onChange={(e) => setEta(e.target.value)} className="rounded-xl" />
-                    <Button size="sm" onClick={setEtaMinutes}>Share</Button>
+                    <Button size="sm" onClick={setEtaMinutes}>{t("incidentConsole.share")}</Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Countdown: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
+                    {t("incidentConsole.countdown")}: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
                   </p>
                 </div>
               </div>
@@ -178,13 +183,13 @@ export default function AmbulanceIncidentConsole() {
               />
 
               <div className="rounded-2xl border bg-card p-3 space-y-2">
-                <Label className="text-xs">Pre-arrival notes (visible to hospital)</Label>
-                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[80px] rounded-xl" placeholder="GCS, vitals, mechanism of injury, allergies observed…" />
-                <Button size="sm" variant="outline" onClick={saveNotes} disabled={savingNotes}>Save notes</Button>
+                <Label className="text-xs">{t("incidentConsole.preArrivalNotes")}</Label>
+                <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[80px] rounded-xl" placeholder={t("incidentConsole.notesPlaceholder")} />
+                <Button size="sm" variant="outline" onClick={saveNotes} disabled={savingNotes}>{t("incidentConsole.saveNotes")}</Button>
               </div>
 
               <Button size="sm" variant="destructive" className="gap-1.5" onClick={release}>
-                <AlertTriangle className="h-4 w-4" /> Unable to continue
+                <AlertTriangle className="h-4 w-4" /> {t("incidentConsole.unableContinue")}
               </Button>
             </>
           )}

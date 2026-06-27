@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export type GeofenceRow = {
   id: string;
@@ -29,6 +30,7 @@ interface GeofenceFormDialogProps {
 }
 
 export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, onSaved }: GeofenceFormDialogProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initial?.name ?? "");
   const [type, setType] = useState(initial?.type ?? "depot");
   const [latitude, setLatitude] = useState(initial?.latitude?.toString() ?? "");
@@ -38,18 +40,18 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast.error("Please enter a name");
+      toast.error(t("geofence.enterName"));
       return;
     }
     if (!latitude || !longitude || !radiusKm) {
-      toast.error("Please fill in all location fields");
+      toast.error(t("geofence.fillLocation"));
       return;
     }
 
     setSaving(true);
     try {
       // Would save to Supabase here
-      toast.success(initial ? "Geofence updated" : "Geofence created");
+      toast.success(initial ? t("geofence.updated") : t("geofence.created"));
       onOpenChange(false);
       onSaved();
       // Reset form
@@ -61,7 +63,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
         setRadiusKm("1");
       }
     } catch (error: any) {
-      toast.error(error.message ?? "Failed to save geofence");
+      toast.error(error.message ?? t("geofence.failed"));
     } finally {
       setSaving(false);
     }
@@ -71,20 +73,20 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{initial ? "Edit Geofence" : "Create Geofence"}</DialogTitle>
+          <DialogTitle>{initial ? t("geofence.editTitle") : t("geofence.createTitle")}</DialogTitle>
           <DialogDescription>
-            {initial ? "Update the geofence location and settings." : "Define a new geographic zone for vehicle monitoring."}
+            {initial ? t("geofence.editDescription") : t("geofence.createDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
             <Label htmlFor="gf-name" className="text-xs">
-              Geofence Name
+              {t("geofence.name")}
             </Label>
             <Input
               id="gf-name"
-              placeholder="e.g., Main Depot, Central Hospital"
+              placeholder={t("geofence.namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="mt-1"
@@ -93,18 +95,18 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
 
           <div>
             <Label htmlFor="gf-type" className="text-xs">
-              Type
+              {t("geofence.type")}
             </Label>
             <Select value={type} onValueChange={(v) => setType(v as any)}>
               <SelectTrigger id="gf-type" className="mt-1">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="depot">Depot</SelectItem>
-                <SelectItem value="hospital">Hospital</SelectItem>
-                <SelectItem value="no_go">No-Go Zone</SelectItem>
-                <SelectItem value="service_center">Service Center</SelectItem>
-                <SelectItem value="standby">Standby Point</SelectItem>
+                <SelectItem value="depot">{t("geofence.depot")}</SelectItem>
+                <SelectItem value="hospital">{t("topbar.hospital")}</SelectItem>
+                <SelectItem value="no_go">{t("geofence.noGo")}</SelectItem>
+                <SelectItem value="service_center">{t("geofence.serviceCenter")}</SelectItem>
+                <SelectItem value="standby">{t("geofence.standby")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -112,7 +114,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="gf-lat" className="text-xs">
-                Latitude
+                {t("geofence.latitude")}
               </Label>
               <Input
                 id="gf-lat"
@@ -126,7 +128,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
             </div>
             <div>
               <Label htmlFor="gf-lng" className="text-xs">
-                Longitude
+                {t("geofence.longitude")}
               </Label>
               <Input
                 id="gf-lng"
@@ -142,7 +144,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
 
           <div>
             <Label htmlFor="gf-radius" className="text-xs">
-              Radius (km)
+              {t("geofence.radiusKm")}
             </Label>
             <Input
               id="gf-radius"
@@ -157,11 +159,11 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {initial ? "Update" : "Create"} Geofence
+              {initial ? t("common.update", { defaultValue: "Update" }) : t("common.create", { defaultValue: "Create" })} {t("geofence.geofence")}
             </Button>
           </div>
         </div>

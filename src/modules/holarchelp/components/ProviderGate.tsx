@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Shield, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export type ProviderType = "hospital" | "ambulance" | null;
 
@@ -65,6 +66,7 @@ export function useProviderAccess() {
 }
 
 export function ProviderGate({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { providerType, loading } = useProviderAccess();
   const navigate = useNavigate();
 
@@ -82,21 +84,19 @@ export function ProviderGate({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
           <Shield className="h-8 w-8 text-primary" />
         </div>
-        <h1 className="mt-4 text-2xl font-extrabold">HolarcHelp Provider Portal</h1>
+        <h1 className="mt-4 text-2xl font-extrabold">{t("providerGate.title")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This portal is for approved hospitals and ER providers in the HolarcHelp network.
+          {t("providerGate.description")}
         </p>
         <div className="mt-6 rounded-2xl border bg-card p-4 text-left text-sm">
-          <p className="flex items-center gap-2 font-semibold"><Lock className="h-4 w-4" /> Not a provider yet</p>
+          <p className="flex items-center gap-2 font-semibold"><Lock className="h-4 w-4" /> {t("providerGate.notProvider")}</p>
           <p className="mt-1 text-muted-foreground">
-            Your account isn't linked to a hospital or emergency response service. If you started signing up
-            but didn't finish, complete your application below — an administrator will activate your
-            organisation before you can access the dispatch portal.
+            {t("providerGate.notProviderBody")}
           </p>
         </div>
         <div className="mt-6 flex flex-col gap-2">
-          <Button onClick={() => navigate("/provider-signup")}>Complete provider sign-up</Button>
-          <Button variant="outline" onClick={() => navigate("/")}>Go home</Button>
+          <Button onClick={() => navigate("/provider-signup")}>{t("providerGate.completeSignup")}</Button>
+          <Button variant="outline" onClick={() => navigate("/")}>{t("providerGate.goHome")}</Button>
         </div>
       </div>
     );

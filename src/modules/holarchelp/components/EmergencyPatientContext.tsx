@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, Activity, Pill, Phone, UserRound, Stethoscope, Droplet } from "lucide-react";
 import { VoiceNoteAudio } from "./VoiceNoteAudio";
+import { useTranslation } from "react-i18next";
 
 type Ctx = {
   profile?: {
@@ -41,6 +42,7 @@ const asList = (v?: string[] | string | null): string[] => {
 };
 
 export function EmergencyPatientContext({ incidentId }: { incidentId: string }) {
+  const { t } = useTranslation();
   const [ctx, setCtx] = useState<Ctx | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +58,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
     return <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">{error}</div>;
   }
   if (!ctx) {
-    return <div className="rounded-2xl border bg-card p-3 text-xs text-muted-foreground">Loading patient context…</div>;
+    return <div className="rounded-2xl border bg-card p-3 text-xs text-muted-foreground">{t("emergencyContext.loading")}</div>;
   }
 
   const age = ageFromDob(ctx.profile?.date_of_birth);
@@ -66,27 +68,27 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
   return (
     <div className="space-y-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">Emergency patient context</p>
-        <span className="text-[10px] uppercase text-muted-foreground">Permission-controlled</span>
+        <p className="text-xs font-bold uppercase tracking-wider text-primary">{t("emergencyContext.title")}</p>
+        <span className="text-[10px] uppercase text-muted-foreground">{t("emergencyContext.permission")}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-        <Field icon={UserRound} label="Name" value={ctx.profile?.full_name ?? "—"} />
-        <Field label="Age / Sex" value={`${age ?? "—"}${ctx.profile?.gender ? " · " + ctx.profile.gender : ""}`} />
-        <Field icon={Droplet} label="Blood" value={ctx.profile?.blood_type ?? "—"} />
-        <Field label="Language" value={ctx.profile?.preferred_language ?? "—"} />
+        <Field icon={UserRound} label={t("emergencyContext.name")} value={ctx.profile?.full_name ?? "—"} />
+        <Field label={t("emergencyContext.ageSex")} value={`${age ?? "—"}${ctx.profile?.gender ? " · " + ctx.profile.gender : ""}`} />
+        <Field icon={Droplet} label={t("emergencyContext.blood")} value={ctx.profile?.blood_type ?? "—"} />
+        <Field label={t("emergencyContext.language")} value={ctx.profile?.preferred_language ?? "—"} />
       </div>
 
       <div className="grid grid-cols-3 gap-2 text-xs">
-        <Pill2 ok={ctx.conscious !== false} label={ctx.conscious === false ? "Unconscious" : "Conscious"} />
-        <Pill2 ok={ctx.breathing !== false} label={ctx.breathing === false ? "Not breathing" : "Breathing"} />
+        <Pill2 ok={ctx.conscious !== false} label={ctx.conscious === false ? t("ambulance.unconscious") : t("emergencyContext.conscious")} />
+        <Pill2 ok={ctx.breathing !== false} label={ctx.breathing === false ? t("ambulance.notBreathing") : t("incomingSos.breathing")} />
         <Pill2 ok={(ctx.severity ?? "high") !== "critical"} label={(ctx.severity ?? "high").toUpperCase()} />
       </div>
 
       {ctx.ai_summary && (
         <div className="rounded-xl border bg-muted/40 p-2.5">
           <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            <Stethoscope className="h-3.5 w-3.5" /> AI emergency summary
+            <Stethoscope className="h-3.5 w-3.5" /> {t("emergencyContext.aiSummary")}
           </p>
           <p className="text-xs leading-snug">{ctx.ai_summary}</p>
         </div>
@@ -94,21 +96,21 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
       {(ctx.voice_note_url || ctx.voice_note_transcript) && (
         <div className="rounded-xl border bg-muted/40 p-2.5">
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">SOS voice clip</p>
+          <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t("emergencyContext.voiceClip")}</p>
           {ctx.voice_note_url && <VoiceNoteAudio path={ctx.voice_note_url} />}
           {ctx.voice_note_transcript && <p className="mt-1 text-xs italic text-muted-foreground">"{ctx.voice_note_transcript}"</p>}
         </div>
       )}
 
-      <Section icon={AlertTriangle} label="Allergies" tone="text-destructive">
-        {allergies.length ? <Chips items={allergies} tone="destructive" /> : <Empty>None recorded</Empty>}
+      <Section icon={AlertTriangle} label={t("emergencyContext.allergies")} tone="text-destructive">
+        {allergies.length ? <Chips items={allergies} tone="destructive" /> : <Empty>{t("emergencyContext.noneRecorded")}</Empty>}
       </Section>
 
-      <Section icon={Activity} label="Chronic conditions">
-        {conditions.length ? <Chips items={conditions} /> : <Empty>None recorded</Empty>}
+      <Section icon={Activity} label={t("emergencyContext.chronicConditions")}>
+        {conditions.length ? <Chips items={conditions} /> : <Empty>{t("emergencyContext.noneRecorded")}</Empty>}
       </Section>
 
-      <Section icon={Pill} label="Active medications">
+      <Section icon={Pill} label={t("emergencyContext.activeMedications")}>
         {ctx.medications?.length ? (
           <ul className="space-y-1 text-xs">
             {ctx.medications.slice(0, 10).map((m, i) => (
@@ -118,24 +120,24 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
               </li>
             ))}
           </ul>
-        ) : <Empty>No active medications</Empty>}
+        ) : <Empty>{t("emergencyContext.noActiveMedications")}</Empty>}
       </Section>
 
-      <Section icon={Phone} label="Emergency contacts">
+      <Section icon={Phone} label={t("emergencyContext.emergencyContacts")}>
         {ctx.emergency_contacts?.length ? (
           <ul className="space-y-1 text-xs">
             {ctx.emergency_contacts.map((c, i) => (
               <li key={i} className="flex justify-between gap-2">
-                <span className="font-medium">{c.name} <span className="text-muted-foreground font-normal">({c.relationship ?? "contact"})</span></span>
+                <span className="font-medium">{c.name} <span className="text-muted-foreground font-normal">({c.relationship ?? t("emergencyContext.contact")})</span></span>
                 {c.phone && <a href={`tel:${c.phone}`} className="text-primary hover:underline">{c.phone}</a>}
               </li>
             ))}
           </ul>
-        ) : <Empty>No emergency contacts</Empty>}
+        ) : <Empty>{t("emergencyContext.noEmergencyContacts")}</Empty>}
       </Section>
 
       {!!ctx.linked_providers?.length && (
-        <Section icon={Stethoscope} label="Linked providers">
+        <Section icon={Stethoscope} label={t("emergencyContext.linkedProviders")}>
           <ul className="text-xs text-muted-foreground">
             {ctx.linked_providers.map((p, i) => (
               <li key={i}>{p.name}{p.specialty ? ` · ${p.specialty}` : ""}</li>

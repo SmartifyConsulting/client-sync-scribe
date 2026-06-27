@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Activity, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Ev = { id: string; incident_id: string; event_type: string; payload: any; created_at: string };
 
@@ -15,6 +16,7 @@ const tone = (t: string) =>
   : "border-border bg-card text-foreground";
 
 export default function IncidentTimelineScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [events, setEvents] = useState<Ev[]>([]);
 
@@ -40,8 +42,8 @@ export default function IncidentTimelineScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hospital Emergency Operations</p>
-        <h1 className="text-2xl font-extrabold">Incident Timeline</h1>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
+        <h1 className="text-2xl font-extrabold">{t("nav.incidentTimeline")}</h1>
       </header>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
@@ -52,9 +54,9 @@ export default function IncidentTimelineScreen() {
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-1.5">
                   <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-bold uppercase ${tone(e.event_type)}`}>
-                    {e.event_type.replace(/_/g," ")}
+                    {t(`eventType.${e.event_type}`, { defaultValue: e.event_type.replace(/_/g," ") })}
                   </span>
-                  <span className="truncate text-xs text-muted-foreground">Incident #{e.incident_id.slice(0,8)}</span>
+                  <span className="truncate text-xs text-muted-foreground">{t("ambulance.incident")} #{e.incident_id.slice(0,8)}</span>
                 </p>
               </div>
               <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{fmt(e.created_at)}</span>
@@ -63,7 +65,7 @@ export default function IncidentTimelineScreen() {
               </Link>
             </li>
           ))}
-          {!events.length && <li className="p-8 text-center text-xs text-muted-foreground">No incident events yet.</li>}
+          {!events.length && <li className="p-8 text-center text-xs text-muted-foreground">{t("timeline.noEvents")}</li>}
         </ul>
       </div>
     </div>

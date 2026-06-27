@@ -9,6 +9,7 @@ import { useSubscriptionGate } from "@/hooks/useSubscriptionGate";
 import { SubscriptionGateModal } from "@/components/auth/SubscriptionGateModal";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { TopBarIcons } from "./TopBarIcons";
+import { useTranslation } from "react-i18next";
 
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
 import { RouteTipHost } from "@/components/RouteTipHost";
@@ -16,6 +17,7 @@ import { RouteTipHost } from "@/components/RouteTipHost";
 
 
 export function PatientAppLayout() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
@@ -67,7 +69,7 @@ export function PatientAppLayout() {
           href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
           className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
         >
-          <LifeBuoy className="h-3.5 w-3.5" /> Contact Support
+          <LifeBuoy className="h-3.5 w-3.5" /> {t("common.support")}
         </a>
       </div>
 

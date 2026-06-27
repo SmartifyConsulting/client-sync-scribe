@@ -10,8 +10,10 @@ import { StartShiftDialog } from "../../../components/StartShiftDialog";
 
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 function AmbulanceStatsStrip() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const { stats } = useAmbulanceOpsStats(providerId);
   const { shift, endShift } = useParamedicShift();
@@ -34,8 +36,8 @@ function AmbulanceStatsStrip() {
 
   const onEnd = async () => {
     setEnding(true);
-    try { await endShift(); toast.success("Shift ended"); }
-    catch (e: any) { toast.error(e.message ?? "Could not end shift"); }
+    try { await endShift(); toast.success(t("provider.shiftEnded")); }
+    catch (e: any) { toast.error(e.message ?? t("provider.couldNotEndShift")); }
     finally { setEnding(false); }
   };
 
@@ -52,13 +54,13 @@ function AmbulanceStatsStrip() {
           className="inline-flex items-center gap-2 rounded-xl border border-sos/40 bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
         >
           <Siren className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Active mission</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
           <span className="text-xs font-bold">#{stats.currentIncidentId.slice(0, 8)}</span>
         </Link>
       ) : (
         <span className="inline-flex items-center gap-2 rounded-xl border bg-card px-2.5 py-1.5 text-muted-foreground">
           <Siren className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Standing by</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">{t("provider.standingBy")}</span>
         </span>
       )}
 
@@ -67,7 +69,7 @@ function AmbulanceStatsStrip() {
         statusTone,
       )}>
         <Truck className="h-3.5 w-3.5" />
-        {!shift ? "Off shift" : shift.status === "busy" ? "Busy" : "Available"}
+        {!shift ? t("status.offShift") : shift.status === "busy" ? t("status.busy") : t("status.available")}
       </span>
 
       {!shift ? (
@@ -75,28 +77,28 @@ function AmbulanceStatsStrip() {
           onClick={() => setStartOpen(true)}
           className="inline-flex items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/15"
         >
-          <PlayCircle className="h-3.5 w-3.5" /> Start shift
+          <PlayCircle className="h-3.5 w-3.5" /> {t("provider.startShift")}
         </button>
       ) : (
         <button
           onClick={onEnd}
           disabled={ending || shift.status === "busy"}
-          title={shift.status === "busy" ? "Finish your active incident first" : ""}
+          title={shift.status === "busy" ? t("provider.finishActiveIncidentFirst") : ""}
           className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted disabled:opacity-50"
         >
           {ending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StopCircle className="h-3.5 w-3.5" />}
-          End shift
+          {t("provider.endShift")}
         </button>
       )}
 
       <span className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-[11px]">
         <Truck className="h-3.5 w-3.5 text-muted-foreground" />
-        Open SOS <strong className="tabular-nums">{stats.openSos}</strong>
+        {t("provider.openSos")} <strong className="tabular-nums">{stats.openSos}</strong>
       </span>
 
       <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
-        {online ? "Online" : "Offline"}
+        {online ? t("provider.online") : t("provider.offline")}
       </span>
 
       <StartShiftDialog providerId={providerId} open={startOpen} onOpenChange={setStartOpen} />

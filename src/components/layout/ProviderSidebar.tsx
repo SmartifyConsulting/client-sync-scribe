@@ -130,15 +130,15 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
         <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
             <Avatar className="h-8 w-8 border-2 border-primary">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || "User"} />
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || t("profileMenu.user")} />
               <AvatarFallback className="bg-primary/20 text-primary text-sm">
                 {profile?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-primary truncate">{profile?.full_name || "Provider"}</p>
+              <p className="text-sm font-medium text-primary truncate">{profile?.full_name || t("common.provider")}</p>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
-                {portal === "hospital" ? "Hospital Ops" : "ER Provider"}
+                {portal === "hospital" ? t("provider.hospitalOps") : t("provider.erProvider")}
               </p>
             </div>
           </div>

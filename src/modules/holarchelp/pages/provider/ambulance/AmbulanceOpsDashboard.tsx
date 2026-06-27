@@ -5,6 +5,7 @@ import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ChevronRight, Siren, Activity, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -28,6 +29,7 @@ const ago = (iso: string) => {
 };
 
 export default function AmbulanceOpsDashboard() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
@@ -51,8 +53,8 @@ export default function AmbulanceOpsDashboard() {
   const accept = async (id: string) => {
     if (!providerId) return;
     const { error } = await supabase.rpc("holarchelp_accept_incident" as any, { _incident_id: id, _provider_id: providerId });
-    if (error) return toast.error(error.message === "Incident already taken" ? "Another crew accepted first" : error.message);
-    toast.success("Incident locked");
+    if (error) return toast.error(error.message === "Incident already taken" ? t("ambulance.anotherCrewAccepted") : error.message);
+    toast.success(t("ambulance.incidentLocked"));
     navigate(`/provider/ambulance/incident/${id}`);
   };
 
@@ -64,13 +66,13 @@ export default function AmbulanceOpsDashboard() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
-          <h1 className="text-2xl font-extrabold leading-tight">Live SOS Incident Feed</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+          <h1 className="text-2xl font-extrabold leading-tight">{t("ambulance.liveSosFeed")}</h1>
         </div>
         <div className="flex gap-1.5">
-          <KPI icon={Siren} label="Open" value={open.length} tone="text-sos" />
-          <KPI icon={Activity} label="My active" value={mine.length} tone="text-primary" />
-          <KPI icon={Clock} label="Other crews" value={others.length} tone="text-muted-foreground" />
+          <KPI icon={Siren} label={t("ambulance.open")} value={open.length} tone="text-sos" />
+          <KPI icon={Activity} label={t("ambulance.myActive")} value={mine.length} tone="text-primary" />
+          <KPI icon={Clock} label={t("ambulance.otherCrews")} value={others.length} tone="text-muted-foreground" />
         </div>
       </header>
 
@@ -78,12 +80,12 @@ export default function AmbulanceOpsDashboard() {
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 text-left">Priority</th>
-              <th className="px-3 py-2 text-left">Incident</th>
-              <th className="px-3 py-2 text-left">Patient</th>
-              <th className="px-3 py-2 text-left">Triggered</th>
-              <th className="px-3 py-2 text-left">Response</th>
-              <th className="px-3 py-2 text-right">Action</th>
+              <th className="px-3 py-2 text-left">{t("ambulance.priority")}</th>
+              <th className="px-3 py-2 text-left">{t("ambulance.incident")}</th>
+              <th className="px-3 py-2 text-left">{t("common.patient")}</th>
+              <th className="px-3 py-2 text-left">{t("ambulance.triggered")}</th>
+              <th className="px-3 py-2 text-left">{t("ambulance.response")}</th>
+              <th className="px-3 py-2 text-right">{t("ambulance.action")}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -98,34 +100,34 @@ export default function AmbulanceOpsDashboard() {
                     </span>
                   </td>
                   <td className="px-3 py-2">
-                    <p className="text-xs font-bold">{r.incident_type ?? "Emergency"}</p>
+                    <p className="text-xs font-bold">{r.incident_type ?? t("ambulance.emergency")}</p>
                     <p className="text-[10px] text-muted-foreground">#{r.id.slice(0,8)}</p>
                   </td>
                   <td className="px-3 py-2 text-xs">
-                    {r.conscious === false && <span className="text-destructive font-semibold">Unconscious · </span>}
-                    {r.breathing === false && <span className="text-destructive font-semibold">Not breathing · </span>}
-                    {r.conscious !== false && r.breathing !== false && <span className="text-muted-foreground">Stable signs</span>}
+                    {r.conscious === false && <span className="text-destructive font-semibold">{t("ambulance.unconscious")} · </span>}
+                    {r.breathing === false && <span className="text-destructive font-semibold">{t("ambulance.notBreathing")} · </span>}
+                    {r.conscious !== false && r.breathing !== false && <span className="text-muted-foreground">{t("ambulance.stableSigns")}</span>}
                   </td>
-                  <td className="px-3 py-2 text-[11px] text-muted-foreground">{ago(r.created_at)} ago</td>
+                  <td className="px-3 py-2 text-[11px] text-muted-foreground">{ago(r.created_at)} {t("common.ago")}</td>
                   <td className="px-3 py-2 text-xs">
                     {isMine
-                      ? <span className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">YOU · {r.status.replace(/_/g," ")}</span>
+                      ? <span className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">{t("ambulance.you")} · {r.status.replace(/_/g," ")}</span>
                       : isOpen
-                        ? <span className="rounded-full border border-sos/40 bg-sos/10 px-1.5 py-0.5 text-[10px] font-bold text-sos">UNASSIGNED</span>
-                        : <span className="rounded-full border bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">Other crew · {r.status.replace(/_/g," ")}</span>}
+                        ? <span className="rounded-full border border-sos/40 bg-sos/10 px-1.5 py-0.5 text-[10px] font-bold text-sos">{t("status.unassigned")}</span>
+                        : <span className="rounded-full border bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">{t("ambulance.otherCrew")} · {r.status.replace(/_/g," ")}</span>}
                   </td>
                   <td className="px-3 py-2 text-right">
                     {isOpen
-                      ? <Button size="sm" onClick={() => accept(r.id)} className="h-7">Accept</Button>
+                      ? <Button size="sm" onClick={() => accept(r.id)} className="h-7">{t("ambulance.accept")}</Button>
                       : <Link to={`/provider/ambulance/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted">
-                          Open <ChevronRight className="h-3 w-3" />
+                           {t("common.open")} <ChevronRight className="h-3 w-3" />
                         </Link>}
                   </td>
                 </tr>
               );
             })}
             {!rows.length && (
-              <tr><td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">No active SOS incidents. Standing by.</td></tr>
+              <tr><td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">{t("ambulance.noActiveSos")}</td></tr>
             )}
           </tbody>
         </table>

@@ -15,32 +15,34 @@ import {
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useTranslation } from "react-i18next";
 
 const doctorNavItems = [
-  { icon: LayoutDashboard, label: "Home", to: "/doctor-dashboard" },
-  { icon: Users, label: "Patients", to: "/patients" },
-  { icon: Briefcase, label: "Practice", to: "/practice" },
-  { icon: UserCog, label: "Admin", to: "/admin" },
-  { icon: Siren, label: "SOS", to: "/doctor/holarchelp", danger: true },
+  { icon: LayoutDashboard, labelKey: "nav.home", to: "/doctor-dashboard" },
+  { icon: Users, labelKey: "bottomNav.patients", to: "/patients" },
+  { icon: Briefcase, labelKey: "bottomNav.practice", to: "/practice" },
+  { icon: UserCog, labelKey: "nav.admin", to: "/admin" },
+  { icon: Siren, labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
 const patientSections = [
-  { icon: User, label: "My Profile", section: "health", to: "/patient/details?section=health" },
-  { icon: Handshake, label: "My Holarchy", section: "care", to: "/patient/details?section=care" },
-  { icon: FolderOpen, label: "My Desk", section: "admin", to: "/patient/details?section=admin" },
-  { icon: Gift, label: "My Rewards", section: "rewards", to: "/patient/rewards" },
-  { icon: Siren, label: "SOS", section: "sos", to: "/patient/holarchelp", danger: true },
+  { icon: User, labelKey: "nav.myProfile", section: "health", to: "/patient/details?section=health" },
+  { icon: Handshake, labelKey: "nav.myHolarchy", section: "care", to: "/patient/details?section=care" },
+  { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
+  { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
+  { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
 ];
 
 const adminNavItems = [
-  { icon: Users, label: "Users", to: "/admin/users" },
-  { icon: DollarSign, label: "Pricing", to: "/admin/pricing" },
-  { icon: Gift, label: "Rewards", to: "/admin/gamification" },
-  { icon: Siren, label: "SOS", to: "/patient/holarchelp", danger: true },
-  { icon: Home, label: "Exit", to: "/doctor-dashboard" },
+  { icon: Users, labelKey: "nav.users", to: "/admin/users" },
+  { icon: DollarSign, labelKey: "nav.pricing", to: "/admin/pricing" },
+  { icon: Gift, labelKey: "nav.rewards", to: "/admin/gamification" },
+  { icon: Siren, labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
+  { icon: Home, labelKey: "bottomNav.exit", to: "/doctor-dashboard" },
 ];
 
 export function BottomNav() {
+  const { t } = useTranslation();
   const { isPatient, loading } = useUserRole();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
@@ -62,7 +64,7 @@ export function BottomNav() {
               : location.pathname.startsWith(item.to);
             return (
               <button
-                key={item.to + item.label}
+                key={item.to + item.labelKey}
                 onClick={() => navigate(item.to)}
                 className={cn(
                   "flex flex-1 flex-col items-center gap-0.5 px-1 py-2 rounded-xl transition-all duration-200 min-w-0",
@@ -78,7 +80,7 @@ export function BottomNav() {
                   <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 </div>
                 <span className={cn("text-[10px] font-medium text-center leading-tight", isActive && "text-primary")}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </span>
               </button>
             );
@@ -130,7 +132,7 @@ export function BottomNav() {
                 >
                   <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 </div>
-                <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{item.label}</span>
+                <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{t(item.labelKey)}</span>
               </button>
             );
           })}
@@ -188,7 +190,7 @@ export function BottomNav() {
               >
                 <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
               </div>
-              <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{item.label}</span>
+              <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{t(item.labelKey)}</span>
             </button>
           );
         })}

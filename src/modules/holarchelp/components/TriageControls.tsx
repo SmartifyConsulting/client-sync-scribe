@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const PRIORITIES = [
   { v: "esi-1", label: "ESI 1 — Resuscitation" },
@@ -20,6 +21,7 @@ export function TriageControls({
   incidentId: string;
   current: { triage_priority?: string | null; triage_bay?: string | null; triage_nurse?: string | null };
 }) {
+  const { t } = useTranslation();
   const [priority, setPriority] = useState(current.triage_priority ?? "");
   const [bay, setBay] = useState(current.triage_bay ?? "");
   const [nurse, setNurse] = useState(current.triage_nurse ?? "");
@@ -39,32 +41,32 @@ export function TriageControls({
       incident_id: incidentId, event_type: "triage_assigned",
       payload: { priority, bay, nurse },
     } as any);
-    toast.success("Triage assigned");
+    toast.success(t("triageControls.assigned"));
   };
 
   return (
     <div className="rounded-2xl border bg-card p-3 space-y-3">
-      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Triage assignment</p>
+      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("triageControls.assignment")}</p>
       <div className="grid gap-2 sm:grid-cols-3">
         <div className="grid gap-1.5">
-          <Label className="text-xs">Priority</Label>
+          <Label className="text-xs">{t("triageControls.priority")}</Label>
           <Select value={priority} onValueChange={setPriority}>
-            <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select priority" /></SelectTrigger>
+            <SelectTrigger className="rounded-xl"><SelectValue placeholder={t("triageControls.selectPriority")} /></SelectTrigger>
             <SelectContent>
               {PRIORITIES.map((p) => <SelectItem key={p.v} value={p.v}>{p.label}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="grid gap-1.5">
-          <Label className="text-xs">Bay</Label>
+          <Label className="text-xs">{t("triageControls.bay")}</Label>
           <Input value={bay} onChange={(e) => setBay(e.target.value)} placeholder="e.g. Resus-2" className="rounded-xl" />
         </div>
         <div className="grid gap-1.5">
-          <Label className="text-xs">Intake nurse</Label>
-          <Input value={nurse} onChange={(e) => setNurse(e.target.value)} placeholder="Name" className="rounded-xl" />
+          <Label className="text-xs">{t("triageControls.intakeNurse")}</Label>
+          <Input value={nurse} onChange={(e) => setNurse(e.target.value)} placeholder={t("common.name")} className="rounded-xl" />
         </div>
       </div>
-      <Button size="sm" onClick={save} disabled={saving || !priority}>Save triage</Button>
+      <Button size="sm" onClick={save} disabled={saving || !priority}>{t("triageControls.saveTriage")}</Button>
     </div>
   );
 }

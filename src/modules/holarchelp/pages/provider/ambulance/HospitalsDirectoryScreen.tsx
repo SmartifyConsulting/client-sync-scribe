@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Hospital, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type H = {
   id: string; name: string; ownership: string | null; city?: string | null;
@@ -25,6 +26,7 @@ const distKm = (a: { lat: number; lng: number } | null, b: { lat: number; lng: n
 };
 
 export default function HospitalsDirectoryScreen() {
+  const { t } = useTranslation();
   const [list, setList] = useState<H[]>([]);
   const [q, setQ] = useState("");
   const [me, setMe] = useState<{ lat: number; lng: number } | null>(null);
@@ -53,14 +55,14 @@ export default function HospitalsDirectoryScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
-        <h1 className="text-2xl font-extrabold">Hospitals</h1>
-        <p className="text-xs text-muted-foreground">Live capacity. Selecting a hospital from the incident console sends an inbound alert.</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+        <h1 className="text-2xl font-extrabold">{t("hospitalsDirectory.title")}</h1>
+        <p className="text-xs text-muted-foreground">{t("hospitalsDirectory.subtitle")}</p>
       </header>
 
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or city" className="rounded-xl pl-8" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("hospitalsDirectory.searchPlaceholder")} className="rounded-xl pl-8" />
       </div>
 
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
@@ -83,9 +85,9 @@ export default function HospitalsDirectoryScreen() {
                 <span className={`rounded-full border px-1.5 py-0.5 font-bold uppercase ${capColor(h.er_capacity_status)}`}>
                   {(h.er_capacity_status ?? "green").toUpperCase()}
                 </span>
-                {h.er_beds_available != null && <span className="rounded-full border bg-background px-1.5 py-0.5">{h.er_beds_available} ER beds</span>}
-                {h.icu_beds_available != null && <span className="rounded-full border bg-background px-1.5 py-0.5">{h.icu_beds_available} ICU</span>}
-                {!h.accepting_patients && <span className="rounded-full border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-destructive">Not accepting</span>}
+                {h.er_beds_available != null && <span className="rounded-full border bg-background px-1.5 py-0.5">{h.er_beds_available} {t("hospitalsDirectory.erBeds")}</span>}
+                {h.icu_beds_available != null && <span className="rounded-full border bg-background px-1.5 py-0.5">{h.icu_beds_available} {t("hospitalsDirectory.icu")}</span>}
+                {!h.accepting_patients && <span className="rounded-full border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-destructive">{t("hospitalsDirectory.notAccepting")}</span>}
               </div>
               {h.contact_phone && (
                 <a href={`tel:${h.contact_phone}`} className="mt-2 inline-block text-[11px] font-semibold text-primary hover:underline">
@@ -95,7 +97,7 @@ export default function HospitalsDirectoryScreen() {
             </div>
           );
         })}
-        {!filtered.length && <div className="rounded-2xl border border-dashed p-8 text-center text-xs text-muted-foreground md:col-span-2 xl:col-span-3">No matching hospitals.</div>}
+        {!filtered.length && <div className="rounded-2xl border border-dashed p-8 text-center text-xs text-muted-foreground md:col-span-2 xl:col-span-3">{t("hospitalsDirectory.noMatches")}</div>}
       </div>
     </div>
   );
