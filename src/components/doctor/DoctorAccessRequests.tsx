@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
-import { 
-  User, 
-  Shield, 
-  Loader2, 
-  CheckCircle, 
+import {
+  User,
+  Loader2,
+  CheckCircle,
   XCircle,
-  Clock,
-  UserCheck,
-  UserX
+  Calendar as CalendarIcon,
+  FileText,
+  Pill,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +19,6 @@ import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -44,12 +39,19 @@ interface AccessRequest {
   };
 }
 
-const permissionLabels: Record<AccessPermission, string> = {
-  session_summaries: "Session Summaries",
-  patient_info: "Patient Information",
-  calendar: "Calendar",
-  prescription_history: "Documentation",
-};
+const FULL_PERMISSIONS: AccessPermission[] = [
+  "patient_info",
+  "calendar",
+  "session_summaries",
+  "prescription_history",
+];
+
+const ACCESS_ITEMS = [
+  { icon: User, label: "Patient Information", desc: "Contact details, demographics and clinical profile." },
+  { icon: CalendarIcon, label: "Calendar", desc: "Their upcoming appointments and availability." },
+  { icon: FileText, label: "Session Summaries", desc: "AI-generated summaries of past consultations." },
+  { icon: Pill, label: "Documentation", desc: "Prescriptions, results and other shared documents." },
+];
 
 export function DoctorAccessRequests() {
   const { user } = useAuth();
@@ -57,14 +59,8 @@ export function DoctorAccessRequests() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<AccessRequest[]>([]);
-  const [acceptingRequest, setAcceptingRequest] = useState<AccessRequest | null>(null);
-  const [selectedPermissions, setSelectedPermissions] = useState<AccessPermission[]>([
-    "patient_info",
-    "calendar",
-    "session_summaries",
-    "prescription_history",
-  ]);
-  const [processing, setProcessing] = useState(false);
+  const [grantedInfo, setGrantedInfo] = useState<{ patientName: string } | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && profile) {
@@ -120,19 +116,18 @@ export function DoctorAccessRequests() {
     }
   };
 
-  const handleAcceptRequest = async () => {
-    if (!acceptingRequest || !user) return;
-    setProcessing(true);
+  const handleAcceptRequest = async (request: AccessRequest) => {
+    if (!user) return;
+    setProcessingId(request.id);
 
     try {
-      // Create or re-activate the access grant (handles re-invite after revoke)
       const { error: accessError } = await supabase
         .from("doctor_patient_access")
         .upsert(
           {
             doctor_id: user.id,
-            patient_user_id: acceptingRequest.patient_user_id,
-            permissions: selectedPermissions,
+            patient_user_id: request.patient_user_id,
+            permissions: FULL_PERMISSIONS,
             is_active: true,
             revoked_at: null,
           } as any,
@@ -141,16 +136,14 @@ export function DoctorAccessRequests() {
 
       if (accessError) throw accessError;
 
-      // Update request status
       const { error: updateError } = await supabase
         .from("doctor_access_requests")
         .update({ status: "accepted" })
-        .eq("id", acceptingRequest.id);
+        .eq("id", request.id);
 
       if (updateError) throw updateError;
 
-      // Auto-create patient record for this doctor if one doesn't already exist
-      const patientUserId = acceptingRequest.patient_user_id;
+      const patientUserId = request.patient_user_id;
       const { data: existingPatient } = await supabase
         .from("patients")
         .select("id")
@@ -159,14 +152,12 @@ export function DoctorAccessRequests() {
         .maybeSingle();
 
       if (!existingPatient) {
-        // Fetch patient profile info
         const { data: patientProfile } = await supabase
           .from("profiles")
           .select("full_name, mobile_number")
           .eq("id", patientUserId)
           .maybeSingle();
 
-        // Fetch email from auth user via user_invitations or profile email
         let patientEmail: string | null = null;
         const { data: invitations } = await supabase
           .from("user_invitations")
@@ -178,33 +169,24 @@ export function DoctorAccessRequests() {
         const { error: insertError } = await supabase.from("patients").insert({
           user_id: user.id,
           patient_user_id: patientUserId,
-          name: patientProfile?.full_name || acceptingRequest.patient_profile?.full_name || "Unknown Patient",
+          name: patientProfile?.full_name || request.patient_profile?.full_name || "Unknown Patient",
           phone: patientProfile?.mobile_number || null,
           email: patientEmail,
           status: "active",
         });
-
-        if (insertError) {
-          console.error("Error creating patient record:", insertError);
-          throw insertError;
-        }
+        if (insertError) throw insertError;
       }
 
-      // Send notification to patient about acceptance
       await supabase.from("notifications").insert({
-        user_id: acceptingRequest.patient_user_id,
+        user_id: request.patient_user_id,
         type: "access_accepted",
         title: "Invitation Accepted",
         description: `Dr. ${profile?.full_name || "Your doctor"} has accepted your invitation.`,
         is_read: false,
       });
 
-      toast({
-        title: "Access granted",
-        description: `You now have access to ${acceptingRequest.patient_profile?.full_name || "this patient"}'s information. They have been added to your patient list.`,
-      });
-
-      setAcceptingRequest(null);
+      const patientName = request.patient_profile?.full_name || "this patient";
+      setGrantedInfo({ patientName });
       fetchRequests();
     } catch (error: any) {
       console.error("Error accepting request:", error);
@@ -214,7 +196,7 @@ export function DoctorAccessRequests() {
         variant: "destructive",
       });
     } finally {
-      setProcessing(false);
+      setProcessingId(null);
     }
   };
 
@@ -224,10 +206,8 @@ export function DoctorAccessRequests() {
         .from("doctor_access_requests")
         .update({ status: "declined" })
         .eq("id", request.id);
-
       if (error) throw error;
 
-      // Send notification to patient about decline
       await supabase.from("notifications").insert({
         user_id: request.patient_user_id,
         type: "access_declined",
@@ -236,27 +216,11 @@ export function DoctorAccessRequests() {
         is_read: false,
       });
 
-      toast({
-        title: "Request declined",
-        description: "The access request has been declined.",
-      });
-
+      toast({ title: "Request declined", description: "The access request has been declined." });
       fetchRequests();
     } catch (error: any) {
-      toast({
-        title: "Error declining request",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error declining request", description: error.message, variant: "destructive" });
     }
-  };
-
-  const togglePermission = (permission: AccessPermission) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permission)
-        ? prev.filter((p) => p !== permission)
-        : [...prev, permission]
-    );
   };
 
   if (loading) {
@@ -269,17 +233,12 @@ export function DoctorAccessRequests() {
     );
   }
 
-  if (!profile?.practice_number || !profile?.doctor_number) {
-    return null;
-  }
-
-  if (requests.length === 0) {
-    return null;
-  }
+  if (!profile?.practice_number || !profile?.doctor_number) return null;
+  if (requests.length === 0) return null;
 
   const getInitials = (name: string | null) => {
     if (!name) return "?";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
   return (
@@ -287,6 +246,7 @@ export function DoctorAccessRequests() {
       <div className="space-y-3">
         {requests.map((request) => {
           const patientName = (request as any).patient_name || request.patient_profile?.full_name || "Unknown Patient";
+          const busy = processingId === request.id;
           return (
             <div
               key={request.id}
@@ -295,7 +255,9 @@ export function DoctorAccessRequests() {
               <div className="flex items-start gap-3">
                 <Avatar className="h-12 w-12 shrink-0">
                   <AvatarImage src={request.patient_profile?.avatar_url || undefined} alt={patientName} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">{getInitials(patientName)}</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
+                    {getInitials(patientName)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{patientName}</p>
@@ -313,6 +275,7 @@ export function DoctorAccessRequests() {
                   size="sm"
                   className="flex-1 rounded-xl text-xs"
                   onClick={() => handleDeclineRequest(request)}
+                  disabled={busy}
                 >
                   <XCircle className="h-3.5 w-3.5 mr-1.5" />
                   Decline
@@ -320,12 +283,14 @@ export function DoctorAccessRequests() {
                 <Button
                   size="sm"
                   className="flex-1 rounded-xl text-xs"
-                  onClick={() => {
-                    setAcceptingRequest(request);
-                    setSelectedPermissions(["patient_info", "calendar", "session_summaries", "prescription_history"]);
-                  }}
+                  onClick={() => handleAcceptRequest(request)}
+                  disabled={busy}
                 >
-                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                  {busy ? (
+                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                  )}
                   Accept
                 </Button>
               </div>
@@ -334,52 +299,38 @@ export function DoctorAccessRequests() {
         })}
       </div>
 
-      {/* Accept Dialog with Permission Selection */}
-      <Dialog open={!!acceptingRequest} onOpenChange={() => setAcceptingRequest(null)}>
-        <DialogContent>
+      {/* Access-granted info modal — no selection, just confirmation */}
+      <Dialog open={!!grantedInfo} onOpenChange={(open) => !open && setGrantedInfo(null)}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Accept Patient Request</DialogTitle>
-            <DialogDescription>
-              Select the information you want to access for{" "}
-              {acceptingRequest?.patient_profile?.full_name || "this patient"}
-            </DialogDescription>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Access granted
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 py-4">
-            {(Object.keys(permissionLabels) as AccessPermission[]).map((permission) => (
-              <div
-                key={permission}
-                className="flex items-center space-x-3 rounded-lg border border-border p-3"
-              >
-                <Checkbox
-                  id={`accept-${permission}`}
-                  checked={selectedPermissions.includes(permission)}
-                  onCheckedChange={() => togglePermission(permission)}
-                />
-                <Label htmlFor={`accept-${permission}`} className="flex-1 cursor-pointer">
-                  {permissionLabels[permission]}
-                </Label>
-              </div>
-            ))}
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-foreground">
+              You now have access to{" "}
+              <span className="font-semibold">{grantedInfo?.patientName}</span>'s information:
+            </p>
+            <ul className="space-y-2">
+              {ACCESS_ITEMS.map((item) => (
+                <li
+                  key={item.label}
+                  className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2"
+                >
+                  <item.icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground leading-snug">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
-          <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" onClick={() => setAcceptingRequest(null)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleAcceptRequest} 
-              disabled={processing || selectedPermissions.length === 0}
-            >
-              {processing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Accept Request
-                </>
-              )}
+          <DialogFooter>
+            <Button onClick={() => setGrantedInfo(null)} className="w-full sm:w-auto">
+              Got it
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -387,3 +338,4 @@ export function DoctorAccessRequests() {
     </>
   );
 }
+
