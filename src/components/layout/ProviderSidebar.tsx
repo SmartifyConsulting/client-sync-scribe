@@ -52,21 +52,17 @@ const hospitalNav: NavItem[] = [
 ];
 
 const ambulanceNav: NavItem[] = [
-  // EMERGENCY RESPONSE TIER
-  { icon: Siren, labelKey: "nav.activeIncidents", to: "/provider/ambulance", end: true, danger: true },
-  { icon: HeartPulse, labelKey: "nav.liveSOS", to: "/provider/ambulance/live-sos", danger: true },
-  { icon: Ambulance, labelKey: "nav.incomingSos", to: "/provider/ambulance/incoming" },
-  { icon: ClipboardList, labelKey: "nav.incidentManagement", to: "/provider/ambulance/incident-management" },
-  { icon: History, labelKey: "nav.incidentHistory", to: "/provider/ambulance/history" },
-  // EXTERNAL PARTNERSHIPS TIER
+  // EMERGENCY RESPONSE TIER (Consolidated)
+  { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
   { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
-  { icon: Hospital, labelKey: "nav.hospitals", to: "/provider/ambulance/hospitals" },
-  { icon: Hospital, labelKey: "nav.affiliatedHospitals", to: "/provider/ambulance/affiliations" },
+  // EXTERNAL PARTNERSHIPS TIER (Consolidated)
+  { icon: Hospital, labelKey: "nav.hospitalNetwork", to: "/provider/ambulance/hospital-network" },
   // TEAM & FLEET TIER
   { icon: Users, labelKey: "nav.teamStatus", to: "/provider/ambulance/team" },
-  { icon: Ambulance, labelKey: "nav.fleet", to: "/provider/ambulance/fleet" },
-  { icon: AlertTriangle, labelKey: "nav.vehicleAbuse", to: "/provider/ambulance/abuse" },
-  { icon: Radar, labelKey: "nav.telematics", to: "/provider/ambulance/telematics" },
+  { icon: Ambulance, labelKey: "nav.fleetOperations", to: "/provider/ambulance/fleet-operations" },
+  // MONITORING & ANALYTICS TIER (Consolidated)
+  { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
+  { icon: Users, labelKey: "nav.driverManagement", to: "/provider/ambulance/drivers" },
   // ADMIN TIER
   { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/ambulance/admins" },
 ];

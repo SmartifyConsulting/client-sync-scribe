@@ -16,40 +16,28 @@ import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
 import AdministratorsScreen from "./pages/provider/AdministratorsScreen";
 
 import AmbulanceOpsLayout from "./pages/provider/ambulance/AmbulanceOpsLayout";
-import AmbulanceOpsDashboard from "./pages/provider/ambulance/AmbulanceOpsDashboard";
-import IncomingSosScreen from "./pages/provider/ambulance/IncomingSosScreen";
 import NavigationScreen from "./pages/provider/ambulance/NavigationScreen";
-import HospitalsDirectoryScreen from "./pages/provider/ambulance/HospitalsDirectoryScreen";
-import AffiliatedHospitalsScreen from "./pages/provider/ambulance/AffiliatedHospitalsScreen";
-import IncidentHistoryScreen from "./pages/provider/ambulance/IncidentHistoryScreen";
 import TeamStatusScreen from "./pages/provider/ambulance/TeamStatusScreen";
-import FleetPage from "./pages/provider/ambulance/FleetPage";
-import TelematicsScreen from "./pages/provider/ambulance/TelematicsScreen";
-import LiveSOSScreen from "./pages/provider/ambulance/LiveSOSScreen";
 import AmbulanceIncidentConsole from "./pages/provider/AmbulanceIncidentConsole";
 
-// Vehicle Abuse Prevention screens
+// Vehicle Abuse Prevention screens (detail drilldown views)
 import VehicleAbuseScreen from "./pages/provider/ambulance/VehicleAbuseScreen";
 import GeofenceScreen from "./pages/provider/ambulance/GeofenceScreen";
 import RouteDeviationScreen from "./pages/provider/ambulance/RouteDeviationScreen";
 import AfterHoursScreen from "./pages/provider/ambulance/AfterHoursScreen";
 import UnlinkedTripsScreen from "./pages/provider/ambulance/UnlinkedTripsScreen";
 
-// ER Provider - Incident Management
-import IncidentManagementScreen from "./pages/provider/ambulance/IncidentManagementScreen";
-
-// Fleet Management screens
+// Fleet detail screens (deep-link profiles)
 import VehicleProfileScreen from "./pages/provider/ambulance/VehicleProfileScreen";
-import VehicleAvailabilityScreen from "./pages/provider/ambulance/VehicleAvailabilityScreen";
-import VehicleAssignmentScreen from "./pages/provider/ambulance/VehicleAssignmentScreen";
-import FleetCalendarScreen from "./pages/provider/ambulance/FleetCalendarScreen";
-import VehicleUtilisationScreen from "./pages/provider/ambulance/VehicleUtilisationScreen";
-import VehicleTypeManagementScreen from "./pages/provider/ambulance/VehicleTypeManagementScreen";
+
+// Consolidated Screens (Option A: Aggressive Consolidation)
+import EmergencyDashboardScreen from "./pages/provider/ambulance/EmergencyDashboardScreen";
+import FleetOperationsScreen from "./pages/provider/ambulance/FleetOperationsScreen";
+import HospitalNetworkScreen from "./pages/provider/ambulance/HospitalNetworkScreen";
+import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitoringScreen";
 
 // Additional Management Screens
-import TelemetryHubScreen from "./pages/provider/ambulance/TelemetryHubScreen";
 import DriverManagementScreen from "./pages/provider/ambulance/DriverManagementScreen";
-import MaintenanceDashboardScreen from "./pages/provider/ambulance/MaintenanceDashboardScreen";
 import BillingDashboardScreen from "./pages/provider/BillingDashboardScreen";
 import ExecutiveDashboardScreen from "./pages/provider/ExecutiveDashboardScreen";
 import AlertsCentreScreen from "./pages/provider/AlertsCentreScreen";
@@ -120,35 +108,40 @@ export default function ProviderRoutes() {
       </Route>
 
       <Route path="ambulance" element={<ProviderShell><AmbulanceOpsLayout /></ProviderShell>}>
-        <Route index element={<AmbulanceOpsDashboard />} />
-        <Route path="incoming" element={<IncomingSosScreen />} />
-        <Route path="live-sos" element={<LiveSOSScreen />} />
+        {/* Consolidated Emergency Response Dashboard */}
+        <Route index element={<EmergencyDashboardScreen />} />
+
+        {/* Navigation Tool */}
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
-        <Route path="hospitals" element={<HospitalsDirectoryScreen />} />
-        <Route path="affiliations" element={<AffiliatedHospitalsScreen />} />
-        <Route path="history" element={<IncidentHistoryScreen />} />
+
+        {/* Consolidated Hospital Network (All Partners + Affiliates) */}
+        <Route path="hospital-network" element={<HospitalNetworkScreen />} />
+
+        {/* Team & Drivers */}
         <Route path="team" element={<TeamStatusScreen />} />
-        <Route path="fleet" element={<FleetPage />} />
-        <Route path="fleet/vehicle/:id" element={<VehicleProfileScreen />} />
-        <Route path="fleet/availability" element={<VehicleAvailabilityScreen />} />
-        <Route path="fleet/assignment" element={<VehicleAssignmentScreen />} />
-        <Route path="fleet/calendar" element={<FleetCalendarScreen />} />
-        <Route path="fleet/utilisation" element={<VehicleUtilisationScreen />} />
-        <Route path="fleet/types" element={<VehicleTypeManagementScreen />} />
-        <Route path="incident-management" element={<IncidentManagementScreen />} />
-        <Route path="telematics" element={<TelematicsScreen />} />
-        <Route path="telematics-hub" element={<TelemetryHubScreen />} />
         <Route path="drivers" element={<DriverManagementScreen />} />
-        <Route path="maintenance" element={<MaintenanceDashboardScreen />} />
-        <Route path="alerts" element={<AlertsCentreScreen />} />
-        <Route path="billing" element={<BillingDashboardScreen />} />
-        <Route path="executive" element={<ExecutiveDashboardScreen />} />
+
+        {/* Consolidated Fleet Operations (Vehicles + Availability + Maintenance + Utilisation) */}
+        <Route path="fleet-operations" element={<FleetOperationsScreen />} />
+        <Route path="fleet/vehicle/:id" element={<VehicleProfileScreen />} />
+
+        {/* Consolidated Real-Time Monitoring (Live Tracking + Safety Alerts) */}
+        <Route path="monitoring" element={<RealTimeMonitoringScreen />} />
+
+        {/* Detail drilldown views for safety monitoring */}
         <Route path="abuse" element={<VehicleAbuseScreen />} />
         <Route path="abuse/geofence" element={<GeofenceScreen />} />
         <Route path="abuse/routes" element={<RouteDeviationScreen />} />
         <Route path="abuse/hours" element={<AfterHoursScreen />} />
         <Route path="abuse/trips" element={<UnlinkedTripsScreen />} />
+
+        {/* Analytics & Admin */}
+        <Route path="alerts" element={<AlertsCentreScreen />} />
+        <Route path="billing" element={<BillingDashboardScreen />} />
+        <Route path="executive" element={<ExecutiveDashboardScreen />} />
+
+        {/* Incident & Session */}
         <Route path="incident/:id" element={<AmbulanceIncidentConsole />} />
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
