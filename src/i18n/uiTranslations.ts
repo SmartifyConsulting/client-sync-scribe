@@ -110,7 +110,6 @@ export const uiTranslations: Record<string, TranslationTree> = {
       enRouteToHospital: "To hospital",
       atHospital: "At hospital",
       out_of_service: "Out of service",
-      admitted: "Admitted",
     },
     provider: {
       hospitalOps: "Hospital Ops",
