@@ -36,6 +36,10 @@ export const uiTranslations: Record<string, TranslationTree> = {
       and: "and",
       update: "Update",
       create: "Create",
+      cancel: "Cancel",
+      loading: "Loading…",
+      close: "Close",
+      delete: "Delete",
     },
     footer: {
       copyright: "© {{year}} Holarc Health (Pty) Ltd. All rights reserved.",
@@ -590,7 +594,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
     }
   },
   fr: {
-    common: { support: "Contacter le support", clearAll: "Tout effacer", noNotifications: "Aucune notification", install: "Installer", yes: "Oui", no: "Non", open: "Ouvrir", review: "Examiner", remove: "Retirer", invite: "Inviter", patient: "Patient", patients: "Patients", doctor: "Médecin", provider: "Prestataire", member: "Membre", crew: "Équipe", crewMember: "Membre d'équipe", anonymous: "Anonyme", ago: "il y a", max: "max", required: "obligatoire", beta: "Bêta", gotIt: "Compris", capacityUpdated: "Capacité mise à jour", and: "et", update: "Mettre à jour", create: "Créer", dismiss: "Fermer" },
+    common: { support: "Contacter le support", clearAll: "Tout effacer", noNotifications: "Aucune notification", install: "Installer", yes: "Oui", no: "Non", open: "Ouvrir", review: "Examiner", remove: "Retirer", invite: "Inviter", patient: "Patient", patients: "Patients", doctor: "Médecin", provider: "Prestataire", member: "Membre", crew: "Équipe", crewMember: "Membre d'équipe", anonymous: "Anonyme", ago: "il y a", max: "max", required: "obligatoire", beta: "Bêta", gotIt: "Compris", capacityUpdated: "Capacité mise à jour", and: "et", update: "Mettre à jour", create: "Créer", dismiss: "Fermer", cancel: "Annuler", loading: "Chargement…", close: "Fermer", delete: "Supprimer" },
     footer: { copyright: "© {{year}} Holarc Health (Pty) Ltd. Tous droits réservés.", terms: "Conditions générales", privacy: "Confidentialité et consentement", compliance: "Conformité", legal: "Centre juridique" },
     topbar: { clearAll: "Tout effacer", noNotifications: "Aucune notification", switchProfile: "Changer de profil (admin)", switchToAdmin: "Passer à Admin", myRewards: "Mes récompenses", admin: "Admin", legalTerms: "Mentions légales", shareApp: "Partager l'app", doctor: "Médecin", patient: "Patient", er: "Urgences", hospital: "Hôpital" },
     settingsPage: { title: "Paramètres", subtitle: "Gérez vos préférences, la sécurité et la facturation" },
