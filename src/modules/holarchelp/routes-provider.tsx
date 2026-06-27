@@ -38,6 +38,22 @@ import UnlinkedTripsScreen from "./pages/provider/ambulance/UnlinkedTripsScreen"
 // ER Provider - Incident Management
 import IncidentManagementScreen from "./pages/provider/ambulance/IncidentManagementScreen";
 
+// Fleet Management screens
+import VehicleProfileScreen from "./pages/provider/ambulance/VehicleProfileScreen";
+import VehicleAvailabilityScreen from "./pages/provider/ambulance/VehicleAvailabilityScreen";
+import VehicleAssignmentScreen from "./pages/provider/ambulance/VehicleAssignmentScreen";
+import FleetCalendarScreen from "./pages/provider/ambulance/FleetCalendarScreen";
+import VehicleUtilisationScreen from "./pages/provider/ambulance/VehicleUtilisationScreen";
+import VehicleTypeManagementScreen from "./pages/provider/ambulance/VehicleTypeManagementScreen";
+
+// Additional Management Screens
+import TelemetryHubScreen from "./pages/provider/ambulance/TelemetryHubScreen";
+import DriverManagementScreen from "./pages/provider/ambulance/DriverManagementScreen";
+import MaintenanceDashboardScreen from "./pages/provider/ambulance/MaintenanceDashboardScreen";
+import BillingDashboardScreen from "./pages/provider/BillingDashboardScreen";
+import ExecutiveDashboardScreen from "./pages/provider/ExecutiveDashboardScreen";
+import AlertsCentreScreen from "./pages/provider/AlertsCentreScreen";
+
 // Incident & Dispatch Management screens
 import CreateIncidentScreen from "./pages/provider/hospital/CreateIncidentScreen";
 import IncidentLocationScreen from "./pages/provider/hospital/IncidentLocationScreen";
@@ -114,8 +130,20 @@ export default function ProviderRoutes() {
         <Route path="history" element={<IncidentHistoryScreen />} />
         <Route path="team" element={<TeamStatusScreen />} />
         <Route path="fleet" element={<FleetPage />} />
+        <Route path="fleet/vehicle/:id" element={<VehicleProfileScreen />} />
+        <Route path="fleet/availability" element={<VehicleAvailabilityScreen />} />
+        <Route path="fleet/assignment" element={<VehicleAssignmentScreen />} />
+        <Route path="fleet/calendar" element={<FleetCalendarScreen />} />
+        <Route path="fleet/utilisation" element={<VehicleUtilisationScreen />} />
+        <Route path="fleet/types" element={<VehicleTypeManagementScreen />} />
         <Route path="incident-management" element={<IncidentManagementScreen />} />
         <Route path="telematics" element={<TelematicsScreen />} />
+        <Route path="telematics-hub" element={<TelemetryHubScreen />} />
+        <Route path="drivers" element={<DriverManagementScreen />} />
+        <Route path="maintenance" element={<MaintenanceDashboardScreen />} />
+        <Route path="alerts" element={<AlertsCentreScreen />} />
+        <Route path="billing" element={<BillingDashboardScreen />} />
+        <Route path="executive" element={<ExecutiveDashboardScreen />} />
         <Route path="abuse" element={<VehicleAbuseScreen />} />
         <Route path="abuse/geofence" element={<GeofenceScreen />} />
         <Route path="abuse/routes" element={<RouteDeviationScreen />} />
