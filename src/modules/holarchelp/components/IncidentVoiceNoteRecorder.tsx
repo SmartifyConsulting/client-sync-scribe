@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, Square, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { VoiceNoteAudio } from "./VoiceNoteAudio";
+import { useTranslation } from "react-i18next";
 
 type Note = {
   id: string; audio_url: string; transcript: string | null; created_at: string;
@@ -15,6 +16,7 @@ type Note = {
 export function IncidentVoiceNoteRecorder({
   incidentId, providerId,
 }: { incidentId: string; providerId: string | null }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [recording, setRecording] = useState(false);
@@ -60,7 +62,7 @@ export function IncidentVoiceNoteRecorder({
       startedAtRef.current = Date.now();
       setRecording(true);
     } catch (e: any) {
-      toast.error("Microphone permission needed");
+      toast.error(t("voiceNotes.micPermission"));
     }
   };
 
@@ -102,15 +104,15 @@ export function IncidentVoiceNoteRecorder({
             .select("id").eq("incident_id", incidentId).eq("audio_url", path).maybeSingle();
           if ((latest as any)?.id) {
             await supabase.from("holarchelp_voice_notes" as any).update({
-              transcript: text || "(Transcription unavailable — tap Retry)",
+              transcript: text || t("voiceNotes.transcriptionUnavailable"),
             } as any).eq("id", (latest as any).id);
           }
         };
         reader.readAsDataURL(blob);
       } catch { /* ignore */ }
-      toast.success("Voice note saved");
+      toast.success(t("voiceNotes.saved"));
     } catch (e: any) {
-      toast.error(e?.message ?? "Failed to save voice note");
+      toast.error(e?.message ?? t("voiceNotes.failedSave"));
     } finally {
       stream.getTracks().forEach((t) => t.stop());
       setBusy(false);
@@ -120,23 +122,23 @@ export function IncidentVoiceNoteRecorder({
   return (
     <div className="rounded-2xl border bg-card p-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Voice notes</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("voiceNotes.title")}</p>
         {!recording ? (
           <Button size="sm" onClick={start} disabled={busy} className="gap-1.5">
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />} Record
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />} {t("voiceNotes.record")}
           </Button>
         ) : (
           <Button size="sm" variant="destructive" onClick={stop} className="gap-1.5">
-            <Square className="h-4 w-4" /> Stop
+            <Square className="h-4 w-4" /> {t("voiceNotes.stop")}
           </Button>
         )}
       </div>
       <div className="mt-3 space-y-3">
-        {notes.length === 0 && <p className="text-sm text-muted-foreground">No voice notes yet.</p>}
+        {notes.length === 0 && <p className="text-sm text-muted-foreground">{t("voiceNotes.none")}</p>}
         {notes.map((n) => (
           <div key={n.id} className="rounded-xl border p-3">
             <p className="text-xs font-semibold">
-              🎤 {n.actor_name ?? "Unknown"} {n.provider_name ? `— ${n.provider_name}` : ""}
+              🎤 {n.actor_name ?? t("common.unknown")} {n.provider_name ? `— ${n.provider_name}` : ""}
             </p>
             <p className="text-[11px] text-muted-foreground">
               {new Date(n.created_at).toLocaleString()} {n.duration_seconds ? `· ${n.duration_seconds.toFixed(1)}s` : ""}
@@ -149,7 +151,7 @@ export function IncidentVoiceNoteRecorder({
                 variant="outline"
                 className="h-7 text-xs"
                 onClick={async () => {
-                  toast.message("Re-transcribing…");
+                  toast.message(t("voiceNotes.retranscribing"));
                   try {
                     const { data: signed } = await supabase.storage.from("session-audio").createSignedUrl(n.audio_url, 120);
                     if (!signed?.signedUrl) throw new Error("Could not access audio");
@@ -164,13 +166,13 @@ export function IncidentVoiceNoteRecorder({
                     const { data, error } = await supabase.functions.invoke("transcribe-audio", { body: { audio: b64 } });
                     if (error || !(data as any)?.text) throw new Error("Empty transcript");
                     await supabase.from("holarchelp_voice_notes" as any).update({ transcript: String((data as any).text) } as any).eq("id", n.id);
-                    toast.success("Transcript updated");
+                    toast.success(t("voiceNotes.updated"));
                   } catch (e: any) {
                     toast.error(e?.message ?? "Retry failed");
                   }
                 }}
               >
-                Retry
+                {t("voiceNotes.retry")}
               </Button>
             </div>
           </div>
