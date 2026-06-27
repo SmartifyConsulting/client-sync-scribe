@@ -13,10 +13,10 @@ type ProviderInfo = { name: string; kind: "ambulance" | "hospital" };
 const labelFor = (e: EventRow, t: (key: string, options?: any) => string) => {
   switch (e.event_type) {
     case "sos_triggered": return t("timeline.sosTriggered");
-    case "auto_assigned": return `🤖 ${t("timeline.autoAssigned")}`;
-    case "patient_picked": return `✋ ${t("timeline.youPicked")}`;
-    case "accepted": return `✋ ${t("timeline.selectedCall")}`;
-    case "declined": return t("timeline.responderDeclined");
+    case "auto_assigned": return t("timeline.autoAssigned");
+    case "patient_picked": return t("timeline.patientPicked");
+    case "accepted": return t("timeline.accepted");
+    case "declined": return t("timeline.declined");
     case "reassigned": return t("timeline.reassigned");
     case "released": return t("timeline.released");
     case "en_route": return t("status.en_route");
@@ -24,8 +24,8 @@ const labelFor = (e: EventRow, t: (key: string, options?: any) => string) => {
     case "patient_collected": return t("status.patient_collected");
     case "at_hospital": return t("timeline.arrivedHospital");
     case "completed": return t("timeline.completed");
-    case "voice_note": return t("timeline.voiceNoteAdded");
-    case "eta_set": return t("timeline.etaSet", { minutes: e.payload?.eta_minutes ? `: ${e.payload.eta_minutes} ${t("common.min")}` : "" });
+    case "voice_note": return t("timeline.voiceNote");
+    case "eta_set": return `${t("timeline.etaSet")}${e.payload?.eta_minutes ? `: ${e.payload.eta_minutes} min` : ""}`;
     default: return e.event_type;
   }
 };
@@ -95,7 +95,7 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
           const showProvider = prov && PROVIDER_EVENTS.has(e.event_type);
           const suffix =
             e.event_type === "auto_assigned"
-              ? t("timeline.autoAssignedLower")
+              ? t("timeline.autoAssigned").replace(/^🤖\s*/, "").toLowerCase()
               : e.event_type === "accepted" || e.event_type === "patient_picked"
                 ? t("timeline.respondedPicked")
                 : null;
