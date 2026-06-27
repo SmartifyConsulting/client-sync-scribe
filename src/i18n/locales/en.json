@@ -63,7 +63,8 @@
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
     "liveSOS": "Live SOS",
-    "vehicleAbuse": "Vehicle Abuse"
+    "vehicleAbuse": "Vehicle Abuse",
+    "dispatchManagement": "Dispatch Management"
   },
   "topbar": {
     "reportBug": "Report Bug/Fix",

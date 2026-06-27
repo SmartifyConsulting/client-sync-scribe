@@ -23,6 +23,7 @@ import {
   UserCheck,
   Radar,
   AlertTriangle,
+  Zap,
 } from "lucide-react";
 
 import { useProfile } from "@/hooks/useProfile";
@@ -46,6 +47,7 @@ const hospitalNav: NavItem[] = [
   { icon: BedDouble, labelKey: "nav.erCapacity", to: "/provider/hospital/capacity" },
   { icon: Users, labelKey: "nav.providers", to: "/provider/hospital/providers" },
   { icon: Activity, labelKey: "nav.incidentTimeline", to: "/provider/hospital/timeline" },
+  { icon: Zap, labelKey: "nav.dispatchManagement", to: "/provider/hospital/dispatch" },
   { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/hospital/admins" },
 ];
 

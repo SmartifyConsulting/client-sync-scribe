@@ -35,6 +35,19 @@ import RouteDeviationScreen from "./pages/provider/ambulance/RouteDeviationScree
 import AfterHoursScreen from "./pages/provider/ambulance/AfterHoursScreen";
 import UnlinkedTripsScreen from "./pages/provider/ambulance/UnlinkedTripsScreen";
 
+// Incident & Dispatch Management screens
+import CreateIncidentScreen from "./pages/provider/hospital/CreateIncidentScreen";
+import IncidentLocationScreen from "./pages/provider/hospital/IncidentLocationScreen";
+import IncidentTriageScreen from "./pages/provider/hospital/IncidentTriageScreen";
+import NearestAmbulanceScreen from "./pages/provider/hospital/NearestAmbulanceScreen";
+import DispatchAssignmentScreen from "./pages/provider/hospital/DispatchAssignmentScreen";
+import ActiveDispatchScreen from "./pages/provider/hospital/ActiveDispatchScreen";
+import DispatchQueueScreen from "./pages/provider/hospital/DispatchQueueScreen";
+import MultiIncidentBoardScreen from "./pages/provider/hospital/MultiIncidentBoardScreen";
+import HospitalSelectionScreen from "./pages/provider/hospital/HospitalSelectionScreen";
+import DispatchReassignmentScreen from "./pages/provider/hospital/DispatchReassignmentScreen";
+import ManualOverrideScreen from "./pages/provider/hospital/ManualOverrideScreen";
+
 function ProviderShell({ children }: { children: React.ReactNode }) {
   return (
     <ProviderGate>
@@ -67,6 +80,23 @@ export default function ProviderRoutes() {
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
+
+        {/* Dispatch Management Routes */}
+        <Route path="dispatch" element={<MultiIncidentBoardScreen />} />
+        <Route path="dispatch-queue" element={<DispatchQueueScreen />} />
+        <Route path="dispatch-board" element={<MultiIncidentBoardScreen />} />
+        <Route path="dispatch-reassign/:incidentId" element={<DispatchReassignmentScreen />} />
+        <Route path="manual-override" element={<ManualOverrideScreen />} />
+
+        {/* Incident Creation Workflow */}
+        <Route path="incident/create" element={<CreateIncidentScreen />} />
+        <Route path="incident/create/location" element={<IncidentLocationScreen />} />
+        <Route path="incident/create/triage" element={<IncidentTriageScreen />} />
+        <Route path="incident/create/recommend-ambulance" element={<NearestAmbulanceScreen />} />
+        <Route path="incident/create/dispatch-assignment" element={<DispatchAssignmentScreen />} />
+        <Route path="incident/create/hospital-selection" element={<HospitalSelectionScreen />} />
+        <Route path="incident/active-dispatch/:ambulanceId" element={<ActiveDispatchScreen />} />
+
         <Route path="*" element={<Navigate to="" replace />} />
       </Route>
 
