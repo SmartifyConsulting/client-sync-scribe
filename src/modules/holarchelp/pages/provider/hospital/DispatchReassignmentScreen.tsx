@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Loader2, Swap2 } from "lucide-react";
+import { AlertTriangle, Loader2, ArrowLeftRight } from "lucide-react";
 
 interface Ambulance {
   id: string;
@@ -128,7 +128,7 @@ export default function DispatchReassignmentScreen() {
         {/* Available Ambulances */}
         <div className="rounded-2xl border bg-card p-6">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Swap2 className="h-5 w-5 text-primary" />
+            <ArrowLeftRight className="h-5 w-5 text-primary" />
             Available Ambulances
           </h3>
 
