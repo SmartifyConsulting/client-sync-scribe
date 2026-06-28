@@ -35,6 +35,7 @@ const STATUS_CONFIG = {
 
 const MOCK_VEHICLE_DETAILS: Record<string, VehicleWithDetails> = {
   "AMB-001": {
+    provider_id: "",
     id: "1",
     vehicle_code: "AMB-001",
     registration_number: "REG-2023-001",
@@ -47,6 +48,7 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleWithDetails> = {
     next_service_date: "2026-09-15",
   },
   "AMB-002": {
+    provider_id: "",
     id: "2",
     vehicle_code: "AMB-002",
     registration_number: "REG-2023-002",
@@ -59,6 +61,7 @@ const MOCK_VEHICLE_DETAILS: Record<string, VehicleWithDetails> = {
     next_service_date: "2026-08-20",
   },
   "AMB-003": {
+    provider_id: "",
     id: "3",
     vehicle_code: "AMB-003",
     registration_number: "REG-2023-003",
