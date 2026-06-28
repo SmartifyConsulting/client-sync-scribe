@@ -249,6 +249,7 @@
   },
   "calendar": {
     "title": "Calendar",
+    "subtitle": "Manage your appointments and schedule",
     "today": "Today",
     "day": "Day",
     "week": "Week",
@@ -258,7 +259,17 @@
     "previous": "Previous",
     "next": "Next",
     "allDay": "All-day",
-    "noEvents": "No events"
+    "noEvents": "No events",
+    "myCalendar": "My Calendar",
+    "practiceCalendar": "Practice Calendar",
+    "googleCalendar": "Google Calendar",
+    "disconnectGoogle": "Disconnect Google",
+    "googleSyncCaption": "Google sync mirrors only your own appointments.",
+    "book": "Book",
+    "todaysSchedule": "Today's Schedule",
+    "noAppointmentsToday": "No appointments scheduled for today",
+    "filterDoctor": "Filter doctor",
+    "allDoctors": "All doctors in practice"
   },
   "sessions": {
     "title": "Sessions",
