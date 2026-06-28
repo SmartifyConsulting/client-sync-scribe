@@ -1079,7 +1079,7 @@ export default function CalendarView() {
               })
             ) : (
               <div className="p-8 text-center text-muted-foreground">
-                No appointments scheduled for today
+                {t("calendar.noAppointmentsToday")}
               </div>
             )}
           </div>
