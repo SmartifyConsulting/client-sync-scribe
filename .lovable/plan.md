@@ -1,13 +1,25 @@
-## Problem
+## Doctor home page — convert to selected language
 
-The "Chronic Meds" tab in My Rewards only shows when `patients.is_chronic = true`. Marking Lion's Mane as Chronic in the daily-meds form sets `prescriptions.is_chronic = true` but never flips the flag on the patient record, so the tab stays hidden.
+Wire every visible label on the doctor Dashboard (`/doctor-dashboard`) to `t()` and translate into all 25 supported locales.
 
-## Fix
+### Files to change
 
-1. **`src/features/patients/components/DailyMedsInline.tsx`** — after inserting a prescription where `isChronic` is true, update `patients.is_chronic = true` for that patient and invalidate the `my-chronic-patient-record` query so the tab appears immediately.
+1. **`src/i18n/locales/*.json` (all 25)** — add a new `doctorDashboard` namespace with native translations for: greetings (morning/afternoon/evening), subtitle, stat-card titles (Total Patients, This Week, Doctor Rating, Vula Vouchers, No ratings yet), My Round Tables panel (heading, search placeholder, "No patients found"), To-Do List (heading, add placeholder, Active, Done, empty states), Recent Activity (heading, default item strings).
 
-2. **`src/features/rewards/hooks/usePatientRewards.ts` (`useMyChronicPatientId`)** — treat a patient as chronic if **either** `patients.is_chronic = true` **or** they have any active chronic prescription. This self-heals existing users (like the Lion's Mane case) without a migration.
+2. **`src/pages/Dashboard.tsx`** — import `useTranslation`; replace the hardcoded greeting trio, page subtitle, four `StatsCard` titles, the duplicated "My Round Tables" panel (desktop + mobile) heading, search placeholder, and "No patients found" with `t("doctorDashboard.*")`. Strip the English suffixes from change badges ("this month", "from last week", "Comm:/Exp:/Prof:") so they stay numeric-only and locale-clean.
 
-3. **One-time backfill** (data update, not a migration): set `patients.is_chronic = true` for any patient who already has an active `prescriptions.is_chronic = true` row.
+3. **`src/components/dashboard/CompactTodoList.tsx`** — translate the "To-Do List" header, "Add a task..." input placeholder, the `Active (n)` / `Done (n)` tab labels, and the empty-state lines ("No active tasks" / "No completed tasks").
 
-No UI redesign, no schema change — purely wiring the chronic flag end-to-end.
+4. **`src/components/dashboard/RecentActivity.tsx`** — translate the "Recent Activity" header and the default activity strings ("Getting started", "Add your first patient to get started", "Just now"). The dynamically-generated mock activity strings ("Session completed", "Document generated", "Task completed", "Follow-up sent") are mapped through `t()` lookups too.
+
+5. **`TodaysBriefing`** is left as-is — it already runs its content through the `translate-text` edge function based on `profiles.preferred_language`, so it auto-translates separately.
+
+### Out of scope this pass
+
+- Dialogs opened from the dashboard, the Patient Access Requests card content, the sidebar/topbar (already partially keyed in earlier passes).
+- Dynamic data (patient names, AI summaries, document titles).
+- Other portals — those will be subsequent sweeps, one screen at a time.
+
+### Verification
+
+After the changes, switch the top-right language picker between English → isiZulu → Igbo → 中文 → العربية and confirm: the greeting, subtitle, every stat-card title, both Round Tables panels, the To-Do List header/tabs/placeholder, and the Recent Activity header all flip language. RTL flips correctly for Arabic.

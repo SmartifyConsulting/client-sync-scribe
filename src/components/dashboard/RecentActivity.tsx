@@ -6,6 +6,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { supabase } from "@/integrations/supabase/client";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
+import { useTranslation } from "react-i18next";
 
 interface Activity {
   id: string;
@@ -32,6 +33,7 @@ const activityColors = {
 };
 
 export function RecentActivity() {
+  const { t } = useTranslation();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +49,7 @@ export function RecentActivity() {
         if (patients && patients.length > 0) {
           // Create mock activities from real patients
           const activityTypes: ("session" | "document" | "task" | "message")[] = ["session", "document", "task", "message"];
-          const titles = ["Session completed", "Document generated", "Task completed", "Follow-up sent"];
+          const titles = [t("doctorDashboard.sessionCompleted"), t("doctorDashboard.documentGenerated"), t("doctorDashboard.taskCompleted"), t("doctorDashboard.followUpSent")];
           const descriptions = ["Consultation with", "Action Plan for", "Review notes for", "Email to"];
           const times = ["2 hours ago", "3 hours ago", "5 hours ago", "Yesterday"];
 
@@ -66,7 +68,7 @@ export function RecentActivity() {
             mockActivities[2] = {
               id: 'act-task',
               type: 'task',
-              title: 'Task completed',
+              title: t("doctorDashboard.taskCompleted"),
               description: 'Review financial documents',
               time: '5 hours ago',
             };
@@ -79,9 +81,9 @@ export function RecentActivity() {
             {
               id: "1",
               type: "task",
-              title: "Getting started",
-              description: "Add your first patient to get started",
-              time: "Just now",
+              title: t("doctorDashboard.gettingStarted"),
+              description: t("doctorDashboard.addFirstPatient"),
+              time: t("doctorDashboard.justNow"),
             },
           ]);
         }
@@ -110,7 +112,7 @@ export function RecentActivity() {
     <Collapsible defaultOpen={true}>
       <div className="rounded-xl border border-primary bg-card shadow-sm">
         <CollapsibleTrigger className="w-full rounded-xl data-[state=open]:rounded-b-none bg-primary px-4 py-3 flex items-center justify-between transition-all">
-          <h3 className="text-sm font-semibold text-primary-foreground">Recent Activity</h3>
+          <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.recentActivity")}</h3>
           <ChevronDown className="h-4 w-4 text-primary-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
         </CollapsibleTrigger>
         <CollapsibleContent>

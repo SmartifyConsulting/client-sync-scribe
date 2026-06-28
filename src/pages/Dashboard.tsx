@@ -21,8 +21,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { profile, loading: profileLoading } = useProfile();
   const { isDoctor, isPatient, loading: roleLoading } = useUserRole();
   const queryClient = useQueryClient();
@@ -258,7 +260,7 @@ export default function Dashboard() {
 
   // Get time-based greeting
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? t("doctorDashboard.greetingMorning") : hour < 18 ? t("doctorDashboard.greetingAfternoon") : t("doctorDashboard.greetingEvening");
   
   // Format today's date
   const today = new Date();
@@ -288,7 +290,7 @@ export default function Dashboard() {
             {greeting}{displayName ? `, ${displayName}` : ''}
           </h1>
           <p className="mt-2 text-muted-foreground text-[12px]">
-            Here's what's happening with your practice today,
+            {t("doctorDashboard.subtitle")}
             <span className="block md:inline"> {formattedDate}</span>
           </p>
         </div>
@@ -309,28 +311,28 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid gap-2 md:gap-5 grid-cols-2 lg:grid-cols-5">
         <StatsCard
-          title="Total Patients"
+          title={t("doctorDashboard.totalPatients")}
           value={128}
-          change="+12 this month"
+          change="+12"
           trend="up"
           icon={Users}
           href="/patients"
         />
         <StatsCard
-          title="This Week"
+          title={t("doctorDashboard.thisWeek")}
           value={24}
-          change="+8% from last week"
+          change="+8%"
           trend="up"
           icon={TrendingUp}
           href="/calendar"
         />
         {isDoctor && (
           <StatsCard
-            title="Doctor Rating"
+            title={t("doctorDashboard.doctorRating")}
             value={ratingData.avg > 0 ? `${ratingData.avg.toFixed(1)} ★` : "—"}
             change={ratingData.count > 0 
-              ? `Comm: ${ratingData.communication.toFixed(1)} · Exp: ${ratingData.expertise.toFixed(1)} · Prof: ${ratingData.professionalism.toFixed(1)}`
-              : "No ratings yet"}
+              ? `${ratingData.communication.toFixed(1)} · ${ratingData.expertise.toFixed(1)} · ${ratingData.professionalism.toFixed(1)}`
+              : t("doctorDashboard.noRatings")}
             trend="neutral"
             icon={Star}
             href="/profile"
@@ -338,7 +340,7 @@ export default function Dashboard() {
         )}
         {isDoctor && (
           <StatsCard
-            title="Vula Vouchers"
+            title={t("doctorDashboard.vulaVouchers")}
             value={doctorVulas + patientVulas}
             change={undefined}
             trend="up"
@@ -364,14 +366,14 @@ export default function Dashboard() {
             <div className="hidden lg:block">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
                 <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
+                  <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
-                      placeholder="Search patient to start round table..."
+                      placeholder={t("doctorDashboard.searchRoundTable")}
                       className="pl-9 h-8 text-xs"
                       value={rtSearch}
                       onChange={(e) => setRtSearch(e.target.value)}
@@ -391,7 +393,7 @@ export default function Dashboard() {
                     </div>
                   )}
                   {rtSearch.trim() && filteredPatients.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">No patients found</p>
+                    <p className="text-xs text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
                   )}
                   <DoctorRoundTables />
                 </div>
@@ -405,14 +407,14 @@ export default function Dashboard() {
             <div className="lg:hidden">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
                 <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-primary-foreground">My Round Tables</h3>
+                  <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
-                      placeholder="Search patient to start round table..."
+                      placeholder={t("doctorDashboard.searchRoundTable")}
                       className="pl-9 h-8 text-xs"
                       value={rtSearch}
                       onChange={(e) => setRtSearch(e.target.value)}
@@ -432,7 +434,7 @@ export default function Dashboard() {
                     </div>
                   )}
                   {rtSearch.trim() && filteredPatients.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">No patients found</p>
+                    <p className="text-xs text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
                   )}
                   <DoctorRoundTables />
                 </div>

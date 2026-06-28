@@ -27,6 +27,7 @@ import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
+import { useTranslation } from "react-i18next";
 
 interface TodoItem {
   id: string;
@@ -58,6 +59,7 @@ const actionTypeLabels: Record<string, string> = {
 
 export function CompactTodoList() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useProfile();
   const [todos, setTodos] = useState<TodoItem[]>([]);
@@ -352,7 +354,7 @@ export function CompactTodoList() {
       <div className="rounded-xl border border-primary bg-card shadow-sm font-size-preserve">
         {/* Header */}
         <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-primary-foreground">To-Do List</h3>
+          <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.todoList")}</h3>
           <div className="flex items-center gap-2">
             <button
               onClick={() => { isRecording ? stopRecording() : startRecording(); }}
@@ -382,7 +384,7 @@ export function CompactTodoList() {
             value={newTaskText}
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
-            placeholder="Add a task..."
+            placeholder={t("doctorDashboard.addTask")}
             className="h-8 text-xs border-border rounded-lg px-2.5"
             disabled={isProcessing || isAiProcessing}
           />
@@ -399,10 +401,10 @@ export function CompactTodoList() {
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
           <TabsList className="h-7 w-full bg-primary p-0.5">
             <TabsTrigger value="active" className="text-[11px] h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-              Active ({activeCount})
+              {t("doctorDashboard.active")} ({activeCount})
             </TabsTrigger>
             <TabsTrigger value="completed" className="text-[11px] h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-              Done ({completedCount})
+              {t("doctorDashboard.done")} ({completedCount})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -415,7 +417,7 @@ export function CompactTodoList() {
             </div>
           ) : filteredTodos.length === 0 ? (
             <p className="text-[11px] text-muted-foreground text-center py-3">
-              {filter === "active" ? "No active tasks" : "No completed tasks"}
+              {filter === "active" ? t("doctorDashboard.noActiveTasks") : t("doctorDashboard.noCompletedTasks")}
             </p>
           ) : (
             filteredTodos.map((todo) => (
