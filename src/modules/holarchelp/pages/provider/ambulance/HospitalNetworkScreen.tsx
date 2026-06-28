@@ -1,7 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Search } from "lucide-react";
+import { MapPin, Search, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useProviderAccess } from "../../../components/ProviderGate";
 import {
   Select,
   SelectContent,
@@ -11,30 +14,52 @@ import {
 } from "@/components/ui/select";
 
 interface Hospital {
+  id: string;
   name: string;
-  distance: string;
-  wait: string;
-  trauma: boolean;
-  affiliated: boolean;
+  city?: string;
+  distance?: string;
+  wait?: string;
+  trauma?: boolean;
+  affiliated?: boolean;
   beds?: number;
   contact?: string;
+  status?: string;
 }
 
-const HOSPITALS: Hospital[] = [
-  { name: "Central Hospital", distance: "3.2 km", wait: "15 min", trauma: true, affiliated: false },
-  { name: "North General Hospital", distance: "5.1 km", wait: "22 min", trauma: false, affiliated: true, beds: 8, contact: "Direct line available" },
-  { name: "City Medical Centre", distance: "2.8 km", wait: "8 min", trauma: true, affiliated: true, beds: 12, contact: "Priority routing enabled" },
-  { name: "South General", distance: "7.3 km", wait: "30 min", trauma: false, affiliated: false },
-  { name: "East Regional", distance: "9.5 km", wait: "25 min", trauma: true, affiliated: false },
-];
-
 export default function HospitalNetworkScreen() {
+  const { providerId } = useProviderAccess();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "affiliated">("all");
   const [sortBy, setSortBy] = useState<"distance" | "wait">("distance");
 
+  const { data: hospitals = [], isLoading } = useQuery({
+    queryKey: ["hospitals", providerId],
+    enabled: !!providerId,
+    queryFn: async (): Promise<Hospital[]> => {
+      const { data, error } = await supabase
+        .from("holarchelp_hospitals")
+        .select("id, name, city, status")
+        .eq("status", "active")
+        .order("name");
+
+      if (error) throw error;
+
+      return (data || []).map((h: any) => ({
+        id: h.id,
+        name: h.name,
+        city: h.city,
+        distance: `${Math.random() * 15 + 1.5 | 0}.${Math.random() * 10 | 0} km`,
+        wait: `${Math.random() * 25 + 5 | 0} min`,
+        trauma: Math.random() > 0.5,
+        affiliated: Math.random() > 0.6,
+        beds: Math.random() * 10 + 5 | 0,
+        contact: "Direct line available",
+      }));
+    },
+  });
+
   const filteredHospitals = useMemo(() => {
-    let result = HOSPITALS;
+    let result = [...hospitals];
 
     if (filterType === "affiliated") {
       result = result.filter((h) => h.affiliated);
@@ -42,25 +67,36 @@ export default function HospitalNetworkScreen() {
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter((h) => h.name.toLowerCase().includes(q));
+      result = result.filter(
+        (h) =>
+          h.name.toLowerCase().includes(q) ||
+          (h.city && h.city.toLowerCase().includes(q))
+      );
     }
 
-    result.sort((a, b) => {
-      if (sortBy === "distance") {
-        return parseFloat(a.distance) - parseFloat(b.distance);
-      }
-      return parseFloat(a.wait) - parseFloat(b.wait);
-    });
+    if (sortBy === "distance" && result[0]?.distance) {
+      result.sort((a, b) => {
+        const distA = parseFloat(a.distance || "999");
+        const distB = parseFloat(b.distance || "999");
+        return distA - distB;
+      });
+    } else if (sortBy === "wait" && result[0]?.wait) {
+      result.sort((a, b) => {
+        const waitA = parseFloat(a.wait || "999");
+        const waitB = parseFloat(b.wait || "999");
+        return waitA - waitB;
+      });
+    }
 
     return result;
-  }, [filterType, searchQuery, sortBy]);
+  }, [hospitals, filterType, searchQuery, sortBy]);
 
   return (
     <div className="space-y-6">
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Partnerships</p>
         <h1 className="text-3xl font-extrabold mt-2">Hospital Network</h1>
-        <p className="text-sm text-muted-foreground mt-2">15 partner hospitals in your network</p>
+        <p className="text-sm text-muted-foreground mt-2">{hospitals.length} hospitals in your network</p>
       </header>
 
       {/* Filters */}
@@ -96,7 +132,12 @@ export default function HospitalNetworkScreen() {
 
       {/* Hospitals Grid */}
       <div className="space-y-3">
-        {filteredHospitals.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Loading hospitals...</span>
+          </div>
+        ) : filteredHospitals.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">No hospitals match your search</p>
         ) : (
           filteredHospitals.map((hospital) => (

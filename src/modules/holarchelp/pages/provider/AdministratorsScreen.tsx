@@ -203,98 +203,95 @@ export default function AdministratorsScreen() {
     return (
       <div
         key={row.id}
-        className={`rounded-lg border p-4 ${colors.bg} ${colors.text}`}
+        className={`rounded border p-2.5 flex items-center justify-between text-xs ${colors.bg} ${colors.text}`}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="font-semibold text-lg">
-              {row.full_name || row.invited_name || row.invited_email || "—"}
-            </div>
-            <div className="text-sm opacity-75 mt-1">
-              {[row.invited_email, row.phone].filter(Boolean).join(" · ")}
-              {row.shift_pattern ? ` · ${row.shift_pattern}` : ""}
-              {" · "}
-              {row.user_id ? t("common.active") : t("common.pending")}
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <div className={`${colors.badge} text-white px-4 py-2 rounded text-sm font-semibold`}>
-              {(row.role || "member").toUpperCase()}
-            </div>
-          </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold">
+            {row.full_name || row.invited_name || row.invited_email || "—"}
+          </p>
+          <p className="text-[11px] opacity-70 mt-0.5">
+            {[row.invited_email, row.phone].filter(Boolean).join(" · ")}
+            {row.user_id ? " · Active" : " · Pending"}
+          </p>
         </div>
-        {isCurrentUserAdmin && !isOwner && (
-          <div className="flex gap-2 mt-3 pt-3 border-t border-current border-opacity-20">
-            <Button size="sm" variant="ghost" className="flex-1 text-sm">
-              <Edit2 className="h-4 w-4 mr-1" /> Edit
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="flex-1 text-sm"
-              onClick={() => removeMember(row)}
-            >
-              <Trash2 className="h-4 w-4 mr-1" /> Remove
-            </Button>
+        <div className="flex items-center gap-1.5 ml-2">
+          <div className={`${colors.badge} text-white px-2 py-1 rounded font-semibold text-[10px] whitespace-nowrap`}>
+            {(row.role || "member").toUpperCase()}
           </div>
-        )}
+          {isCurrentUserAdmin && !isOwner && (
+            <div className="flex gap-1">
+              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                <Edit2 className="h-3 w-3" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 w-6 p-0"
+                onClick={() => removeMember(row)}
+              >
+                <Trash2 className="h-3 w-3 text-red-600" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Administration</p>
-        <h1 className="text-3xl font-extrabold mt-2">User Management</h1>
-        <p className="text-sm text-muted-foreground mt-2">Manage all users, admins, and crew members</p>
+        <h1 className="text-2xl font-extrabold mt-1">User Management</h1>
+        <p className="text-xs text-muted-foreground mt-1">Manage users, admins, and crew members</p>
       </div>
 
       {!isCurrentUserAdmin && (
-        <div className="rounded-lg bg-amber-100 border border-amber-200 text-amber-800 p-4">
+        <div className="rounded border bg-amber-50 border-amber-200 text-amber-800 p-2.5 text-xs">
           <p className="font-semibold">📖 Read-Only View</p>
-          <p className="text-sm mt-1">Only Admin users can add, edit, or remove members</p>
+          <p className="mt-0.5">Only Admin users can add, edit, or remove members</p>
         </div>
       )}
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" />
+      <div className="rounded-lg border bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-3 py-2.5 border-b bg-card">
+          <h2 className="font-semibold text-sm flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" />
             Users ({members.length})
-          </CardTitle>
+          </h2>
           {isCurrentUserAdmin && (
-            <Button size="sm" onClick={() => setAddOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" /> Add User
+            <Button size="sm" onClick={() => setAddOpen(true)} className="h-7 text-xs">
+              <UserPlus className="mr-1 h-3 w-3" /> Add
             </Button>
           )}
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </div>
+
+        <div className="p-2.5 space-y-2">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Search by name, email, or role..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-8 h-8 text-xs"
             />
           </div>
 
           {isLoading ? (
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
+            <div className="flex items-center gap-2 text-muted-foreground text-xs py-4">
+              <Loader2 className="h-3 w-3 animate-spin" /> {t("common.loading")}
             </div>
           ) : filteredMembers.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
+            <p className="text-xs text-muted-foreground text-center py-6">
               {searchQuery ? "No users match your search" : "No users yet"}
             </p>
           ) : (
-            <div className="grid gap-3">
+            <div className="space-y-1">
               {filteredMembers.map(renderMemberCard)}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Add/Edit Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
