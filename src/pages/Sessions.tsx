@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedAudioUrl } from "@/utils/audioUrl";
@@ -81,6 +82,7 @@ import {
 type SessionState = "idle" | "active" | "processing" | "completed";
 
 export default function Sessions() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlPatientId = searchParams.get("patient");
@@ -711,7 +713,7 @@ export default function Sessions() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Session Mode</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("sessions.sessionMode")}</h1>
         <p className="mt-1 text-muted-foreground text-[12px]">
           Record, transcribe, and generate AI summaries for patient sessions
         </p>
@@ -1342,7 +1344,7 @@ export default function Sessions() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">All Sessions</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t("sessions.allSessions")}</h2>
           </div>
           <div className="flex items-center gap-2">
             {selectedRecordings.size > 0 && (
@@ -1385,7 +1387,7 @@ export default function Sessions() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search by patient name..."
+              placeholder={t("sessions.searchByPatient")}
               value={sessionSearch}
               onChange={(e) => setSessionSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"

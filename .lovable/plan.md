@@ -1,77 +1,55 @@
-# Plan — UX & workflow polish (updated)
+# Plan — Translate Today's Briefing + 6 doctor screens
 
-## 1. Sign-up & profile
-- Default role = **Patient** on `Auth.tsx` and `Landing.tsx` dropdown.
-- Larger dial-code selector in `PhoneNumberInput.tsx` (`text-sm h-11 min-w-[120px]`) — applied everywhere.
-- Mailbox email helper: *"This is your document intake address. You won't receive mail here — anything emailed to it is auto-filed under your Documents tab."*
+Extends the doctor-dashboard translation work to the rest of the primary doctor portal using the same `t()` + `uiTranslations.ts` pattern.
 
-## 2. Practice partners (`MyPractice.tsx`)
-- Green-bordered **"Practice Partners"** frame.
-- Three invite modes: email, dropdown of existing doctors, copy shareable signup link.
-- Per-partner color swatch + **Share calendar** checkbox (new `practice_members.share_calendar`).
-- Remove the standalone Shared Practice Calendar entry point.
+## Scope
 
-## 3. Navigation — "My Sessions"
-- New sidebar item under "My Patients", route `/sessions`.
-- Accordion grouped Today (expanded) / Last week / Last month / Older — teal-bordered to match doctor profile.
+**Translate** (labels, headings, buttons, tabs, menu items, placeholders, empty-states, toasts):
 
-## 4. Home page task list
-- `CompactTodoList.tsx` — show all action icons by default with tooltips.
+1. **Today's Briefing card** (image 1) — `BriefingCard` / `DashboardBriefing`: title "Today's Briefing", date, "X of Y appointments completed", **Narrate** button, arrow nav tooltips.
+2. **My Patients** (`/patients`) — page title, search placeholder, "Add Patient", tab labels (All / Mine / Shared / Pending), accordion section headers, empty state, sort/filter controls, card action buttons.
+3. **My Calendar** (`/calendar`) — view toggles (Day/Week/Month), "Today", "New Appointment", date-navigation arrows aria-labels, status filters, mini-legend, all-day label.
+4. **My Sessions** (`/sessions`) — page title, "New Session", search placeholder, accordion group headers (Today / Last week / Last month / Older — from the prior plan), session-row action menu labels (Open, Edit, Delete, Mark Complete), empty state.
+5. **My Round Tables** (`/round-tables`) — title, "New Topic", tab labels, member-presence labels, "Reply", composer placeholder, "Mark all read", notification labels.
+6. **My Rewards** (`/doctor/rewards`) — title, KPI card titles (Vulas earned, Streak, Patients adhering), tab labels, redeem-button copy, empty state.
+7. **SOS** — `LiveSOSScreen` + `DoctorSosChooser`: title, severity labels (Critical / High / Medium / Low), KPI cards (Active, Responding, Resolved), filter chips, "Assign", "Mark resolved", confirm-cancel dialog copy, voice-note CTA labels (the recorder UI itself).
 
-## 5. Currency
-- Remove **NAD**, add **NGN (₦ Naira)**.
+**Not translated** (data, not chrome):
+- AI-generated todo descriptions like *"Schedule appointment with Sarah Johnson on 2026-06-04…"* (image 2) — these come from `process-todo-actions` and remain in the source language. We'll add a separate follow-up to teach that edge function to honor the user's `preferred_language` for new tasks.
+- Patient names, prescription text, transcripts, document contents.
 
-## 6. Photo upload UX
-- Prominent dashed drop zone + "Upload photo" label on all profile pages **except Hospital**.
+## How the work is done
 
-## 7. Camera errors
-- `MediaCapture.tsx` + `IncidentPhotos.tsx`: map `NotReadableError`/`TrackStartError` → *"Your camera looks busy — another app (Zoom, Teams, browser tab) may be using it. Close it and try again."* Also handle `NotAllowedError` and `NotFoundError`.
+1. **Add namespaces** to every locale JSON in `src/i18n/locales/*.json`:
+   - `briefing` — title, date format, completedCount, narrate, prev, next.
+   - `patients` — page chrome only.
+   - `calendar` — view names + controls.
+   - `sessions` — page + accordion group labels.
+   - `roundTables` — page + composer chrome.
+   - `doctorRewards` — page + KPI chrome.
+   - `sos` — page, severity, status, KPI chrome (without overwriting existing `sosVoice` / `voiceNotes` namespaces).
+2. **Wire `useTranslation()`** in each screen's top component and replace hardcoded JSX text. Same pattern as `Dashboard.tsx` / `CompactTodoList.tsx`.
+3. **Batch-translate** the new English keys into the other 24 locales using a one-shot Lovable AI call (Gemini 2.5 Flash) per locale, with a Python helper script (same approach used for `doctorDashboard`). Existing keys are left untouched.
+4. **Verify** by switching the top-right language picker to French, Igbo, Zulu and Arabic and confirming:
+   - Today's Briefing header, Narrate button, and arrow controls flip.
+   - Each of the 6 screens' chrome flips while data inside cards remains in its source language.
+   - RTL layout (Arabic) keeps icons mirrored correctly.
 
-## 8. Chronic medication → Emergency contact link
-- When **Chronic** toggled in `AddMedicationDialog`/`DailyMedsInline`, reveal checkbox *"Notify my emergency contact if I miss this medication"*.
-- Persist `prescriptions.notify_emergency_on_missed`.
+## Files expected to change (chrome-only edits)
 
-## 9. Emergency contact / NOK fixes
-- Relationship `<Select>` no longer locks after blur — remove disabled logic.
-- Zod email validation on emergency contact + NOK email fields.
+- `src/components/dashboard/BriefingCard.tsx` (or equivalent — confirmed once exploration phase begins).
+- `src/pages/Patients.tsx`
+- `src/pages/CalendarView.tsx`
+- `src/pages/Sessions.tsx`
+- `src/pages/doctor/DoctorRoundTablesPage.tsx`
+- `src/pages/doctor/DoctorRewards.tsx`
+- `src/modules/holarchelp/pages/provider/LiveSOSScreen.tsx` + `src/modules/holarchelp/components/DoctorSosChooser.tsx`
+- All 25 `src/i18n/locales/*.json` files (additive)
 
-## 10. Patient document uploads + AI explanations
-- Enable upload on `PatientDocuments.tsx` for patients (existing bucket + RLS).
-- On image/PDF upload, call `ai-medical-image-analysis` (Gemini 2.5 Pro), persist `documents.ai_summary`, render with medical disclaimer.
+No backend, schema, or behavior changes — translation only.
 
-## 11. Baseline pill-recording explainer (NEW)
-- On `PillBaselineCapture.tsx`, prepend a friendly info card before the Record button:
-  > *"One-time setup — about 10 seconds. Show your tablet and how you take it. Our AI uses this to recognise your medication and your face on future check-ins, so you won't need to record this again."*
-- Use `Info` icon, teal background, dismissible only after recording completes.
+## Out of scope (already on the master plan, not re-done here)
 
-## 12. SOS recording — extend timer + no hallucinations (NEW)
-- `IncidentVoiceNoteRecorder.tsx` / `SosVoiceNoteDialog.tsx`: increase max recording duration **+5 seconds** (current cap → cap+5).
-- Backend transcription path: if audio blob is missing, < 500 ms, or silence-only, **skip the AI call entirely** and store `transcript = null` with `status = "no_recording"`. UI renders *"No recording captured"* instead of any AI-generated text. Prevents Whisper from hallucinating filler phrases on empty audio.
-
-## 13. Hospital admissions (NEW)
-- In `ManualLogAdmissionDialog.tsx` / admission form, add a **Hospital** `<Select>` populated from `holarchelp_hospitals` + the doctor's `hospital_doctor_affiliations`. Currently the field is missing — wire it to `hospital_admissions.hospital_id`.
-- Add a repeatable **Procedure / Diagnostic Codes** section: each row = `code` (text) + `description` (text). Stored as `hospital_admissions.procedure_codes jsonb default '[]'`. Render as a small table inside a green-bordered frame with "Add code" button.
-
-## 14. Full UI translation sweep (NEW — Part 3)
-- Replace every hardcoded label, button, heading, tab title, menu item, placeholder, and toast string across all screens with `t()` keys.
-- **Excluded**: user-entered data, frame content (notes, transcripts, patient records, AI output) — those stay in their source language.
-- Process:
-  1. Add namespaces per portal (`doctor`, `patient`, `hospital`, `ambulance`, `insurer`, `pharmacy`, `admin`, `common`).
-  2. Sweep components with a script that flags JSX text nodes / `<Button>` children / `<Label>` text / `aria-label` / `placeholder`.
-  3. Batch-translate the master `en.json` into all 25 locales via Lovable AI (Gemini 2.5 Flash).
-  4. Verify live re-render on language switch + RTL for Arabic/Hebrew.
-- Roll out portal-by-portal so each is testable: Doctor → Patient → Hospital → Ambulance → Insurer → Pharmacy → Admin.
-
-## Schema changes (single migration)
-- `practice_members.share_calendar boolean default true`
-- `prescriptions.notify_emergency_on_missed boolean default false`
-- `hospital_admissions.hospital_id uuid references holarchelp_hospitals(id)`
-- `hospital_admissions.procedure_codes jsonb default '[]'`
-
-## Verification
-- Baseline card visible only until first successful capture.
-- SOS recorder runs 5s longer; empty recording yields no AI text.
-- Hospital dropdown lists affiliated + public hospitals; codes save and re-load.
-- Switching language updates every label/button across the swept portal without page reload.
+Practice partners overhaul, hospital admissions, chronic-meds emergency-contact, patient document AI uploads. Those stay in their own batches so each ships verifiable.
 
 Approve and I'll execute end-to-end.

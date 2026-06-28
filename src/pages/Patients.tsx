@@ -699,7 +699,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search patients..."
+            placeholder={t("patients.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -734,7 +734,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                 <Label>Status</Label>
                 <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
+                    <SelectValue placeholder={t("patients.allStatuses")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
