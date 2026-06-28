@@ -102,6 +102,7 @@ function getDaysInMonth(date: Date) {
 }
 
 export default function CalendarView() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
