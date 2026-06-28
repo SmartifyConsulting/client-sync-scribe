@@ -212,10 +212,10 @@ export default function PatientProfile() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Patients
+          {t("patientProfile.backToPatients")}
         </Link>
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-muted-foreground">Patient not found</p>
+          <p className="text-muted-foreground">{t("patientProfile.patientNotFound")}</p>
         </div>
       </div>
     );
