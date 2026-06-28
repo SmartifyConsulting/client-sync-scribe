@@ -65,7 +65,12 @@
     "liveSOS": "Live SOS",
     "vehicleAbuse": "Vehicle Abuse",
     "dispatchManagement": "Dispatch Management",
-    "incidentManagement": "Incident Management"
+    "incidentManagement": "Incident Management",
+    "emergencyDashboard": "Emergency Dashboard",
+    "hospitalNetwork": "Hospital Network",
+    "fleetOperations": "Fleet Operations",
+    "realTimeMonitoring": "Real-Time Monitoring",
+    "driverManagement": "Driver Management"
   },
   "topbar": {
     "reportBug": "Report Bug/Fix",
