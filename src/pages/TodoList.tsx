@@ -65,11 +65,11 @@ const priorityColors = {
   high: "bg-destructive/10 text-destructive",
 };
 
-const priorityLabels = {
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-};
+const priorityKey = {
+  low: "todo.low",
+  medium: "todo.medium",
+  high: "todo.high",
+} as const;
 
 const actionTypeLabels: Record<string, string> = {
   schedule_appointment: "📅 Scheduled appointment",
