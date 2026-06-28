@@ -65,11 +65,11 @@ const priorityColors = {
   high: "bg-destructive/10 text-destructive",
 };
 
-const priorityLabels = {
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-};
+const priorityKey = {
+  low: "todo.low",
+  medium: "todo.medium",
+  high: "todo.high",
+} as const;
 
 const actionTypeLabels: Record<string, string> = {
   schedule_appointment: "📅 Scheduled appointment",
@@ -414,7 +414,7 @@ export default function TodoList() {
 
       {/* Add New Task — reduced by 60% */}
       <div className="rounded-xl border border-primary bg-card p-2.5 shadow-sm">
-        <h2 className="text-sm font-semibold text-foreground mb-2">Add New Task</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-2">{t("todo.addNewTask")}</h2>
         <div className="flex items-center gap-2 py-1.5 mb-1.5 border-b border-border">
           <button
             onClick={isRecording ? stopRecording : startRecording}
@@ -429,27 +429,27 @@ export default function TodoList() {
             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </button>
           <p className="text-xs text-muted-foreground">
-            {isProcessing ? "Transcribing..." : isAiProcessing ? "AI processing..." : isRecording ? "Listening... stops after a pause" : "Tap to record"}
+            {isProcessing ? t("todo.transcribing") : isAiProcessing ? t("todo.aiProcessing") : isRecording ? t("todo.listening") : t("todo.tapToRecord")}
           </p>
         </div>
         <div className="space-y-2">
           <div className="flex gap-2">
-            <Input placeholder="Or type your task here..." value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTask()} className="flex-1 h-8 text-sm" />
-            <Button onClick={addTask} disabled={!newTaskText.trim() || isAiProcessing} className="gap-1 h-8 px-3 text-xs"><Plus className="h-3.5 w-3.5" />Add</Button>
+            <Input placeholder={t("todo.typeTask")} value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTask()} className="flex-1 h-8 text-sm" />
+            <Button onClick={addTask} disabled={!newTaskText.trim() || isAiProcessing} className="gap-1 h-8 px-3 text-xs"><Plus className="h-3.5 w-3.5" />{t("todo.add")}</Button>
           </div>
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">Priority:</span>
+              <span className="text-xs text-muted-foreground">{t("todo.priority")}</span>
               <div className="flex gap-1">
                 {(["low", "medium", "high"] as const).map((p) => (
                   <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
-                    {priorityLabels[p]}
+                    {t(priorityKey[p])}
                   </button>
                 ))}
               </div>
             </div>
             <Button onClick={() => handleAiProcess()} disabled={!newTaskText.trim() || isAiProcessing} variant="secondary" className="gap-1 h-7 px-2 text-xs">
-              {isAiProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}AI Process
+              {isAiProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}{t("todo.aiProcess")}
             </Button>
           </div>
         </div>
@@ -479,11 +479,12 @@ export default function TodoList() {
       <div className="flex items-center gap-2">
         {(["active", "completed", "all"] as const).map((f) => (
           <button key={f} onClick={() => setFilter(f)} className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", filter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80")}>
-            {f.charAt(0).toUpperCase() + f.slice(1)}
+            {t(`todo.${f}`)}
             <span className="ml-1.5 text-xs opacity-70">({f === "all" ? todos.length : f === "active" ? activeCount : completedCount})</span>
           </button>
         ))}
       </div>
+
 
       {/* Task List — Grouped by Date */}
       <div className="space-y-3">
@@ -538,13 +539,13 @@ export default function TodoList() {
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <button className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80", priorityColors[todo.priority])}>
-                                        <Flag className="h-4 w-4" />{priorityLabels[todo.priority]}
+                                        <Flag className="h-4 w-4" />{t(priorityKey[todo.priority])}
                                       </button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="start">
                                       {(["low", "medium", "high"] as const).map((p) => (
                                         <DropdownMenuItem key={p} onClick={() => updatePriority(todo.id, p)} className={cn("gap-2", todo.priority === p && "bg-accent")}>
-                                          <Flag className={cn("h-3 w-3", p === "high" && "text-destructive", p === "medium" && "text-warning", p === "low" && "text-muted-foreground")} />{priorityLabels[p]}
+                                          <Flag className={cn("h-3 w-3", p === "high" && "text-destructive", p === "medium" && "text-warning", p === "low" && "text-muted-foreground")} />{t(priorityKey[p])}
                                         </DropdownMenuItem>
                                       ))}
                                     </DropdownMenuContent>

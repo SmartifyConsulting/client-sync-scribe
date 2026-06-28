@@ -250,5 +250,75 @@
     "location": "Indawo",
     "openInMaps": "Vula kwiiMephu",
     "openConsole": "Vula i-console"
+  },
+  "myPractice": {
+    "tabPractice": "Umkhuba Wam",
+    "tabReferrals": "Izitaleko",
+    "tabCredentials": "Izimfanelo",
+    "tabRewards": "Imivuzo Yam",
+    "aboutMe": "Malunga Nam",
+    "aboutMeHelper": "Gqabhuza intetho emfutshane malunga nomkhuba wakho kunye nendlela oyisebenzisa ngayo. Izigulo ziyibona oku xa zijonga iprofayile yakho. Ubuninzi bezimvo 600.",
+    "wordCount": "{{count}} / 600 amazwi",
+    "save": "Gcina"
+  },
+  "patientRewards": {
+    "progressTitle": "Inkqubela ukuya kwiSigaba Esilandelayo",
+    "progressLabel": "{{current}} / {{target}} Vulas ukuya ku\"{{milestone}}\"",
+    "moreToGo": "{{count}} ezininzi zishiyeke!",
+    "recentRewards": "Imivuzo Yamva nje",
+    "empty": "Akukho mivuzo ngoku. Qala uhambo lwakho lokuphila kakuhle!"
+  },
+  "todo": {
+    "addNewTask": "Yongeza Umsebenzi Omnye",
+    "tapToRecord": "Cofa ukuze ubhale",
+    "transcribing": "Iyabhala...",
+    "aiProcessing": "I-AI icubungula...",
+    "listening": "Ilalela... iyeka emva kokuphumla",
+    "typeTask": "Okanye uchwethele umsebenzi wakho apha...",
+    "add": "Yongeza",
+    "priority": "Ubuninzi:",
+    "low": "Ephantsi",
+    "medium": "Phakathi",
+    "high": "Phezulu",
+    "aiProcess": "Inkqubo ye-AI",
+    "active": "Isebenzayo",
+    "completed": "Iphelele",
+    "all": "Zonke",
+    "approve": "Vuma",
+    "noMatchingPatient": "Akufunyenwanga sigulo esihambelanayo"
+  },
+  "documents": {
+    "title": "Amaxwebhu",
+    "tabDocuments": "Amaxwebhu",
+    "tabTemplates": "Iimigca",
+    "tabHeaderFooter": "Inkophelo & Umlenze",
+    "tabContent": "Iimigca Zomxholo",
+    "contentHelper": "Yenza iimigca zomxholo wamaxwebhu (inkophelo/umlenze ziya kusetyenziswa kwilayibrari yakho ekhethiweyo)",
+    "newContent": "Ikomponent Yemigca Emitsha",
+    "searchContent": "Khangela iimigca zomxholo...",
+    "createTemplate": "Yenza iMigca",
+    "patientDocuments": "Amaxwebhu esigulo",
+    "searchDocuments": "Khangela amaxwebhu...",
+    "letterhead": "Intloko yephepha:",
+    "letterheadHeaderFooter": "Inkophelo kunye neNtlambo",
+    "letterheadDefault": "Eqhelekileyo"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} inqaku",
+    "noteOther": "{{count}} amacwecwe",
+    "lastActivity": "Umsebenzi wokugqibela {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Uncedo olungxamisekileyo",
+    "helpAlerted": "Uncedo luya kwaziswa ngoko nangoko",
+    "ackHeading": "PHAMBIOKU SEBENZISE I-SOS, Nceda UVUMELE:",
+    "ackA": "Inkxaso ye-SOS ibonelelwa ngokusekelwe kubuninzi bokuzama kwaye ayinakugarantiyi ukuphendula okungxamisekileyo.",
+    "ackB": "I-SOS ixhomekeke kwisixokelelwano, imeko yesixhobo, ukufikelela kwendawo, kunye nabancedisi beqela lesithathu.",
+    "ackC": "I-SOS ifuna imvume yokufikelela kwindawo, amandla ebhetri, kunye nokuxhumana kwe-intanethi okanye iselula.",
+    "sosLabel": "SOS",
+    "tapForHelp": "COFA UNCEDO",
+    "footerCaption": "Ukucofa i-SOS kusabelana ngendawo yakho kwaye yazisa abafowunelwa bakho abangxamisekileyo.",
+    "manageContacts": "Phatha abafowunelwa abangxamisekileyo",
+    "viewHistory": "Bukela imbali yeemeko"
   }
 }

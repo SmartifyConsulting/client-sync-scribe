@@ -250,5 +250,75 @@
     "location": "Ipò",
     "openInMaps": "Ṣii ninu Maapu",
     "openConsole": "Ṣii console"
+  },
+  "myPractice": {
+    "tabPractice": "Mi Iṣe",
+    "tabReferrals": "Awọn Itọkasi",
+    "tabCredentials": "Awọn iwe-ẹri",
+    "tabRewards": "Awọn ere mi",
+    "aboutMe": "Nipa mi",
+    "aboutMeHelper": "Sọ ọrọ kukuru nipa iṣe rẹ ati ọna. Awọn alaisan wo eyi nigbati o n wo profaili rẹ. Ti o pọju awọn ọrọ 600.",
+    "wordCount": "{{count}} / 600 awọn ọrọ",
+    "save": "Fipamọ"
+  },
+  "patientRewards": {
+    "progressTitle": "Ilọsiwaju si Ipele Ipele",
+    "progressLabel": "{{current}} / {{target}} Vulas si \"{{milestone}}\"",
+    "moreToGo": "{{count}} diẹ sii lati lọ!",
+    "recentRewards": "Awọn ere-idaraya Tuntun",
+    "empty": "Ko si awọn ere sibẹsibẹ. Bẹrẹ irin ajo ilera rẹ!"
+  },
+  "todo": {
+    "addNewTask": "Ṣafikun Iṣẹ Tuntun",
+    "tapToRecord": "Fọwọkan lati rekọja",
+    "transcribing": "Gbigbe...",
+    "aiProcessing": "AI processing...",
+    "listening": "Ngbagbọ... duro lẹhin isinmi",
+    "typeTask": "Tabi tẹ iṣẹ rẹ nibi...",
+    "add": "Ṣafikun",
+    "priority": "Ipo:",
+    "low": "Kekere",
+    "medium": "Arin",
+    "high": "Giga",
+    "aiProcess": "Ilana AI",
+    "active": "Ti nṣiṣẹ",
+    "completed": "Ti pari",
+    "all": "Gbogbo",
+    "approve": "Fọwọsi",
+    "noMatchingPatient": "Ko si alaisan ti o baramu ti a rii"
+  },
+  "documents": {
+    "title": "Awọn iwe aṣẹ",
+    "tabDocuments": "Awọn iwe aṣẹ",
+    "tabTemplates": "Awọn awoṣe",
+    "tabHeaderFooter": "Ori ati ẹsẹ oju-iwe",
+    "tabContent": "Awọn awoṣe akoonu",
+    "contentHelper": "Ṣẹda awọn awoṣe akoonu iwe (ori/ẹsẹ oju-iwe yoo lo lati layout ti o yan)",
+    "newContent": "Awoṣe akoonu Tuntun",
+    "searchContent": "Ṣawari awọn awoṣe akoonu...",
+    "createTemplate": " ṣẹda Awoṣe",
+    "patientDocuments": "Awọn iwe aṣẹ Alaisan",
+    "searchDocuments": "Ṣawari awọn iwe aṣẹ...",
+    "letterhead": "Ori lẹta:",
+    "letterheadHeaderFooter": "Ori ati ẹsẹ oju-iwe",
+    "letterheadDefault": "Aiyipada"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} akọsilẹ",
+    "noteOther": "{{count}} awọn akọsilẹ",
+    "lastActivity": "Iṣẹ ayẹyẹ kẹhin {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Igbaduro Ipalọlọ",
+    "helpAlerted": "Yoo ṣe iranlọwọ lẹsẹkẹsẹ",
+    "ackHeading": "SE KANKAN ṢE LATI LO SOS, JỌWỌ KỌỌṢẸ:",
+    "ackA": "Atilẹyin SOS ni a pese lori ipilẹ igbiyanju ti o dara julọ ati pe ko le ṣe iṣeduro idahun pajawiri.",
+    "ackB": "SOS da lori nẹtiwọọki, ipo ẹrọ, iraye si ipo, ati awọn oludahun ẹnikẹta.",
+    "ackC": "SOS nilo awọn igbanilaaye ipo, agbara batiri, ati asopọ intanẹẹti tabi alagbeka.",
+    "sosLabel": "SOS",
+    "tapForHelp": "FỌWỌ KAN FUN IGBADURO",
+    "footerCaption": "Titẹ SOS n pin ipo rẹ ati sọ fun awọn olubasọrọ pajawiri rẹ.",
+    "manageContacts": "Ṣakoso awọn olubasọrọ pajawiri",
+    "viewHistory": "Wo itan iṣẹlẹ"
   }
 }

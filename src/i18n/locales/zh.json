@@ -250,5 +250,75 @@
     "location": "位置",
     "openInMaps": "在地图中打开",
     "openConsole": "打开控制台"
+  },
+  "myPractice": {
+    "tabPractice": "我的实践",
+    "tabReferrals": "推荐",
+    "tabCredentials": "资质",
+    "tabRewards": "我的奖励",
+    "aboutMe": "关于我",
+    "aboutMeHelper": "简短介绍您的实践和方法。患者查看您的个人资料时会看到此信息。最多 600 字。",
+    "wordCount": "{{count}} / 600 字",
+    "save": "保存"
+  },
+  "patientRewards": {
+    "progressTitle": "达到下一个里程碑的进度",
+    "progressLabel": "{{current}} / {{target}} 次就诊可获得“{{milestone}}”",
+    "moreToGo": "还需要 {{count}} 个！",
+    "recentRewards": "近期奖励",
+    "empty": "暂无奖励。开始您的健康之旅！"
+  },
+  "todo": {
+    "addNewTask": "添加新任务",
+    "tapToRecord": "点按录制",
+    "transcribing": "正在转录...",
+    "aiProcessing": "AI 正在处理...",
+    "listening": "正在监听…暂停后停止",
+    "typeTask": "或在此处输入您的任务...",
+    "add": "添加",
+    "priority": "优先级：",
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "aiProcess": "AI 处理",
+    "active": "活跃",
+    "completed": "已完成",
+    "all": "全部",
+    "approve": "批准",
+    "noMatchingPatient": "未找到匹配的患者"
+  },
+  "documents": {
+    "title": "文件",
+    "tabDocuments": "文件",
+    "tabTemplates": "模板",
+    "tabHeaderFooter": "页眉和页脚",
+    "tabContent": "内容模板",
+    "contentHelper": "创建文档内容模板（页眉/页脚将从您选择的布局应用）",
+    "newContent": "新的内容模板",
+    "searchContent": "搜索内容模板...",
+    "createTemplate": "创建模板",
+    "patientDocuments": "患者文件",
+    "searchDocuments": "搜索文件...",
+    "letterhead": "信头：",
+    "letterheadHeaderFooter": "页眉和页脚",
+    "letterheadDefault": "默认"
+  },
+  "roundTablesMeta": {
+    "noteOne": "1 条笔记",
+    "noteOther": "{{count}} 条笔记",
+    "lastActivity": "最后活动 {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "紧急援助",
+    "helpAlerted": "将立即警示援助",
+    "ackHeading": "使用 SOS 之前，请确认：",
+    "ackA": "SOS 支持基于最佳努力提供，不能保证紧急响应。",
+    "ackB": "SOS 依赖于网络、设备状态、位置访问和第三方响应者。",
+    "ackC": "SOS 需要位置权限、电池电量和互联网或蜂窝连接。",
+    "sosLabel": "SOS",
+    "tapForHelp": "点按寻求帮助",
+    "footerCaption": "点按 SOS 会共享您的位置并通知您的紧急联系人。",
+    "manageContacts": "管理紧急联系人",
+    "viewHistory": "查看事件历史记录"
   }
 }

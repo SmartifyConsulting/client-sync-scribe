@@ -250,5 +250,75 @@
     "location": "Ligging",
     "openInMaps": "Maak oop in kaarte",
     "openConsole": "Maak konsole oop"
+  },
+  "myPractice": {
+    "tabPractice": "My Praktyk",
+    "tabReferrals": "Verwysings",
+    "tabCredentials": "Bewyse",
+    "tabRewards": "My Belonings",
+    "aboutMe": "Oor My",
+    "aboutMeHelper": "Deel 'n kort opsomming oor jou praktyk en benadering. Pasiënte sien dit wanneer hulle jou profiel bekyk. Maksimum 600 woorde.",
+    "wordCount": "{{count}} / 600 woorde",
+    "save": "Stoor"
+  },
+  "patientRewards": {
+    "progressTitle": "Vordering na volgende mylpaal",
+    "progressLabel": "{{current}} / {{target}} Vulas na \"{{milestone}}\"",
+    "moreToGo": "{{count}} meer om te gaan!",
+    "recentRewards": "Onlangse Belonings",
+    "empty": "Nog geen belonings nie. Begin jou gesondheidsreis!"
+  },
+  "todo": {
+    "addNewTask": "Voeg nuwe taak by",
+    "tapToRecord": "Tik om op te neem",
+    "transcribing": "Transkrypsie...",
+    "aiProcessing": "KI-verwerking...",
+    "listening": "Luister... stop na 'n pouse",
+    "typeTask": "Of tik jou taak hier...",
+    "add": "Voeg by",
+    "priority": "Prioriteit:",
+    "low": "Laag",
+    "medium": "Medium",
+    "high": "Hoog",
+    "aiProcess": "KI-proses",
+    "active": "Aktief",
+    "completed": "Voltooi",
+    "all": "Alles",
+    "approve": "Keur goed",
+    "noMatchingPatient": "Geen ooreenstemmende pasiënt gevind nie"
+  },
+  "documents": {
+    "title": "Dokumente",
+    "tabDocuments": "Dokumente",
+    "tabTemplates": "Sjablone",
+    "tabHeaderFooter": "Kop- en Voetblad",
+    "tabContent": "Inhoudsjablone",
+    "contentHelper": "Skep inhoudsjablone vir dokumente (kop-/voetblaaie sal van jou gekose uitleg toegepas word)",
+    "newContent": "Nuwe Inhoudsjabloon",
+    "searchContent": "Soek inhoudsjablone...",
+    "createTemplate": "Skep Sjabloon",
+    "patientDocuments": "Pasiënt Dokumente",
+    "searchDocuments": "Soek dokumente...",
+    "letterhead": "Briefhoof:",
+    "letterheadHeaderFooter": "Kop- en Voetblad",
+    "letterheadDefault": "Tuis"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} nota",
+    "noteOther": "{{count}} notas",
+    "lastActivity": "Laaste aktiwiteit {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Noodhulp",
+    "helpAlerted": "Hulp sal onmiddellik gewaarsku word",
+    "ackHeading": "VOORDAT SOS GEBRUIK WORD, ERKEN ASSEBLIEF:",
+    "ackA": "SOS-ondersteuning word op 'n beste-poging-basis verskaf en kan nie noodreaksie waarborg nie.",
+    "ackB": "SOS hang af van netwerk, toestelstatus, liggingtoegang en derdeparty-reageerders.",
+    "ackC": "SOS vereis liggingtoestemmings, batterykrag en internet- of sellulêre verbinding.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TAP VIR HULP",
+    "footerCaption": "Om op SOS te tik, deel jou ligging en stel jou noodkontakte in kennis.",
+    "manageContacts": "Bestuur noodkontakte",
+    "viewHistory": "Bekyk gebeurtenisgeskiedenis"
   }
 }

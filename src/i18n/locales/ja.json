@@ -250,5 +250,75 @@
     "location": "場所",
     "openInMaps": "マップで開く",
     "openConsole": "コンソールを開く"
+  },
+  "myPractice": {
+    "tabPractice": "マイプラクティス",
+    "tabReferrals": "紹介",
+    "tabCredentials": "資格",
+    "tabRewards": "マイリワード",
+    "aboutMe": "私について",
+    "aboutMeHelper": "あなたのプラクティスとアプローチについて短いピッチを共有してください。患者はこの情報を見てあなたのプロフィールを表示します。最大600語。",
+    "wordCount": "{{count}} / 600 語",
+    "save": "保存"
+  },
+  "patientRewards": {
+    "progressTitle": "次のマイルストーンまでの進捗",
+    "progressLabel": "\"{{milestone}}\" に向けて {{current}} / {{target}} Vulas",
+    "moreToGo": "{{count}} 残り！",
+    "recentRewards": "最近のリワード",
+    "empty": "まだリワードはありません。健康の旅を始めましょう！"
+  },
+  "todo": {
+    "addNewTask": "新しいタスクを追加",
+    "tapToRecord": "記録するにはタップ",
+    "transcribing": "文字起こし中...",
+    "aiProcessing": "AI処理中...",
+    "listening": "聞いています... 一時停止後停止",
+    "typeTask": "またはここにタスクを入力してください...",
+    "add": "追加",
+    "priority": "優先度:",
+    "low": "低",
+    "medium": "中",
+    "high": "高",
+    "aiProcess": "AIプロセス",
+    "active": "アクティブ",
+    "completed": "完了",
+    "all": "すべて",
+    "approve": "承認",
+    "noMatchingPatient": "一致する患者が見つかりませんでした"
+  },
+  "documents": {
+    "title": "ドキュメント",
+    "tabDocuments": "ドキュメント",
+    "tabTemplates": "テンプレート",
+    "tabHeaderFooter": "ヘッダーとフッター",
+    "tabContent": "コンテンツテンプレート",
+    "contentHelper": "ドキュメントコンテンツテンプレートを作成します（ヘッダー/フッターは選択したレイアウトから適用されます）",
+    "newContent": "新しいコンテンツテンプレート",
+    "searchContent": "コンテンツテンプレートを検索...",
+    "createTemplate": "テンプレートを作成",
+    "patientDocuments": "患者ドキュメント",
+    "searchDocuments": "ドキュメントを検索...",
+    "letterhead": "レターヘッド:",
+    "letterheadHeaderFooter": "ヘッダーとフッター",
+    "letterheadDefault": "デフォルト"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} 件のメモ",
+    "noteOther": "{{count}} 件のメモ",
+    "lastActivity": "最終アクティビティ {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "緊急支援",
+    "helpAlerted": "すぐにヘルプが通知されます",
+    "ackHeading": "SOSを使用する前に、まずご確認ください:",
+    "ackA": "SOSサポートはベストエフォートベースで提供され、緊急対応を保証するものではありません。",
+    "ackB": "SOSは、ネットワーク、デバイスの状態、位置情報へのアクセス、およびサードパーティの対応者に依存します。",
+    "ackC": "SOSは、位置情報へのアクセス許可、バッテリー電力、およびインターネットまたはセルラー接続が必要です。",
+    "sosLabel": "SOS",
+    "tapForHelp": "ヘルプをタップ",
+    "footerCaption": "SOSをタップすると、あなたの位置情報が共有され、緊急連絡先に通知されます。",
+    "manageContacts": "緊急連絡先を管理",
+    "viewHistory": "インシデント履歴を表示"
   }
 }

@@ -250,5 +250,75 @@
     "location": "Posizione",
     "openInMaps": "Apri in Maps",
     "openConsole": "Apri console"
+  },
+  "myPractice": {
+    "tabPractice": "La mia pratica",
+    "tabReferrals": "Referral",
+    "tabCredentials": "Credenziali",
+    "tabRewards": "I miei premi",
+    "aboutMe": "Su di me",
+    "aboutMeHelper": "Condividi un breve lancio sulla tua pratica e sul tuo approccio. I pazienti lo vedono quando visitano il tuo profilo. Massimo 600 parole.",
+    "wordCount": "{{count}} / 600 parole",
+    "save": "Salva"
+  },
+  "patientRewards": {
+    "progressTitle": "Progresso verso il prossimo traguardo",
+    "progressLabel": "{{current}} / {{target}} Vulas per \"{{milestone}}\"",
+    "moreToGo": "Altri {{count}} da raggiungere!",
+    "recentRewards": "Premi recenti",
+    "empty": "Nessun premio ancora. Inizia il tuo percorso di salute!"
+  },
+  "todo": {
+    "addNewTask": "Aggiungi nuovo compito",
+    "tapToRecord": "Tocca per registrare",
+    "transcribing": "Trascrizione in corso...",
+    "aiProcessing": "Elaborazione AI in corso...",
+    "listening": "In ascolto... si interrompe dopo una pausa",
+    "typeTask": "Oppure digita il tuo compito qui...",
+    "add": "Aggiungi",
+    "priority": "Priorità:",
+    "low": "Bassa",
+    "medium": "Media",
+    "high": "Alta",
+    "aiProcess": "Processo AI",
+    "active": "Attivo",
+    "completed": "Completato",
+    "all": "Tutti",
+    "approve": "Approva",
+    "noMatchingPatient": "Nessun paziente corrispondente trovato"
+  },
+  "documents": {
+    "title": "Documenti",
+    "tabDocuments": "Documenti",
+    "tabTemplates": "Modelli",
+    "tabHeaderFooter": "Intestazione e piè di pagina",
+    "tabContent": "Modelli di contenuto",
+    "contentHelper": "Crea modelli di contenuto per documenti (intestazione/piè di pagina verranno applicati dal layout selezionato)",
+    "newContent": "Nuovo modello di contenuto",
+    "searchContent": "Cerca modelli di contenuto...",
+    "createTemplate": "Crea modello",
+    "patientDocuments": "Documenti del paziente",
+    "searchDocuments": "Cerca documenti...",
+    "letterhead": "Intestazione:",
+    "letterheadHeaderFooter": "Intestazione e piè di pagina",
+    "letterheadDefault": "Predefinito"
+  },
+  "roundTablesMeta": {
+    "noteOne": "1 nota",
+    "noteOther": "{{count}} note",
+    "lastActivity": "Ultima attività {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Assistenza di emergenza",
+    "helpAlerted": "L'aiuto verrà allertato istantaneamente",
+    "ackHeading": "PRIMA DI USARE SOS, SI PREGA DI CONFERMARE:",
+    "ackA": "Il supporto SOS è fornito al meglio delle nostre capacità e non può garantire una risposta di emergenza.",
+    "ackB": "SOS dipende dalla rete, dallo stato del dispositivo, dall'accesso alla posizione e dai soccorritori di terze parti.",
+    "ackC": "SOS richiede permessi di localizzazione, carica della batteria e connettività internet o cellulare.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TOCCA PER AIUTO",
+    "footerCaption": "Toccando SOS condividerai la tua posizione e notificherai i tuoi contatti di emergenza.",
+    "manageContacts": "Gestisci contatti di emergenza",
+    "viewHistory": "Visualizza cronologia incidenti"
   }
 }

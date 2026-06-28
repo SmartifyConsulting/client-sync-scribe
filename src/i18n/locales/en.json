@@ -322,5 +322,75 @@
     "location": "Location",
     "openInMaps": "Open in Maps",
     "openConsole": "Open console"
+  },
+  "myPractice": {
+    "tabPractice": "My Practice",
+    "tabReferrals": "Referrals",
+    "tabCredentials": "Credentials",
+    "tabRewards": "My Rewards",
+    "aboutMe": "About Me",
+    "aboutMeHelper": "Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.",
+    "wordCount": "{{count}} / 600 words",
+    "save": "Save"
+  },
+  "patientRewards": {
+    "progressTitle": "Progress to Next Milestone",
+    "progressLabel": "{{current}} / {{target}} Vulas to \"{{milestone}}\"",
+    "moreToGo": "{{count}} more to go!",
+    "recentRewards": "Recent Rewards",
+    "empty": "No rewards yet. Start your health journey!"
+  },
+  "todo": {
+    "addNewTask": "Add New Task",
+    "tapToRecord": "Tap to record",
+    "transcribing": "Transcribing...",
+    "aiProcessing": "AI processing...",
+    "listening": "Listening... stops after a pause",
+    "typeTask": "Or type your task here...",
+    "add": "Add",
+    "priority": "Priority:",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "aiProcess": "AI Process",
+    "active": "Active",
+    "completed": "Completed",
+    "all": "All",
+    "approve": "Approve",
+    "noMatchingPatient": "No matching patient found"
+  },
+  "documents": {
+    "title": "Documents",
+    "tabDocuments": "Documents",
+    "tabTemplates": "Templates",
+    "tabHeaderFooter": "Header & Footer",
+    "tabContent": "Content Templates",
+    "contentHelper": "Create document content templates (header/footer will be applied from your selected layout)",
+    "newContent": "New Content Template",
+    "searchContent": "Search content templates...",
+    "createTemplate": "Create Template",
+    "patientDocuments": "Patient Documents",
+    "searchDocuments": "Search documents...",
+    "letterhead": "Letterhead:",
+    "letterheadHeaderFooter": "Header and Footer",
+    "letterheadDefault": "Default"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} note",
+    "noteOther": "{{count}} notes",
+    "lastActivity": "Last activity {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Emergency Assistance",
+    "helpAlerted": "Help will be alerted instantly",
+    "ackHeading": "BEFORE USING SOS, PLEASE ACKNOWLEDGE:",
+    "ackA": "SOS support is provided on a best-effort basis and cannot guarantee emergency response.",
+    "ackB": "SOS depends on network, device status, location access, and third-party responders.",
+    "ackC": "SOS requires location permissions, battery power, and internet or cellular connectivity.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TAP FOR HELP",
+    "footerCaption": "Tapping SOS shares your location and notifies your emergency contacts.",
+    "manageContacts": "Manage emergency contacts",
+    "viewHistory": "View incident history"
   }
 }

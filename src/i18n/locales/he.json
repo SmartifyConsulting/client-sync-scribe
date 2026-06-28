@@ -250,5 +250,75 @@
     "location": "מיקום",
     "openInMaps": "פתח במפות",
     "openConsole": "פתח את המסוף"
+  },
+  "myPractice": {
+    "tabPractice": "התרגול שלי",
+    "tabReferrals": "הפניות",
+    "tabCredentials": "תעודות",
+    "tabRewards": "התגמולים שלי",
+    "aboutMe": "עליי",
+    "aboutMeHelper": "שתף סיכום קצר על התרגול והגישה שלך. מטופלים רואים זאת בעת צפייה בפרופיל שלך. מקסימום 600 מילים.",
+    "wordCount": "{{count}} / 600 מילים",
+    "save": "שמור"
+  },
+  "patientRewards": {
+    "progressTitle": "התקדמות לקראת אבן דרך הבאה",
+    "progressLabel": "{{current}} / {{target}} Vulas ל-\"{{milestone}}\"",
+    "moreToGo": "{{count}} נוספים ללכת!",
+    "recentRewards": "תגמולים אחרונים",
+    "empty": "אין עדיין תגמולים. התחל את מסע הבריאות שלך!"
+  },
+  "todo": {
+    "addNewTask": "הוסף משימה חדשה",
+    "tapToRecord": "הקש להקלטה",
+    "transcribing": "מתעתק...",
+    "aiProcessing": "מעבד AI...",
+    "listening": "מאזין... עוצר לאחר הפסקה",
+    "typeTask": "או הקלד את המשימה שלך כאן...",
+    "add": "הוסף",
+    "priority": "עדיפות:",
+    "low": "נמוכה",
+    "medium": "בינונית",
+    "high": "גבוהה",
+    "aiProcess": "עיבוד AI",
+    "active": "פעיל",
+    "completed": "הושלם",
+    "all": "הכל",
+    "approve": "אשר",
+    "noMatchingPatient": "לא נמצא מטופל תואם"
+  },
+  "documents": {
+    "title": "מסמכים",
+    "tabDocuments": "מסמכים",
+    "tabTemplates": "תבניות",
+    "tabHeaderFooter": "כותרת תחתונה וכותרת עליונה",
+    "tabContent": "תבניות תוכן",
+    "contentHelper": "צור תבניות תוכן למסמכים (כותרת עליונה/תחתונה יוחלו מפריסתך שנבחרה)",
+    "newContent": "תבנית תוכן חדשה",
+    "searchContent": "חפש תבניות תוכן...",
+    "createTemplate": "צור תבנית",
+    "patientDocuments": "מסמכי מטופל",
+    "searchDocuments": "חפש מסמכים...",
+    "letterhead": "נייר מכתבים:",
+    "letterheadHeaderFooter": "כותרת עליונה ותחתונה",
+    "letterheadDefault": "ברירת מחדל"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} הערה",
+    "noteOther": "{{count}} הערות",
+    "lastActivity": "פעילות אחרונה {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "סיוע חירום",
+    "helpAlerted": "עזרה תופעל באופן מיידי",
+    "ackHeading": "לפני השימוש ב-SOS, אנא אשר:",
+    "ackA": "תמיכת SOS ניתנת על בסיס המאמץ הטוב ביותר ואינה יכולה להבטיח תגובת חירום.",
+    "ackB": "SOS תלוי ברשת, סטטוס מכשיר, גישת מיקום ומגיבים צד שלישי.",
+    "ackC": "SOS דורש הרשאות מיקום, כוח סוללה וקישוריות לאינטרנט או סלולר.",
+    "sosLabel": "SOS",
+    "tapForHelp": "הקש לעזרה",
+    "footerCaption": "הקשה על SOS משתפת את מיקומך ומודיעה לאנשי הקשר שלך לחירום.",
+    "manageContacts": "נהל אנשי קשר לחירום",
+    "viewHistory": "צפה בהיסטוריית תקריות"
   }
 }

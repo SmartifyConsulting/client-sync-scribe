@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 
 
 export function AppLayout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
   const { isPatient, isAdmin, loading: roleLoading } = useUserRole();
@@ -33,7 +33,7 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden">
+    <div key={i18n.language} className="min-h-screen bg-background flex flex-col overflow-hidden">
       <EarlyReleaseNotice />
 
 

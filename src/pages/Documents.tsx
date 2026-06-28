@@ -338,14 +338,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
           >
             <LayoutTemplate className="h-4 w-4 mr-2" />
-            Header & Footer
+            {t("documents.tabHeaderFooter")}
           </TabsTrigger>
           <TabsTrigger
             value="content"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
           >
             <FileText className="h-4 w-4 mr-2" />
-            Content Templates
+            {t("documents.tabContent")}
           </TabsTrigger>
         </TabsList>
 
@@ -459,13 +459,13 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         <TabsContent value="content" className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[12px] text-muted-foreground">
-              Create document content templates (header/footer will be applied from your selected layout)
+              {t("documents.contentHelper")}
             </p>
             <Dialog open={isNewTemplateOpen} onOpenChange={setIsNewTemplateOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />
-                  New Content Template
+                  {t("documents.newContent")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -486,7 +486,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search content templates..."
+              placeholder={t("documents.searchContent")}
               value={templateSearchQuery}
               onChange={(e) => setTemplateSearchQuery(e.target.value)}
               className="pl-10"
@@ -557,9 +557,9 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                       );
                       return (
                         <p className="text-[11px] text-muted-foreground mb-2">
-                          Letterhead:{" "}
+                          {t("documents.letterhead")}{" "}
                           <span className="font-medium text-foreground">
-                            {linkedHf?.name ?? "Default"}
+                            {linkedHf?.name ?? t("documents.letterheadDefault")}
                           </span>
                         </p>
                       );
@@ -577,7 +577,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
                   <Plus className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-[12px] font-medium text-muted-foreground">Create Template</p>
+                <p className="text-[12px] font-medium text-muted-foreground">{t("documents.createTemplate")}</p>
               </div>
             </div>
           )}
@@ -587,11 +587,11 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       {/* All Documents Section */}
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Patient Documents</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t("documents.patientDocuments")}</h2>
           <div className="relative max-w-xs">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search documents..."
+              placeholder={t("documents.searchDocuments")}
               value={documentSearchQuery}
               onChange={(e) => setDocumentSearchQuery(e.target.value)}
               className="pl-10"

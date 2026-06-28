@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
   Loader2,
@@ -323,6 +324,7 @@ function MailboxSection({ userId }: { userId?: string }) {
 
 // ── About Me accordion (doctor pitch, max 600 words) ──
 function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string) => Promise<void> }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(value);
   const [saving, setSaving] = useState(false);
   useEffect(() => { setDraft(value); }, [value]);
@@ -335,12 +337,12 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
         <AccordionTrigger className="px-4 py-3 hover:no-underline">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold text-foreground">About Me</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t("myPractice.aboutMe")}</h3>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4 space-y-2">
           <p className="text-xs text-muted-foreground">
-            Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.
+            {t("myPractice.aboutMeHelper")}
           </p>
           <Textarea
             value={draft}
@@ -350,7 +352,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
           />
           <div className="flex items-center justify-between">
             <span className={cn("text-[11px]", overLimit ? "text-destructive" : "text-muted-foreground")}>
-              {wordCount} / 600 words
+              {t("myPractice.wordCount", { count: wordCount })}
             </span>
             <Button
               size="sm"
@@ -361,7 +363,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
               }}
             >
               {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
-              Save
+              {t("myPractice.save")}
             </Button>
           </div>
         </AccordionContent>
@@ -370,8 +372,10 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   );
 }
 
+
 // ── Main Component ──────────────────────────────────────────────────
 export default function MyPractice() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
@@ -1091,25 +1095,25 @@ export default function MyPractice() {
             value="practice"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            My Practice
+            {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="referrals"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            Referrals
+            {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            Credentials{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
+            {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            My Rewards
+            {t("myPractice.tabRewards")}
           </TabsTrigger>
         </TabsList>
 

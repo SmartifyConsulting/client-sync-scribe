@@ -250,5 +250,75 @@
     "location": "Locatie",
     "openInMaps": "Openen in Kaarten",
     "openConsole": "Console openen"
+  },
+  "myPractice": {
+    "tabPractice": "Mijn Praktijk",
+    "tabReferrals": "Verwijzingen",
+    "tabCredentials": "Credentials",
+    "tabRewards": "Mijn Beloningen",
+    "aboutMe": "Over Mij",
+    "aboutMeHelper": "Deel een korte pitch over uw praktijk en aanpak. Patiënten zien dit wanneer ze uw profiel bekijken. Maximaal 600 woorden.",
+    "wordCount": "{{count}} / 600 woorden",
+    "save": "Opslaan"
+  },
+  "patientRewards": {
+    "progressTitle": "Voortgang naar Volgende Mijlpijl",
+    "progressLabel": "{{current}} / {{target}} Vulas naar \"{{milestone}}\"",
+    "moreToGo": "Nog {{count}} te gaan!",
+    "recentRewards": "Recente Beloningen",
+    "empty": "Nog geen beloningen. Begin uw gezondheidsreis!"
+  },
+  "todo": {
+    "addNewTask": "Nieuwe Taak Toevoegen",
+    "tapToRecord": "Tik om op te nemen",
+    "transcribing": "Transcriberen...",
+    "aiProcessing": "AI-verwerking...",
+    "listening": "Luisteren... stopt na een pauze",
+    "typeTask": "Of typ hier uw taak...",
+    "add": "Toevoegen",
+    "priority": "Prioriteit:",
+    "low": "Laag",
+    "medium": "Gemiddeld",
+    "high": "Hoog",
+    "aiProcess": "AI Proces",
+    "active": "Actief",
+    "completed": "Voltooid",
+    "all": "Alles",
+    "approve": "Goedkeuren",
+    "noMatchingPatient": "Geen overeenkomende patiënt gevonden"
+  },
+  "documents": {
+    "title": "Documenten",
+    "tabDocuments": "Documenten",
+    "tabTemplates": "Sjablonen",
+    "tabHeaderFooter": "Kop- en Voettekst",
+    "tabContent": "Inhoudssjablonen",
+    "contentHelper": "Maak inhoudssjablonen voor documenten (kop- en voettekst worden toegepast vanuit uw geselecteerde lay-out)",
+    "newContent": "Nieuw Inhoudssjabloon",
+    "searchContent": "Zoek inhoudssjablonen...",
+    "createTemplate": "Sjabloon Maken",
+    "patientDocuments": "Patiëntdocumenten",
+    "searchDocuments": "Zoek documenten...",
+    "letterhead": "Briefhoofd:",
+    "letterheadHeaderFooter": "Kop- en Voettekst",
+    "letterheadDefault": "Standaard"
+  },
+  "roundTablesMeta": {
+    "noteOne": "1 opmerking",
+    "noteOther": "{{count}} opmerkingen",
+    "lastActivity": "Laatste activiteit {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Noodhulp",
+    "helpAlerted": "Hulp wordt direct gealarmeerd",
+    "ackHeading": "VOORDAT U SOS GEBRUIKT, BEVESTIG ALSTUBLIEFT:",
+    "ackA": "SOS-ondersteuning wordt geleverd op basis van de best mogelijke inspanning en kan geen noodhulp garanderen.",
+    "ackB": "SOS is afhankelijk van netwerk-, apparaatstatus, locatiegegevens en externe responders.",
+    "ackC": "SOS vereist locatiepermissies, batterijvermogen en internet- of mobiele verbinding.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TIK VOOR HULP",
+    "footerCaption": "Tik op SOS om uw locatie te delen en uw noodcontacten te waarschuwen.",
+    "manageContacts": "Noodcontacten Beheren",
+    "viewHistory": "Incidentgeschiedenis Bekijken"
   }
 }

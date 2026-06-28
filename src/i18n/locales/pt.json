@@ -250,5 +250,75 @@
     "location": "Localização",
     "openInMaps": "Abrir no Mapas",
     "openConsole": "Abrir Console"
+  },
+  "myPractice": {
+    "tabPractice": "Minha Clínica",
+    "tabReferrals": "Encaminhamentos",
+    "tabCredentials": "Credenciais",
+    "tabRewards": "Minhas Recompensas",
+    "aboutMe": "Sobre Mim",
+    "aboutMeHelper": "Compartilhe um breve resumo sobre sua prática e abordagem. Os pacientes verão isso ao visualizar seu perfil. Máximo de 600 palavras.",
+    "wordCount": "{{count}} / 600 palavras",
+    "save": "Salvar"
+  },
+  "patientRewards": {
+    "progressTitle": "Progresso para o Próximo Marco",
+    "progressLabel": "{{current}} / {{target}} Vulas para \"{{milestone}}\"",
+    "moreToGo": "Faltam {{count}}!",
+    "recentRewards": "Recompensas Recentes",
+    "empty": "Ainda não há recompensas. Comece sua jornada de saúde!"
+  },
+  "todo": {
+    "addNewTask": "Adicionar Nova Tarefa",
+    "tapToRecord": "Toque para gravar",
+    "transcribing": "Transcrevendo...",
+    "aiProcessing": "Processando IA...",
+    "listening": "Ouvindo... para após uma pausa",
+    "typeTask": "Ou digite sua tarefa aqui...",
+    "add": "Adicionar",
+    "priority": "Prioridade:",
+    "low": "Baixa",
+    "medium": "Média",
+    "high": "Alta",
+    "aiProcess": "Processo de IA",
+    "active": "Ativo",
+    "completed": "Concluído",
+    "all": "Todos",
+    "approve": "Aprovar",
+    "noMatchingPatient": "Nenhum paciente correspondente encontrado"
+  },
+  "documents": {
+    "title": "Documentos",
+    "tabDocuments": "Documentos",
+    "tabTemplates": "Modelos",
+    "tabHeaderFooter": "Cabeçalho e Rodapé",
+    "tabContent": "Modelos de Conteúdo",
+    "contentHelper": "Crie modelos de conteúdo de documentos (cabeçalho/rodapé serão aplicados a partir do layout selecionado)",
+    "newContent": "Novo Modelo de Conteúdo",
+    "searchContent": "Pesquisar modelos de conteúdo...",
+    "createTemplate": "Criar Modelo",
+    "patientDocuments": "Documentos do Paciente",
+    "searchDocuments": "Pesquisar documentos...",
+    "letterhead": "Papel Timbrado:",
+    "letterheadHeaderFooter": "Cabeçalho e Rodapé",
+    "letterheadDefault": "Padrão"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} nota",
+    "noteOther": "{{count}} notas",
+    "lastActivity": "Última atividade {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Assistência de Emergência",
+    "helpAlerted": "A ajuda será alertada instantaneamente",
+    "ackHeading": "ANTES DE USAR O SOS, POR FAVOR, RECONHEÇA:",
+    "ackA": "O suporte SOS é fornecido com base no melhor esforço possível e não pode garantir resposta de emergência.",
+    "ackB": "O SOS depende de rede, status do dispositivo, acesso à localização e respondedores de terceiros.",
+    "ackC": "O SOS requer permissões de localização, carga de bateria e conectividade com a internet ou celular.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TOQUE PARA AJUDA",
+    "footerCaption": "Tocar no SOS compartilha sua localização e notifica seus contatos de emergência.",
+    "manageContacts": "Gerenciar contatos de emergência",
+    "viewHistory": "Ver histórico de incidentes"
   }
 }

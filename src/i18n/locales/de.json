@@ -250,5 +250,75 @@
     "location": "Standort",
     "openInMaps": "In Karten öffnen",
     "openConsole": "Konsole öffnen"
+  },
+  "myPractice": {
+    "tabPractice": "Meine Praxis",
+    "tabReferrals": "Überweisungen",
+    "tabCredentials": "Berechtigungsnachweise",
+    "tabRewards": "Meine Belohnungen",
+    "aboutMe": "Über mich",
+    "aboutMeHelper": "Teilen Sie eine kurze Vorstellung Ihrer Praxis und Ihres Ansatzes. Patienten sehen dies, wenn sie Ihr Profil aufrufen. Maximal 600 Wörter.",
+    "wordCount": "{{count}} / 600 Wörter",
+    "save": "Speichern"
+  },
+  "patientRewards": {
+    "progressTitle": "Fortschritt zum nächsten Meilenstein",
+    "progressLabel": "{{current}} / {{target}} Vula für \"{{milestone}}\"",
+    "moreToGo": "{{count}} mehr übrig!",
+    "recentRewards": "Jüngste Belohnungen",
+    "empty": "Noch keine Belohnungen. Beginnen Sie Ihre Gesundheitsreise!"
+  },
+  "todo": {
+    "addNewTask": "Neue Aufgabe hinzufügen",
+    "tapToRecord": "Tippen Sie zum Aufzeichnen",
+    "transcribing": "Transkribieren...",
+    "aiProcessing": "KI-Verarbeitung...",
+    "listening": "Zuhört... stoppt nach einer Pause",
+    "typeTask": "Oder geben Sie Ihre Aufgabe hier ein...",
+    "add": "Hinzufügen",
+    "priority": "Priorität:",
+    "low": "Niedrig",
+    "medium": "Mittel",
+    "high": "Hoch",
+    "aiProcess": "KI-Prozess",
+    "active": "Aktiv",
+    "completed": "Abgeschlossen",
+    "all": "Alle",
+    "approve": "Genehmigen",
+    "noMatchingPatient": "Kein passender Patient gefunden"
+  },
+  "documents": {
+    "title": "Dokumente",
+    "tabDocuments": "Dokumente",
+    "tabTemplates": "Vorlagen",
+    "tabHeaderFooter": "Kopf- und Fußzeile",
+    "tabContent": "Inhaltsvorlagen",
+    "contentHelper": "Erstellen Sie Vorlagen für Dokumenteninhalte (Kopf- und Fußzeile werden aus Ihrem ausgewählten Layout angewendet)",
+    "newContent": "Neue Inhaltsvorlage",
+    "searchContent": "Inhaltsvorlagen suchen...",
+    "createTemplate": "Vorlage erstellen",
+    "patientDocuments": "Patientendokumente",
+    "searchDocuments": "Dokumente suchen...",
+    "letterhead": "Briefkopf:",
+    "letterheadHeaderFooter": "Kopf- und Fußzeile",
+    "letterheadDefault": "Standard"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} Notiz",
+    "noteOther": "{{count}} Notizen",
+    "lastActivity": "Letzte Aktivität {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Notfallhilfe",
+    "helpAlerted": "Hilfe wird sofort alarmiert",
+    "ackHeading": "BITTE BESTÄTIGEN SIE VOR DER VERWENDUNG VON SOS:",
+    "ackA": "Der SOS-Support wird nach bestem Wissen und Gewissen bereitgestellt und kann keine Notfallreaktion garantieren.",
+    "ackB": "SOS hängt vom Netzwerk, dem Gerätestatus, dem Standortzugriff und Drittanbietern ab.",
+    "ackC": "SOS erfordert Standortberechtigungen, Akkuleistung und eine Internet- oder Mobilfunkverbindung.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TIPPEN SIE FÜR HILFE",
+    "footerCaption": "Das Tippen auf SOS teilt Ihren Standort und benachrichtigt Ihre Notfallkontakte.",
+    "manageContacts": "Notfallkontakte verwalten",
+    "viewHistory": "Vorfallverlauf anzeigen"
   }
 }

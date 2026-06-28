@@ -250,5 +250,75 @@
     "location": "الموقع",
     "openInMaps": "فتح في الخرائط",
     "openConsole": "فتح وحدة التحكم"
+  },
+  "myPractice": {
+    "tabPractice": "ممارستي",
+    "tabReferrals": "الإحالات",
+    "tabCredentials": "المؤهلات",
+    "tabRewards": "مكافآتي",
+    "aboutMe": "عني",
+    "aboutMeHelper": "شارك نبذة مختصرة عن ممارستك ونهجك. يراها المرضى عند عرض ملفك الشخصي. بحد أقصى 600 كلمة.",
+    "wordCount": "{{count}} / 600 كلمات",
+    "save": "حفظ"
+  },
+  "patientRewards": {
+    "progressTitle": "التقدم نحو المرحلة التالية",
+    "progressLabel": "{{current}} / {{target}} Vulas لـ \"{{milestone}}\"",
+    "moreToGo": "المزيد متبقٍ {{count}}!",
+    "recentRewards": "المكافآت الأخيرة",
+    "empty": "لا توجد مكافآت بعد. ابدأ رحلتك الصحية!"
+  },
+  "todo": {
+    "addNewTask": "إضافة مهمة جديدة",
+    "tapToRecord": "اضغط للتسجيل",
+    "transcribing": "جارٍ نسخ الصوت...",
+    "aiProcessing": "جارٍ معالجة الذكاء الاصطناعي...",
+    "listening": "الاستماع... يتوقف بعد لحظة صمت",
+    "typeTask": "أو اكتب مهمتك هنا...",
+    "add": "إضافة",
+    "priority": "الأولوية:",
+    "low": "منخفض",
+    "medium": "متوسط",
+    "high": "مرتفع",
+    "aiProcess": "معالجة الذكاء الاصطناعي",
+    "active": "نشط",
+    "completed": "مكتمل",
+    "all": "الكل",
+    "approve": "موافقة",
+    "noMatchingPatient": "لم يتم العثور على مريض مطابق"
+  },
+  "documents": {
+    "title": "المستندات",
+    "tabDocuments": "المستندات",
+    "tabTemplates": "القوالب",
+    "tabHeaderFooter": "الرأس والتذييل",
+    "tabContent": "قوالب المحتوى",
+    "contentHelper": "إنشاء قوالب محتوى المستندات (سيتم تطبيق الرأس/التذييل من التخطيط المحدد)",
+    "newContent": "قالب محتوى جديد",
+    "searchContent": "البحث عن قوالب المحتوى...",
+    "createTemplate": "إنشاء قالب",
+    "patientDocuments": "مستندات المريض",
+    "searchDocuments": "البحث عن المستندات...",
+    "letterhead": "ترويسة:",
+    "letterheadHeaderFooter": "الرأس والتذييل",
+    "letterheadDefault": "افتراضي"
+  },
+  "roundTablesMeta": {
+    "noteOne": "ملاحظة {{count}}",
+    "noteOther": "{{count}} ملاحظات",
+    "lastActivity": "آخر نشاط {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "مساعدة الطوارئ",
+    "helpAlerted": "سيتم تنبيه المساعدة على الفور",
+    "ackHeading": "قبل استخدام SOS، يرجى الإقرار بـ:",
+    "ackA": "يتم تقديم دعم SOS على أساس أفضل جهد ولا يمكنه ضمان الاستجابة للطوارئ.",
+    "ackB": "يعتمد SOS على حالة الشبكة والجهاز والوصول إلى الموقع والمستجيبين الخارجيين.",
+    "ackC": "يتطلب SOS أذونات الموقع وقوة البطارية واتصال الإنترنت أو الخلوي.",
+    "sosLabel": "SOS",
+    "tapForHelp": "اضغط للمساعدة",
+    "footerCaption": "سيؤدي الضغط على SOS إلى مشاركة موقعك وإخطار جهات الاتصال الخاصة بالطوارئ.",
+    "manageContacts": "إدارة جهات اتصال الطوارئ",
+    "viewHistory": "عرض سجل الحوادث"
   }
 }

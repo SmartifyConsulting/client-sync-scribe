@@ -250,5 +250,75 @@
     "location": "Ebe",
     "openInMaps": "Mepee na Maps",
     "openConsole": "Mepee console"
+  },
+  "myPractice": {
+    "tabPractice": "Omume M",
+    "tabReferrals": "Ndị zigara",
+    "tabCredentials": "Akwụkwọ ozi",
+    "tabRewards": "Ihe nrite M",
+    "aboutMe": "Banyere M",
+    "aboutMeHelper": "Kọọ obere pitch gbasara omume gị na ụzọ gị. Ndị ọrịa na-ahụ nke a mgbe ha na-enyocha profaịlụ gị. Okwu 600 kacha.",
+    "wordCount": "{{count}} / 600 okwu",
+    "save": "Chekwaa"
+  },
+  "patientRewards": {
+    "progressTitle": "Ọganihu Ruo Nnukwu Nzọụzụ Na-esote",
+    "progressLabel": "{{current}} / {{target}} Vulas ruo \"{{milestone}}\"",
+    "moreToGo": "{{count}} ọzọ iji gaa!",
+    "recentRewards": "Ihe nrite ndị na-adịbeghị anya",
+    "empty": "Enweghị ihe nrite ma. Bido njem ahụike gị!"
+  },
+  "todo": {
+    "addNewTask": "Tinye Ike Ọhụrụ",
+    "tapToRecord": "Metụ aka ka ịdekọ",
+    "transcribing": "Na-edekọ...",
+    "aiProcessing": "AI na-edozi...",
+    "listening": "Na-ege ntị... kwụsịrị mgbe ụfọdụ",
+    "typeTask": "Ma ọ bụ dee ọrụ gị ebe a...",
+    "add": "Tinye",
+    "priority": "Ihe kacha mkpa:",
+    "low": "Ala",
+    "medium": "Etiti",
+    "high": "Dị elu",
+    "aiProcess": "Ngwọta AI",
+    "active": "Na-arụ ọrụ",
+    "completed": "Mezuru",
+    "all": "Niile",
+    "approve": "Kwado",
+    "noMatchingPatient": "Onweghị onye ọrịa dakọtara achọtara"
+  },
+  "documents": {
+    "title": "Akwụkwọ",
+    "tabDocuments": "Akwụkwọ",
+    "tabTemplates": "Ụdị",
+    "tabHeaderFooter": "Isi na Akụkụ",
+    "tabContent": "Ụdị ọdịnaya",
+    "contentHelper": "Mepụta ihe ndebiri ọdịnaya akwụkwọ (a ga-etinye isi na akụkụ site na nhazi gị ahọpụtara)",
+    "newContent": "Ụdị Ọdịnaya Ọhụrụ",
+    "searchContent": "Chọọ ụdị ọdịnaya...",
+    "createTemplate": "Mepụta Ụdị",
+    "patientDocuments": "Akwụkwọ Ndị Ọrịa",
+    "searchDocuments": "Chọọ akwụkwọ...",
+    "letterhead": "Akwụkwọ ozi:",
+    "letterheadHeaderFooter": "Isi na Akụkụ",
+    "letterheadDefault": "Ụkpụrụ"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} ndetu",
+    "noteOther": "{{count}} ndetu",
+    "lastActivity": "Omume ikpeazụ {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Enyemaka Mberede",
+    "helpAlerted": "A ga-agba Mberede ozugbo",
+    "ackHeading": "TUPU IJIRI SOS, BIKO KWADO:",
+    "ackA": "Nkwado SOS na-enweta na ntọala kacha mma ma enweghị ike ikwe ka nzaghachi mberede.",
+    "ackB": "SOS dabere na netwọkụ, ọnọdụ ngwaọrụ, ohere ebe, na ndị nzọpụta nke atọ.",
+    "ackC": "SOS chọrọ ikike ebe, ike batrị, yana njikọ internet ma ọ bụ cellular.",
+    "sosLabel": "SOS",
+    "tapForHelp": "METỤ AKA maka enyemaka",
+    "footerCaption": "Ịmetụ SOS aka na-ekerịta ebe gị ma na-agwa ndị kọntaktị mberede gị.",
+    "manageContacts": "Jikwaa ndị kọntaktị mberede",
+    "viewHistory": "Lelee akụkọ ihe mere eme"
   }
 }

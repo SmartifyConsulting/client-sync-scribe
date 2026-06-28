@@ -250,5 +250,75 @@
     "location": "Konum",
     "openInMaps": "Haritalarda aç",
     "openConsole": "Konsolu aç"
+  },
+  "myPractice": {
+    "tabPractice": "Benim Uygulamam",
+    "tabReferrals": "Yönlendirmeler",
+    "tabCredentials": "Kimlik Bilgileri",
+    "tabRewards": "Ödüllerim",
+    "aboutMe": "Hakkımda",
+    "aboutMeHelper": "Uygulamanız ve yaklaşımınız hakkında kısa bir tanıtım yapın. Hastalar profilinizi görüntülerken bunu görür. Maksimum 600 kelime.",
+    "wordCount": "{{count}} / 600 kelime",
+    "save": "Kaydet"
+  },
+  "patientRewards": {
+    "progressTitle": "Sonraki Kilometre Taşı İçin İlerleme",
+    "progressLabel": "\"{{milestone}}\" İçin {{current}} / {{target}} Vula",
+    "moreToGo": "{{count}} tane daha var!",
+    "recentRewards": "Son Ödüller",
+    "empty": "Henüz ödül yok. Sağlık yolculuğunuza başlayın!"
+  },
+  "todo": {
+    "addNewTask": "Yeni Görev Ekle",
+    "tapToRecord": "Kayıt İçin Dokunun",
+    "transcribing": "Tercüme Ediliyor...",
+    "aiProcessing": "Yapay Zeka İşleniyor...",
+    "listening": "Dinleniyor... Bir duraklamadan sonra durur",
+    "typeTask": "Veya görevinizi buraya yazın...",
+    "add": "Ekle",
+    "priority": "Öncelik:",
+    "low": "Düşük",
+    "medium": "Orta",
+    "high": "Yüksek",
+    "aiProcess": "Yapay Zeka İşlemi",
+    "active": "Aktif",
+    "completed": "Tamamlanan",
+    "all": "Tümü",
+    "approve": "Onayla",
+    "noMatchingPatient": "Eşleşen hasta bulunamadı"
+  },
+  "documents": {
+    "title": "Belgeler",
+    "tabDocuments": "Belgeler",
+    "tabTemplates": "Şablonlar",
+    "tabHeaderFooter": "Üstbilgi ve Altbilgi",
+    "tabContent": "İçerik Şablonları",
+    "contentHelper": "Belge içeriği şablonları oluşturun (üstbilgi/altbilgi seçtiğiniz düzenden uygulanacaktır)",
+    "newContent": "Yeni İçerik Şablonu",
+    "searchContent": "İçerik şablonlarını ara...",
+    "createTemplate": "Şablon Oluştur",
+    "patientDocuments": "Hasta Belgeleri",
+    "searchDocuments": "Belgeleri ara...",
+    "letterhead": "Antetli Kağıt:",
+    "letterheadHeaderFooter": "Üstbilgi ve Altbilgi",
+    "letterheadDefault": "Varsayılan"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} not",
+    "noteOther": "{{count}} notlar",
+    "lastActivity": "Son etkinlik {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Acil Yardım",
+    "helpAlerted": "Yardım anında uyarılacaktır",
+    "ackHeading": "SOS'U KULLANMADAN ÖNCE, LÜTFEN KABUL EDİN:",
+    "ackA": "SOS desteği, elinden gelenin en iyisini yapma esasına göre sağlanır ve acil müdahale garanti edilemez.",
+    "ackB": "SOS ağ, cihaz durumu, konum erişimi ve üçüncü taraf müdahale ekiplerine bağlıdır.",
+    "ackC": "SOS konum izinleri, pil gücü ve internet veya hücresel bağlantı gerektirir.",
+    "sosLabel": "SOS",
+    "tapForHelp": "YARDIM İÇİN DOKUNUN",
+    "footerCaption": "SOS'a dokunmak konumunuzu paylaşır ve acil durum kişilerinizi bildirir.",
+    "manageContacts": "Acil durum kişilerini yönet",
+    "viewHistory": "Olay geçmişini görüntüle"
   }
 }
