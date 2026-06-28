@@ -244,7 +244,7 @@ export default function PatientProfile() {
         className="inline-flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-        Back to Patients
+        {t("patientProfile.backToPatients")}
       </Link>
 
       {/* Header Card */}
