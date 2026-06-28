@@ -490,7 +490,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
       <div className="rounded-xl border border-primary bg-card p-8 text-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Generating AI summary of patient history...</p>
+          <p className="text-muted-foreground">{t("patientProfile.aiSummaryGenerating")}</p>
         </div>
       </div>
     );
@@ -499,10 +499,10 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
   if (!summaryData) {
     return (
       <div className="rounded-xl border border-primary bg-card p-8 text-center">
-        <p className="text-muted-foreground mb-4">No summary available yet.</p>
+        <p className="text-muted-foreground mb-4">{t("patientProfile.aiSummaryEmpty")}</p>
         <Button onClick={generateSummary} className="gap-2">
           <Sparkles className="h-4 w-4" />
-          Generate Summary
+          {t("patientProfile.aiSummaryGenerate")}
         </Button>
       </div>
     );
@@ -528,14 +528,14 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">AI Patient Summary</h3>
-              <p className="text-xs text-muted-foreground">Summarized from all session transcriptions and history</p>
+              <h3 className="font-semibold text-foreground">{t("patientProfile.aiSummaryTitle")}</h3>
+              <p className="text-xs text-muted-foreground">{t("patientProfile.aiSummarySubtitle")}</p>
             </div>
           </div>
           {!isSelfService && (
             <Button variant="ghost" size="sm" onClick={generateSummary} className="gap-2">
               <RefreshCw className="h-4 w-4" />
-              Refresh
+              {t("patientProfile.aiSummaryRefresh")}
             </Button>
           )}
         </div>
@@ -543,7 +543,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
         {/* Overall AI narrative summary first */}
         {summaryData.summary && (
           <div className="mb-4 p-4 rounded-lg bg-primary/5 border border-primary/10">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Summary</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{t("patientProfile.aiSummarySectionSummary")}</h4>
             <p className="text-sm text-foreground leading-relaxed">
               {summaryData.summary.replace(/<\/?(?:med|symptom|condition)>/g, '').split(/(?<=[.!?])\s+/).slice(0, 3).join(' ')}
             </p>
@@ -552,7 +552,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
 
         {/* Timeline breakdown */}
         <div className="prose prose-sm max-w-none">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Timeline</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("patientProfile.aiSummarySectionTimeline")}</h4>
           {renderSummaryTimeline(summaryData.summary)}
         </div>
       </div>
