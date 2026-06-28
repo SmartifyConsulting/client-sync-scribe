@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../components/ProviderGate";
+import { useAuth } from "@/hooks/useAuth";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,7 +63,10 @@ const ROLE_COLORS: Record<string, { bg: string; text: string; badge: string }> =
 };
 
 export default function AdministratorsScreen() {
-  const { providerId, providerType, userId } = useProviderAccess();
+  const { providerId, providerType } = useProviderAccess();
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
