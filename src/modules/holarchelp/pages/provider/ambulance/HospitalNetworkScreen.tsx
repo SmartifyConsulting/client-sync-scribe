@@ -1,137 +1,175 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MapPin, Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface Hospital {
+  name: string;
+  distance: string;
+  wait: string;
+  trauma: boolean;
+  affiliated: boolean;
+  beds?: number;
+  contact?: string;
+}
+
+const HOSPITALS: Hospital[] = [
+  { name: "Central Hospital", distance: "3.2 km", wait: "15 min", trauma: true, affiliated: false },
+  { name: "North General Hospital", distance: "5.1 km", wait: "22 min", trauma: false, affiliated: true, beds: 8, contact: "Direct line available" },
+  { name: "City Medical Centre", distance: "2.8 km", wait: "8 min", trauma: true, affiliated: true, beds: 12, contact: "Priority routing enabled" },
+  { name: "South General", distance: "7.3 km", wait: "30 min", trauma: false, affiliated: false },
+  { name: "East Regional", distance: "9.5 km", wait: "25 min", trauma: true, affiliated: false },
+];
 
 export default function HospitalNetworkScreen() {
-  const [activeTab, setActiveTab] = useState<"all" | "affiliated">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "affiliated">("all");
+  const [sortBy, setSortBy] = useState<"distance" | "wait">("distance");
+
+  const filteredHospitals = useMemo(() => {
+    let result = HOSPITALS;
+
+    if (filterType === "affiliated") {
+      result = result.filter((h) => h.affiliated);
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((h) => h.name.toLowerCase().includes(q));
+    }
+
+    result.sort((a, b) => {
+      if (sortBy === "distance") {
+        return parseFloat(a.distance) - parseFloat(b.distance);
+      }
+      return parseFloat(a.wait) - parseFloat(b.wait);
+    });
+
+    return result;
+  }, [filterType, searchQuery, sortBy]);
 
   return (
     <div className="space-y-6">
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Partnerships</p>
         <h1 className="text-3xl font-extrabold mt-2">Hospital Network</h1>
-        <p className="text-sm text-muted-foreground mt-2">
-          {activeTab === "all" ? "All partner hospitals in your region" : "Your formal hospital affiliations"}
-        </p>
+        <p className="text-sm text-muted-foreground mt-2">15 partner hospitals in your network</p>
       </header>
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b">
-        {(["all", "affiliated"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-medium border-b-2 transition-all ${
-              activeTab === tab
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {tab === "all" && "🏥 All Partners (12)"}
-            {tab === "affiliated" && "⭐ My Affiliates (3)"}
-          </button>
-        ))}
+      {/* Filters */}
+      <div className="flex gap-3">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search hospitals..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={filterType} onValueChange={(v: any) => setFilterType(v)}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Hospitals</SelectItem>
+            <SelectItem value="affiliated">Affiliated Only</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="distance">Sort: Distance</SelectItem>
+            <SelectItem value="wait">Sort: Wait Time</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* All Partners Tab */}
-      {activeTab === "all" && (
-        <div className="space-y-3">
-          {[
-            { name: "Central Hospital", distance: "3.2 km", wait: "15 min", trauma: true, affiliation: false },
-            { name: "North General Hospital", distance: "5.1 km", wait: "22 min", trauma: false, affiliation: true },
-            { name: "City Medical Centre", distance: "2.8 km", wait: "8 min", trauma: true, affiliation: true },
-            { name: "South General", distance: "7.3 km", wait: "30 min", trauma: false, affiliation: false },
-            { name: "East Regional", distance: "9.5 km", wait: "25 min", trauma: true, affiliation: false },
-          ].map((hospital) => (
-            <div key={hospital.name} className="rounded-lg border bg-card p-4">
+      {/* Hospitals Grid */}
+      <div className="space-y-3">
+        {filteredHospitals.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">No hospitals match your search</p>
+        ) : (
+          filteredHospitals.map((hospital) => (
+            <div
+              key={hospital.name}
+              className={`rounded-lg border p-4 ${
+                hospital.affiliated ? "border-2 border-blue-400 bg-blue-50 dark:bg-blue-950/20" : "bg-card"
+              }`}
+            >
               <div className="flex items-start justify-between mb-3">
-                <div>
+                <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold">{hospital.name}</h3>
-                    {hospital.affiliation && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">⭐ Affiliated</span>}
-                    {hospital.trauma && <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">🚑 Trauma Center</span>}
+                    <h3 className="font-bold text-lg">{hospital.name}</h3>
+                    {hospital.affiliated && (
+                      <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">⭐ AFFILIATED</span>
+                    )}
+                    {hospital.trauma && (
+                      <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">🚑 TRAUMA</span>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {hospital.distance}
+                    {hospital.distance} away
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3 mb-3 pt-3 border-t">
+
+              <div className="grid grid-cols-3 gap-3 pt-3 border-t border-current border-opacity-20">
                 <div>
                   <p className="text-xs text-muted-foreground">ER Wait Time</p>
-                  <p className="font-semibold">{hospital.wait}</p>
+                  <p className="font-semibold mt-1">{hospital.wait}</p>
                 </div>
+                {hospital.affiliated && hospital.beds && (
+                  <div>
+                    <p className="text-xs text-muted-foreground">Available Beds</p>
+                    <p className="font-semibold mt-1 text-green-600">{hospital.beds}</p>
+                  </div>
+                )}
                 <div className="text-right">
-                  <Button variant="outline" size="sm">View Details</Button>
+                  {hospital.affiliated ? (
+                    <Button variant="outline" size="sm">Dashboard</Button>
+                  ) : (
+                    <Button variant="outline" size="sm">Apply</Button>
+                  )}
                 </div>
               </div>
-              <Button variant="default" size="sm" className="w-full">Call Direct</Button>
-            </div>
-          ))}
-        </div>
-      )}
 
-      {/* My Affiliates Tab */}
-      {activeTab === "affiliated" && (
-        <div className="space-y-3">
-          {[
-            { name: "North General Hospital", distance: "5.1 km", wait: "22 min", contact: "Direct line available", beds: 8 },
-            { name: "City Medical Centre", distance: "2.8 km", wait: "8 min", contact: "Priority routing enabled", beds: 12 },
-            { name: "Central Hospital", distance: "3.2 km", wait: "15 min", contact: "Integrated dispatch system", beds: 10 },
-          ].map((hospital) => (
-            <div key={hospital.name} className="rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-bold">{hospital.name}</h3>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                    <MapPin className="h-4 w-4" />
-                    {hospital.distance}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-3 pt-3 border-t">
-                <div>
-                  <p className="text-xs text-muted-foreground">ER Wait</p>
-                  <p className="font-semibold">{hospital.wait}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Available Beds</p>
-                  <p className="font-semibold text-green-600">{hospital.beds}</p>
-                </div>
-                <div className="text-right">
-                  <Button variant="outline" size="sm">Dashboard</Button>
-                </div>
-              </div>
-              <p className="text-sm text-blue-700 mt-3 flex items-center gap-1">
-                ✓ {hospital.contact}
-              </p>
+              {hospital.affiliated && hospital.contact && (
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-3 flex items-center gap-1">
+                  ✓ {hospital.contact}
+                </p>
+              )}
             </div>
-          ))}
+          ))
+        )}
+      </div>
 
-          <div className="rounded-lg border bg-card p-4">
-            <h3 className="font-bold mb-3">Affiliation Benefits</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                Direct incident dispatch
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                Real-time bed availability
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                Priority routing
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-600">✓</span>
-                Simplified billing integration
-              </li>
-            </ul>
+      {/* Key Indicators */}
+      <div className="rounded-lg border bg-card p-4">
+        <h3 className="font-bold mb-3">Key indicators</h3>
+        <div className="space-y-2 text-sm">
+          <div>
+            <span className="text-blue-600 dark:text-blue-400 font-semibold">⭐ AFFILIATED</span>
+            <span className="text-muted-foreground"> — Direct dispatch, priority routing, bed sync</span>
           </div>
+          <div>
+            <span className="text-red-600 dark:text-red-400 font-semibold">🚑 TRAUMA</span>
+            <span className="text-muted-foreground"> — Designated trauma facility</span>
+          </div>
+          <div className="text-muted-foreground">📍 Distance helps with dispatch decisions</div>
+          <div className="text-muted-foreground">⏱ Wait times updated in real-time</div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
