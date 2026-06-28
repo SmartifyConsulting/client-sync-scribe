@@ -1008,11 +1008,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
                                 <Clock className="mr-2 h-4 w-4" />
-                                Start Session
+                                {t("patients.startSession")}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
                                 <Edit3 className="mr-2 h-4 w-4" />
-                                View Profile
+                                {t("patients.viewProfile")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
@@ -1020,7 +1020,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 className="text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Patient
+                                {t("patients.deletePatient")}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
