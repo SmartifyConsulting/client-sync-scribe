@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import type { Session } from "@/hooks/useSessions";
 import { medicationSyncBus } from "@/lib/utils";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 
 interface PatientOverviewProps {
   patient: {
