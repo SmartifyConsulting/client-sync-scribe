@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../components/ProviderGate";
@@ -14,8 +14,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -23,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash2, UserPlus, Loader2, ShieldCheck, Users } from "lucide-react";
+import { Trash2, UserPlus, Loader2, ShieldCheck, Edit2, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface MemberRow {
@@ -50,23 +48,32 @@ const CREW_ROLE_OPTIONS = [
   "supervisor",
 ];
 
+const ROLE_COLORS: Record<string, { bg: string; text: string; badge: string }> = {
+  admin: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
+  owner: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
+  manager: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
+  paramedic: { bg: "bg-green-100", text: "text-green-800", badge: "bg-green-600" },
+  emt: { bg: "bg-blue-100", text: "text-blue-800", badge: "bg-blue-600" },
+  driver: { bg: "bg-amber-100", text: "text-amber-800", badge: "bg-amber-600" },
+  dispatcher: { bg: "bg-purple-100", text: "text-purple-800", badge: "bg-purple-600" },
+  nurse: { bg: "bg-pink-100", text: "text-pink-800", badge: "bg-pink-600" },
+  supervisor: { bg: "bg-indigo-100", text: "text-indigo-800", badge: "bg-indigo-600" },
+};
+
 export default function AdministratorsScreen() {
-  const { providerId, providerType } = useProviderAccess();
+  const { providerId, providerType, userId } = useProviderAccess();
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteName, setInviteName] = useState("");
-  const [sending, setSending] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [addEmail, setAddEmail] = useState("");
+  const [addName, setAddName] = useState("");
+  const [addRole, setAddRole] = useState("paramedic");
+  const [addPhone, setAddPhone] = useState("");
+  const [addShift, setAddShift] = useState("");
+  const [saving, setSaving] = useState(false);
   const [ownerId, setOwnerId] = useState<string | null>(null);
-
-  const [crewOpen, setCrewOpen] = useState(false);
-  const [crewName, setCrewName] = useState("");
-  const [crewRole, setCrewRole] = useState("paramedic");
-  const [crewPhone, setCrewPhone] = useState("");
-  const [crewEmail, setCrewEmail] = useState("");
-  const [crewShift, setCrewShift] = useState("");
-  const [savingCrew, setSavingCrew] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
 
   const table =
     providerType === "hospital"
@@ -116,77 +123,61 @@ export default function AdministratorsScreen() {
           if (r.user_id) r.full_name = map.get(r.user_id) ?? null;
         });
       }
+      if (userId) {
+        const currentUserRow = rows.find((r) => r.user_id === userId);
+        if (currentUserRow) {
+          setCurrentUserRole(currentUserRow.role);
+        }
+      }
       return rows;
     },
   });
 
-  const admins = members.filter((m) =>
-    ADMIN_ROLES.has((m.role || "").toLowerCase()),
-  );
-  const crew = members.filter(
-    (m) => !ADMIN_ROLES.has((m.role || "").toLowerCase()),
-  );
+  const isCurrentUserAdmin = currentUserRole && ADMIN_ROLES.has(currentUserRole.toLowerCase());
 
-  const sendInvite = async () => {
-    if (!inviteEmail.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-    if (!providerId || !providerType) return;
-    setSending(true);
-    try {
-      const { error } = await supabase.functions.invoke("invite-provider-admin", {
-        body: {
-          provider_id: providerId,
-          provider_type: providerType,
-          email: inviteEmail.trim(),
-          name: inviteName.trim() || null,
-        },
-      });
-      if (error) throw error;
-      toast.success("Invitation sent");
-      setInviteOpen(false);
-      setInviteEmail("");
-      setInviteName("");
-      qc.invalidateQueries({ queryKey: ["provider-members"] });
-    } catch (err: any) {
-      toast.error(err?.message ?? "Failed to send invite");
-    } finally {
-      setSending(false);
-    }
-  };
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery.trim()) return members;
+    const q = searchQuery.toLowerCase();
+    return members.filter(
+      (m) =>
+        (m.full_name || "").toLowerCase().includes(q) ||
+        (m.invited_name || "").toLowerCase().includes(q) ||
+        (m.invited_email || "").toLowerCase().includes(q) ||
+        (m.role || "").toLowerCase().includes(q)
+    );
+  }, [members, searchQuery]);
 
-  const addCrew = async () => {
-    if (!crewName.trim()) {
+  const addMember = async () => {
+    if (!addName.trim()) {
       toast.error(t("common.name") + " required");
       return;
     }
     if (!providerId) return;
-    setSavingCrew(true);
+    setSaving(true);
     try {
       const insertRow: any = {
         [fkCol]: providerId,
-        role: crewRole,
-        invited_name: crewName.trim(),
-        invited_email: crewEmail.trim() || null,
-        phone: crewPhone.trim() || null,
-        shift_pattern: crewShift.trim() || null,
+        role: addRole,
+        invited_name: addName.trim(),
+        invited_email: addEmail.trim() || null,
+        phone: addPhone.trim() || null,
+        shift_pattern: addShift.trim() || null,
         status: "active",
       };
       const { error } = await supabase.from(table as any).insert(insertRow);
       if (error) throw error;
       toast.success(t("userAdmin.memberAdded"));
-      setCrewOpen(false);
-      setCrewName("");
-      setCrewRole("paramedic");
-      setCrewPhone("");
-      setCrewEmail("");
-      setCrewShift("");
+      setAddOpen(false);
+      setAddName("");
+      setAddEmail("");
+      setAddRole("paramedic");
+      setAddPhone("");
+      setAddShift("");
       qc.invalidateQueries({ queryKey: ["provider-members"] });
     } catch (err: any) {
-      toast.error(err?.message ?? "Failed to add crew member");
+      toast.error(err?.message ?? "Failed to add member");
     } finally {
-      setSavingCrew(false);
+      setSaving(false);
     }
   };
 
@@ -201,156 +192,137 @@ export default function AdministratorsScreen() {
     qc.invalidateQueries({ queryKey: ["provider-members"] });
   };
 
-  const renderMemberRow = (row: MemberRow) => (
-    <div
-      key={row.id}
-      className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2"
-    >
-      <div className="text-sm">
-        <div className="font-medium">
-          {row.full_name || row.invited_name || row.invited_email || "—"}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          {[row.invited_email, row.phone].filter(Boolean).join(" · ")}
-          {row.shift_pattern ? ` · ${row.shift_pattern}` : ""}
-          {" · "}
-          {row.user_id ? t("common.active") : t("common.pending")}
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Badge variant={row.user_id ? "secondary" : "outline"}>
-          {row.role || "member"}
-        </Badge>
-        <Button size="icon" variant="ghost" onClick={() => removeMember(row)}>
-          <Trash2 className="h-4 w-4 text-destructive" />
-        </Button>
-      </div>
-    </div>
-  );
+  const getRoleColor = (role: string) => {
+    const roleLower = (role || "member").toLowerCase();
+    return ROLE_COLORS[roleLower] || { bg: "bg-gray-100", text: "text-gray-800", badge: "bg-gray-600" };
+  };
 
-  const showCrewTab = providerType === "ambulance";
+  const renderMemberCard = (row: MemberRow) => {
+    const colors = getRoleColor(row.role);
+    const isOwner = row.user_id === ownerId;
+    return (
+      <div
+        key={row.id}
+        className={`rounded-lg border p-4 ${colors.bg} ${colors.text}`}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="font-semibold text-lg">
+              {row.full_name || row.invited_name || row.invited_email || "—"}
+            </div>
+            <div className="text-sm opacity-75 mt-1">
+              {[row.invited_email, row.phone].filter(Boolean).join(" · ")}
+              {row.shift_pattern ? ` · ${row.shift_pattern}` : ""}
+              {" · "}
+              {row.user_id ? t("common.active") : t("common.pending")}
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <div className={`${colors.badge} text-white px-4 py-2 rounded text-sm font-semibold`}>
+              {(row.role || "member").toUpperCase()}
+            </div>
+          </div>
+        </div>
+        {isCurrentUserAdmin && !isOwner && (
+          <div className="flex gap-2 mt-3 pt-3 border-t border-current border-opacity-20">
+            <Button size="sm" variant="ghost" className="flex-1 text-sm">
+              <Edit2 className="h-4 w-4 mr-1" /> Edit
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="flex-1 text-sm"
+              onClick={() => removeMember(row)}
+            >
+              <Trash2 className="h-4 w-4 mr-1" /> Remove
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Administration</p>
+        <h1 className="text-3xl font-extrabold mt-2">User Management</h1>
+        <p className="text-sm text-muted-foreground mt-2">Manage all users, admins, and crew members</p>
+      </div>
+
+      {!isCurrentUserAdmin && (
+        <div className="rounded-lg bg-amber-100 border border-amber-200 text-amber-800 p-4">
+          <p className="font-semibold">📖 Read-Only View</p>
+          <p className="text-sm mt-1">Only Admin users can add, edit, or remove members</p>
+        </div>
+      )}
+
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
-            {t("userAdmin.title")}
+            Users ({members.length})
           </CardTitle>
+          {isCurrentUserAdmin && (
+            <Button size="sm" onClick={() => setAddOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" /> Add User
+            </Button>
+          )}
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="admins" className="w-full">
-            <TabsList>
-              <TabsTrigger value="admins">{t("userAdmin.tabAdmins")}</TabsTrigger>
-              {showCrewTab && (
-                <TabsTrigger value="crew">{t("userAdmin.tabCrew")}</TabsTrigger>
-              )}
-            </TabsList>
+        <CardContent className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, email, or role..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
 
-            <TabsContent value="admins" className="mt-4 space-y-2">
-              <div className="flex justify-end">
-                <Button size="sm" onClick={() => setInviteOpen(true)}>
-                  <UserPlus className="mr-2 h-4 w-4" /> {t("userAdmin.inviteAdmin")}
-                </Button>
-              </div>
-              {isLoading ? (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
-                </div>
-              ) : (
-                <>
-                  {ownerId && (
-                    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2">
-                      <div className="text-sm">
-                        <div className="font-medium">{t("userAdmin.organisationOwner")}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {t("userAdmin.ownerCannotRemove")}
-                        </div>
-                      </div>
-                      <Badge variant="default">{t("userAdmin.owner")}</Badge>
-                    </div>
-                  )}
-                  {admins.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      {t("userAdmin.noAdmins")}
-                    </p>
-                  ) : (
-                    admins.map(renderMemberRow)
-                  )}
-                </>
-              )}
-            </TabsContent>
-
-            {showCrewTab && (
-              <TabsContent value="crew" className="mt-4 space-y-2">
-                <div className="flex justify-end">
-                  <Button size="sm" onClick={() => setCrewOpen(true)}>
-                    <Users className="mr-2 h-4 w-4" /> {t("userAdmin.addCrew")}
-                  </Button>
-                </div>
-                {isLoading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                    <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
-                  </div>
-                ) : crew.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{t("userAdmin.noCrew")}</p>
-                ) : (
-                  crew.map(renderMemberRow)
-                )}
-              </TabsContent>
-            )}
-          </Tabs>
+          {isLoading ? (
+            <div className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
+            </div>
+          ) : filteredMembers.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              {searchQuery ? "No users match your search" : "No users yet"}
+            </p>
+          ) : (
+            <div className="grid gap-3">
+              {filteredMembers.map(renderMemberCard)}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Invite admin dialog */}
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+      {/* Add/Edit Dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("userAdmin.inviteAdmin")}</DialogTitle>
+            <DialogTitle>Add User</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label>{t("common.name")}</Label>
-              <Input value={inviteName} onChange={(e) => setInviteName(e.target.value)} />
+              <Label>{t("common.name")} *</Label>
+              <Input
+                value={addName}
+                onChange={(e) => setAddName(e.target.value)}
+                placeholder="Full name"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{t("common.email")}</Label>
               <Input
                 type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="admin@example.com"
+                value={addEmail}
+                onChange={(e) => setAddEmail(e.target.value)}
+                placeholder="user@example.com"
               />
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setInviteOpen(false)}>
-              {t("common.cancel")}
-            </Button>
-            <Button onClick={sendInvite} disabled={sending}>
-              {sending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t("common.send")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Add crew dialog */}
-      <Dialog open={crewOpen} onOpenChange={setCrewOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("userAdmin.addCrew")}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label>{t("common.name")}</Label>
-              <Input value={crewName} onChange={(e) => setCrewName(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t("common.role")}</Label>
-              <Select value={crewRole} onValueChange={setCrewRole}>
+              <Label>{t("common.role")} *</Label>
+              <Select value={addRole} onValueChange={setAddRole}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -366,35 +338,26 @@ export default function AdministratorsScreen() {
             <div className="space-y-1.5">
               <Label>{t("common.phone")}</Label>
               <Input
-                value={crewPhone}
-                onChange={(e) => setCrewPhone(e.target.value)}
+                value={addPhone}
+                onChange={(e) => setAddPhone(e.target.value)}
                 placeholder="+27 82 555 0000"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>{t("common.email")}</Label>
-              <Input
-                type="email"
-                value={crewEmail}
-                onChange={(e) => setCrewEmail(e.target.value)}
-                placeholder="crew@example.com"
               />
             </div>
             <div className="space-y-1.5">
               <Label>{t("userAdmin.shiftPattern")}</Label>
               <Input
-                value={crewShift}
-                onChange={(e) => setCrewShift(e.target.value)}
+                value={addShift}
+                onChange={(e) => setAddShift(e.target.value)}
                 placeholder="Mon–Fri 07:00–19:00"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setCrewOpen(false)}>
+            <Button variant="ghost" onClick={() => setAddOpen(false)}>
               {t("common.cancel")}
             </Button>
-            <Button onClick={addCrew} disabled={savingCrew}>
-              {savingCrew && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={addMember} disabled={saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t("common.save")}
             </Button>
           </DialogFooter>
