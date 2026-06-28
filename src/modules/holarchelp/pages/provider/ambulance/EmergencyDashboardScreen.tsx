@@ -139,7 +139,7 @@ export default function EmergencyDashboardScreen() {
         {filteredIncidents.map((incident) => {
           const config = STATUS_CONFIG[incident.status];
           return (
-            <div key={incident.id} className={`rounded-xl border p-4 ${config.bg}`} style={{ borderColor: config.color }}>
+            <div key={incident.id} className={`rounded-xl border border-border p-4 ${config.bg}`}>
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">

@@ -220,13 +220,9 @@ export default function FleetPage() {
             return (
               <div
                 key={vehicle.id}
-                className={cn(
-                  "rounded-xl border-2 p-4 space-y-3",
-                  config.bg,
-                  "border-current"
-                )}
-                style={{ borderColor: config.color }}
+                className={cn("rounded-xl border border-border p-4 space-y-3", config.bg)}
               >
+
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
