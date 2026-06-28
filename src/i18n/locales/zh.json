@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "早上好",
+    "greetingAfternoon": "下午好",
+    "greetingEvening": "晚上好",
+    "subtitle": "以下是今天您诊所的情况,",
+    "totalPatients": "患者总数",
+    "thisWeek": "本周",
+    "doctorRating": "医生评分",
+    "noRatings": "暂无评分",
+    "vulaVouchers": "Vula 代金券",
+    "myRoundTables": "我的圆桌",
+    "searchRoundTable": "搜索患者开始圆桌讨论...",
+    "noPatientsFound": "未找到患者",
+    "todoList": "待办事项",
+    "addTask": "添加任务...",
+    "active": "进行中",
+    "done": "已完成",
+    "noActiveTasks": "没有进行中的任务",
+    "noCompletedTasks": "没有已完成的任务",
+    "recentActivity": "近期活动",
+    "sessionCompleted": "会话已完成",
+    "documentGenerated": "已生成文档",
+    "taskCompleted": "任务已完成",
+    "followUpSent": "已发送跟进",
+    "gettingStarted": "开始",
+    "addFirstPatient": "添加您的第一位患者以开始",
+    "justNow": "刚刚"
   }
 }

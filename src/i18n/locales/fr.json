@@ -109,5 +109,33 @@
     "location": "Lieu",
     "noQualifyingStops": "Aucun arrêt qualifiant",
     "vehicle": "Véhicule"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Bonjour",
+    "greetingAfternoon": "Bon après-midi",
+    "greetingEvening": "Bonsoir",
+    "subtitle": "Voici ce qui se passe dans votre cabinet aujourd'hui,",
+    "totalPatients": "Total des patients",
+    "thisWeek": "Cette semaine",
+    "doctorRating": "Évaluation du médecin",
+    "noRatings": "Aucune évaluation",
+    "vulaVouchers": "Bons Vula",
+    "myRoundTables": "Mes tables rondes",
+    "searchRoundTable": "Chercher un patient pour démarrer une table ronde...",
+    "noPatientsFound": "Aucun patient trouvé",
+    "todoList": "Liste de tâches",
+    "addTask": "Ajouter une tâche...",
+    "active": "Actif",
+    "done": "Terminé",
+    "noActiveTasks": "Aucune tâche active",
+    "noCompletedTasks": "Aucune tâche terminée",
+    "recentActivity": "Activité récente",
+    "sessionCompleted": "Session terminée",
+    "documentGenerated": "Document généré",
+    "taskCompleted": "Tâche terminée",
+    "followUpSent": "Suivi envoyé",
+    "gettingStarted": "Commencer",
+    "addFirstPatient": "Ajoutez votre premier patient pour commencer",
+    "justNow": "À l'instant"
   }
 }

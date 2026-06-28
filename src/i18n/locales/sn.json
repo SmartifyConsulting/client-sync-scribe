@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Mangwanani",
+    "greetingAfternoon": "Masikati",
+    "greetingEvening": "Manheru",
+    "subtitle": "Heinoi zviri kuitika muchipatara chenyu nhasi,",
+    "totalPatients": "Varwere Vese",
+    "thisWeek": "Vhiki Iyi",
+    "doctorRating": "Chiyero ChaChiremba",
+    "noRatings": "Hapana zviyero parizvino",
+    "vulaVouchers": "Vula Vouchers",
+    "myRoundTables": "Matafura Angu Anotenderera",
+    "searchRoundTable": "Tsvaga murwere kutanga tafura inotenderera...",
+    "noPatientsFound": "Hapana varwere vanowanikwa",
+    "todoList": "Rondedzero yeBasa",
+    "addTask": "Wedzera basa...",
+    "active": "Inoshanda",
+    "done": "Yapera",
+    "noActiveTasks": "Hapana mabasa anoshanda",
+    "noCompletedTasks": "Hapana mabasa apera",
+    "recentActivity": "Zvichangoitika",
+    "sessionCompleted": "Chikamu chapera",
+    "documentGenerated": "Gwaro raitwa",
+    "taskCompleted": "Basa rapera",
+    "followUpSent": "Kutevera kwatumirwa",
+    "gettingStarted": "Kutanga",
+    "addFirstPatient": "Wedzera murwere wako wekutanga",
+    "justNow": "Iye zvino"
   }
 }

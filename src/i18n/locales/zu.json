@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Sawubona ekuseni",
+    "greetingAfternoon": "Sawubona emini",
+    "greetingEvening": "Sawubona kusihlwa",
+    "subtitle": "Nakhu okwenzeka emtholampilo wakho namuhla,",
+    "totalPatients": "Iziguli Sezizonke",
+    "thisWeek": "Leli Sonto",
+    "doctorRating": "Isilinganiso Sikadokotela",
+    "noRatings": "Awekho amaqophelo okwamanje",
+    "vulaVouchers": "Ama-Vula Voucher",
+    "myRoundTables": "Amatafula Ami Awundlangothi",
+    "searchRoundTable": "Sesha isiguli ukuze uqale itafula awundlangothi...",
+    "noPatientsFound": "Aziphathwa iziguli",
+    "todoList": "Uhlu lwemisebenzi",
+    "addTask": "Engeza umsebenzi...",
+    "active": "Kuyasebenza",
+    "done": "Kwenziwe",
+    "noActiveTasks": "Ayikho imisebenzi esebenzayo",
+    "noCompletedTasks": "Ayikho imisebenzi eqediwe",
+    "recentActivity": "Umsebenzi Wakamuva",
+    "sessionCompleted": "Iseshini iphelile",
+    "documentGenerated": "Idokhumenti yenziwe",
+    "taskCompleted": "Umsebenzi uphelile",
+    "followUpSent": "Ukulandelela kuthunyelwe",
+    "gettingStarted": "Ukuqala",
+    "addFirstPatient": "Engeza isiguli sakho sokuqala ukuze uqale",
+    "justNow": "Manje nje"
   }
 }

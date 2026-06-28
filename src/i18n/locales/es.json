@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Buenos días",
+    "greetingAfternoon": "Buenas tardes",
+    "greetingEvening": "Buenas noches",
+    "subtitle": "Esto es lo que ocurre hoy en su consulta,",
+    "totalPatients": "Pacientes totales",
+    "thisWeek": "Esta semana",
+    "doctorRating": "Calificación del médico",
+    "noRatings": "Sin calificaciones aún",
+    "vulaVouchers": "Vales Vula",
+    "myRoundTables": "Mis mesas redondas",
+    "searchRoundTable": "Buscar paciente para iniciar mesa redonda...",
+    "noPatientsFound": "No se encontraron pacientes",
+    "todoList": "Lista de tareas",
+    "addTask": "Añadir tarea...",
+    "active": "Activas",
+    "done": "Hecho",
+    "noActiveTasks": "Sin tareas activas",
+    "noCompletedTasks": "Sin tareas completadas",
+    "recentActivity": "Actividad reciente",
+    "sessionCompleted": "Sesión completada",
+    "documentGenerated": "Documento generado",
+    "taskCompleted": "Tarea completada",
+    "followUpSent": "Seguimiento enviado",
+    "gettingStarted": "Empezar",
+    "addFirstPatient": "Añade tu primer paciente para empezar",
+    "justNow": "Justo ahora"
   }
 }

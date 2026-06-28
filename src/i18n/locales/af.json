@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Goeie môre",
+    "greetingAfternoon": "Goeie middag",
+    "greetingEvening": "Goeie naand",
+    "subtitle": "Hier is wat vandag in jou praktyk gebeur,",
+    "totalPatients": "Totale Pasiënte",
+    "thisWeek": "Hierdie Week",
+    "doctorRating": "Doktersgradering",
+    "noRatings": "Nog geen graderings",
+    "vulaVouchers": "Vula-bewyse",
+    "myRoundTables": "My Rondetafels",
+    "searchRoundTable": "Soek pasiënt om rondetafel te begin...",
+    "noPatientsFound": "Geen pasiënte gevind",
+    "todoList": "Take-lys",
+    "addTask": "Voeg 'n taak by...",
+    "active": "Aktief",
+    "done": "Gedoen",
+    "noActiveTasks": "Geen aktiewe take",
+    "noCompletedTasks": "Geen voltooide take",
+    "recentActivity": "Onlangse Aktiwiteit",
+    "sessionCompleted": "Sessie voltooi",
+    "documentGenerated": "Dokument gegenereer",
+    "taskCompleted": "Taak voltooi",
+    "followUpSent": "Opvolg gestuur",
+    "gettingStarted": "Aan die gang kom",
+    "addFirstPatient": "Voeg jou eerste pasiënt by om te begin",
+    "justNow": "Nou net"
   }
 }

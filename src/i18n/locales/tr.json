@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Günaydın",
+    "greetingAfternoon": "İyi öğleden sonra",
+    "greetingEvening": "İyi akşamlar",
+    "subtitle": "Bugün muayenehanenizde olanlar,",
+    "totalPatients": "Toplam Hasta",
+    "thisWeek": "Bu Hafta",
+    "doctorRating": "Doktor Puanı",
+    "noRatings": "Henüz puan yok",
+    "vulaVouchers": "Vula Kuponları",
+    "myRoundTables": "Yuvarlak Masalarım",
+    "searchRoundTable": "Yuvarlak masa başlatmak için hasta ara...",
+    "noPatientsFound": "Hasta bulunamadı",
+    "todoList": "Görev Listesi",
+    "addTask": "Görev ekle...",
+    "active": "Etkin",
+    "done": "Tamamlandı",
+    "noActiveTasks": "Etkin görev yok",
+    "noCompletedTasks": "Tamamlanmış görev yok",
+    "recentActivity": "Son Etkinlik",
+    "sessionCompleted": "Oturum tamamlandı",
+    "documentGenerated": "Belge oluşturuldu",
+    "taskCompleted": "Görev tamamlandı",
+    "followUpSent": "Takip gönderildi",
+    "gettingStarted": "Başlangıç",
+    "addFirstPatient": "Başlamak için ilk hastanızı ekleyin",
+    "justNow": "Az önce"
   }
 }

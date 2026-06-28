@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Molo kusasa",
+    "greetingAfternoon": "Molo emini",
+    "greetingEvening": "Molo ngokuhlwa",
+    "subtitle": "Nantsi le yenzekayo kwinkqubo yakho namhlanje,",
+    "totalPatients": "Izigulane Zizonke",
+    "thisWeek": "Le Veki",
+    "doctorRating": "Uvavanyo Lukagqirha",
+    "noRatings": "Akukho zilinganiso okwangoku",
+    "vulaVouchers": "Ii-Vula Voucher",
+    "myRoundTables": "Iitafile Zam Ezijikelezayo",
+    "searchRoundTable": "Khangela isigulane ukuqalisa itafile ejikelezayo...",
+    "noPatientsFound": "Akukho zigulane zifumanekayo",
+    "todoList": "Uluhlu Lwemisebenzi",
+    "addTask": "Yongeza umsebenzi...",
+    "active": "Kuyasebenza",
+    "done": "Kwenziwe",
+    "noActiveTasks": "Akukho misebenzi isebenzayo",
+    "noCompletedTasks": "Akukho misebenzi igqityiweyo",
+    "recentActivity": "Umsebenzi Wakutshanje",
+    "sessionCompleted": "Iseshoni igqityiwe",
+    "documentGenerated": "Uxwebhu luveliswe",
+    "taskCompleted": "Umsebenzi ugqityiwe",
+    "followUpSent": "Ukulandela kuthunyelwe",
+    "gettingStarted": "Ukuqalisa",
+    "addFirstPatient": "Yongeza isigulane sakho sokuqala ukuqalisa",
+    "justNow": "Ngoku nje"
   }
 }

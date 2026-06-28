@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Dzień dobry",
+    "greetingAfternoon": "Dzień dobry",
+    "greetingEvening": "Dobry wieczór",
+    "subtitle": "Oto co dzieje się dziś w Twojej praktyce,",
+    "totalPatients": "Wszyscy pacjenci",
+    "thisWeek": "W tym tygodniu",
+    "doctorRating": "Ocena lekarza",
+    "noRatings": "Brak ocen",
+    "vulaVouchers": "Vouchery Vula",
+    "myRoundTables": "Moje okrągłe stoły",
+    "searchRoundTable": "Szukaj pacjenta, aby rozpocząć okrągły stół...",
+    "noPatientsFound": "Nie znaleziono pacjentów",
+    "todoList": "Lista zadań",
+    "addTask": "Dodaj zadanie...",
+    "active": "Aktywne",
+    "done": "Zakończone",
+    "noActiveTasks": "Brak aktywnych zadań",
+    "noCompletedTasks": "Brak zakończonych zadań",
+    "recentActivity": "Ostatnia aktywność",
+    "sessionCompleted": "Sesja zakończona",
+    "documentGenerated": "Dokument wygenerowany",
+    "taskCompleted": "Zadanie zakończone",
+    "followUpSent": "Wysłano kontynuację",
+    "gettingStarted": "Rozpoczęcie",
+    "addFirstPatient": "Dodaj pierwszego pacjenta",
+    "justNow": "Przed chwilą"
   }
 }

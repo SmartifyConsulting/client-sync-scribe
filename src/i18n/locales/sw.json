@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Habari za asubuhi",
+    "greetingAfternoon": "Habari za mchana",
+    "greetingEvening": "Habari za jioni",
+    "subtitle": "Hiki ndicho kinachoendelea katika kliniki yako leo,",
+    "totalPatients": "Jumla ya Wagonjwa",
+    "thisWeek": "Wiki Hii",
+    "doctorRating": "Ukadiriaji wa Daktari",
+    "noRatings": "Hakuna ukadiriaji bado",
+    "vulaVouchers": "Vocha za Vula",
+    "myRoundTables": "Meza Zangu za Pande Zote",
+    "searchRoundTable": "Tafuta mgonjwa kuanza meza ya pande zote...",
+    "noPatientsFound": "Hakuna wagonjwa waliopatikana",
+    "todoList": "Orodha ya Kazi",
+    "addTask": "Ongeza kazi...",
+    "active": "Inafanya kazi",
+    "done": "Imekamilika",
+    "noActiveTasks": "Hakuna kazi zinazoendelea",
+    "noCompletedTasks": "Hakuna kazi zilizokamilika",
+    "recentActivity": "Shughuli za Hivi Karibuni",
+    "sessionCompleted": "Kikao kimekamilika",
+    "documentGenerated": "Hati imetengenezwa",
+    "taskCompleted": "Kazi imekamilika",
+    "followUpSent": "Ufuatiliaji umetumwa",
+    "gettingStarted": "Anza",
+    "addFirstPatient": "Ongeza mgonjwa wako wa kwanza kuanza",
+    "justNow": "Sasa hivi"
   }
 }

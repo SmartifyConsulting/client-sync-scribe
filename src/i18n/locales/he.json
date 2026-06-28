@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "בוקר טוב",
+    "greetingAfternoon": "צהריים טובים",
+    "greetingEvening": "ערב טוב",
+    "subtitle": "הנה מה שקורה במרפאה שלך היום,",
+    "totalPatients": "סך המטופלים",
+    "thisWeek": "השבוע",
+    "doctorRating": "דירוג רופא",
+    "noRatings": "אין דירוגים עדיין",
+    "vulaVouchers": "שוברי Vula",
+    "myRoundTables": "שולחנות עגולים שלי",
+    "searchRoundTable": "חפש מטופל כדי להתחיל שולחן עגול...",
+    "noPatientsFound": "לא נמצאו מטופלים",
+    "todoList": "רשימת משימות",
+    "addTask": "הוסף משימה...",
+    "active": "פעילות",
+    "done": "הושלמו",
+    "noActiveTasks": "אין משימות פעילות",
+    "noCompletedTasks": "אין משימות שהושלמו",
+    "recentActivity": "פעילות אחרונה",
+    "sessionCompleted": "מפגש הושלם",
+    "documentGenerated": "מסמך נוצר",
+    "taskCompleted": "משימה הושלמה",
+    "followUpSent": "מעקב נשלח",
+    "gettingStarted": "תחילת העבודה",
+    "addFirstPatient": "הוסף את המטופל הראשון שלך",
+    "justNow": "הרגע"
   }
 }
