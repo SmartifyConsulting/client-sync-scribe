@@ -479,11 +479,12 @@ export default function TodoList() {
       <div className="flex items-center gap-2">
         {(["active", "completed", "all"] as const).map((f) => (
           <button key={f} onClick={() => setFilter(f)} className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", filter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80")}>
-            {f.charAt(0).toUpperCase() + f.slice(1)}
+            {t(`todo.${f}`)}
             <span className="ml-1.5 text-xs opacity-70">({f === "all" ? todos.length : f === "active" ? activeCount : completedCount})</span>
           </button>
         ))}
       </div>
+
 
       {/* Task List — Grouped by Date */}
       <div className="space-y-3">
