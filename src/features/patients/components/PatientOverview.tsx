@@ -216,6 +216,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
 
 export function PatientOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
 
