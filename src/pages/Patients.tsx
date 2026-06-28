@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
@@ -50,6 +51,7 @@ import { isSamplePatient } from "@/lib/samplePatients";
 
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -393,7 +395,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Patients</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("nav.myPatients", "Patients")}</h1>
             <p className="mt-1 text-muted-foreground text-[12px]">
               Manage your patient profiles and history
             </p>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -93,6 +94,7 @@ function getDateKey(dateStr: string): string {
 }
 
 export default function TodoList() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { profile } = useProfile();
@@ -406,7 +408,7 @@ export default function TodoList() {
     <div className="space-y-6 animate-fade-in max-w-3xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">To-Do List</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
         <p className="mt-1 text-muted-foreground text-[12px]">Manage your tasks with voice or text input — AI can auto-execute actions</p>
       </div>
 

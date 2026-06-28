@@ -39,7 +39,7 @@ export default function HospitalNetworkScreen() {
       const { data, error } = await supabase
         .from("holarchelp_hospitals")
         .select("id, name, city, status")
-        .eq("status", "active")
+        .eq("status", "approved")
         .order("name");
 
       if (error) throw error;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Pencil, Link, Unlink, Loader2, X } from "lucide-react";
 import googleCalLogo from "@/assets/google-calendar-logo.png";
@@ -101,6 +102,7 @@ function getDaysInMonth(date: Date) {
 }
 
 export default function CalendarView() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -552,7 +554,7 @@ export default function CalendarView() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Calendar</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("nav.myCalendar", "Calendar")}</h1>
           <p className="text-muted-foreground text-[12px]">
             Manage your appointments and schedule
           </p>
