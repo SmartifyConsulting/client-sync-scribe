@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
 import { useTranslation } from "react-i18next";
+import { relativeTimeLabel } from "@/lib/relativeTimeLabel";
 
 interface Activity {
   id: string;
