@@ -338,14 +338,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
           >
             <LayoutTemplate className="h-4 w-4 mr-2" />
-            Header & Footer
+            {t("documents.tabHeaderFooter")}
           </TabsTrigger>
           <TabsTrigger
             value="content"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
           >
             <FileText className="h-4 w-4 mr-2" />
-            Content Templates
+            {t("documents.tabContent")}
           </TabsTrigger>
         </TabsList>
 
