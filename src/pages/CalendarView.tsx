@@ -581,10 +581,10 @@ export default function CalendarView() {
           {practice && scope === 'practice' && members.length > 0 && (
             <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
               <SelectTrigger className="h-8 w-[200px] text-xs">
-                <SelectValue placeholder="Filter doctor" />
+                <SelectValue placeholder={t("calendar.filterDoctor")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All doctors in practice</SelectItem>
+                <SelectItem value="all">{t("calendar.allDoctors")}</SelectItem>
                 {members.map((m) => (
                   <SelectItem key={m.doctor_id} value={m.doctor_id}>
                     <span className="inline-flex items-center gap-2">
