@@ -310,19 +310,19 @@ export default function PatientProfile() {
                     }}
                   >
                     <img src={vulaSymbol} alt="" className="h-3.5 w-3.5" />
-                    Check in
+                    {t("patientProfile.checkIn")}
                   </Button>
                 )}
               </>
             )}
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleScheduleAppointment}>
               <Calendar className="h-3.5 w-3.5" />
-              Schedule
+              {t("patientProfile.schedule")}
             </Button>
             {(patient as any).patient_user_id !== currentUserId && (
               <Button size="sm" className="gap-1.5" onClick={handleStartSession}>
                 <Clock className="h-3.5 w-3.5" />
-                Start Session
+                {t("patientProfile.startSession")}
               </Button>
             )}
           </div>
