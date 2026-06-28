@@ -1,81 +1,92 @@
 ## Goal
 
-Reformat every screen under the Emergency Responder portal (`/provider/ambulance/*`) so its visual language matches the Doctor profile (Dashboard, Patients, Sessions, etc.). Today the ambulance screens use ad‑hoc Tailwind colors (`bg-red-100`, `bg-blue-50`, `text-green-600`, raw emoji badges, inline `border-2`, mixed font weights) that violate the Style Manifest and look nothing like the Doctor pages.
+Tighten the Emergency Responder (Ambulance) portal so it matches the density and accordion patterns used in the Doctor and Patient profiles, consolidate "Admin" navigation, make hospital pickers respect real availability, and wire the Hospital Network screen to the live database.
 
-No business logic, data, or routing changes — purely presentation.
+## 1. Compact screen styling (parity with Doctor profile)
 
-## What "match the Doctor profile" means
+Apply to every screen under `src/modules/holarchelp/pages/provider/ambulance/*` and `src/modules/holarchelp/pages/provider/AdministratorsScreen.tsx`:
 
-Standards already used by the Doctor screens:
+- Page header: replace `text-3xl font-extrabold` / oversized headers with the doctor-profile pattern — `text-2xl font-semibold tracking-tight` + `text-sm text-muted-foreground` subtitle in a `space-y-1` block.
+- Outer wrapper: `space-y-4` (was `space-y-6`).
+- Card chrome: `rounded-xl border border-border bg-card shadow-sm`, `CardHeader` `py-3`, `CardContent` `pt-0 space-y-3`.
+- Typography: body `text-sm`, secondary `text-xs`, KPI numbers `text-lg font-semibold`.
+- Rows: `py-2` not `py-4`; icons `h-4 w-4`.
+- Buttons default `size="sm"`.
 
-- `PageHeader` from `src/components/shared/PageHeader.tsx` for the title block (title + subtitle + actions, never a custom `<header>` with `text-3xl font-extrabold` + uppercase eyebrow).
-- Cards via shadcn `Card / CardHeader / CardTitle / CardContent`, rounded‑xl, `border-border`, `bg-card`.
-- Semantic tokens only: `primary`, `secondary`, `muted`, `accent`, `destructive`, `success`, `warning`, `sos`, `foreground`, `muted-foreground`. No `bg-red-*`, `bg-blue-*`, `bg-green-*`, `text-amber-*`, `dark:bg-*-950/20`, inline hex.
-- Shared shadcn `Badge` for status pills (variants/tones via semantic tokens), shadcn `Button` for actions, shadcn `Tabs` for tab switching (not a row of `Button variant=outline`).
-- Stat tiles use `StatsCard` (`src/components/dashboard/StatsCard.tsx`) like the Doctor dashboard.
-- Mobile‑first, `max-w-7xl mx-auto`, `space-y-6`, 44px touch targets, `rounded-xl`, no horizontal overflow at 375px.
-- All user‑facing strings go through `t()` (i18n) — many ambulance screens still have hardcoded English ("Current Shift ▼", "Track Live", "Team Summary", "Day Crew", etc.).
+## 2. Standardized accordion pattern
 
-## Scope — every screen under `pages/provider/ambulance/`
+Reuse the doctor/patient profile pattern (`src/pages/MyPractice.tsx` line 362-398):
 
-1. AmbulanceOpsDashboard.tsx
-2. EmergencyDashboardScreen.tsx
-3. NavigationScreen.tsx
-4. TeamStatusScreen.tsx
-5. DriverManagementScreen.tsx
-6. FleetOperationsScreen.tsx
-7. FleetPage.tsx
-8. FleetCalendarScreen.tsx
-9. MaintenanceDashboardScreen.tsx
-10. VehicleProfileScreen.tsx
-11. VehicleAvailabilityScreen.tsx
-12. VehicleAssignmentScreen.tsx
-13. VehicleUtilisationScreen.tsx
-14. VehicleTypeManagementScreen.tsx
-15. HospitalNetworkScreen.tsx
-16. HospitalsDirectoryScreen.tsx
-17. AffiliatedHospitalsScreen.tsx
-18. RealTimeMonitoringScreen.tsx
-19. TelemetryHubScreen.tsx
-20. TelematicsScreen.tsx
-21. LiveSOSScreen.tsx
-22. IncomingSosScreen.tsx
-23. IncidentHistoryScreen.tsx
-24. IncidentManagementScreen.tsx
-25. VehicleAbuseScreen.tsx
-26. GeofenceScreen.tsx
-27. RouteDeviationScreen.tsx
-28. AfterHoursScreen.tsx
-29. UnlinkedTripsScreen.tsx
+```tsx
+<Accordion type="single" collapsible className="space-y-3">
+  <AccordionItem value="..." className="rounded-xl border border-primary bg-card shadow-sm">
+    <AccordionTrigger className="px-4 py-3 hover:no-underline">…</AccordionTrigger>
+    <AccordionContent className="px-4 pb-4 space-y-3">…</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
 
-Plus the shared shell `AmbulanceOpsLayout.tsx` stats strip is already token‑based and stays as‑is.
+Convert these to that exact pattern, collapsed by default:
 
-## Refactor recipe applied to each file
+- **Fleet Operations Vehicles** (`FleetPage.tsx` / `FleetOperationsScreen.tsx`) — wrap the vehicles list in one accordion item titled "Vehicles ({count})". KPI summary stays above the accordion.
+- **Team Status** (`TeamStatusScreen.tsx`) — rename to **Shift Teams**, wrap the team roster in one accordion item "Shift Teams ({count})". Update sidebar label `nav.teamStatus` → `nav.shiftTeams` and i18n strings (English fallback for the 25 locales).
 
-For each screen:
+## 3. Admin consolidation
 
-1. Replace the bespoke header block with `<PageHeader title={t(...)} subtitle={t(...)} actions={...} />`.
-2. Wrap content in `<div className="space-y-6">`; remove ad‑hoc `mt-2`, `mb-3` stacks.
-3. Convert every panel/tile/section to `<Card>` + `<CardHeader>` + `<CardContent>`; drop `rounded-lg border bg-card p-4` repeats.
-4. Replace stat tiles with `<StatsCard label value icon tone="default|success|warning|destructive" />`.
-5. Replace status pills (e.g. `bg-green-100 text-green-800`, `bg-red-600 text-white`) with `<Badge variant="...">` mapped to semantic tokens (`success`, `destructive`, `warning`, `primary`, `secondary`).
-6. Replace tab rows of `<Button>` with shadcn `<Tabs>`.
-7. Replace emoji icons (🔔 🚑 ✓ 🌅 🌆 🏥 🚨) with `lucide-react` icons (Bell, Ambulance, CheckCircle2, Sunrise, Sunset, Hospital, Siren) sized via `lib/icon-sizes`.
-8. Strip all raw color utilities and `dark:*` variants — colors come from `index.css` tokens only.
-9. Wrap every visible string in `t("...")`; add the missing keys to `en.json` and run them through `uiTranslations.ts` so all 25 locales pick them up.
-10. Ensure mobile breakpoint: grids collapse to `grid-cols-1` on mobile, `md:grid-cols-2`, `lg:grid-cols-3`.
+- Sidebar (`src/components/layout/ProviderSidebar.tsx`):
+  - Rename `nav.userAdmin` value to **Admin**.
+  - Remove the standalone **Hospital Network** entry from `ambulanceNav`.
+- `AdministratorsScreen.tsx` becomes a tabbed shell:
+  1. **Users** — current member list/dialog.
+  2. **Hospital Network** — renders `HospitalNetworkScreen` inline.
+- Route `/provider/ambulance/hospital-network` redirects to `/provider/ambulance/admins?tab=hospital-network`; the tab reads `?tab=` from the URL.
+- Page title: "Admin" (replacing "User Management").
+
+## 4. Remove "Affiliate" and "Trauma" badges
+
+Strip every "Affiliated" / "Affiliate" pill, the dotted/colored affiliated ring, and the red **Trauma** badge in:
+
+- `ambulance/HospitalNetworkScreen.tsx` — drop the affiliated filter Select and the trauma pill from each card. Keep search + sort.
+- `hospital/ProvidersScreen.tsx`, `ProviderAvailabilityPanel.tsx`, `AffiliatedDoctorsScreen.tsx`, `AffiliatedAmbulancesScreen.tsx`.
+- `ambulance/IncidentManagementScreen.tsx`, `AffiliatedHospitalsScreen.tsx`.
+- `hospital/HospitalSelectionScreen.tsx` — remove any trauma pill rendered on hospital cards.
+
+Underlying `affiliated` / `trauma` fields stay intact — only the badges/filters are removed.
+
+## 5. Wire Hospital Network to the live database
+
+Replace the mock `HOSPITALS` array in `ambulance/HospitalNetworkScreen.tsx` with a Supabase-backed query against `public.holarchelp_hospitals`.
+
+Data flow:
+
+- New hook `src/modules/holarchelp/hooks/useHospitalNetwork.ts`
+  - React Query key: `["hospital-network", { acceptingOnly }]`.
+  - Selects from `holarchelp_hospitals`: `id, name, address, city, province, contact_phone, contact_email, accepting_patients, beds_available, er_status, latitude, longitude`.
+  - Returns rows ordered by `name`.
+- New hook `useAvailableHospitals()` — wraps the above with `acceptingOnly: true` and is shared with every hospital selector (`hospital/HospitalSelectionScreen.tsx`, dispatch pickers, ambulance combobox).
+- Distance/ETA columns: computed client-side from the provider's current geolocation (already available via `useProviderAccess` location, fall back to `—` when unknown). No mock numbers.
+- Wait time: read `beds_available` and `er_status` instead of mocked `wait`. Show "Accepting" / "Diverting" / "Closed" chip derived from `er_status`.
+- Search filter runs against `name`, `city`, `address`.
+- Sort options: "Name" and "Distance" (only when geolocation present).
+- Loading skeletons + empty state ("No hospitals available right now") use existing shadcn `Skeleton`.
+
+## 6. Availability-gated hospital selection
+
+Every selector lists hospitals only when `accepting_patients = true` (and `er_status != 'closed'`):
+
+- `hospital/HospitalSelectionScreen.tsx` — switch to `useAvailableHospitals()`.
+- Any other Select/Combobox listing hospitals (search `holarchelp_hospitals` queries) refactored onto the shared hook.
+- Hospital Network admin tab itself shows all rows but greys non-accepting ones and labels them; selection contexts hide them entirely.
+
+## 7. Workflow linkage
+
+- Toggling `accepting_patients` from the Hospital Network admin tab invalidates `["hospital-network"]` so dispatch pickers refresh immediately.
+- Users tab mutations invalidate `["provider-members", providerId]` (used by Shift Teams + Driver Management).
+- Vehicle status changes inside the Fleet Operations accordion invalidate `["ambulance-fleet", providerId]` (consumed by `EmergencyDashboardScreen`).
 
 ## Technical notes
 
-- Reuse existing `Card`, `Badge`, `Tabs`, `Button`, `Input`, `Select`, `Tooltip`, `Avatar` from `@/components/ui/*`.
-- Reuse `PageHeader`, `StatsCard`, `TodaysBriefing` patterns where shape matches.
-- Token reference: `src/index.css` defines `--primary` (teal), `--sos` (crimson), `--success`, `--warning`, `--destructive`, plus surface tokens.
-- Do not touch data fetching, hooks, RPC calls, route definitions, or the providers/admins screens — only JSX/className.
-- After edits run a build to confirm no TS regressions; sample 3 screens at 375px and 1280px to confirm parity with `PatientDashboard.tsx` / `Dashboard.tsx`.
-
-## Out of scope
-
-- Hospital portal screens (already mostly token‑based).
-- Sidebar/navigation/layout shell.
-- Adding/removing functionality, new charts, new data.
-- Backend, RLS, or i18n infrastructure changes (only string additions).
+- New files: `src/modules/holarchelp/hooks/useHospitalNetwork.ts`, `useAvailableHospitals.ts`.
+- Edited files (~20): sidebar, routes-provider, AdministratorsScreen, HospitalNetworkScreen, TeamStatusScreen, FleetPage/FleetOperationsScreen, all `Affiliated*` screens, `ProvidersScreen`, `ProviderAvailabilityPanel`, `IncidentManagementScreen`, `HospitalSelectionScreen`, locale files.
+- No DB migrations required; `holarchelp_hospitals` already has `accepting_patients`, `er_status`, `beds_available`, contact, and geo columns. RLS is already configured to allow authenticated reads of approved hospitals.
+- No business-logic changes outside the availability filter, cache invalidation hooks, and the mock→DB switch.
