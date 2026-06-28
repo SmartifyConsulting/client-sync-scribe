@@ -491,17 +491,17 @@ export default function MyRewards() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5 text-primary" />
-                  Progress to Next Milestone
+                  {t("patientRewards.progressTitle")}
                 </CardTitle>
                 <CardDescription>
-                  {lollipopCount} / {nextMilestone.count} Vulas to "{nextMilestone.label}"
+                  {t("patientRewards.progressLabel", { current: lollipopCount, target: nextMilestone.count, milestone: nextMilestone.label })}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <Progress value={progressToNext} className="h-4" />
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{nextMilestone.count - lollipopCount} more to go!</span>
+                    <span>{t("patientRewards.moreToGo", { count: nextMilestone.count - lollipopCount })}</span>
                     <span className="text-2xl">{nextMilestone.icon}</span>
                   </div>
                 </div>
@@ -512,14 +512,14 @@ export default function MyRewards() {
           <Card>
             <CardHeader>
               <CardTitle>
-                Recent Rewards
+                {t("patientRewards.recentRewards")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
                   <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-20 md:h-10 w-auto object-contain mx-auto mb-4" />
-                  <p className="text-muted-foreground">No rewards yet. Start your health journey!</p>
+                  <p className="text-muted-foreground">{t("patientRewards.empty")}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
