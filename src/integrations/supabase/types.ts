@@ -5848,6 +5848,10 @@ export type Database = {
           stars: number
         }[]
       }
+      seed_default_header_footer_template: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       user_can_access_patient_rt: {
         Args: { _patient_id: string }
         Returns: boolean
