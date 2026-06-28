@@ -324,7 +324,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       {!hideHeader && (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Templates</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("nav.myDocuments", "Documents")}</h1>
             <p className="mt-1 text-muted-foreground text-[12px]">Manage header/footer layouts and content templates separately</p>
           </div>
         </div>
