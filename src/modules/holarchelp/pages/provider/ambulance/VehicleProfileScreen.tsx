@@ -99,8 +99,8 @@ export default function VehicleProfileScreen() {
           Back to Fleet
         </Button>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Operations</p>
-          <h1 className="text-3xl font-extrabold mt-2">{vehicle.code}</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">{vehicle.code}</h1>
           <p className="text-sm text-muted-foreground mt-1">{vehicle.make} {vehicle.model}</p>
           <p className="text-xs text-muted-foreground">{vehicle.type} • {vehicle.location}</p>
         </div>
@@ -110,7 +110,7 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Vehicle Information */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Vehicle Information</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
@@ -145,7 +145,7 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Operational Status */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Operational Status</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
@@ -181,7 +181,7 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Service & Maintenance */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Service & Maintenance</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="rounded-lg bg-muted/50 p-3">
@@ -227,7 +227,7 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Equipment */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Equipment & Configuration</h2>
         <div className="space-y-2">
           {vehicle.equipment.map((item, idx) => (

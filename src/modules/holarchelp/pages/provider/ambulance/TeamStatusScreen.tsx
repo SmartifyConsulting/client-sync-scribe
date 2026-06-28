@@ -81,17 +81,17 @@ export default function TeamStatusScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
-        <h1 className="text-3xl font-extrabold mt-2">{t("team.title")}</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">{t("team.title")}</h1>
         <p className="text-sm text-muted-foreground mt-2">Current shift: Friday 08:00 - 20:00</p>
       </header>
 
       {/* Shift Selector */}
       <div className="flex gap-3">
-        <div className="flex-1 rounded-lg border bg-card p-3">
+        <div className="flex-1 rounded-xl border border-border bg-card p-3">
           <p className="text-sm font-medium">Current Shift ▼</p>
         </div>
-        <div className="flex-1 rounded-lg border bg-card p-3">
+        <div className="flex-1 rounded-xl border border-border bg-card p-3">
           <p className="text-sm font-medium">View Assignments ▼</p>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function TeamStatusScreen() {
         {shiftGroups.map((group) => (
           <div key={group.name}>
             {/* Shift Group Header */}
-            <div className="rounded-lg border-2 bg-primary/10 border-primary/40 p-4 mb-3">
+            <div className="rounded-xl border bg-primary/10 border-primary/40 p-4 mb-3">
               <div className="flex items-center justify-between">
                 <h2 className="font-bold text-lg">{group.name} ({group.time})</h2>
                 <span className="font-semibold text-muted-foreground">{group.members.length} members</span>
@@ -116,7 +116,7 @@ export default function TeamStatusScreen() {
                 const isOnDuty = !!shift && shift.status !== "off_shift";
 
                 return (
-                  <div key={idx} className="rounded-lg border bg-card p-3 flex items-center justify-between">
+                  <div key={idx} className="rounded-xl border border-border bg-card p-3 flex items-center justify-between">
                     <div className="flex-1">
                       <p className="font-semibold">{memberName}</p>
                       <p className={`text-sm ${member?.role ? roleColors[member.role.toLowerCase()] : roleColors.default}`}>
@@ -141,7 +141,7 @@ export default function TeamStatusScreen() {
       </div>
 
       {/* Team Summary */}
-      <div className="rounded-lg border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="font-bold mb-4">Team Summary</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="rounded-lg bg-success/10 p-3">

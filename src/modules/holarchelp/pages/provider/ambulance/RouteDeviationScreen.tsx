@@ -65,10 +65,10 @@ export default function RouteDeviationScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
-          <h1 className="text-2xl font-extrabold">Route Deviation</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Route Deviation</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Monitor when ambulances deviate from authorized dispatch routes.
           </p>
@@ -77,7 +77,7 @@ export default function RouteDeviationScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             High Deviation
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">
@@ -85,7 +85,7 @@ export default function RouteDeviationScreen() {
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Medium Deviation
           </p>
           <p className="mt-1 text-2xl font-bold text-warning">
@@ -93,7 +93,7 @@ export default function RouteDeviationScreen() {
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total Events
           </p>
           <p className="mt-1 text-2xl font-bold">{DEVIATION_DATA.length}</p>

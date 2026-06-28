@@ -28,8 +28,8 @@ export default function VehicleUtilisationScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Fleet Analytics</p>
-        <h1 className="text-3xl font-extrabold mt-2">Vehicle Utilisation</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Analytics</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Utilisation</h1>
         <p className="text-sm text-muted-foreground mt-2">Monitor fleet usage, efficiency, and costs</p>
       </header>
 

@@ -156,8 +156,8 @@ export default function FleetPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Operations</p>
-        <h1 className="text-3xl font-extrabold">Fleet Management</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Fleet Management</h1>
         <p className="text-sm text-muted-foreground mt-2">
           {stats.total} vehicles total • {stats.available} available • {stats.assigned} in-service • {stats.maintenance} maintenance
         </p>
@@ -180,19 +180,19 @@ export default function FleetPage() {
 
       {/* Fleet Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Average Mileage</p>
           <p className="text-2xl font-bold mt-1">{stats.avgMileage.toLocaleString()} km</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Fleet Age</p>
           <p className="text-2xl font-bold mt-1">3.2 years</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Maintenance Overdue</p>
           <p className={`text-2xl font-bold mt-1 ${stats.overdue > 0 ? "text-destructive" : "text-success"}`}>{stats.overdue}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Next 30 Days</p>
           <p className="text-2xl font-bold mt-1">{rows.filter(r => {
             const days = calculateDaysUntilService(r.next_service_date);

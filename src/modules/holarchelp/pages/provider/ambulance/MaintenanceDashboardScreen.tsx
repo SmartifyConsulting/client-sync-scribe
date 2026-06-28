@@ -69,26 +69,26 @@ export default function MaintenanceDashboardScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Fleet Care</p>
-        <h1 className="text-3xl font-extrabold mt-2">Maintenance Dashboard</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Care</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Maintenance Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-2">Track service schedules and vehicle maintenance</p>
       </header>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Pending</p>
           <p className="text-2xl font-bold mt-2 text-warning">{stats.pending}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">In Progress</p>
           <p className="text-2xl font-bold mt-2 text-primary">{stats.inProgress}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Overdue</p>
           <p className="text-2xl font-bold mt-2 text-destructive">{stats.overdue}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Total Cost</p>
           <p className="text-2xl font-bold mt-2">${stats.totalCost.toLocaleString()}</p>
         </div>
@@ -97,7 +97,7 @@ export default function MaintenanceDashboardScreen() {
       {/* Maintenance Items */}
       <div className="space-y-3">
         {MOCK_MAINTENANCE.map((item) => (
-          <div key={item.id} className="rounded-lg border bg-card p-4">
+          <div key={item.id} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-start gap-3">
                 {getStatusIcon(item.status)}

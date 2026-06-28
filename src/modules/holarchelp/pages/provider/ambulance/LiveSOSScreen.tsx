@@ -115,8 +115,8 @@ export default function LiveSOSScreen() {
             <HeartPulse className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("liveSos.subtitle")}</p>
-            <h1 className="text-2xl font-extrabold leading-tight">{t("liveSos.title")}</h1>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("liveSos.subtitle")}</p>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-tight">{t("liveSos.title")}</h1>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -284,7 +284,7 @@ const Stat = ({ label, value, bad, icon: Icon }: { label: string; value: string;
 );
 
 const SectionLabel = ({ children, count }: { children: React.ReactNode; count: number }) => (
-  <div className="flex items-center justify-between pt-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+  <div className="flex items-center justify-between pt-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
     <span>{children}</span>
     <span className="rounded-full bg-muted px-1.5 py-0.5 text-foreground">{count}</span>
   </div>

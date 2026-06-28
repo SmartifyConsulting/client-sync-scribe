@@ -8,8 +8,8 @@ export default function RealTimeMonitoringScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Monitoring</p>
-        <h1 className="text-3xl font-extrabold mt-2">Real-Time Operations</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Monitoring</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Real-Time Operations</h1>
         <p className="text-sm text-muted-foreground mt-2">Live fleet tracking and safety monitoring</p>
       </header>
 
@@ -35,17 +35,17 @@ export default function RealTimeMonitoringScreen() {
       {activeTab === "tracking" && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">Vehicles Online</p>
               <p className="text-2xl font-bold mt-2">6/6</p>
               <p className="text-xs text-success">All GPS connected</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">Avg Speed</p>
               <p className="text-2xl font-bold mt-2">42 km/h</p>
               <p className="text-xs text-muted-foreground">Within limits</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">Fuel Status</p>
               <p className="text-2xl font-bold mt-2">72%</p>
               <p className="text-xs text-success">Good levels</p>
@@ -58,7 +58,7 @@ export default function RealTimeMonitoringScreen() {
               { vehicle: "AMB-002", location: "Highway 101", speed: "68 km/h", fuel: "62%", status: "moving" },
               { vehicle: "AMB-003", location: "Workshop", speed: "0 km/h", fuel: "45%", status: "stopped" },
             ].map((item) => (
-              <div key={item.vehicle} className={`rounded-lg border-2 p-4 ${
+              <div key={item.vehicle} className={`rounded-xl border p-4 ${
                 item.status === "moving" ? "bg-primary/10 border-blue-200" : "bg-muted border-border"
               }`}>
                 <div className="flex items-center justify-between mb-3">
@@ -98,17 +98,17 @@ export default function RealTimeMonitoringScreen() {
       {activeTab === "safety" && (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">Critical Alerts</p>
               <p className="text-2xl font-bold mt-2 text-destructive">2</p>
               <p className="text-xs">Immediate action</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">Safety Events</p>
               <p className="text-2xl font-bold mt-2 text-warning">5</p>
               <p className="text-xs">This week</p>
             </div>
-            <div className="rounded-lg border bg-card p-4">
+            <div className="rounded-xl border border-border bg-card p-4">
               <p className="text-xs text-muted-foreground">Fleet Score</p>
               <p className="text-2xl font-bold mt-2 text-success">92/100</p>
               <p className="text-xs">Excellent safety</p>
@@ -143,7 +143,7 @@ export default function RealTimeMonitoringScreen() {
             ))}
           </div>
 
-          <div className="rounded-lg border bg-card p-4">
+          <div className="rounded-xl border border-border bg-card p-4">
             <h3 className="font-bold mb-3">Safety Event Types Monitored</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               {[

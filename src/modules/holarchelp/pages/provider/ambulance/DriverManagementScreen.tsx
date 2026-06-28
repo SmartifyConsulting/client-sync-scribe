@@ -103,8 +103,8 @@ export default function DriverManagementScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Team Management</p>
-        <h1 className="text-3xl font-extrabold mt-2">Driver & Crew Management</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Team Management</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Driver & Crew Management</h1>
         <p className="text-sm text-muted-foreground mt-2">View and organize all crew members by role</p>
       </header>
 
@@ -137,7 +137,7 @@ export default function DriverManagementScreen() {
               {/* Group Header */}
               <button
                 onClick={() => toggleGroup(role)}
-                className={`w-full rounded-lg border-2 p-4 text-left font-medium transition-all flex items-center justify-between ${
+                className={`w-full rounded-xl border p-4 text-left font-medium transition-all flex items-center justify-between ${
                   isExpanded ? `${colors.bg} ${colors.accent} border-2` : "bg-card border"
                 }`}
               >
@@ -158,7 +158,7 @@ export default function DriverManagementScreen() {
                     <p className="text-sm text-muted-foreground py-4">No members in this group</p>
                   ) : (
                     members.map((member) => (
-                      <div key={member.id} className="rounded-lg border bg-card p-3 space-y-2">
+                      <div key={member.id} className="rounded-xl border border-border bg-card p-3 space-y-2">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-semibold">{member.name}</p>
@@ -186,7 +186,7 @@ export default function DriverManagementScreen() {
       </div>
 
       {/* Info Section */}
-      <div className="rounded-lg border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="font-bold mb-3">How to manage crew</h3>
         <ul className="space-y-2 text-sm">
           <li className="flex items-center gap-2">

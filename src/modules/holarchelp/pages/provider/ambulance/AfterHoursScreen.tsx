@@ -72,10 +72,10 @@ export default function AfterHoursScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
-          <h1 className="text-2xl font-extrabold">After-Hours Vehicle Use</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">After-Hours Vehicle Use</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Track vehicles that are used outside scheduled operating hours.
           </p>
@@ -84,19 +84,19 @@ export default function AfterHoursScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Critical Events
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">{criticalCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             High Risk
           </p>
           <p className="mt-1 text-2xl font-bold text-warning">{highCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total Events
           </p>
           <p className="mt-1 text-2xl font-bold">{HOURS_DATA.length}</p>

@@ -223,7 +223,7 @@ export default function TelematicsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {t("telematics.subtitle")}
           </p>
           <h1 className="flex items-center gap-2 text-xl font-extrabold">

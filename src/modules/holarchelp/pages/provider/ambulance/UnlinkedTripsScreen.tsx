@@ -73,10 +73,10 @@ export default function UnlinkedTripsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
-          <h1 className="text-2xl font-extrabold">Unlinked Trips</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Unlinked Trips</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Detect vehicle movements without an authorized incident, dispatch, or approved purpose.
           </p>
@@ -85,19 +85,19 @@ export default function UnlinkedTripsScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             High Risk Trips
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">{highRiskCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Unauthorized Distance
           </p>
           <p className="mt-1 text-2xl font-bold">{totalDistance.toFixed(1)} km</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total Trips
           </p>
           <p className="mt-1 text-2xl font-bold">{TRIPS_DATA.length}</p>

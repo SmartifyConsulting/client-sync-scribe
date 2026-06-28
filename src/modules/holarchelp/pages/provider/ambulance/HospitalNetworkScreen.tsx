@@ -58,8 +58,8 @@ export default function HospitalNetworkScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Partnerships</p>
-        <h1 className="text-3xl font-extrabold mt-2">Hospital Network</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Partnerships</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Hospital Network</h1>
         <p className="text-sm text-muted-foreground mt-2">15 partner hospitals in your network</p>
       </header>
 
@@ -155,7 +155,7 @@ export default function HospitalNetworkScreen() {
       </div>
 
       {/* Key Indicators */}
-      <div className="rounded-lg border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="font-bold mb-3">Key indicators</h3>
         <div className="space-y-2 text-sm">
           <div>

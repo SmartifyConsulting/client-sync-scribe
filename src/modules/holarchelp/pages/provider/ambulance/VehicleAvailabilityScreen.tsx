@@ -44,8 +44,8 @@ export default function VehicleAvailabilityScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Fleet Operations</p>
-        <h1 className="text-3xl font-extrabold mt-2">Vehicle Availability</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Availability</h1>
         <p className="text-sm text-muted-foreground mt-2">View upcoming availability and schedule assignments</p>
       </header>
 
@@ -55,7 +55,7 @@ export default function VehicleAvailabilityScreen() {
           <div
             key={slot.vehicleCode}
             onClick={() => setSelectedVehicle(slot.vehicleCode)}
-            className={`rounded-lg border-2 p-4 cursor-pointer transition-all ${
+            className={`rounded-xl border p-4 cursor-pointer transition-all ${
               selectedVehicle === slot.vehicleCode ? "border-primary bg-primary/5" : "border-border"
             }`}
           >
@@ -104,17 +104,17 @@ export default function VehicleAvailabilityScreen() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <div className="rounded-lg border bg-card p-4 text-center">
+        <div className="rounded-xl border border-border bg-card p-4 text-center">
           <CheckCircle2 className="h-6 w-6 text-success mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">Available Now</p>
           <p className="text-2xl font-bold mt-1">3</p>
         </div>
-        <div className="rounded-lg border bg-card p-4 text-center">
+        <div className="rounded-xl border border-border bg-card p-4 text-center">
           <Clock className="h-6 w-6 text-warning mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">Available Soon</p>
           <p className="text-2xl font-bold mt-1">2</p>
         </div>
-        <div className="rounded-lg border bg-card p-4 text-center">
+        <div className="rounded-xl border border-border bg-card p-4 text-center">
           <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">In Service</p>
           <p className="text-2xl font-bold mt-1">7</p>

@@ -96,8 +96,8 @@ export default function EmergencyDashboardScreen() {
 
       {/* Header */}
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response</p>
-        <h1 className="text-3xl font-extrabold mt-2">Emergency Operations</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Emergency Response</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Emergency Operations</h1>
         <p className="text-sm text-muted-foreground mt-2">
           {stats.new} new • {stats.active} active • {stats.critical} critical
         </p>
@@ -105,15 +105,15 @@ export default function EmergencyDashboardScreen() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">New Requests</p>
           <p className="text-2xl font-bold mt-2 text-destructive">{stats.new}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Active Operations</p>
           <p className="text-2xl font-bold mt-2 text-success">{stats.active}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Critical Incidents</p>
           <p className="text-2xl font-bold mt-2 text-warning">{stats.critical}</p>
         </div>
@@ -139,7 +139,7 @@ export default function EmergencyDashboardScreen() {
         {filteredIncidents.map((incident) => {
           const config = STATUS_CONFIG[incident.status];
           return (
-            <div key={incident.id} className={`rounded-lg border-2 p-4 ${config.bg}`} style={{ borderColor: config.color }}>
+            <div key={incident.id} className={`rounded-xl border p-4 ${config.bg}`} style={{ borderColor: config.color }}>
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
