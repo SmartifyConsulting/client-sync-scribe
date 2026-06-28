@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Barka da safiya",
+    "greetingAfternoon": "Barka da rana",
+    "greetingEvening": "Barka da yamma",
+    "subtitle": "Ga abin da ke faruwa a aikinka yau,",
+    "totalPatients": "Jimillar Marasa Lafiya",
+    "thisWeek": "Wannan Mako",
+    "doctorRating": "Ƙimar Likita",
+    "noRatings": "Babu ƙima tukuna",
+    "vulaVouchers": "Vula Vouchers",
+    "myRoundTables": "Tebura Na Masu Zagayowa",
+    "searchRoundTable": "Nemo majinyaci don fara teburi...",
+    "noPatientsFound": "Ba a sami majinyata ba",
+    "todoList": "Jerin Ayyuka",
+    "addTask": "Ƙara aiki...",
+    "active": "Mai aiki",
+    "done": "An gama",
+    "noActiveTasks": "Babu ayyuka masu aiki",
+    "noCompletedTasks": "Babu ayyukan da aka gama",
+    "recentActivity": "Ayyukan Kwanan Nan",
+    "sessionCompleted": "An kammala zama",
+    "documentGenerated": "An samar da takarda",
+    "taskCompleted": "An kammala aiki",
+    "followUpSent": "An aika bibiyya",
+    "gettingStarted": "Farawa",
+    "addFirstPatient": "Ƙara majiyyacinka na farko don farawa",
+    "justNow": "Yanzu kawai"
   }
 }

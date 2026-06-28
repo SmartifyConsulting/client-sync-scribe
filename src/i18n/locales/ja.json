@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "おはようございます",
+    "greetingAfternoon": "こんにちは",
+    "greetingEvening": "こんばんは",
+    "subtitle": "今日の診療所の様子です,",
+    "totalPatients": "患者総数",
+    "thisWeek": "今週",
+    "doctorRating": "医師評価",
+    "noRatings": "まだ評価がありません",
+    "vulaVouchers": "Vulaバウチャー",
+    "myRoundTables": "マイ ラウンドテーブル",
+    "searchRoundTable": "患者を検索してラウンドテーブルを開始...",
+    "noPatientsFound": "患者が見つかりません",
+    "todoList": "To-Doリスト",
+    "addTask": "タスクを追加...",
+    "active": "アクティブ",
+    "done": "完了",
+    "noActiveTasks": "アクティブなタスクなし",
+    "noCompletedTasks": "完了したタスクなし",
+    "recentActivity": "最近のアクティビティ",
+    "sessionCompleted": "セッション完了",
+    "documentGenerated": "ドキュメント生成",
+    "taskCompleted": "タスク完了",
+    "followUpSent": "フォローアップ送信済",
+    "gettingStarted": "はじめに",
+    "addFirstPatient": "最初の患者を追加してください",
+    "justNow": "たった今"
   }
 }

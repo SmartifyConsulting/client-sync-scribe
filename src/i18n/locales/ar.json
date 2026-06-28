@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "صباح الخير",
+    "greetingAfternoon": "مساء الخير",
+    "greetingEvening": "مساء الخير",
+    "subtitle": "إليك ما يحدث في عيادتك اليوم,",
+    "totalPatients": "إجمالي المرضى",
+    "thisWeek": "هذا الأسبوع",
+    "doctorRating": "تقييم الطبيب",
+    "noRatings": "لا توجد تقييمات بعد",
+    "vulaVouchers": "قسائم Vula",
+    "myRoundTables": "موائدي المستديرة",
+    "searchRoundTable": "ابحث عن مريض لبدء مائدة مستديرة...",
+    "noPatientsFound": "لم يتم العثور على مرضى",
+    "todoList": "قائمة المهام",
+    "addTask": "إضافة مهمة...",
+    "active": "نشطة",
+    "done": "منجزة",
+    "noActiveTasks": "لا توجد مهام نشطة",
+    "noCompletedTasks": "لا توجد مهام منجزة",
+    "recentActivity": "النشاط الأخير",
+    "sessionCompleted": "اكتملت الجلسة",
+    "documentGenerated": "تم إنشاء المستند",
+    "taskCompleted": "اكتملت المهمة",
+    "followUpSent": "تم إرسال المتابعة",
+    "gettingStarted": "البدء",
+    "addFirstPatient": "أضف أول مريض لك للبدء",
+    "justNow": "الآن"
   }
 }

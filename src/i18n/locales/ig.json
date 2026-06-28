@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Ụtụtụ ọma",
+    "greetingAfternoon": "Ehihie ọma",
+    "greetingEvening": "Mgbede ọma",
+    "subtitle": "Lee ihe na-eme n'ụlọ ọrụ gị taa,",
+    "totalPatients": "Ndị Ọrịa Niile",
+    "thisWeek": "Izu A",
+    "doctorRating": "Ọkwa Dọkịta",
+    "noRatings": "Enwebeghị ọkwa",
+    "vulaVouchers": "Vula Vouchers",
+    "myRoundTables": "Tebụl Okirikiri M",
+    "searchRoundTable": "Chọọ onye ọrịa ịmalite tebụl okirikiri...",
+    "noPatientsFound": "Achọtaghị ndị ọrịa",
+    "todoList": "Ndepụta Ọrụ",
+    "addTask": "Tinye ọrụ...",
+    "active": "Na-arụ ọrụ",
+    "done": "Emechara",
+    "noActiveTasks": "Enweghị ọrụ na-arụ ọrụ",
+    "noCompletedTasks": "Enweghị ọrụ emechara",
+    "recentActivity": "Ihe Omume Nso Nso A",
+    "sessionCompleted": "Emechara nnọkọ",
+    "documentGenerated": "Emepụtara akwụkwọ",
+    "taskCompleted": "Emechara ọrụ",
+    "followUpSent": "Ezigara nleba anya",
+    "gettingStarted": "Ịmalite",
+    "addFirstPatient": "Tinye onye ọrịa mbụ gị ka ịmalite",
+    "justNow": "Ugbu a"
   }
 }

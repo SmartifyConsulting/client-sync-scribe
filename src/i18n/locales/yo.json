@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Ẹ kaaro",
+    "greetingAfternoon": "Ẹ kaasan",
+    "greetingEvening": "Ẹ kaalẹ",
+    "subtitle": "Eyi ni ohun ti n ṣẹlẹ ni ile-iwosan rẹ loni,",
+    "totalPatients": "Lapapọ Awọn Alaisan",
+    "thisWeek": "Ọsẹ Yi",
+    "doctorRating": "Idiyele Dokita",
+    "noRatings": "Ko si idiyele",
+    "vulaVouchers": "Vula Vouchers",
+    "myRoundTables": "Awọn Tabili Yika Mi",
+    "searchRoundTable": "Wa alaisan lati bẹrẹ tabili yika...",
+    "noPatientsFound": "Ko si alaisan ti a ri",
+    "todoList": "Akojọ Iṣẹ",
+    "addTask": "Fi iṣẹ kun...",
+    "active": "Ti n ṣiṣẹ",
+    "done": "Ti pari",
+    "noActiveTasks": "Ko si iṣẹ ti n ṣiṣẹ",
+    "noCompletedTasks": "Ko si iṣẹ ti o pari",
+    "recentActivity": "Iṣẹ Aipẹ",
+    "sessionCompleted": "Ipade pari",
+    "documentGenerated": "Iwe ti ṣẹda",
+    "taskCompleted": "Iṣẹ pari",
+    "followUpSent": "Atẹle ti firanṣẹ",
+    "gettingStarted": "Bibẹrẹ",
+    "addFirstPatient": "Fi alaisan akọkọ rẹ kun lati bẹrẹ",
+    "justNow": "Bayi"
   }
 }

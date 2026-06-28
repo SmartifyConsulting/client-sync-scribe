@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Доброе утро",
+    "greetingAfternoon": "Добрый день",
+    "greetingEvening": "Добрый вечер",
+    "subtitle": "Вот что происходит в вашей практике сегодня,",
+    "totalPatients": "Всего пациентов",
+    "thisWeek": "На этой неделе",
+    "doctorRating": "Рейтинг врача",
+    "noRatings": "Пока нет оценок",
+    "vulaVouchers": "Ваучеры Vula",
+    "myRoundTables": "Мои круглые столы",
+    "searchRoundTable": "Найти пациента для круглого стола...",
+    "noPatientsFound": "Пациенты не найдены",
+    "todoList": "Список задач",
+    "addTask": "Добавить задачу...",
+    "active": "Активные",
+    "done": "Готово",
+    "noActiveTasks": "Нет активных задач",
+    "noCompletedTasks": "Нет завершённых задач",
+    "recentActivity": "Недавняя активность",
+    "sessionCompleted": "Сессия завершена",
+    "documentGenerated": "Документ создан",
+    "taskCompleted": "Задача выполнена",
+    "followUpSent": "Отправлено напоминание",
+    "gettingStarted": "Начало работы",
+    "addFirstPatient": "Добавьте первого пациента",
+    "justNow": "Только что"
   }
 }

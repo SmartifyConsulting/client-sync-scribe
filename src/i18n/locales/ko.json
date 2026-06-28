@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "좋은 아침입니다",
+    "greetingAfternoon": "좋은 오후입니다",
+    "greetingEvening": "좋은 저녁입니다",
+    "subtitle": "오늘 진료소의 현황입니다,",
+    "totalPatients": "총 환자",
+    "thisWeek": "이번 주",
+    "doctorRating": "의사 평점",
+    "noRatings": "아직 평점 없음",
+    "vulaVouchers": "Vula 바우처",
+    "myRoundTables": "내 라운드 테이블",
+    "searchRoundTable": "라운드 테이블을 시작할 환자 검색...",
+    "noPatientsFound": "환자를 찾을 수 없음",
+    "todoList": "할 일 목록",
+    "addTask": "작업 추가...",
+    "active": "활성",
+    "done": "완료",
+    "noActiveTasks": "활성 작업 없음",
+    "noCompletedTasks": "완료된 작업 없음",
+    "recentActivity": "최근 활동",
+    "sessionCompleted": "세션 완료",
+    "documentGenerated": "문서 생성됨",
+    "taskCompleted": "작업 완료",
+    "followUpSent": "후속 조치 전송",
+    "gettingStarted": "시작하기",
+    "addFirstPatient": "첫 환자를 추가하세요",
+    "justNow": "방금 전"
   }
 }

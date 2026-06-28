@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "सुप्रभात",
+    "greetingAfternoon": "नमस्कार",
+    "greetingEvening": "शुभ संध्या",
+    "subtitle": "आज आपकी प्रैक्टिस में क्या हो रहा है,",
+    "totalPatients": "कुल मरीज़",
+    "thisWeek": "इस सप्ताह",
+    "doctorRating": "डॉक्टर रेटिंग",
+    "noRatings": "अभी कोई रेटिंग नहीं",
+    "vulaVouchers": "वुला वाउचर",
+    "myRoundTables": "मेरे राउंड टेबल",
+    "searchRoundTable": "राउंड टेबल शुरू करने के लिए मरीज़ खोजें...",
+    "noPatientsFound": "कोई मरीज़ नहीं मिला",
+    "todoList": "कार्य सूची",
+    "addTask": "कार्य जोड़ें...",
+    "active": "सक्रिय",
+    "done": "पूर्ण",
+    "noActiveTasks": "कोई सक्रिय कार्य नहीं",
+    "noCompletedTasks": "कोई पूर्ण कार्य नहीं",
+    "recentActivity": "हाल की गतिविधि",
+    "sessionCompleted": "सत्र पूर्ण",
+    "documentGenerated": "दस्तावेज़ बनाया",
+    "taskCompleted": "कार्य पूर्ण",
+    "followUpSent": "फॉलो-अप भेजा",
+    "gettingStarted": "शुरू करें",
+    "addFirstPatient": "शुरू करने के लिए अपना पहला मरीज़ जोड़ें",
+    "justNow": "अभी"
   }
 }

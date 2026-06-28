@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Καλημέρα",
+    "greetingAfternoon": "Καλό απόγευμα",
+    "greetingEvening": "Καλησπέρα",
+    "subtitle": "Αυτά συμβαίνουν στο ιατρείο σας σήμερα,",
+    "totalPatients": "Σύνολο ασθενών",
+    "thisWeek": "Αυτή την εβδομάδα",
+    "doctorRating": "Αξιολόγηση ιατρού",
+    "noRatings": "Δεν υπάρχουν αξιολογήσεις",
+    "vulaVouchers": "Κουπόνια Vula",
+    "myRoundTables": "Τα στρογγυλά τραπέζια μου",
+    "searchRoundTable": "Αναζήτηση ασθενούς για στρογγυλό τραπέζι...",
+    "noPatientsFound": "Δεν βρέθηκαν ασθενείς",
+    "todoList": "Λίστα εργασιών",
+    "addTask": "Προσθήκη εργασίας...",
+    "active": "Ενεργές",
+    "done": "Ολοκληρωμένες",
+    "noActiveTasks": "Καμία ενεργή εργασία",
+    "noCompletedTasks": "Καμία ολοκληρωμένη εργασία",
+    "recentActivity": "Πρόσφατη δραστηριότητα",
+    "sessionCompleted": "Η συνεδρία ολοκληρώθηκε",
+    "documentGenerated": "Δημιουργήθηκε έγγραφο",
+    "taskCompleted": "Εργασία ολοκληρώθηκε",
+    "followUpSent": "Στάλθηκε παρακολούθηση",
+    "gettingStarted": "Ξεκινήστε",
+    "addFirstPatient": "Προσθέστε τον πρώτο ασθενή σας",
+    "justNow": "Μόλις τώρα"
   }
 }

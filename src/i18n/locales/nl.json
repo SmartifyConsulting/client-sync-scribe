@@ -109,5 +109,33 @@
     "location": "Location",
     "noQualifyingStops": "No qualifying stops",
     "vehicle": "Vehicle"
+  },
+  "doctorDashboard": {
+    "greetingMorning": "Goedemorgen",
+    "greetingAfternoon": "Goedemiddag",
+    "greetingEvening": "Goedenavond",
+    "subtitle": "Dit gebeurt vandaag in uw praktijk,",
+    "totalPatients": "Totaal patiënten",
+    "thisWeek": "Deze week",
+    "doctorRating": "Artsbeoordeling",
+    "noRatings": "Nog geen beoordelingen",
+    "vulaVouchers": "Vula-bonnen",
+    "myRoundTables": "Mijn ronde tafels",
+    "searchRoundTable": "Patiënt zoeken om ronde tafel te starten...",
+    "noPatientsFound": "Geen patiënten gevonden",
+    "todoList": "Takenlijst",
+    "addTask": "Taak toevoegen...",
+    "active": "Actief",
+    "done": "Klaar",
+    "noActiveTasks": "Geen actieve taken",
+    "noCompletedTasks": "Geen voltooide taken",
+    "recentActivity": "Recente activiteit",
+    "sessionCompleted": "Sessie voltooid",
+    "documentGenerated": "Document gegenereerd",
+    "taskCompleted": "Taak voltooid",
+    "followUpSent": "Follow-up verzonden",
+    "gettingStarted": "Aan de slag",
+    "addFirstPatient": "Voeg uw eerste patiënt toe",
+    "justNow": "Zojuist"
   }
 }
