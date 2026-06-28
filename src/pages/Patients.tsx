@@ -51,6 +51,7 @@ import { isSamplePatient } from "@/lib/samplePatients";
 
 
 export default function Patients({ hideHeader = false }: { hideHeader?: boolean }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
