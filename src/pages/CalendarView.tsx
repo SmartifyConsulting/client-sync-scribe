@@ -629,7 +629,7 @@ export default function CalendarView() {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Book
+                {t("calendar.book")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
