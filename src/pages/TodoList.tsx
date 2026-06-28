@@ -443,7 +443,7 @@ export default function TodoList() {
               <div className="flex gap-1">
                 {(["low", "medium", "high"] as const).map((p) => (
                   <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
-                    {priorityLabels[p]}
+                    {t(priorityKey[p])}
                   </button>
                 ))}
               </div>
@@ -538,13 +538,13 @@ export default function TodoList() {
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <button className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80", priorityColors[todo.priority])}>
-                                        <Flag className="h-4 w-4" />{priorityLabels[todo.priority]}
+                                        <Flag className="h-4 w-4" />{t(priorityKey[todo.priority])}
                                       </button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="start">
                                       {(["low", "medium", "high"] as const).map((p) => (
                                         <DropdownMenuItem key={p} onClick={() => updatePriority(todo.id, p)} className={cn("gap-2", todo.priority === p && "bg-accent")}>
-                                          <Flag className={cn("h-3 w-3", p === "high" && "text-destructive", p === "medium" && "text-warning", p === "low" && "text-muted-foreground")} />{priorityLabels[p]}
+                                          <Flag className={cn("h-3 w-3", p === "high" && "text-destructive", p === "medium" && "text-warning", p === "low" && "text-muted-foreground")} />{t(priorityKey[p])}
                                         </DropdownMenuItem>
                                       ))}
                                     </DropdownMenuContent>
