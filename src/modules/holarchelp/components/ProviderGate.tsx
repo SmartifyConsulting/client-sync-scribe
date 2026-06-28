@@ -62,7 +62,7 @@ export function useProviderAccess() {
     })();
   }, [user, authLoading]);
 
-  return { providerType, providerId, loading };
+  return { providerType, providerId, loading, userId: user?.id ?? null };
 }
 
 export function ProviderGate({ children }: { children: React.ReactNode }) {
