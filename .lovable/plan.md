@@ -1,92 +1,58 @@
 ## Goal
+1. Make every "Primary Language" / "Language" dropdown in the app show the same full list of 25 languages used by the top-right flag switcher (including Igbo, Hausa, Yoruba, Shona, isiZulu, isiXhosa, Kiswahili, Afrikaans, etc.).
+2. Make the entire UI (headings, labels, buttons, menus, table headers, dialog titles) actually re-render in the selected language — not just a handful of nav items.
 
-Tighten the Emergency Responder (Ambulance) portal so it matches the density and accordion patterns used in the Doctor and Patient profiles, consolidate "Admin" navigation, make hospital pickers respect real availability, and wire the Hospital Network screen to the live database.
+## Part 1 — Unify the language list (small, low-risk)
 
-## 1. Compact screen styling (parity with Doctor profile)
+Replace the three divergent language lists with one source of truth: `SUPPORTED_LANGUAGES` from `src/i18n/index.ts` (25 langs, includes Igbo/Hausa/Yoruba/Shona/Zulu/Xhosa/Swahili/Afrikaans/Arabic/Hebrew/etc.).
 
-Apply to every screen under `src/modules/holarchelp/pages/provider/ambulance/*` and `src/modules/holarchelp/pages/provider/AdministratorsScreen.tsx`:
+Files to update:
+- `src/lib/languages.ts` — re-export `LANGUAGES` derived from `SUPPORTED_LANGUAGES` (`{ code, name }`). Keep `COMMON_SPECIALTIES` untouched.
+- `src/pages/MyPractice.tsx` — delete the local `LANGUAGES` array (lines 120–149); import from `@/lib/languages`. The Primary Language `<Select>` (line ~1222) then renders all 25 options.
+- `src/features/patients/components/PatientDetailsEditor.tsx` — already imports from `@/lib/languages`, so it picks up the new list automatically.
+- `src/pages/patient/MyDoctors.tsx` — same, no change needed beyond the shared list expanding.
 
-- Page header: replace `text-3xl font-extrabold` / oversized headers with the doctor-profile pattern — `text-2xl font-semibold tracking-tight` + `text-sm text-muted-foreground` subtitle in a `space-y-1` block.
-- Outer wrapper: `space-y-4` (was `space-y-6`).
-- Card chrome: `rounded-xl border border-border bg-card shadow-sm`, `CardHeader` `py-3`, `CardContent` `pt-0 space-y-3`.
-- Typography: body `text-sm`, secondary `text-xs`, KPI numbers `text-lg font-semibold`.
-- Rows: `py-2` not `py-4`; icons `h-4 w-4`.
-- Buttons default `size="sm"`.
+Result: Igbo, Hausa, Yoruba, Shona (and the rest) appear in every Primary Language picker.
 
-## 2. Standardized accordion pattern
+## Part 2 — Make the whole UI translate when the flag changes
 
-Reuse the doctor/patient profile pattern (`src/pages/MyPractice.tsx` line 362-398):
+Today only a subset of strings go through `t()`. Everything else is hardcoded English, so switching languages looks like nothing happened. The fix is a systematic sweep, done in priority order so the user sees change immediately:
 
-```tsx
-<Accordion type="single" collapsible className="space-y-3">
-  <AccordionItem value="..." className="rounded-xl border border-primary bg-card shadow-sm">
-    <AccordionTrigger className="px-4 py-3 hover:no-underline">…</AccordionTrigger>
-    <AccordionContent className="px-4 pb-4 space-y-3">…</AccordionContent>
-  </AccordionItem>
-</Accordion>
-```
+### 2a. Expand the shared UI dictionary
+Grow `src/i18n/uiTranslations.ts` with keys for the chrome that appears on every screen, in all 25 languages (machine-translated baseline, English fallback retained):
+- Sidebar / TopBar items not yet keyed
+- Common buttons: Save, Cancel, Delete, Edit, Add, Send, Search, Close, Submit, Back, Next, Continue, Upload, Download, Print, Share
+- Common labels: Name, Email, Phone, Address, Date, Time, Status, Notes, Description, Type, Category, Actions, Loading…, No data
+- Common headings: Settings, Profile, Dashboard, Overview, Details, History, Documents, Messages, Notifications
+- Auth screen: Sign in, Sign up, Create your free account, Forgot password, Password, Email, Show/Hide password
+- Toast/empty states: "No results", "Saved", "Updated", "Deleted", error/success generics
 
-Convert these to that exact pattern, collapsed by default:
+### 2b. Wire `t()` into the high-traffic screens
+Sweep these screens to replace literal strings with `t("namespace.key")`:
+- `src/components/layout/*` (Sidebar, TopBar, ProviderSidebar, PatientSidebar) — fully
+- `src/pages/Dashboard.tsx`, `src/pages/Settings.tsx`, `src/pages/Profile.tsx`, `src/pages/MyPractice.tsx` (tab labels + section headings + Primary Language label)
+- `src/pages/Auth.tsx`, `src/pages/Landing.tsx`, `src/pages/ForgotPassword.tsx`, `src/pages/ResetPassword.tsx`
+- `src/pages/Patients.tsx`, `src/pages/PatientProfile.tsx` (tab labels + buttons)
+- `src/pages/patient/PatientDashboard.tsx`, `MyDetails.tsx`, `MyDoctors.tsx`, `MyRewards.tsx`, `PatientDocuments.tsx`
+- `src/pages/doctor/*` (page headers + tab labels + table headers)
+- `src/modules/holarchelp/pages/provider/**` — section headers, tab labels, buttons (Hospital, Ambulance, ER portals)
+- Common shared components: `PageHeader`, empty-state, confirm dialogs, `ProvidersScreen` tabs (Doctors/Nurses/ER), `AffiliatedHospitalsScreen`
 
-- **Fleet Operations Vehicles** (`FleetPage.tsx` / `FleetOperationsScreen.tsx`) — wrap the vehicles list in one accordion item titled "Vehicles ({count})". KPI summary stays above the accordion.
-- **Team Status** (`TeamStatusScreen.tsx`) — rename to **Shift Teams**, wrap the team roster in one accordion item "Shift Teams ({count})". Update sidebar label `nav.teamStatus` → `nav.shiftTeams` and i18n strings (English fallback for the 25 locales).
+For deeply nested content (clinical free-text, AI output, user-entered data) we will NOT translate — only chrome (labels, buttons, headings, tab titles, table headers, menu items, toasts).
 
-## 3. Admin consolidation
+### 2c. Force a re-render on language change
+- Verify `i18n.changeLanguage` triggers re-render. `react-i18next` does this automatically when components call `useTranslation()`. The reason screens don't update today is that they don't call `t()` at all — Part 2b fixes that.
+- Keep the `applyLang` handler in `src/i18n/index.ts` (sets `--lang-scale`, `dir`, `lang`) — already correct.
 
-- Sidebar (`src/components/layout/ProviderSidebar.tsx`):
-  - Rename `nav.userAdmin` value to **Admin**.
-  - Remove the standalone **Hospital Network** entry from `ambulanceNav`.
-- `AdministratorsScreen.tsx` becomes a tabbed shell:
-  1. **Users** — current member list/dialog.
-  2. **Hospital Network** — renders `HospitalNetworkScreen` inline.
-- Route `/provider/ambulance/hospital-network` redirects to `/provider/ambulance/admins?tab=hospital-network`; the tab reads `?tab=` from the URL.
-- Page title: "Admin" (replacing "User Management").
+### 2d. Persistence stays as-is
+`LanguageSwitcher` already saves `profiles.preferred_language` and rehydrates on profile switch — no change.
 
-## 4. Remove "Affiliate" and "Trauma" badges
+## Out of scope
+- Translating user-entered clinical content, AI narrations, patient notes, document bodies.
+- Translating server-side / edge-function output (emails, PDFs).
+- Adding new languages beyond the 25 already in `SUPPORTED_LANGUAGES`.
 
-Strip every "Affiliated" / "Affiliate" pill, the dotted/colored affiliated ring, and the red **Trauma** badge in:
-
-- `ambulance/HospitalNetworkScreen.tsx` — drop the affiliated filter Select and the trauma pill from each card. Keep search + sort.
-- `hospital/ProvidersScreen.tsx`, `ProviderAvailabilityPanel.tsx`, `AffiliatedDoctorsScreen.tsx`, `AffiliatedAmbulancesScreen.tsx`.
-- `ambulance/IncidentManagementScreen.tsx`, `AffiliatedHospitalsScreen.tsx`.
-- `hospital/HospitalSelectionScreen.tsx` — remove any trauma pill rendered on hospital cards.
-
-Underlying `affiliated` / `trauma` fields stay intact — only the badges/filters are removed.
-
-## 5. Wire Hospital Network to the live database
-
-Replace the mock `HOSPITALS` array in `ambulance/HospitalNetworkScreen.tsx` with a Supabase-backed query against `public.holarchelp_hospitals`.
-
-Data flow:
-
-- New hook `src/modules/holarchelp/hooks/useHospitalNetwork.ts`
-  - React Query key: `["hospital-network", { acceptingOnly }]`.
-  - Selects from `holarchelp_hospitals`: `id, name, address, city, province, contact_phone, contact_email, accepting_patients, beds_available, er_status, latitude, longitude`.
-  - Returns rows ordered by `name`.
-- New hook `useAvailableHospitals()` — wraps the above with `acceptingOnly: true` and is shared with every hospital selector (`hospital/HospitalSelectionScreen.tsx`, dispatch pickers, ambulance combobox).
-- Distance/ETA columns: computed client-side from the provider's current geolocation (already available via `useProviderAccess` location, fall back to `—` when unknown). No mock numbers.
-- Wait time: read `beds_available` and `er_status` instead of mocked `wait`. Show "Accepting" / "Diverting" / "Closed" chip derived from `er_status`.
-- Search filter runs against `name`, `city`, `address`.
-- Sort options: "Name" and "Distance" (only when geolocation present).
-- Loading skeletons + empty state ("No hospitals available right now") use existing shadcn `Skeleton`.
-
-## 6. Availability-gated hospital selection
-
-Every selector lists hospitals only when `accepting_patients = true` (and `er_status != 'closed'`):
-
-- `hospital/HospitalSelectionScreen.tsx` — switch to `useAvailableHospitals()`.
-- Any other Select/Combobox listing hospitals (search `holarchelp_hospitals` queries) refactored onto the shared hook.
-- Hospital Network admin tab itself shows all rows but greys non-accepting ones and labels them; selection contexts hide them entirely.
-
-## 7. Workflow linkage
-
-- Toggling `accepting_patients` from the Hospital Network admin tab invalidates `["hospital-network"]` so dispatch pickers refresh immediately.
-- Users tab mutations invalidate `["provider-members", providerId]` (used by Shift Teams + Driver Management).
-- Vehicle status changes inside the Fleet Operations accordion invalidate `["ambulance-fleet", providerId]` (consumed by `EmergencyDashboardScreen`).
-
-## Technical notes
-
-- New files: `src/modules/holarchelp/hooks/useHospitalNetwork.ts`, `useAvailableHospitals.ts`.
-- Edited files (~20): sidebar, routes-provider, AdministratorsScreen, HospitalNetworkScreen, TeamStatusScreen, FleetPage/FleetOperationsScreen, all `Affiliated*` screens, `ProvidersScreen`, `ProviderAvailabilityPanel`, `IncidentManagementScreen`, `HospitalSelectionScreen`, locale files.
-- No DB migrations required; `holarchelp_hospitals` already has `accepting_patients`, `er_status`, `beds_available`, contact, and geo columns. RLS is already configured to allow authenticated reads of approved hospitals.
-- No business-logic changes outside the availability filter, cache invalidation hooks, and the mock→DB switch.
+## Acceptance
+- Open Profile / My Practice → Primary Language dropdown lists 25 options including Igbo, Hausa, Yoruba, Shona, isiZulu, isiXhosa, Kiswahili, Afrikaans.
+- Click the flag (top-right) → pick Yorùbá → sidebar, top bar, page headers, tab labels, common buttons, settings labels, auth screen all switch to Yorùbá. English remains only for free-text content explicitly out of scope.
+- Refresh the page → language persists. Switch profile → adopts that profile's saved language.
