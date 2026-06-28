@@ -17,7 +17,7 @@ import { RouteTipHost } from "@/components/RouteTipHost";
 
 
 export function PatientAppLayout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { isBlocked, daysRemaining, loading } = useSubscriptionGate();
@@ -25,7 +25,7 @@ export function PatientAppLayout() {
   const isSettingsPage = location.pathname.startsWith("/settings");
 
   return (
-    <div className="min-h-screen bg-background flex flex-col overflow-hidden">
+    <div key={i18n.language} className="min-h-screen bg-background flex flex-col overflow-hidden">
       <EarlyReleaseNotice />
 
       {/* Sidebar for tablet/web */}
