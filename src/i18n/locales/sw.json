@@ -250,5 +250,75 @@
     "location": "Mahali",
     "openInMaps": "Fungua kwenye Ramani",
     "openConsole": "Fungua koni"
+  },
+  "myPractice": {
+    "tabPractice": "Mazoezi Yangu",
+    "tabReferrals": "Marejeleo",
+    "tabCredentials": "Vipimo",
+    "tabRewards": "Zawadi Zangu",
+    "aboutMe": "Kuhusu Mimi",
+    "aboutMeHelper": "Shiriki tangazo fupi kuhusu mazoezi yako na mbinu zako. Wagonjwa huona hii wanapotazama wasifu wako. Upeo wa maneno 600.",
+    "wordCount": "{{count}} / maneno 600",
+    "save": "Hifadhi"
+  },
+  "patientRewards": {
+    "progressTitle": "Maendeleo kuelekea Hatua Inayofuata",
+    "progressLabel": "{{current}} / {{target}} Vulas hadi \"{{milestone}}\"",
+    "moreToGo": "zaidi {{count}} zimeachwa!",
+    "recentRewards": "Zawadi za Hivi Karibuni",
+    "empty": "Hakuna zawadi bado. Anza safari yako ya afya!"
+  },
+  "todo": {
+    "addNewTask": "Ongeza Kazi Mpya",
+    "tapToRecord": "Gusa kurekodi",
+    "transcribing": "Inatafsiri...",
+    "aiProcessing": "Inachakata AI...",
+    "listening": "Inasikiliza... itasimama baada ya muda mfupi",
+    "typeTask": "Au andika kazi yako hapa...",
+    "add": "Ongeza",
+    "priority": "Kipaumbele:",
+    "low": "Chini",
+    "medium": "Kati",
+    "high": "Juu",
+    "aiProcess": "Mchakato wa AI",
+    "active": "Inafanya kazi",
+    "completed": "Imekamilika",
+    "all": "Zote",
+    "approve": "Idhinisha",
+    "noMatchingPatient": "Hakuna mgonjwa anayelingana aliyepatikana"
+  },
+  "documents": {
+    "title": "Nyaraka",
+    "tabDocuments": "Nyaraka",
+    "tabTemplates": "Violezo",
+    "tabHeaderFooter": "Header & Footer",
+    "tabContent": "Violezo vya Maudhui",
+    "contentHelper": "Unda violezo vya maudhui ya hati (header/footer zitatumiwa kutoka kwa mpangilio wako uliochaguliwa)",
+    "newContent": "Kiolezo kipya cha Maudhui",
+    "searchContent": "Tafuta violezo vya maudhui...",
+    "createTemplate": "Unda Kiolezo",
+    "patientDocuments": "Nyaraka za Mgonjwa",
+    "searchDocuments": "Tafuta nyaraka...",
+    "letterhead": "Letterhead:",
+    "letterheadHeaderFooter": "Header na Footer",
+    "letterheadDefault": "Chaguo-msingi"
+  },
+  "roundTablesMeta": {
+    "noteOne": "dokezo {{count}}",
+    "noteOther": "madokezo {{count}}",
+    "lastActivity": "Shughuli ya mwisho {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Usaidizi wa Dharura",
+    "helpAlerted": "Usaidizi utaearifiwa mara moja",
+    "ackHeading": "KABLA YA KUTUMIA SOS, TAFADHALI THIBITISHA:",
+    "ackA": "Usaidizi wa SOS hutolewa kwa jitihada bora zaidi na huwezi kuhakikisha mwitikio wa dharura.",
+    "ackB": "SOS inategemea mtandao, hali ya kifaa, ufikiaji wa eneo, na watoa huduma watu wengine.",
+    "ackC": "SOS inahitaji ruhusa za eneo, nishati ya betri, na muunganisho wa intaneti au simu.",
+    "sosLabel": "SOS",
+    "tapForHelp": "GUSA KWA MSAADA",
+    "footerCaption": "Kugonga SOS hushiriki eneo lako na kuwaripoti watu wako wa dharura.",
+    "manageContacts": "Dhibiti watu wa dharura",
+    "viewHistory": "Tazama historia ya matukio"
   }
 }

@@ -250,5 +250,75 @@
     "location": "Indawo",
     "openInMaps": "Vula ku-Amamephu",
     "openConsole": "Vula ikhonsoli"
+  },
+  "myPractice": {
+    "tabPractice": "Umkhuba Wami",
+    "tabReferrals": "Uku_d_lulisa",
+    "tabCredentials": "Iziqu",
+    "tabRewards": "Imivuzo Yami",
+    "aboutMe": "Mayelana Nami",
+    "aboutMeHelper": "Yabelana ngokufingqiweyo ngomkhuba wakho nendlela osabela ngayo. Iziguli zikubona lokhu lapho zibuka iphrofayela yakho. Amagama angu-600.",
+    "wordCount": "{{count}} / 600 amagama",
+    "save": "Gcina"
+  },
+  "patientRewards": {
+    "progressTitle": "Inqubekelaphambili kuze kube yisigaba esilandelayo",
+    "progressLabel": "{{current}} / {{target}} Vulas ku-'{{milestone}}'",
+    "moreToGo": "{{count}} okunye okusele!",
+    "recentRewards": "Imivuzo yakamuva",
+    "empty": "Akukho mvuzo okwamanje. Qala uhambo lwakho lwezempilo!"
+  },
+  "todo": {
+    "addNewTask": "Faka umsebenzi omusha",
+    "tapToRecord": "Thepha ukuze urekhode",
+    "transcribing": "Iyarekhoda...",
+    "aiProcessing": "I-AI iyacubungula...",
+    "listening": "Iyalalela... iyama kungakapheli isikhashana",
+    "typeTask": "Noma thayipha umsebenzi wakho lapha...",
+    "add": "Faka",
+    "priority": "Ububanzi:",
+    "low": "Phansi",
+    "medium": "Phakathi",
+    "high": "Phezulu",
+    "aiProcess": "I-AI Iyakucubungula",
+    "active": "Iyasebenza",
+    "completed": "Iqediwe",
+    "all": "Konke",
+    "approve": "Vumela",
+    "noMatchingPatient": "Awekho amaphasienthi afanayo atholiwe"
+  },
+  "documents": {
+    "title": "Imibhalo",
+    "tabDocuments": "Imibhalo",
+    "tabTemplates": "Izifanekiso",
+    "tabHeaderFooter": "Inhloko Nonqamulayo",
+    "tabContent": "Izifanekiso Zokuqukethwe",
+    "contentHelper": "Dala izifanekiso zokuqukethwe kwemibhalo (inhloko/unqamulayo izosetshenziswa kusukela kuhlelo lwakho olukhethiwe)",
+    "newContent": "Ifanekiso Lokuqukethwe Okusha",
+    "searchContent": "Sesha izifanekiso zokuqukethwe...",
+    "createTemplate": "Dala Ifanekiso",
+    "patientDocuments": "Imibhalo yesiguli",
+    "searchDocuments": "Sesha imibhalo...",
+    "letterhead": "I-Letterhead:",
+    "letterheadHeaderFooter": "Inhloko Nonqamulayo",
+    "letterheadDefault": "Okujwayelekile"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} inothi",
+    "noteOther": "{{count}} amanye amano",
+    "lastActivity": "Umsebenzi wokugcina {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Usizo lwesimo esiphuthumayo",
+    "helpAlerted": "Usizo luzokwaziswa ngokushesha",
+    "ackHeading": "PHAMBILI KOKUSETSHENZISWA KWE-SOS, SICELA UVUMELE:",
+    "ackA": "Usizo lwe-SOS lunikezwa ngesisekelo esingcono kakhulu futhi alukwazi ukuqinisekisa ukusabela okuphuthumayo.",
+    "ackB": "I-SOS incike kunethiwekhi, isimo sedivayisi, ukufinyelela indawo, nabasindisi bangaphandle.",
+    "ackC": "I-SOS idinga izimvume zendawo, amandla ebhethri, kanye nokuxhumana kwe-inthanethi noma iselula.",
+    "sosLabel": "SOS",
+    "tapForHelp": "THEPHA UKUZE USIZE",
+    "footerCaption": "Ukuthepha i-SOS kusabelana ngendawo yakho futhi kwazisa abathintwayo bakho abaphuthumayo.",
+    "manageContacts": "Phatha abathintwayo bakho abaphuthumayo",
+    "viewHistory": "Buka umlando wezenzakalo"
   }
 }

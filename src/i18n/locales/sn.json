@@ -250,5 +250,75 @@
     "location": "Nzvimbo",
     "openInMaps": "Vhura muMepu",
     "openConsole": "Vhura koni"
+  },
+  "myPractice": {
+    "tabPractice": "Distare yangu",
+    "tabReferrals": "Zvirevo",
+    "tabCredentials": "Zvitupa",
+    "tabRewards": "Mibairo Yangu",
+    "aboutMe": "Ndafa Neni",
+    "aboutMeHelper": "Gogodza pfupi nezve distare yako ne nzira yako. Varwere vanoiona pavanotarisa purofai rako. Mabhuku mazhinji mazana matanhatu.",
+    "wordCount": "{{count}} / 600 mazwi",
+    "save": "Rongedza"
+  },
+  "patientRewards": {
+    "progressTitle": "Kufambira Kwekupedzisira Kwekugona",
+    "progressLabel": "{{current}} / {{target}} Vulas ku \"{{milestone}}\"",
+    "moreToGo": "{{count}} zvimwe zvakasara!",
+    "recentRewards": "Mibairo Yachangobva Kuzoitika",
+    "empty": "Hapana mibairo kusvika zvino. Kutanga rwendo rwehutano hwako!"
+  },
+  "todo": {
+    "addNewTask": "Wedzera Basa Idzva",
+    "tapToRecord": "Dzvanya kunyora",
+    "transcribing": "Zviri kunyorwa...",
+    "aiProcessing": "AI iri kugadzirisa...",
+    "listening": "Kuteerera... kunomira mushure mekuona kuri pakati",
+    "typeTask": "Kana kuti nyora basa rako pano...",
+    "add": "Wedzera",
+    "priority": "Chikamu:",
+    "low": "Pasi",
+    "medium": "Pakati",
+    "high": "Pamusoro",
+    "aiProcess": "AI Process",
+    "active": "Zviri Kuita",
+    "completed": "Zvapedzwa",
+    "all": "Zvose",
+    "approve": "bvumidza",
+    "noMatchingPatient": "Hapana murwere anowirirana akaonekwa"
+  },
+  "documents": {
+    "title": "Zvinyorwa",
+    "tabDocuments": "Zvinyorwa",
+    "tabTemplates": "Zvimiro",
+    "tabHeaderFooter": "Musoro & Tsoka",
+    "tabContent": "Zvimiro Zvemukati",
+    "contentHelper": "Gadzira zvinyorwa zvemukati (musoro/tsoka zvichaiswa kubva mune yako yakasarudzwa marongedzero)",
+    "newContent": "Zvepukati Zvitsva Zvitsva",
+    "searchContent": "Tsvaga zvimiro zvemukati...",
+    "createTemplate": "Gadzira chimiro",
+    "patientDocuments": "Zvinyorwa Zvemurwere",
+    "searchDocuments": "Tsvaga zvinyorwa...",
+    "letterhead": "Musoro wePeji:",
+    "letterheadHeaderFooter": "Musoro neTsoka",
+    "letterheadDefault": "Default"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} chengeta mazwi",
+    "noteOther": "{{count}} zvinyorwa",
+    "lastActivity": "Kugona Kwokupedzisira {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Rubatsiro Rwezvinokurumidza Kuchipindura",
+    "helpAlerted": "Rubatsiro ruchaziviswa pakarepo",
+    "ackHeading": "USATI WAISVIRA SOS, NDAPAPOTA TSANANGURAI:",
+    "ackA": "Rubatsiro rweSOS runopiwa nerugwaro runovimbiswa uye harugoni kuvimbisa kupindura kwemamiriro echimbichimbi.",
+    "ackB": "SOS inoenderana ne network, mamiriro echishandiso, mukana we nzvimbo, nevanozvitsigira vechitatu.",
+    "ackC": "SOS inoda mvumo yenharaunda, simba rebhatiri, uye internet kana nhare yekufonera.",
+    "sosLabel": "SOS",
+    "tapForHelp": "Dzvanya Kubatsirwa",
+    "footerCaption": "Kudzvanya SOS kunogovana nzvimbo yako uye kunozivisa vanobatika newe pakutsigira",
+    "manageContacts": "Gadzira vanobatika pakutsigira",
+    "viewHistory": "Tarisa nhoroondo yemamiriro ezvinhu"
   }
 }

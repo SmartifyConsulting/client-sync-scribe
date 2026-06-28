@@ -250,5 +250,75 @@
     "location": "위치",
     "openInMaps": "지도에서 열기",
     "openConsole": "콘솔 열기"
+  },
+  "myPractice": {
+    "tabPractice": "나의 연습",
+    "tabReferrals": "추천",
+    "tabCredentials": "자격 증명",
+    "tabRewards": "나의 보상",
+    "aboutMe": "자기 소개",
+    "aboutMeHelper": "진료와 접근 방식에 대한 짧은 소개를 공유하세요. 환자는 프로필을 볼 때 이것을 봅니다. 최대 600단어.",
+    "wordCount": "{{count}} / 600 단어",
+    "save": "저장"
+  },
+  "patientRewards": {
+    "progressTitle": "다음 목표까지의 진행 상황",
+    "progressLabel": "{{current}} / {{target}} Vulas \"{{milestone}}\"",
+    "moreToGo": "{{count}} 더 남았습니다!",
+    "recentRewards": "최근 보상",
+    "empty": "아직 보상이 없습니다. 건강 여정을 시작하세요!"
+  },
+  "todo": {
+    "addNewTask": "새 작업 추가",
+    "tapToRecord": "녹음하려면 탭하세요",
+    "transcribing": "전사 중...",
+    "aiProcessing": "AI 처리 중...",
+    "listening": "듣는 중... 잠시 후 중지됩니다.",
+    "typeTask": "또는 여기에 작업을 입력하세요...",
+    "add": "추가",
+    "priority": "우선 순위:",
+    "low": "낮음",
+    "medium": "중간",
+    "high": "높음",
+    "aiProcess": "AI 프로세스",
+    "active": "활성",
+    "completed": "완료됨",
+    "all": "모두",
+    "approve": "승인",
+    "noMatchingPatient": "일치하는 환자를 찾을 수 없습니다."
+  },
+  "documents": {
+    "title": "문서",
+    "tabDocuments": "문서",
+    "tabTemplates": "템플릿",
+    "tabHeaderFooter": "머리글 및 바닥글",
+    "tabContent": "콘텐츠 템플릿",
+    "contentHelper": "문서 콘텐츠 템플릿을 생성합니다 (머리글/바닥글은 선택한 레이아웃에서 적용됩니다)",
+    "newContent": "새 콘텐츠 템플릿",
+    "searchContent": "콘텐츠 템플릿 검색...",
+    "createTemplate": "템플릿 생성",
+    "patientDocuments": "환자 문서",
+    "searchDocuments": "문서 검색...",
+    "letterhead": "편지지:",
+    "letterheadHeaderFooter": "머리글 및 바닥글",
+    "letterheadDefault": "기본값"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} 메모",
+    "noteOther": "{{count}} 메모",
+    "lastActivity": "마지막 활동 {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "긴급 지원",
+    "helpAlerted": "즉시 도움 요청이 전달됩니다",
+    "ackHeading": "SOS를 사용하기 전에 다음을 인정하십시오:",
+    "ackA": "SOS 지원은 최선의 노력으로 제공되며 긴급 대응을 보장할 수 없습니다.",
+    "ackB": "SOS는 네트워크, 장치 상태, 위치 액세스 및 타사 응답자에 따라 달라집니다.",
+    "ackC": "SOS에는 위치 권한, 배터리 전원 및 인터넷 또는 셀룰러 연결이 필요합니다.",
+    "sosLabel": "SOS",
+    "tapForHelp": "도움이 필요하면 탭하세요",
+    "footerCaption": "SOS를 탭하면 위치가 공유되고 비상 연락처에 통지됩니다.",
+    "manageContacts": "비상 연락처 관리",
+    "viewHistory": "사고 기록 보기"
   }
 }

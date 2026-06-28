@@ -250,5 +250,75 @@
     "location": "Ubicación",
     "openInMaps": "Abrir en Mapas",
     "openConsole": "Abrir consola"
+  },
+  "myPractice": {
+    "tabPractice": "Mi Práctica",
+    "tabReferrals": "Referencias",
+    "tabCredentials": "Credenciales",
+    "tabRewards": "Mis Recompensas",
+    "aboutMe": "Sobre Mí",
+    "aboutMeHelper": "Comparte un breve discurso sobre tu práctica y enfoque. Los pacientes lo ven al ver tu perfil. Máximo 600 palabras.",
+    "wordCount": "{{count}} / 600 palabras",
+    "save": "Guardar"
+  },
+  "patientRewards": {
+    "progressTitle": "Progreso al Próximo Hito",
+    "progressLabel": "{{current}} / {{target}} Vulas para \"{{milestone}}\"",
+    "moreToGo": "¡Faltan {{count}}!",
+    "recentRewards": "Recompensas Recientes",
+    "empty": "Aún no hay recompensas. ¡Comienza tu viaje de salud!"
+  },
+  "todo": {
+    "addNewTask": "Añadir Nueva Tarea",
+    "tapToRecord": "Toca para grabar",
+    "transcribing": "Transcribiendo...",
+    "aiProcessing": "Procesando IA...",
+    "listening": "Escuchando... se detiene después de una pausa",
+    "typeTask": "O escribe tu tarea aquí...",
+    "add": "Añadir",
+    "priority": "Prioridad:",
+    "low": "Baja",
+    "medium": "Media",
+    "high": "Alta",
+    "aiProcess": "Proceso IA",
+    "active": "Activo",
+    "completed": "Completado",
+    "all": "Todos",
+    "approve": "Aprobar",
+    "noMatchingPatient": "No se encontró paciente coincidente"
+  },
+  "documents": {
+    "title": "Documentos",
+    "tabDocuments": "Documentos",
+    "tabTemplates": "Plantillas",
+    "tabHeaderFooter": "Encabezado y Pie de Página",
+    "tabContent": "Plantillas de Contenido",
+    "contentHelper": "Crea plantillas de contenido de documentos (el encabezado/pie de página se aplicarán desde tu diseño seleccionado)",
+    "newContent": "Nueva Plantilla de Contenido",
+    "searchContent": "Buscar plantillas de contenido...",
+    "createTemplate": "Crear Plantilla",
+    "patientDocuments": "Documentos del Paciente",
+    "searchDocuments": "Buscar documentos...",
+    "letterhead": "Membrete:",
+    "letterheadHeaderFooter": "Encabezado y Pie de Página",
+    "letterheadDefault": "Por Defecto"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} nota",
+    "noteOther": "{{count}} notas",
+    "lastActivity": "Última actividad {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Asistencia de Emergencia",
+    "helpAlerted": "La ayuda se alertará instantáneamente",
+    "ackHeading": "ANTES DE USAR SOS, POR FAVOR ACUSE RECIBO:",
+    "ackA": "El soporte SOS se proporciona según el mejor esfuerzo posible y no puede garantizar una respuesta de emergencia.",
+    "ackB": "SOS depende de la red, el estado del dispositivo, el acceso a la ubicación y los respondedores de terceros.",
+    "ackC": "SOS requiere permisos de ubicación, energía de la batería y conectividad a Internet o celular.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TOCA PARA PEDIR AYUDA",
+    "footerCaption": "Tocar SOS comparte tu ubicación y notifica a tus contactos de emergencia.",
+    "manageContacts": "Gestionar contactos de emergencia",
+    "viewHistory": "Ver historial de incidentes"
   }
 }

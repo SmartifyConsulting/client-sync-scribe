@@ -250,5 +250,75 @@
     "location": "Wuri",
     "openInMaps": "Bude a Taswira",
     "openConsole": "Bude Console"
+  },
+  "myPractice": {
+    "tabPractice": "My Practice",
+    "tabReferrals": "Ndaurawa",
+    "tabCredentials": "Takaddun shaida",
+    "tabRewards": "Kyautatawata",
+    "aboutMe": "Game da Ni",
+    "aboutMeHelper": "Raba gajeren bayani game da aikinku da tsarin ku. Marasa lafiya suna ganin wannan lokacin da suke duba bayanan ku. Mafi girman kalmomi 600.",
+    "wordCount": "{{count}} / 600 kalmomi",
+    "save": "Ajiye"
+  },
+  "patientRewards": {
+    "progressTitle": "Cigaba zuwa Mataki Na Gaba",
+    "progressLabel": "{{current}} / {{target}} Vulas zuwa \"{{milestone}}\"",
+    "moreToGo": "{{count}} ƙari don zuwa!",
+    "recentRewards": "Kyautatawa Kusa-Kusa",
+    "empty": "Babu kyautatawa tukuna. Fara tafiyar lafiyarku!"
+  },
+  "todo": {
+    "addNewTask": "Ƙara Sabuwar Aiki",
+    "tapToRecord": "Taɓa don yi rikodin",
+    "transcribing": "Yin rikodin...",
+    "aiProcessing": "Amfani da AI...",
+    "listening": "Jini... yana tsayawa bayan ɗan lokaci",
+    "typeTask": "Ko rubuta aikinka anan...",
+    "add": "Ƙara",
+    "priority": "Gagava:",
+    "low": "Rage",
+    "medium": "Tsakiya",
+    "high": "Dauki",
+    "aiProcess": "Amfani da AI",
+    "active": "Aiki",
+    "completed": "An Gama",
+    "all": "Duk",
+    "approve": "Amincewa",
+    "noMatchingPatient": "Babu maras lafiya da ya dace"
+  },
+  "documents": {
+    "title": "Takardu",
+    "tabDocuments": "Takardu",
+    "tabTemplates": "Samfura",
+    "tabHeaderFooter": "Sashi na Sama & Ƙasa",
+    "tabContent": "Samfuran Abun Ciki",
+    "contentHelper": "Ƙirƙiri samfuran abun ciki na takardu (za a yi amfani da sashe na sama/ƙasa daga zaɓin shimfidarku)",
+    "newContent": "Sabuwar Samfurin Abun Ciki",
+    "searchContent": "Bincika samfuran abun ciki...",
+    "createTemplate": "Ƙirƙiri Samfura",
+    "patientDocuments": "Takardun Marasa Lafiya",
+    "searchDocuments": "Bincika takardu...",
+    "letterhead": "Injin takarda:",
+    "letterheadHeaderFooter": "Sashi na Sama da Ƙasa",
+    "letterheadDefault": "Ofishin"
+  },
+  "roundTablesMeta": {
+    "noteOne": "lura {{count}}",
+    "noteOther": "lura {{count}}",
+    "lastActivity": "Ayyukan ƙarshe {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Taimakon Gaggawa",
+    "helpAlerted": "Za a sanar da taimako nan take",
+    "ackHeading": "KAFIN AMFANI DA SOS, DA FATAN ZAA AMINCE:",
+    "ackA": "Ana samar da taimakon SOS akan tushen mafi kyawun ƙoƙari kuma ba zai iya tabbatar da martanin gaggawa ba.",
+    "ackB": "SOS ya dogara da hanyar sadarwa, matsayin na'ura, damar samun wuri, da masu amsa ta ɓangare na uku.",
+    "ackC": "SOS yana buƙatar izinin wuri, ikon baturi, da haɗin intanet ko na salula.",
+    "sosLabel": "SOS",
+    "tapForHelp": "TAFA DON TAIKO",
+    "footerCaption": "Taɓa SOS yana raba wurinku kuma yana sanar da lambobin sadarwar ku na gaggawa.",
+    "manageContacts": "Gudanar da lambobin sadarwar gaggawa",
+    "viewHistory": "Duba tarihin al'amura"
   }
 }

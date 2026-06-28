@@ -250,5 +250,75 @@
     "location": "Lokalizacja",
     "openInMaps": "Otwórz w Mapach",
     "openConsole": "Otwórz konsolę"
+  },
+  "myPractice": {
+    "tabPractice": "Moja praktyka",
+    "tabReferrals": "Referencje",
+    "tabCredentials": "Poświadczenia",
+    "tabRewards": "Moje nagrody",
+    "aboutMe": "O mnie",
+    "aboutMeHelper": "Podziel się krótkim opisem swojej praktyki i podejścia. Pacjenci widzą to, przeglądając Twój profil. Maksymalnie 600 słów.",
+    "wordCount": "{{count}} / 600 słów",
+    "save": "Zapisać"
+  },
+  "patientRewards": {
+    "progressTitle": "Postęp do następnego etapu",
+    "progressLabel": "{{current}} / {{target}} Vulas do \"{{milestone}}\"",
+    "moreToGo": "Zostało {{count}} więcej!",
+    "recentRewards": "Ostatnie nagrody",
+    "empty": "Jeszcze bez nagród. Zacznij swoją podróż ku zdrowiu!"
+  },
+  "todo": {
+    "addNewTask": "Dodaj nowe zadanie",
+    "tapToRecord": "Stuknij, aby nagrać",
+    "transcribing": "Transkrypcja...",
+    "aiProcessing": "Przetwarzanie przez SI...",
+    "listening": "Słuchanie... zatrzymuje się po pauzie",
+    "typeTask": "Lub wpisz tutaj swoje zadanie...",
+    "add": "Dodać",
+    "priority": "Priorytet:",
+    "low": "Niski",
+    "medium": "Średni",
+    "high": "Wysoki",
+    "aiProcess": "Proces SI",
+    "active": "Aktywny",
+    "completed": "Zakończone",
+    "all": "Wszystko",
+    "approve": "Zatwierdzić",
+    "noMatchingPatient": "Nie znaleziono pasującego pacjenta"
+  },
+  "documents": {
+    "title": "Dokumenty",
+    "tabDocuments": "Dokumenty",
+    "tabTemplates": "Szablony",
+    "tabHeaderFooter": "Nagłówek i Stopka",
+    "tabContent": "Szablony treści",
+    "contentHelper": "Twórz szablony treści dokumentów (nagłówek/stopka zostaną zastosowane z wybranego układu)",
+    "newContent": "Nowy szablon treści",
+    "searchContent": "Szukaj szablonów treści...",
+    "createTemplate": "Utwórz szablon",
+    "patientDocuments": "Dokumenty pacjenta",
+    "searchDocuments": "Szukaj dokumentów...",
+    "letterhead": "Papier firmowy:",
+    "letterheadHeaderFooter": "Nagłówek i Stopka",
+    "letterheadDefault": "Domyślny"
+  },
+  "roundTablesMeta": {
+    "noteOne": "{{count}} notatka",
+    "noteOther": "{{count}} notatek",
+    "lastActivity": "Ostatnia aktywność {{date}}"
+  },
+  "sos": {
+    "emergencyAssistance": "Pomoc w nagłych wypadkach",
+    "helpAlerted": "Pomoc zostanie natychmiast zaalarmowana",
+    "ackHeading": "PRZED UŻYCIEM SOS, PROSZĘ POTWIERDŹ:",
+    "ackA": "Wsparcie SOS jest świadczone na zasadzie \"dołożenia wszelkich starań\" i nie może gwarantować reakcji w nagłych wypadkach.",
+    "ackB": "SOS zależy od sieci, stanu urządzenia, dostępu do lokalizacji i zewnętrznych ratowników.",
+    "ackC": "SOS wymaga uprawnień do lokalizacji, zasilania bateryjnego oraz połączenia internetowego lub komórkowego.",
+    "sosLabel": "SOS",
+    "tapForHelp": "STUKNIJ PO POMOC",
+    "footerCaption": "Stuknięcie SOS udostępnia Twoją lokalizację i powiadamia Twoje kontakty alarmowe.",
+    "manageContacts": "Zarządzaj kontaktami alarmowymi",
+    "viewHistory": "Wyświetl historię incydentów"
   }
 }
