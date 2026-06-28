@@ -556,7 +556,7 @@ export default function CalendarView() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("nav.myCalendar", "Calendar")}</h1>
           <p className="text-muted-foreground text-[12px]">
-            Manage your appointments and schedule
+            {t("calendar.subtitle")}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap items-center">
