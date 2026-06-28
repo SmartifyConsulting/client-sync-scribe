@@ -389,7 +389,7 @@ export function useMyChronicPatientId() {
       const ids = patients.map((p) => p.id);
       const { data: rxRows } = await supabase
         .from('prescriptions')
-        .select('patient_id')
+        .select('patient_id, is_chronic')
         .in('patient_id', ids)
         .eq('status', 'active');
 
@@ -402,7 +402,17 @@ export function useMyChronicPatientId() {
         .order('taken_at', { ascending: false });
 
       const rxCount = new Map<string, number>();
-      (rxRows ?? []).forEach((r) => rxCount.set(r.patient_id, (rxCount.get(r.patient_id) ?? 0) + 1));
+      const chronicRxIds = new Set<string>();
+      (rxRows ?? []).forEach((r: any) => {
+        rxCount.set(r.patient_id, (rxCount.get(r.patient_id) ?? 0) + 1);
+        if (r.is_chronic) chronicRxIds.add(r.patient_id);
+      });
+
+      // Self-heal: any patient with an active chronic prescription is chronic
+      const enriched = patients.map((p) => ({
+        ...p,
+        is_chronic: !!p.is_chronic || chronicRxIds.has(p.id),
+      }));
 
       const lastAdh = new Map<string, number>();
       (adhRows ?? []).forEach((r) => {
@@ -411,7 +421,7 @@ export function useMyChronicPatientId() {
         }
       });
 
-      const ranked = [...patients].sort((a, b) => {
+      const ranked = [...enriched].sort((a, b) => {
         const rx = (rxCount.get(b.id) ?? 0) - (rxCount.get(a.id) ?? 0);
         if (rx !== 0) return rx;
         const adh = (lastAdh.get(b.id) ?? 0) - (lastAdh.get(a.id) ?? 0);
@@ -430,6 +440,7 @@ export function useMyChronicPatientId() {
         console.log('[useMyChronicPatientId] picked', chosen.id, '·', reason);
       }
       return chosen;
+
     },
   });
 }
