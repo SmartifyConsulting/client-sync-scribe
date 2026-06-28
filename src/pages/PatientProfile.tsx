@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   Mail,
@@ -67,6 +68,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function PatientProfile() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -210,10 +212,10 @@ export default function PatientProfile() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Patients
+          {t("patientProfile.backToPatients")}
         </Link>
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-muted-foreground">Patient not found</p>
+          <p className="text-muted-foreground">{t("patientProfile.patientNotFound")}</p>
         </div>
       </div>
     );
@@ -242,7 +244,7 @@ export default function PatientProfile() {
         className="inline-flex items-center gap-2 text-base font-medium text-muted-foreground hover:text-foreground transition-colors group"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-        Back to Patients
+        {t("patientProfile.backToPatients")}
       </Link>
 
       {/* Header Card */}
@@ -308,19 +310,19 @@ export default function PatientProfile() {
                     }}
                   >
                     <img src={vulaSymbol} alt="" className="h-3.5 w-3.5" />
-                    Check in
+                    {t("patientProfile.checkIn")}
                   </Button>
                 )}
               </>
             )}
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleScheduleAppointment}>
               <Calendar className="h-3.5 w-3.5" />
-              Schedule
+              {t("patientProfile.schedule")}
             </Button>
             {(patient as any).patient_user_id !== currentUserId && (
               <Button size="sm" className="gap-1.5" onClick={handleStartSession}>
                 <Clock className="h-3.5 w-3.5" />
-                Start Session
+                {t("patientProfile.startSession")}
               </Button>
             )}
           </div>
@@ -332,14 +334,14 @@ export default function PatientProfile() {
         <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium text-muted-foreground">Total Sessions</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.totalSessions")}</p>
               <FileText className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">{completedSessions.length}</p>
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium text-muted-foreground">Last Seen</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.lastSeen")}</p>
               <Clock className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
@@ -352,7 +354,7 @@ export default function PatientProfile() {
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium text-muted-foreground">Since</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.since")}</p>
               <Calendar className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
@@ -362,7 +364,7 @@ export default function PatientProfile() {
           {/* Vula Rewards */}
           <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
             <div className="flex flex-col items-center sm:items-start min-w-0">
-              <p className="text-[10px] font-medium text-muted-foreground">Vulas</p>
+              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.vulas")}</p>
               <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
             </div>
             <img
@@ -381,43 +383,43 @@ export default function PatientProfile() {
             value="details"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Details
+            {t("patientProfile.tabDetails")}
           </TabsTrigger>
           <TabsTrigger
             value="overview"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Overview
+            {t("patientProfile.tabOverview")}
           </TabsTrigger>
           <TabsTrigger
             value="sessions"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Session History
+            {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
             value="admissions"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Admissions
+            {t("patientProfile.tabAdmissions")}
           </TabsTrigger>
           <TabsTrigger
             value="doctors"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Healthcare Providers
+            {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
             value="documents"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Documents
+            {t("patientProfile.tabDocuments")}
           </TabsTrigger>
           <TabsTrigger
             value="roundtable"
             className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Round Table
+            {t("patientProfile.tabRoundTable")}
             {unreadRoundTableCount > 0 && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}
           </TabsTrigger>
         </TabsList>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
 import { EmergencyContactsInline } from "@/features/patients/components/EmergencyContactsInline";
@@ -405,6 +406,7 @@ export function PatientDetailsEditor({
   rewardsLoading = false,
   section,
 }: PatientDetailsEditorProps) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -1422,47 +1424,47 @@ export function PatientDetailsEditor({
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
-              Personal Information
+              {t("patientProfile.togglePersonal")}
             </TabsTrigger>
           )}
           {show("medical") && (
             <TabsTrigger value="medical" className={triggerClass}>
-              Medical Information
+              {t("patientProfile.toggleMedical")}
             </TabsTrigger>
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Holarchy
+              {t("nav.myHolarchy")}
             </TabsTrigger>
           )}
           {show("sessions") && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              Sessions
+              {t("sessions.title")}
             </TabsTrigger>
           )}
           {show("hospital_visits") && (
             <TabsTrigger value="hospital_visits" className={triggerClass}>
-              Admissions
+              {t("patientProfile.tabAdmissions")}
             </TabsTrigger>
           )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              Round Table
+              {t("patientProfile.tabRoundTable")}
             </TabsTrigger>
           )}
           {show("calendar") && (
             <TabsTrigger value="calendar" className={triggerClass}>
-              My Calendar
+              {t("nav.myCalendar")}
             </TabsTrigger>
           )}
           {show("tasks") && (
             <TabsTrigger value="tasks" className={triggerClass}>
-              My Tasks
+              {t("nav.myTasks")}
             </TabsTrigger>
           )}
           {show("documents") && (
             <TabsTrigger value="documents" className={triggerClass}>
-              My Documents
+              {t("nav.myDocuments")}
             </TabsTrigger>
           )}
         </TabsList>
@@ -1476,17 +1478,18 @@ export function PatientDetailsEditor({
           value="personal"
           className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
-          Personal Information
+          {t("patientProfile.togglePersonal")}
         </TabsTrigger>
         <TabsTrigger
           value="medical"
           className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
-          Medical Information
+          {t("patientProfile.toggleMedical")}
         </TabsTrigger>
       </TabsList>
     );
   };
+
 
   // Compact profile banner for non-Home mobile sections
   const CompactBanner = () => {
@@ -1567,8 +1570,8 @@ export function PatientDetailsEditor({
             <TabsContent value="personal" className="space-y-4 mt-4">
               <div className="mb-1 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-                  <p className="text-xs text-muted-foreground">View and manage personal details</p>
+                  <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.personalHeading")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                   <Pencil className="h-4 w-4" />
@@ -1703,8 +1706,8 @@ export function PatientDetailsEditor({
             <TabsContent value="medical" className="mt-4">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-                  <p className="text-xs text-muted-foreground">View and manage medical records</p>
+                  <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.medicalHeading")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                   <Pencil className="h-4 w-4" />
@@ -2127,8 +2130,8 @@ export function PatientDetailsEditor({
           <TabsContent value="personal" className="space-y-4 mt-4">
             <div className="mb-1 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage personal details</p>
+                <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.personalHeading")}</h2>
+                <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
@@ -2551,8 +2554,8 @@ export function PatientDetailsEditor({
           <TabsContent value="medical" className="mt-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage medical records</p>
+                <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.medicalHeading")}</h2>
+                <p className="text-xs text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>

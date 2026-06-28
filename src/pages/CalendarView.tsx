@@ -556,7 +556,7 @@ export default function CalendarView() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("nav.myCalendar", "Calendar")}</h1>
           <p className="text-muted-foreground text-[12px]">
-            Manage your appointments and schedule
+            {t("calendar.subtitle")}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap items-center">
@@ -573,7 +573,7 @@ export default function CalendarView() {
                       : "hover:bg-muted text-muted-foreground"
                   )}
                 >
-                  {s === 'mine' ? 'My Calendar' : 'Practice Calendar'}
+                  {s === 'mine' ? t('calendar.myCalendar') : t('calendar.practiceCalendar')}
                 </button>
               ))}
             </div>
@@ -581,10 +581,10 @@ export default function CalendarView() {
           {practice && scope === 'practice' && members.length > 0 && (
             <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
               <SelectTrigger className="h-8 w-[200px] text-xs">
-                <SelectValue placeholder="Filter doctor" />
+                <SelectValue placeholder={t("calendar.filterDoctor")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All doctors in practice</SelectItem>
+                <SelectItem value="all">{t("calendar.allDoctors")}</SelectItem>
                 {members.map((m) => (
                   <SelectItem key={m.doctor_id} value={m.doctor_id}>
                     <span className="inline-flex items-center gap-2">
@@ -604,10 +604,10 @@ export default function CalendarView() {
               <div className="flex flex-col items-end">
                 <Button variant="outline" onClick={disconnect} className="gap-2">
                   <Unlink className="h-4 w-4" />
-                  Disconnect Google
+                  {t("calendar.disconnectGoogle")}
                 </Button>
                 <p className="text-[10px] text-muted-foreground max-w-[200px] mt-1 text-right">
-                  Google sync mirrors only your own appointments.
+                  {t("calendar.googleSyncCaption")}
                 </p>
               </div>
             ) : (
@@ -629,7 +629,7 @@ export default function CalendarView() {
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Book
+                {t("calendar.book")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
@@ -782,7 +782,7 @@ export default function CalendarView() {
                   : "hover:bg-muted text-muted-foreground"
               )}
             >
-              {view}
+              {t(`calendar.${view}`)}
             </button>
           ))}
         </div>
@@ -1013,7 +1013,7 @@ export default function CalendarView() {
         {/* Today's Schedule */}
         <div className="rounded-xl border border-primary bg-card shadow-sm">
           <div className="rounded-t-xl bg-primary p-5">
-            <h3 className="text-lg font-semibold text-primary-foreground">Today's Schedule</h3>
+            <h3 className="text-lg font-semibold text-primary-foreground">{t("calendar.todaysSchedule")}</h3>
             <p className="text-sm text-primary-foreground/80">
               {currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </p>
@@ -1079,7 +1079,7 @@ export default function CalendarView() {
               })
             ) : (
               <div className="p-8 text-center text-muted-foreground">
-                No appointments scheduled for today
+                {t("calendar.noAppointmentsToday")}
               </div>
             )}
           </div>
