@@ -154,7 +154,7 @@ export function RecentActivity() {
                     )}
                   </div>
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    {activity.time}
+                    {relativeTimeLabel(activity.timeIso, t)}
                   </span>
                 </div>
               );
