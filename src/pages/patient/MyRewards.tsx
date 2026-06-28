@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History, Vault } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,6 +83,7 @@ interface VulaTransfer {
 }
 
 export default function MyRewards() {
+  const { t } = useTranslation();
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
   const [activeTab, setActiveTabRaw] = useState<string>(() => {
