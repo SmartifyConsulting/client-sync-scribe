@@ -709,7 +709,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <PopoverTrigger asChild>
             <Button variant="outline" className={cn("gap-2", hasActiveFilters && "border-primary text-primary")}>
               <Filter className="h-4 w-4" />
-              Filter
+              {t("patients.filter")}
               {hasActiveFilters && (
                 <span className="ml-1 rounded-full bg-primary text-primary-foreground px-1.5 py-0.5 text-xs">
                   {[statusFilter !== "all", dateFrom, dateTo].filter(Boolean).length}
