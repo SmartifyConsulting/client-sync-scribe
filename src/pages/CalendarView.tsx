@@ -573,7 +573,7 @@ export default function CalendarView() {
                       : "hover:bg-muted text-muted-foreground"
                   )}
                 >
-                  {s === 'mine' ? 'My Calendar' : 'Practice Calendar'}
+                  {s === 'mine' ? t('calendar.myCalendar') : t('calendar.practiceCalendar')}
                 </button>
               ))}
             </div>
