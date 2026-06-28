@@ -1,48 +1,148 @@
-## Translation Sweep — Round 2 (revised)
+## Translation Sweep — Round 3
 
-The screenshots show two problems:
+Round 2 wired the high-level chrome, but several strings nested inside cards, list rows, template tiles, calendar header, **and every Patient Detail subform** are still hard-coded English. This round closes those gaps across the same 25 locales.
 
-1. **Missing keys** — chrome strings on My Practice, Rewards, To-Do, Documents, Round-Table meta, and SOS landing are still hard-coded English.
-2. **Stale renders on language switch** — when the flag changes, only some components re-render. The rest keep the previous locale (or fall back to English), producing the half-Italian/half-Greek/half-English screens.
+### Strings to translate (grouped by screen)
 
-### Part A — Fix the live language-switch bug
+**My Practice (image-116)**
+- Top pill tabs: `My Practice`, `Referrals`, `Credentials`, `My Rewards`
+- "About Me" helper + `/ 600 words` counter
 
-Root cause: components that read translations outside the `useTranslation()` hook (module-scope `i18n.t(...)`, memoized constants, options arrays declared at file top, default props) capture the locale at import time and never update. Suspense fallbacks and `key`-less list renders also freeze the old strings.
+**Patient Rewards (image-117)**
+- `Vulas to "{milestone}"`, `No rewards yet. Start your health journey!`
 
-Fixes:
+**To-Do List (image-121)**
+- `Add New Task`, `Tap to record`, `Or type your task here…`, `Add`, `Priority:`, `Low/Medium/High`, `AI Process`
+- Tab counts `Active (n) / Completed (n) / All (n)`
+- Date group headers via `date-fns` locale map
+- `Approve`, `AI` pill
+- Template task verbs from `generateTaskTitle.ts` only
 
-- **Force a global re-render on `languageChanged`.** In `src/i18n/index.ts`, after `i18n.init(...)`, attach `i18n.on('languageChanged', lng => { document.documentElement.lang = lng; document.documentElement.dir = RTL.has(lng) ? 'rtl' : 'ltr'; })` and bump a Zustand/Context `langVersion` counter that the root `<App />` consumes so the whole tree re-renders (or wrap `<Outlet />` with `key={i18n.language}`).
-- **Replace all module-scope `i18n.t(...)` calls** with in-component `const { t } = useTranslation()`. Audit with `rg "i18n\.t\(" src` and `rg "from .*i18next.*\n.*\.t\(" src`.
-- **Move static option arrays** (`PRIORITIES`, tab defs, milestone labels, template card metadata) inside the component body so they re-evaluate on each render, or compute via `useMemo(..., [i18n.language])`.
-- **Persist `i18n.changeLanguage` properly** in `LanguageSwitcher` — await the promise, then `await queryClient.invalidateQueries()` so any server-translated content (briefing narration, AI summaries) also refreshes.
-- **Guard against suspense flicker** — set `react: { useSuspense: false }` in `i18n.init` so partial trees don't keep stale text while a namespace lazy-loads.
-- **Verify with Playwright**: load `/dashboard` in `en`, switch to `it`, assert no English chrome remains; switch to `el`, assert no Italian chrome remains.
+**Documents / Templates (image-122, image-120)**
+- Helper text, `+ New Content Template`, `Create Template`
+- Default template display labels + descriptions (Referral Letter, General Letterhead, Prescription, Medical Certificate, Invoice, Hospital Admission Form)
+- `Letterhead: {Header and Footer | Default}`
+- `Patient Documents`, `Search documents…`
+- Document-type chips
 
-### Part B — Add the missing translation keys
+**Patient card meta (image-119)**
+- `{n} notes · Last activity {date}` via `t()` + `date-fns`
 
-Same scope as before. New namespaces in `src/i18n/locales/en.json`:
-- `myPractice` — tabs (My Practice / Referrals / Credentials / My Rewards), About Me card, `{n} / 600 words`, Save
-- `patientRewards` — Progress to Next Milestone, `{n} / {n} Vulas to "{milestone}"`, `{n} more to go!`, Recent Rewards, empty state
-- `todo` (extend) — Add New Task, Tap to record, Or type your task here..., Add, Priority, Low/Medium/High, AI Process, Active/Completed/All tab labels, Approve, `(No matching patient found)`
-- `documents` — Documents/Templates/Header & Footer/Content Templates tabs, helper text, + New Content Template, Search content templates..., Create Template, Patient Documents, Search documents..., Letterhead label, Header and Footer / Default values, built-in template name+description keyed by slug
-- `roundTablesMeta` — `{count, plural, one {# note} other {# notes}} · Last activity {date}`
-- `sos` — Emergency Assistance, Help will be alerted instantly, acknowledge heading + 3 bullets, SOS / TAP FOR HELP, footer caption, Manage emergency contacts, View incident history
+**SOS landing (image-123 residual)**
+- `Help will be alerted instantly`, `Tapping SOS shares your location...`, `Manage emergency contacts`, `View incident history`
 
-Run `/tmp/i18n_extend.py` (Gemini 2.5 Flash) to translate into the other 24 locales.
+**My Calendar (image-124)**
+- Subtitle `Manage your appointments and schedule`
+- View toggles: `My Calendar`, `Practice Calendar`
+- `Google Calendar`, `+ Book`, `Week / Month / Year`
+- Month title (`LLLL yyyy`) + weekday short labels via `date-fns` locale
+- Right rail: `Today's Schedule`, localized day-of-week date, `No appointments scheduled for today`
 
-### Part C — Wire components
+**Patient Detail screen — every tab and every subform (image-125) — NEW**
 
-`src/pages/MyPractice.tsx`, `src/pages/patient/MyRewards.tsx`, `src/pages/TodoList.tsx` (+ `AddTaskCard`), `src/pages/Documents.tsx` & `src/pages/doctor/DoctorDocumentsPage.tsx`, `src/pages/doctor/DoctorRoundTablesPage.tsx`, `src/modules/holarchelp/pages/HolarcHelpHome.tsx`.
+The patient profile is the biggest untranslated surface. Wire every label, helper, placeholder, accordion header, tab trigger, button, and empty state — across all tabs.
 
-- Replace hard-coded JSX with `t('namespace.key')`.
-- Use `new Intl.DateTimeFormat(i18n.language, …)` for the To-Do day headers and Round-Table "Last activity" date so dates flip with the locale too.
-- For template display names, look up `t(\`documents.builtin.${slug}.name\`)` with a fallback to the DB name (keeps custom templates untouched).
+*Header strip*
+- `Back to Patients`, `Schedule`
+
+*Top tab triggers*
+- `Details`, `Overview`, `Session History`, `Admissions`, `Healthcare Providers`, `Documents`, `Round Table`
+
+*Details tab — section toggle*
+- `Personal Information`, `Medical Information`, `Saved` indicator
+
+*Personal Information subform*
+- Section heading + helper `View and manage personal details`
+- Accordion headers: `Personal Information`, `Addresses`, `Emergency Contacts`, `Next of Kin`, `Insurance / Medical Aid`, `Employer`, `Lifestyle`, `Consents`
+- Field labels: `First Name(s)`, `Last Name`, `ID/Passport Number`, `Gender`, `Date of Birth`, `Email`, `Phone`, `Marital Status`, `Language`, `Referred By`
+- Placeholders: `ID or passport number`, `Select status`, `Select language`, `Referral source`, `dd ---- yyyy` (use native date input — leave OS-controlled)
+- Select option labels: gender values, marital status values, language values (use existing `lib/languages.ts` localized list)
+
+*Medical Information subform*
+- Section heading + helper
+- Accordion headers: `Allergies`, `Chronic Conditions`, `Current Medication`, `Family History`, `Surgical History`, `Immunizations`, `Vitals`, `Lab Results`, `Genetic Markers`, `Lifestyle Factors`, `Mental Health`
+- All field labels, placeholders, and empty states inside each accordion
+
+*Overview tab*
+- Section titles (Timeline, Recent Activity, Risk Badges), `No activity yet`, date stamps via `date-fns`
+
+*Session History tab*
+- Group headers `Today / Last Week / Last Month / Older`, `No sessions yet`, action buttons (`View`, `Resume`, `Notes`)
+
+*Admissions tab*
+- `New Admission`, column headers (`Hospital`, `Admitted`, `Discharged`, `Procedure Codes`, `Status`), empty state
+
+*Healthcare Providers tab*
+- `Invite Provider`, role chips (`GP`, `Specialist`, `Pharmacy`, `Insurer`), `No providers linked`
+
+*Documents tab*
+- Filter chips per document type, `Upload`, `Send`, empty state
+
+*Round Table tab*
+- `Start Round Table`, `Participants`, `Shared Notes`, empty state
+
+### Files to touch
+
+```text
+src/i18n/locales/en.json                          (add new keys: patientDetail.*, calendar.*, etc.)
+src/i18n/locales/{24 others}.json                 (batch via /tmp/i18n_extend3.py)
+
+src/pages/MyPractice.tsx
+src/pages/patient/MyRewards.tsx
+src/pages/TodoList.tsx
+src/components/todo/TaskDateGroup.tsx
+src/lib/generateTaskTitle.ts
+src/pages/Documents.tsx
+src/components/documents/TemplateCard.tsx
+src/lib/defaultTemplates.ts
+src/components/documents/DocumentRow.tsx
+src/components/patients/PatientCard.tsx
+src/modules/holarchelp/pages/HolarcHelpHome.tsx
+src/pages/CalendarView.tsx
+src/components/calendar/MonthGrid.tsx
+src/components/calendar/TodaysSchedule.tsx
+src/lib/dateFnsLocale.ts                          (NEW: i18n.language → date-fns Locale)
+
+# Patient Detail surface
+src/pages/PatientDetail.tsx                       (header strip, top tabs)
+src/components/patient-detail/DetailsTab.tsx      (Personal/Medical toggle, Saved badge)
+src/components/patient-detail/PersonalInformationForm.tsx
+src/components/patient-detail/MedicalInformationForm.tsx
+src/components/patient-detail/sections/AddressesSection.tsx
+src/components/patient-detail/sections/EmergencyContactsSection.tsx
+src/components/patient-detail/sections/NextOfKinSection.tsx
+src/components/patient-detail/sections/InsuranceSection.tsx
+src/components/patient-detail/sections/EmployerSection.tsx
+src/components/patient-detail/sections/LifestyleSection.tsx
+src/components/patient-detail/sections/ConsentsSection.tsx
+src/components/patient-detail/sections/AllergiesSection.tsx
+src/components/patient-detail/sections/ChronicConditionsSection.tsx
+src/components/patient-detail/sections/MedicationsSection.tsx
+src/components/patient-detail/sections/FamilyHistorySection.tsx
+src/components/patient-detail/sections/SurgicalHistorySection.tsx
+src/components/patient-detail/sections/ImmunizationsSection.tsx
+src/components/patient-detail/sections/VitalsSection.tsx
+src/components/patient-detail/sections/LabResultsSection.tsx
+src/components/patient-detail/sections/GeneticMarkersSection.tsx
+src/components/patient-detail/sections/MentalHealthSection.tsx
+src/components/patient-detail/tabs/OverviewTab.tsx
+src/components/patient-detail/tabs/SessionHistoryTab.tsx
+src/components/patient-detail/tabs/AdmissionsTab.tsx
+src/components/patient-detail/tabs/HealthcareProvidersTab.tsx
+src/components/patient-detail/tabs/DocumentsTab.tsx
+src/components/patient-detail/tabs/RoundTableTab.tsx
+```
+
+(Exact file names confirmed during build — folder layout may use slightly different naming; the audit will follow imports from `PatientDetail.tsx`.)
+
+### Re-render
+
+`key={i18n.language}` on `AppLayout` / `PatientAppLayout` from Round 2 already handles live language switching. Once wired to `t()` these surfaces flip together.
+
+### Translation script
+
+`/tmp/i18n_extend3.py` (clone of `extend2.py`) targets only newly added keys, fills the 24 non-English locales via Gemini in one batch. English values authored manually in `en.json`.
 
 ### Out of scope
 
-User-entered content (About Me paragraph, patient names, dictated task text, document body, invoice numbers, brand words Vula / HolarcHelp / SOS) stays in the language it was authored in.
-
-### Verification
-
-1. `tsgo` clean.
-2. Playwright switches `en → it → el → ig → zu` on `/dashboard`, `/doctor/round-tables`, `/todo`, `/documents`, `/patient/rewards`, `/sos`; screenshot each and confirm no mixed-locale chrome.
+Captured patient data (names, addresses, allergy text, doctor notes, transcripts) stays in its source language by design — only the chrome around it is translated.
