@@ -782,7 +782,7 @@ export default function CalendarView() {
                   : "hover:bg-muted text-muted-foreground"
               )}
             >
-              {view}
+              {t(`calendar.${view}`)}
             </button>
           ))}
         </div>
