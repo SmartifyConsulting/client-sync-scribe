@@ -1013,7 +1013,7 @@ export default function CalendarView() {
         {/* Today's Schedule */}
         <div className="rounded-xl border border-primary bg-card shadow-sm">
           <div className="rounded-t-xl bg-primary p-5">
-            <h3 className="text-lg font-semibold text-primary-foreground">Today's Schedule</h3>
+            <h3 className="text-lg font-semibold text-primary-foreground">{t("calendar.todaysSchedule")}</h3>
             <p className="text-sm text-primary-foreground/80">
               {currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
             </p>
