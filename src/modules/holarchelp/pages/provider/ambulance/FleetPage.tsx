@@ -311,6 +311,10 @@ export default function FleetPage() {
           })}
         </div>
       )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
 
       {providerId && (
         <AmbulanceFormDialog
