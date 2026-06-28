@@ -24,6 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2, UserPlus, Loader2, ShieldCheck, Edit2, Search } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
+import HospitalNetworkScreen from "./ambulance/HospitalNetworkScreen";
 import { toast } from "sonner";
 
 interface MemberRow {
