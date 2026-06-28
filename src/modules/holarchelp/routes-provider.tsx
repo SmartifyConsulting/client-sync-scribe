@@ -115,8 +115,8 @@ export default function ProviderRoutes() {
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
 
-        {/* Consolidated Hospital Network (All Partners + Affiliates) */}
-        <Route path="hospital-network" element={<HospitalNetworkScreen />} />
+        {/* Hospital Network now lives inside Admin */}
+        <Route path="hospital-network" element={<Navigate to="/provider/ambulance/admins?tab=hospital-network" replace />} />
 
         {/* Team & Drivers */}
         <Route path="team" element={<TeamStatusScreen />} />

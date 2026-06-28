@@ -48,8 +48,8 @@ const DEVIATION_DATA: RouteDeviation[] = [
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: "border-blue-500/40 bg-blue-500/10 text-blue-600",
-  medium: "border-orange-500/40 bg-orange-500/10 text-orange-600",
+  low: "border-primary/40/40 bg-primary/10 text-primary",
+  medium: "border-warning/40/40 bg-warning/10 text-warning",
   high: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
@@ -65,10 +65,10 @@ export default function RouteDeviationScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
-          <h1 className="text-2xl font-extrabold">Route Deviation</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Route Deviation</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Monitor when ambulances deviate from authorized dispatch routes.
           </p>
@@ -77,7 +77,7 @@ export default function RouteDeviationScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             High Deviation
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">
@@ -85,15 +85,15 @@ export default function RouteDeviationScreen() {
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Medium Deviation
           </p>
-          <p className="mt-1 text-2xl font-bold text-orange-600">
+          <p className="mt-1 text-2xl font-bold text-warning">
             {DEVIATION_DATA.filter((d) => d.severity === "medium").length}
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total Events
           </p>
           <p className="mt-1 text-2xl font-bold">{DEVIATION_DATA.length}</p>

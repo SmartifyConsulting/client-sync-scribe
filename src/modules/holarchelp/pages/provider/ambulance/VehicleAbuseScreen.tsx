@@ -9,9 +9,9 @@ import { toast } from "sonner";
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: "bg-destructive/15 text-destructive border-destructive/40",
-  high: "bg-orange-500/15 text-orange-600 border-orange-500/40",
+  high: "bg-warning/15 text-warning border-warning/40/40",
   medium: "bg-warning/15 text-warning border-warning/40",
-  low: "bg-blue-500/15 text-blue-600 border-blue-500/40",
+  low: "bg-primary/15 text-primary border-primary/40/40",
 };
 
 interface AbuseEvent {
@@ -148,10 +148,10 @@ export default function VehicleAbuseScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Emergency Response Dispatch
           </p>
-          <h1 className="text-2xl font-extrabold">Vehicle Abuse Prevention</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Vehicle Abuse Prevention</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Monitor suspicious vehicle activity, geofence breaches, and unauthorized usage.
           </p>
@@ -162,7 +162,7 @@ export default function VehicleAbuseScreen() {
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Critical Events
               </p>
               <p className="mt-1 text-2xl font-bold text-destructive">{criticalCount}</p>
@@ -173,18 +173,18 @@ export default function VehicleAbuseScreen() {
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 High Risk
               </p>
-              <p className="mt-1 text-2xl font-bold text-orange-600">{highCount}</p>
+              <p className="mt-1 text-2xl font-bold text-warning">{highCount}</p>
             </div>
-            <AlertCircle className="h-8 w-8 text-orange-500/40" />
+            <AlertCircle className="h-8 w-8 text-warning/40" />
           </div>
         </div>
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Medium Priority
               </p>
               <p className="mt-1 text-2xl font-bold text-warning">{mediumCount}</p>
@@ -195,7 +195,7 @@ export default function VehicleAbuseScreen() {
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Total Events
               </p>
               <p className="mt-1 text-2xl font-bold">{events.length}</p>

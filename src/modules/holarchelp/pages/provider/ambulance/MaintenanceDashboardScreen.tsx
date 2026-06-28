@@ -56,39 +56,39 @@ export default function MaintenanceDashboardScreen() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "pending":
-        return <Clock className="h-5 w-5 text-yellow-600" />;
+        return <Clock className="h-5 w-5 text-warning" />;
       case "in-progress":
-        return <Wrench className="h-5 w-5 text-blue-600" />;
+        return <Wrench className="h-5 w-5 text-primary" />;
       case "completed":
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case "overdue":
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-destructive" />;
     }
   };
 
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Fleet Care</p>
-        <h1 className="text-3xl font-extrabold mt-2">Maintenance Dashboard</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Care</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Maintenance Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-2">Track service schedules and vehicle maintenance</p>
       </header>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Pending</p>
-          <p className="text-2xl font-bold mt-2 text-yellow-600">{stats.pending}</p>
+          <p className="text-2xl font-bold mt-2 text-warning">{stats.pending}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">In Progress</p>
-          <p className="text-2xl font-bold mt-2 text-blue-600">{stats.inProgress}</p>
+          <p className="text-2xl font-bold mt-2 text-primary">{stats.inProgress}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Overdue</p>
-          <p className="text-2xl font-bold mt-2 text-red-600">{stats.overdue}</p>
+          <p className="text-2xl font-bold mt-2 text-destructive">{stats.overdue}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Total Cost</p>
           <p className="text-2xl font-bold mt-2">${stats.totalCost.toLocaleString()}</p>
         </div>
@@ -97,7 +97,7 @@ export default function MaintenanceDashboardScreen() {
       {/* Maintenance Items */}
       <div className="space-y-3">
         {MOCK_MAINTENANCE.map((item) => (
-          <div key={item.id} className="rounded-lg border bg-card p-4">
+          <div key={item.id} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-start gap-3">
                 {getStatusIcon(item.status)}
@@ -109,12 +109,12 @@ export default function MaintenanceDashboardScreen() {
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   item.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
+                    ? "bg-warning/10 text-warning"
                     : item.status === "in-progress"
-                      ? "bg-blue-100 text-blue-800"
+                      ? "bg-primary/10 text-primary"
                       : item.status === "completed"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                        ? "bg-success/10 text-success"
+                        : "bg-destructive/10 text-destructive"
                 }`}
               >
                 {item.status.replace("-", " ")}

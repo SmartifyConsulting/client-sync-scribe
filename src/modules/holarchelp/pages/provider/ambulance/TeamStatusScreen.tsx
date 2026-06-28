@@ -3,40 +3,55 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { InviteStaffDialog } from "../../../components/InviteStaffDialog";
-import { Button } from "@/components/ui/button";
-import { Users, UserCheck, UserX, UserPlus, Truck } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Users } from "lucide-react";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
-type Member = { id: string; user_id: string; role?: string | null; full_name?: string | null };
-type Shift = { user_id: string; status: string; ambulance_id: string; vehicle_code?: string | null };
+type Member = {
+  id: string;
+  user_id: string;
+  role?: string | null;
+  full_name?: string | null;
+};
+type Shift = {
+  user_id: string;
+  status: string;
+  ambulance_id: string;
+  vehicle_code?: string | null;
+};
+
+const roleColors: Record<string, string> = {
+  paramedic: "text-success",
+  driver: "text-warning",
+  emt: "text-primary",
+  default: "text-muted-foreground",
+};
 
 export default function TeamStatusScreen() {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const { providerId } = useProviderAccess();
   const [members, setMembers] = useState<Member[]>([]);
   const [shiftsByUser, setShiftsByUser] = useState<Record<string, Shift>>({});
-  const [isAdmin, setIsAdmin] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
 
-  useEffect(() => {
-    if (!providerId || !user) return;
-    (async () => {
-      const { data: ok } = await supabase.rpc("is_ambulance_admin" as any, {
-        _provider_id: providerId, _user_id: user.id,
-      } as any);
-      setIsAdmin(!!ok);
-    })();
-  }, [providerId, user?.id]);
-
   const loadShifts = async (pid: string) => {
-    const { data } = await supabase.from("paramedic_shifts" as any)
+    const { data } = await supabase
+      .from("paramedic_shifts" as any)
       .select("user_id, status, ambulance_id, ambulances(vehicle_code)")
       .eq("provider_id", pid)
       .is("ended_at", null);
     const map: Record<string, Shift> = {};
     ((data as any) ?? []).forEach((r: any) => {
-      map[r.user_id] = { user_id: r.user_id, status: r.status, ambulance_id: r.ambulance_id, vehicle_code: r.ambulances?.vehicle_code ?? null };
+      map[r.user_id] = {
+        user_id: r.user_id,
+        status: r.status,
+        ambulance_id: r.ambulance_id,
+        vehicle_code: r.ambulances?.vehicle_code ?? null,
+      };
     });
     setShiftsByUser(map);
   };
@@ -44,124 +59,121 @@ export default function TeamStatusScreen() {
   useEffect(() => {
     if (!providerId) return;
     (async () => {
-      const { data: m } = await supabase.from("holarchelp_ambulance_members" as any)
-        .select("id, user_id, role").eq("provider_id", providerId);
+      const { data: m } = await supabase
+        .from("holarchelp_ambulance_members" as any)
+        .select("id, user_id, role")
+        .eq("provider_id", providerId);
       const list = ((m as any) ?? []) as Member[];
-      const ids = list.map(x => x.user_id);
-      let profMap: Record<string,string> = {};
+      const ids = list.map((x) => x.user_id).filter(Boolean);
+      const profMap: Record<string, string> = {};
       if (ids.length) {
-        const { data: profs } = await supabase.from("profiles" as any).select("id, full_name").in("id", ids);
-        ((profs as any) ?? []).forEach((p: any) => { profMap[p.id] = p.full_name; });
+        const { data: profs } = await supabase
+          .from("profiles" as any)
+          .select("id, full_name")
+          .in("id", ids);
+        ((profs as any) ?? []).forEach((p: any) => {
+          profMap[p.id] = p.full_name;
+        });
       }
-      setMembers(list.map(x => ({ ...x, full_name: profMap[x.user_id] ?? t("common.crewMember") })));
+      setMembers(
+        list.map((x) => ({
+          ...x,
+          full_name: profMap[x.user_id] ?? "Crew Member",
+        })),
+      );
     })();
     loadShifts(providerId);
-    const ch = supabase.channel(`shifts-${providerId}`)
-      .on("postgres_changes",
-        { event: "*", schema: "public", table: "paramedic_shifts", filter: `provider_id=eq.${providerId}` },
-        () => loadShifts(providerId))
+    const ch = supabase
+      .channel(`shifts-${providerId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "paramedic_shifts",
+          filter: `provider_id=eq.${providerId}`,
+        },
+        () => loadShifts(providerId),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
   }, [providerId]);
 
-  const onShift = Object.values(shiftsByUser).filter(s => s.status !== "off_shift").length;
-
-  const shiftGroups = [
-    { name: "🌅 Day Crew", time: "08:00 - 16:00", members: ["John Smith", "Mike Johnson"] },
-    { name: "🌆 Evening Crew", time: "16:00 - 20:00", members: ["Sarah Miller", "James Kelly", "Rachel Chen"] },
-  ];
-
-  const roleColors: Record<string, string> = {
-    paramedic: "text-green-600",
-    driver: "text-amber-600",
-    emt: "text-blue-600",
-    default: "text-gray-600",
-  };
+  const onShift = Object.values(shiftsByUser).filter(
+    (s) => s.status !== "off_shift",
+  ).length;
 
   return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
-        <h1 className="text-3xl font-extrabold mt-2">{t("team.title")}</h1>
-        <p className="text-sm text-muted-foreground mt-2">Current shift: Friday 08:00 - 20:00</p>
-      </header>
-
-      {/* Shift Selector */}
-      <div className="flex gap-3">
-        <div className="flex-1 rounded-lg border bg-card p-3">
-          <p className="text-sm font-medium">Current Shift ▼</p>
-        </div>
-        <div className="flex-1 rounded-lg border bg-card p-3">
-          <p className="text-sm font-medium">View Assignments ▼</p>
-        </div>
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Emergency Response
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">Shift Teams</h1>
+        <p className="text-sm text-muted-foreground">
+          {members.length} crew · {onShift} on duty
+        </p>
       </div>
 
-      {/* Shift Groups */}
-      <div className="space-y-6">
-        {shiftGroups.map((group) => (
-          <div key={group.name}>
-            {/* Shift Group Header */}
-            <div className="rounded-lg border-2 bg-blue-50 dark:bg-blue-950/20 border-blue-300 p-4 mb-3">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold text-lg">{group.name} ({group.time})</h2>
-                <span className="font-semibold text-muted-foreground">{group.members.length} members</span>
-              </div>
+      <Accordion type="single" collapsible className="space-y-3">
+        <AccordionItem
+          value="shift-teams"
+          className="rounded-xl border border-primary bg-card shadow-sm"
+        >
+          <AccordionTrigger className="px-4 py-3 hover:no-underline">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Users className="h-4 w-4 text-primary" /> Shift Teams (
+              {members.length})
             </div>
-
-            {/* Crew Members in Group */}
-            <div className="space-y-2 ml-4">
-              {group.members.map((memberName, idx) => {
-                const member = members.find((m) => m.full_name === memberName);
-                const shift = member ? shiftsByUser[member.user_id] : null;
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 space-y-2">
+            {members.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-3 text-center">
+                No crew members yet.
+              </p>
+            ) : (
+              members.map((m) => {
+                const shift = shiftsByUser[m.user_id];
                 const isOnDuty = !!shift && shift.status !== "off_shift";
-
+                const roleClass = m.role
+                  ? roleColors[m.role.toLowerCase()] ?? roleColors.default
+                  : roleColors.default;
                 return (
-                  <div key={idx} className="rounded-lg border bg-card p-3 flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="font-semibold">{memberName}</p>
-                      <p className={`text-sm ${member?.role ? roleColors[member.role.toLowerCase()] : roleColors.default}`}>
-                        {member?.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : "Crew Member"}
+                  <div
+                    key={m.id}
+                    className="rounded-lg border border-border bg-card px-3 py-2 flex items-center justify-between"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate">
+                        {m.full_name}
+                      </p>
+                      <p className={`text-xs ${roleClass}`}>
+                        {m.role
+                          ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
+                          : "Crew Member"}
+                        {shift?.vehicle_code
+                          ? ` · ${shift.vehicle_code}`
+                          : ""}
                       </p>
                     </div>
                     <span
-                      className={`px-3 py-1.5 rounded text-xs font-semibold ${
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
                         isOnDuty
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
+                          ? "bg-success/10 text-success"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {isOnDuty ? "ON DUTY" : "READY"}
+                      {isOnDuty ? "On Duty" : "Ready"}
                     </span>
                   </div>
                 );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Team Summary */}
-      <div className="rounded-lg border bg-card p-4">
-        <h3 className="font-bold mb-4">Team Summary</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="rounded-lg bg-green-100 dark:bg-green-950/30 p-3">
-            <p className="text-xs text-muted-foreground">Paramedics</p>
-            <p className="text-2xl font-bold text-green-700 mt-1">3</p>
-          </div>
-          <div className="rounded-lg bg-amber-100 dark:bg-amber-950/30 p-3">
-            <p className="text-xs text-muted-foreground">Drivers</p>
-            <p className="text-2xl font-bold text-amber-700 mt-1">2</p>
-          </div>
-          <div className="rounded-lg bg-blue-100 dark:bg-blue-950/30 p-3">
-            <p className="text-xs text-muted-foreground">EMTs</p>
-            <p className="text-2xl font-bold text-blue-700 mt-1">1</p>
-          </div>
-          <div className="rounded-lg bg-purple-100 dark:bg-purple-950/30 p-3">
-            <p className="text-xs text-muted-foreground">On Duty</p>
-            <p className="text-2xl font-bold text-purple-700 mt-1">{onShift}/{members.length}</p>
-          </div>
-        </div>
-      </div>
+              })
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {providerId && (
         <InviteStaffDialog

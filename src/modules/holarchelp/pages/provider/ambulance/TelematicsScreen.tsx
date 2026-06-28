@@ -223,7 +223,7 @@ export default function TelematicsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {t("telematics.subtitle")}
           </p>
           <h1 className="flex items-center gap-2 text-xl font-extrabold">
@@ -265,7 +265,7 @@ export default function TelematicsScreen() {
                       className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                         d.moving
                           ? "bg-emerald-500/15 text-emerald-700"
-                          : "bg-amber-500/15 text-amber-700"
+                          : "bg-warning/15 text-warning"
                       }`}
                     >
                       {d.moving ? t("telematics.moving") : t("telematics.stopped")}

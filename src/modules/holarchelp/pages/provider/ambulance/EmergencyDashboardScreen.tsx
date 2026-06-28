@@ -60,16 +60,16 @@ const MOCK_INCIDENTS: Incident[] = [
 ];
 
 const SEVERITY_COLORS = {
-  critical: "bg-red-600 text-white",
-  high: "bg-orange-600 text-white",
-  medium: "bg-yellow-600 text-white",
-  low: "bg-blue-600 text-white",
+  critical: "bg-destructive text-destructive-foreground",
+  high: "bg-warning text-warning-foreground",
+  medium: "bg-warning text-warning-foreground",
+  low: "bg-primary text-primary-foreground",
 };
 
 const STATUS_CONFIG = {
-  new: { icon: "🔔", label: "NEW", color: "text-red-600", bg: "bg-red-50" },
-  active: { icon: "🚑", label: "ACTIVE", color: "text-green-600", bg: "bg-green-50" },
-  completed: { icon: "✓", label: "COMPLETED", color: "text-gray-600", bg: "bg-gray-50" },
+  new: { icon: "🔔", label: "NEW", color: "text-destructive", bg: "bg-destructive/10" },
+  active: { icon: "🚑", label: "ACTIVE", color: "text-success", bg: "bg-success/10" },
+  completed: { icon: "✓", label: "COMPLETED", color: "text-muted-foreground", bg: "bg-muted" },
 };
 
 export default function EmergencyDashboardScreen() {
@@ -86,18 +86,18 @@ export default function EmergencyDashboardScreen() {
     <div className="space-y-6">
       {/* Status Bar */}
       <div className="flex gap-3">
-        <div className="rounded-lg bg-red-100 text-red-800 px-4 py-2 text-sm font-semibold">
+        <div className="rounded-lg bg-destructive/10 text-destructive px-4 py-2 text-sm font-semibold">
           🚨 ACTIVE MISSION #5505050
         </div>
-        <div className="rounded-lg bg-blue-100 text-blue-800 px-4 py-2 text-sm font-semibold">
+        <div className="rounded-lg bg-primary/10 text-primary px-4 py-2 text-sm font-semibold">
           ✓ ON SHIFT (08:00 - 20:00)
         </div>
       </div>
 
       {/* Header */}
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response</p>
-        <h1 className="text-3xl font-extrabold mt-2">Emergency Operations</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Emergency Response</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Emergency Operations</h1>
         <p className="text-sm text-muted-foreground mt-2">
           {stats.new} new • {stats.active} active • {stats.critical} critical
         </p>
@@ -105,17 +105,17 @@ export default function EmergencyDashboardScreen() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">New Requests</p>
-          <p className="text-2xl font-bold mt-2 text-red-600">{stats.new}</p>
+          <p className="text-2xl font-bold mt-2 text-destructive">{stats.new}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Active Operations</p>
-          <p className="text-2xl font-bold mt-2 text-green-600">{stats.active}</p>
+          <p className="text-2xl font-bold mt-2 text-success">{stats.active}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Critical Incidents</p>
-          <p className="text-2xl font-bold mt-2 text-orange-600">{stats.critical}</p>
+          <p className="text-2xl font-bold mt-2 text-warning">{stats.critical}</p>
         </div>
       </div>
 
@@ -139,7 +139,7 @@ export default function EmergencyDashboardScreen() {
         {filteredIncidents.map((incident) => {
           const config = STATUS_CONFIG[incident.status];
           return (
-            <div key={incident.id} className={`rounded-lg border-2 p-4 ${config.bg}`} style={{ borderColor: config.color }}>
+            <div key={incident.id} className={`rounded-xl border border-border p-4 ${config.bg}`}>
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -180,10 +180,10 @@ export default function EmergencyDashboardScreen() {
               <div className="flex gap-2 mt-4 pt-3 border-t">
                 {incident.status === "new" && (
                   <>
-                    <Button className="flex-1 bg-green-600 hover:bg-green-700" size="sm">
+                    <Button className="flex-1 bg-success hover:bg-success" size="sm">
                       Accept & Dispatch
                     </Button>
-                    <Button variant="outline" className="flex-1 text-red-600" size="sm">
+                    <Button variant="outline" className="flex-1 text-destructive" size="sm">
                       Decline
                     </Button>
                   </>

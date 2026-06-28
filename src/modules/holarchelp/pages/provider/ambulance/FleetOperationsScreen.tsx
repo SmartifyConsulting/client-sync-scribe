@@ -78,26 +78,26 @@ export default function FleetOperationsScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "available":
-        return { badge: "bg-green-100 text-green-800", icon: "✓" };
+        return { badge: "bg-success/10 text-success", icon: "✓" };
       case "in-service":
-        return { badge: "bg-amber-100 text-amber-800", icon: "🚑" };
+        return { badge: "bg-warning/10 text-warning", icon: "🚑" };
       case "maintenance":
-        return { badge: "bg-gray-100 text-gray-800", icon: "⚙" };
+        return { badge: "bg-muted text-muted-foreground", icon: "⚙" };
       default:
-        return { badge: "bg-gray-100 text-gray-800", icon: "•" };
+        return { badge: "bg-muted text-muted-foreground", icon: "•" };
     }
   };
 
   const getMaintenanceStatusColor = (status: string) => {
     switch (status) {
       case "scheduled":
-        return "bg-amber-100 text-amber-800";
+        return "bg-warning/10 text-warning";
       case "in-progress":
-        return "bg-blue-100 text-blue-800";
+        return "bg-primary/10 text-primary";
       case "overdue":
-        return "bg-red-100 text-red-800";
+        return "bg-destructive/10 text-destructive";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -111,26 +111,26 @@ export default function FleetOperationsScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
-        <h1 className="text-3xl font-extrabold mt-2">Fleet Operations</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Operations</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Fleet Operations</h1>
         <p className="text-sm text-muted-foreground mt-2">6 vehicles • 3 available • 2 in-service • 1 maintenance</p>
       </header>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Total Vehicles</p>
           <p className="text-2xl font-bold mt-2">6</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Utilization Rate</p>
           <p className="text-2xl font-bold mt-2">76.4%</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Total Mileage</p>
           <p className="text-2xl font-bold mt-2">13.5k km</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Cost/Vehicle</p>
           <p className="text-2xl font-bold mt-2">$4.2k/mo</p>
         </div>
@@ -145,7 +145,7 @@ export default function FleetOperationsScreen() {
           const maintenanceColor = getMaintenanceStatusColor(vehicle.maintenanceStatus);
 
           return (
-            <div key={vehicle.code} className="rounded-lg border bg-card p-4 space-y-3">
+            <div key={vehicle.code} className="rounded-xl border border-border bg-card p-4 space-y-3">
               {/* Header Row */}
               <div className="flex items-start justify-between">
                 <div>
@@ -170,7 +170,7 @@ export default function FleetOperationsScreen() {
               <div className="border-t" />
 
               {/* Vehicle Utilization */}
-              <div className="bg-gray-50 dark:bg-gray-900/30 rounded p-3 space-y-2">
+              <div className="bg-muted rounded p-3 space-y-2">
                 <p className="text-sm font-semibold">Vehicle Utilization</p>
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div>
@@ -203,7 +203,7 @@ export default function FleetOperationsScreen() {
       </div>
 
       {/* Fleet Efficiency Metrics */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h3 className="font-bold">Fleet Efficiency Metrics</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div className="flex justify-between">

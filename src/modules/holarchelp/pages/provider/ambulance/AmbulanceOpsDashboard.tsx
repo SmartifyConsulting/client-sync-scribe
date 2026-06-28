@@ -66,8 +66,8 @@ export default function AmbulanceOpsDashboard() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
-          <h1 className="text-2xl font-extrabold leading-tight">{t("ambulance.liveSosFeed")}</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-tight">{t("ambulance.liveSosFeed")}</h1>
         </div>
         <div className="flex gap-1.5">
           <KPI icon={Siren} label={t("ambulance.open")} value={open.length} tone="text-sos" />

@@ -12,11 +12,11 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const GEOFENCE_TYPE_COLORS: Record<string, string> = {
-  depot: "bg-blue-500/15 text-blue-600 border-blue-500/40",
-  hospital: "bg-green-500/15 text-green-600 border-green-500/40",
+  depot: "bg-primary/15 text-primary border-primary/40/40",
+  hospital: "bg-success/15 text-success border-success/40/40",
   no_go: "bg-destructive/15 text-destructive border-destructive/40",
-  service_center: "bg-orange-500/15 text-orange-600 border-orange-500/40",
-  standby: "bg-purple-500/15 text-purple-600 border-purple-500/40",
+  service_center: "bg-warning/15 text-warning border-warning/40/40",
+  standby: "bg-accent/15 text-accent-foreground border-purple-500/40",
 };
 
 const GEOFENCE_TYPE_LABELS: Record<string, string> = {
@@ -111,10 +111,10 @@ export default function GeofenceScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
-          <h1 className="text-2xl font-extrabold">Geofence Management</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Geofence Management</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Create geographic zones and receive alerts when vehicles enter or leave them.
           </p>
@@ -126,13 +126,13 @@ export default function GeofenceScreen() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Active Geofences
           </p>
           <p className="mt-1 text-2xl font-bold">{geofences.length}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Restricted Zones
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">
@@ -140,7 +140,7 @@ export default function GeofenceScreen() {
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Coverage Area
           </p>
           <p className="mt-1 text-2xl font-bold">
@@ -150,9 +150,9 @@ export default function GeofenceScreen() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <AlertCircle className="h-4 w-4 text-blue-600" />
-          <p className="text-xs text-blue-700">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/40/20">
+          <AlertCircle className="h-4 w-4 text-primary" />
+          <p className="text-xs text-primary">
             💡 Create geofences around depots, hospitals, and restricted areas. Vehicles will be monitored for breaches.
           </p>
         </div>

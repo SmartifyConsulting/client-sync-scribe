@@ -56,10 +56,10 @@ const MOCK_EVENTS: CalendarEvent[] = [
 ];
 
 const EVENT_CONFIG = {
-  maintenance: { color: "bg-blue-100 text-blue-800", label: "Maintenance", icon: "🔧" },
-  inspection: { color: "bg-purple-100 text-purple-800", label: "Inspection", icon: "✓" },
-  insurance: { color: "bg-green-100 text-green-800", label: "Insurance", icon: "📋" },
-  mot: { color: "bg-orange-100 text-orange-800", label: "MOT", icon: "🚗" },
+  maintenance: { color: "bg-primary/10 text-primary", label: "Maintenance", icon: "🔧" },
+  inspection: { color: "bg-accent/40 text-accent-foreground", label: "Inspection", icon: "✓" },
+  insurance: { color: "bg-success/10 text-success", label: "Insurance", icon: "📋" },
+  mot: { color: "bg-warning/10 text-warning", label: "MOT", icon: "🚗" },
 };
 
 export default function FleetCalendarScreen() {
@@ -88,8 +88,8 @@ export default function FleetCalendarScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Fleet Management</p>
-        <h1 className="text-3xl font-extrabold mt-2">Maintenance Calendar</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Management</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Maintenance Calendar</h1>
         <p className="text-sm text-muted-foreground mt-2">Plan maintenance, inspections, and renewals</p>
       </header>
 
@@ -113,7 +113,7 @@ export default function FleetCalendarScreen() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="rounded-lg border bg-card overflow-hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
         {/* Day Headers */}
         <div className="grid grid-cols-7 bg-muted/50 border-b">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -163,14 +163,14 @@ export default function FleetCalendarScreen() {
 
       {/* Selected Date Events */}
       {selectedDate && (
-        <div className="rounded-lg border bg-card p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <h2 className="font-bold text-lg">Events on {selectedDate}</h2>
           <div className="space-y-2">
             {getEventsForDate(parseInt(selectedDate.split("-")[2])).length > 0 ? (
               getEventsForDate(parseInt(selectedDate.split("-")[2])).map((event, idx) => {
                 const config = EVENT_CONFIG[event.type];
                 return (
-                  <div key={idx} className={`rounded-lg border-2 p-3 ${config.color}`}>
+                  <div key={idx} className={`rounded-xl border p-3 ${config.color}`}>
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-semibold">{event.vehicle}</p>
@@ -196,7 +196,7 @@ export default function FleetCalendarScreen() {
       )}
 
       {/* Legend */}
-      <div className="rounded-lg border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-4">
         <p className="font-semibold text-sm mb-3">Event Types</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {Object.entries(EVENT_CONFIG).map(([key, config]) => (

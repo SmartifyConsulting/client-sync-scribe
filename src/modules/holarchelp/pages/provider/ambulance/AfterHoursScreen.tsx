@@ -55,8 +55,8 @@ const HOURS_DATA: AfterHoursEvent[] = [
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: "border-blue-500/40 bg-blue-500/10 text-blue-600",
-  medium: "border-orange-500/40 bg-orange-500/10 text-orange-600",
+  low: "border-primary/40/40 bg-primary/10 text-primary",
+  medium: "border-warning/40/40 bg-warning/10 text-warning",
   high: "border-destructive/40 bg-destructive/10 text-destructive",
   critical: "border-destructive/40 bg-destructive/10 text-destructive",
 };
@@ -72,10 +72,10 @@ export default function AfterHoursScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
-          <h1 className="text-2xl font-extrabold">After-Hours Vehicle Use</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">After-Hours Vehicle Use</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Track vehicles that are used outside scheduled operating hours.
           </p>
@@ -84,19 +84,19 @@ export default function AfterHoursScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Critical Events
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">{criticalCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             High Risk
           </p>
-          <p className="mt-1 text-2xl font-bold text-orange-600">{highCount}</p>
+          <p className="mt-1 text-2xl font-bold text-warning">{highCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total Events
           </p>
           <p className="mt-1 text-2xl font-bold">{HOURS_DATA.length}</p>
