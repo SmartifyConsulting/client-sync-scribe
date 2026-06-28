@@ -9,6 +9,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Accordion, AccordionItem, AccordionTrigger, AccordionContent,
+} from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -201,7 +204,18 @@ export default function FleetPage() {
         </div>
       </div>
 
-      {/* Vehicles Grid */}
+      {/* Vehicles Accordion (collapsed by default) */}
+      <Accordion type="single" collapsible className="space-y-3">
+        <AccordionItem
+          value="vehicles"
+          className="rounded-xl border border-primary bg-card shadow-sm"
+        >
+          <AccordionTrigger className="px-4 py-3 hover:no-underline">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Ambulance className="h-4 w-4 text-primary" /> Vehicles ({filteredRows.length})
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
       {loading ? (
         <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
       ) : filteredRows.length === 0 ? (
@@ -297,6 +311,10 @@ export default function FleetPage() {
           })}
         </div>
       )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
 
       {providerId && (
         <AmbulanceFormDialog

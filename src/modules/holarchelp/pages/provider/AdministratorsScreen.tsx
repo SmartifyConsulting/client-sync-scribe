@@ -24,6 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2, UserPlus, Loader2, ShieldCheck, Edit2, Search } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
+import HospitalNetworkScreen from "./ambulance/HospitalNetworkScreen";
 import { toast } from "sonner";
 
 interface MemberRow {
@@ -247,59 +250,88 @@ export default function AdministratorsScreen() {
     );
   };
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "hospital-network" ? "hospital-network" : "users";
+  const showHospitalTab = providerType === "ambulance";
+
   return (
     <div className="space-y-4">
-      <div>
+      <div className="space-y-1">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Administration</p>
-        <h1 className="text-3xl font-extrabold mt-2">User Management</h1>
-        <p className="text-sm text-muted-foreground mt-2">Manage all users, admins, and crew members</p>
+        <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
+        <p className="text-sm text-muted-foreground">Manage users{showHospitalTab ? " and the hospital network" : ""}</p>
       </div>
 
       {!isCurrentUserAdmin && (
-        <div className="rounded-lg bg-warning/10 border border-amber-200 text-warning p-4">
-          <p className="font-semibold">📖 Read-Only View</p>
-          <p className="text-sm mt-1">Only Admin users can add, edit, or remove members</p>
+        <div className="rounded-lg bg-warning/10 border border-amber-200 text-warning p-3 text-sm">
+          <span className="font-semibold">Read-only view —</span> only Admin users can add, edit, or remove members.
         </div>
       )}
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" />
-            Users ({members.length})
-          </CardTitle>
-          {isCurrentUserAdmin && (
-            <Button size="sm" onClick={() => setAddOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" /> Add User
-            </Button>
+      <Tabs
+        defaultValue={initialTab}
+        onValueChange={(v) => {
+          const next = new URLSearchParams(searchParams);
+          if (v === "hospital-network") next.set("tab", "hospital-network");
+          else next.delete("tab");
+          setSearchParams(next, { replace: true });
+        }}
+      >
+        <TabsList>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          {showHospitalTab && (
+            <TabsTrigger value="hospital-network">Hospital Network</TabsTrigger>
           )}
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by name, email, or role..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+        </TabsList>
 
-          {isLoading ? (
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
-            </div>
-          ) : filteredMembers.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {searchQuery ? "No users match your search" : "No users yet"}
-            </p>
-          ) : (
-            <div className="grid gap-3">
-              {filteredMembers.map(renderMemberCard)}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        <TabsContent value="users" className="mt-4">
+          <Card className="rounded-xl border border-border bg-card shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 py-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Users ({members.length})
+              </CardTitle>
+              {isCurrentUserAdmin && (
+                <Button size="sm" onClick={() => setAddOpen(true)}>
+                  <UserPlus className="mr-2 h-4 w-4" /> Add User
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="pt-0 space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, or role..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9 text-sm"
+                />
+              </div>
+
+              {isLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
+                </div>
+              ) : filteredMembers.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  {searchQuery ? "No users match your search" : "No users yet"}
+                </p>
+              ) : (
+                <div className="grid gap-2">
+                  {filteredMembers.map(renderMemberCard)}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {showHospitalTab && (
+          <TabsContent value="hospital-network" className="mt-4">
+            <HospitalNetworkScreen embedded />
+          </TabsContent>
+        )}
+      </Tabs>
+
 
       {/* Add/Edit Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
