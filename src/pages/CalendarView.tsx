@@ -604,10 +604,10 @@ export default function CalendarView() {
               <div className="flex flex-col items-end">
                 <Button variant="outline" onClick={disconnect} className="gap-2">
                   <Unlink className="h-4 w-4" />
-                  Disconnect Google
+                  {t("calendar.disconnectGoogle")}
                 </Button>
                 <p className="text-[10px] text-muted-foreground max-w-[200px] mt-1 text-right">
-                  Google sync mirrors only your own appointments.
+                  {t("calendar.googleSyncCaption")}
                 </p>
               </div>
             ) : (
