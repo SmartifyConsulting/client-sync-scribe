@@ -1,55 +1,48 @@
-# Plan — Translate Today's Briefing + 6 doctor screens
+## Translation Sweep — Round 2 (revised)
 
-Extends the doctor-dashboard translation work to the rest of the primary doctor portal using the same `t()` + `uiTranslations.ts` pattern.
+The screenshots show two problems:
 
-## Scope
+1. **Missing keys** — chrome strings on My Practice, Rewards, To-Do, Documents, Round-Table meta, and SOS landing are still hard-coded English.
+2. **Stale renders on language switch** — when the flag changes, only some components re-render. The rest keep the previous locale (or fall back to English), producing the half-Italian/half-Greek/half-English screens.
 
-**Translate** (labels, headings, buttons, tabs, menu items, placeholders, empty-states, toasts):
+### Part A — Fix the live language-switch bug
 
-1. **Today's Briefing card** (image 1) — `BriefingCard` / `DashboardBriefing`: title "Today's Briefing", date, "X of Y appointments completed", **Narrate** button, arrow nav tooltips.
-2. **My Patients** (`/patients`) — page title, search placeholder, "Add Patient", tab labels (All / Mine / Shared / Pending), accordion section headers, empty state, sort/filter controls, card action buttons.
-3. **My Calendar** (`/calendar`) — view toggles (Day/Week/Month), "Today", "New Appointment", date-navigation arrows aria-labels, status filters, mini-legend, all-day label.
-4. **My Sessions** (`/sessions`) — page title, "New Session", search placeholder, accordion group headers (Today / Last week / Last month / Older — from the prior plan), session-row action menu labels (Open, Edit, Delete, Mark Complete), empty state.
-5. **My Round Tables** (`/round-tables`) — title, "New Topic", tab labels, member-presence labels, "Reply", composer placeholder, "Mark all read", notification labels.
-6. **My Rewards** (`/doctor/rewards`) — title, KPI card titles (Vulas earned, Streak, Patients adhering), tab labels, redeem-button copy, empty state.
-7. **SOS** — `LiveSOSScreen` + `DoctorSosChooser`: title, severity labels (Critical / High / Medium / Low), KPI cards (Active, Responding, Resolved), filter chips, "Assign", "Mark resolved", confirm-cancel dialog copy, voice-note CTA labels (the recorder UI itself).
+Root cause: components that read translations outside the `useTranslation()` hook (module-scope `i18n.t(...)`, memoized constants, options arrays declared at file top, default props) capture the locale at import time and never update. Suspense fallbacks and `key`-less list renders also freeze the old strings.
 
-**Not translated** (data, not chrome):
-- AI-generated todo descriptions like *"Schedule appointment with Sarah Johnson on 2026-06-04…"* (image 2) — these come from `process-todo-actions` and remain in the source language. We'll add a separate follow-up to teach that edge function to honor the user's `preferred_language` for new tasks.
-- Patient names, prescription text, transcripts, document contents.
+Fixes:
 
-## How the work is done
+- **Force a global re-render on `languageChanged`.** In `src/i18n/index.ts`, after `i18n.init(...)`, attach `i18n.on('languageChanged', lng => { document.documentElement.lang = lng; document.documentElement.dir = RTL.has(lng) ? 'rtl' : 'ltr'; })` and bump a Zustand/Context `langVersion` counter that the root `<App />` consumes so the whole tree re-renders (or wrap `<Outlet />` with `key={i18n.language}`).
+- **Replace all module-scope `i18n.t(...)` calls** with in-component `const { t } = useTranslation()`. Audit with `rg "i18n\.t\(" src` and `rg "from .*i18next.*\n.*\.t\(" src`.
+- **Move static option arrays** (`PRIORITIES`, tab defs, milestone labels, template card metadata) inside the component body so they re-evaluate on each render, or compute via `useMemo(..., [i18n.language])`.
+- **Persist `i18n.changeLanguage` properly** in `LanguageSwitcher` — await the promise, then `await queryClient.invalidateQueries()` so any server-translated content (briefing narration, AI summaries) also refreshes.
+- **Guard against suspense flicker** — set `react: { useSuspense: false }` in `i18n.init` so partial trees don't keep stale text while a namespace lazy-loads.
+- **Verify with Playwright**: load `/dashboard` in `en`, switch to `it`, assert no English chrome remains; switch to `el`, assert no Italian chrome remains.
 
-1. **Add namespaces** to every locale JSON in `src/i18n/locales/*.json`:
-   - `briefing` — title, date format, completedCount, narrate, prev, next.
-   - `patients` — page chrome only.
-   - `calendar` — view names + controls.
-   - `sessions` — page + accordion group labels.
-   - `roundTables` — page + composer chrome.
-   - `doctorRewards` — page + KPI chrome.
-   - `sos` — page, severity, status, KPI chrome (without overwriting existing `sosVoice` / `voiceNotes` namespaces).
-2. **Wire `useTranslation()`** in each screen's top component and replace hardcoded JSX text. Same pattern as `Dashboard.tsx` / `CompactTodoList.tsx`.
-3. **Batch-translate** the new English keys into the other 24 locales using a one-shot Lovable AI call (Gemini 2.5 Flash) per locale, with a Python helper script (same approach used for `doctorDashboard`). Existing keys are left untouched.
-4. **Verify** by switching the top-right language picker to French, Igbo, Zulu and Arabic and confirming:
-   - Today's Briefing header, Narrate button, and arrow controls flip.
-   - Each of the 6 screens' chrome flips while data inside cards remains in its source language.
-   - RTL layout (Arabic) keeps icons mirrored correctly.
+### Part B — Add the missing translation keys
 
-## Files expected to change (chrome-only edits)
+Same scope as before. New namespaces in `src/i18n/locales/en.json`:
+- `myPractice` — tabs (My Practice / Referrals / Credentials / My Rewards), About Me card, `{n} / 600 words`, Save
+- `patientRewards` — Progress to Next Milestone, `{n} / {n} Vulas to "{milestone}"`, `{n} more to go!`, Recent Rewards, empty state
+- `todo` (extend) — Add New Task, Tap to record, Or type your task here..., Add, Priority, Low/Medium/High, AI Process, Active/Completed/All tab labels, Approve, `(No matching patient found)`
+- `documents` — Documents/Templates/Header & Footer/Content Templates tabs, helper text, + New Content Template, Search content templates..., Create Template, Patient Documents, Search documents..., Letterhead label, Header and Footer / Default values, built-in template name+description keyed by slug
+- `roundTablesMeta` — `{count, plural, one {# note} other {# notes}} · Last activity {date}`
+- `sos` — Emergency Assistance, Help will be alerted instantly, acknowledge heading + 3 bullets, SOS / TAP FOR HELP, footer caption, Manage emergency contacts, View incident history
 
-- `src/components/dashboard/BriefingCard.tsx` (or equivalent — confirmed once exploration phase begins).
-- `src/pages/Patients.tsx`
-- `src/pages/CalendarView.tsx`
-- `src/pages/Sessions.tsx`
-- `src/pages/doctor/DoctorRoundTablesPage.tsx`
-- `src/pages/doctor/DoctorRewards.tsx`
-- `src/modules/holarchelp/pages/provider/LiveSOSScreen.tsx` + `src/modules/holarchelp/components/DoctorSosChooser.tsx`
-- All 25 `src/i18n/locales/*.json` files (additive)
+Run `/tmp/i18n_extend.py` (Gemini 2.5 Flash) to translate into the other 24 locales.
 
-No backend, schema, or behavior changes — translation only.
+### Part C — Wire components
 
-## Out of scope (already on the master plan, not re-done here)
+`src/pages/MyPractice.tsx`, `src/pages/patient/MyRewards.tsx`, `src/pages/TodoList.tsx` (+ `AddTaskCard`), `src/pages/Documents.tsx` & `src/pages/doctor/DoctorDocumentsPage.tsx`, `src/pages/doctor/DoctorRoundTablesPage.tsx`, `src/modules/holarchelp/pages/HolarcHelpHome.tsx`.
 
-Practice partners overhaul, hospital admissions, chronic-meds emergency-contact, patient document AI uploads. Those stay in their own batches so each ships verifiable.
+- Replace hard-coded JSX with `t('namespace.key')`.
+- Use `new Intl.DateTimeFormat(i18n.language, …)` for the To-Do day headers and Round-Table "Last activity" date so dates flip with the locale too.
+- For template display names, look up `t(\`documents.builtin.${slug}.name\`)` with a fallback to the DB name (keeps custom templates untouched).
 
-Approve and I'll execute end-to-end.
+### Out of scope
+
+User-entered content (About Me paragraph, patient names, dictated task text, document body, invoice numbers, brand words Vula / HolarcHelp / SOS) stays in the language it was authored in.
+
+### Verification
+
+1. `tsgo` clean.
+2. Playwright switches `en → it → el → ig → zu` on `/dashboard`, `/doctor/round-tables`, `/todo`, `/documents`, `/patient/rewards`, `/sos`; screenshot each and confirm no mixed-locale chrome.
