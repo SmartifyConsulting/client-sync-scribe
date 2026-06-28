@@ -90,6 +90,7 @@ const formatDate = (dateString: string): string => {
 
 
 export default function Documents({ hideHeader = false }: { hideHeader?: boolean }) {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const {
