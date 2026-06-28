@@ -1424,47 +1424,47 @@ export function PatientDetailsEditor({
         <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
           {show("personal") && (
             <TabsTrigger value="personal" className={triggerClass}>
-              Personal Information
+              {t("patientProfile.togglePersonal")}
             </TabsTrigger>
           )}
           {show("medical") && (
             <TabsTrigger value="medical" className={triggerClass}>
-              Medical Information
+              {t("patientProfile.toggleMedical")}
             </TabsTrigger>
           )}
           {show("doctors") && (
             <TabsTrigger value="doctors" className={triggerClass}>
-              My Holarchy
+              {t("nav.myHolarchy")}
             </TabsTrigger>
           )}
           {show("sessions") && (
             <TabsTrigger value="sessions" className={triggerClass}>
-              Sessions
+              {t("sessions.title")}
             </TabsTrigger>
           )}
           {show("hospital_visits") && (
             <TabsTrigger value="hospital_visits" className={triggerClass}>
-              Admissions
+              {t("patientProfile.tabAdmissions")}
             </TabsTrigger>
           )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
-              Round Table
+              {t("patientProfile.tabRoundTable")}
             </TabsTrigger>
           )}
           {show("calendar") && (
             <TabsTrigger value="calendar" className={triggerClass}>
-              My Calendar
+              {t("nav.myCalendar")}
             </TabsTrigger>
           )}
           {show("tasks") && (
             <TabsTrigger value="tasks" className={triggerClass}>
-              My Tasks
+              {t("nav.myTasks")}
             </TabsTrigger>
           )}
           {show("documents") && (
             <TabsTrigger value="documents" className={triggerClass}>
-              My Documents
+              {t("nav.myDocuments")}
             </TabsTrigger>
           )}
         </TabsList>
@@ -1478,17 +1478,18 @@ export function PatientDetailsEditor({
           value="personal"
           className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
-          Personal Information
+          {t("patientProfile.togglePersonal")}
         </TabsTrigger>
         <TabsTrigger
           value="medical"
           className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
-          Medical Information
+          {t("patientProfile.toggleMedical")}
         </TabsTrigger>
       </TabsList>
     );
   };
+
 
   // Compact profile banner for non-Home mobile sections
   const CompactBanner = () => {
