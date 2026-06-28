@@ -2130,8 +2130,8 @@ export function PatientDetailsEditor({
           <TabsContent value="personal" className="space-y-4 mt-4">
             <div className="mb-1 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-                <p className="text-xs text-muted-foreground">View and manage personal details</p>
+                <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.personalHeading")}</h2>
+                <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
