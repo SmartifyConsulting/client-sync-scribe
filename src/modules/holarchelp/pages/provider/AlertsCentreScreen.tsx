@@ -57,22 +57,22 @@ const MOCK_ALERTS: Alert[] = [
 const getAlertIcon = (type: string) => {
   switch (type) {
     case "critical":
-      return <AlertCircle className="h-5 w-5 text-red-600" />;
+      return <AlertCircle className="h-5 w-5 text-destructive" />;
     case "warning":
-      return <AlertTriangle className="h-5 w-5 text-orange-600" />;
+      return <AlertTriangle className="h-5 w-5 text-warning" />;
     case "info":
-      return <Info className="h-5 w-5 text-blue-600" />;
+      return <Info className="h-5 w-5 text-primary" />;
   }
 };
 
 const getAlertColor = (type: string) => {
   switch (type) {
     case "critical":
-      return "border-red-200 bg-red-50";
+      return "border-red-200 bg-destructive/10";
     case "warning":
-      return "border-orange-200 bg-orange-50";
+      return "border-orange-200 bg-warning/10";
     case "info":
-      return "border-blue-200 bg-blue-50";
+      return "border-blue-200 bg-primary/10";
   }
 };
 
@@ -116,11 +116,11 @@ export default function AlertsCentreScreen() {
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Unread</p>
-          <p className="text-2xl font-bold mt-2 text-orange-600">{stats.unread}</p>
+          <p className="text-2xl font-bold mt-2 text-warning">{stats.unread}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Critical</p>
-          <p className="text-2xl font-bold mt-2 text-red-600">{stats.critical}</p>
+          <p className="text-2xl font-bold mt-2 text-destructive">{stats.critical}</p>
         </div>
       </div>
 
@@ -159,7 +159,7 @@ export default function AlertsCentreScreen() {
                   </div>
                 </div>
                 {!alert.read && (
-                  <span className="h-3 w-3 rounded-full bg-red-600 flex-shrink-0 mt-1" />
+                  <span className="h-3 w-3 rounded-full bg-destructive flex-shrink-0 mt-1" />
                 )}
               </div>
 

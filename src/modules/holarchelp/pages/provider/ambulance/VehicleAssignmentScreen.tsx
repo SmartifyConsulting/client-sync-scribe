@@ -50,13 +50,13 @@ export default function VehicleAssignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Fleet Operations</p>
-        <h1 className="text-3xl font-extrabold mt-2">Vehicle Assignment</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Assignment</h1>
         <p className="text-sm text-muted-foreground mt-2">Assign vehicles to crew and routes</p>
       </header>
 
       {/* Vehicle Selection */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Select Vehicle</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {["AMB-001", "AMB-002", "AMB-003"].map((vehicle) => (
@@ -66,7 +66,7 @@ export default function VehicleAssignmentScreen() {
                 setSelectedVehicle(vehicle);
                 setSelectedCrew([]);
               }}
-              className={`rounded-lg border-2 p-4 transition-all text-left ${
+              className={`rounded-xl border p-4 transition-all text-left ${
                 selectedVehicle === vehicle
                   ? "border-primary bg-primary/5"
                   : "border-border hover:border-primary/50"
@@ -80,7 +80,7 @@ export default function VehicleAssignmentScreen() {
       </div>
 
       {/* Crew Selection */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg flex items-center gap-2">
           <Users className="h-5 w-5" />
           Select Crew Members
@@ -89,7 +89,7 @@ export default function VehicleAssignmentScreen() {
           {MOCK_CREW.map((crew) => (
             <div
               key={crew.id}
-              className={`rounded-lg border-2 p-3 cursor-pointer transition-all ${
+              className={`rounded-xl border p-3 cursor-pointer transition-all ${
                 selectedCrew.includes(crew.id)
                   ? "border-primary bg-primary/5"
                   : "border-border"
@@ -104,15 +104,15 @@ export default function VehicleAssignmentScreen() {
                 <div
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
                     selectedCrew.includes(crew.id)
-                      ? "border-primary bg-primary text-white"
-                      : "border-gray-300"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border"
                   }`}
                 >
                   {selectedCrew.includes(crew.id) && <span className="text-sm">✓</span>}
                 </div>
               </div>
               {!crew.available && (
-                <p className="text-xs text-red-600 mt-1">Not available</p>
+                <p className="text-xs text-destructive mt-1">Not available</p>
               )}
             </div>
           ))}
@@ -120,7 +120,7 @@ export default function VehicleAssignmentScreen() {
       </div>
 
       {/* Assignment Details */}
-      <div className="rounded-lg border bg-card p-4 space-y-4">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-4">
         <h2 className="font-bold text-lg">Assignment Details</h2>
         <div className="space-y-3">
           <div>
@@ -151,7 +151,7 @@ export default function VehicleAssignmentScreen() {
 
       {/* Summary & Assign */}
       {selectedCrew.length > 0 && (
-        <div className="rounded-lg border-2 border-primary bg-primary/5 p-4 space-y-3">
+        <div className="rounded-xl border border-primary bg-primary/5 p-4 space-y-3">
           <h3 className="font-bold">Assignment Summary</h3>
           <div className="space-y-2 text-sm">
             <p>
@@ -175,7 +175,7 @@ export default function VehicleAssignmentScreen() {
       )}
 
       {!selectedCrew.length && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+        <div className="rounded-xl border border-dashed border-border p-8 text-center">
           <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-muted-foreground">Select crew members to create assignment</p>
         </div>

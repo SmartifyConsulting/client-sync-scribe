@@ -68,9 +68,9 @@ const MOCK_VEHICLES: Record<string, Vehicle> = {
 };
 
 const STATUS_CONFIG = {
-  available: { icon: "✓", label: "AVAILABLE", color: "text-green-600", bg: "bg-green-50", badge: "bg-green-100 text-green-800" },
-  assigned: { icon: "🚑", label: "IN-SERVICE", color: "text-orange-600", bg: "bg-orange-50", badge: "bg-orange-100 text-orange-800" },
-  out_of_service: { icon: "⚙", label: "MAINTENANCE", color: "text-gray-600", bg: "bg-gray-50", badge: "bg-gray-100 text-gray-800" },
+  available: { icon: "✓", label: "AVAILABLE", color: "text-success", bg: "bg-success/10", badge: "bg-success/10 text-success" },
+  assigned: { icon: "🚑", label: "IN-SERVICE", color: "text-warning", bg: "bg-warning/10", badge: "bg-warning/10 text-warning" },
+  out_of_service: { icon: "⚙", label: "MAINTENANCE", color: "text-muted-foreground", bg: "bg-muted", badge: "bg-muted text-muted-foreground" },
 };
 
 export default function VehicleProfileScreen() {
@@ -99,8 +99,8 @@ export default function VehicleProfileScreen() {
           Back to Fleet
         </Button>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Operations</p>
-          <h1 className="text-3xl font-extrabold mt-2">{vehicle.code}</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">{vehicle.code}</h1>
           <p className="text-sm text-muted-foreground mt-1">{vehicle.make} {vehicle.model}</p>
           <p className="text-xs text-muted-foreground">{vehicle.type} • {vehicle.location}</p>
         </div>
@@ -110,7 +110,7 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Vehicle Information */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Vehicle Information</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
@@ -145,7 +145,7 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Operational Status */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Operational Status</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
@@ -167,8 +167,8 @@ export default function VehicleProfileScreen() {
           <div>
             <p className="text-xs text-muted-foreground">Fuel Level</p>
             <div className="flex items-center gap-2 mt-1">
-              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full bg-green-500" style={{ width: `${vehicle.fuelLevel}%` }} />
+              <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-success" style={{ width: `${vehicle.fuelLevel}%` }} />
               </div>
               <p className="font-semibold text-sm">{vehicle.fuelLevel}%</p>
             </div>
@@ -181,7 +181,7 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Service & Maintenance */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Service & Maintenance</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="rounded-lg bg-muted/50 p-3">
@@ -190,34 +190,34 @@ export default function VehicleProfileScreen() {
                 <p className="text-xs text-muted-foreground">Last Service</p>
                 <p className="font-semibold">{vehicle.lastService}</p>
               </div>
-              <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+              <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
             </div>
           </div>
-          <div className={`rounded-lg ${serviceDays < 0 ? "bg-red-50" : serviceDays < 30 ? "bg-yellow-50" : "bg-green-50"} p-3`}>
+          <div className={`rounded-lg ${serviceDays < 0 ? "bg-destructive/10" : serviceDays < 30 ? "bg-warning/10" : "bg-success/10"} p-3`}>
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-xs text-muted-foreground">Next Service</p>
                 <p className="font-semibold">{vehicle.nextService}</p>
-                <p className={`text-xs mt-1 ${serviceDays < 0 ? "text-red-600" : serviceDays < 30 ? "text-orange-600" : "text-green-600"}`}>
+                <p className={`text-xs mt-1 ${serviceDays < 0 ? "text-destructive" : serviceDays < 30 ? "text-warning" : "text-success"}`}>
                   {serviceDays < 0 ? "OVERDUE" : `${serviceDays} days`}
                 </p>
               </div>
-              <Clock className={`h-5 w-5 flex-shrink-0 ${serviceDays < 0 ? "text-red-600" : serviceDays < 30 ? "text-orange-600" : "text-green-600"}`} />
+              <Clock className={`h-5 w-5 flex-shrink-0 ${serviceDays < 0 ? "text-destructive" : serviceDays < 30 ? "text-warning" : "text-success"}`} />
             </div>
           </div>
           <div className="rounded-lg bg-muted/50 p-3">
             <p className="text-xs text-muted-foreground">Last Inspection</p>
             <p className="font-semibold">{vehicle.lastInspection}</p>
           </div>
-          <div className={`rounded-lg ${insuranceDays < 30 ? "bg-yellow-50" : "bg-green-50"} p-3`}>
+          <div className={`rounded-lg ${insuranceDays < 30 ? "bg-warning/10" : "bg-success/10"} p-3`}>
             <p className="text-xs text-muted-foreground">Insurance Expiry</p>
             <p className="font-semibold">{vehicle.insuranceExpiry}</p>
-            <p className={`text-xs mt-1 ${insuranceDays < 30 ? "text-orange-600" : "text-green-600"}`}>{insuranceDays} days</p>
+            <p className={`text-xs mt-1 ${insuranceDays < 30 ? "text-warning" : "text-success"}`}>{insuranceDays} days</p>
           </div>
-          <div className={`rounded-lg ${motDays < 30 ? "bg-yellow-50" : "bg-green-50"} p-3`}>
+          <div className={`rounded-lg ${motDays < 30 ? "bg-warning/10" : "bg-success/10"} p-3`}>
             <p className="text-xs text-muted-foreground">MOT Expiry</p>
             <p className="font-semibold">{vehicle.motExpiry}</p>
-            <p className={`text-xs mt-1 ${motDays < 30 ? "text-orange-600" : "text-green-600"}`}>{motDays} days</p>
+            <p className={`text-xs mt-1 ${motDays < 30 ? "text-warning" : "text-success"}`}>{motDays} days</p>
           </div>
         </div>
         <Button variant="outline" size="sm" className="w-full">
@@ -227,16 +227,16 @@ export default function VehicleProfileScreen() {
       </div>
 
       {/* Equipment */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Equipment & Configuration</h2>
         <div className="space-y-2">
           {vehicle.equipment.map((item, idx) => (
             <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50">
               <span className="text-sm font-medium">{item.name}</span>
               {item.available ? (
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+                <CheckCircle2 className="h-5 w-5 text-success" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-red-600" />
+                <AlertCircle className="h-5 w-5 text-destructive" />
               )}
             </div>
           ))}

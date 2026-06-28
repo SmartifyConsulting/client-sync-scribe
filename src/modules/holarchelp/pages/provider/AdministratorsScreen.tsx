@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../components/ProviderGate";
+import { useAuth } from "@/hooks/useAuth";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,19 +51,22 @@ const CREW_ROLE_OPTIONS = [
 ];
 
 const ROLE_COLORS: Record<string, { bg: string; text: string; badge: string }> = {
-  admin: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
-  owner: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
-  manager: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
-  paramedic: { bg: "bg-green-100", text: "text-green-800", badge: "bg-green-600" },
-  emt: { bg: "bg-blue-100", text: "text-blue-800", badge: "bg-blue-600" },
-  driver: { bg: "bg-amber-100", text: "text-amber-800", badge: "bg-amber-600" },
-  dispatcher: { bg: "bg-purple-100", text: "text-purple-800", badge: "bg-purple-600" },
-  nurse: { bg: "bg-pink-100", text: "text-pink-800", badge: "bg-pink-600" },
-  supervisor: { bg: "bg-indigo-100", text: "text-indigo-800", badge: "bg-indigo-600" },
+  admin: { bg: "bg-destructive/10", text: "text-destructive", badge: "bg-destructive" },
+  owner: { bg: "bg-destructive/10", text: "text-destructive", badge: "bg-destructive" },
+  manager: { bg: "bg-destructive/10", text: "text-destructive", badge: "bg-destructive" },
+  paramedic: { bg: "bg-success/10", text: "text-success", badge: "bg-success" },
+  emt: { bg: "bg-primary/10", text: "text-primary", badge: "bg-primary" },
+  driver: { bg: "bg-warning/10", text: "text-warning", badge: "bg-warning" },
+  dispatcher: { bg: "bg-accent/40", text: "text-accent-foreground", badge: "bg-accent" },
+  nurse: { bg: "bg-accent/40", text: "text-accent-foreground", badge: "bg-accent" },
+  supervisor: { bg: "bg-accent/40", text: "text-accent-foreground", badge: "bg-accent" },
 };
 
 export default function AdministratorsScreen() {
-  const { providerId, providerType, userId } = useProviderAccess();
+  const { providerId, providerType } = useProviderAccess();
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
@@ -194,7 +199,7 @@ export default function AdministratorsScreen() {
 
   const getRoleColor = (role: string) => {
     const roleLower = (role || "member").toLowerCase();
-    return ROLE_COLORS[roleLower] || { bg: "bg-gray-100", text: "text-gray-800", badge: "bg-gray-600" };
+    return ROLE_COLORS[roleLower] || { bg: "bg-muted", text: "text-muted-foreground", badge: "bg-gray-600" };
   };
 
   const renderMemberCard = (row: MemberRow) => {
@@ -251,7 +256,7 @@ export default function AdministratorsScreen() {
       </div>
 
       {!isCurrentUserAdmin && (
-        <div className="rounded-lg bg-amber-100 border border-amber-200 text-amber-800 p-4">
+        <div className="rounded-lg bg-warning/10 border border-amber-200 text-warning p-4">
           <p className="font-semibold">📖 Read-Only View</p>
           <p className="text-sm mt-1">Only Admin users can add, edit, or remove members</p>
         </div>

@@ -44,11 +44,11 @@ export default function TelemetryHubScreen() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "connected":
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case "disconnected":
-        return <WifiOff className="h-5 w-5 text-gray-600" />;
+        return <WifiOff className="h-5 w-5 text-muted-foreground" />;
       case "error":
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-destructive" />;
       default:
         return null;
     }
@@ -58,8 +58,8 @@ export default function TelemetryHubScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Integration</p>
-          <h1 className="text-3xl font-extrabold mt-2">Telemetry Integration Hub</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Integration</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Telemetry Integration Hub</h1>
           <p className="text-sm text-muted-foreground mt-2">Connect and manage telematics providers</p>
         </div>
         <Button>
@@ -70,28 +70,28 @@ export default function TelemetryHubScreen() {
 
       {/* Health Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Connected Providers</p>
           <p className="text-2xl font-bold mt-2">2</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Total Devices</p>
           <p className="text-2xl font-bold mt-2">25</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Data Points/Hour</p>
           <p className="text-2xl font-bold mt-2">1,258</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">API Health</p>
-          <p className="text-2xl font-bold text-green-600 mt-2">98%</p>
+          <p className="text-2xl font-bold text-success mt-2">98%</p>
         </div>
       </div>
 
       {/* Providers List */}
       <div className="space-y-3">
         {providers.map((provider) => (
-          <div key={provider.id} className="rounded-lg border bg-card p-4">
+          <div key={provider.id} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-start gap-3">
                 {getStatusIcon(provider.status)}
@@ -107,10 +107,10 @@ export default function TelemetryHubScreen() {
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   provider.status === "connected"
-                    ? "bg-green-100 text-green-800"
+                    ? "bg-success/10 text-success"
                     : provider.status === "disconnected"
-                      ? "bg-gray-100 text-gray-800"
-                      : "bg-red-100 text-red-800"
+                      ? "bg-muted text-muted-foreground"
+                      : "bg-destructive/10 text-destructive"
                 }`}
               >
                 {provider.status === "connected"
@@ -133,7 +133,7 @@ export default function TelemetryHubScreen() {
               <div>
                 <p className="text-xs text-muted-foreground">Status</p>
                 <p className={`font-semibold text-sm mt-1 ${
-                  provider.status === "connected" ? "text-green-600" : "text-red-600"
+                  provider.status === "connected" ? "text-success" : "text-destructive"
                 }`}>
                   {provider.status === "connected" ? "Healthy" : "Attention"}
                 </p>
@@ -148,7 +148,7 @@ export default function TelemetryHubScreen() {
                 View API Logs
               </Button>
               {provider.status === "error" && (
-                <Button variant="outline" size="sm" className="flex-1 text-red-600">
+                <Button variant="outline" size="sm" className="flex-1 text-destructive">
                   Troubleshoot
                 </Button>
               )}
@@ -158,7 +158,7 @@ export default function TelemetryHubScreen() {
       </div>
 
       {/* API Field Mapping */}
-      <div className="rounded-lg border bg-card p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
         <h2 className="font-bold text-lg">Telemetry Field Mapping</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -182,7 +182,7 @@ export default function TelemetryHubScreen() {
                   <td className="p-2">{row.field}</td>
                   <td className="p-2 text-muted-foreground">{row.source}</td>
                   <td className="p-2 text-muted-foreground">{row.type}</td>
-                  <td className="p-2 text-green-600">{row.status}</td>
+                  <td className="p-2 text-success">{row.status}</td>
                 </tr>
               ))}
             </tbody>

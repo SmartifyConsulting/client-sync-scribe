@@ -26,7 +26,7 @@ export default function ExecutiveDashboardScreen() {
           <p className="text-xs text-muted-foreground">YTD Incidents</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">868</p>
-            <div className="flex items-center gap-1 text-green-600">
+            <div className="flex items-center gap-1 text-success">
               <TrendingUp className="h-4 w-4" />
               <span className="text-xs font-semibold">+12%</span>
             </div>
@@ -36,7 +36,7 @@ export default function ExecutiveDashboardScreen() {
           <p className="text-xs text-muted-foreground">YTD Revenue</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">$128K</p>
-            <div className="flex items-center gap-1 text-green-600">
+            <div className="flex items-center gap-1 text-success">
               <TrendingUp className="h-4 w-4" />
               <span className="text-xs font-semibold">+18%</span>
             </div>
@@ -46,7 +46,7 @@ export default function ExecutiveDashboardScreen() {
           <p className="text-xs text-muted-foreground">Fleet Efficiency</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">84%</p>
-            <div className="flex items-center gap-1 text-green-600">
+            <div className="flex items-center gap-1 text-success">
               <TrendingUp className="h-4 w-4" />
               <span className="text-xs font-semibold">+5%</span>
             </div>
@@ -56,7 +56,7 @@ export default function ExecutiveDashboardScreen() {
           <p className="text-xs text-muted-foreground">Safety Score</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">94/100</p>
-            <div className="flex items-center gap-1 text-green-600">
+            <div className="flex items-center gap-1 text-success">
               <CheckCircle2 className="h-4 w-4" />
               <span className="text-xs font-semibold">Excellent</span>
             </div>
@@ -127,7 +127,7 @@ export default function ExecutiveDashboardScreen() {
             ].map((item, idx) => (
               <div key={idx} className="flex justify-between items-center text-sm p-2 rounded bg-muted/50">
                 <span className="text-muted-foreground">{item.label}</span>
-                <p className={`font-semibold ${item.status === "good" ? "text-green-600" : "text-yellow-600"}`}>
+                <p className={`font-semibold ${item.status === "good" ? "text-success" : "text-warning"}`}>
                   {item.value}
                 </p>
               </div>

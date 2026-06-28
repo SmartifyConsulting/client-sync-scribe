@@ -28,9 +28,9 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 const STATUS_CONFIG = {
-  available: { icon: "✓", label: "AVAILABLE", color: "text-green-600", bg: "bg-green-50", badge: "bg-green-100 text-green-800" },
-  assigned: { icon: "🚑", label: "IN-SERVICE", color: "text-orange-600", bg: "bg-orange-50", badge: "bg-orange-100 text-orange-800" },
-  out_of_service: { icon: "⚙", label: "MAINTENANCE", color: "text-gray-600", bg: "bg-gray-50", badge: "bg-gray-100 text-gray-800" },
+  available: { icon: "✓", label: "AVAILABLE", color: "text-success", bg: "bg-success/10", badge: "bg-success/10 text-success" },
+  assigned: { icon: "🚑", label: "IN-SERVICE", color: "text-warning", bg: "bg-warning/10", badge: "bg-warning/10 text-warning" },
+  out_of_service: { icon: "⚙", label: "MAINTENANCE", color: "text-muted-foreground", bg: "bg-muted", badge: "bg-muted text-muted-foreground" },
 };
 
 const MOCK_VEHICLE_DETAILS: Record<string, VehicleWithDetails> = {
@@ -156,8 +156,8 @@ export default function FleetPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Ambulance Operations</p>
-        <h1 className="text-3xl font-extrabold">Fleet Management</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Fleet Management</h1>
         <p className="text-sm text-muted-foreground mt-2">
           {stats.total} vehicles total • {stats.available} available • {stats.assigned} in-service • {stats.maintenance} maintenance
         </p>
@@ -180,19 +180,19 @@ export default function FleetPage() {
 
       {/* Fleet Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Average Mileage</p>
           <p className="text-2xl font-bold mt-1">{stats.avgMileage.toLocaleString()} km</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Fleet Age</p>
           <p className="text-2xl font-bold mt-1">3.2 years</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Maintenance Overdue</p>
-          <p className={`text-2xl font-bold mt-1 ${stats.overdue > 0 ? "text-red-600" : "text-green-600"}`}>{stats.overdue}</p>
+          <p className={`text-2xl font-bold mt-1 ${stats.overdue > 0 ? "text-destructive" : "text-success"}`}>{stats.overdue}</p>
         </div>
-        <div className="rounded-lg border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Next 30 Days</p>
           <p className="text-2xl font-bold mt-1">{rows.filter(r => {
             const days = calculateDaysUntilService(r.next_service_date);
@@ -220,13 +220,9 @@ export default function FleetPage() {
             return (
               <div
                 key={vehicle.id}
-                className={cn(
-                  "rounded-xl border-2 p-4 space-y-3",
-                  config.bg,
-                  "border-current"
-                )}
-                style={{ borderColor: config.color }}
+                className={cn("rounded-xl border border-border p-4 space-y-3", config.bg)}
               >
+
                 {/* Header */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -257,7 +253,7 @@ export default function FleetPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Next Service</p>
-                    <p className={`font-semibold text-sm mt-1 ${isServiceOverdue ? "text-red-600" : isServiceSoon ? "text-orange-600" : ""}`}>
+                    <p className={`font-semibold text-sm mt-1 ${isServiceOverdue ? "text-destructive" : isServiceSoon ? "text-warning" : ""}`}>
                       {vehicle.next_service_date || "—"}
                       {daysUntilService !== null && daysUntilService !== 0 && (
                         <span className="text-xs ml-1">

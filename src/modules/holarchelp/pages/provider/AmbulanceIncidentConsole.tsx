@@ -136,8 +136,8 @@ export default function AmbulanceIncidentConsole() {
       </div>
 
       {!isAssignedParamedic && !isAssignedProvider && incident.assigned_provider_id && (
-        <div className="rounded-2xl border-2 border-amber-500/40 bg-amber-50 p-3 text-sm dark:bg-amber-950/20">
-          <p className="font-semibold text-amber-800 dark:text-amber-300">{t("incidentConsole.locked")}</p>
+        <div className="rounded-2xl border-2 border-warning/40/40 bg-warning/10 p-3 text-sm">
+          <p className="font-semibold text-warning">{t("incidentConsole.locked")}</p>
         </div>
       )}
 

@@ -84,13 +84,13 @@ export default function DriverManagementScreen() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case "paramedic":
-        return { bg: "bg-green-100", text: "text-green-800", accent: "border-green-300" };
+        return { bg: "bg-success/10", text: "text-success", accent: "border-success/40" };
       case "driver":
-        return { bg: "bg-amber-100", text: "text-amber-800", accent: "border-amber-300" };
+        return { bg: "bg-warning/10", text: "text-warning", accent: "border-warning/40" };
       case "emt":
-        return { bg: "bg-blue-100", text: "text-blue-800", accent: "border-blue-300" };
+        return { bg: "bg-primary/10", text: "text-primary", accent: "border-primary/40" };
       default:
-        return { bg: "bg-gray-100", text: "text-gray-800", accent: "border-gray-300" };
+        return { bg: "bg-muted", text: "text-muted-foreground", accent: "border-border" };
     }
   };
 
@@ -103,13 +103,13 @@ export default function DriverManagementScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Team Management</p>
-        <h1 className="text-3xl font-extrabold mt-2">Driver & Crew Management</h1>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Team Management</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Driver & Crew Management</h1>
         <p className="text-sm text-muted-foreground mt-2">View and organize all crew members by role</p>
       </header>
 
       {/* Read-Only Notice */}
-      <div className="rounded-lg bg-amber-100 border border-amber-200 text-amber-800 p-4">
+      <div className="rounded-lg bg-warning/10 border border-amber-200 text-warning p-4">
         <p className="font-semibold">📖 Read-Only View</p>
         <p className="text-sm mt-1">To add or manage crew members, use the <span className="font-semibold">User Admin</span> screen</p>
       </div>
@@ -137,7 +137,7 @@ export default function DriverManagementScreen() {
               {/* Group Header */}
               <button
                 onClick={() => toggleGroup(role)}
-                className={`w-full rounded-lg border-2 p-4 text-left font-medium transition-all flex items-center justify-between ${
+                className={`w-full rounded-xl border p-4 text-left font-medium transition-all flex items-center justify-between ${
                   isExpanded ? `${colors.bg} ${colors.accent} border-2` : "bg-card border"
                 }`}
               >
@@ -158,7 +158,7 @@ export default function DriverManagementScreen() {
                     <p className="text-sm text-muted-foreground py-4">No members in this group</p>
                   ) : (
                     members.map((member) => (
-                      <div key={member.id} className="rounded-lg border bg-card p-3 space-y-2">
+                      <div key={member.id} className="rounded-xl border border-border bg-card p-3 space-y-2">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-semibold">{member.name}</p>
@@ -167,8 +167,8 @@ export default function DriverManagementScreen() {
                           <span
                             className={`px-2 py-1 rounded text-xs font-semibold ${
                               member.status === "active"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-gray-100 text-gray-800"
+                                ? "bg-success/10 text-success"
+                                : "bg-muted text-muted-foreground"
                             }`}
                           >
                             {member.status === "active" ? "ACTIVE" : "INACTIVE"}
@@ -186,19 +186,19 @@ export default function DriverManagementScreen() {
       </div>
 
       {/* Info Section */}
-      <div className="rounded-lg border bg-card p-4">
+      <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="font-bold mb-3">How to manage crew</h3>
         <ul className="space-y-2 text-sm">
           <li className="flex items-center gap-2">
-            <span className="text-green-600">✓</span>
+            <span className="text-success">✓</span>
             <span>Add crew members from <span className="font-semibold">User Admin</span> screen</span>
           </li>
           <li className="flex items-center gap-2">
-            <span className="text-green-600">✓</span>
+            <span className="text-success">✓</span>
             <span>View all active crew grouped by role on this screen</span>
           </li>
           <li className="flex items-center gap-2">
-            <span className="text-green-600">✓</span>
+            <span className="text-success">✓</span>
             <span>Assign crew to shifts in <span className="font-semibold">Team Status</span> screen</span>
           </li>
         </ul>
