@@ -7,13 +7,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
 import { useTranslation } from "react-i18next";
+import { relativeTimeLabel } from "@/lib/relativeTimeLabel";
 
 interface Activity {
   id: string;
   type: "document" | "task" | "message" | "session";
   title: string;
   description: string;
-  time: string;
+  /** ISO timestamp; rendered via i18n relative-time helper */
+  timeIso: string;
   patientId?: string;
   patientName?: string;
 }
@@ -51,14 +53,15 @@ export function RecentActivity() {
           const activityTypes: ("session" | "document" | "task" | "message")[] = ["session", "document", "task", "message"];
           const titles = [t("doctorDashboard.sessionCompleted"), t("doctorDashboard.documentGenerated"), t("doctorDashboard.taskCompleted"), t("doctorDashboard.followUpSent")];
           const descriptions = ["Consultation with", "Action Plan for", "Review notes for", "Email to"];
-          const times = ["2 hours ago", "3 hours ago", "5 hours ago", "Yesterday"];
+          const now = Date.now();
+          const offsetsMs = [2 * 3600_000, 3 * 3600_000, 5 * 3600_000, 26 * 3600_000];
 
           const mockActivities: Activity[] = patients.map((patient, index) => ({
             id: `act-${index}`,
             type: activityTypes[index % activityTypes.length],
             title: titles[index % titles.length],
             description: descriptions[index % descriptions.length],
-            time: times[index % times.length],
+            timeIso: new Date(now - offsetsMs[index % offsetsMs.length]).toISOString(),
             patientId: patient.id,
             patientName: patient.name,
           }));
@@ -70,7 +73,7 @@ export function RecentActivity() {
               type: 'task',
               title: t("doctorDashboard.taskCompleted"),
               description: 'Review financial documents',
-              time: '5 hours ago',
+              timeIso: new Date(now - 5 * 3600_000).toISOString(),
             };
           }
 
@@ -83,7 +86,7 @@ export function RecentActivity() {
               type: "task",
               title: t("doctorDashboard.gettingStarted"),
               description: t("doctorDashboard.addFirstPatient"),
-              time: t("doctorDashboard.justNow"),
+              timeIso: new Date().toISOString(),
             },
           ]);
         }
@@ -151,7 +154,7 @@ export function RecentActivity() {
                     )}
                   </div>
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    {activity.time}
+                    {relativeTimeLabel(activity.timeIso)}
                   </span>
                 </div>
               );

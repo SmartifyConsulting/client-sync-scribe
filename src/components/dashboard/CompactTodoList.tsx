@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { translateTodoTitle } from "@/lib/translateTodoTitle";
 import {
   Mic,
   MicOff,
@@ -457,7 +458,7 @@ export function CompactTodoList() {
                         todo.completed && "line-through text-muted-foreground"
                       )}
                     >
-                      {todo.title}
+                      {translateTodoTitle(todo.title)}
                     </span>
                     {todo.is_auto_executed && !todo.completed && (
                       <button

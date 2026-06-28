@@ -1,148 +1,53 @@
-## Translation Sweep — Round 3
+## Translation Sweep — Round 4 (expanded)
 
-Round 2 wired the high-level chrome, but several strings nested inside cards, list rows, template tiles, calendar header, **and every Patient Detail subform** are still hard-coded English. This round closes those gaps across the same 25 locales.
+Combines the earlier Round 4 scope (calendar dates, accordion titles, every field label) with the new untranslated surfaces shown in the screenshots.
 
-### Strings to translate (grouped by screen)
+### A. Calendar localization
+- Month name in header ("June 2026") and weekday short labels (Mon–Sun) driven by localized tables for all 25 languages, plus `date-fns` locale wiring where upstream supports it.
+- "Today" pill, week-range chips, "All day", empty-state strings.
 
-**My Practice (image-116)**
-- Top pill tabs: `My Practice`, `Referrals`, `Credentials`, `My Rewards`
-- "About Me" helper + `/ 600 words` counter
+### B. Patient Profile accordions
+- Translate every `<SectionHeader>` title (Personal Details, Next of Kin, Employer, General Information, Allergies/Medication/Conditions, Daily Vitamins, Surgeries, General Practitioner, Pharmacies — ~18 call sites).
+- Translate every inner `<Label>` (~50 fields: First/Surname, Preferred Name, Title, ID, DOB, Gender, Marital Status, Languages, Mobile, Email, Home/Postal Address, Relationship, Employer, Occupation, Medical Scheme/Plan/Member No./Dependant Code, Allergen, Reaction, Severity, Condition, Onset, Status, Medicine, Dose, Frequency, Route, Start/End, Surgery, Date, Surgeon, Hospital, GP Name/Practice/Phone/Email, Pharmacy Name/Phone/Address) and inline Add/Remove buttons.
 
-**Patient Rewards (image-117)**
-- `Vulas to "{milestone}"`, `No rewards yet. Start your health journey!`
+### C. My Practice accordions
+- Section titles: About Me, Practice Information, Letterhead/Branding, Banking Details, Partners, Calendar Sharing.
+- Field labels: Practice Name, Practice No., HPCSA/MDCN/MCAZ No., Tax/VAT No., Specialty, Sub-specialty, Languages, Phone, Email, Website, Physical/Postal Address, Bank Name, Account Holder/Number/Branch/Type/SWIFT.
 
-**To-Do List (image-121)**
-- `Add New Task`, `Tap to record`, `Or type your task here…`, `Add`, `Priority:`, `Low/Medium/High`, `AI Process`
-- Tab counts `Active (n) / Completed (n) / All (n)`
-- Date group headers via `date-fns` locale map
-- `Approve`, `AI` pill
-- Template task verbs from `generateTaskTitle.ts` only
+### D. NEW — Patients list page (screenshots 1, 4, 5)
+- Subtitle: "Manage your patient profiles and history".
+- Page action buttons in `Patients.tsx` header: **Round Tables**, **All Sessions**, **Import**, **+ Patient**, **Filter**.
+- Patient table column headers: **Patient**, **Contact**, **Last Seen**, **Since**, **Actions**.
+- Row action menu items: **Start Session**, **View Profile**, **Delete Patient**.
+- Inline icon tooltips on each row: **Preview**, **Send**, **Edit**, **Delete**.
 
-**Documents / Templates (image-122, image-120)**
-- Helper text, `+ New Content Template`, `Create Template`
-- Default template display labels + descriptions (Referral Letter, General Letterhead, Prescription, Medical Certificate, Invoice, Hospital Admission Form)
-- `Letterhead: {Header and Footer | Default}`
-- `Patient Documents`, `Search documents…`
-- Document-type chips
+### E. NEW — To-Do AI-suggested tasks (screenshot 2)
+- Localize the AI task scaffolds emitted into the To-Do list. Verbs `Review`, `Schedule`, `Send`, and the document nouns `Invoice`, `Prescription`, `Letter of recommendation`, `Appointment`, `Follow-up` rendered through `t()` so output reads e.g. "Réviser la facture — Sharon Kennedy" / "Überprüfen Rechnung — …" depending on language.
+- Implementation: replace stored English action verbs with structured keys `{ verb: "review", noun: "invoice", subject: "Sharon Kennedy" }`. The renderer composes `${t('todo.verbs.' + verb)} ${t('todo.nouns.' + noun)} — ${subject}`. Subjects (names, dates) stay verbatim. Legacy free-text tasks fall back to original string.
 
-**Patient card meta (image-119)**
-- `{n} notes · Last activity {date}` via `t()` + `date-fns`
+### F. NEW — Recent Activity card (screenshot 3)
+- Relative-time strings ("2 hours ago", "Yesterday", "5 mins ago", "just now") wired through `date-fns/formatDistanceToNow` with the localized `date-fns` locale resolved in §A.
+- Activity verbs ("Session completed", "Document created", "Task completed", "Follow-up sent") already translated; verify and patch any English residuals (e.g. nested item subtitle "Review financial documents" is user data and stays as-is).
 
-**SOS landing (image-123 residual)**
-- `Help will be alerted instantly`, `Tapping SOS shares your location...`, `Manage emergency contacts`, `View incident history`
+### G. NEW — AI Summary surfaces (screenshots 8, 9, 10)
+- Loading text "Generating AI summary of patient history…" → `t('patientProfile.aiSummaryGenerating')`.
+- AI Patient Summary card: title **AI Patient Summary**, subtitle **Summarized from all session transcriptions and history**, section labels **SUMMARY**, **TIMELINE**, **Refresh** button, **N event(s)** chip (pluralised via i18next interpolation).
+- Auto-generated summary body itself is dynamic AI output; out of scope (user data).
 
-**My Calendar (image-124)**
-- Subtitle `Manage your appointments and schedule`
-- View toggles: `My Calendar`, `Practice Calendar`
-- `Google Calendar`, `+ Book`, `Week / Month / Year`
-- Month title (`LLLL yyyy`) + weekday short labels via `date-fns` locale
-- Right rail: `Today's Schedule`, localized day-of-week date, `No appointments scheduled for today`
+### H. Locale file updates
+Add the following namespaces/keys to `en.json` and translate to all 24 other locales via the Gemini batch script:
+- `calendar.months.*`, `calendar.weekdaysShort.*`, `calendar.today`, `calendar.allDay`.
+- `patientProfile.section*` and `patientProfile.field*` (~60 keys).
+- `myPractice.section*` and `myPractice.field*` (~30 keys).
+- `patients.subtitle`, `patients.col*`, `patients.action*`, `patients.tooltip*`, plus header buttons (`roundTables`, `allSessions`, `import`, `addPatient`, `filter`).
+- `todo.verbs.{review,schedule,send,sign,follow_up,call,email}` and `todo.nouns.{invoice,prescription,letter,appointment,report,referral,result}`.
+- `recentActivity.{justNow,minsAgo,hoursAgo,yesterday,daysAgo,weeksAgo}` (using i18next plural/interpolation).
+- `aiSummary.{generating,title,subtitle,summary,timeline,refresh,eventCount}`.
 
-**Patient Detail screen — every tab and every subform (image-125) — NEW**
-
-The patient profile is the biggest untranslated surface. Wire every label, helper, placeholder, accordion header, tab trigger, button, and empty state — across all tabs.
-
-*Header strip*
-- `Back to Patients`, `Schedule`
-
-*Top tab triggers*
-- `Details`, `Overview`, `Session History`, `Admissions`, `Healthcare Providers`, `Documents`, `Round Table`
-
-*Details tab — section toggle*
-- `Personal Information`, `Medical Information`, `Saved` indicator
-
-*Personal Information subform*
-- Section heading + helper `View and manage personal details`
-- Accordion headers: `Personal Information`, `Addresses`, `Emergency Contacts`, `Next of Kin`, `Insurance / Medical Aid`, `Employer`, `Lifestyle`, `Consents`
-- Field labels: `First Name(s)`, `Last Name`, `ID/Passport Number`, `Gender`, `Date of Birth`, `Email`, `Phone`, `Marital Status`, `Language`, `Referred By`
-- Placeholders: `ID or passport number`, `Select status`, `Select language`, `Referral source`, `dd ---- yyyy` (use native date input — leave OS-controlled)
-- Select option labels: gender values, marital status values, language values (use existing `lib/languages.ts` localized list)
-
-*Medical Information subform*
-- Section heading + helper
-- Accordion headers: `Allergies`, `Chronic Conditions`, `Current Medication`, `Family History`, `Surgical History`, `Immunizations`, `Vitals`, `Lab Results`, `Genetic Markers`, `Lifestyle Factors`, `Mental Health`
-- All field labels, placeholders, and empty states inside each accordion
-
-*Overview tab*
-- Section titles (Timeline, Recent Activity, Risk Badges), `No activity yet`, date stamps via `date-fns`
-
-*Session History tab*
-- Group headers `Today / Last Week / Last Month / Older`, `No sessions yet`, action buttons (`View`, `Resume`, `Notes`)
-
-*Admissions tab*
-- `New Admission`, column headers (`Hospital`, `Admitted`, `Discharged`, `Procedure Codes`, `Status`), empty state
-
-*Healthcare Providers tab*
-- `Invite Provider`, role chips (`GP`, `Specialist`, `Pharmacy`, `Insurer`), `No providers linked`
-
-*Documents tab*
-- Filter chips per document type, `Upload`, `Send`, empty state
-
-*Round Table tab*
-- `Start Round Table`, `Participants`, `Shared Notes`, empty state
-
-### Files to touch
-
-```text
-src/i18n/locales/en.json                          (add new keys: patientDetail.*, calendar.*, etc.)
-src/i18n/locales/{24 others}.json                 (batch via /tmp/i18n_extend3.py)
-
-src/pages/MyPractice.tsx
-src/pages/patient/MyRewards.tsx
-src/pages/TodoList.tsx
-src/components/todo/TaskDateGroup.tsx
-src/lib/generateTaskTitle.ts
-src/pages/Documents.tsx
-src/components/documents/TemplateCard.tsx
-src/lib/defaultTemplates.ts
-src/components/documents/DocumentRow.tsx
-src/components/patients/PatientCard.tsx
-src/modules/holarchelp/pages/HolarcHelpHome.tsx
-src/pages/CalendarView.tsx
-src/components/calendar/MonthGrid.tsx
-src/components/calendar/TodaysSchedule.tsx
-src/lib/dateFnsLocale.ts                          (NEW: i18n.language → date-fns Locale)
-
-# Patient Detail surface
-src/pages/PatientDetail.tsx                       (header strip, top tabs)
-src/components/patient-detail/DetailsTab.tsx      (Personal/Medical toggle, Saved badge)
-src/components/patient-detail/PersonalInformationForm.tsx
-src/components/patient-detail/MedicalInformationForm.tsx
-src/components/patient-detail/sections/AddressesSection.tsx
-src/components/patient-detail/sections/EmergencyContactsSection.tsx
-src/components/patient-detail/sections/NextOfKinSection.tsx
-src/components/patient-detail/sections/InsuranceSection.tsx
-src/components/patient-detail/sections/EmployerSection.tsx
-src/components/patient-detail/sections/LifestyleSection.tsx
-src/components/patient-detail/sections/ConsentsSection.tsx
-src/components/patient-detail/sections/AllergiesSection.tsx
-src/components/patient-detail/sections/ChronicConditionsSection.tsx
-src/components/patient-detail/sections/MedicationsSection.tsx
-src/components/patient-detail/sections/FamilyHistorySection.tsx
-src/components/patient-detail/sections/SurgicalHistorySection.tsx
-src/components/patient-detail/sections/ImmunizationsSection.tsx
-src/components/patient-detail/sections/VitalsSection.tsx
-src/components/patient-detail/sections/LabResultsSection.tsx
-src/components/patient-detail/sections/GeneticMarkersSection.tsx
-src/components/patient-detail/sections/MentalHealthSection.tsx
-src/components/patient-detail/tabs/OverviewTab.tsx
-src/components/patient-detail/tabs/SessionHistoryTab.tsx
-src/components/patient-detail/tabs/AdmissionsTab.tsx
-src/components/patient-detail/tabs/HealthcareProvidersTab.tsx
-src/components/patient-detail/tabs/DocumentsTab.tsx
-src/components/patient-detail/tabs/RoundTableTab.tsx
-```
-
-(Exact file names confirmed during build — folder layout may use slightly different naming; the audit will follow imports from `PatientDetail.tsx`.)
-
-### Re-render
-
-`key={i18n.language}` on `AppLayout` / `PatientAppLayout` from Round 2 already handles live language switching. Once wired to `t()` these surfaces flip together.
-
-### Translation script
-
-`/tmp/i18n_extend3.py` (clone of `extend2.py`) targets only newly added keys, fills the 24 non-English locales via Gemini in one batch. English values authored manually in `en.json`.
+### I. Verification
+- `tsgo --noEmit`.
+- Playwright switch to Zulu, Hausa, French, Greek and capture: Calendar header + weekdays, Patient Profile (Personal + Medical), Patients list (header buttons, columns, row menu, tooltips), Recent Activity, AI Summary loading + loaded.
 
 ### Out of scope
-
-Captured patient data (names, addresses, allergy text, doctor notes, transcripts) stays in its source language by design — only the chrome around it is translated.
+- User-entered values (patient names, addresses, free-text notes, AI-generated summary bodies, individual task subjects).
+- Doctor Sessions / Round Tables / Admin — already translated in earlier rounds.

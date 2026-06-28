@@ -397,24 +397,24 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <div>
             <h1 className="text-2xl font-bold text-foreground">{t("nav.myPatients", "Patients")}</h1>
             <p className="mt-1 text-muted-foreground text-[12px]">
-              Manage your patient profiles and history
+              {t("patients.subtitle")}
             </p>
           </div>
         )}
         <div className="grid grid-cols-2 gap-2 ml-auto">
           <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs" onClick={() => navigate("/dashboard")}>
             <Users className="h-3.5 w-3.5 md:h-4 md:w-4" />
-            Round Tables
+            {t("patients.roundTables")}
           </Button>
           <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs" onClick={() => navigate("/sessions")}>
             <CalendarIcon className="h-3.5 w-3.5 md:h-4 md:w-4" />
-            All Sessions
+            {t("patients.allSessions")}
           </Button>
           <PatientImportDialog 
             trigger={
               <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
                 <Upload className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                Import
+                {t("patients.importPatients")}
               </Button>
             }
             onImportComplete={() => fetchPatients()}
@@ -423,7 +423,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <DialogTrigger asChild>
               <Button className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
                 <Plus className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                Patient
+                {t("patients.addPatient")}
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
@@ -709,7 +709,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <PopoverTrigger asChild>
             <Button variant="outline" className={cn("gap-2", hasActiveFilters && "border-primary text-primary")}>
               <Filter className="h-4 w-4" />
-              Filter
+              {t("patients.filter")}
               {hasActiveFilters && (
                 <span className="ml-1 rounded-full bg-primary text-primary-foreground px-1.5 py-0.5 text-xs">
                   {[statusFilter !== "all", dateFrom, dateTo].filter(Boolean).length}
@@ -827,7 +827,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {sortedPatients.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            {searchQuery ? "No patients found matching your search" : "No patients yet. Add your first patient!"}
+            {searchQuery ? t("patients.noPatientsFound") : t("patients.noPatientsHint")}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -835,19 +835,19 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
               <thead>
                 <tr className="bg-primary">
                   <th className="px-2 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Patient
+                    {t("patients.colPatient")}
                   </th>
                   <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Contact
+                    {t("patients.colContact")}
                   </th>
                   <th className="px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Last Seen
+                    {t("patients.colLastSeen")}
                   </th>
                   <th className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Since
+                    {t("patients.colSince")}
                   </th>
                   <th className="px-3 lg:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
-                    Actions
+                    {t("patients.colActions")}
                   </th>
                 </tr>
               </thead>
@@ -1008,11 +1008,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => handleStartSession(patient.id)}>
                                 <Clock className="mr-2 h-4 w-4" />
-                                Start Session
+                                {t("patients.startSession")}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
                                 <Edit3 className="mr-2 h-4 w-4" />
-                                View Profile
+                                {t("patients.viewProfile")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
@@ -1020,7 +1020,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 className="text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Patient
+                                {t("patients.deletePatient")}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
