@@ -806,7 +806,7 @@ export default function CalendarView() {
                     <Button variant="outline" size="icon" onClick={() => setSelectedDate(addDays(selectedDate, -7))}>
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>Today</Button>
+                    <Button variant="outline" size="sm" onClick={() => setSelectedDate(new Date())}>{t("calendar.today")}</Button>
                     <Button variant="outline" size="icon" onClick={() => setSelectedDate(addDays(selectedDate, 7))}>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
