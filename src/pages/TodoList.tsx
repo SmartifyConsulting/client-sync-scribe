@@ -522,7 +522,7 @@ export default function TodoList() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                    <p className={cn("text-sm font-medium text-foreground", todo.completed && "line-through text-muted-foreground")}>
-                                     {todo.title}
+                                     {translateTodoTitle(todo.title)}
                                      {todo.patient_name && <span className="text-primary font-semibold"> — {todo.patient_name}</span>}
                                    </p>
                                    {(todo.is_auto_executed || todo.task_type === 'document_review') && (
