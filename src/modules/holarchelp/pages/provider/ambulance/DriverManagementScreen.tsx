@@ -1,165 +1,207 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, AlertCircle, CheckCircle2, TrendingUp } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ChevronDown, ChevronRight, Search } from "lucide-react";
 
-interface Driver {
+interface Member {
   id: string;
   name: string;
-  role: string;
-  licenseExpiry: string;
-  score: number;
-  incidents: number;
-  status: "active" | "inactive" | "suspended";
+  role: "paramedic" | "emt" | "driver";
+  email: string;
+  phone: string;
+  status: "active" | "inactive";
 }
 
-const MOCK_DRIVERS: Driver[] = [
-  {
-    id: "1",
-    name: "John Smith",
-    role: "Paramedic",
-    licenseExpiry: "2027-03-15",
-    score: 92,
-    incidents: 0,
-    status: "active",
-  },
-  {
-    id: "2",
-    name: "Sarah Johnson",
-    role: "EMT",
-    licenseExpiry: "2026-08-20",
-    score: 85,
-    incidents: 1,
-    status: "active",
-  },
-  {
-    id: "3",
-    name: "Mike Brown",
-    role: "Driver",
-    licenseExpiry: "2026-12-01",
-    score: 78,
-    incidents: 2,
-    status: "active",
-  },
-  {
-    id: "4",
-    name: "Lisa Davis",
-    role: "Paramedic",
-    licenseExpiry: "2025-09-30",
-    score: 65,
-    incidents: 4,
-    status: "suspended",
-  },
+const MOCK_MEMBERS: Member[] = [
+  { id: "1", name: "Alice Martinez", role: "paramedic", email: "alice@example.com", phone: "+27 82 123 4567", status: "active" },
+  { id: "2", name: "James Miller", role: "paramedic", email: "james@example.com", phone: "+27 82 234 5678", status: "active" },
+  { id: "3", name: "Sarah Chen", role: "paramedic", email: "sarah@example.com", phone: "+27 82 345 6789", status: "inactive" },
+  { id: "4", name: "Mike Johnson", role: "driver", email: "mike@example.com", phone: "+27 82 456 7890", status: "active" },
+  { id: "5", name: "Tom Wilson", role: "driver", email: "tom@example.com", phone: "+27 82 567 8901", status: "active" },
+  { id: "6", name: "Rachel Brown", role: "emt", email: "rachel@example.com", phone: "+27 82 678 9012", status: "active" },
 ];
 
 export default function DriverManagementScreen() {
-  const [drivers] = useState<Driver[]>(MOCK_DRIVERS);
-  const [filter, setFilter] = useState<"all" | "active" | "suspended">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    paramedic: true,
+    driver: false,
+    emt: false,
+  });
 
-  const filteredDrivers = filter === "all" ? drivers : drivers.filter((d) => d.status === filter);
+  const toggleGroup = (role: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [role]: !prev[role],
+    }));
+  };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-green-600";
-    if (score >= 80) return "text-blue-600";
-    if (score >= 70) return "text-yellow-600";
-    return "text-red-600";
+  const groupedMembers = useMemo(() => {
+    const filtered = searchQuery.trim()
+      ? MOCK_MEMBERS.filter(
+          (m) =>
+            m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            m.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            m.email.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : MOCK_MEMBERS;
+
+    const grouped: Record<string, Member[]> = {
+      paramedic: [],
+      driver: [],
+      emt: [],
+    };
+
+    filtered.forEach((m) => {
+      grouped[m.role].push(m);
+    });
+
+    Object.keys(grouped).forEach((role) => {
+      grouped[role].sort((a, b) => {
+        if (a.status !== b.status) {
+          return a.status === "active" ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name);
+      });
+    });
+
+    return grouped;
+  }, [searchQuery]);
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "paramedic":
+        return "👤";
+      case "driver":
+        return "👥";
+      case "emt":
+        return "👤";
+      default:
+        return "•";
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case "paramedic":
+        return { bg: "bg-green-100", text: "text-green-800", accent: "border-green-300" };
+      case "driver":
+        return { bg: "bg-amber-100", text: "text-amber-800", accent: "border-amber-300" };
+      case "emt":
+        return { bg: "bg-blue-100", text: "text-blue-800", accent: "border-blue-300" };
+      default:
+        return { bg: "bg-gray-100", text: "text-gray-800", accent: "border-gray-300" };
+    }
+  };
+
+  const roleLabels: Record<string, string> = {
+    paramedic: "Paramedics",
+    driver: "Drivers",
+    emt: "EMTs",
   };
 
   return (
     <div className="space-y-6">
-      <header className="flex items-end justify-between">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Personnel</p>
-          <h1 className="text-3xl font-extrabold mt-2">Driver & Crew Management</h1>
-          <p className="text-sm text-muted-foreground mt-2">Manage staff, licenses, and performance</p>
-        </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Driver
-        </Button>
+      <header>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Team Management</p>
+        <h1 className="text-3xl font-extrabold mt-2">Driver & Crew Management</h1>
+        <p className="text-sm text-muted-foreground mt-2">View and organize all crew members by role</p>
       </header>
 
-      {/* Filters */}
-      <div className="flex gap-2">
-        {["all", "active", "suspended"].map((f) => (
-          <Button
-            key={f}
-            variant={filter === f ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(f as any)}
-            className="capitalize"
-          >
-            {f}
-          </Button>
-        ))}
+      {/* Read-Only Notice */}
+      <div className="rounded-lg bg-amber-100 border border-amber-200 text-amber-800 p-4">
+        <p className="font-semibold">📖 Read-Only View</p>
+        <p className="text-sm mt-1">To add or manage crew members, use the <span className="font-semibold">User Admin</span> screen</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Total Staff</p>
-          <p className="text-2xl font-bold mt-2">{drivers.length}</p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Active</p>
-          <p className="text-2xl font-bold text-green-600 mt-2">{drivers.filter((d) => d.status === "active").length}</p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Avg Score</p>
-          <p className={`text-2xl font-bold mt-2 ${getScoreColor(Math.round(drivers.reduce((s, d) => s + d.score, 0) / drivers.length))}`}>
-            {Math.round(drivers.reduce((s, d) => s + d.score, 0) / drivers.length)}
-          </p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Licenses Expiring</p>
-          <p className="text-2xl font-bold text-orange-600 mt-2">
-            {drivers.filter((d) => new Date(d.licenseExpiry) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)).length}
-          </p>
-        </div>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by name or role..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
       </div>
 
-      {/* Drivers List */}
+      {/* Accordion Groups */}
       <div className="space-y-3">
-        {filteredDrivers.map((driver) => (
-          <div key={driver.id} className="rounded-lg border bg-card p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-bold text-lg">{driver.name}</h3>
-                <p className="text-xs text-muted-foreground">{driver.role}</p>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  driver.status === "active"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
+        {(["paramedic", "driver", "emt"] as const).map((role) => {
+          const isExpanded = expandedGroups[role];
+          const members = groupedMembers[role];
+          const colors = getRoleColor(role);
+
+          return (
+            <div key={role}>
+              {/* Group Header */}
+              <button
+                onClick={() => toggleGroup(role)}
+                className={`w-full rounded-lg border-2 p-4 text-left font-medium transition-all flex items-center justify-between ${
+                  isExpanded ? `${colors.bg} ${colors.accent} border-2` : "bg-card border"
                 }`}
               >
-                {driver.status === "active" ? "Active" : "Suspended"}
-              </span>
-            </div>
+                <span>
+                  {getRoleIcon(role)} {roleLabels[role]} ({members.length})
+                </span>
+                {isExpanded ? (
+                  <ChevronDown className="h-5 w-5" />
+                ) : (
+                  <ChevronRight className="h-5 w-5" />
+                )}
+              </button>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t">
-              <div>
-                <p className="text-xs text-muted-foreground">Performance Score</p>
-                <p className={`text-lg font-bold mt-1 ${getScoreColor(driver.score)}`}>{driver.score}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Incidents</p>
-                <p className={`text-lg font-bold mt-1 ${driver.incidents > 2 ? "text-red-600" : "text-green-600"}`}>
-                  {driver.incidents}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">License Expiry</p>
-                <p className="font-semibold text-sm mt-1">{driver.licenseExpiry}</p>
-              </div>
-              <div className="text-right">
-                <Button variant="outline" size="sm">
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Group Items */}
+              {isExpanded && (
+                <div className="space-y-2 mt-2 ml-4">
+                  {members.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4">No members in this group</p>
+                  ) : (
+                    members.map((member) => (
+                      <div key={member.id} className="rounded-lg border bg-card p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">{member.email}</p>
+                          </div>
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                              member.status === "active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {member.status === "active" ? "ACTIVE" : "INACTIVE"}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{member.phone}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+
+      {/* Info Section */}
+      <div className="rounded-lg border bg-card p-4">
+        <h3 className="font-bold mb-3">How to manage crew</h3>
+        <ul className="space-y-2 text-sm">
+          <li className="flex items-center gap-2">
+            <span className="text-green-600">✓</span>
+            <span>Add crew members from <span className="font-semibold">User Admin</span> screen</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-green-600">✓</span>
+            <span>View all active crew grouped by role on this screen</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-green-600">✓</span>
+            <span>Assign crew to shifts in <span className="font-semibold">Team Status</span> screen</span>
+          </li>
+        </ul>
       </div>
     </div>
   );
