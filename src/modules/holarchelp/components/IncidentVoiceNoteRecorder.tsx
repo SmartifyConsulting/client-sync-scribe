@@ -74,6 +74,13 @@ export function IncidentVoiceNoteRecorder({
     try {
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
       const dur = (Date.now() - startedAtRef.current) / 1000;
+
+      // Guard: empty / silent recording. Don't upload, don't transcribe, don't hallucinate.
+      if (blob.size < 1500 || dur < 0.5) {
+        toast.message(t("voiceNotes.noneCaptured", { defaultValue: "No recording captured" }));
+        return;
+      }
+
       const path = `holarchelp/${incidentId}/${crypto.randomUUID()}.webm`;
       const { error: upErr } = await supabase.storage.from("session-audio").upload(path, blob, { contentType: "audio/webm" });
       if (upErr) throw upErr;
@@ -86,7 +93,7 @@ export function IncidentVoiceNoteRecorder({
         incident_id: incidentId, provider_id: providerId, actor_user_id: user.id,
         event_type: "voice_note", payload: { duration: Number(dur.toFixed(1)) },
       } as any);
-      // best-effort transcription with retries
+      // best-effort transcription with retries; only persist when a real transcript comes back
       try {
         const reader = new FileReader();
         reader.onloadend = async () => {
@@ -100,11 +107,12 @@ export function IncidentVoiceNoteRecorder({
               if (tx?.text) { text = String(tx.text); break; }
             } catch { /* retry */ }
           }
+          if (!text) return; // never store placeholder text
           const { data: latest } = await (supabase.from("holarchelp_voice_notes" as any) as any)
             .select("id").eq("incident_id", incidentId).eq("audio_url", path).maybeSingle();
           if ((latest as any)?.id) {
             await supabase.from("holarchelp_voice_notes" as any).update({
-              transcript: text || t("voiceNotes.transcriptionUnavailable"),
+              transcript: text,
             } as any).eq("id", (latest as any).id);
           }
         };

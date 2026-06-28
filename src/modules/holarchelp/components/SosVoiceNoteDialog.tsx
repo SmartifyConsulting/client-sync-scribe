@@ -6,8 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-const MAX_SECONDS = 60;
-const SILENCE_MS = 4000;
+const MAX_SECONDS = 65; // +5s extra capture window
+const SILENCE_MS = 9000; // +5s before auto-stop on silence
 const MIN_RECORD_MS = 2000;
 const SILENCE_RMS = 0.015; // amplitude threshold
 
@@ -190,9 +190,12 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
             console.error("Transcription attempt failed", err);
           }
         }
-        await supabase.from("holarchelp_incidents" as any).update({
-          voice_note_transcript: transcript || t("sosVoice.transcriptionUnavailable"),
-        } as any).eq("id", incidentId);
+        // Only persist a transcript when one actually came back — never fabricate placeholder text.
+        if (transcript) {
+          await supabase.from("holarchelp_incidents" as any).update({
+            voice_note_transcript: transcript,
+          } as any).eq("id", incidentId);
+        }
         // Log voice-note event for the timeline
         try {
           await supabase.from("holarchelp_incident_events" as any).insert({
