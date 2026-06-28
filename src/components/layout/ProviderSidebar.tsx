@@ -14,7 +14,7 @@ import {
   BedDouble,
   Activity,
   ClipboardList,
-  Hospital,
+  
   Navigation as NavIcon,
   History,
   Users,
