@@ -458,7 +458,7 @@ export function CompactTodoList() {
                         todo.completed && "line-through text-muted-foreground"
                       )}
                     >
-                      {todo.title}
+                      {translateTodoTitle(todo.title)}
                     </span>
                     {todo.is_auto_executed && !todo.completed && (
                       <button
