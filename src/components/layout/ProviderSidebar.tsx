@@ -48,23 +48,21 @@ const hospitalNav: NavItem[] = [
   { icon: Users, labelKey: "nav.providers", to: "/provider/hospital/providers" },
   { icon: Activity, labelKey: "nav.incidentTimeline", to: "/provider/hospital/timeline" },
   { icon: Zap, labelKey: "nav.dispatchManagement", to: "/provider/hospital/dispatch" },
-  { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/hospital/admins" },
+  { icon: UserCheck, labelKey: "nav.admin", to: "/provider/hospital/admins" },
 ];
 
 const ambulanceNav: NavItem[] = [
   // EMERGENCY RESPONSE TIER (Consolidated)
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
   { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
-  // EXTERNAL PARTNERSHIPS TIER (Consolidated)
-  { icon: Hospital, labelKey: "nav.hospitalNetwork", to: "/provider/ambulance/hospital-network" },
   // TEAM & FLEET TIER
-  { icon: Users, labelKey: "nav.teamStatus", to: "/provider/ambulance/team" },
+  { icon: Users, labelKey: "nav.shiftTeams", to: "/provider/ambulance/team" },
   { icon: Ambulance, labelKey: "nav.fleetOperations", to: "/provider/ambulance/fleet-operations" },
   // MONITORING & ANALYTICS TIER (Consolidated)
   { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
   { icon: Users, labelKey: "nav.driverManagement", to: "/provider/ambulance/drivers" },
-  // ADMIN TIER
-  { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/ambulance/admins" },
+  // ADMIN TIER (Hospital Network lives as a tab inside Admin)
+  { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
 ];
 
 interface ProviderSidebarProps {
