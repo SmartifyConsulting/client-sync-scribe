@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedAudioUrl } from "@/utils/audioUrl";
@@ -81,6 +82,7 @@ import {
 type SessionState = "idle" | "active" | "processing" | "completed";
 
 export default function Sessions() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlPatientId = searchParams.get("patient");
