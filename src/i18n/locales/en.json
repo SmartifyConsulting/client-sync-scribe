@@ -384,7 +384,28 @@
     "completed": "Completed",
     "all": "All",
     "approve": "Approve",
-    "noMatchingPatient": "No matching patient found"
+    "approveSave": "Approve & Save",
+    "noMatchingPatient": "No matching patient found",
+    "verbs": {
+      "review": "Review",
+      "schedule": "Schedule",
+      "send": "Send",
+      "sign": "Sign",
+      "followUp": "Follow up",
+      "call": "Call",
+      "email": "Email"
+    },
+    "nouns": {
+      "invoice": "Invoice",
+      "prescription": "Prescription",
+      "letter": "Letter of recommendation",
+      "appointment": "Appointment",
+      "certificate": "Medical certificate",
+      "referral": "Referral",
+      "admission": "Hospital admission",
+      "report": "Report",
+      "result": "Result"
+    }
   },
   "documents": {
     "title": "Documents",
