@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { translateTodoTitle } from "@/lib/translateTodoTitle";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Plus,
