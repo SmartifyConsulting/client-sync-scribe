@@ -1706,8 +1706,8 @@ export function PatientDetailsEditor({
             <TabsContent value="medical" className="mt-4">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Medical Information</h2>
-                  <p className="text-xs text-muted-foreground">View and manage medical records</p>
+                  <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.medicalHeading")}</h2>
+                  <p className="text-xs text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                   <Pencil className="h-4 w-4" />
