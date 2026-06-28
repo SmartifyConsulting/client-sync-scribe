@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -34,6 +35,7 @@ interface AppointmentWithHistory {
 }
 
 export function TodaysBriefing() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<AppointmentWithHistory[]>([]);
   const [translatedAppointments, setTranslatedAppointments] = useState<AppointmentWithHistory[] | null>(null);
@@ -599,7 +601,8 @@ export function TodaysBriefing() {
   }
 
   const formattedSelectedDate = format(selectedDate, 'd MMMM yyyy');
-  const briefingTitle = isToday ? "Today's Briefing" : `Briefing for ${format(selectedDate, 'EEEE')}`;
+  const briefingTitle = isToday ? t("briefing.todaysBriefing") : t("briefing.briefingFor", { day: format(selectedDate, 'EEEE') });
+  const doneCount = appointments.filter(a => new Date(a.startTime) < new Date()).length;
 
   return (
     <div data-tour="doctor-briefing" className="rounded-xl border border-primary bg-card shadow-sm">
@@ -608,6 +611,7 @@ export function TodaysBriefing() {
           <Button
             variant="ghost"
             size="icon"
+            aria-label={t("briefing.previousDay")}
             onClick={() => setSelectedDate(addDays(selectedDate, -1))}
             className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground hover:bg-white/20"
           >
@@ -617,13 +621,14 @@ export function TodaysBriefing() {
             <h3 className="text-xs md:text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
             <p className="text-[10px] md:text-sm text-primary-foreground/80">
               <span>{formattedSelectedDate}</span>
-              <span className="inline md:hidden"> • {appointments.filter(a => new Date(a.startTime) < new Date()).length}/{appointments.length}</span>
-              <span className="hidden md:block">{appointments.filter(a => new Date(a.startTime) < new Date()).length} of {appointments.length} appointment{appointments.length !== 1 ? 's' : ''} completed</span>
+              <span className="inline md:hidden"> • {doneCount}/{appointments.length}</span>
+              <span className="hidden md:block">{t("briefing.completedOf", { done: doneCount, total: appointments.length })}</span>
             </p>
           </div>
           <Button
             variant="ghost"
             size="icon"
+            aria-label={t("briefing.nextDay")}
             onClick={() => setSelectedDate(addDays(selectedDate, 1))}
             className="h-6 w-6 md:h-8 md:w-8 text-primary-foreground hover:bg-white/20"
           >
@@ -693,13 +698,13 @@ export function TodaysBriefing() {
               {isNarrating ? (
                  <>
                     <Loader2 className="h-2.5 w-2.5 md:h-3 md:w-3 animate-spin" />
-                    <span className="hidden md:inline">Preparing...</span>
+                    <span className="hidden md:inline">{t("briefing.preparing")}</span>
                     <span className="md:hidden">...</span>
                  </>
               ) : (
                 <>
                    <Volume2 className="h-2.5 w-2.5 md:h-3 md:w-3" />
-                  Narrate
+                  {t("briefing.narrate")}
                 </>
               )}
             </Button>
@@ -710,13 +715,13 @@ export function TodaysBriefing() {
       {isTranslating && (
         <div className="px-4 py-2 flex items-center gap-2 text-xs text-muted-foreground border-b border-border">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Translating briefing...
+          {t("briefing.translating")}
         </div>
       )}
 
       {appointments.length === 0 ? (
         <div className="p-8 text-center text-muted-foreground">
-          {translatedLabels['No appointments scheduled for today.'] || 'No appointments scheduled for today.'}
+          {translatedLabels['No appointments scheduled for today.'] || t("briefing.noAppointments")}
         </div>
       ) : (
         <div className="divide-y divide-border">
