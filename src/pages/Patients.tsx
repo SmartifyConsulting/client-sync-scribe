@@ -397,24 +397,24 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <div>
             <h1 className="text-2xl font-bold text-foreground">{t("nav.myPatients", "Patients")}</h1>
             <p className="mt-1 text-muted-foreground text-[12px]">
-              Manage your patient profiles and history
+              {t("patients.subtitle")}
             </p>
           </div>
         )}
         <div className="grid grid-cols-2 gap-2 ml-auto">
           <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs" onClick={() => navigate("/dashboard")}>
             <Users className="h-3.5 w-3.5 md:h-4 md:w-4" />
-            Round Tables
+            {t("patients.roundTables")}
           </Button>
           <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs" onClick={() => navigate("/sessions")}>
             <CalendarIcon className="h-3.5 w-3.5 md:h-4 md:w-4" />
-            All Sessions
+            {t("patients.allSessions")}
           </Button>
           <PatientImportDialog 
             trigger={
               <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
                 <Upload className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                Import
+                {t("patients.importPatients")}
               </Button>
             }
             onImportComplete={() => fetchPatients()}
@@ -423,7 +423,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <DialogTrigger asChild>
               <Button className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
                 <Plus className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                Patient
+                {t("patients.addPatient")}
               </Button>
             </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh]">
