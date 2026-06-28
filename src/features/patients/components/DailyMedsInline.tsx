@@ -108,9 +108,13 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
       toast({ title: "Couldn't add", description: error.message, variant: "destructive" });
       return;
     }
+    if (isChronic) {
+      await supabase.from("patients").update({ is_chronic: true } as any).eq("id", patientId);
+    }
     setPickedId(""); setShowCustom(false); setCustomName("");
     toast({ title: "Added — you'll be reminded" });
     load();
+
   };
 
   const remove = async (id: string) => {
