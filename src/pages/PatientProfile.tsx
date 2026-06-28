@@ -383,43 +383,43 @@ export default function PatientProfile() {
             value="details"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Details
+            {t("patientProfile.tabDetails")}
           </TabsTrigger>
           <TabsTrigger
             value="overview"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Overview
+            {t("patientProfile.tabOverview")}
           </TabsTrigger>
           <TabsTrigger
             value="sessions"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Session History
+            {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
             value="admissions"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Admissions
+            {t("patientProfile.tabAdmissions")}
           </TabsTrigger>
           <TabsTrigger
             value="doctors"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Healthcare Providers
+            {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
             value="documents"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Documents
+            {t("patientProfile.tabDocuments")}
           </TabsTrigger>
           <TabsTrigger
             value="roundtable"
             className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
-            Round Table
+            {t("patientProfile.tabRoundTable")}
             {unreadRoundTableCount > 0 && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}
           </TabsTrigger>
         </TabsList>
