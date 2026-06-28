@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
 import { EmergencyContactsInline } from "@/features/patients/components/EmergencyContactsInline";
