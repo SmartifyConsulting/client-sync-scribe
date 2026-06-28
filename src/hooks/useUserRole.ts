@@ -72,20 +72,20 @@ export function useUserRole() {
         }
         if ((hasEmergencyRaw || ownsProvider) && !normalized.includes('emergency')) normalized.push('emergency');
 
-        // If the user owns a provider organisation, the provider portal takes
-        // precedence over any auto-assigned doctor profile.
-        const effectiveRole: UserRole = ownsProvider
-          ? 'emergency'
-          : profileRole ??
-            (normalized.includes('doctor')
-              ? 'doctor'
-              : normalized.includes('patient')
-                ? 'patient'
-                : normalized.includes('emergency')
-                  ? 'emergency'
-                  : normalized.includes('admin')
-                    ? 'admin'
-                    : null);
+        // Prefer the explicit profile role so a doctor who also owns a hospital
+        // (or other provider) still lands on the doctor dashboard. The profile
+        // switcher still surfaces the provider portal via hasEmergencyRole.
+        const effectiveRole: UserRole =
+          profileRole ??
+          (normalized.includes('doctor')
+            ? 'doctor'
+            : normalized.includes('patient')
+              ? 'patient'
+              : (ownsProvider || normalized.includes('emergency'))
+                ? 'emergency'
+                : normalized.includes('admin')
+                  ? 'admin'
+                  : null);
 
         setAvailableRoles(normalized);
         setRole(effectiveRole);
