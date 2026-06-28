@@ -57,8 +57,8 @@ const TRIPS_DATA: UnlinkedTrip[] = [
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: "border-blue-500/40 bg-blue-500/10 text-blue-600",
-  medium: "border-orange-500/40 bg-orange-500/10 text-orange-600",
+  low: "border-primary/40/40 bg-primary/10 text-primary",
+  medium: "border-warning/40/40 bg-warning/10 text-warning",
   high: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
@@ -105,9 +105,9 @@ export default function UnlinkedTripsScreen() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-start gap-2 px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-blue-700">
+        <div className="flex items-start gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/40/20">
+          <AlertCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-primary">
             Every ambulance trip must be linked to a dispatch, maintenance job, fuel stop, or other authorized purpose.
           </p>
         </div>

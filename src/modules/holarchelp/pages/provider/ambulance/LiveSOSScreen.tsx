@@ -30,7 +30,7 @@ const sevTone = (s: string | null) =>
     : s === "high"
     ? "bg-warning/15 text-warning border-warning/40"
     : s === "moderate"
-    ? "bg-amber-100 text-amber-700 border-amber-300"
+    ? "bg-warning/10 text-warning border-warning/40"
     : "bg-muted text-muted-foreground border-border";
 
 const ago = (iso: string) => {

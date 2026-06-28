@@ -105,14 +105,14 @@ export default function VehicleAssignmentScreen() {
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
                     selectedCrew.includes(crew.id)
                       ? "border-primary bg-primary text-white"
-                      : "border-gray-300"
+                      : "border-border"
                   }`}
                 >
                   {selectedCrew.includes(crew.id) && <span className="text-sm">✓</span>}
                 </div>
               </div>
               {!crew.available && (
-                <p className="text-xs text-red-600 mt-1">Not available</p>
+                <p className="text-xs text-destructive mt-1">Not available</p>
               )}
             </div>
           ))}
@@ -175,7 +175,7 @@ export default function VehicleAssignmentScreen() {
       )}
 
       {!selectedCrew.length && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+        <div className="rounded-lg border-2 border-dashed border-border p-8 text-center">
           <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-muted-foreground">Select crew members to create assignment</p>
         </div>

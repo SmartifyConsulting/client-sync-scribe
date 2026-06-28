@@ -56,10 +56,10 @@ const MOCK_EVENTS: CalendarEvent[] = [
 ];
 
 const EVENT_CONFIG = {
-  maintenance: { color: "bg-blue-100 text-blue-800", label: "Maintenance", icon: "🔧" },
-  inspection: { color: "bg-purple-100 text-purple-800", label: "Inspection", icon: "✓" },
-  insurance: { color: "bg-green-100 text-green-800", label: "Insurance", icon: "📋" },
-  mot: { color: "bg-orange-100 text-orange-800", label: "MOT", icon: "🚗" },
+  maintenance: { color: "bg-primary/10 text-primary", label: "Maintenance", icon: "🔧" },
+  inspection: { color: "bg-accent/40 text-accent-foreground", label: "Inspection", icon: "✓" },
+  insurance: { color: "bg-success/10 text-success", label: "Insurance", icon: "📋" },
+  mot: { color: "bg-warning/10 text-warning", label: "MOT", icon: "🚗" },
 };
 
 export default function FleetCalendarScreen() {

@@ -56,13 +56,13 @@ export default function MaintenanceDashboardScreen() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "pending":
-        return <Clock className="h-5 w-5 text-yellow-600" />;
+        return <Clock className="h-5 w-5 text-warning" />;
       case "in-progress":
-        return <Wrench className="h-5 w-5 text-blue-600" />;
+        return <Wrench className="h-5 w-5 text-primary" />;
       case "completed":
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case "overdue":
-        return <AlertCircle className="h-5 w-5 text-red-600" />;
+        return <AlertCircle className="h-5 w-5 text-destructive" />;
     }
   };
 
@@ -78,15 +78,15 @@ export default function MaintenanceDashboardScreen() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Pending</p>
-          <p className="text-2xl font-bold mt-2 text-yellow-600">{stats.pending}</p>
+          <p className="text-2xl font-bold mt-2 text-warning">{stats.pending}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">In Progress</p>
-          <p className="text-2xl font-bold mt-2 text-blue-600">{stats.inProgress}</p>
+          <p className="text-2xl font-bold mt-2 text-primary">{stats.inProgress}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Overdue</p>
-          <p className="text-2xl font-bold mt-2 text-red-600">{stats.overdue}</p>
+          <p className="text-2xl font-bold mt-2 text-destructive">{stats.overdue}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Total Cost</p>
@@ -109,12 +109,12 @@ export default function MaintenanceDashboardScreen() {
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   item.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
+                    ? "bg-warning/10 text-warning"
                     : item.status === "in-progress"
-                      ? "bg-blue-100 text-blue-800"
+                      ? "bg-primary/10 text-primary"
                       : item.status === "completed"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
+                        ? "bg-success/10 text-success"
+                        : "bg-destructive/10 text-destructive"
                 }`}
               >
                 {item.status.replace("-", " ")}

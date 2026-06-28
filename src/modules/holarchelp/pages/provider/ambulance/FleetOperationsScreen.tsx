@@ -78,26 +78,26 @@ export default function FleetOperationsScreen() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "available":
-        return { badge: "bg-green-100 text-green-800", icon: "✓" };
+        return { badge: "bg-success/10 text-success", icon: "✓" };
       case "in-service":
-        return { badge: "bg-amber-100 text-amber-800", icon: "🚑" };
+        return { badge: "bg-warning/10 text-warning", icon: "🚑" };
       case "maintenance":
-        return { badge: "bg-gray-100 text-gray-800", icon: "⚙" };
+        return { badge: "bg-muted text-muted-foreground", icon: "⚙" };
       default:
-        return { badge: "bg-gray-100 text-gray-800", icon: "•" };
+        return { badge: "bg-muted text-muted-foreground", icon: "•" };
     }
   };
 
   const getMaintenanceStatusColor = (status: string) => {
     switch (status) {
       case "scheduled":
-        return "bg-amber-100 text-amber-800";
+        return "bg-warning/10 text-warning";
       case "in-progress":
-        return "bg-blue-100 text-blue-800";
+        return "bg-primary/10 text-primary";
       case "overdue":
-        return "bg-red-100 text-red-800";
+        return "bg-destructive/10 text-destructive";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-muted text-muted-foreground";
     }
   };
 
@@ -170,7 +170,7 @@ export default function FleetOperationsScreen() {
               <div className="border-t" />
 
               {/* Vehicle Utilization */}
-              <div className="bg-gray-50 dark:bg-gray-900/30 rounded p-3 space-y-2">
+              <div className="bg-muted rounded p-3 space-y-2">
                 <p className="text-sm font-semibold">Vehicle Utilization</p>
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div>

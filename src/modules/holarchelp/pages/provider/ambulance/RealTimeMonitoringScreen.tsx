@@ -38,17 +38,17 @@ export default function RealTimeMonitoringScreen() {
             <div className="rounded-lg border bg-card p-4">
               <p className="text-xs text-muted-foreground">Vehicles Online</p>
               <p className="text-2xl font-bold mt-2">6/6</p>
-              <p className="text-xs text-green-600">All GPS connected</p>
+              <p className="text-xs text-success">All GPS connected</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <p className="text-xs text-muted-foreground">Avg Speed</p>
               <p className="text-2xl font-bold mt-2">42 km/h</p>
-              <p className="text-xs text-gray-600">Within limits</p>
+              <p className="text-xs text-muted-foreground">Within limits</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <p className="text-xs text-muted-foreground">Fuel Status</p>
               <p className="text-2xl font-bold mt-2">72%</p>
-              <p className="text-xs text-green-600">Good levels</p>
+              <p className="text-xs text-success">Good levels</p>
             </div>
           </div>
 
@@ -59,7 +59,7 @@ export default function RealTimeMonitoringScreen() {
               { vehicle: "AMB-003", location: "Workshop", speed: "0 km/h", fuel: "45%", status: "stopped" },
             ].map((item) => (
               <div key={item.vehicle} className={`rounded-lg border-2 p-4 ${
-                item.status === "moving" ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200"
+                item.status === "moving" ? "bg-primary/10 border-blue-200" : "bg-muted border-border"
               }`}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
@@ -70,7 +70,7 @@ export default function RealTimeMonitoringScreen() {
                     </p>
                   </div>
                   <span className={`px-3 py-1 rounded text-xs font-semibold ${
-                    item.status === "moving" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"
+                    item.status === "moving" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
                   }`}>
                     {item.status === "moving" ? "🚑 MOVING" : "⊛ STOPPED"}
                   </span>
@@ -100,17 +100,17 @@ export default function RealTimeMonitoringScreen() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div className="rounded-lg border bg-card p-4">
               <p className="text-xs text-muted-foreground">Critical Alerts</p>
-              <p className="text-2xl font-bold mt-2 text-red-600">2</p>
+              <p className="text-2xl font-bold mt-2 text-destructive">2</p>
               <p className="text-xs">Immediate action</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <p className="text-xs text-muted-foreground">Safety Events</p>
-              <p className="text-2xl font-bold mt-2 text-orange-600">5</p>
+              <p className="text-2xl font-bold mt-2 text-warning">5</p>
               <p className="text-xs">This week</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
               <p className="text-xs text-muted-foreground">Fleet Score</p>
-              <p className="text-2xl font-bold mt-2 text-green-600">92/100</p>
+              <p className="text-2xl font-bold mt-2 text-success">92/100</p>
               <p className="text-xs">Excellent safety</p>
             </div>
           </div>
@@ -122,7 +122,7 @@ export default function RealTimeMonitoringScreen() {
               { vehicle: "AMB-003", event: "After-hours movement", severity: "HIGH", time: "1 hour ago", action: "Investigate" },
             ].map((item) => (
               <div key={`${item.vehicle}-${item.event}`} className={`rounded-lg border-l-4 bg-card p-4 ${
-                item.severity === "HIGH" ? "border-l-red-600 bg-red-50" : "border-l-orange-600 bg-orange-50"
+                item.severity === "HIGH" ? "border-l-red-600 bg-destructive/10" : "border-l-orange-600 bg-warning/10"
               }`}>
                 <div className="flex items-start justify-between mb-2">
                   <div>
@@ -130,7 +130,7 @@ export default function RealTimeMonitoringScreen() {
                     <p className="text-sm mt-1">{item.event}</p>
                   </div>
                   <span className={`px-3 py-1 rounded text-xs font-semibold ${
-                    item.severity === "HIGH" ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"
+                    item.severity === "HIGH" ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"
                   }`}>
                     {item.severity === "HIGH" ? "🔴 CRITICAL" : "🟠 ALERT"}
                   </span>
@@ -155,7 +155,7 @@ export default function RealTimeMonitoringScreen() {
                 "⏱️ Unauthorized stops",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />
                   <span>{item}</span>
                 </div>
               ))}

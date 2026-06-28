@@ -9,9 +9,9 @@ import { toast } from "sonner";
 
 const SEVERITY_COLORS: Record<string, string> = {
   critical: "bg-destructive/15 text-destructive border-destructive/40",
-  high: "bg-orange-500/15 text-orange-600 border-orange-500/40",
+  high: "bg-warning/15 text-warning border-warning/40/40",
   medium: "bg-warning/15 text-warning border-warning/40",
-  low: "bg-blue-500/15 text-blue-600 border-blue-500/40",
+  low: "bg-primary/15 text-primary border-primary/40/40",
 };
 
 interface AbuseEvent {
@@ -176,9 +176,9 @@ export default function VehicleAbuseScreen() {
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                 High Risk
               </p>
-              <p className="mt-1 text-2xl font-bold text-orange-600">{highCount}</p>
+              <p className="mt-1 text-2xl font-bold text-warning">{highCount}</p>
             </div>
-            <AlertCircle className="h-8 w-8 text-orange-500/40" />
+            <AlertCircle className="h-8 w-8 text-warning/40" />
           </div>
         </div>
         <div className="rounded-2xl border bg-card p-4">

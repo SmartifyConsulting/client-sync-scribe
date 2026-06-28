@@ -55,8 +55,8 @@ const HOURS_DATA: AfterHoursEvent[] = [
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: "border-blue-500/40 bg-blue-500/10 text-blue-600",
-  medium: "border-orange-500/40 bg-orange-500/10 text-orange-600",
+  low: "border-primary/40/40 bg-primary/10 text-primary",
+  medium: "border-warning/40/40 bg-warning/10 text-warning",
   high: "border-destructive/40 bg-destructive/10 text-destructive",
   critical: "border-destructive/40 bg-destructive/10 text-destructive",
 };
@@ -93,7 +93,7 @@ export default function AfterHoursScreen() {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             High Risk
           </p>
-          <p className="mt-1 text-2xl font-bold text-orange-600">{highCount}</p>
+          <p className="mt-1 text-2xl font-bold text-warning">{highCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

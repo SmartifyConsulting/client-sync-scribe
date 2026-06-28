@@ -67,8 +67,8 @@ export default function VehicleAvailabilityScreen() {
               <span
                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   slot.status === "available"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-yellow-100 text-yellow-800"
+                    ? "bg-success/10 text-success"
+                    : "bg-warning/10 text-warning"
                 }`}
               >
                 {slot.status === "available" ? "Available Now" : "Available Soon"}
@@ -105,17 +105,17 @@ export default function VehicleAvailabilityScreen() {
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div className="rounded-lg border bg-card p-4 text-center">
-          <CheckCircle2 className="h-6 w-6 text-green-600 mx-auto mb-2" />
+          <CheckCircle2 className="h-6 w-6 text-success mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">Available Now</p>
           <p className="text-2xl font-bold mt-1">3</p>
         </div>
         <div className="rounded-lg border bg-card p-4 text-center">
-          <Clock className="h-6 w-6 text-orange-600 mx-auto mb-2" />
+          <Clock className="h-6 w-6 text-warning mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">Available Soon</p>
           <p className="text-2xl font-bold mt-1">2</p>
         </div>
         <div className="rounded-lg border bg-card p-4 text-center">
-          <AlertCircle className="h-6 w-6 text-red-600 mx-auto mb-2" />
+          <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">In Service</p>
           <p className="text-2xl font-bold mt-1">7</p>
         </div>

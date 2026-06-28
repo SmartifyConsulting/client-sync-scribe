@@ -265,7 +265,7 @@ export default function TelematicsScreen() {
                       className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                         d.moving
                           ? "bg-emerald-500/15 text-emerald-700"
-                          : "bg-amber-500/15 text-amber-700"
+                          : "bg-warning/15 text-warning"
                       }`}
                     >
                       {d.moving ? t("telematics.moving") : t("telematics.stopped")}

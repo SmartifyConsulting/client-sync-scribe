@@ -38,22 +38,22 @@ export default function VehicleUtilisationScreen() {
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Average Utilisation</p>
           <p className="text-2xl font-bold mt-2">76.4%</p>
-          <p className="text-xs text-green-600 mt-1">↑ 5% vs last month</p>
+          <p className="text-xs text-success mt-1">↑ 5% vs last month</p>
         </Card>
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Total Trips</p>
           <p className="text-2xl font-bold mt-2">3,675</p>
-          <p className="text-xs text-green-600 mt-1">↑ 12% vs last month</p>
+          <p className="text-xs text-success mt-1">↑ 12% vs last month</p>
         </Card>
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Total Mileage</p>
           <p className="text-2xl font-bold mt-2">13,520</p>
-          <p className="text-xs text-gray-600 mt-1">km this month</p>
+          <p className="text-xs text-muted-foreground mt-1">km this month</p>
         </Card>
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Operating Cost</p>
           <p className="text-2xl font-bold mt-2">$4,250</p>
-          <p className="text-xs text-gray-600 mt-1">per vehicle/month</p>
+          <p className="text-xs text-muted-foreground mt-1">per vehicle/month</p>
         </Card>
       </div>
 

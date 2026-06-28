@@ -103,7 +103,7 @@ export default function HospitalNetworkScreen() {
             <div
               key={hospital.name}
               className={`rounded-lg border p-4 ${
-                hospital.affiliated ? "border-2 border-blue-400 bg-blue-50 dark:bg-blue-950/20" : "bg-card"
+                hospital.affiliated ? "border-2 border-primary/40 bg-primary/10" : "bg-card"
               }`}
             >
               <div className="flex items-start justify-between mb-3">
@@ -111,10 +111,10 @@ export default function HospitalNetworkScreen() {
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-bold text-lg">{hospital.name}</h3>
                     {hospital.affiliated && (
-                      <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">⭐ AFFILIATED</span>
+                      <span className="text-xs bg-primary text-white px-2 py-1 rounded">⭐ AFFILIATED</span>
                     )}
                     {hospital.trauma && (
-                      <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">🚑 TRAUMA</span>
+                      <span className="text-xs bg-destructive text-white px-2 py-1 rounded">🚑 TRAUMA</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -132,7 +132,7 @@ export default function HospitalNetworkScreen() {
                 {hospital.affiliated && hospital.beds && (
                   <div>
                     <p className="text-xs text-muted-foreground">Available Beds</p>
-                    <p className="font-semibold mt-1 text-green-600">{hospital.beds}</p>
+                    <p className="font-semibold mt-1 text-success">{hospital.beds}</p>
                   </div>
                 )}
                 <div className="text-right">
@@ -145,7 +145,7 @@ export default function HospitalNetworkScreen() {
               </div>
 
               {hospital.affiliated && hospital.contact && (
-                <p className="text-sm text-blue-700 dark:text-blue-300 mt-3 flex items-center gap-1">
+                <p className="text-sm text-primary mt-3 flex items-center gap-1">
                   ✓ {hospital.contact}
                 </p>
               )}
@@ -159,11 +159,11 @@ export default function HospitalNetworkScreen() {
         <h3 className="font-bold mb-3">Key indicators</h3>
         <div className="space-y-2 text-sm">
           <div>
-            <span className="text-blue-600 dark:text-blue-400 font-semibold">⭐ AFFILIATED</span>
+            <span className="text-primary font-semibold">⭐ AFFILIATED</span>
             <span className="text-muted-foreground"> — Direct dispatch, priority routing, bed sync</span>
           </div>
           <div>
-            <span className="text-red-600 dark:text-red-400 font-semibold">🚑 TRAUMA</span>
+            <span className="text-destructive font-semibold">🚑 TRAUMA</span>
             <span className="text-muted-foreground"> — Designated trauma facility</span>
           </div>
           <div className="text-muted-foreground">📍 Distance helps with dispatch decisions</div>

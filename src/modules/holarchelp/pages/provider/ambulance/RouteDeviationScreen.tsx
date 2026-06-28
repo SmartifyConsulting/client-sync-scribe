@@ -48,8 +48,8 @@ const DEVIATION_DATA: RouteDeviation[] = [
 ];
 
 const SEVERITY_COLORS: Record<string, string> = {
-  low: "border-blue-500/40 bg-blue-500/10 text-blue-600",
-  medium: "border-orange-500/40 bg-orange-500/10 text-orange-600",
+  low: "border-primary/40/40 bg-primary/10 text-primary",
+  medium: "border-warning/40/40 bg-warning/10 text-warning",
   high: "border-destructive/40 bg-destructive/10 text-destructive",
 };
 
@@ -88,7 +88,7 @@ export default function RouteDeviationScreen() {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Medium Deviation
           </p>
-          <p className="mt-1 text-2xl font-bold text-orange-600">
+          <p className="mt-1 text-2xl font-bold text-warning">
             {DEVIATION_DATA.filter((d) => d.severity === "medium").length}
           </p>
         </div>

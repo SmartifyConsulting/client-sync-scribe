@@ -94,18 +94,18 @@ const DECLINE_REASONS = [
 ];
 
 const SEVERITY_COLORS = {
-  critical: "bg-red-600 text-white",
-  high: "bg-orange-600 text-white",
-  medium: "bg-yellow-600 text-white",
-  low: "bg-blue-600 text-white",
+  critical: "bg-destructive text-white",
+  high: "bg-warning text-white",
+  medium: "bg-warning text-white",
+  low: "bg-primary text-white",
 };
 
 const STATUS_BADGES = {
-  pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  accepted: "bg-green-100 text-green-800 border-green-300",
-  declined: "bg-red-100 text-red-800 border-red-300",
-  active: "bg-blue-100 text-blue-800 border-blue-300",
-  completed: "bg-gray-100 text-gray-800 border-gray-300",
+  pending: "bg-warning/10 text-warning border-warning/40",
+  accepted: "bg-success/10 text-success border-success/40",
+  declined: "bg-destructive/10 text-destructive border-destructive/40",
+  active: "bg-primary/10 text-primary border-primary/40",
+  completed: "bg-muted text-muted-foreground border-border",
 };
 
 export default function IncidentManagementScreen() {
@@ -209,7 +209,7 @@ export default function IncidentManagementScreen() {
             key={incident.id}
             className={cn(
               "rounded-2xl border-2 p-6 space-y-3",
-              incident.status === "pending" ? "border-yellow-300 bg-yellow-50" : "border-border bg-card"
+              incident.status === "pending" ? "border-warning/40 bg-warning/10" : "border-border bg-card"
             )}
           >
             {/* Header Row */}
@@ -240,12 +240,12 @@ export default function IncidentManagementScreen() {
 
             {/* Source Badge */}
             {incident.type === "from-hospital" && (
-              <div className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+              <div className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">
                 🏥 FROM: {incident.hospital_name}
               </div>
             )}
             {incident.type === "self-created" && (
-              <div className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-semibold">
+              <div className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm font-semibold">
                 📋 Self-Created
               </div>
             )}
@@ -300,7 +300,7 @@ export default function IncidentManagementScreen() {
               {incident.status === "pending" && incident.type === "from-hospital" && (
                 <>
                   <Button
-                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    className="flex-1 bg-success hover:bg-success"
                     onClick={() => handleAccept(incident.id)}
                     disabled={loading}
                   >
@@ -318,7 +318,7 @@ export default function IncidentManagementScreen() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1 text-red-600 border-red-300"
+                    className="flex-1 text-destructive border-destructive/40"
                     onClick={() => setShowDeclineDialog(incident.id)}
                     disabled={loading}
                   >
@@ -395,7 +395,7 @@ export default function IncidentManagementScreen() {
                     Cancel
                   </Button>
                   <Button
-                    className="flex-1 bg-red-600 hover:bg-red-700"
+                    className="flex-1 bg-destructive hover:bg-destructive"
                     onClick={() => handleDecline(incident.id)}
                     disabled={!selectedReason || loading}
                   >
