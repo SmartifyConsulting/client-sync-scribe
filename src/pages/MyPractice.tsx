@@ -375,6 +375,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
 
 // ── Main Component ──────────────────────────────────────────────────
 export default function MyPractice() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile, loading, fetchProfile, updateProfile, uploadLogo } = useProfile();
@@ -1094,25 +1095,25 @@ export default function MyPractice() {
             value="practice"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            My Practice
+            {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="referrals"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            Referrals
+            {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            Credentials{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
+            {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
-            My Rewards
+            {t("myPractice.tabRewards")}
           </TabsTrigger>
         </TabsList>
 
