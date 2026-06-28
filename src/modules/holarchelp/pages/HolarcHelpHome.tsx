@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -12,6 +13,7 @@ import logo from "@/assets/holarc-help-logo.png";
 type Coords = { lat: number; lng: number };
 
 export default function HolarcHelpHome() {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const navigate = useNavigate();
@@ -137,20 +139,20 @@ export default function HolarcHelpHome() {
 
       {/* Title */}
       <div className="mt-8 text-center">
-        <h1 className="text-2xl font-extrabold tracking-tight">Emergency Assistance</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Help will be alerted instantly</p>
+        <h1 className="text-2xl font-extrabold tracking-tight">{t("sos.emergencyAssistance")}</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">{t("sos.helpAlerted")}</p>
       </div>
 
       {/* SOS acknowledgements */}
       {!activeIncidentId && (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4 space-y-3">
           <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Before using SOS, please acknowledge:
+            {t("sos.ackHeading")}
           </p>
           {[
-            { k: "a" as const, label: "SOS support is provided on a best-effort basis and cannot guarantee emergency response." },
-            { k: "b" as const, label: "SOS depends on network, device status, location access, and third-party responders." },
-            { k: "c" as const, label: "SOS requires location permissions, battery power, and internet or cellular connectivity." },
+            { k: "a" as const, label: t("sos.ackA") },
+            { k: "b" as const, label: t("sos.ackB") },
+            { k: "c" as const, label: t("sos.ackC") },
           ].map((item) => (
             <label key={item.k} htmlFor={`sos-ack-${item.k}`} className="flex items-start gap-3 cursor-pointer">
               <Checkbox
@@ -190,8 +192,8 @@ export default function HolarcHelpHome() {
               <Loader2 className="h-10 w-10 animate-spin" />
             ) : (
               <>
-                <span className="text-3xl tracking-[0.18em]">SOS</span>
-                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">Tap For Help</span>
+                <span className="text-3xl tracking-[0.18em]">{t("sos.sosLabel")}</span>
+                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">{t("sos.tapForHelp")}</span>
               </>
             )}
           </button>
@@ -199,7 +201,7 @@ export default function HolarcHelpHome() {
 
         {/* What happens when you tap SOS — static notice, no spinners */}
         <p className="mt-6 max-w-xs text-center text-xs leading-relaxed text-muted-foreground">
-          Tapping SOS shares your location and notifies your emergency contacts.
+          {t("sos.footerCaption")}
         </p>
 
         {/* Active SOS — surfaced directly under the hint */}
@@ -244,13 +246,13 @@ export default function HolarcHelpHome() {
           onClick={() => navigate("/patient/holarchelp/contacts")}
           className="text-xs font-semibold text-primary underline-offset-4 hover:underline"
         >
-          Manage emergency contacts
+          {t("sos.manageContacts")}
         </button>
         <button
           onClick={() => navigate("/patient/holarchelp/incidents")}
           className="text-xs font-semibold text-muted-foreground underline-offset-4 hover:underline"
         >
-          View incident history
+          {t("sos.viewHistory")}
         </button>
       </div>
     </div>
