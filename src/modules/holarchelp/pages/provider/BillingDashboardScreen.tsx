@@ -15,22 +15,22 @@ export default function BillingDashboardScreen() {
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Monthly Revenue</p>
           <p className="text-2xl font-bold mt-2">$24,500</p>
-          <p className="text-xs text-green-600 mt-1">↑ 8% vs last month</p>
+          <p className="text-xs text-success mt-1">↑ 8% vs last month</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Pending Invoices</p>
           <p className="text-2xl font-bold mt-2">$8,750</p>
-          <p className="text-xs text-orange-600 mt-1">6 invoices</p>
+          <p className="text-xs text-warning mt-1">6 invoices</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Paid This Month</p>
           <p className="text-2xl font-bold mt-2">$18,200</p>
-          <p className="text-xs text-green-600 mt-1">74% collected</p>
+          <p className="text-xs text-success mt-1">74% collected</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
           <p className="text-xs text-muted-foreground">Active Contracts</p>
           <p className="text-2xl font-bold mt-2">12</p>
-          <p className="text-xs text-blue-600 mt-1">All active</p>
+          <p className="text-xs text-primary mt-1">All active</p>
         </div>
       </div>
 
@@ -65,10 +65,10 @@ export default function BillingDashboardScreen() {
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${
                         row.status === "Paid"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-success/10 text-success"
                           : row.status === "Pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                            ? "bg-warning/10 text-warning"
+                            : "bg-destructive/10 text-destructive"
                       }`}
                     >
                       {row.status}
