@@ -117,36 +117,7 @@ const CURRENCIES = [
   { code: "LSL", symbol: "M", name: "Lesotho Loti" },
 ];
 
-const LANGUAGES = [
-  { code: "af", name: "Afrikaans" },
-  { code: "ar", name: "Arabic" },
-  { code: "nl", name: "Dutch" },
-  { code: "en", name: "English" },
-  { code: "fr", name: "French" },
-  { code: "de", name: "German" },
-  { code: "el", name: "Greek" },
-  { code: "he", name: "Hebrew" },
-  { code: "hi", name: "Hindi" },
-  { code: "id", name: "Indonesian" },
-  { code: "it", name: "Italian" },
-  { code: "ja", name: "Japanese" },
-  { code: "ko", name: "Korean" },
-  { code: "ms", name: "Malay" },
-  { code: "zh", name: "Mandarin Chinese" },
-  { code: "pl", name: "Polish" },
-  { code: "pt", name: "Portuguese" },
-  { code: "ru", name: "Russian" },
-  { code: "st", name: "Sotho" },
-  { code: "es", name: "Spanish" },
-  { code: "sw", name: "Swahili" },
-  { code: "th", name: "Thai" },
-  { code: "tn", name: "Tswana" },
-  { code: "tr", name: "Turkish" },
-  { code: "uk", name: "Ukrainian" },
-  { code: "vi", name: "Vietnamese" },
-  { code: "xh", name: "Xhosa" },
-  { code: "zu", name: "Zulu" },
-];
+import { LANGUAGES } from "@/lib/languages";
 
 const COUNTRY_CODE_TO_LANGUAGE: Record<string, string> = {
   "+27": "en",
