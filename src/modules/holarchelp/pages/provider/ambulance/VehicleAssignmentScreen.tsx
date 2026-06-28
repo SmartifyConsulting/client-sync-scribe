@@ -104,7 +104,7 @@ export default function VehicleAssignmentScreen() {
                 <div
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
                     selectedCrew.includes(crew.id)
-                      ? "border-primary bg-primary text-white"
+                      ? "border-primary bg-primary text-primary-foreground"
                       : "border-border"
                   }`}
                 >

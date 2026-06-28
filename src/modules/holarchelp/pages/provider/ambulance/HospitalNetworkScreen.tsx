@@ -111,10 +111,10 @@ export default function HospitalNetworkScreen() {
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-bold text-lg">{hospital.name}</h3>
                     {hospital.affiliated && (
-                      <span className="text-xs bg-primary text-white px-2 py-1 rounded">⭐ AFFILIATED</span>
+                      <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded">⭐ AFFILIATED</span>
                     )}
                     {hospital.trauma && (
-                      <span className="text-xs bg-destructive text-white px-2 py-1 rounded">🚑 TRAUMA</span>
+                      <span className="text-xs bg-destructive text-destructive-foreground px-2 py-1 rounded">🚑 TRAUMA</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">

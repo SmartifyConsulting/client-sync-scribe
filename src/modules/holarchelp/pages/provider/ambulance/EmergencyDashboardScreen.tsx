@@ -60,10 +60,10 @@ const MOCK_INCIDENTS: Incident[] = [
 ];
 
 const SEVERITY_COLORS = {
-  critical: "bg-destructive text-white",
-  high: "bg-warning text-white",
-  medium: "bg-warning text-white",
-  low: "bg-primary text-white",
+  critical: "bg-destructive text-destructive-foreground",
+  high: "bg-warning text-warning-foreground",
+  medium: "bg-warning text-warning-foreground",
+  low: "bg-primary text-primary-foreground",
 };
 
 const STATUS_CONFIG = {
