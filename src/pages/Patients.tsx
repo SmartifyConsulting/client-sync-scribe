@@ -827,7 +827,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {sortedPatients.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            {searchQuery ? "No patients found matching your search" : "No patients yet. Add your first patient!"}
+            {searchQuery ? t("patients.noPatientsFound") : t("patients.noPatientsHint")}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -835,19 +835,19 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
               <thead>
                 <tr className="bg-primary">
                   <th className="px-2 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Patient
+                    {t("patients.colPatient")}
                   </th>
                   <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Contact
+                    {t("patients.colContact")}
                   </th>
                   <th className="px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Last Seen
+                    {t("patients.colLastSeen")}
                   </th>
                   <th className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
-                    Since
+                    {t("patients.colSince")}
                   </th>
                   <th className="px-3 lg:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
-                    Actions
+                    {t("patients.colActions")}
                   </th>
                 </tr>
               </thead>
