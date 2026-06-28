@@ -66,58 +66,101 @@ export default function TeamStatusScreen() {
 
   const onShift = Object.values(shiftsByUser).filter(s => s.status !== "off_shift").length;
 
+  const shiftGroups = [
+    { name: "🌅 Day Crew", time: "08:00 - 16:00", members: ["John Smith", "Mike Johnson"] },
+    { name: "🌆 Evening Crew", time: "16:00 - 20:00", members: ["Sarah Miller", "James Kelly", "Rachel Chen"] },
+  ];
+
+  const roleColors: Record<string, string> = {
+    paramedic: "text-green-600",
+    driver: "text-amber-600",
+    emt: "text-blue-600",
+    default: "text-gray-600",
+  };
+
   return (
-    <div className="space-y-4">
-      <header className="flex items-end justify-between">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
-          <h1 className="text-2xl font-extrabold">{t("team.title")}</h1>
-          <p className="text-xs text-muted-foreground">{t("team.subtitle")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">
-            <Users className="mr-1 inline h-3.5 w-3.5 text-primary" /> {onShift} / {members.length} {t("team.onShift")}
-          </span>
-          {isAdmin && (
-            <Button size="sm" onClick={() => setInviteOpen(true)}>
-              <UserPlus className="mr-1 h-4 w-4" /> {t("common.invite")}
-            </Button>
-          )}
-        </div>
+    <div className="space-y-6">
+      <header>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+        <h1 className="text-3xl font-extrabold mt-2">{t("team.title")}</h1>
+        <p className="text-sm text-muted-foreground mt-2">Current shift: Friday 08:00 - 20:00</p>
       </header>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        <ul className="divide-y">
-          {members.map((m) => {
-            const s = shiftsByUser[m.user_id];
-            const active = !!s && s.status !== "off_shift";
-            const busy = s?.status === "busy";
-            return (
-              <li key={m.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40">
-                {active
-                  ? <UserCheck className={`h-4 w-4 ${busy ? "text-destructive" : "text-success"}`} />
-                  : <UserX className="h-4 w-4 text-muted-foreground" />}
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold">{m.full_name}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {m.role ?? t("team.paramedic")}
-                    {s?.vehicle_code && <> · <Truck className="inline h-3 w-3" /> {s.vehicle_code}</>}
-                  </p>
-                </div>
-                <span
-                  className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
-                    busy ? "border-destructive/40 bg-destructive/10 text-destructive"
-                    : active ? "border-success/40 bg-success/10 text-success"
-                    : "border-border bg-background text-muted-foreground"
-                  }`}
-                >
-                  {busy ? t("status.busy") : active ? t("status.available") : t("status.offShift")}
-                </span>
-              </li>
-            );
-          })}
-          {!members.length && <li className="p-8 text-center text-xs text-muted-foreground">{t("team.noCrew")}</li>}
-        </ul>
+      {/* Shift Selector */}
+      <div className="flex gap-3">
+        <div className="flex-1 rounded-lg border bg-card p-3">
+          <p className="text-sm font-medium">Current Shift ▼</p>
+        </div>
+        <div className="flex-1 rounded-lg border bg-card p-3">
+          <p className="text-sm font-medium">View Assignments ▼</p>
+        </div>
+      </div>
+
+      {/* Shift Groups */}
+      <div className="space-y-6">
+        {shiftGroups.map((group) => (
+          <div key={group.name}>
+            {/* Shift Group Header */}
+            <div className="rounded-lg border-2 bg-blue-50 dark:bg-blue-950/20 border-blue-300 p-4 mb-3">
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-lg">{group.name} ({group.time})</h2>
+                <span className="font-semibold text-muted-foreground">{group.members.length} members</span>
+              </div>
+            </div>
+
+            {/* Crew Members in Group */}
+            <div className="space-y-2 ml-4">
+              {group.members.map((memberName, idx) => {
+                const member = members.find((m) => m.full_name === memberName);
+                const shift = member ? shiftsByUser[member.user_id] : null;
+                const isOnDuty = !!shift && shift.status !== "off_shift";
+
+                return (
+                  <div key={idx} className="rounded-lg border bg-card p-3 flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold">{memberName}</p>
+                      <p className={`text-sm ${member?.role ? roleColors[member.role.toLowerCase()] : roleColors.default}`}>
+                        {member?.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : "Crew Member"}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-3 py-1.5 rounded text-xs font-semibold ${
+                        isOnDuty
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {isOnDuty ? "ON DUTY" : "READY"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Team Summary */}
+      <div className="rounded-lg border bg-card p-4">
+        <h3 className="font-bold mb-4">Team Summary</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="rounded-lg bg-green-100 dark:bg-green-950/30 p-3">
+            <p className="text-xs text-muted-foreground">Paramedics</p>
+            <p className="text-2xl font-bold text-green-700 mt-1">3</p>
+          </div>
+          <div className="rounded-lg bg-amber-100 dark:bg-amber-950/30 p-3">
+            <p className="text-xs text-muted-foreground">Drivers</p>
+            <p className="text-2xl font-bold text-amber-700 mt-1">2</p>
+          </div>
+          <div className="rounded-lg bg-blue-100 dark:bg-blue-950/30 p-3">
+            <p className="text-xs text-muted-foreground">EMTs</p>
+            <p className="text-2xl font-bold text-blue-700 mt-1">1</p>
+          </div>
+          <div className="rounded-lg bg-purple-100 dark:bg-purple-950/30 p-3">
+            <p className="text-xs text-muted-foreground">On Duty</p>
+            <p className="text-2xl font-bold text-purple-700 mt-1">{onShift}/{members.length}</p>
+          </div>
+        </div>
       </div>
 
       {providerId && (
