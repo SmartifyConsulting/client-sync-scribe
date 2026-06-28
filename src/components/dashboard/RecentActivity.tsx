@@ -13,7 +13,8 @@ interface Activity {
   type: "document" | "task" | "message" | "session";
   title: string;
   description: string;
-  time: string;
+  /** ISO timestamp; rendered via i18n relative-time helper */
+  timeIso: string;
   patientId?: string;
   patientName?: string;
 }
