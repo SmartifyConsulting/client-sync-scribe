@@ -94,6 +94,7 @@ function getDateKey(dateStr: string): string {
 }
 
 export default function TodoList() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { profile } = useProfile();
