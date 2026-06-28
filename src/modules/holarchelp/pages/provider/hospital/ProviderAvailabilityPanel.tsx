@@ -95,9 +95,6 @@ export function ProviderAvailabilityPanel({ onSelectProvider }: { onSelectProvid
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <h4 className="font-bold text-base">{provider.name}</h4>
-                {provider.is_affiliated && (
-                  <p className="text-xs text-muted-foreground mt-1">Affiliated Hospital</p>
-                )}
               </div>
               <span className={`text-2xl font-bold ${config.color}`}>{config.icon}</span>
             </div>
