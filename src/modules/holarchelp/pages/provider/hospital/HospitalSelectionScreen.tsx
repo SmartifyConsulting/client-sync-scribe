@@ -1,182 +1,161 @@
-import { useState } from "react";
-import { useProviderAccess } from "../../../components/ProviderGate";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, Users, AlertCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { MapPin, AlertCircle, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface Hospital {
-  id: string;
-  name: string;
-  distance_km: number;
-  eta_minutes: number;
-  specialty: string[];
-  capacity: {
-    trauma: number;
-    cardiac: number;
-    medical: number;
-  };
-  current_wait: number;
-  contact: string;
-  address: string;
-}
-
-const HOSPITALS: Hospital[] = [
-  {
-    id: "h_001",
-    name: "Central Hospital",
-    distance_km: 3.2,
-    eta_minutes: 10,
-    specialty: ["Trauma", "Cardiac", "General"],
-    capacity: { trauma: 8, cardiac: 5, medical: 12 },
-    current_wait: 45,
-    contact: "+27 11 234 5678",
-    address: "123 Main Street, Downtown",
-  },
-  {
-    id: "h_002",
-    name: "City Medical Centre",
-    distance_km: 4.1,
-    eta_minutes: 12,
-    specialty: ["Cardiac", "General", "Pediatric"],
-    capacity: { trauma: 3, cardiac: 8, medical: 15 },
-    current_wait: 60,
-    contact: "+27 11 345 6789",
-    address: "456 Park Ave, City Centre",
-  },
-  {
-    id: "h_003",
-    name: "North General Hospital",
-    distance_km: 5.5,
-    eta_minutes: 16,
-    specialty: ["General", "Trauma"],
-    capacity: { trauma: 6, cardiac: 2, medical: 10 },
-    current_wait: 20,
-    contact: "+27 11 456 7890",
-    address: "789 North Rd, North District",
-  },
-];
+import {
+  useAvailableHospitals,
+  distanceKm,
+} from "../../../hooks/useHospitalNetwork";
 
 export default function HospitalSelectionScreen() {
-  const { providerId } = useProviderAccess();
-  const [selectedHospital, setSelectedHospital] = useState<string | null>(HOSPITALS[0].id);
+  const { data = [], isLoading } = useAvailableHospitals();
+  const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (p) => setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => setCoords(null),
+      { enableHighAccuracy: false, timeout: 4000, maximumAge: 60_000 },
+    );
+  }, []);
+
+  const hospitals = useMemo(() => {
+    return data.map((h) => {
+      const km =
+        coords && h.latitude != null && h.longitude != null
+          ? distanceKm(coords, { lat: h.latitude, lng: h.longitude })
+          : null;
+      // Rough ETA: assume 50 km/h urban average → 1.2 min/km
+      const eta = km != null ? Math.max(2, Math.round(km * 1.2)) : null;
+      return { ...h, _km: km, _eta: eta };
+    });
+  }, [data, coords]);
+
+  useEffect(() => {
+    if (!selectedHospital && hospitals.length) setSelectedHospital(hospitals[0].id);
+  }, [hospitals, selectedHospital]);
 
   return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+    <div className="space-y-4">
+      <div className="space-y-1">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Dispatch Management
         </p>
-        <h1 className="text-3xl font-extrabold">Select Hospital Destination</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Choose the most appropriate hospital for the patient
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Select Hospital Destination
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Only hospitals currently accepting patients are listed.
         </p>
-      </header>
-
-      <div className="grid gap-4 max-w-2xl">
-        {HOSPITALS.map((hospital) => (
-          <div
-            key={hospital.id}
-            onClick={() => setSelectedHospital(hospital.id)}
-            className={`rounded-2xl border-2 p-6 cursor-pointer transition-all ${
-              selectedHospital === hospital.id
-                ? "border-primary bg-primary/10"
-                : "border-border hover:border-primary/50"
-            }`}
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-bold text-primary">{hospital.name}</h3>
-                <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                  <MapPin className="h-3 w-3" />
-                  {hospital.address}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-bold text-orange-600">{hospital.eta_minutes} min ETA</p>
-                <p className="text-xs text-muted-foreground">{hospital.distance_km} km away</p>
-              </div>
-            </div>
-
-            {/* Specialties */}
-            <div className="mb-4 flex flex-wrap gap-2">
-              {hospital.specialty.map((spec) => (
-                <span
-                  key={spec}
-                  className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold"
-                >
-                  {spec}
-                </span>
-              ))}
-            </div>
-
-            {/* Capacity */}
-            <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-muted rounded-lg">
-              <div>
-                <p className="text-xs text-muted-foreground">Trauma Beds</p>
-                <p className="font-bold text-sm">{hospital.capacity.trauma}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Cardiac Beds</p>
-                <p className="font-bold text-sm">{hospital.capacity.cardiac}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Medical Beds</p>
-                <p className="font-bold text-sm">{hospital.capacity.medical}</p>
-              </div>
-            </div>
-
-            {/* Wait Time */}
-            <div
-              className={cn(
-                "rounded-lg p-3 flex items-center gap-2",
-                hospital.current_wait > 45
-                  ? "bg-orange-50 border border-orange-200"
-                  : "bg-green-50 border border-green-200"
-              )}
-            >
-              <AlertCircle
-                className={cn(
-                  "h-4 w-4",
-                  hospital.current_wait > 45 ? "text-orange-600" : "text-green-600"
-                )}
-              />
-              <p className="text-sm font-semibold">
-                Current wait: {hospital.current_wait} minutes
-              </p>
-            </div>
-
-            {/* Contact */}
-            <div className="mt-3 text-xs text-muted-foreground">
-              <p>Direct: {hospital.contact}</p>
-            </div>
-          </div>
-        ))}
       </div>
 
-      {/* Summary */}
+      {isLoading ? (
+        <div className="grid gap-2 max-w-2xl">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-32 w-full rounded-xl" />
+          ))}
+        </div>
+      ) : hospitals.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8">
+          No hospitals are currently accepting patients.
+        </p>
+      ) : (
+        <div className="grid gap-3 max-w-2xl">
+          {hospitals.map((hospital) => (
+            <div
+              key={hospital.id}
+              onClick={() => setSelectedHospital(hospital.id)}
+              className={cn(
+                "rounded-xl border p-4 cursor-pointer transition-all",
+                selectedHospital === hospital.id
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50",
+              )}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-semibold text-primary truncate">
+                    {hospital.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    {[hospital.address, hospital.city, hospital.state]
+                      .filter(Boolean)
+                      .join(", ") || "—"}
+                  </p>
+                </div>
+                {hospital._eta != null && (
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-semibold text-warning">
+                      {hospital._eta} min ETA
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {hospital._km!.toFixed(1)} km away
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mb-2 p-2 bg-muted rounded text-xs">
+                <div>
+                  <p className="text-muted-foreground">Beds</p>
+                  <p className="font-semibold">{hospital.beds_available ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">ICU</p>
+                  <p className="font-semibold">{hospital.icu_available ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">ER beds</p>
+                  <p className="font-semibold">{hospital.er_beds_available ?? "—"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs text-success">
+                <AlertCircle className="h-3.5 w-3.5" />
+                <span className="font-medium">Accepting patients</span>
+              </div>
+
+              {hospital.contact_phone && (
+                <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                  <Phone className="h-3.5 w-3.5" />
+                  {hospital.contact_phone}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {selectedHospital && (
-        <div className="rounded-2xl border bg-card p-6 max-w-2xl">
-          <h3 className="text-sm font-bold mb-3">SELECTED DESTINATION</h3>
-          <p className="text-lg font-bold">
-            {HOSPITALS.find((h) => h.id === selectedHospital)?.name}
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            ETA:{" "}
-            {HOSPITALS.find((h) => h.id === selectedHospital)?.eta_minutes} minutes
+        <div className="rounded-xl border bg-card p-4 max-w-2xl">
+          <h3 className="text-xs font-semibold uppercase mb-1 text-muted-foreground">
+            Selected destination
+          </h3>
+          <p className="text-sm font-semibold">
+            {hospitals.find((h) => h.id === selectedHospital)?.name}
           </p>
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex gap-3 max-w-2xl">
+      <div className="flex gap-2 max-w-2xl">
         <Button
           variant="outline"
+          size="sm"
           className="flex-1"
           onClick={() => window.history.back()}
         >
           Back
         </Button>
-        <Button className="flex-1" onClick={() => alert("Hospital selected!")}>
+        <Button
+          size="sm"
+          className="flex-1"
+          disabled={!selectedHospital}
+          onClick={() => alert("Hospital selected!")}
+        >
           Confirm Selection
         </Button>
       </div>
