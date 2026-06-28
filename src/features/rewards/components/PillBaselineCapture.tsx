@@ -434,8 +434,19 @@ export function PillBaselineCapture({
         {/* STEP: intro */}
         {step === "intro" && (
           <div className="space-y-4">
+            <div className="rounded-xl border border-teal-500/40 bg-teal-50/60 p-4 text-sm">
+              <p className="flex items-center gap-2 font-semibold text-foreground mb-1.5">
+                <Info className="h-4 w-4 text-teal-600" />
+                One-time setup — you won't need to do this again
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                These three quick captures teach our AI what <strong className="text-foreground">your medication</strong> looks like
+                and <strong className="text-foreground">how you take it</strong>. From the next dose onwards, we'll recognise
+                your tablet and your face automatically — no more set-up, just a quick check-in.
+              </p>
+            </div>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
-              <p className="font-medium mb-1">Three quick steps to set up your baseline.</p>
+              <p className="font-medium mb-1">Three quick steps</p>
               <ol className="text-muted-foreground list-decimal list-inside space-y-1">
                 <li>A photo of the <strong className="text-foreground">packaging</strong> (box, blister or label)</li>
                 <li>A photo of the <strong className="text-foreground">tablet</strong> on your palm or a flat surface</li>

@@ -61,12 +61,21 @@ export function MediaCapture({ patientId, patientName, onSaved }: MediaCapturePr
 
       recorder.start();
       setIsRecording(true);
-    } catch (err) {
-      toast({
-        title: "Permission Denied",
-        description: `Could not access ${mediaType} device. Please allow permissions.`,
-        variant: "destructive",
-      });
+    } catch (err: any) {
+      const name = err?.name || "";
+      let title = "Camera unavailable";
+      let description = `Could not access ${mediaType} device.`;
+      if (name === "NotReadableError" || name === "TrackStartError" || name === "AbortError") {
+        title = "Camera is busy";
+        description = "Your camera looks busy — another app (Zoom, Teams, FaceTime, or another browser tab) may be using it. Close it and try again.";
+      } else if (name === "NotAllowedError" || name === "SecurityError") {
+        title = "Permission denied";
+        description = `Please allow ${mediaType} access in your browser settings and try again.`;
+      } else if (name === "NotFoundError" || name === "OverconstrainedError") {
+        title = "No camera found";
+        description = `We couldn't find a ${mediaType === "video" ? "camera" : "microphone"} on this device.`;
+      }
+      toast({ title, description, variant: "destructive" });
     }
   }, [mediaType, toast]);
 

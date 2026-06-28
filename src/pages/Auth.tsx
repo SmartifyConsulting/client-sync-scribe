@@ -54,7 +54,7 @@ const COUNTRIES = [
   { code: "+234", name: "Nigeria", flag: "🇳🇬", lang: "English" },
   { code: "+263", name: "Zimbabwe", flag: "🇿🇼", lang: "English" },
   { code: "+267", name: "Botswana", flag: "🇧🇼", lang: "English" },
-  { code: "+264", name: "Namibia", flag: "🇳🇦", lang: "English" },
+  
   { code: "+258", name: "Mozambique", flag: "🇲🇿", lang: "Portuguese" },
 ];
 
@@ -117,7 +117,7 @@ export default function Auth() {
     return () => clearTimeout(t);
   }, [otpCooldown]);
 
-  const [userRole, setUserRole] = useState<UserRole>(roleParam || "doctor");
+  const [userRole, setUserRole] = useState<UserRole>(roleParam || "patient");
   const [countryCode, setCountryCode] = useState("+27");
 
   // Doctor fields
