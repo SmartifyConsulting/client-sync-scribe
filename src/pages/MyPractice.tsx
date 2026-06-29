@@ -195,6 +195,7 @@ function formatPhoneNumber(value: string): string {
 }
 
 function MailboxSection({ userId }: { userId?: string }) {
+  const { t } = useTranslation();
   const [mailboxId, setMailboxId] = useState<string | null>(null);
   const [mailboxAlias, setMailboxAlias] = useState<string>("");
   const [editingAlias, setEditingAlias] = useState(false);
@@ -202,6 +203,7 @@ function MailboxSection({ userId }: { userId?: string }) {
   const [isSavingAlias, setIsSavingAlias] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
 
   useEffect(() => {
     const fetchMailboxInfo = async () => {
