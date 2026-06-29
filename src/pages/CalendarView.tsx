@@ -45,6 +45,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePractice } from "@/hooks/usePractice";
 import { Label } from "@/components/ui/label";
 import { format, startOfMonth, endOfMonth, addMonths, startOfYear, endOfYear, eachMonthOfInterval, parseISO, isSameDay, addDays, startOfWeek, endOfWeek, eachDayOfInterval, isToday as isTodayFn, startOfToday } from "date-fns";
+import {
+  formatCalendarMonthDayYear,
+  formatCalendarMonthYear,
+  formatCalendarShortMonthDay,
+  formatCalendarShortMonthYear,
+  formatCalendarWeekdayMonthDay,
+  formatCalendarWeekRange,
+  getCalendarMonthName,
+  getCalendarShortWeekdayName,
+  getCalendarShortWeekdayNames,
+} from "@/lib/localizedDate";
 
 // Generate 15-min time slots from 7:00 AM to 6:00 PM
 const TIME_SLOTS: string[] = [];
@@ -73,7 +84,6 @@ interface ServicePriceColor {
   color: string | null;
 }
 
-const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 type CalendarViewMode = "week" | "month" | "year";
 
 interface CalendarEvent {
@@ -240,7 +250,7 @@ export default function CalendarView() {
   }, [selectedDate, scope, practice?.id, members.length, user?.id, selectedDoctorId]);
 
   const currentDate = new Date();
-  const monthName = selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const monthName = formatCalendarMonthYear(t, selectedDate);
 
   const prevMonth = () => {
     setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1));
@@ -772,7 +782,7 @@ export default function CalendarView() {
             return (
               <>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-foreground">{format(weekStart, "MMM d")} – {format(weekEnd, "MMM d, yyyy")}</h2>
+                  <h2 className="text-xl font-semibold text-foreground">{formatCalendarWeekRange(t, weekStart, weekEnd)}</h2>
                   <div className="flex gap-2">
                     <Button variant="outline" size="icon" onClick={() => setSelectedDate(addDays(selectedDate, -7))}>
                       <ChevronLeft className="h-4 w-4" />
@@ -797,7 +807,7 @@ export default function CalendarView() {
                           isSameDay(day, selectedDate) ? "bg-primary text-primary-foreground" : today ? "bg-primary/10 text-primary" : "hover:bg-muted"
                         )}
                       >
-                        <span className="text-xs font-medium">{format(day, "EEE")}</span>
+                        <span className="text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
                         <span className="text-lg font-semibold">{format(day, "d")}</span>
                         {dayEvents.length > 0 && (
                           <div className="mt-2 space-y-1 w-full">
@@ -832,7 +842,7 @@ export default function CalendarView() {
               </div>
 
               <div className="grid grid-cols-7 mb-2">
-                {daysOfWeek.map((day) => (
+                {getCalendarShortWeekdayNames(t).map((day) => (
                   <div key={day} className="py-2 text-center text-sm font-medium text-muted-foreground">{day}</div>
                 ))}
               </div>
@@ -968,9 +978,9 @@ export default function CalendarView() {
                           isCurrent && "border-primary bg-primary/5"
                         )}
                       >
-                        <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{format(month, "MMMM")}</p>
+                        <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{getCalendarMonthName(t, month)}</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {isCurrent ? "Current month" : format(month, "MMM yyyy")}
+                          {isCurrent ? "Current month" : formatCalendarShortMonthYear(t, month)}
                         </p>
                       </button>
                     );
@@ -986,7 +996,7 @@ export default function CalendarView() {
           <div className="rounded-t-xl bg-primary p-5">
             <h3 className="text-lg font-semibold text-primary-foreground">{t("calendar.todaysSchedule")}</h3>
             <p className="text-sm text-primary-foreground/80">
-              {currentDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+              {formatCalendarWeekdayMonthDay(t, currentDate)}
             </p>
           </div>
           <div className="divide-y divide-border">
@@ -1189,7 +1199,7 @@ export default function CalendarView() {
                         ) : null;
                       })()}
                       <span className="block text-muted-foreground text-xs">
-                        {selectedDate.toLocaleDateString("en-US", { month: "long" })} {selectedEvent.day}, {selectedDate.getFullYear()} · {selectedEvent.time}
+                        {formatCalendarMonthDayYear(t, new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedEvent.day))} · {selectedEvent.time}
                       </span>
                     </DialogDescription>
                   </DialogHeader>
@@ -1282,7 +1292,7 @@ export default function CalendarView() {
             <AlertDialogTitle>Delete this appointment?</AlertDialogTitle>
             <AlertDialogDescription>
               {selectedEvent
-                ? `Are you sure you want to delete this appointment with ${selectedEvent.title} on ${selectedDate.toLocaleDateString("en-US", { month: "long" })} ${selectedEvent.day}, ${selectedDate.getFullYear()} at ${selectedEvent.time}? This action cannot be undone.`
+                ? `Are you sure you want to delete this appointment with ${selectedEvent.title} on ${formatCalendarMonthDayYear(t, new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedEvent.day))} at ${selectedEvent.time}? This action cannot be undone.`
                 : "This action cannot be undone."}
             </AlertDialogDescription>
           </AlertDialogHeader>

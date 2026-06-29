@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { formatCalendarMonthYear, getCalendarShortWeekdayNames } from "@/lib/localizedDate";
 
 interface CalendarEvent {
   date: string;
@@ -63,6 +65,7 @@ const EVENT_CONFIG = {
 };
 
 export default function FleetCalendarScreen() {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 5, 27));
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -83,7 +86,7 @@ export default function FleetCalendarScreen() {
     return MOCK_EVENTS.filter((e) => e.date === dateStr);
   };
 
-  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const monthName = formatCalendarMonthYear(t, currentMonth);
 
   return (
     <div className="space-y-6">
@@ -116,7 +119,7 @@ export default function FleetCalendarScreen() {
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {/* Day Headers */}
         <div className="grid grid-cols-7 bg-muted/50 border-b">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          {getCalendarShortWeekdayNames(t).map((day) => (
             <div key={day} className="p-2 text-center font-semibold text-xs text-muted-foreground">
               {day}
             </div>

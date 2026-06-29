@@ -10,6 +10,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { BookAppointmentDialog } from "@/components/appointments/BookAppointmentDialog";
 import { PatientRequestsBadge } from "@/components/appointments/PatientRequestsBadge";
+import { useTranslation } from "react-i18next";
+import {
+  formatCalendarMonthYear,
+  formatCalendarShortMonthDay,
+  formatCalendarWeekdayMonthDay,
+  getCalendarMonthName,
+  getCalendarShortWeekdayName,
+  getCalendarShortWeekdayNames,
+} from "@/lib/localizedDate";
 
 interface Appointment {
   id: string;
@@ -28,6 +37,7 @@ interface Appointment {
 type CalendarViewMode = "week" | "month" | "year";
 
 export default function PatientCalendar() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -195,7 +205,7 @@ export default function PatientCalendar() {
               : "hover:bg-muted text-muted-foreground"
           )}
         >
-          {view}
+          {t(`calendar.${view}`, view)}
         </button>
       ))}
     </div>
@@ -206,12 +216,12 @@ export default function PatientCalendar() {
       <CardHeader className="pb-2 p-3 md:p-6 md:pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base md:text-lg">
-            {format(currentWeekStart, "MMMM yyyy")}
+            {formatCalendarMonthYear(t, currentWeekStart)}
           </CardTitle>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>Prev</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>Today</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>Next</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>{t("calendar.previous", "Previous")}</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>{t("calendar.today", "Today")}</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>{t("calendar.next", "Next")}</Button>
           </div>
         </div>
       </CardHeader>
@@ -229,7 +239,7 @@ export default function PatientCalendar() {
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
-                <span className="text-[10px] md:text-xs font-medium">{format(day, "EEE")}</span>
+                <span className="text-[10px] md:text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
                 <span className="text-base md:text-lg font-semibold">{format(day, "d")}</span>
                 {dayAppointments.length > 0 && (
                   <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
@@ -246,17 +256,17 @@ export default function PatientCalendar() {
     <Card>
       <CardHeader className="pb-2 p-3 md:p-6 md:pb-2">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base md:text-lg">{format(currentMonth, "MMMM yyyy")}</CardTitle>
+            <CardTitle className="text-base md:text-lg">{formatCalendarMonthYear(t, currentMonth)}</CardTitle>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>Prev</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(new Date())}>Today</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>Next</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>{t("calendar.previous", "Previous")}</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(new Date())}>{t("calendar.today", "Today")}</Button>
+            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>{t("calendar.next", "Next")}</Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-7 mb-1 md:mb-2">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+          {getCalendarShortWeekdayNames(t, true).map((d) => (
             <div key={d} className="py-1 md:py-2 text-center text-xs md:text-sm font-medium text-muted-foreground">{d}</div>
           ))}
         </div>
@@ -306,9 +316,9 @@ export default function PatientCalendar() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{format(currentMonth, "yyyy")}</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(subMonths(currentMonth, 12))}>Previous</Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>This Year</Button>
-            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(addMonths(currentMonth, 12))}>Next</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(subMonths(currentMonth, 12))}>{t("calendar.previous", "Previous")}</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>{t("calendar.year", "Year")}</Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(addMonths(currentMonth, 12))}>{t("calendar.next", "Next")}</Button>
           </div>
         </div>
       </CardHeader>
@@ -331,7 +341,7 @@ export default function PatientCalendar() {
                   isCurrent && "border-primary bg-primary/5"
                 )}
               >
-                <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{format(month, "MMMM")}</p>
+                <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{getCalendarMonthName(t, month)}</p>
                 {monthApts.length > 0 ? (
                   <p className="text-xs text-primary mt-1">{monthApts.length} appointment{monthApts.length !== 1 ? "s" : ""}</p>
                 ) : (
@@ -381,7 +391,7 @@ export default function PatientCalendar() {
                   )}
                   <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
                     <CalendarIcon className="h-2 w-2" />
-                    {format(parseISO(apt.start_time), "MMM d")} · {format(parseISO(apt.start_time), "h:mm a")}
+                    {formatCalendarShortMonthDay(t, parseISO(apt.start_time))} · {format(parseISO(apt.start_time), "h:mm a")}
                   </div>
                 </div>
               ))}
@@ -398,7 +408,7 @@ export default function PatientCalendar() {
         {calendarView !== "year" && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">{format(selectedDate, "EEEE, MMMM d")}</CardTitle>
+              <CardTitle className="text-lg">{formatCalendarWeekdayMonthDay(t, selectedDate)}</CardTitle>
               <CardDescription>{selectedDayAppointments.length} appointment(s)</CardDescription>
             </CardHeader>
             <CardContent>

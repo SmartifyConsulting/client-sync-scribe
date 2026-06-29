@@ -1,71 +1,50 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, type Locale } from "react-day-picker";
+import { enUS } from "date-fns/locale";
+import { DayPicker } from "react-day-picker";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  getCalendarMonthNames,
+  getCalendarNarrowWeekdayNames,
+  getCalendarShortMonthNames,
+  getCalendarShortWeekdayNames,
+  getCalendarWeekdayNames,
+} from "@/lib/localizedDate";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 // Custom locale objects for each language using i18n translations
-const createLocale = (t: any): Locale => ({
-  months: [
-    t("calendar.months.january"),
-    t("calendar.months.february"),
-    t("calendar.months.march"),
-    t("calendar.months.april"),
-    t("calendar.months.may"),
-    t("calendar.months.june"),
-    t("calendar.months.july"),
-    t("calendar.months.august"),
-    t("calendar.months.september"),
-    t("calendar.months.october"),
-    t("calendar.months.november"),
-    t("calendar.months.december"),
-  ],
-  monthsShort: [
-    t("calendar.monthsShort.jan"),
-    t("calendar.monthsShort.feb"),
-    t("calendar.monthsShort.mar"),
-    t("calendar.monthsShort.apr"),
-    t("calendar.monthsShort.may"),
-    t("calendar.monthsShort.jun"),
-    t("calendar.monthsShort.jul"),
-    t("calendar.monthsShort.aug"),
-    t("calendar.monthsShort.sep"),
-    t("calendar.monthsShort.oct"),
-    t("calendar.monthsShort.nov"),
-    t("calendar.monthsShort.dec"),
-  ],
-  weekdays: [
-    t("calendar.days.sunday"),
-    t("calendar.days.monday"),
-    t("calendar.days.tuesday"),
-    t("calendar.days.wednesday"),
-    t("calendar.days.thursday"),
-    t("calendar.days.friday"),
-    t("calendar.days.saturday"),
-  ],
-  weekdaysShort: [
-    t("calendar.daysShort.sun"),
-    t("calendar.daysShort.mon"),
-    t("calendar.daysShort.tue"),
-    t("calendar.daysShort.wed"),
-    t("calendar.daysShort.thu"),
-    t("calendar.daysShort.fri"),
-    t("calendar.daysShort.sat"),
-  ],
-  weekdaysNarrow: t("calendar.daysNarrow", { returnObjects: true }) || ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-  firstWeekContainsDate: 4,
-});
+const createLocale = (t: any) => {
+  const months = getCalendarMonthNames(t);
+  const monthsShort = getCalendarShortMonthNames(t);
+  const weekdays = getCalendarWeekdayNames(t);
+  const weekdaysShort = getCalendarShortWeekdayNames(t);
+  const weekdaysNarrow = getCalendarNarrowWeekdayNames(t);
+
+  return {
+    ...enUS,
+    localize: {
+      ...enUS.localize,
+      month: (month, options) => (options?.width === "abbreviated" ? monthsShort[month] : months[month]),
+      day: (day, options) => {
+        if (options?.width === "wide") return weekdays[day];
+        if (options?.width === "narrow") return weekdaysNarrow[day];
+        return weekdaysShort[day];
+      },
+    },
+  } as typeof enUS;
+};
 
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
-  const { t } = useTranslation();
-  const locale = createLocale(t);
+  const { t, i18n } = useTranslation();
+  const locale = React.useMemo(() => createLocale(t), [t, i18n.language]);
 
   return (
     <DayPicker
+      key={i18n.language}
       locale={locale}
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
