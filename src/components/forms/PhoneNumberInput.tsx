@@ -55,15 +55,15 @@ export function PhoneNumberInput({ id, value, onChange, disabled, placeholder = 
   return (
     <div className="flex gap-2">
       <Select value={dial} onValueChange={onDialChange} disabled={disabled}>
-        <SelectTrigger className="w-[10.5rem] h-11 text-base shrink-0 font-medium">
+        <SelectTrigger className="w-[13rem] h-12 text-lg shrink-0 font-medium">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="max-h-72">
           {COUNTRY_DIAL_CODES.map((c) => (
-            <SelectItem key={`${c.code}-${c.dial}`} value={c.dial} className="text-base">
-              <span className="mr-2 text-lg">{c.flag}</span>
-              <span className="font-semibold">{c.dial}</span>
-              <span className="ml-2 text-xs text-muted-foreground">{c.code}</span>
+            <SelectItem key={`${c.code}-${c.dial}`} value={c.dial} className="text-lg">
+              <span className="mr-2 text-2xl">{c.flag}</span>
+              <span className="text-lg font-semibold">{c.dial}</span>
+              <span className="ml-2 text-sm text-muted-foreground">{c.code}</span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -77,8 +77,9 @@ export function PhoneNumberInput({ id, value, onChange, disabled, placeholder = 
         disabled={disabled}
         placeholder={placeholder}
         onChange={(e) => onLocalChange(e.target.value)}
-        className="flex-1 h-11 text-base"
+        className="flex-1 h-12 text-lg"
       />
     </div>
   );
 }
+
