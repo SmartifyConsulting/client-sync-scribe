@@ -41,6 +41,8 @@ import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitor
 import BillingDashboardScreen from "./pages/provider/BillingDashboardScreen";
 import ExecutiveDashboardScreen from "./pages/provider/ExecutiveDashboardScreen";
 import AlertsCentreScreen from "./pages/provider/AlertsCentreScreen";
+import DispatcherConsoleScreen from "./pages/provider/ambulance/DispatcherConsoleScreen";
+import IncomingSosScreen from "./pages/provider/ambulance/IncomingSosScreen";
 
 // Incident & Dispatch Management screens
 import CreateIncidentScreen from "./pages/provider/hospital/CreateIncidentScreen";
