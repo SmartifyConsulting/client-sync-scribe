@@ -237,7 +237,9 @@ const App = () => (
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
+            <Route path="/my-sessions" element={<MySessions />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
+
             <Route path="/documents" element={<DoctorDocumentsPage />} />
             <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
