@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function AddMedicationDialog({ open, onOpenChange, admissionId, hospitalId }: Props) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
@@ -28,7 +30,7 @@ export function AddMedicationDialog({ open, onOpenChange, admissionId, hospitalI
 
   const handleSave = async () => {
     if (!name.trim()) {
-      toast({ title: "Medication name required", variant: "destructive" });
+      toast({ title: t("forms.validation.required"), variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -47,12 +49,12 @@ export function AddMedicationDialog({ open, onOpenChange, admissionId, hospitalI
         notes: notes || null,
       } as any);
       if (error) throw error;
-      toast({ title: "Medication added" });
+      toast({ title: t("dialogs.success") });
       qc.invalidateQueries({ queryKey: ["admission-medications", admissionId] });
       setName(""); setDosage(""); setFrequency(""); setNotes("");
       onOpenChange(false);
     } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      toast({ title: t("dialogs.error"), description: e.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -61,19 +63,19 @@ export function AddMedicationDialog({ open, onOpenChange, admissionId, hospitalI
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>Add Active Medication</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t("admissions.medication.title")}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
-          <div><Label className="text-[11px]">Medication Name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
+          <div><Label className="text-[11px]">{t("admissions.medication.name")}</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-[11px]">Dosage</Label><Input value={dosage} onChange={(e) => setDosage(e.target.value)} placeholder="e.g. 500mg" /></div>
-            <div><Label className="text-[11px]">Frequency</Label><Input value={frequency} onChange={(e) => setFrequency(e.target.value)} placeholder="e.g. twice daily" /></div>
+            <div><Label className="text-[11px]">{t("admissions.medication.dosage")}</Label><Input value={dosage} onChange={(e) => setDosage(e.target.value)} placeholder={t("admissions.medication.dosagePlaceholder")} /></div>
+            <div><Label className="text-[11px]">{t("admissions.medication.frequency")}</Label><Input value={frequency} onChange={(e) => setFrequency(e.target.value)} placeholder={t("admissions.medication.frequencyPlaceholder")} /></div>
           </div>
-          <div><Label className="text-[11px]">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
+          <div><Label className="text-[11px]">{t("forms.labels.name")}</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("dialogs.cancel")}</Button>
+          <Button onClick={handleSave} disabled={saving}>{saving ? t("common.loading") : t("common.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

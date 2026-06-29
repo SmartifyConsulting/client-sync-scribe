@@ -3052,6 +3052,15 @@
             "attachPdf": "Attach PDF",
             "attached": "Attached ✓",
             "notes": "Notes"
+        },
+        "medication": {
+            "title": "Add Active Medication",
+            "name": "Medication Name",
+            "dosage": "Dosage",
+            "dosagePlaceholder": "e.g. 500mg",
+            "frequency": "Frequency",
+            "frequencyPlaceholder": "e.g. twice daily",
+            "notes": "Notes"
         }
     }
 }
