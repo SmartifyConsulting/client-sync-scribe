@@ -471,7 +471,7 @@ export default function MyPractice() {
   // ── Existing-user partner search ──
   const [partnerSearch, setPartnerSearch] = useState("");
   const [partnerSearchResults, setPartnerSearchResults] = useState<
-    Array<{ id: string; full_name: string | null; email: string | null; doctor_number: string | null; mobile_number: string | null }>
+    Array<{ id: string; full_name: string | null; doctor_number: string | null; mobile_number: string | null }>
   >([]);
   const [searchingPartners, setSearchingPartners] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
@@ -488,30 +488,29 @@ export default function MyPractice() {
     const handle = setTimeout(async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("id, full_name, email, doctor_number, mobile_number")
-        .or(`full_name.ilike.%${q}%,email.ilike.%${q}%,doctor_number.ilike.%${q}%`)
+        .select("id, full_name, doctor_number, mobile_number")
+        .or(`full_name.ilike.%${q}%,doctor_number.ilike.%${q}%`)
         .neq("id", user?.id || "")
         .limit(8);
       if (!cancelled) {
-        setPartnerSearchResults(data || []);
+        setPartnerSearchResults((data as any) || []);
         setSearchingPartners(false);
       }
     }, 250);
     return () => { cancelled = true; clearTimeout(handle); };
   }, [partnerSearch, showAddPartnerForm, user?.id]);
 
-  const addExistingPartner = async (existing: { id: string; full_name: string | null; email: string | null; doctor_number: string | null; mobile_number: string | null }) => {
+  const addExistingPartner = async (existing: { id: string; full_name: string | null; doctor_number: string | null; mobile_number: string | null }) => {
     if (!user) return;
     setIsAddingPartner(true);
     const { data, error } = await supabase
       .from("practice_partners")
       .insert({
-        owner_id: user.id,
-        full_name: existing.full_name || existing.email || "Partner",
+        user_id: user.id,
+        full_name: existing.full_name || "Partner",
         registration_number: existing.doctor_number || "—",
         mobile_number: existing.mobile_number || null,
-        email: existing.email || null,
-      })
+      } as any)
       .select()
       .single();
     setIsAddingPartner(false);
@@ -525,6 +524,7 @@ export default function MyPractice() {
       toast({ title: "Partner added" });
     }
   };
+
 
   const partnerShareLink = `${typeof window !== "undefined" ? window.location.origin : "https://holarchealth.com"}/?invite=${user?.id || ""}`;
   const copyShareLink = async () => {
