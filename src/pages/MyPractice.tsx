@@ -468,6 +468,73 @@ export default function MyPractice() {
   const [editingPartner, setEditingPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
   const [isSavingPartner, setIsSavingPartner] = useState(false);
 
+  // ── Existing-user partner search ──
+  const [partnerSearch, setPartnerSearch] = useState("");
+  const [partnerSearchResults, setPartnerSearchResults] = useState<
+    Array<{ id: string; full_name: string | null; email: string | null; doctor_number: string | null; mobile_number: string | null }>
+  >([]);
+  const [searchingPartners, setSearchingPartners] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
+
+  useEffect(() => {
+    if (!showAddPartnerForm) return;
+    const q = partnerSearch.trim();
+    if (q.length < 2) {
+      setPartnerSearchResults([]);
+      return;
+    }
+    let cancelled = false;
+    setSearchingPartners(true);
+    const handle = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, doctor_number, mobile_number")
+        .or(`full_name.ilike.%${q}%,email.ilike.%${q}%,doctor_number.ilike.%${q}%`)
+        .neq("id", user?.id || "")
+        .limit(8);
+      if (!cancelled) {
+        setPartnerSearchResults(data || []);
+        setSearchingPartners(false);
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(handle); };
+  }, [partnerSearch, showAddPartnerForm, user?.id]);
+
+  const addExistingPartner = async (existing: { id: string; full_name: string | null; email: string | null; doctor_number: string | null; mobile_number: string | null }) => {
+    if (!user) return;
+    setIsAddingPartner(true);
+    const { data, error } = await supabase
+      .from("practice_partners")
+      .insert({
+        owner_id: user.id,
+        full_name: existing.full_name || existing.email || "Partner",
+        registration_number: existing.doctor_number || "—",
+        mobile_number: existing.mobile_number || null,
+        email: existing.email || null,
+      })
+      .select()
+      .single();
+    setIsAddingPartner(false);
+    if (error) {
+      toast({ title: "Error", description: "Failed to add partner", variant: "destructive" });
+    } else {
+      setPartners([...partners, data]);
+      setPartnerSearch("");
+      setPartnerSearchResults([]);
+      setShowAddPartnerForm(false);
+      toast({ title: "Partner added" });
+    }
+  };
+
+  const partnerShareLink = `${typeof window !== "undefined" ? window.location.origin : "https://holarchealth.com"}/?invite=${user?.id || ""}`;
+  const copyShareLink = async () => {
+    await navigator.clipboard.writeText(partnerShareLink);
+    setCopiedShareLink(true);
+    toast({ title: "Link copied" });
+    setTimeout(() => setCopiedShareLink(false), 2000);
+  };
+
+
   // ── Service Prices ──
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [newService, setNewService] = useState({
