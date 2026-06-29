@@ -1,65 +1,22 @@
-## Goal
-Replace Mapbox with Google Maps across the live tracking experience (SOS, Active Mission, Fleet Live, Public Track, Incident Detail) for a more polished, familiar look — without losing the smooth ambulance tweening, route line, distance pill, or realtime updates we already have.
+## Where we are
+You've done Steps 1–5 in Google Cloud, so you should now have an API key (`AIza…`) that's restricted to `holarchealth.com` / `www.holarchealth.com` and has Maps JavaScript API + Routes API + Geocoding API enabled.
 
-## Why it failed last time (and how we avoid it)
-Google Maps needs three things lined up correctly. Last time at least one was missing:
+## What I'll do next (in build mode)
+1. Call `standard_connectors--connect` for the **Google Maps Platform** connector. You'll see a dialog with your existing managed connection plus an option to **Add a new connection** — pick **Add new**.
+2. The dialog will ask for the API key. Paste the key from Step 4. Save.
+3. Lovable injects it as `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` (browser) and `GOOGLE_MAPS_API_KEY` (server). The existing `LiveMap`, `ProviderMap`, `PinMap`, and `routes-eta` edge function read those names already — **zero code changes**.
+4. Republish to `holarchealth.com`.
 
-1. **A connection to the Google Maps Platform connector.** Lovable injects a *browser key* (`VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY`) for the in-page map, and a *server key* for gateway calls like Routes/ETA.
-2. **Async loading with a `callback`.** With `loading=async`, `google.maps.Map` is not ready at script `onload` — we must wait for an `initMap` callback. This is the most common cause of a blank map.
-3. **No `mapId` and no `AdvancedMarkerElement`.** Those require Cloud Console setup users don't have. We'll use classic `google.maps.Marker` + custom HTML overlays so it just works.
+## Then we verify together
+1. Open `https://holarchealth.com` in an incognito window.
+2. Open the browser console (F12).
+3. Navigate to SOS / Active Mission / Fleet Live / a provider profile.
+4. Map tiles should render and the console should be clean — no `RefererNotAllowedMapError`, `ApiNotActivatedMapError`, or `REQUEST_DENIED`.
 
-The managed Lovable key is restricted to `*.lovable.app` / `*.lovableproject.com`. It will work on the preview and `holarchealth.lovable.app` out of the box. For `holarchealth.com` / `www.holarchealth.com` (custom domain), you'll need your own Google Cloud API key with those domains in the HTTP-referrer allowlist — I'll walk you through it when we publish.
+If anything errors, paste the console message and I'll map it back to which Google Cloud step needs a tweak (referrer typo, missing API, billing, etc.).
 
-## What changes (user-visible)
-- Same map UI surface area — but rendered by Google Maps with the standard Google road styling, traffic-aware route line, and Google's familiar controls.
-- Patient = blue dot, ambulance = red circle with ambulance icon, hospital = red cross marker (same icons we use today, just on Google tiles).
-- Ambulance still glides smoothly between GPS pings (tweened over ~800 ms).
-- Distance pill stays on the route midpoint.
-- "Waiting for first GPS fix…" overlay preserved.
-- Realtime Supabase subscription unchanged — only the renderer swaps.
+## Important: don't paste the API key into chat
+The connect dialog has a secure secret field. Paste the key **only** there — not into the chat. If it ever ends up in chat by accident, rotate it in Google Cloud Credentials and create a new one.
 
-## Technical plan
-
-### 1. Connect Google Maps Platform
-Use the `Google Maps Platform` connector. This provisions:
-- `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` (browser, referrer-restricted)
-- `GOOGLE_MAPS_API_KEY` + `LOVABLE_API_KEY` (server, for the gateway)
-- `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID` (channel param)
-
-### 2. New `LiveMap` (Google Maps version)
-Rewrite `src/modules/holarchelp/components/LiveMap.tsx` to:
-- Lazy-load the Maps JS API once via a shared loader util (`src/modules/holarchelp/lib/googleMapsLoader.ts`) using `loading=async&callback=__lovableInitGmaps&channel=…`. The loader returns a promise that resolves when the callback fires — every map mount awaits it.
-- Create a `google.maps.Map` with no `mapId`, default Google styling, `disableDefaultUI: false`, `zoomControl: true`, `streetViewControl: false`.
-- Render markers with `google.maps.Marker` using inline-SVG `icon` URLs (same visual as today's HTML markers).
-- Draw the route as a `google.maps.Polyline` with `strokeColor` red/teal and a dashed `icons` pattern.
-- Distance pill = `google.maps.OverlayView` anchored at route midpoint (so it scales with the map and stays styled like today's pill).
-- Ambulance tween: same `requestAnimationFrame` loop, just call `marker.setPosition({lat,lng})` and update the polyline's path each frame.
-- Fit bounds with `map.fitBounds(bounds, {padding:64})`; single-point centers with `map.panTo` + zoom 13.
-
-### 3. Replace Mapbox ETA with Google Routes
-Rewrite `supabase/functions/routes-eta/index.ts` to call Google Routes API through the gateway:
-- `POST https://connector-gateway.lovable.dev/google_maps/routes/directions/v2:computeRoutes`
-- Headers: `Authorization: Bearer ${LOVABLE_API_KEY}`, `X-Connection-Api-Key: ${GOOGLE_MAPS_API_KEY}`, `X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline`
-- Same response shape returned to the client (`duration_seconds`, `duration_minutes`, `distance_meters`, `polyline`) so no caller changes.
-- Decode the encoded polyline client-side with `google.maps.geometry.encoding.decodePath` (load `libraries=geometry` in the script URL).
-
-### 4. Drop Mapbox config
-- Delete `src/modules/holarchelp/config/mapbox.ts`.
-- Delete `src/modules/holarchelp/hooks/useMapboxToken.ts`.
-- Keep `supabase/functions/mapbox-config` in place for one release (in case any cached client still calls it), then remove next pass.
-- Remove `mapbox-gl` from `package.json` and `import "mapbox-gl/dist/mapbox-gl.css"`.
-
-### 5. Custom domain prep (later, at publish time)
-When you're ready to publish to `holarchealth.com`, I'll walk you through:
-1. Create/select a Google Cloud project, enable billing, enable **Maps JavaScript API**, **Routes API**, **Places API (New)** (if we add search later).
-2. Create an API key, restrict to HTTP referrers: `https://holarchealth.com/*` and `https://*.holarchealth.com/*`.
-3. In Lovable connector settings, add a *custom* Google Maps connection with that key alongside the managed one.
-
-Until then, preview + `holarchealth.lovable.app` work with the managed key automatically.
-
-## What I need from you to start
-1. Approve this plan.
-2. After approval (in build mode) I'll call the connector — you'll get a one-click prompt to connect Google Maps Platform.
-
-## Risk / rollback
-The change is isolated to `LiveMap.tsx`, `routes-eta`, and removal of two Mapbox-only files. If anything looks off we can revert just those files in one shot.
+## What I need from you
+Reply **"approve"** and I'll trigger the connect dialog right away.
