@@ -94,8 +94,16 @@ export default function NavigationScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("provider.emergencyResponseDispatch")} · {t("navigationScreen.navigation")}</p>
-          <h1 className="text-xl font-extrabold">{t("navigationScreen.mission")} #{activeId.slice(0,8)}</h1>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {t("provider.emergencyResponseDispatch")} · {t("navigationScreen.activeMission", "Active Mission")}
+          </p>
+          <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
+            <NavIcon className="h-5 w-5 text-primary" />
+            {t("navigationScreen.mission")} #{(incident.incident_number ?? activeId.slice(0,8))}
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t("navigationScreen.helper", "Your current mission — turn-by-turn route, status and destination hospital.")}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full border border-sos/40 bg-sos/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-sos">
