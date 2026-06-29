@@ -1019,6 +1019,11 @@ export function PatientDetailsEditor({
       toast({ title: "Required", description: "Name is required", variant: "destructive" });
       return;
     }
+    if (newNOK.email.trim() && !isValidOptionalEmail(newNOK.email)) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
+
     if (editingNOKId) {
       setNokMembers((prev) =>
         prev.map((n) => (n.id === editingNOKId ? { ...n, ...newNOK, name: newNOK.name.trim() } : n)),
