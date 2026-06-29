@@ -6,6 +6,7 @@ import { useLiveProviderLocation } from "../../../hooks/useLiveProviderLocation"
 import { SosLiveMap } from "../../../components/SosLiveMap";
 import { HospitalPicker } from "../../../components/HospitalPicker";
 import { EtaCountdown } from "../../../components/EtaCountdown";
+import { AmbulanceSimulator } from "../../../components/AmbulanceSimulator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Siren, Navigation as NavIcon } from "lucide-react";
