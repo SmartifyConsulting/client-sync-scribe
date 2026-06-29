@@ -12,7 +12,9 @@ type Row = {
   eta_minutes: number | null; last_eta_update: string | null;
   assigned_provider_id: string | null; created_at: string;
   pre_arrival_notes?: string | null;
+  incident_number?: string | null;
 };
+
 
 export default function IncomingAmbulancesScreen() {
   const { providerId } = useProviderAccess();
@@ -84,7 +86,7 @@ export default function IncomingAmbulancesScreen() {
                       </Badge>
                     )}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">Incident {r.id.slice(0,8)} · {r.status.replace(/_/g," ")}</p>
+                  <p className="text-[11px] text-muted-foreground">{r.incident_number ?? `Incident ${r.id.slice(0,8)}`} · {r.status.replace(/_/g," ")}</p>
                 </div>
                 <div className="text-right">
                   {r.eta_minutes != null
