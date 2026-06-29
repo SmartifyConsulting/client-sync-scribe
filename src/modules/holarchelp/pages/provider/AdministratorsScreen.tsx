@@ -501,7 +501,7 @@ export default function AdministratorsScreen() {
                 <SelectContent>
                   {CREW_ROLE_OPTIONS.map((r) => (
                     <SelectItem key={r} value={r}>
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                      {ROLE_LABELS[r] ?? r.charAt(0).toUpperCase() + r.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
