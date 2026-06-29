@@ -59,7 +59,7 @@ export function InvoiceEditor({ patientId, patientName, sessionId, onClose, onSa
     { code: "EUR", symbol: "€" },
     { code: "GBP", symbol: "£" },
     { code: "BWP", symbol: "P" },
-    { code: "NAD", symbol: "N$" },
+    // (NAD removed)
     { code: "SZL", symbol: "E" },
     { code: "LSL", symbol: "M" },
   ];

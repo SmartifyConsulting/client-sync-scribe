@@ -114,7 +114,7 @@ const CURRENCIES = [
   { code: "EUR", symbol: "€" },
   { code: "GBP", symbol: "£" },
   { code: "BWP", symbol: "P" },
-  { code: "NAD", symbol: "N$" },
+  { code: "NGN", symbol: "₦" },
   { code: "SZL", symbol: "E" },
   { code: "LSL", symbol: "M" },
 ];

@@ -32,7 +32,7 @@ export interface BuildInvoiceArgs {
 }
 
 const CURRENCY_SYMBOL: Record<string, string> = {
-  ZAR: "R", NGN: "₦", USD: "$", EUR: "€", GBP: "£", BWP: "P", NAD: "N$", SZL: "E", LSL: "M",
+  ZAR: "R", NGN: "₦", USD: "$", EUR: "€", GBP: "£", BWP: "P", SZL: "E", LSL: "M",
 };
 
 function fmtAmount(amount: number, currency = "ZAR") {

@@ -800,7 +800,7 @@ const completeSession = async (
           const currencySymbol = (code: string): string => {
             const map: Record<string, string> = {
               ZAR: 'R', USD: '$', EUR: '€', GBP: '£',
-              BWP: 'P', NAD: 'N$', SZL: 'E', LSL: 'M',
+              BWP: 'P', SZL: 'E', LSL: 'M',
             };
             return map[code?.toUpperCase()] || code || 'R';
           };
