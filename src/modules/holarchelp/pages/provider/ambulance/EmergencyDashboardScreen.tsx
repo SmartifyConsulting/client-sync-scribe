@@ -148,7 +148,7 @@ export default function EmergencyDashboardScreen() {
                   {incident.status === "new" && (
                     <>
                       <Button size="sm" className="h-7 text-xs flex-1">
-                        <Phone className="mr-1 h-3 w-3" /> Accept & Dispatch
+                        <Phone className="mr-1 h-3 w-3" /> Accept &amp; Roll
                       </Button>
                       <Button size="sm" variant="outline" className="h-7 text-xs text-destructive hover:text-destructive">
                         Decline
