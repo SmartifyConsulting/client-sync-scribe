@@ -456,6 +456,11 @@ export default function MyPractice() {
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
   const [editingPartner, setEditingPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
   const [isSavingPartner, setIsSavingPartner] = useState(false);
+  const [partnerAddMode, setPartnerAddMode] = useState<"email" | "select">("email");
+  const [availableDoctors, setAvailableDoctors] = useState<any[]>([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState("");
+  const [shareLink, setShareLink] = useState("");
+  const [showShareLink, setShowShareLink] = useState(false);
 
   // ── Service Prices ──
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
@@ -708,6 +713,63 @@ export default function MyPractice() {
       toast({ title: "Partner removed" });
     }
   };
+
+  const fetchAvailableDoctors = async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, registration_number")
+      .eq("role", "doctor")
+      .neq("id", user?.id);
+    if (data) setAvailableDoctors(data);
+  };
+
+  const addPartnerFromSelect = async () => {
+    if (!selectedDoctorId) {
+      toast({ title: "Please select a doctor", variant: "destructive" });
+      return;
+    }
+
+    const doctor = availableDoctors.find((d) => d.id === selectedDoctorId);
+    if (!doctor) return;
+
+    setIsAddingPartner(true);
+    const { data, error } = await supabase
+      .from("practice_partners")
+      .insert({
+        user_id: user?.id,
+        full_name: doctor.full_name,
+        registration_number: doctor.registration_number || "N/A",
+        mobile_number: null,
+        email: doctor.email,
+      } as any)
+      .select()
+      .single();
+
+    if (error) {
+      toast({ title: "Error", description: "Failed to add partner", variant: "destructive" });
+    } else {
+      setPartners([...partners, data]);
+      toast({ title: "Partner added", description: `${doctor.full_name} has been added` });
+      setSelectedDoctorId("");
+      setPartnerAddMode("email");
+      setShowAddPartnerForm(false);
+    }
+    setIsAddingPartner(false);
+  };
+
+  const generateShareLink = () => {
+    const baseUrl = window.location.origin;
+    const link = `${baseUrl}/signup?practice=${user?.id}&ref=practice-invite`;
+    setShareLink(link);
+    setShowShareLink(true);
+    toast({ title: "Share link generated" });
+  };
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    toast({ title: "Link copied to clipboard" });
+  };
+
   const startEditingPartner = (partner: Partner) => {
     setEditingPartnerId(partner.id);
     setEditingPartner({
@@ -1330,17 +1392,47 @@ export default function MyPractice() {
                   Add partners of the same practice. Their information will be available on documents.
                 </p>
                 {!showAddPartnerForm && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAddPartnerForm(true)}
-                    className="gap-1.5 shrink-0"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add Partner
-                  </Button>
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => generateShareLink()}
+                      className="gap-1.5"
+                      title="Generate a shareable link to invite partners"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Share Link
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowAddPartnerForm(true);
+                        fetchAvailableDoctors();
+                      }}
+                      className="gap-1.5"
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      Add Partner
+                    </Button>
+                  </div>
                 )}
               </div>
+
+              {showShareLink && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
+                  <p className="text-sm font-medium text-foreground mb-2">Share this link with new doctors:</p>
+                  <div className="flex gap-2 items-center">
+                    <Input value={shareLink} readOnly className="text-xs" />
+                    <Button size="sm" onClick={copyShareLink} className="shrink-0">
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    They can use this link to sign up and be automatically added as a partner to your practice.
+                  </p>
+                </div>
+              )}
               {partners.length > 0 && (
                 <div className="space-y-2">
                   {partners.map((partner) => (
@@ -1453,42 +1545,78 @@ export default function MyPractice() {
               )}
               {showAddPartnerForm && (
                 <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label>Full Name *</Label>
-                      <Input
-                        value={newPartner.full_name}
-                        onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })}
-                        placeholder="Dr. Jane Doe"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Registration Number *</Label>
-                      <Input
-                        value={newPartner.registration_number}
-                        onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })}
-                        placeholder="e.g., MP654321"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Mobile (Optional)</Label>
-                      <Input
-                        value={newPartner.mobile_number}
-                        onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Email *</Label>
-                      <Input
-                        type="email"
-                        value={newPartner.email}
-                        onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
-                        placeholder="partner@example.com"
-                      />
-                    </div>
-                  </div>
+                  <Tabs value={partnerAddMode} onValueChange={(v) => setPartnerAddMode(v as "email" | "select")}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="email">Add by Email</TabsTrigger>
+                      <TabsTrigger value="select">Select Existing Doctor</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="email" className="space-y-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <Label>Full Name *</Label>
+                          <Input
+                            value={newPartner.full_name}
+                            onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })}
+                            placeholder="Dr. Jane Doe"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Registration Number *</Label>
+                          <Input
+                            value={newPartner.registration_number}
+                            onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })}
+                            placeholder="e.g., MP654321"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Mobile (Optional)</Label>
+                          <Input
+                            value={newPartner.mobile_number}
+                            onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Email *</Label>
+                          <Input
+                            type="email"
+                            value={newPartner.email}
+                            onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
+                            placeholder="partner@example.com"
+                          />
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="select" className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label>Select a Doctor *</Label>
+                        <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose a doctor from the list" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableDoctors.map((doctor) => (
+                              <SelectItem key={doctor.id} value={doctor.id}>
+                                {doctor.full_name} ({doctor.email})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {availableDoctors.length === 0 && (
+                        <p className="text-xs text-muted-foreground italic">No other doctors available in the system yet.</p>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5">
+                    <Button
+                      size="sm"
+                      onClick={partnerAddMode === "email" ? addPartner : addPartnerFromSelect}
+                      disabled={isAddingPartner}
+                      className="gap-1.5"
+                    >
                       <Save className="h-3.5 w-3.5" />
                       {isAddingPartner ? "Saving..." : "Save"}
                     </Button>
@@ -1498,6 +1626,8 @@ export default function MyPractice() {
                       onClick={() => {
                         setShowAddPartnerForm(false);
                         setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
+                        setSelectedDoctorId("");
+                        setPartnerAddMode("email");
                       }}
                     >
                       Cancel

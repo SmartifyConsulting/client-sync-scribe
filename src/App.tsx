@@ -57,6 +57,7 @@ import ExpiringRecordings from "./pages/ExpiringRecordings";
 import Admin from "./pages/Admin";
 import DoctorDocumentsPage from "./pages/doctor/DoctorDocumentsPage";
 import DoctorRoundTablesPage from "./pages/doctor/DoctorRoundTablesPage";
+import DoctorSessions from "./pages/doctor/Sessions";
 import ProviderSignup from "./pages/ProviderSignup";
 import ProviderApprovalAction from "./pages/admin/ProviderApprovalAction";
 
@@ -232,6 +233,7 @@ const App = () => (
             {/* Doctor routes */}
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/:id" element={<PatientProfile />} />
+            <Route path="/doctor/sessions" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />

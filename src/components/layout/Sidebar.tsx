@@ -19,6 +19,7 @@ import {
   Siren,
   ListChecks,
   Users2,
+  Clock,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
@@ -37,6 +38,7 @@ interface NavItem {
 const doctorNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard", tour: "doctor-home" },
   { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+  { icon: Clock, label: "My Sessions", labelKey: "nav.mySessions", to: "/doctor/sessions" },
   { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },

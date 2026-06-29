@@ -468,7 +468,7 @@ export function CompactTodoList() {
                         <ShieldCheck className="h-4 w-4" />
                       </button>
                     )}
-                    <div className="hidden group-hover:flex gap-0.5">
+                    <div className="flex gap-0.5">
                       {todo.document_id && (
                         <>
                           <button
