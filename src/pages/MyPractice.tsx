@@ -1407,17 +1407,16 @@ export default function MyPractice() {
                 <p className="text-sm text-muted-foreground">
                   Add partners of the same practice. Their information will be available on documents.
                 </p>
-                {!showAddPartnerForm && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAddPartnerForm(true)}
-                    className="gap-1.5 shrink-0"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add Partner
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddPartnerForm(true)}
+                  className="gap-1.5 shrink-0"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Partner
+                </Button>
+
               </div>
               {partners.length > 0 && (
                 <div className="space-y-2">
