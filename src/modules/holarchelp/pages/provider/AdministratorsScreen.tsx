@@ -190,13 +190,15 @@ export default function AdministratorsScreen() {
       bucket.push(m);
       groups.set(key, bucket);
     }
-    // Stable order
+    // Alphabetical order by display label.
     const ordered: { role: string; rows: MemberRow[] }[] = [];
-    for (const role of ROLE_ORDER) {
-      if (groups.has(role)) ordered.push({ role, rows: groups.get(role)! });
-    }
-    for (const [role, rows] of groups) {
-      if (!ROLE_ORDER.includes(role)) ordered.push({ role, rows });
+    const keys = Array.from(groups.keys()).sort((a, b) => {
+      const la = ROLE_LABELS[a] ?? a;
+      const lb = ROLE_LABELS[b] ?? b;
+      return la.localeCompare(lb);
+    });
+    for (const role of keys) {
+      ordered.push({ role, rows: groups.get(role)! });
     }
     return ordered;
   }, [members, searchQuery]);
