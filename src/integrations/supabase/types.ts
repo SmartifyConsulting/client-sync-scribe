@@ -2845,6 +2845,7 @@ export type Database = {
       hospital_admissions: {
         Row: {
           admission_date: string
+          codes: Json
           created_at: string
           created_by: string | null
           diagnosis: string | null
@@ -2863,6 +2864,7 @@ export type Database = {
         }
         Insert: {
           admission_date?: string
+          codes?: Json
           created_at?: string
           created_by?: string | null
           diagnosis?: string | null
@@ -2881,6 +2883,7 @@ export type Database = {
         }
         Update: {
           admission_date?: string
+          codes?: Json
           created_at?: string
           created_by?: string | null
           diagnosis?: string | null
@@ -4201,6 +4204,8 @@ export type Database = {
           reminder_times: string[] | null
           reminders_enabled: boolean
           session_id: string | null
+          skip_notify_contact: Json | null
+          skip_notify_target: string | null
           source: string
           start_date: string
           status: string
@@ -4227,6 +4232,8 @@ export type Database = {
           reminder_times?: string[] | null
           reminders_enabled?: boolean
           session_id?: string | null
+          skip_notify_contact?: Json | null
+          skip_notify_target?: string | null
           source?: string
           start_date?: string
           status?: string
@@ -4253,6 +4260,8 @@ export type Database = {
           reminder_times?: string[] | null
           reminders_enabled?: boolean
           session_id?: string | null
+          skip_notify_contact?: Json | null
+          skip_notify_target?: string | null
           source?: string
           start_date?: string
           status?: string
