@@ -19,7 +19,9 @@ import {
   Siren,
   ListChecks,
   Users2,
+  Mic,
 } from "lucide-react";
+
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
