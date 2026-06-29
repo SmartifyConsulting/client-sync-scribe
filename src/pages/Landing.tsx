@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import holarcLogo from "@/assets/holarc-logo-clear.png";
 import { motion } from "framer-motion";
 import {
