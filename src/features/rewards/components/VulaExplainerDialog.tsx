@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Droplet, Users, TrendingUp, Ticket, Heart } from "lucide-react";
@@ -9,6 +10,8 @@ interface VulaExplainerContentProps {
 }
 
 export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative p-5 space-y-3">
       {/* Logo */}
@@ -23,16 +26,14 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
       {/* Headline */}
       <div className="text-center space-y-1">
         <h2 className="text-lg font-bold text-foreground leading-tight">
-          Vula means rain in
+          {t("rewards.vula.explainer.headline")}
           <br />
           <span className="bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
-            isiZulu and isiXhosa
+            {t("rewards.vula.explainer.languages")}
           </span>
         </h2>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          — something you can't always predict,
-          <br />
-          but always need.
+          {t("rewards.vula.explainer.tagline")}
         </p>
       </div>
 
@@ -52,13 +53,13 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
         </div>
         <div className="flex-1 space-y-0.5">
           <p className="text-xs font-bold text-foreground leading-snug">
-            Vulas reward real-world actions —
+            {t("rewards.vula.explainer.section1Title")}
           </p>
           <p className="text-xs text-foreground/80 leading-relaxed">
-            caring, helping, sharing, contributing, and following through.
+            {t("rewards.vula.explainer.section1Desc")}
           </p>
           <p className="text-xs font-medium bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
-            It's how we show up for each other.
+            {t("rewards.vula.explainer.section1Tagline")}
           </p>
         </div>
       </div>
@@ -72,7 +73,7 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
         </div>
         <div className="flex-1">
           <p className="text-xs font-bold text-foreground leading-snug">
-            Vulas are a simple way to start building value for the future.
+            {t("rewards.vula.explainer.section2Title")}
           </p>
         </div>
       </div>
@@ -84,14 +85,14 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
           className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white gap-2 shadow-md h-10 text-sm font-semibold"
         >
           <Ticket className="h-4 w-4" />
-          See where I can use my Vulas
+          {t("rewards.vula.explainer.cta")}
         </Button>
       )}
 
       {/* Footer tagline */}
       <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
         <Heart className="h-4 w-4 text-blue-500 fill-blue-500" />
-        <span>Earn them. Use them. Keep them.</span>
+        <span>{t("rewards.vula.explainer.footerTagline")}</span>
       </div>
     </div>
   );

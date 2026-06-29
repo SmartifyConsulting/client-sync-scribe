@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +24,7 @@ interface InvitePatientDialogProps {
 }
 
 export function InvitePatientDialog({ patientId, patientName }: InvitePatientDialogProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [showTransparency, setShowTransparency] = useState(false);
   const [email, setEmail] = useState("");
@@ -33,8 +35,8 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
   const handleSendInvitation = async () => {
     if (!email) {
       toast({
-        title: "Email required",
-        description: "Please enter the patient's email address.",
+        title: t("forms.validation.required"),
+        description: t("doctor.referrals.errors.emailRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -48,16 +50,16 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
           patientEmail: email,
           patientName: patientName,
           patientId: patientId,
-          doctorName: profile?.full_name || "Your Doctor",
-          practiceName: profile?.practice_address || "Medical Practice",
+          doctorName: profile?.full_name || t("common.name"),
+          practiceName: profile?.practice_address || t("common.name"),
         },
       });
 
       if (error) throw error;
 
       toast({
-        title: "Invitation sent",
-        description: `An invitation has been sent to ${email}.`,
+        title: t("dialogs.success"),
+        description: t("doctor.referrals.messages.inviteSentDesc") + " " + email,
       });
 
       setEmail("");
@@ -65,8 +67,8 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
     } catch (error: any) {
       console.error("Failed to send invitation:", error);
       toast({
-        title: "Failed to send invitation",
-        description: error.message || "Please try again later.",
+        title: t("dialogs.error"),
+        description: error.message || t("messages.error"),
         variant: "destructive",
       });
     } finally {
@@ -79,24 +81,23 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Mail className="mr-2 h-4 w-4" />
-          Invite Patient
+          {t("doctor.referrals.actions.inviteButton")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Invite Patient to Holarc</DialogTitle>
+          <DialogTitle>{t("doctor.referrals.form.title")}</DialogTitle>
           <DialogDescription>
-            Send an invitation email to {patientName} to create their own Holarc account. They will be able to view their
-            health information and manage appointments.
+            {t("doctor.referrals.form.sendInvite")}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Patient Email</Label>
+            <Label htmlFor="email">{t("forms.labels.email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="patient@example.com"
+              placeholder={t("forms.placeholders.email")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -104,12 +105,16 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {t("dialogs.cancel")}
           </Button>
           <Button
             onClick={() => {
               if (!email) {
-                toast({ title: "Email required", description: "Please enter the patient's email address.", variant: "destructive" });
+                toast({
+                  title: t("forms.validation.required"),
+                  description: t("doctor.referrals.errors.emailRequiredDesc"),
+                  variant: "destructive",
+                });
                 return;
               }
               setShowTransparency(true);
@@ -117,11 +122,11 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
             disabled={isLoading}
           >
             {isLoading ? (
-              "Sending..."
+              t("common.loading")
             ) : (
               <>
                 <Send className="mr-2 h-4 w-4" />
-                Send Invitation
+                {t("doctor.referrals.actions.inviteButton")}
               </>
             )}
           </Button>
@@ -131,7 +136,7 @@ export function InvitePatientDialog({ patientId, patientName }: InvitePatientDia
         open={showTransparency}
         onOpenChange={setShowTransparency}
         mode="doctor_invites_patient"
-        confirmLabel="I Understand — Send Invitation"
+        confirmLabel={t("doctor.referrals.messages.inviteSentTitle")}
         onConfirm={async () => {
           setShowTransparency(false);
           await handleSendInvitation();

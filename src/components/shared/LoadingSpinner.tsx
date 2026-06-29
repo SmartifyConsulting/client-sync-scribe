@@ -5,9 +5,11 @@
 
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface LoadingSpinnerProps {
   label?: string;
+  showDefaultLabel?: boolean;
   className?: string;
   size?: "sm" | "md" | "lg";
 }
@@ -18,11 +20,14 @@ const SIZE_MAP = {
   lg: "h-8 w-8",
 } as const;
 
-export function LoadingSpinner({ label, className, size = "md" }: LoadingSpinnerProps) {
+export function LoadingSpinner({ label, showDefaultLabel, className, size = "md" }: LoadingSpinnerProps) {
+  const { t } = useTranslation();
+  const displayLabel = label || (showDefaultLabel ? t("common.loading") : undefined);
+
   return (
     <div className={cn("flex flex-col items-center justify-center gap-2 py-6 text-muted-foreground", className)}>
       <Loader2 className={cn("animate-spin text-primary", SIZE_MAP[size])} />
-      {label && <span className="text-xs">{label}</span>}
+      {displayLabel && <span className="text-xs">{displayLabel}</span>}
     </div>
   );
 }
