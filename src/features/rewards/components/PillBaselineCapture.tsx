@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Camera, Loader2, RefreshCw, Check, Video, Square, Info, Pill, Package } from "lucide-react";
+import { Camera, Loader2, RefreshCw, Check, Video, Square, Info, Pill, Package, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { mapCameraError } from "@/lib/cameraErrors";
+
 
 
 interface PillBaselineCaptureProps {
