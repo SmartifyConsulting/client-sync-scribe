@@ -30,7 +30,9 @@ import {
   Calendar as CalendarIcon,
   Palette,
   Sparkles,
+  Info,
 } from "lucide-react";
+
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import DoctorRewards from "@/pages/doctor/DoctorRewards";
 
