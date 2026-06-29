@@ -1,1135 +1,1139 @@
-{
-  "auth": {
-    "login": {
-      "title": "Login",
-      "email": "Email Address",
-      "password": "Password",
-      "rememberMe": "Remember me",
-      "signIn": "Sign In",
-      "noAccount": "Don't have an account?",
-      "signUp": "Sign up here",
-      "invalidCredentials": "Invalid email or password",
-      "accountLocked": "Account locked"
-    },
-    "signup": {
-      "title": "Create Account",
-      "firstName": "First Name",
-      "lastName": "Last Name",
-      "email": "Email",
-      "password": "Password",
-      "confirmPassword": "Confirm Password",
-      "agreeTerms": "I agree to Terms and Conditions",
-      "create": "Create Account",
-      "haveAccount": "Already have an account?",
-      "signIn": "Sign in"
-    },
-    "forgot": {
-      "title": "Forgot Password?",
-      "instructions": "Enter your email to reset password",
-      "email": "Email Address",
-      "submit": "Send Reset Link",
-      "checkEmail": "Check email for reset link"
-    },
-    "reset": {
-      "title": "Reset Password",
-      "newPassword": "New Password",
-      "confirmPassword": "Confirm Password",
-      "reset": "Reset Password",
-      "success": "Password reset successfully"
-    }
-  },
-  "notifications": {
-    "title": "Notifications",
-    "unread": "Unread",
-    "markAsRead": "Mark as Read",
-    "clearAll": "Clear All",
-    "noNotifications": "No notifications",
-    "appointmentReminder": "Appointment Reminder",
-    "messageReceived": "New Message",
-    "medicationReminder": "Medication Reminder"
-  },
-  "profile": {
-    "title": "My Profile",
-    "personalInfo": "Personal Information",
-    "contactInfo": "Contact Information",
-    "preferences": "Preferences",
-    "privacy": "Privacy Settings",
-    "securitySettings": "Security Settings",
-    "edit": "Edit Profile",
-    "save": "Save Changes",
-    "changePassword": "Change Password",
-    "logout": "Log Out"
-  },
-  "legal": {
-    "termsAndConditions": {
-      "title": "Terms and Conditions",
-      "accept": "Accept",
-      "reject": "Reject"
-    },
-    "patientConsent": {
-      "title": "Patient Consent",
-      "accept": "Accept Consent",
-      "decline": "Decline"
-    },
-    "businessAssociate": {
-      "title": "Business Associate Agreement",
-      "agree": "I agree"
-    }
-  },
-  "common": {
-    "language": "Èdè",
-    "changeLanguage": "Yi èdè padà",
-    "signOut": "Jáde",
-    "save": "Fipamọ́",
-    "cancel": "Fagilee",
-    "delete": "Pa rẹ́",
-    "edit": "Ṣatúnṣe",
-    "add": "Fikun",
-    "send": "Firanṣẹ́",
-    "confirm": "Jẹrisi",
-    "close": "Pa",
-    "search": "Wa",
-    "loading": "N gbé...",
-    "settings": "Eto",
-    "noData": "No data",
-    "active": "Active",
-    "inactive": "Inactive",
-    "pending": "Pending",
-    "phone": "Phone",
-    "email": "Email",
-    "name": "Name",
-    "role": "Role",
-    "status": "Status",
-    "actions": "Actions"
-  },
-  "nav": {
-    "home": "Ile",
-    "myPatients": "Awọn Aláìsàn Mi",
-    "myPractice": "Iṣẹ́ Mi",
-    "myCalendar": "Kalẹnda Mi",
-    "myTasks": "Awọn Iṣẹ́ Mi",
-    "myDocuments": "Awọn Iwe Mi",
-    "myRoundTables": "Awọn Tabili Yíká Mi",
-    "myRewards": "Awọn Ẹbun Mi",
-    "sos": "SOS",
-    "myProfile": "Profaili Mi",
-    "myHolarchy": "Holarchy Mi",
-    "admin": "Alabojuto",
-    "users": "Awọn Olumulo",
-    "pricing": "Idiyele",
-    "rewards": "Awọn Ẹbun",
-    "hospitalPortal": "Ẹnu-ọna Ile Iwosan",
-    "erPortal": "Ẹnu-ọna Pajawiri",
-    "userAdmin": "User Admin",
-    "telematics": "Telematics",
-    "teamStatus": "Team Status",
-    "fleet": "Fleet",
-    "navigation": "Navigation",
-    "hospitals": "Hospitals",
-    "affiliatedHospitals": "Affiliated Hospitals",
-    "incidentHistory": "Incident History",
-    "incomingSos": "Incoming SOS",
-    "incomingEr": "Incoming ER",
-    "triage": "Triage",
-    "admissions": "Admissions",
-    "erCapacity": "ER Capacity",
-    "providers": "Providers",
-    "incidentTimeline": "Incident Timeline",
-    "emergencyQueue": "Emergency Queue",
-    "activeIncidents": "Active Incidents",
-    "providerProfile": "Provider Profile",
-    "backToAdmin": "Back to Admin",
-    "liveSOS": "SOS Tààrà"
-  },
-  "topbar": {
-    "reportBug": "Jabọ Aṣiṣe",
-    "calendar": "Kalẹnda",
-    "recordTask": "Gbasilẹ Iṣẹ́",
-    "notifications": "Awọn Iwifunni"
-  },
-  "userAdmin": {
-    "title": "User Admin",
-    "tabAdmins": "Admins",
-    "tabCrew": "Crew Members",
-    "inviteAdmin": "Invite admin",
-    "addCrew": "Add Crew Member",
-    "owner": "Owner",
-    "organisationOwner": "Organisation owner",
-    "ownerCannotRemove": "Initial registrant — cannot be removed",
-    "noAdmins": "No additional administrators yet.",
-    "noCrew": "No crew members yet.",
-    "shiftPattern": "Shift pattern",
-    "removeConfirm": "Remove this member?",
-    "memberAdded": "Member added",
-    "memberRemoved": "Member removed",
-    "rolesCrew": "Paramedic / EMT / Driver / Dispatcher"
-  },
-  "holarcHelp": {
-    "admin": {
-      "eyebrow": "Admin",
-      "title": "User Management",
-      "description": "Manage users and accountability.",
-      "tabs": {
-        "users": "Users",
-        "accountability": "Accountability"
-      },
-      "subtabs": {
-        "patients": "Patients",
-        "healthcare": "Healthcare Providers",
-        "hospitals": "Hospitals",
-        "erProviders": "ER Providers",
-        "pharmacies": "Pharmacies",
-        "insurers": "Insurers",
-        "admin": "Admin"
-      },
-      "status": {
-        "active": "Active",
-        "inactive": "Inactive",
-        "all": "All"
-      },
-      "tier": {
-        "tier_1": "Tier 1",
-        "tier_2": "Tier 2",
-        "tier_3": "Tier 3",
-        "tier_4": "Tier 4"
-      },
-      "table": {
-        "name": "Name",
-        "contact": "Contact",
-        "city": "City",
-        "tier": "Tier",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "messages": {
-        "adminAccessRequired": "Admin access required",
-        "activated": "Activated",
-        "deactivated": "Deactivated",
-        "tierUpdated": "Tier updated",
-        "deleted": "Deleted",
-        "deleteConfirm": "Delete provider?",
-        "deleteMessage": "will be permanently removed",
-        "noMatch": "No match found"
-      },
-      "actions": {
-        "add": "Add",
-        "addProvider": "Add provider",
-        "edit": "Edit",
-        "delete": "Delete",
-        "cancel": "Cancel",
-        "search": "Search {{noun}}",
-        "inviteStaff": "Invite staff",
-        "hospital": "Hospital",
-        "ambulance": "Emergency Response",
-        "pharmacy": "Pharmacy"
-      },
-      "forms": {
-        "groupedBy": "Grouped by country, then tier"
-      }
-    },
-    "emergency": {
-      "dashboard": {
-        "title": "Emergency Dashboard",
-        "status": {
-          "new": "NEW",
-          "active": "ACTIVE",
-          "completed": "COMPLETED"
-        },
-        "severity": {
-          "critical": "Critical",
-          "high": "High",
-          "medium": "Medium",
-          "low": "Low"
-        },
-        "incidentType": {
-          "selfCreated": "Self-created",
-          "fromHospital": "From Hospital"
-        }
-      },
-      "dispatch": {
-        "title": "Dispatch Management",
-        "activeDispatch": "Active Dispatch",
-        "dispatchQueue": "Dispatch Queue",
-        "assignment": "Dispatch Assignment",
-        "reassignment": "Dispatch Reassignment",
-        "status": {
-          "active": "Active",
-          "pending": "Pending",
-          "complete": "Complete"
-        },
-        "actions": {
-          "assign": "Assign",
-          "reassign": "Reassign",
-          "dispatch": "Dispatch",
-          "cancel": "Cancel"
-        }
-      },
-      "incidents": {
-        "title": "Incidents",
-        "list": "Incident List",
-        "detail": "Incident Detail",
-        "contacts": "Emergency Contacts",
-        "nearby": "Nearby Resources"
-      },
-      "ambulance": {
-        "dashboard": "Emergency Dashboard",
-        "affiliations": "Affiliated Hospitals",
-        "networkScreen": "Hospital Network",
-        "directory": "Hospitals Directory"
-      },
-      "hospital": {
-        "operations": "Hospital Operations",
-        "dashboard": "Hospital Dashboard",
-        "selection": "Hospital Selection",
-        "console": "Incident Console",
-        "layout": "Operations Layout"
-      }
-    }
-  },
-  "telematics": {
-    "title": "Driver Tracking",
-    "subtitle": "Fleet Telematics · Last 24h",
-    "liveFleet": "Live Fleet",
-    "tripsStops": "Trips & Stops",
-    "moving": "Moving",
-    "stopped": "Stopped",
-    "onMission": "On mission",
-    "freeRoam": "Free roam",
-    "noActive": "No active drivers in the last 24 hours.",
-    "noTrips": "No trip data yet — start a shift to begin recording telematics.",
-    "pings": "pings",
-    "driver": "Driver",
-    "drivers": "drivers",
-    "stop": "stop",
-    "stops": "stops",
-    "arrived": "Arrived",
-    "departed": "Departed",
-    "dwell": "Dwell",
-    "location": "Location",
-    "noQualifyingStops": "No qualifying stops",
-    "vehicle": "Vehicle"
-  },
-  "doctorDashboard": {
-    "greetingMorning": "Ẹ kaaro",
-    "greetingAfternoon": "Ẹ kaasan",
-    "greetingEvening": "Ẹ kaalẹ",
-    "subtitle": "Eyi ni ohun ti n ṣẹlẹ ni ile-iwosan rẹ loni,",
-    "totalPatients": "Lapapọ Awọn Alaisan",
-    "thisWeek": "Ọsẹ Yi",
-    "doctorRating": "Idiyele Dokita",
-    "noRatings": "Ko si idiyele",
-    "vulaVouchers": "Vula Vouchers",
-    "myRoundTables": "Awọn Tabili Yika Mi",
-    "searchRoundTable": "Wa alaisan lati bẹrẹ tabili yika...",
-    "noPatientsFound": "Ko si alaisan ti a ri",
-    "todoList": "Akojọ Iṣẹ",
-    "addTask": "Fi iṣẹ kun...",
-    "active": "Ti n ṣiṣẹ",
-    "done": "Ti pari",
-    "noActiveTasks": "Ko si iṣẹ ti n ṣiṣẹ",
-    "noCompletedTasks": "Ko si iṣẹ ti o pari",
-    "recentActivity": "Iṣẹ Aipẹ",
-    "sessionCompleted": "Ipade pari",
-    "documentGenerated": "Iwe ti ṣẹda",
-    "taskCompleted": "Iṣẹ pari",
-    "followUpSent": "Atẹle ti firanṣẹ",
-    "gettingStarted": "Bibẹrẹ",
-    "addFirstPatient": "Fi alaisan akọkọ rẹ kun lati bẹrẹ",
-    "justNow": "Bayi"
-  },
-  "briefing": {
-    "todaysBriefing": "Àtòjọ fún òní",
-    "briefingFor": "Àtòjọ fún ọjọ́ {{day}}",
-    "completedOf": "Ìpàdé {{done}} nínú {{total}} ti parí",
-    "noAppointments": "Kò sí ìpàdé tí a ṣètò fún òní.",
-    "narrate": "Kà á",
-    "preparing": "Múra sílẹ̀...",
-    "pause": "Dúró ná",
-    "resume": "Tẹ̀síwájú",
-    "stop": "Dáwọ́ dúró",
-    "previousDay": "Ọjọ́ tí ó kọjá",
-    "nextDay": "Ọjọ́ tí ń bọ̀",
-    "translating": "Ń ṣèdédè àtòjọ...",
-    "allergies": "Àìhó",
-    "lastSession": "Ìpàdé tó kọjá",
-    "noPreviousSession": "Kò sí àkọsílẹ̀ ìpàdé tó kọjá",
-    "unreadNote": "àkọsílẹ̀ tí kò tíì kà",
-    "unreadNotes": "awọn àkọsílẹ̀ tí kò tíì kà"
-  },
-  "patients": {
-    "title": "Àwọn Aláìsàn",
-    "subtitle": "Ṣakoso àwọn ìgbéhòsílẹ̀ aláìsàn rẹ",
-    "searchPlaceholder": "Wa àwọn aláìsàn...",
-    "addPatient": "Fi Aláìsàn Kún",
-    "importPatients": "Kó Wọlé",
-    "noPatients": "Kò sí aláìsàn kankan báyìí",
-    "allStatuses": "Gbogbo ipò",
-    "active": "Ṣiṣẹ́",
-    "inactive": "Kò Ṣiṣẹ́",
-    "roundTables": "Àwọn tabili yíká",
-    "share": "Pín",
-    "viewProfile": "Wo Àwòrán Profaili",
-    "tabAll": "Gbogbo",
-    "tabMine": "Tièmi",
-    "tabShared": "Pínpín",
-    "tabPending": "Dúró"
-  },
-  "calendar": {
-    "title": "Kalẹnda",
-    "subtitle": "Ṣakoso awọn ipinnu iṣoogun rẹ ati eto",
-    "today": "Loni",
-    "day": "Ọjọ",
-    "week": "Ọsẹ",
-    "month": "Oṣu",
-    "year": "Odun",
-    "newAppointment": "Igbimọ tuntun",
-    "previous": "Ti tẹlẹ",
-    "next": "Itele",
-    "allDay": "Gbogbo ọjọ",
-    "noEvents": "Ko si iṣẹlẹ",
-    "myCalendar": "Kalẹnda mi",
-    "practiceCalendar": "Kalẹnda iṣe",
-    "googleCalendar": "Google Kalẹnda",
-    "disconnectGoogle": "Putọ Google",
-    "googleSyncCaption": "Aiyara Google nikan ṣe afihan awọn ipinnu iṣoogun ti ara rẹ.",
-    "book": "Iwe",
-    "todaysSchedule": "Eto loni",
-    "noAppointmentsToday": "Ko si awọn ipinnu iṣoogun ti a ti ṣeto fun oni",
-    "filterDoctor": "Ṣe àlàyé Dókítà",
-    "allDoctors": "Gbogbo awọn Dókítà ni iṣe",
-    "months": {
-      "january": "Oṣu Kínní",
-      "february": "Oṣu Keèjì",
-      "march": "Oṣu Kẹta",
-      "april": "Oṣu Kẹrin",
-      "may": "Oṣu Karun",
-      "june": "Oṣu Kẹfa",
-      "july": "Oṣu Keje",
-      "august": "Oṣu Kẹjọ",
-      "september": "Oṣu Kẹsọ",
-      "october": "Oṣu Kẹwa",
-      "november": "Oṣu Kọkandun",
-      "december": "Oṣu Kọkanléélọ"
-    },
-    "monthsShort": {
-      "jan": "Kín",
-      "feb": "Keè",
-      "mar": "Kẹt",
-      "apr": "Kẹr",
-      "may": "Kar",
-      "jun": "Kẹf",
-      "jul": "Kej",
-      "aug": "Kẹj",
-      "sep": "Kẹs",
-      "oct": "Kẹw",
-      "nov": "Kọk1",
-      "dec": "Kọk2"
-    },
-    "days": {
-      "sunday": "Àìkú",
-      "monday": "Ajé",
-      "tuesday": "Ìṣẹ́gun",
-      "wednesday": "Ọjọ́rú",
-      "thursday": "Ọjọ́bọ",
-      "friday": "Ẹtì",
-      "saturday": "Àbámẹ́ta"
-    },
-    "daysShort": {
-      "sun": "Àìk",
-      "mon": "Ajé",
-      "tue": "Ìṣẹ",
-      "wed": "Ọjr",
-      "thu": "Ọjb",
-      "fri": "Ẹtì",
-      "sat": "Àbá"
-    },
-    "daysNarrow": {
-      "s": "À",
-      "m": "A",
-      "t": "Ì",
-      "w": "Ọ",
-      "f": "Ẹ"
-    }
-  },
-  "sessions": {
-    "title": "Awọn ipele",
-    "sessionMode": "Ipo Ipele",
-    "selectPatient": "Yan Alaisan kan",
-    "readyToStart": "Ti ṣetan lati Bẹrẹ",
-    "searchByPatient": "Wadi nipasẹ orukọ alaisan...",
-    "newSession": "Ipele Tuntun",
-    "allSessions": "Gbogbo Awọn ipele",
-    "noPatientsFound": "Ko ri alaisan kankan.",
-    "searchByName": "Wadi nipasẹ orukọ...",
-    "today": "Loni",
-    "lastWeek": "Ọsẹ to kọja",
-    "lastMonth": "Oṣu to kọja",
-    "older": "Agbalagba",
-    "tapToRecord": "Tẹ lati ṣe igbasilẹ",
-    "recording": "N ṣe igbasilẹ... Tẹ lati da duro",
-    "paused": "Duro — tẹ ere lati tun bẹrẹ",
-    "transcribing": "N kọwe ni kikun...",
-    "endSessionTip": "Sọ \"Pari Ipele\" lati da igbasilẹ duro laifọwọyi",
-    "generateAnalysis": "Ṣe ipilẹṣẹ Itupalẹ",
-    "regenerate": "Tun ṣe ipilẹṣẹ",
-    "currentSession": "Ipele lọwọlọwọ"
-  },
-  "roundTables": {
-    "title": "Àwọn Àga Ìdèré Mi",
-    "noTables": "O kò tíì ní àga ìdèré kankan.",
-    "unread": "èyí tí a kò kà",
-    "lastUpdate": "Ìgbà tó kẹ́yìn tí a ṣe àtúnṣe",
-    "openTable": "Ṣí i",
-    "newTopic": "Kókó-ọ̀rọ̀ Titun"
-  },
-  "doctorRewards": {
-    "title": "Àwọn Èrè Mi",
-    "tabOverview": "Àpẹ̀yẹ",
-    "tabMilestones": "Àwọn Àtìgbegbà",
-    "tabStreaks": "Àwọn Ìtẹ̀síwájú",
-    "tabHistory": "Ìtàn",
-    "tabRedeem": "Ràpadà",
-    "totalVulas": "Àpapọ Vulas",
-    "currentStreak": "Ìtẹ̀síwájú lọ́wọ́lọ́wọ́",
-    "patientsAdhering": "Àwọn aláìsàn tó faramọ́"
-  },
-  "liveSos": {
-    "title": "SOS Live",
-    "subtitle": "Ifura pajawiri ni akoko gidi",
-    "active": "Inúṣe",
-    "critical": "Critical",
-    "recent": "Tuntun",
-    "activeNow": "Nlo lowo",
-    "allClear": "Gbogbo re dara—ko si isele SOS ti nlo lowo.",
-    "selectIncident": "Yan isele kan lati wo alaye re.",
-    "sosIncident": "Isele SOS",
-    "muted": "Dakẹ",
-    "alertsOn": "Awọn iwifunni wa ni titan",
-    "consciousness": "Imọlara",
-    "responsive": "Onidahun",
-    "adequate": "To",
-    "ambulance": "Ọkọ alaisan",
-    "eta": "ETA",
-    "location": "Ipò",
-    "openInMaps": "Ṣii ninu Maapu",
-    "openConsole": "Ṣii console"
-  },
-  "myPractice": {
-    "tabPractice": "Mi Iṣe",
-    "tabReferrals": "Referrals",
-    "tabCredentials": "Awọn iwe-ẹri",
-    "tabRewards": "Rewards",
-    "aboutMe": "Nipa mi",
-    "aboutMeHelper": "Sọ ọrọ kukuru nipa iṣe rẹ ati ọna. Awọn alaisan wo eyi nigbati o n wo profaili rẹ. Ti o pọju awọn ọrọ 600.",
-    "wordCount": "{{count}} / 600 awọn ọrọ",
-    "save": "Save",
-    "tabProfile": "Profile",
-    "tabServices": "Services",
-    "tabSchedule": "Schedule",
-    "tabPatients": "Patients",
-    "tabInvoices": "Invoices",
-    "tabRoundTables": "Round Tables",
-    "tabDocuments": "Documents",
-    "tabHospitals": "Hospital Affiliations",
-    "profileTitle": "Practice Profile",
-    "profileDescription": "Manage your professional information and credentials",
-    "basicInfo": "Basic Information",
-    "name": "Full Name",
-    "email": "Email",
-    "phone": "Phone",
-    "specialty": "Specialty",
-    "qualifications": "Qualifications",
-    "practiceNumber": "Practice Number",
-    "bio": "Professional Bio",
-    "credentials": "Credentials & Certifications",
-    "addCredential": "Add Credential",
-    "editCredential": "Edit Credential",
-    "certificateName": "Certificate Name",
-    "issuingBody": "Issuing Body",
-    "dateEarned": "Date Earned",
-    "cpdPoints": "CPD Points",
-    "servicesTitle": "Services & Pricing",
-    "servicesDescription": "Define your services and set pricing",
-    "addService": "Add Service",
-    "serviceName": "Service Name",
-    "defaultPrice": "Default Price",
-    "currency": "Currency",
-    "serviceColor": "Service Color",
-    "deleteService": "Delete Service",
-    "editService": "Edit Service",
-    "signatureTitle": "Digital Signature",
-    "signatureDescription": "Create your digital signature for documents",
-    "signatureFont": "Font Style",
-    "signaturePreview": "Preview",
-    "practiceSettings": "Practice Settings",
-    "practiceLanguage": "Practice Language",
-    "practiceTimezone": "Timezone",
-    "consultationFee": "Default Consultation Fee",
-    "teamMembers": "Team Members",
-    "inviteMember": "Invite Team Member",
-    "memberEmail": "Member Email",
-    "memberRole": "Role",
-    "removeMember": "Remove Member",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "edit": "Edit",
-    "add": "Add",
-    "upload": "Upload",
-    "leave": "Leave Practice",
-    "savingProfile": "Saving profile...",
-    "profileUpdated": "Profile updated successfully",
-    "errorUpdatingProfile": "Error updating profile",
-    "uploadingAvatar": "Uploading profile picture...",
-    "uploadingLogo": "Uploading logo...",
-    "invalidFileType": "Invalid file type",
-    "uploadFailed": "Upload failed",
-    "required": "Required field",
-    "missingFields": "Please fill all required fields",
-    "scheduleTitle": "Schedule",
-    "setAvailability": "Set Your Availability",
-    "connectedPatients": "Connected Patients",
-    "invoicesTitle": "Invoices",
-    "referralDoctors": "Referral Network",
-    "noServices": "No services added yet",
-    "noCredentials": "No credentials added yet",
-    "noPatients": "No patients connected yet"
-  },
-  "patientRewards": {
-    "progressTitle": "Ilọsiwaju si Ipele Ipele",
-    "progressLabel": "{{current}} / {{target}} Vulas si \"{{milestone}}\"",
-    "moreToGo": "{{count}} diẹ sii lati lọ!",
-    "recentRewards": "Awọn ere-idaraya Tuntun",
-    "empty": "Ko si awọn ere sibẹsibẹ. Bẹrẹ irin ajo ilera rẹ!"
-  },
-  "todo": {
-    "addNewTask": "Ṣafikun Iṣẹ Tuntun",
-    "tapToRecord": "Fọwọkan lati rekọja",
-    "transcribing": "Gbigbe...",
-    "aiProcessing": "AI processing...",
-    "listening": "Ngbagbọ... duro lẹhin isinmi",
-    "typeTask": "Tabi tẹ iṣẹ rẹ nibi...",
-    "add": "Ṣafikun",
-    "priority": "Ipo:",
-    "low": "Kekere",
-    "medium": "Arin",
-    "high": "Giga",
-    "aiProcess": "Ilana AI",
-    "active": "Ti nṣiṣẹ",
-    "completed": "Ti pari",
-    "all": "Gbogbo",
-    "approve": "Fọwọsi",
-    "noMatchingPatient": "Ko si alaisan ti o baramu ti a rii"
-  },
-  "documents": {
-    "title": "Awọn iwe aṣẹ",
-    "tabDocuments": "Awọn iwe aṣẹ",
-    "tabTemplates": "Awọn awoṣe",
-    "tabHeaderFooter": "Ori ati ẹsẹ oju-iwe",
-    "tabContent": "Awọn awoṣe akoonu",
-    "contentHelper": "Ṣẹda awọn awoṣe akoonu iwe (ori/ẹsẹ oju-iwe yoo lo lati layout ti o yan)",
-    "newContent": "Awoṣe akoonu Tuntun",
-    "searchContent": "Ṣawari awọn awoṣe akoonu...",
-    "createTemplate": " ṣẹda Awoṣe",
-    "patientDocuments": "Awọn iwe aṣẹ Alaisan",
-    "searchDocuments": "Ṣawari awọn iwe aṣẹ...",
-    "letterhead": "Ori lẹta:",
-    "letterheadHeaderFooter": "Ori ati ẹsẹ oju-iwe",
-    "letterheadDefault": "Aiyipada"
-  },
-  "roundTablesMeta": {
-    "noteOne": "{{count}} akọsilẹ",
-    "noteOther": "{{count}} awọn akọsilẹ",
-    "lastActivity": "Iṣẹ ayẹyẹ kẹhin {{date}}"
-  },
-  "sos": {
-    "emergencyAssistance": "Igbaduro Ipalọlọ",
-    "helpAlerted": "Yoo ṣe iranlọwọ lẹsẹkẹsẹ",
-    "ackHeading": "SE KANKAN ṢE LATI LO SOS, JỌWỌ KỌỌṢẸ:",
-    "ackA": "Atilẹyin SOS ni a pese lori ipilẹ igbiyanju ti o dara julọ ati pe ko le ṣe iṣeduro idahun pajawiri.",
-    "ackB": "SOS da lori nẹtiwọọki, ipo ẹrọ, iraye si ipo, ati awọn oludahun ẹnikẹta.",
-    "ackC": "SOS nilo awọn igbanilaaye ipo, agbara batiri, ati asopọ intanẹẹti tabi alagbeka.",
-    "sosLabel": "SOS",
-    "tapForHelp": "FỌWỌ KAN FUN IGBADURO",
-    "footerCaption": "Titẹ SOS n pin ipo rẹ ati sọ fun awọn olubasọrọ pajawiri rẹ.",
-    "manageContacts": "Ṣakoso awọn olubasọrọ pajawiri",
-    "viewHistory": "Wo itan iṣẹlẹ"
-  },
-  "patientProfile": {
-    "backToPatients": "Pada pada Onirun",
-    "patientNotFound": "A ko ri alaisan naa",
-    "schedule": "Eto",
-    "startSession": "Bẹrẹ Igbimọ",
-    "checkIn": "Ṣayẹwo wọle",
-    "totalSessions": "Iye Awọn igbimọ",
-    "lastSeen": "Kẹhin Ti Wo",
-    "since": "Lati",
-    "vulas": "Awọn Vulas",
-    "tabDetails": "Awọn alaye",
-    "tabOverview": "Akopọ",
-    "tabSessions": "Itan Awọn igbimọ",
-    "tabAdmissions": "Awọn Gbigba",
-    "tabProviders": "Awọn Olupese Ilera",
-    "tabDocuments": "Awọn iwe aṣẹ",
-    "tabRoundTable": "Tabili Yika",
-    "togglePersonal": "Alaye ti ara ẹni",
-    "toggleMedical": "Alaye Iṣoogun",
-    "personalHeading": "Alaye ti ara ẹni",
-    "personalHelper": "Wo ki o si ṣakoso awọn alaye ti ara ẹni",
-    "medicalHeading": "Alaye Iṣoogun",
-    "medicalHelper": "Wo ki o si ṣakoso awọn alaye iṣoogun",
-    "saved": "Ti fipamọ",
-    "sectionAddresses": "Awọn adirẹsi",
-    "sectionEmergencyContacts": "Awọn olubasọrọ pajawiri",
-    "sectionNextOfKin": "Ẹgbẹẹgbẹrun ti Ẹgbẹẹgbẹrun",
-    "sectionInsurance": "Insurance / iranlowo Oogun",
-    "sectionEmployer": "Agbẹ",
-    "sectionLifestyle": "Igbesi aye",
-    "sectionConsents": "Awọn igbanilaaye",
-    "sectionAllergies": "Awọn nkan ti ara korira",
-    "sectionChronic": "Awọn ipo onibaje",
-    "sectionMedications": "Oogun lọwọlọwọ",
-    "sectionFamilyHistory": "Itan Ẹbi",
-    "sectionSurgicalHistory": "Itan iṣẹ abẹ",
-    "sectionImmunizations": "Awọn ajesara",
-    "sectionVitals": "Awọn iwo",
-    "sectionLabResults": "Awọn abajade idanwo",
-    "sectionGeneticMarkers": "Awọn ami-ami-ami",
-    "sectionMentalHealth": "Ilera Ọpọlọ"
-  },
-  "emergencyDashboard": {
-    "statusBar": {
-      "activeMission": "ISáº¸ AKIYESI",
-      "onShift": "NINU Iá¹¢áº¸"
-    },
-    "header": {
-      "subtitle": "Idahun ÃŒjoba",
-      "title": "Iá¹£áº¹ ÃŒjoba"
-    },
-    "stats": {
-      "new": "titun",
-      "active": "akiyesi",
-      "critical": "pataki"
-    },
-    "statsCard": {
-      "newRequests": "Ebe Titun",
-      "activeOperations": "Iá¹£áº¹ Akiyesi",
-      "criticalIncidents": "Pataki Iá¹£áº¹láº¹"
-    },
-    "tabs": {
-      "new": "Titun",
-      "active": "Akiyesi",
-      "completed": "Ti Pari"
-    },
-    "details": {
-      "location": "Aaye",
-      "received": "Ti Gba",
-      "fromHospital": "Lati Ile Asa"
-    },
-    "actions": {
-      "acceptDispatch": "Gba Ki O Ran",
-      "decline": "Kole",
-      "trackLive": "Táº¹je Lori Amutorunwa",
-      "updateStatus": "á¹¢e Ilana Iyalere",
-      "viewReport": "Wo Igbero"
-    }
-  },
-  "navigationScreen": {
-    "noActiveMission": "Aká»á» Isáº¹ Aji",
-    "acceptToStart": "Gba ere ipon daradun ni ojo lati bere idin nkan",
-    "openIncomingSos": "Si Etan SOS Ipon",
-    "loadingMission": "Ifi Awo Tani Isáº¹...",
-    "status": "Iá¹£áº¹láº¹ Paá¹£áº¹ si {{status}}",
-    "mission": "Isáº¹",
-    "eta": "Akoko Diduro:",
-    "actionPanel": "Ipolongo Iá¹£áº¹láº¹",
-    "enRoute": "Ninu Ona",
-    "arrived": "O Wo De",
-    "patientLoaded": "Alaisan Sáº¹",
-    "toHospital": "Ninu Ona Si Ile Asa",
-    "arrivedAtHospital": "O Wo De Ile Asa",
-    "resolveIncident": "Yipada Iá¹£áº¹láº¹",
-    "navigation": "Idin",
-    "fullConsole": "Si Onigun Ni Lapá»"
-  },
-  "provider": {
-    "emergencyResponseDispatch": "Firaná¹£áº¹ Iyáº¹ Gidigidi"
-  },
-  "realTimeMonitoring": {
-    "header": {
-      "subtitle": "Akiyesi",
-      "title": "Iá¹£áº¹ Akoko Lokan",
-      "description": "Ã€kÃ­yÃ¨sÃ­ Ã wá»n á»ká» ibaÃ² akoko lokan ati akiyesi iá¹£ojogun"
-    },
-    "tabs": {
-      "tracking": "Ã€kÃ­yÃ¨sÃ­",
-      "safety": "Iá¹£ojogun"
-    },
-    "tracking": {
-      "vehiclesOnline": "á»Œká» Ninu Eeyan",
-      "allGpsConnected": "Gbogbo GPS ti sá»pá»",
-      "avgSpeed": "Ara Iá¹£Ã lejÃ²",
-      "withinLimits": "Ninu Opin",
-      "fuelStatus": "Ipo Epo",
-      "goodLevels": "Awá»n Ipele Dara",
-      "speed": "Iá¹£Ã lejÃ²",
-      "fuel": "Epo",
-      "track": "Akiyesi",
-      "moving": "áº¸KA NILO",
-      "stopped": "DURO"
-    },
-    "safety": {
-      "criticalAlerts": "Ibi Iá¹£ojogun Pataki",
-      "immediateAction": "Iá¹£e Ninu Ise",
-      "safetyEvents": "Awá»n Iá¹£áº¹láº¹ Iá¹£ojogun",
-      "thisWeek": "á»Œsáº¹ Yi",
-      "fleetScore": "Iwe IbaÃ²",
-      "excellentSafety": "Iá¹£ojogun Dara Julo",
-      "critical": "PATAKI",
-      "alert": "ISINMI",
-      "eventTypesMonitored": "Awá»n Iru Iá¹£áº¹láº¹ Iá¹£ojogun Ti a á¹¢e Akiyesi",
-      "speedingEvents": "Awá»n Iá¹£áº¹láº¹ Iá¹£Ã lejÃ² Ti O Ju",
-      "harshAcceleration": "Iyipada Alaka/Gbigbana Alaka",
-      "afterHoursUse": "Lilo á»Œká» Ni áº¸ya Ti Isáº¹",
-      "geofenceBreaches": "Gbigbe Geofence",
-      "routeDeviations": "Iyatá» á»Œna",
-      "unauthorizedStops": "Iduro Ti O Ba Gba Iwa"
-    }
-  },
-  "vehicleProfile": {
-    "navigation": {
-      "back": "Lá» Pada"
-    },
-    "header": {
-      "title": "Iá¹£áº¹ Ambulansi"
-    },
-    "information": {
-      "title": "Alaye á»Œká»",
-      "registration": "Iforuká»siláº¹",
-      "vin": "VIN",
-      "year": "Odun",
-      "makeModel": "áº¸ka/Awoá¹£e",
-      "engine": "áº¸jáº¹",
-      "seats": "Awá»n Ise",
-      "color": "ÃŒlÃº"
-    },
-    "operational": {
-      "title": "Ipo Iá¹£áº¹",
-      "mileage": "Akoni",
-      "engineHours": "Awá»n Wakati ti áº¸jáº¹",
-      "fuelType": "Iru Epo",
-      "tankCapacity": "Iwon ti Tank",
-      "fuelLevel": "Ipele ti Epo",
-      "lastGpsCheck": "Akiyesi GPS ti Ikokoro"
-    },
-    "maintenance": {
-      "title": "Iá¹£áº¹ ati Isususiláº¹",
-      "lastService": "Iá¹£áº¹ ti Ikokoro",
-      "nextService": "Iá¹£áº¹ Atáº¹le",
-      "overdue": "TI JAGBE",
-      "days": "á»já»",
-      "lastInspection": "Iwokolo ti Ikokoro",
-      "insuranceExpiry": "Idaduro ti Jinere",
-      "motExpiry": "Idaduro ti MOT",
-      "scheduleService": "Seto Iá¹£áº¹"
-    },
-    "equipment": {
-      "title": "Ohun Elo ati Eto",
-      "viewEquipment": "Wo Ohun Elo"
-    },
-    "actions": {
-      "assign": "Yan",
-      "history": "Itan"
-    }
-  },
-  "vehicleAbuse": {
-    "header": {
-      "title": "Idiwon Itankale á»Œká»",
-      "description": "á¹¢e iwatáº¹nwá» ara iyaláº¹nu á»ká», iyaláº¹nu agbooro geofence, ati lilo ti a ko gbadun."
-    },
-    "stats": {
-      "criticalEvents": "Awon Iá¹£áº¹láº¹ Ixáº¹yáº¹",
-      "highRisk": "Eewu Giga",
-      "mediumPriority": "Iá¹£áº¹ Ariwa",
-      "totalEvents": "Lapapá» Awon Iá¹£áº¹láº¹"
-    },
-    "tabs": {
-      "allEvents": "Gbogbo Awon Iá¹£áº¹láº¹",
-      "geofence": "Geofence",
-      "afterHours": "Iyaláº¹nu Wakati",
-      "routes": "Awá»n á»na"
-    },
-    "dashboard": {
-      "noEvents": "Ko si itankale iá¹£áº¹láº¹ ti a á¹£e awari.",
-      "review": "á¹¢e Iwatáº¹nwá»"
-    },
-    "eventTypes": {
-      "geofenceBreach": "Iyaláº¹nu Geofence",
-      "speeding": "Iá¹£adi Giga",
-      "afterHoursUse": "Lilo Iyaláº¹nu Wakati",
-      "unlinkedTrip": "Ija Ti A Ko Siso",
-      "harshDriving": "á»Œká» Itankale",
-      "routeDeviation": "Iyaláº¹nu á»Œna"
-    },
-    "geofenceTab": {
-      "title": "Iá¹£akojá» Geofence ati Awon Kelepáº¹ Iyaláº¹nu Ti N Wa.",
-      "description": "á¹¢áº¹da awon ifini táº¹bu ati gba awon kelepáº¹ nigbati awon á»ká» á¹£e iyaláº¹nu wá»n."
-    },
-    "hoursTab": {
-      "title": "Iwari Iyaláº¹nu Wakati Ti N Wa.",
-      "description": "á¹¢e awatáº¹nwá» ara á»ká» ti a lo ni iyaláº¹nu á»páº¹ iá¹£áº¹ ajáº¹ á¹£áº¹da."
-    },
-    "routesTab": {
-      "title": "Iyaláº¹nu á»Œna ati Iwari Ti N Wa.",
-      "description": "á¹¢e iwatáº¹nwá» ara ambulansi ba tabi ko ba táº¹le awon á»na ti a fi á¹£áº¹da."
-    }
-  },
-  "vehicleTypeManagement": {
-    "header": {
-      "category": "Iá¹£eto Iyaleta",
-      "title": "Iru á»Œká» Ayandun",
-      "description": "á¹¢akoso iru ambulansi, aje, ati iá¹£eto"
-    },
-    "summary": {
-      "totalVehicles": "Apapá» á»Œká» Ayandun",
-      "avgMonthlyCost": "Idiyele Oá¹£u Aarin",
-      "totalCrewCapacity": "Apapá» Agbara Olurombonrin",
-      "title": "Akopá» Iyaleta",
-      "totalTypes": "Apapá» Iru"
-    },
-    "specifications": {
-      "monthlyCost": "Idiyele Oá¹£u",
-      "capacity": "Agbara",
-      "inFleet": "Ninu Iyaleta",
-      "vehicles": "Awon Oko Ayandun",
-      "members": "Awon Omo",
-      "crewSize": "Iwon Olurombonrin"
-    },
-    "editForm": {
-      "button": {
-        "cancel": "Fagile",
-        "save": "Fi Pamá»"
-      },
-      "placeholders": {
-        "name": "Oruko"
-      }
-    },
-    "button": {
-      "newType": "Iru Tuntun"
-    },
-    "equipment": {
-      "title": "Aje Aká»ká»"
-    }
-  },
-  "vehicleUtilisation": {
-    "metrics": {
-      "peakUsageHours": "Awon Wakati Ilo Giga",
-      "costPerKm": "Idiyele/km",
-      "title": "Awon Iwe Imá»ran",
-      "averageHoursDay": "Awon Iwa Wakati/Ojo",
-      "downtime": "Akoko Idile (Paamo)",
-      "averageDistanceDay": "Awon Iwe Ijinna/Ojo",
-      "fuelConsumption": "Ilo Epo"
-    },
-    "keyMetrics": {
-      "totalTrips": "Apapá» Irin",
-      "totalMileage": "Apapá» Alaafin",
-      "perVehicleMonth": "fun ká» akin/osu",
-      "averageUtilisation": "Ilo Aarin",
-      "kmThisMonth": "km oyinbo",
-      "operatingCost": "Idiyele Iá¹£iá¹£áº¹"
-    },
-    "header": {
-      "description": "á¹¢e agba funfun lilo iyaleta, iá¹£iá¹£áº¹, ati idiyele",
-      "title": "Ilo á»Œká» Ayandun",
-      "category": "Ikunole Iyaleta"
-    },
-    "charts": {
-      "target": "% Ipadabá»",
-      "mileageKm": "Alaafin (km)",
-      "hoursUsed": "Wakati Lilo",
-      "vehicleUtilisationRate": "Sani Ilo á»Œká» Ayandun",
-      "actual": "% Gidi",
-      "operatingCostBreakdown": "Isunmo Idiyele Iá¹£iá¹£áº¹",
-      "usageTrend": "Isunmo Ilo (5 Ose)"
-    }
-  },
-  "landing": {
-    "nav": {
-      "login": "Login",
-      "getStarted": "Get Started"
-    },
-    "hero": {
-      "badge": "AI-powered · Patient-controlled · HIPAA-aligned",
-      "title": "A revolutionary healthcare ecosystem",
-      "titleHighlight": "built around you.",
-      "description": "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360° health story — from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
-      "cta": "Join the Ecosystem",
-      "doctorsButton": "Doctors",
-      "patientsButton": "Patients"
-    },
-    "capabilities": {
-      "voiceConsultations": "Voice Consultations",
-      "aiSummaries": "AI Summaries",
-      "incentivizedAdherence": "Incentivized Adherence",
-      "rewards": "Rewards",
-      "roundTable": "Round Table",
-      "prescriptions": "Prescriptions",
-      "hospitalAdmissions": "Hospital Admissions",
-      "autoTasks": "Auto-Tasks",
-      "unifiedCalendar": "Unified Calendar",
-      "emergencySOS": "Emergency SOS",
-      "emergencyResponseDispatch": "Emergency Response Dispatch",
-      "hospitalNetwork": "Hospital Network"
-    },
-    "mobile": {
-      "title": "Get Holarc on your phone",
-      "description": "Available on iOS and Android — your full health story in your pocket.",
-      "appStore": "App Store",
-      "googlePlay": "Google Play"
-    },
-    "trustStrip": {
-      "patientAccess": "Patient-granted access",
-      "collaboration": "Real-time collaboration",
-      "patientCentric": "Built around the patient"
-    },
-    "features": {
-      "transcribedSessions": "Transcribed Sessions",
-      "transcribedDescription": "Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks automatically.",
-      "medicationAdherence": "Medication Adherence",
-      "medicationDescription": "Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.",
-      "rewardsEarned": "+5 Rewards earned",
-      "roundTableFeature": "Round Table",
-      "roundTableDescription": "Specialists coordinate per patient with shared notes and read-receipts.",
-      "aiAssistant": "AI Clinical Assistant",
-      "aiAssistantDescription": "Patient history summaries · medication conflict alerts · imaging analysis · auto-generated documents.",
-      "holarcHelp": "Holarc Help (SOS)",
-      "holarcHelpDescription": "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
-      "emergencyResponders": "Emergency responders",
-      "hospitals": "Hospitals",
-      "bloodBanks": "Blood banks",
-      "roundTable": "Round Table"
-    },
-    "patientBenefits": {
-      "sectionBadge": "For Patients",
-      "sectionTitle": "Your Health.",
-      "sectionTitleHighlight": "360° View.",
-      "sectionDescription": "Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
-      "benefit1Title": "Complete Health Picture",
-      "benefit1Description": "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records.",
-      "benefit2Title": "Connect Your Care Team",
-      "benefit2Description": "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
-      "benefit3Title": "You're in Control",
-      "benefit3Description": "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
-      "benefit4Title": "Unified Appointments",
-      "benefit4Description": "All your healthcare appointments from every provider in one calendar—never miss a follow-up."
-    },
-    "providerBenefits": {
-      "sectionBadge": "For Healthcare Providers",
-      "sectionTitle": "Practice with the Full Picture",
-      "sectionDescription": "When patients grant you access, you see everything—their complete history across all providers. Make better decisions with better information.",
-      "benefit1Title": "AI-Powered Insights",
-      "benefit1Description": "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
-      "benefit2Title": "Seamless Collaboration",
-      "benefit2Description": "Round Table notes enable real-time communication with other specialists caring for the same patient.",
-      "benefit3Title": "Automated Documentation",
-      "benefit3Description": "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
-      "benefit4Title": "Better Patient Outcomes",
-      "benefit4Description": "Access complete patient history across all their providers—make informed decisions with the full picture.",
-      "benefit5Title": "Emergency Service Providers",
-      "benefit5Description": "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context.",
-      "benefit6Title": "Hospital Partners",
-      "benefit6Description": "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time."
-    },
-    "cta": {
-      "title": "Ready for Healthcare That Works Together?",
-      "description": "Join thousands of patients and providers building a better healthcare experience—one where your health story is complete, connected, and under your control.",
-      "button": "Get Started Today"
-    },
-    "roleDialog": {
-      "title": "Join Holarc",
-      "description": "How will you use the platform?",
-      "label": "I am a...",
-      "placeholder": "Select user type",
-      "options": {
-        "patient": "Patient",
-        "doctor": "Healthcare Provider",
-        "hospital": "Hospital",
-        "emergency": "Emergency Service Provider",
-        "insurance": "Insurance Company",
-        "pharmacy": "Pharmacy"
-      },
-      "continueButton": "Continue"
-    }
-  },
-  "patientDashboard": {
-    "welcomeTitle": "Welcome back",
-    "welcomeSubtitle": "Your health dashboard at a glance",
-    "calendar": "Calendar",
-    "recordTask": "Record Task",
-    "recentActivity": "Recent Activity",
-    "aiSummaryTitle": "AI Health Summary",
-    "aiSummaryEmpty": "No health summary available yet. Visit your doctor to build your health profile.",
-    "appointmentsTitle": "Upcoming Appointments",
-    "appointmentsEmpty": "No upcoming appointments.",
-    "doctorFallback": "Doctor",
-    "vulaLabel": "My Vula Vouchers",
-    "earnVulasTitle": "Earn More Vulas",
-    "earnVulasDescription": "Tips to boost your rewards",
-    "tip1": "Log daily medication intake",
-    "tip2": "Complete tasks from your doctor",
-    "tip3": "Upload health photos regularly",
-    "tip4": "Keep visit streaks going",
-    "claimsTitle": "Recent Claims",
-    "claimsAllInvoices": "All Invoices",
-    "claimsDescription": "Invoices submitted to your medical aid",
-    "claimsEmpty": "No claims submitted recently.",
-    "claimsSubmitted": "Submitted",
-    "documentationTitle": "Documentation",
-    "documentationDescription": "View your documents and records",
-    "tasksTitle": "Assigned Tasks",
-    "tasksViewAll": "View All",
-    "tasksDescription": "Complete tasks to earn Vulas",
-    "tasksDue": "Due"
-  },
-  "patientDocuments": {
-    "title": "My Documents",
-    "description": "Your medical documents, lab results, and health records",
-    "uploadNew": "Upload Document",
-    "filter": "Filter Documents",
-    "sort": "Sort By",
-    "typeAll": "All Documents",
-    "typeLab": "Lab Results",
-    "typeImaging": "Imaging",
-    "typePrescription": "Prescriptions",
-    "typeReport": "Medical Reports",
-    "typeOther": "Other",
-    "download": "Download",
-    "delete": "Delete",
-    "share": "Share",
-    "view": "View",
-    "upload": "Upload",
-    "documentName": "Document Name",
-    "documentType": "Type",
-    "uploadedBy": "Uploaded By",
-    "uploadedDate": "Upload Date",
-    "provider": "Provider",
-    "actions": "Actions",
-    "noDocuments": "No documents yet",
-    "noDocumentsDescription": "Documents will appear here as your healthcare providers upload them",
-    "uploadTitle": "Upload Document",
-    "uploadDescription": "Add a new medical document to your health record",
-    "selectFile": "Select File",
-    "fileName": "File Name",
-    "documentTypeLabel": "Document Type",
-    "dragDrop": "Drag and drop your file here",
-    "selectFilePrompt": "Or click to select",
-    "uploading": "Uploading...",
-    "uploadSuccess": "Document uploaded successfully",
-    "uploadError": "Failed to upload document",
-    "deleteConfirm": "Are you sure you want to delete this document?",
-    "deleteSuccess": "Document deleted",
-    "deleteError": "Failed to delete document",
-    "invalidFileType": "Invalid file type",
-    "fileTooLarge": "File is too large"
-  }
+﻿{
+    "auth":  {
+                 "login":  {
+                               "title":  "Login",
+                               "email":  "Email Address",
+                               "password":  "Password",
+                               "rememberMe":  "Remember me",
+                               "signIn":  "Sign In",
+                               "noAccount":  "Don\u0027t have an account?",
+                               "signUp":  "Sign up here",
+                               "invalidCredentials":  "Invalid email or password",
+                               "accountLocked":  "Account locked"
+                           },
+                 "signup":  {
+                                "title":  "Create Account",
+                                "firstName":  "First Name",
+                                "lastName":  "Last Name",
+                                "email":  "Email",
+                                "password":  "Password",
+                                "confirmPassword":  "Confirm Password",
+                                "agreeTerms":  "I agree to Terms and Conditions",
+                                "create":  "Create Account",
+                                "haveAccount":  "Already have an account?",
+                                "signIn":  "Sign in"
+                            },
+                 "forgot":  {
+                                "title":  "Forgot Password?",
+                                "instructions":  "Enter your email to reset password",
+                                "email":  "Email Address",
+                                "submit":  "Send Reset Link",
+                                "checkEmail":  "Check email for reset link"
+                            },
+                 "reset":  {
+                               "title":  "Reset Password",
+                               "newPassword":  "New Password",
+                               "confirmPassword":  "Confirm Password",
+                               "reset":  "Reset Password",
+                               "success":  "Password reset successfully"
+                           }
+             },
+    "notifications":  {
+                          "title":  "Notifications",
+                          "unread":  "Unread",
+                          "markAsRead":  "Mark as Read",
+                          "clearAll":  "Clear All",
+                          "noNotifications":  "No notifications",
+                          "appointmentReminder":  "Appointment Reminder",
+                          "messageReceived":  "New Message",
+                          "medicationReminder":  "Medication Reminder"
+                      },
+    "profile":  {
+                    "title":  "My Profile",
+                    "personalInfo":  "Personal Information",
+                    "contactInfo":  "Contact Information",
+                    "preferences":  "Preferences",
+                    "privacy":  "Privacy Settings",
+                    "securitySettings":  "Security Settings",
+                    "edit":  "Edit Profile",
+                    "save":  "Save Changes",
+                    "changePassword":  "Change Password",
+                    "logout":  "Log Out"
+                },
+    "legal":  {
+                  "termsAndConditions":  {
+                                             "title":  "Terms and Conditions",
+                                             "accept":  "Accept",
+                                             "reject":  "Reject",
+                                             "subtitle":  "The legally binding agreement governing your use of the Holarc platform."
+                                         },
+                  "patientConsent":  {
+                                         "title":  "HIPAA Patient Consent \u0026 Authorization",
+                                         "accept":  "Accept Consent",
+                                         "decline":  "Decline",
+                                         "subtitle":  "Your consent to use the Holarc platform and to share health information with your care team."
+                                     },
+                  "businessAssociate":  {
+                                            "title":  "HIPAA Business Associate Agreement",
+                                            "agree":  "I agree",
+                                            "subtitle":  "Required agreement between Holarc and HIPAA Covered Entities using the platform to handle PHI.",
+                                            "lastUpdated":  "December 2024"
+                                        }
+              },
+    "common":  {
+                   "language":  "ÃˆdÃ¨",
+                   "changeLanguage":  "Yi Ã¨dÃ¨ padÃ ",
+                   "signOut":  "JÃ¡de",
+                   "save":  "Fipamá»Ì",
+                   "cancel":  "Fagilee",
+                   "delete":  "Pa ráº¹Ì",
+                   "edit":  "á¹¢atÃºná¹£e",
+                   "add":  "Fikun",
+                   "send":  "Firaná¹£áº¹Ì",
+                   "confirm":  "Jáº¹risi",
+                   "close":  "Pa",
+                   "search":  "Wa",
+                   "loading":  "N gbÃ©...",
+                   "settings":  "Eto",
+                   "noData":  "No data",
+                   "active":  "Active",
+                   "inactive":  "Inactive",
+                   "pending":  "Pending",
+                   "phone":  "Phone",
+                   "email":  "Email",
+                   "name":  "Name",
+                   "role":  "Role",
+                   "status":  "Status",
+                   "actions":  "Actions"
+               },
+    "nav":  {
+                "home":  "Ile",
+                "myPatients":  "Awá»n AlÃ¡Ã¬sÃ n Mi",
+                "myPractice":  "Iá¹£áº¹Ì Mi",
+                "myCalendar":  "Kaláº¹nda Mi",
+                "myTasks":  "Awá»n Iá¹£áº¹Ì Mi",
+                "myDocuments":  "Awá»n Iwe Mi",
+                "myRoundTables":  "Awá»n Tabili YÃ­kÃ¡ Mi",
+                "myRewards":  "Awá»n áº¸bun Mi",
+                "sos":  "SOS",
+                "myProfile":  "Profaili Mi",
+                "myHolarchy":  "Holarchy Mi",
+                "admin":  "Alabojuto",
+                "users":  "Awá»n Olumulo",
+                "pricing":  "Idiyele",
+                "rewards":  "Awá»n áº¸bun",
+                "hospitalPortal":  "áº¸nu-á»na Ile Iwosan",
+                "erPortal":  "áº¸nu-á»na Pajawiri",
+                "userAdmin":  "User Admin",
+                "telematics":  "Telematics",
+                "teamStatus":  "Team Status",
+                "fleet":  "Fleet",
+                "navigation":  "Navigation",
+                "hospitals":  "Hospitals",
+                "affiliatedHospitals":  "Affiliated Hospitals",
+                "incidentHistory":  "Incident History",
+                "incomingSos":  "Incoming SOS",
+                "incomingEr":  "Incoming ER",
+                "triage":  "Triage",
+                "admissions":  "Admissions",
+                "erCapacity":  "ER Capacity",
+                "providers":  "Providers",
+                "incidentTimeline":  "Incident Timeline",
+                "emergencyQueue":  "Emergency Queue",
+                "activeIncidents":  "Active Incidents",
+                "providerProfile":  "Provider Profile",
+                "backToAdmin":  "Back to Admin",
+                "liveSOS":  "SOS TÃ Ã rÃ "
+            },
+    "topbar":  {
+                   "reportBug":  "Jabá» Aá¹£iá¹£e",
+                   "calendar":  "Kaláº¹nda",
+                   "recordTask":  "Gbasiláº¹ Iá¹£áº¹Ì",
+                   "notifications":  "Awá»n Iwifunni"
+               },
+    "userAdmin":  {
+                      "title":  "User Admin",
+                      "tabAdmins":  "Admins",
+                      "tabCrew":  "Crew Members",
+                      "inviteAdmin":  "Invite admin",
+                      "addCrew":  "Add Crew Member",
+                      "owner":  "Owner",
+                      "organisationOwner":  "Organisation owner",
+                      "ownerCannotRemove":  "Initial registrant â€” cannot be removed",
+                      "noAdmins":  "No additional administrators yet.",
+                      "noCrew":  "No crew members yet.",
+                      "shiftPattern":  "Shift pattern",
+                      "removeConfirm":  "Remove this member?",
+                      "memberAdded":  "Member added",
+                      "memberRemoved":  "Member removed",
+                      "rolesCrew":  "Paramedic / EMT / Driver / Dispatcher"
+                  },
+    "holarcHelp":  {
+                       "admin":  {
+                                     "eyebrow":  "Admin",
+                                     "title":  "User Management",
+                                     "description":  "Manage users and accountability.",
+                                     "tabs":  {
+                                                  "users":  "Users",
+                                                  "accountability":  "Accountability"
+                                              },
+                                     "subtabs":  {
+                                                     "patients":  "Patients",
+                                                     "healthcare":  "Healthcare Providers",
+                                                     "hospitals":  "Hospitals",
+                                                     "erProviders":  "ER Providers",
+                                                     "pharmacies":  "Pharmacies",
+                                                     "insurers":  "Insurers",
+                                                     "admin":  "Admin"
+                                                 },
+                                     "status":  {
+                                                    "active":  "Active",
+                                                    "inactive":  "Inactive",
+                                                    "all":  "All"
+                                                },
+                                     "tier":  {
+                                                  "tier_1":  "Tier 1",
+                                                  "tier_2":  "Tier 2",
+                                                  "tier_3":  "Tier 3",
+                                                  "tier_4":  "Tier 4"
+                                              },
+                                     "table":  {
+                                                   "name":  "Name",
+                                                   "contact":  "Contact",
+                                                   "city":  "City",
+                                                   "tier":  "Tier",
+                                                   "status":  "Status",
+                                                   "actions":  "Actions"
+                                               },
+                                     "messages":  {
+                                                      "adminAccessRequired":  "Admin access required",
+                                                      "activated":  "Activated",
+                                                      "deactivated":  "Deactivated",
+                                                      "tierUpdated":  "Tier updated",
+                                                      "deleted":  "Deleted",
+                                                      "deleteConfirm":  "Delete provider?",
+                                                      "deleteMessage":  "will be permanently removed",
+                                                      "noMatch":  "No match found"
+                                                  },
+                                     "actions":  {
+                                                     "add":  "Add",
+                                                     "addProvider":  "Add provider",
+                                                     "edit":  "Edit",
+                                                     "delete":  "Delete",
+                                                     "cancel":  "Cancel",
+                                                     "search":  "Search {{noun}}",
+                                                     "inviteStaff":  "Invite staff",
+                                                     "hospital":  "Hospital",
+                                                     "ambulance":  "Emergency Response",
+                                                     "pharmacy":  "Pharmacy"
+                                                 },
+                                     "forms":  {
+                                                   "groupedBy":  "Grouped by country, then tier"
+                                               }
+                                 },
+                       "emergency":  {
+                                         "dashboard":  {
+                                                           "title":  "Emergency Dashboard",
+                                                           "status":  {
+                                                                          "new":  "NEW",
+                                                                          "active":  "ACTIVE",
+                                                                          "completed":  "COMPLETED"
+                                                                      },
+                                                           "severity":  {
+                                                                            "critical":  "Critical",
+                                                                            "high":  "High",
+                                                                            "medium":  "Medium",
+                                                                            "low":  "Low"
+                                                                        },
+                                                           "incidentType":  {
+                                                                                "selfCreated":  "Self-created",
+                                                                                "fromHospital":  "From Hospital"
+                                                                            }
+                                                       },
+                                         "dispatch":  {
+                                                          "title":  "Dispatch Management",
+                                                          "activeDispatch":  "Active Dispatch",
+                                                          "dispatchQueue":  "Dispatch Queue",
+                                                          "assignment":  "Dispatch Assignment",
+                                                          "reassignment":  "Dispatch Reassignment",
+                                                          "status":  {
+                                                                         "active":  "Active",
+                                                                         "pending":  "Pending",
+                                                                         "complete":  "Complete"
+                                                                     },
+                                                          "actions":  {
+                                                                          "assign":  "Assign",
+                                                                          "reassign":  "Reassign",
+                                                                          "dispatch":  "Dispatch",
+                                                                          "cancel":  "Cancel"
+                                                                      }
+                                                      },
+                                         "incidents":  {
+                                                           "title":  "Incidents",
+                                                           "list":  "Incident List",
+                                                           "detail":  "Incident Detail",
+                                                           "contacts":  "Emergency Contacts",
+                                                           "nearby":  "Nearby Resources"
+                                                       },
+                                         "ambulance":  {
+                                                           "dashboard":  "Emergency Dashboard",
+                                                           "affiliations":  "Affiliated Hospitals",
+                                                           "networkScreen":  "Hospital Network",
+                                                           "directory":  "Hospitals Directory"
+                                                       },
+                                         "hospital":  {
+                                                          "operations":  "Hospital Operations",
+                                                          "dashboard":  "Hospital Dashboard",
+                                                          "selection":  "Hospital Selection",
+                                                          "console":  "Incident Console",
+                                                          "layout":  "Operations Layout"
+                                                      }
+                                     }
+                   },
+    "telematics":  {
+                       "title":  "Driver Tracking",
+                       "subtitle":  "Fleet Telematics Â· Last 24h",
+                       "liveFleet":  "Live Fleet",
+                       "tripsStops":  "Trips \u0026 Stops",
+                       "moving":  "Moving",
+                       "stopped":  "Stopped",
+                       "onMission":  "On mission",
+                       "freeRoam":  "Free roam",
+                       "noActive":  "No active drivers in the last 24 hours.",
+                       "noTrips":  "No trip data yet â€” start a shift to begin recording telematics.",
+                       "pings":  "pings",
+                       "driver":  "Driver",
+                       "drivers":  "drivers",
+                       "stop":  "stop",
+                       "stops":  "stops",
+                       "arrived":  "Arrived",
+                       "departed":  "Departed",
+                       "dwell":  "Dwell",
+                       "location":  "Location",
+                       "noQualifyingStops":  "No qualifying stops",
+                       "vehicle":  "Vehicle"
+                   },
+    "doctorDashboard":  {
+                            "greetingMorning":  "áº¸ kaaro",
+                            "greetingAfternoon":  "áº¸ kaasan",
+                            "greetingEvening":  "áº¸ kaaláº¹",
+                            "subtitle":  "Eyi ni ohun ti n á¹£áº¹láº¹ ni ile-iwosan ráº¹ loni,",
+                            "totalPatients":  "Lapapá» Awá»n Alaisan",
+                            "thisWeek":  "á»Œsáº¹ Yi",
+                            "doctorRating":  "Idiyele Dokita",
+                            "noRatings":  "Ko si idiyele",
+                            "vulaVouchers":  "Vula Vouchers",
+                            "myRoundTables":  "Awá»n Tabili Yika Mi",
+                            "searchRoundTable":  "Wa alaisan lati báº¹ráº¹ tabili yika...",
+                            "noPatientsFound":  "Ko si alaisan ti a ri",
+                            "todoList":  "Akojá» Iá¹£áº¹",
+                            "addTask":  "Fi iá¹£áº¹ kun...",
+                            "active":  "Ti n á¹£iá¹£áº¹",
+                            "done":  "Ti pari",
+                            "noActiveTasks":  "Ko si iá¹£áº¹ ti n á¹£iá¹£áº¹",
+                            "noCompletedTasks":  "Ko si iá¹£áº¹ ti o pari",
+                            "recentActivity":  "Iá¹£áº¹ Aipáº¹",
+                            "sessionCompleted":  "Ipade pari",
+                            "documentGenerated":  "Iwe ti á¹£áº¹da",
+                            "taskCompleted":  "Iá¹£áº¹ pari",
+                            "followUpSent":  "Atáº¹le ti firaná¹£áº¹",
+                            "gettingStarted":  "Bibáº¹ráº¹",
+                            "addFirstPatient":  "Fi alaisan aká»ká» ráº¹ kun lati báº¹ráº¹",
+                            "justNow":  "Bayi"
+                        },
+    "briefing":  {
+                     "todaysBriefing":  "Ã€tÃ²já» fÃºn Ã²nÃ­",
+                     "briefingFor":  "Ã€tÃ²já» fÃºn á»já»Ì {{day}}",
+                     "completedOf":  "ÃŒpÃ dÃ© {{done}} nÃ­nÃº {{total}} ti parÃ­",
+                     "noAppointments":  "KÃ² sÃ­ Ã¬pÃ dÃ© tÃ­ a á¹£Ã¨tÃ² fÃºn Ã²nÃ­.",
+                     "narrate":  "KÃ  Ã¡",
+                     "preparing":  "MÃºra sÃ­láº¹Ì€...",
+                     "pause":  "DÃºrÃ³ nÃ¡",
+                     "resume":  "Táº¹Ì€sÃ­wÃ¡jÃº",
+                     "stop":  "DÃ¡wá»Ì dÃºrÃ³",
+                     "previousDay":  "á»Œjá»Ì tÃ­ Ã³ ká»jÃ¡",
+                     "nextDay":  "á»Œjá»Ì tÃ­ Å„ bá»Ì€",
+                     "translating":  "Åƒ á¹£Ã¨dÃ©dÃ¨ Ã tÃ²já»...",
+                     "allergies":  "Ã€Ã¬hÃ³",
+                     "lastSession":  "ÃŒpÃ dÃ© tÃ³ ká»jÃ¡",
+                     "noPreviousSession":  "KÃ² sÃ­ Ã ká»sÃ­láº¹Ì€ Ã¬pÃ dÃ© tÃ³ ká»jÃ¡",
+                     "unreadNote":  "Ã ká»sÃ­láº¹Ì€ tÃ­ kÃ² tÃ­Ã¬ kÃ ",
+                     "unreadNotes":  "awá»n Ã ká»sÃ­láº¹Ì€ tÃ­ kÃ² tÃ­Ã¬ kÃ "
+                 },
+    "patients":  {
+                     "title":  "Ã€wá»n AlÃ¡Ã¬sÃ n",
+                     "subtitle":  "á¹¢akoso Ã wá»n Ã¬gbÃ©hÃ²sÃ­láº¹Ì€ alÃ¡Ã¬sÃ n ráº¹",
+                     "searchPlaceholder":  "Wa Ã wá»n alÃ¡Ã¬sÃ n...",
+                     "addPatient":  "Fi AlÃ¡Ã¬sÃ n KÃºn",
+                     "importPatients":  "KÃ³ Wá»lÃ©",
+                     "noPatients":  "KÃ² sÃ­ alÃ¡Ã¬sÃ n kankan bÃ¡yÃ¬Ã­",
+                     "allStatuses":  "Gbogbo ipÃ²",
+                     "active":  "á¹¢iá¹£áº¹Ì",
+                     "inactive":  "KÃ² á¹¢iá¹£áº¹Ì",
+                     "roundTables":  "Ã€wá»n tabili yÃ­kÃ¡",
+                     "share":  "PÃ­n",
+                     "viewProfile":  "Wo Ã€wÃ²rÃ¡n Profaili",
+                     "tabAll":  "Gbogbo",
+                     "tabMine":  "TiÃ¨mi",
+                     "tabShared":  "PÃ­npÃ­n",
+                     "tabPending":  "DÃºrÃ³"
+                 },
+    "calendar":  {
+                     "title":  "Kaláº¹nda",
+                     "subtitle":  "á¹¢akoso awá»n ipinnu iá¹£oogun ráº¹ ati eto",
+                     "today":  "Loni",
+                     "day":  "á»Œjá»",
+                     "week":  "á»Œsáº¹",
+                     "month":  "Oá¹£u",
+                     "year":  "Odun",
+                     "newAppointment":  "Igbimá» tuntun",
+                     "previous":  "Ti táº¹láº¹",
+                     "next":  "Itele",
+                     "allDay":  "Gbogbo á»já»",
+                     "noEvents":  "Ko si iá¹£áº¹láº¹",
+                     "myCalendar":  "Kaláº¹nda mi",
+                     "practiceCalendar":  "Kaláº¹nda iá¹£e",
+                     "googleCalendar":  "Google Kaláº¹nda",
+                     "disconnectGoogle":  "Putá» Google",
+                     "googleSyncCaption":  "Aiyara Google nikan á¹£e afihan awá»n ipinnu iá¹£oogun ti ara ráº¹.",
+                     "book":  "Iwe",
+                     "todaysSchedule":  "Eto loni",
+                     "noAppointmentsToday":  "Ko si awá»n ipinnu iá¹£oogun ti a ti á¹£eto fun oni",
+                     "filterDoctor":  "á¹¢e Ã lÃ yÃ© DÃ³kÃ­tÃ ",
+                     "allDoctors":  "Gbogbo awá»n DÃ³kÃ­tÃ  ni iá¹£e",
+                     "months":  {
+                                    "january":  "Oá¹£u KÃ­nnÃ­",
+                                    "february":  "Oá¹£u KeÃ¨jÃ¬",
+                                    "march":  "Oá¹£u Káº¹ta",
+                                    "april":  "Oá¹£u Káº¹rin",
+                                    "may":  "Oá¹£u Karun",
+                                    "june":  "Oá¹£u Káº¹fa",
+                                    "july":  "Oá¹£u Keje",
+                                    "august":  "Oá¹£u Káº¹já»",
+                                    "september":  "Oá¹£u Káº¹sá»",
+                                    "october":  "Oá¹£u Káº¹wa",
+                                    "november":  "Oá¹£u Ká»kandun",
+                                    "december":  "Oá¹£u Ká»kanlÃ©Ã©lá»"
+                                },
+                     "monthsShort":  {
+                                         "jan":  "KÃ­n",
+                                         "feb":  "KeÃ¨",
+                                         "mar":  "Káº¹t",
+                                         "apr":  "Káº¹r",
+                                         "may":  "Kar",
+                                         "jun":  "Káº¹f",
+                                         "jul":  "Kej",
+                                         "aug":  "Káº¹j",
+                                         "sep":  "Káº¹s",
+                                         "oct":  "Káº¹w",
+                                         "nov":  "Ká»k1",
+                                         "dec":  "Ká»k2"
+                                     },
+                     "days":  {
+                                  "sunday":  "Ã€Ã¬kÃº",
+                                  "monday":  "AjÃ©",
+                                  "tuesday":  "ÃŒá¹£áº¹Ìgun",
+                                  "wednesday":  "á»Œjá»ÌrÃº",
+                                  "thursday":  "á»Œjá»Ìbá»",
+                                  "friday":  "áº¸tÃ¬",
+                                  "saturday":  "Ã€bÃ¡máº¹Ìta"
+                              },
+                     "daysShort":  {
+                                       "sun":  "Ã€Ã¬k",
+                                       "mon":  "AjÃ©",
+                                       "tue":  "ÃŒá¹£áº¹",
+                                       "wed":  "á»Œjr",
+                                       "thu":  "á»Œjb",
+                                       "fri":  "áº¸tÃ¬",
+                                       "sat":  "Ã€bÃ¡"
+                                   },
+                     "daysNarrow":  {
+                                        "s":  "Ã€",
+                                        "m":  "A",
+                                        "t":  "ÃŒ",
+                                        "w":  "á»Œ",
+                                        "f":  "áº¸"
+                                    }
+                 },
+    "sessions":  {
+                     "title":  "Awá»n ipele",
+                     "sessionMode":  "Ipo Ipele",
+                     "selectPatient":  "Yan Alaisan kan",
+                     "readyToStart":  "Ti á¹£etan lati Báº¹ráº¹",
+                     "searchByPatient":  "Wadi nipasáº¹ oruká» alaisan...",
+                     "newSession":  "Ipele Tuntun",
+                     "allSessions":  "Gbogbo Awá»n ipele",
+                     "noPatientsFound":  "Ko ri alaisan kankan.",
+                     "searchByName":  "Wadi nipasáº¹ oruká»...",
+                     "today":  "Loni",
+                     "lastWeek":  "á»Œsáº¹ to ká»ja",
+                     "lastMonth":  "Oá¹£u to ká»ja",
+                     "older":  "Agbalagba",
+                     "tapToRecord":  "Táº¹ lati á¹£e igbasiláº¹",
+                     "recording":  "N á¹£e igbasiláº¹... Táº¹ lati da duro",
+                     "paused":  "Duro â€” táº¹ ere lati tun báº¹ráº¹",
+                     "transcribing":  "N ká»we ni kikun...",
+                     "endSessionTip":  "Sá» \"Pari Ipele\" lati da igbasiláº¹ duro laifá»wá»yi",
+                     "generateAnalysis":  "á¹¢e ipiláº¹á¹£áº¹ Itupaláº¹",
+                     "regenerate":  "Tun á¹£e ipiláº¹á¹£áº¹",
+                     "currentSession":  "Ipele lá»wá»lá»wá»"
+                 },
+    "roundTables":  {
+                        "title":  "Ã€wá»n Ã€ga ÃŒdÃ¨rÃ© Mi",
+                        "noTables":  "O kÃ² tÃ­Ã¬ nÃ­ Ã ga Ã¬dÃ¨rÃ© kankan.",
+                        "unread":  "Ã¨yÃ­ tÃ­ a kÃ² kÃ ",
+                        "lastUpdate":  "ÃŒgbÃ  tÃ³ káº¹ÌyÃ¬n tÃ­ a á¹£e Ã tÃºná¹£e",
+                        "openTable":  "á¹¢Ã­ i",
+                        "newTopic":  "KÃ³kÃ³-á»Ì€rá»Ì€ Titun"
+                    },
+    "doctorRewards":  {
+                          "title":  "Ã€wá»n ÃˆrÃ¨ Mi",
+                          "tabOverview":  "Ã€páº¹Ì€yáº¹",
+                          "tabMilestones":  "Ã€wá»n Ã€tÃ¬gbegbÃ ",
+                          "tabStreaks":  "Ã€wá»n ÃŒtáº¹Ì€sÃ­wÃ¡jÃº",
+                          "tabHistory":  "ÃŒtÃ n",
+                          "tabRedeem":  "RÃ padÃ ",
+                          "totalVulas":  "Ã€papá» Vulas",
+                          "currentStreak":  "ÃŒtáº¹Ì€sÃ­wÃ¡jÃº lá»Ìwá»Ìlá»Ìwá»Ì",
+                          "patientsAdhering":  "Ã€wá»n alÃ¡Ã¬sÃ n tÃ³ faramá»Ì"
+                      },
+    "liveSos":  {
+                    "title":  "SOS Live",
+                    "subtitle":  "Ifura pajawiri ni akoko gidi",
+                    "active":  "InÃºá¹£e",
+                    "critical":  "Critical",
+                    "recent":  "Tuntun",
+                    "activeNow":  "Nlo lowo",
+                    "allClear":  "Gbogbo re daraâ€”ko si isele SOS ti nlo lowo.",
+                    "selectIncident":  "Yan isele kan lati wo alaye re.",
+                    "sosIncident":  "Isele SOS",
+                    "muted":  "Dakáº¹",
+                    "alertsOn":  "Awá»n iwifunni wa ni titan",
+                    "consciousness":  "Imá»lara",
+                    "responsive":  "Onidahun",
+                    "adequate":  "To",
+                    "ambulance":  "á»Œká» alaisan",
+                    "eta":  "ETA",
+                    "location":  "IpÃ²",
+                    "openInMaps":  "á¹¢ii ninu Maapu",
+                    "openConsole":  "á¹¢ii console"
+                },
+    "myPractice":  {
+                       "tabPractice":  "Mi Iá¹£e",
+                       "tabReferrals":  "Referrals",
+                       "tabCredentials":  "Awá»n iwe-áº¹ri",
+                       "tabRewards":  "Rewards",
+                       "aboutMe":  "Nipa mi",
+                       "aboutMeHelper":  "Sá» á»rá» kukuru nipa iá¹£e ráº¹ ati á»na. Awá»n alaisan wo eyi nigbati o n wo profaili ráº¹. Ti o pá»ju awá»n á»rá» 600.",
+                       "wordCount":  "{{count}} / 600 awá»n á»rá»",
+                       "save":  "Save",
+                       "tabProfile":  "Profile",
+                       "tabServices":  "Services",
+                       "tabSchedule":  "Schedule",
+                       "tabPatients":  "Patients",
+                       "tabInvoices":  "Invoices",
+                       "tabRoundTables":  "Round Tables",
+                       "tabDocuments":  "Documents",
+                       "tabHospitals":  "Hospital Affiliations",
+                       "profileTitle":  "Practice Profile",
+                       "profileDescription":  "Manage your professional information and credentials",
+                       "basicInfo":  "Basic Information",
+                       "name":  "Full Name",
+                       "email":  "Email",
+                       "phone":  "Phone",
+                       "specialty":  "Specialty",
+                       "qualifications":  "Qualifications",
+                       "practiceNumber":  "Practice Number",
+                       "bio":  "Professional Bio",
+                       "credentials":  "Credentials \u0026 Certifications",
+                       "addCredential":  "Add Credential",
+                       "editCredential":  "Edit Credential",
+                       "certificateName":  "Certificate Name",
+                       "issuingBody":  "Issuing Body",
+                       "dateEarned":  "Date Earned",
+                       "cpdPoints":  "CPD Points",
+                       "servicesTitle":  "Services \u0026 Pricing",
+                       "servicesDescription":  "Define your services and set pricing",
+                       "addService":  "Add Service",
+                       "serviceName":  "Service Name",
+                       "defaultPrice":  "Default Price",
+                       "currency":  "Currency",
+                       "serviceColor":  "Service Color",
+                       "deleteService":  "Delete Service",
+                       "editService":  "Edit Service",
+                       "signatureTitle":  "Digital Signature",
+                       "signatureDescription":  "Create your digital signature for documents",
+                       "signatureFont":  "Font Style",
+                       "signaturePreview":  "Preview",
+                       "practiceSettings":  "Practice Settings",
+                       "practiceLanguage":  "Practice Language",
+                       "practiceTimezone":  "Timezone",
+                       "consultationFee":  "Default Consultation Fee",
+                       "teamMembers":  "Team Members",
+                       "inviteMember":  "Invite Team Member",
+                       "memberEmail":  "Member Email",
+                       "memberRole":  "Role",
+                       "removeMember":  "Remove Member",
+                       "cancel":  "Cancel",
+                       "delete":  "Delete",
+                       "edit":  "Edit",
+                       "add":  "Add",
+                       "upload":  "Upload",
+                       "leave":  "Leave Practice",
+                       "savingProfile":  "Saving profile...",
+                       "profileUpdated":  "Profile updated successfully",
+                       "errorUpdatingProfile":  "Error updating profile",
+                       "uploadingAvatar":  "Uploading profile picture...",
+                       "uploadingLogo":  "Uploading logo...",
+                       "invalidFileType":  "Invalid file type",
+                       "uploadFailed":  "Upload failed",
+                       "required":  "Required field",
+                       "missingFields":  "Please fill all required fields",
+                       "scheduleTitle":  "Schedule",
+                       "setAvailability":  "Set Your Availability",
+                       "connectedPatients":  "Connected Patients",
+                       "invoicesTitle":  "Invoices",
+                       "referralDoctors":  "Referral Network",
+                       "noServices":  "No services added yet",
+                       "noCredentials":  "No credentials added yet",
+                       "noPatients":  "No patients connected yet"
+                   },
+    "patientRewards":  {
+                           "progressTitle":  "Ilá»siwaju si Ipele Ipele",
+                           "progressLabel":  "{{current}} / {{target}} Vulas si \"{{milestone}}\"",
+                           "moreToGo":  "{{count}} diáº¹ sii lati lá»!",
+                           "recentRewards":  "Awá»n ere-idaraya Tuntun",
+                           "empty":  "Ko si awá»n ere sibáº¹sibáº¹. Báº¹ráº¹ irin ajo ilera ráº¹!"
+                       },
+    "todo":  {
+                 "addNewTask":  "á¹¢afikun Iá¹£áº¹ Tuntun",
+                 "tapToRecord":  "Fá»wá»kan lati reká»ja",
+                 "transcribing":  "Gbigbe...",
+                 "aiProcessing":  "AI processing...",
+                 "listening":  "Ngbagbá»... duro láº¹hin isinmi",
+                 "typeTask":  "Tabi táº¹ iá¹£áº¹ ráº¹ nibi...",
+                 "add":  "á¹¢afikun",
+                 "priority":  "Ipo:",
+                 "low":  "Kekere",
+                 "medium":  "Arin",
+                 "high":  "Giga",
+                 "aiProcess":  "Ilana AI",
+                 "active":  "Ti ná¹£iá¹£áº¹",
+                 "completed":  "Ti pari",
+                 "all":  "Gbogbo",
+                 "approve":  "Fá»wá»si",
+                 "noMatchingPatient":  "Ko si alaisan ti o baramu ti a rii"
+             },
+    "documents":  {
+                      "title":  "Awá»n iwe aá¹£áº¹",
+                      "tabDocuments":  "Awá»n iwe aá¹£áº¹",
+                      "tabTemplates":  "Awá»n awoá¹£e",
+                      "tabHeaderFooter":  "Ori ati áº¹sáº¹ oju-iwe",
+                      "tabContent":  "Awá»n awoá¹£e akoonu",
+                      "contentHelper":  "á¹¢áº¹da awá»n awoá¹£e akoonu iwe (ori/áº¹sáº¹ oju-iwe yoo lo lati layout ti o yan)",
+                      "newContent":  "Awoá¹£e akoonu Tuntun",
+                      "searchContent":  "á¹¢awari awá»n awoá¹£e akoonu...",
+                      "createTemplate":  " á¹£áº¹da Awoá¹£e",
+                      "patientDocuments":  "Awá»n iwe aá¹£áº¹ Alaisan",
+                      "searchDocuments":  "á¹¢awari awá»n iwe aá¹£áº¹...",
+                      "letterhead":  "Ori láº¹ta:",
+                      "letterheadHeaderFooter":  "Ori ati áº¹sáº¹ oju-iwe",
+                      "letterheadDefault":  "Aiyipada"
+                  },
+    "roundTablesMeta":  {
+                            "noteOne":  "{{count}} aká»siláº¹",
+                            "noteOther":  "{{count}} awá»n aká»siláº¹",
+                            "lastActivity":  "Iá¹£áº¹ ayáº¹yáº¹ káº¹hin {{date}}"
+                        },
+    "sos":  {
+                "emergencyAssistance":  "Igbaduro Ipalá»lá»",
+                "helpAlerted":  "Yoo á¹£e iranlá»wá» láº¹sáº¹káº¹sáº¹",
+                "ackHeading":  "SE KANKAN á¹¢E LATI LO SOS, Já»ŒWá»Œ Ká»Œá»Œá¹¢áº¸:",
+                "ackA":  "Atiláº¹yin SOS ni a pese lori ipiláº¹ igbiyanju ti o dara julá» ati pe ko le á¹£e iá¹£eduro idahun pajawiri.",
+                "ackB":  "SOS da lori náº¹tiwá»á»ki, ipo áº¹rá», iraye si ipo, ati awá»n oludahun áº¹nikáº¹ta.",
+                "ackC":  "SOS nilo awá»n igbanilaaye ipo, agbara batiri, ati asopá» intanáº¹áº¹ti tabi alagbeka.",
+                "sosLabel":  "SOS",
+                "tapForHelp":  "Fá»ŒWá»Œ KAN FUN IGBADURO",
+                "footerCaption":  "Titáº¹ SOS n pin ipo ráº¹ ati sá» fun awá»n olubasá»rá» pajawiri ráº¹.",
+                "manageContacts":  "á¹¢akoso awá»n olubasá»rá» pajawiri",
+                "viewHistory":  "Wo itan iá¹£áº¹láº¹"
+            },
+    "patientProfile":  {
+                           "backToPatients":  "Pada pada Onirun",
+                           "patientNotFound":  "A ko ri alaisan naa",
+                           "schedule":  "Eto",
+                           "startSession":  "Báº¹ráº¹ Igbimá»",
+                           "checkIn":  "á¹¢ayáº¹wo wá»le",
+                           "totalSessions":  "Iye Awá»n igbimá»",
+                           "lastSeen":  "Káº¹hin Ti Wo",
+                           "since":  "Lati",
+                           "vulas":  "Awá»n Vulas",
+                           "tabDetails":  "Awá»n alaye",
+                           "tabOverview":  "Akopá»",
+                           "tabSessions":  "Itan Awá»n igbimá»",
+                           "tabAdmissions":  "Awá»n Gbigba",
+                           "tabProviders":  "Awá»n Olupese Ilera",
+                           "tabDocuments":  "Awá»n iwe aá¹£áº¹",
+                           "tabRoundTable":  "Tabili Yika",
+                           "togglePersonal":  "Alaye ti ara áº¹ni",
+                           "toggleMedical":  "Alaye Iá¹£oogun",
+                           "personalHeading":  "Alaye ti ara áº¹ni",
+                           "personalHelper":  "Wo ki o si á¹£akoso awá»n alaye ti ara áº¹ni",
+                           "medicalHeading":  "Alaye Iá¹£oogun",
+                           "medicalHelper":  "Wo ki o si á¹£akoso awá»n alaye iá¹£oogun",
+                           "saved":  "Ti fipamá»",
+                           "sectionAddresses":  "Awá»n adiráº¹si",
+                           "sectionEmergencyContacts":  "Awá»n olubasá»rá» pajawiri",
+                           "sectionNextOfKin":  "áº¸gbáº¹áº¹gbáº¹run ti áº¸gbáº¹áº¹gbáº¹run",
+                           "sectionInsurance":  "Insurance / iranlowo Oogun",
+                           "sectionEmployer":  "Agbáº¹",
+                           "sectionLifestyle":  "Igbesi aye",
+                           "sectionConsents":  "Awá»n igbanilaaye",
+                           "sectionAllergies":  "Awá»n nkan ti ara korira",
+                           "sectionChronic":  "Awá»n ipo onibaje",
+                           "sectionMedications":  "Oogun lá»wá»lá»wá»",
+                           "sectionFamilyHistory":  "Itan áº¸bi",
+                           "sectionSurgicalHistory":  "Itan iá¹£áº¹ abáº¹",
+                           "sectionImmunizations":  "Awá»n ajesara",
+                           "sectionVitals":  "Awá»n iwo",
+                           "sectionLabResults":  "Awá»n abajade idanwo",
+                           "sectionGeneticMarkers":  "Awá»n ami-ami-ami",
+                           "sectionMentalHealth":  "Ilera á»Œpá»lá»"
+                       },
+    "emergencyDashboard":  {
+                               "statusBar":  {
+                                                 "activeMission":  "ISÃ¡ÂºÂ¸ AKIYESI",
+                                                 "onShift":  "NINU IÃ¡Â¹Â¢Ã¡ÂºÂ¸"
+                                             },
+                               "header":  {
+                                              "subtitle":  "Idahun ÃƒÅ’joba",
+                                              "title":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ ÃƒÅ’joba"
+                                          },
+                               "stats":  {
+                                             "new":  "titun",
+                                             "active":  "akiyesi",
+                                             "critical":  "pataki"
+                                         },
+                               "statsCard":  {
+                                                 "newRequests":  "Ebe Titun",
+                                                 "activeOperations":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ Akiyesi",
+                                                 "criticalIncidents":  "Pataki IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹"
+                                             },
+                               "tabs":  {
+                                            "new":  "Titun",
+                                            "active":  "Akiyesi",
+                                            "completed":  "Ti Pari"
+                                        },
+                               "details":  {
+                                               "location":  "Aaye",
+                                               "received":  "Ti Gba",
+                                               "fromHospital":  "Lati Ile Asa"
+                                           },
+                               "actions":  {
+                                               "acceptDispatch":  "Gba Ki O Ran",
+                                               "decline":  "Kole",
+                                               "trackLive":  "TÃ¡ÂºÂ¹je Lori Amutorunwa",
+                                               "updateStatus":  "Ã¡Â¹Â¢e Ilana Iyalere",
+                                               "viewReport":  "Wo Igbero"
+                                           }
+                           },
+    "navigationScreen":  {
+                             "noActiveMission":  "AkÃ¡Â»ÂÃ¡Â»Â IsÃ¡ÂºÂ¹ Aji",
+                             "acceptToStart":  "Gba ere ipon daradun ni ojo lati bere idin nkan",
+                             "openIncomingSos":  "Si Etan SOS Ipon",
+                             "loadingMission":  "Ifi Awo Tani IsÃ¡ÂºÂ¹...",
+                             "status":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹ PaÃ¡Â¹Â£Ã¡ÂºÂ¹ si {{status}}",
+                             "mission":  "IsÃ¡ÂºÂ¹",
+                             "eta":  "Akoko Diduro:",
+                             "actionPanel":  "Ipolongo IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹",
+                             "enRoute":  "Ninu Ona",
+                             "arrived":  "O Wo De",
+                             "patientLoaded":  "Alaisan SÃ¡ÂºÂ¹",
+                             "toHospital":  "Ninu Ona Si Ile Asa",
+                             "arrivedAtHospital":  "O Wo De Ile Asa",
+                             "resolveIncident":  "Yipada IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹",
+                             "navigation":  "Idin",
+                             "fullConsole":  "Si Onigun Ni LapÃ¡Â»Â"
+                         },
+    "provider":  {
+                     "emergencyResponseDispatch":  "FiranÃ¡Â¹Â£Ã¡ÂºÂ¹ IyÃ¡ÂºÂ¹ Gidigidi"
+                 },
+    "realTimeMonitoring":  {
+                               "header":  {
+                                              "subtitle":  "Akiyesi",
+                                              "title":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ Akoko Lokan",
+                                              "description":  "Ãƒâ‚¬kÃƒÂ­yÃƒÂ¨sÃƒÂ­ ÃƒÂ wÃ¡Â»Ân Ã¡Â»ÂkÃ¡Â»Â ibaÃƒÂ² akoko lokan ati akiyesi iÃ¡Â¹Â£ojogun"
+                                          },
+                               "tabs":  {
+                                            "tracking":  "Ãƒâ‚¬kÃƒÂ­yÃƒÂ¨sÃƒÂ­",
+                                            "safety":  "IÃ¡Â¹Â£ojogun"
+                                        },
+                               "tracking":  {
+                                                "vehiclesOnline":  "Ã¡Â»Å’kÃ¡Â»Â Ninu Eeyan",
+                                                "allGpsConnected":  "Gbogbo GPS ti sÃ¡Â»ÂpÃ¡Â»Â",
+                                                "avgSpeed":  "Ara IÃ¡Â¹Â£ÃƒÂ lejÃƒÂ²",
+                                                "withinLimits":  "Ninu Opin",
+                                                "fuelStatus":  "Ipo Epo",
+                                                "goodLevels":  "AwÃ¡Â»Ân Ipele Dara",
+                                                "speed":  "IÃ¡Â¹Â£ÃƒÂ lejÃƒÂ²",
+                                                "fuel":  "Epo",
+                                                "track":  "Akiyesi",
+                                                "moving":  "Ã¡ÂºÂ¸KA NILO",
+                                                "stopped":  "DURO"
+                                            },
+                               "safety":  {
+                                              "criticalAlerts":  "Ibi IÃ¡Â¹Â£ojogun Pataki",
+                                              "immediateAction":  "IÃ¡Â¹Â£e Ninu Ise",
+                                              "safetyEvents":  "AwÃ¡Â»Ân IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹ IÃ¡Â¹Â£ojogun",
+                                              "thisWeek":  "Ã¡Â»Å’sÃ¡ÂºÂ¹ Yi",
+                                              "fleetScore":  "Iwe IbaÃƒÂ²",
+                                              "excellentSafety":  "IÃ¡Â¹Â£ojogun Dara Julo",
+                                              "critical":  "PATAKI",
+                                              "alert":  "ISINMI",
+                                              "eventTypesMonitored":  "AwÃ¡Â»Ân Iru IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹ IÃ¡Â¹Â£ojogun Ti a Ã¡Â¹Â¢e Akiyesi",
+                                              "speedingEvents":  "AwÃ¡Â»Ân IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹ IÃ¡Â¹Â£ÃƒÂ lejÃƒÂ² Ti O Ju",
+                                              "harshAcceleration":  "Iyipada Alaka/Gbigbana Alaka",
+                                              "afterHoursUse":  "Lilo Ã¡Â»Å’kÃ¡Â»Â Ni Ã¡ÂºÂ¸ya Ti IsÃ¡ÂºÂ¹",
+                                              "geofenceBreaches":  "Gbigbe Geofence",
+                                              "routeDeviations":  "IyatÃ¡Â»Â Ã¡Â»Å’na",
+                                              "unauthorizedStops":  "Iduro Ti O Ba Gba Iwa"
+                                          }
+                           },
+    "vehicleProfile":  {
+                           "navigation":  {
+                                              "back":  "LÃ¡Â»Â Pada"
+                                          },
+                           "header":  {
+                                          "title":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ Ambulansi"
+                                      },
+                           "information":  {
+                                               "title":  "Alaye Ã¡Â»Å’kÃ¡Â»Â",
+                                               "registration":  "IforukÃ¡Â»ÂsilÃ¡ÂºÂ¹",
+                                               "vin":  "VIN",
+                                               "year":  "Odun",
+                                               "makeModel":  "Ã¡ÂºÂ¸ka/AwoÃ¡Â¹Â£e",
+                                               "engine":  "Ã¡ÂºÂ¸jÃ¡ÂºÂ¹",
+                                               "seats":  "AwÃ¡Â»Ân Ise",
+                                               "color":  "ÃƒÅ’lÃƒÂº"
+                                           },
+                           "operational":  {
+                                               "title":  "Ipo IÃ¡Â¹Â£Ã¡ÂºÂ¹",
+                                               "mileage":  "Akoni",
+                                               "engineHours":  "AwÃ¡Â»Ân Wakati ti Ã¡ÂºÂ¸jÃ¡ÂºÂ¹",
+                                               "fuelType":  "Iru Epo",
+                                               "tankCapacity":  "Iwon ti Tank",
+                                               "fuelLevel":  "Ipele ti Epo",
+                                               "lastGpsCheck":  "Akiyesi GPS ti Ikokoro"
+                                           },
+                           "maintenance":  {
+                                               "title":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ ati IsususilÃ¡ÂºÂ¹",
+                                               "lastService":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ ti Ikokoro",
+                                               "nextService":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ AtÃ¡ÂºÂ¹le",
+                                               "overdue":  "TI JAGBE",
+                                               "days":  "Ã¡Â»ÂjÃ¡Â»Â",
+                                               "lastInspection":  "Iwokolo ti Ikokoro",
+                                               "insuranceExpiry":  "Idaduro ti Jinere",
+                                               "motExpiry":  "Idaduro ti MOT",
+                                               "scheduleService":  "Seto IÃ¡Â¹Â£Ã¡ÂºÂ¹"
+                                           },
+                           "equipment":  {
+                                             "title":  "Ohun Elo ati Eto",
+                                             "viewEquipment":  "Wo Ohun Elo"
+                                         },
+                           "actions":  {
+                                           "assign":  "Yan",
+                                           "history":  "Itan"
+                                       }
+                       },
+    "vehicleAbuse":  {
+                         "header":  {
+                                        "title":  "Idiwon Itankale Ã¡Â»Å’kÃ¡Â»Â",
+                                        "description":  "Ã¡Â¹Â¢e iwatÃ¡ÂºÂ¹nwÃ¡Â»Â ara iyalÃ¡ÂºÂ¹nu Ã¡Â»ÂkÃ¡Â»Â, iyalÃ¡ÂºÂ¹nu agbooro geofence, ati lilo ti a ko gbadun."
+                                    },
+                         "stats":  {
+                                       "criticalEvents":  "Awon IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹ IxÃ¡ÂºÂ¹yÃ¡ÂºÂ¹",
+                                       "highRisk":  "Eewu Giga",
+                                       "mediumPriority":  "IÃ¡Â¹Â£Ã¡ÂºÂ¹ Ariwa",
+                                       "totalEvents":  "LapapÃ¡Â»Â Awon IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹"
+                                   },
+                         "tabs":  {
+                                      "allEvents":  "Gbogbo Awon IÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹",
+                                      "geofence":  "Geofence",
+                                      "afterHours":  "IyalÃ¡ÂºÂ¹nu Wakati",
+                                      "routes":  "AwÃ¡Â»Ân Ã¡Â»Âna"
+                                  },
+                         "dashboard":  {
+                                           "noEvents":  "Ko si itankale iÃ¡Â¹Â£Ã¡ÂºÂ¹lÃ¡ÂºÂ¹ ti a Ã¡Â¹Â£e awari.",
+                                           "review":  "Ã¡Â¹Â¢e IwatÃ¡ÂºÂ¹nwÃ¡Â»Â"
+                                       },
+                         "eventTypes":  {
+                                            "geofenceBreach":  "IyalÃ¡ÂºÂ¹nu Geofence",
+                                            "speeding":  "IÃ¡Â¹Â£adi Giga",
+                                            "afterHoursUse":  "Lilo IyalÃ¡ÂºÂ¹nu Wakati",
+                                            "unlinkedTrip":  "Ija Ti A Ko Siso",
+                                            "harshDriving":  "Ã¡Â»Å’kÃ¡Â»Â Itankale",
+                                            "routeDeviation":  "IyalÃ¡ÂºÂ¹nu Ã¡Â»Å’na"
+                                        },
+                         "geofenceTab":  {
+                                             "title":  "IÃ¡Â¹Â£akojÃ¡Â»Â Geofence ati Awon KelepÃ¡ÂºÂ¹ IyalÃ¡ÂºÂ¹nu Ti N Wa.",
+                                             "description":  "Ã¡Â¹Â¢Ã¡ÂºÂ¹da awon ifini tÃ¡ÂºÂ¹bu ati gba awon kelepÃ¡ÂºÂ¹ nigbati awon Ã¡Â»ÂkÃ¡Â»Â Ã¡Â¹Â£e iyalÃ¡ÂºÂ¹nu wÃ¡Â»Ân."
+                                         },
+                         "hoursTab":  {
+                                          "title":  "Iwari IyalÃ¡ÂºÂ¹nu Wakati Ti N Wa.",
+                                          "description":  "Ã¡Â¹Â¢e awatÃ¡ÂºÂ¹nwÃ¡Â»Â ara Ã¡Â»ÂkÃ¡Â»Â ti a lo ni iyalÃ¡ÂºÂ¹nu Ã¡Â»ÂpÃ¡ÂºÂ¹ iÃ¡Â¹Â£Ã¡ÂºÂ¹ ajÃ¡ÂºÂ¹ Ã¡Â¹Â£Ã¡ÂºÂ¹da."
+                                      },
+                         "routesTab":  {
+                                           "title":  "IyalÃ¡ÂºÂ¹nu Ã¡Â»Å’na ati Iwari Ti N Wa.",
+                                           "description":  "Ã¡Â¹Â¢e iwatÃ¡ÂºÂ¹nwÃ¡Â»Â ara ambulansi ba tabi ko ba tÃ¡ÂºÂ¹le awon Ã¡Â»Âna ti a fi Ã¡Â¹Â£Ã¡ÂºÂ¹da."
+                                       }
+                     },
+    "vehicleTypeManagement":  {
+                                  "header":  {
+                                                 "category":  "IÃ¡Â¹Â£eto Iyaleta",
+                                                 "title":  "Iru Ã¡Â»Å’kÃ¡Â»Â Ayandun",
+                                                 "description":  "Ã¡Â¹Â¢akoso iru ambulansi, aje, ati iÃ¡Â¹Â£eto"
+                                             },
+                                  "summary":  {
+                                                  "totalVehicles":  "ApapÃ¡Â»Â Ã¡Â»Å’kÃ¡Â»Â Ayandun",
+                                                  "avgMonthlyCost":  "Idiyele OÃ¡Â¹Â£u Aarin",
+                                                  "totalCrewCapacity":  "ApapÃ¡Â»Â Agbara Olurombonrin",
+                                                  "title":  "AkopÃ¡Â»Â Iyaleta",
+                                                  "totalTypes":  "ApapÃ¡Â»Â Iru"
+                                              },
+                                  "specifications":  {
+                                                         "monthlyCost":  "Idiyele OÃ¡Â¹Â£u",
+                                                         "capacity":  "Agbara",
+                                                         "inFleet":  "Ninu Iyaleta",
+                                                         "vehicles":  "Awon Oko Ayandun",
+                                                         "members":  "Awon Omo",
+                                                         "crewSize":  "Iwon Olurombonrin"
+                                                     },
+                                  "editForm":  {
+                                                   "button":  {
+                                                                  "cancel":  "Fagile",
+                                                                  "save":  "Fi PamÃ¡Â»Â"
+                                                              },
+                                                   "placeholders":  {
+                                                                        "name":  "Oruko"
+                                                                    }
+                                               },
+                                  "button":  {
+                                                 "newType":  "Iru Tuntun"
+                                             },
+                                  "equipment":  {
+                                                    "title":  "Aje AkÃ¡Â»ÂkÃ¡Â»Â"
+                                                }
+                              },
+    "vehicleUtilisation":  {
+                               "metrics":  {
+                                               "peakUsageHours":  "Awon Wakati Ilo Giga",
+                                               "costPerKm":  "Idiyele/km",
+                                               "title":  "Awon Iwe ImÃ¡Â»Âran",
+                                               "averageHoursDay":  "Awon Iwa Wakati/Ojo",
+                                               "downtime":  "Akoko Idile (Paamo)",
+                                               "averageDistanceDay":  "Awon Iwe Ijinna/Ojo",
+                                               "fuelConsumption":  "Ilo Epo"
+                                           },
+                               "keyMetrics":  {
+                                                  "totalTrips":  "ApapÃ¡Â»Â Irin",
+                                                  "totalMileage":  "ApapÃ¡Â»Â Alaafin",
+                                                  "perVehicleMonth":  "fun kÃ¡Â»Â akin/osu",
+                                                  "averageUtilisation":  "Ilo Aarin",
+                                                  "kmThisMonth":  "km oyinbo",
+                                                  "operatingCost":  "Idiyele IÃ¡Â¹Â£iÃ¡Â¹Â£Ã¡ÂºÂ¹"
+                                              },
+                               "header":  {
+                                              "description":  "Ã¡Â¹Â¢e agba funfun lilo iyaleta, iÃ¡Â¹Â£iÃ¡Â¹Â£Ã¡ÂºÂ¹, ati idiyele",
+                                              "title":  "Ilo Ã¡Â»Å’kÃ¡Â»Â Ayandun",
+                                              "category":  "Ikunole Iyaleta"
+                                          },
+                               "charts":  {
+                                              "target":  "% IpadabÃ¡Â»Â",
+                                              "mileageKm":  "Alaafin (km)",
+                                              "hoursUsed":  "Wakati Lilo",
+                                              "vehicleUtilisationRate":  "Sani Ilo Ã¡Â»Å’kÃ¡Â»Â Ayandun",
+                                              "actual":  "% Gidi",
+                                              "operatingCostBreakdown":  "Isunmo Idiyele IÃ¡Â¹Â£iÃ¡Â¹Â£Ã¡ÂºÂ¹",
+                                              "usageTrend":  "Isunmo Ilo (5 Ose)"
+                                          }
+                           },
+    "landing":  {
+                    "nav":  {
+                                "login":  "Login",
+                                "getStarted":  "Get Started"
+                            },
+                    "hero":  {
+                                 "badge":  "AI-powered Â· Patient-controlled Â· HIPAA-aligned",
+                                 "title":  "A revolutionary healthcare ecosystem",
+                                 "titleHighlight":  "built around you.",
+                                 "description":  "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360Â° health story â€” from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
+                                 "cta":  "Join the Ecosystem",
+                                 "doctorsButton":  "Doctors",
+                                 "patientsButton":  "Patients"
+                             },
+                    "capabilities":  {
+                                         "voiceConsultations":  "Voice Consultations",
+                                         "aiSummaries":  "AI Summaries",
+                                         "incentivizedAdherence":  "Incentivized Adherence",
+                                         "rewards":  "Rewards",
+                                         "roundTable":  "Round Table",
+                                         "prescriptions":  "Prescriptions",
+                                         "hospitalAdmissions":  "Hospital Admissions",
+                                         "autoTasks":  "Auto-Tasks",
+                                         "unifiedCalendar":  "Unified Calendar",
+                                         "emergencySOS":  "Emergency SOS",
+                                         "emergencyResponseDispatch":  "Emergency Response Dispatch",
+                                         "hospitalNetwork":  "Hospital Network"
+                                     },
+                    "mobile":  {
+                                   "title":  "Get Holarc on your phone",
+                                   "description":  "Available on iOS and Android â€” your full health story in your pocket.",
+                                   "appStore":  "App Store",
+                                   "googlePlay":  "Google Play"
+                               },
+                    "trustStrip":  {
+                                       "patientAccess":  "Patient-granted access",
+                                       "collaboration":  "Real-time collaboration",
+                                       "patientCentric":  "Built around the patient"
+                                   },
+                    "features":  {
+                                     "transcribedSessions":  "Transcribed Sessions",
+                                     "transcribedDescription":  "Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks automatically.",
+                                     "medicationAdherence":  "Medication Adherence",
+                                     "medicationDescription":  "Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.",
+                                     "rewardsEarned":  "+5 Rewards earned",
+                                     "roundTableFeature":  "Round Table",
+                                     "roundTableDescription":  "Specialists coordinate per patient with shared notes and read-receipts.",
+                                     "aiAssistant":  "AI Clinical Assistant",
+                                     "aiAssistantDescription":  "Patient history summaries Â· medication conflict alerts Â· imaging analysis Â· auto-generated documents.",
+                                     "holarcHelp":  "Holarc Help (SOS)",
+                                     "holarcHelpDescription":  "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
+                                     "emergencyResponders":  "Emergency responders",
+                                     "hospitals":  "Hospitals",
+                                     "bloodBanks":  "Blood banks",
+                                     "roundTable":  "Round Table"
+                                 },
+                    "patientBenefits":  {
+                                            "sectionBadge":  "For Patients",
+                                            "sectionTitle":  "Your Health.",
+                                            "sectionTitleHighlight":  "360Â° View.",
+                                            "sectionDescription":  "Holarc gives you a complete 360-degree view of your health profileâ€”every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
+                                            "benefit1Title":  "Complete Health Picture",
+                                            "benefit1Description":  "See your entire medical history, prescriptions, and care team in one unified viewâ€”no more scattered records.",
+                                            "benefit2Title":  "Connect Your Care Team",
+                                            "benefit2Description":  "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
+                                            "benefit3Title":  "You\u0027re in Control",
+                                            "benefit3Description":  "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
+                                            "benefit4Title":  "Unified Appointments",
+                                            "benefit4Description":  "All your healthcare appointments from every provider in one calendarâ€”never miss a follow-up."
+                                        },
+                    "providerBenefits":  {
+                                             "sectionBadge":  "For Healthcare Providers",
+                                             "sectionTitle":  "Practice with the Full Picture",
+                                             "sectionDescription":  "When patients grant you access, you see everythingâ€”their complete history across all providers. Make better decisions with better information.",
+                                             "benefit1Title":  "AI-Powered Insights",
+                                             "benefit1Description":  "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
+                                             "benefit2Title":  "Seamless Collaboration",
+                                             "benefit2Description":  "Round Table notes enable real-time communication with other specialists caring for the same patient.",
+                                             "benefit3Title":  "Automated Documentation",
+                                             "benefit3Description":  "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
+                                             "benefit4Title":  "Better Patient Outcomes",
+                                             "benefit4Description":  "Access complete patient history across all their providersâ€”make informed decisions with the full picture.",
+                                             "benefit5Title":  "Emergency Service Providers",
+                                             "benefit5Description":  "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient\u0027s full medical context.",
+                                             "benefit6Title":  "Hospital Partners",
+                                             "benefit6Description":  "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time."
+                                         },
+                    "cta":  {
+                                "title":  "Ready for Healthcare That Works Together?",
+                                "description":  "Join thousands of patients and providers building a better healthcare experienceâ€”one where your health story is complete, connected, and under your control.",
+                                "button":  "Get Started Today"
+                            },
+                    "roleDialog":  {
+                                       "title":  "Join Holarc",
+                                       "description":  "How will you use the platform?",
+                                       "label":  "I am a...",
+                                       "placeholder":  "Select user type",
+                                       "options":  {
+                                                       "patient":  "Patient",
+                                                       "doctor":  "Healthcare Provider",
+                                                       "hospital":  "Hospital",
+                                                       "emergency":  "Emergency Service Provider",
+                                                       "insurance":  "Insurance Company",
+                                                       "pharmacy":  "Pharmacy"
+                                                   },
+                                       "continueButton":  "Continue"
+                                   }
+                },
+    "patientDashboard":  {
+                             "welcomeTitle":  "Welcome back",
+                             "welcomeSubtitle":  "Your health dashboard at a glance",
+                             "calendar":  "Calendar",
+                             "recordTask":  "Record Task",
+                             "recentActivity":  "Recent Activity",
+                             "aiSummaryTitle":  "AI Health Summary",
+                             "aiSummaryEmpty":  "No health summary available yet. Visit your doctor to build your health profile.",
+                             "appointmentsTitle":  "Upcoming Appointments",
+                             "appointmentsEmpty":  "No upcoming appointments.",
+                             "doctorFallback":  "Doctor",
+                             "vulaLabel":  "My Vula Vouchers",
+                             "earnVulasTitle":  "Earn More Vulas",
+                             "earnVulasDescription":  "Tips to boost your rewards",
+                             "tip1":  "Log daily medication intake",
+                             "tip2":  "Complete tasks from your doctor",
+                             "tip3":  "Upload health photos regularly",
+                             "tip4":  "Keep visit streaks going",
+                             "claimsTitle":  "Recent Claims",
+                             "claimsAllInvoices":  "All Invoices",
+                             "claimsDescription":  "Invoices submitted to your medical aid",
+                             "claimsEmpty":  "No claims submitted recently.",
+                             "claimsSubmitted":  "Submitted",
+                             "documentationTitle":  "Documentation",
+                             "documentationDescription":  "View your documents and records",
+                             "tasksTitle":  "Assigned Tasks",
+                             "tasksViewAll":  "View All",
+                             "tasksDescription":  "Complete tasks to earn Vulas",
+                             "tasksDue":  "Due"
+                         },
+    "patientDocuments":  {
+                             "title":  "My Documents",
+                             "description":  "Your medical documents, lab results, and health records",
+                             "uploadNew":  "Upload Document",
+                             "filter":  "Filter Documents",
+                             "sort":  "Sort By",
+                             "typeAll":  "All Documents",
+                             "typeLab":  "Lab Results",
+                             "typeImaging":  "Imaging",
+                             "typePrescription":  "Prescriptions",
+                             "typeReport":  "Medical Reports",
+                             "typeOther":  "Other",
+                             "download":  "Download",
+                             "delete":  "Delete",
+                             "share":  "Share",
+                             "view":  "View",
+                             "upload":  "Upload",
+                             "documentName":  "Document Name",
+                             "documentType":  "Type",
+                             "uploadedBy":  "Uploaded By",
+                             "uploadedDate":  "Upload Date",
+                             "provider":  "Provider",
+                             "actions":  "Actions",
+                             "noDocuments":  "No documents yet",
+                             "noDocumentsDescription":  "Documents will appear here as your healthcare providers upload them",
+                             "uploadTitle":  "Upload Document",
+                             "uploadDescription":  "Add a new medical document to your health record",
+                             "selectFile":  "Select File",
+                             "fileName":  "File Name",
+                             "documentTypeLabel":  "Document Type",
+                             "dragDrop":  "Drag and drop your file here",
+                             "selectFilePrompt":  "Or click to select",
+                             "uploading":  "Uploading...",
+                             "uploadSuccess":  "Document uploaded successfully",
+                             "uploadError":  "Failed to upload document",
+                             "deleteConfirm":  "Are you sure you want to delete this document?",
+                             "deleteSuccess":  "Document deleted",
+                             "deleteError":  "Failed to delete document",
+                             "invalidFileType":  "Invalid file type",
+                             "fileTooLarge":  "File is too large"
+                         }
 }

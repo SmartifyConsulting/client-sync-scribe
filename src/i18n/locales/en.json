@@ -63,16 +63,20 @@
   "legal": {
     "termsAndConditions": {
       "title": "Terms and Conditions",
+      "subtitle": "The legally binding agreement governing your use of the Holarc platform.",
       "accept": "Accept",
       "reject": "Reject"
     },
     "patientConsent": {
-      "title": "Patient Consent",
+      "title": "HIPAA Patient Consent & Authorization",
+      "subtitle": "Your consent to use the Holarc platform and to share health information with your care team.",
       "accept": "Accept Consent",
       "decline": "Decline"
     },
     "businessAssociate": {
-      "title": "Business Associate Agreement",
+      "title": "HIPAA Business Associate Agreement",
+      "subtitle": "Required agreement between Holarc and HIPAA Covered Entities using the platform to handle PHI.",
+      "lastUpdated": "December 2024",
       "agree": "I agree"
     }
   },

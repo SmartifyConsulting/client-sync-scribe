@@ -1,10 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 
 export default function TermsAndConditions() {
+  const { t } = useTranslation();
+
   return (
     <LegalDocLayout
-      title="Terms and Conditions"
-      subtitle="The legally binding agreement governing your use of the Holarc platform."
+      title={t("legal.termsAndConditions.title")}
+      subtitle={t("legal.termsAndConditions.subtitle")}
     >
       <>
 

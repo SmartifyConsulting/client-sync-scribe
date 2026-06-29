@@ -1,11 +1,14 @@
+import { useTranslation } from "react-i18next";
 import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 
 const BusinessAssociateAgreement = () => {
+  const { t } = useTranslation();
+
   return (
     <LegalDocLayout
-      title="HIPAA Business Associate Agreement"
-      subtitle="Required agreement between Holarc and HIPAA Covered Entities using the platform to handle PHI."
-      lastUpdated="December 2024"
+      title={t("legal.businessAssociate.title")}
+      subtitle={t("legal.businessAssociate.subtitle")}
+      lastUpdated={t("legal.businessAssociate.lastUpdated")}
     >
       <>
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-8">

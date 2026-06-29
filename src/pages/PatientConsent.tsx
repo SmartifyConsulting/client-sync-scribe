@@ -1,10 +1,13 @@
+import { useTranslation } from "react-i18next";
 import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 
 export default function PatientConsent() {
+  const { t } = useTranslation();
+
   return (
     <LegalDocLayout
-      title="HIPAA Patient Consent & Authorization"
-      subtitle="Your consent to use the Holarc platform and to share health information with your care team."
+      title={t("legal.patientConsent.title")}
+      subtitle={t("legal.patientConsent.subtitle")}
     >
       <>
 
