@@ -44,8 +44,10 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
         videoRef.current.srcObject = mediaStream;
       }
     } catch (error) {
-      toast({ title: "Camera Error", description: "Could not access camera.", variant: "destructive" });
+      const friendly = mapCameraError(error);
+      toast({ title: friendly.title, description: friendly.description, variant: "destructive" });
     }
+
   }, [toast]);
 
   const stopCamera = useCallback(() => {

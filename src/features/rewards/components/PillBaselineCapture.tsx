@@ -96,9 +96,11 @@ export function PillBaselineCapture({
       });
       setStream(ms);
       if (videoRef.current) videoRef.current.srcObject = ms;
-    } catch {
-      toast({ title: "Camera error", description: "Could not access camera.", variant: "destructive" });
+    } catch (err) {
+      const friendly = mapCameraError(err);
+      toast({ title: friendly.title, description: friendly.description, variant: "destructive" });
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 
