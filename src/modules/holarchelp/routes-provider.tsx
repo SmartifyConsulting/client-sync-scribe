@@ -37,7 +37,7 @@ import HospitalNetworkScreen from "./pages/provider/ambulance/HospitalNetworkScr
 import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitoringScreen";
 
 // Additional Management Screens
-import DriverManagementScreen from "./pages/provider/ambulance/DriverManagementScreen";
+// DriverManagementScreen retired — crew lives in User Admin role accordions
 import BillingDashboardScreen from "./pages/provider/BillingDashboardScreen";
 import ExecutiveDashboardScreen from "./pages/provider/ExecutiveDashboardScreen";
 import AlertsCentreScreen from "./pages/provider/AlertsCentreScreen";
@@ -120,7 +120,7 @@ export default function ProviderRoutes() {
 
         {/* Team & Drivers */}
         <Route path="team" element={<TeamStatusScreen />} />
-        <Route path="drivers" element={<DriverManagementScreen />} />
+        {/* /drivers route removed — managed in /admins (User Admin) */}
 
         {/* Consolidated Fleet Operations (Vehicles + Availability + Maintenance + Utilisation) */}
         <Route path="fleet-operations" element={<FleetOperationsScreen />} />

@@ -52,17 +52,16 @@ const hospitalNav: NavItem[] = [
 ];
 
 const ambulanceNav: NavItem[] = [
-  // EMERGENCY RESPONSE TIER (Consolidated)
+  // EMERGENCY RESPONSE TIER
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
   { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
   // TEAM & FLEET TIER
   { icon: Users, labelKey: "nav.shiftTeams", to: "/provider/ambulance/team" },
   { icon: Ambulance, labelKey: "nav.fleetOperations", to: "/provider/ambulance/fleet-operations" },
-  // MONITORING & ANALYTICS TIER (Consolidated)
+  // MONITORING TIER (Fleet Live = all vehicles, all-up tracking + safety)
   { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
-  { icon: Users, labelKey: "nav.driverManagement", to: "/provider/ambulance/drivers" },
-  // ADMIN TIER (Hospital Network lives as a tab inside Admin)
-  { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
+  // USER ADMIN (Hospital Network lives as a tab inside)
+  { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/ambulance/admins" },
 ];
 
 interface ProviderSidebarProps {

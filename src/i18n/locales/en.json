@@ -45,12 +45,12 @@
     "rewards": "Rewards",
     "hospitalPortal": "Hospital Portal",
     "erPortal": "ER Portal",
-    "userAdmin": "Admin",
+    "userAdmin": "User Admin",
     "telematics": "Telematics",
     "teamStatus": "Shift Teams",
     "shiftTeams": "Shift Teams",
     "fleet": "Fleet",
-    "navigation": "Navigation",
+    "navigation": "Active Mission",
     "hospitals": "Hospitals",
     "affiliatedHospitals": "Affiliated Hospitals",
     "incidentHistory": "Incident History",
@@ -72,7 +72,7 @@
     "emergencyDashboard": "Emergency Dashboard",
     "hospitalNetwork": "Hospital Network",
     "fleetOperations": "Fleet Operations",
-    "realTimeMonitoring": "Real-Time Monitoring",
+    "realTimeMonitoring": "Fleet Live",
     "driverManagement": "Driver Management"
   },
   "topbar": {
