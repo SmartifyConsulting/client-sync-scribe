@@ -86,7 +86,7 @@ export default function IncomingAmbulancesScreen() {
                       </Badge>
                     )}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">Incident {r.id.slice(0,8)} · {r.status.replace(/_/g," ")}</p>
+                  <p className="text-[11px] text-muted-foreground">{r.incident_number ?? `Incident ${r.id.slice(0,8)}`} · {r.status.replace(/_/g," ")}</p>
                 </div>
                 <div className="text-right">
                   {r.eta_minutes != null
