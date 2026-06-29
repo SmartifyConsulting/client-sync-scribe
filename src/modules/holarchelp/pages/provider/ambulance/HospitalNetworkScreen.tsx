@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, Search, Loader2 } from "lucide-react";
@@ -27,6 +28,7 @@ interface Hospital {
 }
 
 export default function HospitalNetworkScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "affiliated">("all");
@@ -94,9 +96,9 @@ export default function HospitalNetworkScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Partnerships</p>
-        <h1 className="text-3xl font-extrabold mt-2">Hospital Network</h1>
-        <p className="text-sm text-muted-foreground mt-2">{hospitals.length} hospitals in your network</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("holarcHelp.hospitalNetwork.partnerships")}</p>
+        <h1 className="text-3xl font-extrabold mt-2">{t("nav.hospitalNetwork")}</h1>
+        <p className="text-sm text-muted-foreground mt-2">{t("holarcHelp.hospitalNetwork.count", { count: hospitals.length })}</p>
       </header>
 
       {/* Filters */}
@@ -104,7 +106,7 @@ export default function HospitalNetworkScreen() {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search hospitals..."
+            placeholder={t("holarcHelp.hospitalNetwork.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -115,8 +117,8 @@ export default function HospitalNetworkScreen() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Hospitals</SelectItem>
-            <SelectItem value="affiliated">Affiliated Only</SelectItem>
+            <SelectItem value="all">{t("holarcHelp.hospitalNetwork.allHospitals")}</SelectItem>
+            <SelectItem value="affiliated">{t("holarcHelp.hospitalNetwork.affiliatedOnly")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
@@ -124,8 +126,8 @@ export default function HospitalNetworkScreen() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="distance">Sort: Distance</SelectItem>
-            <SelectItem value="wait">Sort: Wait Time</SelectItem>
+            <SelectItem value="distance">{t("holarcHelp.hospitalNetwork.sortDistance")}</SelectItem>
+            <SelectItem value="wait">{t("holarcHelp.hospitalNetwork.sortWait")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -135,10 +137,10 @@ export default function HospitalNetworkScreen() {
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm">Loading hospitals...</span>
+            <span className="text-sm">{t("common.loading")}</span>
           </div>
         ) : filteredHospitals.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">No hospitals match your search</p>
+          <p className="text-sm text-muted-foreground text-center py-8">{t("holarcHelp.hospitalNetwork.noMatch")}</p>
         ) : (
           filteredHospitals.map((hospital) => (
             <div
@@ -152,27 +154,27 @@ export default function HospitalNetworkScreen() {
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-bold text-lg">{hospital.name}</h3>
                     {hospital.affiliated && (
-                      <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">⭐ AFFILIATED</span>
+                      <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">⭐ {t("holarcHelp.hospitalNetwork.affiliated")}</span>
                     )}
                     {hospital.trauma && (
-                      <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">🚑 TRAUMA</span>
+                      <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">🚑 {t("holarcHelp.hospitalNetwork.trauma")}</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {hospital.distance} away
+                    {hospital.distance} {t("holarcHelp.hospitalNetwork.away")}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3 pt-3 border-t border-current border-opacity-20">
                 <div>
-                  <p className="text-xs text-muted-foreground">ER Wait Time</p>
+                  <p className="text-xs text-muted-foreground">{t("holarcHelp.hospitalNetwork.waitTime")}</p>
                   <p className="font-semibold mt-1">{hospital.wait}</p>
                 </div>
                 {hospital.affiliated && hospital.beds && (
                   <div>
-                    <p className="text-xs text-muted-foreground">Available Beds</p>
+                    <p className="text-xs text-muted-foreground">{t("holarcHelp.hospitalNetwork.availableBeds")}</p>
                     <p className="font-semibold mt-1 text-green-600">{hospital.beds}</p>
                   </div>
                 )}
