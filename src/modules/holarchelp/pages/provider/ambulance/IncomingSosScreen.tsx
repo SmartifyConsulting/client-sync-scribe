@@ -76,6 +76,13 @@ export default function IncomingSosScreen() {
         <p className="text-xs text-muted-foreground">{t("incomingSos.subtitle")}</p>
       </header>
 
+      {dispatcherOnDuty && !isOffShift && (
+        <div className="rounded-2xl border border-primary/40 bg-primary/5 p-3 text-xs text-foreground">
+          <span className="font-bold text-primary">Dispatcher on duty.</span> A controller is assigning units —
+          you will be paged on your phone when you're picked. You can still self-accept below if it's urgent.
+        </div>
+      )}
+
       {isOffShift && (
         <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-8 text-center">
           <PlayCircle className="mx-auto mb-2 h-7 w-7 text-primary" />
@@ -130,12 +137,13 @@ export default function IncomingSosScreen() {
               {r.notes && <p className="mt-2 rounded-xl border bg-background/60 p-2 text-xs italic text-muted-foreground line-clamp-3">"{r.notes}"</p>}
 
               <Button size="lg" className="mt-3 h-12 w-full text-base font-extrabold" onClick={() => setPickFor(r.id)}>
-                {t("incomingSos.acceptIncident")}
+                Accept &amp; Roll
               </Button>
             </div>
           ))}
         </div>
       )}
+
 
       <ParamedicAcceptDialog
         incidentId={pickFor}
