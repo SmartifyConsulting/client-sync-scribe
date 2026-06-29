@@ -197,7 +197,60 @@
     "todaysSchedule": "Bugünün Programı",
     "noAppointmentsToday": "Bugün için planlanmış randevu yok",
     "filterDoctor": "Doktoru Filtrele",
-    "allDoctors": "Muayenehanedeki tüm doktorlar"
+    "allDoctors": "Muayenehanedeki tüm doktorlar",
+    "months": {
+      "january": "Ocak",
+      "february": "Şubat",
+      "march": "Mart",
+      "april": "Nisan",
+      "may": "Mayıs",
+      "june": "Haziran",
+      "july": "Temmuz",
+      "august": "Ağustos",
+      "september": "Eylül",
+      "october": "Ekim",
+      "november": "Kasım",
+      "december": "Aralık"
+    },
+    "monthsShort": {
+      "jan": "Oca",
+      "feb": "Şub",
+      "mar": "Mar",
+      "apr": "Nis",
+      "may": "May",
+      "jun": "Haz",
+      "jul": "Tem",
+      "aug": "Ağu",
+      "sep": "Eyl",
+      "oct": "Eki",
+      "nov": "Kas",
+      "dec": "Ara"
+    },
+    "days": {
+      "sunday": "Pazar",
+      "monday": "Pazartesi",
+      "tuesday": "Salı",
+      "wednesday": "Çarşamba",
+      "thursday": "Perşembe",
+      "friday": "Cuma",
+      "saturday": "Cumartesi"
+    },
+    "daysShort": {
+      "sun": "Paz",
+      "mon": "Pzt",
+      "tue": "Sal",
+      "wed": "Çar",
+      "thu": "Per",
+      "fri": "Cum",
+      "sat": "Cmt"
+    },
+    "daysNarrow": {
+      "s": "P",
+      "m": "P",
+      "t": "S",
+      "w": "Ç",
+      "f": "P"
+    }
   },
   "sessions": {
     "title": "Seanslar",
@@ -373,5 +426,262 @@
     "sectionLabResults": "Laboratuvar Sonuçları",
     "sectionGeneticMarkers": "Genetik Belirteçler",
     "sectionMentalHealth": "Ruh Sağlığı"
+  },
+  "emergencyDashboard": {
+    "statusBar": {
+      "activeMission": "AKTÄ°F GÃ–REVi",
+      "onShift": "GÃ–REVDEKÄ°"
+    },
+    "header": {
+      "subtitle": "Acil YanÄ±t",
+      "title": "Acil Operasyonlar"
+    },
+    "stats": {
+      "new": "yeni",
+      "active": "etkin",
+      "critical": "kritik"
+    },
+    "statsCard": {
+      "newRequests": "Yeni Ä°stekler",
+      "activeOperations": "Etkin Operasyonlar",
+      "criticalIncidents": "Kritik Olaylar"
+    },
+    "tabs": {
+      "new": "Yeni",
+      "active": "Etkin",
+      "completed": "TamamlandÄ±"
+    },
+    "details": {
+      "location": "Konum",
+      "received": "AlÄ±ndÄ±",
+      "fromHospital": "Hastaneden"
+    },
+    "actions": {
+      "acceptDispatch": "Kabul Et ve GÃ¶nder",
+      "decline": "Reddet",
+      "trackLive": "CanlÄ± Takip",
+      "updateStatus": "Durumu GÃ¼ncelle",
+      "viewReport": "Raporu GÃ¶rÃ¼ntÃ¼le"
+    }
+  },
+  "navigationScreen": {
+    "noActiveMission": "Aktif GÃ¶rev Yok",
+    "acceptToStart": "Navigasyonu baÅŸlatmak iÃ§in gelen bir isteÄŸi kabul edin",
+    "openIncomingSos": "Gelen SOS'u AÃ§",
+    "loadingMission": "GÃ¶rev verileri yÃ¼kleniyor...",
+    "status": "Durum {{status}} olarak gÃ¼ncellendi",
+    "mission": "GÃ¶rev",
+    "eta": "Tahmini VarÄ±ÅŸ Saati:",
+    "actionPanel": "Durum GÃ¼ncellemeleri",
+    "enRoute": "Yolda",
+    "arrived": "Geldi",
+    "patientLoaded": "Hasta YÃ¼klendi",
+    "toHospital": "Hastaneye Yolda",
+    "arrivedAtHospital": "Hastaneye Geldi",
+    "resolveIncident": "OlayÄ± Ã‡Ã¶z",
+    "navigation": "Navigasyon",
+    "fullConsole": "Tam Konsolu AÃ§"
+  },
+  "provider": {
+    "emergencyResponseDispatch": "Acil YanÄ±t GÃ¶nderimi"
+  },
+  "realTimeMonitoring": {
+    "header": {
+      "subtitle": "Ä°zleme",
+      "title": "GerÃ§ek ZamanlÄ± Operasyonlar",
+      "description": "CanlÄ± filo izleme ve gÃ¼venlik izlemesi"
+    },
+    "tabs": {
+      "tracking": "Ä°zleme",
+      "safety": "GÃ¼venlik"
+    },
+    "tracking": {
+      "vehiclesOnline": "Ã‡evrimiÃ§i AraÃ§lar",
+      "allGpsConnected": "TÃ¼m GPS BaÄŸlÄ±",
+      "avgSpeed": "Ortalama HÄ±z",
+      "withinLimits": "SÄ±nÄ±rlar Ä°Ã§inde",
+      "fuelStatus": "YakÄ±t Durumu",
+      "goodLevels": "Ä°yi Seviyeler",
+      "speed": "HÄ±z",
+      "fuel": "YakÄ±t",
+      "track": "Ä°zle",
+      "moving": "HAREKET HALINDE",
+      "stopped": "DURDURULDU"
+    },
+    "safety": {
+      "criticalAlerts": "Kritik UyarÄ±lar",
+      "immediateAction": "Acil Ä°ÅŸlem",
+      "safetyEvents": "GÃ¼venlik OlaylarÄ±",
+      "thisWeek": "Bu Hafta",
+      "fleetScore": "Filo PuanÄ±",
+      "excellentSafety": "MÃ¼kemmel GÃ¼venlik",
+      "critical": "KRÄ°TÄ°K",
+      "alert": "UYARI",
+      "eventTypesMonitored": "Ä°zlenen GÃ¼venlik OlayÄ± TÃ¼rleri",
+      "speedingEvents": "HÄ±z Ä°hlali OlaylarÄ±",
+      "harshAcceleration": "Sert HÄ±zlanma/Frenlem",
+      "afterHoursUse": "Ã‡alÄ±ÅŸma Saatleri DÄ±ÅŸÄ±nda AraÃ§ KullanÄ±mÄ±",
+      "geofenceBreaches": "CoÄŸrafi SÄ±nÄ±r Ä°hlalleri",
+      "routeDeviations": "Rota SapmalarÄ±",
+      "unauthorizedStops": "Yetkisiz Durdurmalar"
+    }
+  },
+  "vehicleProfile": {
+    "navigation": {
+      "back": "Geri"
+    },
+    "header": {
+      "title": "Ambulans OperasyonlarÄ±"
+    },
+    "information": {
+      "title": "AraÃ§ Bilgileri",
+      "registration": "KayÄ±t",
+      "vin": "VIN",
+      "year": "YÄ±l",
+      "makeModel": "Marka/Model",
+      "engine": "Motor",
+      "seats": "Koltuklar",
+      "color": "Renk"
+    },
+    "operational": {
+      "title": "Operasyon Durumu",
+      "mileage": "Kilometre",
+      "engineHours": "Motor Saati",
+      "fuelType": "YakÄ±t TÃ¼rÃ¼",
+      "tankCapacity": "Tank Kapasitesi",
+      "fuelLevel": "YakÄ±t Seviyesi",
+      "lastGpsCheck": "Son GPS KontrolÃ¼"
+    },
+    "maintenance": {
+      "title": "Servis ve BakÄ±m",
+      "lastService": "Son Servis",
+      "nextService": "Sonraki Servis",
+      "overdue": "GEÃ‡ KALMÄ±Åž",
+      "days": "gÃ¼n",
+      "lastInspection": "Son Muayene",
+      "insuranceExpiry": "Sigorta SÃ¼resi DoluÅŸ",
+      "motExpiry": "Muayene SÃ¼resi DoluÅŸ",
+      "scheduleService": "Servis Randevusu Al"
+    },
+    "equipment": {
+      "title": "Ekipman ve YapÄ±landÄ±rma",
+      "viewEquipment": "EkipmanÄ± GÃ¶rÃ¼ntÃ¼le"
+    },
+    "actions": {
+      "assign": "Ata",
+      "history": "GeÃ§miÅŸ"
+    }
+  },
+  "vehicleAbuse": {
+    "header": {
+      "title": "AraÃ§ KÃ¶tÃ¼ye KullanÄ±m Ã–nleme",
+      "description": "ÅžÃ¼pheli araÃ§ aktivitesini, coÄŸrafi sÄ±nÄ±r ihlallerini ve yetkisiz kullanÄ±mÄ± izleyin."
+    },
+    "stats": {
+      "criticalEvents": "Kritik Olaylar",
+      "highRisk": "YÃ¼ksek Risk",
+      "mediumPriority": "Orta Ã–ncelik",
+      "totalEvents": "Toplam Olaylar"
+    },
+    "tabs": {
+      "allEvents": "TÃ¼m Olaylar",
+      "geofence": "CoÄŸrafi SÄ±nÄ±r",
+      "afterHours": "Ã‡alÄ±ÅŸma Saatleri DÄ±ÅŸÄ±nda",
+      "routes": "Rotalar"
+    },
+    "dashboard": {
+      "noEvents": "KÃ¶tÃ¼ye kullanÄ±m olayÄ± tespit edilmedi.",
+      "review": "Ä°nceleme"
+    },
+    "eventTypes": {
+      "geofenceBreach": "CoÄŸrafi SÄ±nÄ±r Ä°hlali",
+      "speeding": "HÄ±z YapmasÄ±",
+      "afterHoursUse": "Ã‡alÄ±ÅŸma Saatleri DÄ±ÅŸÄ±nda KullanÄ±m",
+      "unlinkedTrip": "BaÄŸlÄ± Olmayan Yolculuk",
+      "harshDriving": "Sert SÃ¼rÃ¼ÅŸ",
+      "routeDeviation": "Rota SapmasÄ±"
+    },
+    "geofenceTab": {
+      "title": "CoÄŸrafi SÄ±nÄ±r YÃ¶netimi ve Ä°hlal UyarÄ±larÄ± YakÄ±nda.",
+      "description": "CoÄŸrafi sÄ±nÄ±rlar oluÅŸturun ve araÃ§lar bunlarÄ± ihlal ettiÄŸinde uyarÄ± alÄ±n."
+    },
+    "hoursTab": {
+      "title": "Ã‡alÄ±ÅŸma Saatleri DÄ±ÅŸÄ±nda Tespit YakÄ±nda.",
+      "description": "Planlanan Ã§alÄ±ÅŸma saatleri dÄ±ÅŸÄ±nda kullanÄ±lan araÃ§larÄ± takip edin."
+    },
+    "routesTab": {
+      "title": "Rota SapmasÄ± ve Ä°zleme YakÄ±nda.",
+      "description": "AmbulanslarÄ±n gÃ¶nderilen rotalarÄ± takip edip etmediÄŸini veya sapmadÄ±ÄŸÄ±nÄ± izleyin."
+    }
+  },
+  "vehicleTypeManagement": {
+    "header": {
+      "category": "Filo YapÄ±landÄ±rmasÄ±",
+      "title": "AraÃ§ TÃ¼rleri",
+      "description": "Ambulans tÃ¼rlerini, ekipmanlarÄ± ve yapÄ±landÄ±rmalarÄ± yÃ¶netin"
+    },
+    "summary": {
+      "totalVehicles": "Toplam AraÃ§lar",
+      "avgMonthlyCost": "Ortalama AylÄ±k Maliyet",
+      "totalCrewCapacity": "Toplam Gemi MÃ¼rettebatÄ± Kapasitesi",
+      "title": "Filo Ã–zeti",
+      "totalTypes": "Toplam TÃ¼r"
+    },
+    "specifications": {
+      "monthlyCost": "AylÄ±k Maliyet",
+      "capacity": "Kapasite",
+      "inFleet": "Filosunda",
+      "vehicles": "AraÃ§lar",
+      "members": "Ãœyeler",
+      "crewSize": "Gemi MÃ¼rettebatÄ± Boyutu"
+    },
+    "editForm": {
+      "button": {
+        "cancel": "Ä°ptal",
+        "save": "Kaydet"
+      },
+      "placeholders": {
+        "name": "Ad"
+      }
+    },
+    "button": {
+      "newType": "Yeni TÃ¼r"
+    },
+    "equipment": {
+      "title": "Standart DonanÄ±m"
+    }
+  },
+  "vehicleUtilisation": {
+    "metrics": {
+      "peakUsageHours": "Pik KullanÄ±m Saatleri",
+      "costPerKm": "Maliyet/km",
+      "title": "AyrÄ±ntÄ±lÄ± Metrikler",
+      "averageHoursDay": "Ortalama Saatler/GÃ¼n",
+      "downtime": "KapalÄ± Kalma SÃ¼resi (BakÄ±m)",
+      "averageDistanceDay": "Ortalama Mesafe/GÃ¼n",
+      "fuelConsumption": "YakÄ±t TÃ¼ketimi"
+    },
+    "keyMetrics": {
+      "totalTrips": "Toplam Geziler",
+      "totalMileage": "Toplam Kilometre",
+      "perVehicleMonth": "araÃ§ baÅŸÄ±na/ay",
+      "averageUtilisation": "Ortalama KullanÄ±m",
+      "kmThisMonth": "bu ay km",
+      "operatingCost": "Ä°ÅŸletme Maliyeti"
+    },
+    "header": {
+      "description": "Filo kullanÄ±mÄ±, verimlilik ve maliyetleri izleyin",
+      "title": "AraÃ§ KullanÄ±mÄ±",
+      "category": "Filo Analizi"
+    },
+    "charts": {
+      "target": "Hedef %",
+      "mileageKm": "Kilometre (km)",
+      "hoursUsed": "KullanÄ±lan Saatler",
+      "vehicleUtilisationRate": "AraÃ§ KullanÄ±m OranÄ±",
+      "actual": "GerÃ§ek %",
+      "operatingCostBreakdown": "Ä°ÅŸletme Maliyeti DaÄŸÄ±lÄ±mÄ±",
+      "usageTrend": "KullanÄ±m EÄŸilimi (5 Hafta)"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
@@ -22,6 +23,7 @@ const MOCK_MEMBERS: Member[] = [
 ];
 
 export default function DriverManagementScreen() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     paramedic: true,
@@ -95,38 +97,35 @@ export default function DriverManagementScreen() {
   };
 
   const roleLabels: Record<string, string> = {
-    paramedic: "Paramedics",
-    driver: "Drivers",
-    emt: "EMTs",
+    paramedic: t("driverManagement.roles.paramedics"),
+    driver: t("driverManagement.roles.drivers"),
+    emt: t("driverManagement.roles.emts"),
   };
 
   return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Team Management</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Driver & Crew Management</h1>
-        <p className="text-sm text-muted-foreground mt-2">View and organize all crew members by role</p>
-      </header>
-
-      {/* Read-Only Notice */}
-      <div className="rounded-lg bg-warning/10 border border-amber-200 text-warning p-4">
-        <p className="font-semibold">📖 Read-Only View</p>
-        <p className="text-sm mt-1">To add or manage crew members, use the <span className="font-semibold">User Admin</span> screen</p>
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("driverManagement.header.subtitle")}</p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("driverManagement.header.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("driverManagement.header.description")}</p>
       </div>
 
-      {/* Search */}
+      <div className="rounded bg-warning/10 border border-amber-200 text-warning p-2.5">
+        <p className="text-xs font-semibold">📖 {t("driverManagement.readOnly.label")}</p>
+        <p className="text-xs mt-0.5">{t("driverManagement.readOnly.description")}</p>
+      </div>
+
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
         <Input
-          placeholder="Search by name or role..."
+          placeholder={t("driverManagement.search.placeholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
+          className="pl-8 h-8 text-xs"
         />
       </div>
 
-      {/* Accordion Groups */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         {(["paramedic", "driver", "emt"] as const).map((role) => {
           const isExpanded = expandedGroups[role];
           const members = groupedMembers[role];
@@ -134,10 +133,9 @@ export default function DriverManagementScreen() {
 
           return (
             <div key={role}>
-              {/* Group Header */}
               <button
                 onClick={() => toggleGroup(role)}
-                className={`w-full rounded-xl border p-4 text-left font-medium transition-all flex items-center justify-between ${
+                className={`w-full rounded border p-2 text-left font-medium transition-all flex items-center justify-between text-xs ${
                   isExpanded ? `${colors.bg} ${colors.accent} border-2` : "bg-card border"
                 }`}
               >
@@ -145,36 +143,35 @@ export default function DriverManagementScreen() {
                   {getRoleIcon(role)} {roleLabels[role]} ({members.length})
                 </span>
                 {isExpanded ? (
-                  <ChevronDown className="h-5 w-5" />
+                  <ChevronDown className="h-4 w-4" />
                 ) : (
-                  <ChevronRight className="h-5 w-5" />
+                  <ChevronRight className="h-4 w-4" />
                 )}
               </button>
 
-              {/* Group Items */}
               {isExpanded && (
-                <div className="space-y-2 mt-2 ml-4">
+                <div className="space-y-1 mt-1.5 ml-3">
                   {members.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4">No members in this group</p>
+                    <p className="text-xs text-muted-foreground py-2">{t("driverManagement.messages.noMembers")}</p>
                   ) : (
                     members.map((member) => (
-                      <div key={member.id} className="rounded-xl border border-border bg-card p-3 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-semibold">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">{member.email}</p>
+                      <div key={member.id} className="rounded border border-border bg-card p-2 space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-xs truncate">{member.name}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">{member.email}</p>
                           </div>
                           <span
-                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                            className={`px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap ${
                               member.status === "active"
                                 ? "bg-success/10 text-success"
                                 : "bg-muted text-muted-foreground"
                             }`}
                           >
-                            {member.status === "active" ? "ACTIVE" : "INACTIVE"}
+                            {member.status === "active" ? t("driverManagement.status.active") : t("driverManagement.status.inactive")}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">{member.phone}</p>
+                        <p className="text-[10px] text-muted-foreground">{member.phone}</p>
                       </div>
                     ))
                   )}
@@ -185,21 +182,20 @@ export default function DriverManagementScreen() {
         })}
       </div>
 
-      {/* Info Section */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <h3 className="font-bold mb-3">How to manage crew</h3>
-        <ul className="space-y-2 text-sm">
-          <li className="flex items-center gap-2">
+      <div className="rounded border bg-card p-2.5 space-y-1.5">
+        <h3 className="font-semibold text-xs">{t("driverManagement.helpSection.title")}</h3>
+        <ul className="space-y-1 text-[11px]">
+          <li className="flex items-center gap-1.5">
             <span className="text-success">✓</span>
-            <span>Add crew members from <span className="font-semibold">User Admin</span> screen</span>
+            <span>{t("driverManagement.helpSection.step1")}</span>
           </li>
-          <li className="flex items-center gap-2">
+          <li className="flex items-center gap-1.5">
             <span className="text-success">✓</span>
-            <span>View all active crew grouped by role on this screen</span>
+            <span>{t("driverManagement.helpSection.step2")}</span>
           </li>
-          <li className="flex items-center gap-2">
+          <li className="flex items-center gap-1.5">
             <span className="text-success">✓</span>
-            <span>Assign crew to shifts in <span className="font-semibold">Team Status</span> screen</span>
+            <span>{t("driverManagement.helpSection.step3")}</span>
           </li>
         </ul>
       </div>

@@ -197,7 +197,60 @@
     "todaysSchedule": "Eto loni",
     "noAppointmentsToday": "Ko si awọn ipinnu iṣoogun ti a ti ṣeto fun oni",
     "filterDoctor": "Ṣe àlàyé Dókítà",
-    "allDoctors": "Gbogbo awọn Dókítà ni iṣe"
+    "allDoctors": "Gbogbo awọn Dókítà ni iṣe",
+    "months": {
+      "january": "Oṣu Kínní",
+      "february": "Oṣu Keèjì",
+      "march": "Oṣu Kẹta",
+      "april": "Oṣu Kẹrin",
+      "may": "Oṣu Karun",
+      "june": "Oṣu Kẹfa",
+      "july": "Oṣu Keje",
+      "august": "Oṣu Kẹjọ",
+      "september": "Oṣu Kẹsọ",
+      "october": "Oṣu Kẹwa",
+      "november": "Oṣu Kọkandun",
+      "december": "Oṣu Kọkanléélọ"
+    },
+    "monthsShort": {
+      "jan": "Kín",
+      "feb": "Keè",
+      "mar": "Kẹt",
+      "apr": "Kẹr",
+      "may": "Kar",
+      "jun": "Kẹf",
+      "jul": "Kej",
+      "aug": "Kẹj",
+      "sep": "Kẹs",
+      "oct": "Kẹw",
+      "nov": "Kọk1",
+      "dec": "Kọk2"
+    },
+    "days": {
+      "sunday": "Àìkú",
+      "monday": "Ajé",
+      "tuesday": "Ìṣẹ́gun",
+      "wednesday": "Ọjọ́rú",
+      "thursday": "Ọjọ́bọ",
+      "friday": "Ẹtì",
+      "saturday": "Àbámẹ́ta"
+    },
+    "daysShort": {
+      "sun": "Àìk",
+      "mon": "Ajé",
+      "tue": "Ìṣẹ",
+      "wed": "Ọjr",
+      "thu": "Ọjb",
+      "fri": "Ẹtì",
+      "sat": "Àbá"
+    },
+    "daysNarrow": {
+      "s": "À",
+      "m": "A",
+      "t": "Ì",
+      "w": "Ọ",
+      "f": "Ẹ"
+    }
   },
   "sessions": {
     "title": "Awọn ipele",
@@ -373,5 +426,262 @@
     "sectionLabResults": "Awọn abajade idanwo",
     "sectionGeneticMarkers": "Awọn ami-ami-ami",
     "sectionMentalHealth": "Ilera Ọpọlọ"
+  },
+  "emergencyDashboard": {
+    "statusBar": {
+      "activeMission": "ISáº¸ AKIYESI",
+      "onShift": "NINU Iá¹¢áº¸"
+    },
+    "header": {
+      "subtitle": "Idahun ÃŒjoba",
+      "title": "Iá¹£áº¹ ÃŒjoba"
+    },
+    "stats": {
+      "new": "titun",
+      "active": "akiyesi",
+      "critical": "pataki"
+    },
+    "statsCard": {
+      "newRequests": "Ebe Titun",
+      "activeOperations": "Iá¹£áº¹ Akiyesi",
+      "criticalIncidents": "Pataki Iá¹£áº¹láº¹"
+    },
+    "tabs": {
+      "new": "Titun",
+      "active": "Akiyesi",
+      "completed": "Ti Pari"
+    },
+    "details": {
+      "location": "Aaye",
+      "received": "Ti Gba",
+      "fromHospital": "Lati Ile Asa"
+    },
+    "actions": {
+      "acceptDispatch": "Gba Ki O Ran",
+      "decline": "Kole",
+      "trackLive": "Táº¹je Lori Amutorunwa",
+      "updateStatus": "á¹¢e Ilana Iyalere",
+      "viewReport": "Wo Igbero"
+    }
+  },
+  "navigationScreen": {
+    "noActiveMission": "Aká»á» Isáº¹ Aji",
+    "acceptToStart": "Gba ere ipon daradun ni ojo lati bere idin nkan",
+    "openIncomingSos": "Si Etan SOS Ipon",
+    "loadingMission": "Ifi Awo Tani Isáº¹...",
+    "status": "Iá¹£áº¹láº¹ Paá¹£áº¹ si {{status}}",
+    "mission": "Isáº¹",
+    "eta": "Akoko Diduro:",
+    "actionPanel": "Ipolongo Iá¹£áº¹láº¹",
+    "enRoute": "Ninu Ona",
+    "arrived": "O Wo De",
+    "patientLoaded": "Alaisan Sáº¹",
+    "toHospital": "Ninu Ona Si Ile Asa",
+    "arrivedAtHospital": "O Wo De Ile Asa",
+    "resolveIncident": "Yipada Iá¹£áº¹láº¹",
+    "navigation": "Idin",
+    "fullConsole": "Si Onigun Ni Lapá»"
+  },
+  "provider": {
+    "emergencyResponseDispatch": "Firaná¹£áº¹ Iyáº¹ Gidigidi"
+  },
+  "realTimeMonitoring": {
+    "header": {
+      "subtitle": "Akiyesi",
+      "title": "Iá¹£áº¹ Akoko Lokan",
+      "description": "Ã€kÃ­yÃ¨sÃ­ Ã wá»n á»ká» ibaÃ² akoko lokan ati akiyesi iá¹£ojogun"
+    },
+    "tabs": {
+      "tracking": "Ã€kÃ­yÃ¨sÃ­",
+      "safety": "Iá¹£ojogun"
+    },
+    "tracking": {
+      "vehiclesOnline": "á»Œká» Ninu Eeyan",
+      "allGpsConnected": "Gbogbo GPS ti sá»pá»",
+      "avgSpeed": "Ara Iá¹£Ã lejÃ²",
+      "withinLimits": "Ninu Opin",
+      "fuelStatus": "Ipo Epo",
+      "goodLevels": "Awá»n Ipele Dara",
+      "speed": "Iá¹£Ã lejÃ²",
+      "fuel": "Epo",
+      "track": "Akiyesi",
+      "moving": "áº¸KA NILO",
+      "stopped": "DURO"
+    },
+    "safety": {
+      "criticalAlerts": "Ibi Iá¹£ojogun Pataki",
+      "immediateAction": "Iá¹£e Ninu Ise",
+      "safetyEvents": "Awá»n Iá¹£áº¹láº¹ Iá¹£ojogun",
+      "thisWeek": "á»Œsáº¹ Yi",
+      "fleetScore": "Iwe IbaÃ²",
+      "excellentSafety": "Iá¹£ojogun Dara Julo",
+      "critical": "PATAKI",
+      "alert": "ISINMI",
+      "eventTypesMonitored": "Awá»n Iru Iá¹£áº¹láº¹ Iá¹£ojogun Ti a á¹¢e Akiyesi",
+      "speedingEvents": "Awá»n Iá¹£áº¹láº¹ Iá¹£Ã lejÃ² Ti O Ju",
+      "harshAcceleration": "Iyipada Alaka/Gbigbana Alaka",
+      "afterHoursUse": "Lilo á»Œká» Ni áº¸ya Ti Isáº¹",
+      "geofenceBreaches": "Gbigbe Geofence",
+      "routeDeviations": "Iyatá» á»Œna",
+      "unauthorizedStops": "Iduro Ti O Ba Gba Iwa"
+    }
+  },
+  "vehicleProfile": {
+    "navigation": {
+      "back": "Lá» Pada"
+    },
+    "header": {
+      "title": "Iá¹£áº¹ Ambulansi"
+    },
+    "information": {
+      "title": "Alaye á»Œká»",
+      "registration": "Iforuká»siláº¹",
+      "vin": "VIN",
+      "year": "Odun",
+      "makeModel": "áº¸ka/Awoá¹£e",
+      "engine": "áº¸jáº¹",
+      "seats": "Awá»n Ise",
+      "color": "ÃŒlÃº"
+    },
+    "operational": {
+      "title": "Ipo Iá¹£áº¹",
+      "mileage": "Akoni",
+      "engineHours": "Awá»n Wakati ti áº¸jáº¹",
+      "fuelType": "Iru Epo",
+      "tankCapacity": "Iwon ti Tank",
+      "fuelLevel": "Ipele ti Epo",
+      "lastGpsCheck": "Akiyesi GPS ti Ikokoro"
+    },
+    "maintenance": {
+      "title": "Iá¹£áº¹ ati Isususiláº¹",
+      "lastService": "Iá¹£áº¹ ti Ikokoro",
+      "nextService": "Iá¹£áº¹ Atáº¹le",
+      "overdue": "TI JAGBE",
+      "days": "á»já»",
+      "lastInspection": "Iwokolo ti Ikokoro",
+      "insuranceExpiry": "Idaduro ti Jinere",
+      "motExpiry": "Idaduro ti MOT",
+      "scheduleService": "Seto Iá¹£áº¹"
+    },
+    "equipment": {
+      "title": "Ohun Elo ati Eto",
+      "viewEquipment": "Wo Ohun Elo"
+    },
+    "actions": {
+      "assign": "Yan",
+      "history": "Itan"
+    }
+  },
+  "vehicleAbuse": {
+    "header": {
+      "title": "Idiwon Itankale á»Œká»",
+      "description": "á¹¢e iwatáº¹nwá» ara iyaláº¹nu á»ká», iyaláº¹nu agbooro geofence, ati lilo ti a ko gbadun."
+    },
+    "stats": {
+      "criticalEvents": "Awon Iá¹£áº¹láº¹ Ixáº¹yáº¹",
+      "highRisk": "Eewu Giga",
+      "mediumPriority": "Iá¹£áº¹ Ariwa",
+      "totalEvents": "Lapapá» Awon Iá¹£áº¹láº¹"
+    },
+    "tabs": {
+      "allEvents": "Gbogbo Awon Iá¹£áº¹láº¹",
+      "geofence": "Geofence",
+      "afterHours": "Iyaláº¹nu Wakati",
+      "routes": "Awá»n á»na"
+    },
+    "dashboard": {
+      "noEvents": "Ko si itankale iá¹£áº¹láº¹ ti a á¹£e awari.",
+      "review": "á¹¢e Iwatáº¹nwá»"
+    },
+    "eventTypes": {
+      "geofenceBreach": "Iyaláº¹nu Geofence",
+      "speeding": "Iá¹£adi Giga",
+      "afterHoursUse": "Lilo Iyaláº¹nu Wakati",
+      "unlinkedTrip": "Ija Ti A Ko Siso",
+      "harshDriving": "á»Œká» Itankale",
+      "routeDeviation": "Iyaláº¹nu á»Œna"
+    },
+    "geofenceTab": {
+      "title": "Iá¹£akojá» Geofence ati Awon Kelepáº¹ Iyaláº¹nu Ti N Wa.",
+      "description": "á¹¢áº¹da awon ifini táº¹bu ati gba awon kelepáº¹ nigbati awon á»ká» á¹£e iyaláº¹nu wá»n."
+    },
+    "hoursTab": {
+      "title": "Iwari Iyaláº¹nu Wakati Ti N Wa.",
+      "description": "á¹¢e awatáº¹nwá» ara á»ká» ti a lo ni iyaláº¹nu á»páº¹ iá¹£áº¹ ajáº¹ á¹£áº¹da."
+    },
+    "routesTab": {
+      "title": "Iyaláº¹nu á»Œna ati Iwari Ti N Wa.",
+      "description": "á¹¢e iwatáº¹nwá» ara ambulansi ba tabi ko ba táº¹le awon á»na ti a fi á¹£áº¹da."
+    }
+  },
+  "vehicleTypeManagement": {
+    "header": {
+      "category": "Iá¹£eto Iyaleta",
+      "title": "Iru á»Œká» Ayandun",
+      "description": "á¹¢akoso iru ambulansi, aje, ati iá¹£eto"
+    },
+    "summary": {
+      "totalVehicles": "Apapá» á»Œká» Ayandun",
+      "avgMonthlyCost": "Idiyele Oá¹£u Aarin",
+      "totalCrewCapacity": "Apapá» Agbara Olurombonrin",
+      "title": "Akopá» Iyaleta",
+      "totalTypes": "Apapá» Iru"
+    },
+    "specifications": {
+      "monthlyCost": "Idiyele Oá¹£u",
+      "capacity": "Agbara",
+      "inFleet": "Ninu Iyaleta",
+      "vehicles": "Awon Oko Ayandun",
+      "members": "Awon Omo",
+      "crewSize": "Iwon Olurombonrin"
+    },
+    "editForm": {
+      "button": {
+        "cancel": "Fagile",
+        "save": "Fi Pamá»"
+      },
+      "placeholders": {
+        "name": "Oruko"
+      }
+    },
+    "button": {
+      "newType": "Iru Tuntun"
+    },
+    "equipment": {
+      "title": "Aje Aká»ká»"
+    }
+  },
+  "vehicleUtilisation": {
+    "metrics": {
+      "peakUsageHours": "Awon Wakati Ilo Giga",
+      "costPerKm": "Idiyele/km",
+      "title": "Awon Iwe Imá»ran",
+      "averageHoursDay": "Awon Iwa Wakati/Ojo",
+      "downtime": "Akoko Idile (Paamo)",
+      "averageDistanceDay": "Awon Iwe Ijinna/Ojo",
+      "fuelConsumption": "Ilo Epo"
+    },
+    "keyMetrics": {
+      "totalTrips": "Apapá» Irin",
+      "totalMileage": "Apapá» Alaafin",
+      "perVehicleMonth": "fun ká» akin/osu",
+      "averageUtilisation": "Ilo Aarin",
+      "kmThisMonth": "km oyinbo",
+      "operatingCost": "Idiyele Iá¹£iá¹£áº¹"
+    },
+    "header": {
+      "description": "á¹¢e agba funfun lilo iyaleta, iá¹£iá¹£áº¹, ati idiyele",
+      "title": "Ilo á»Œká» Ayandun",
+      "category": "Ikunole Iyaleta"
+    },
+    "charts": {
+      "target": "% Ipadabá»",
+      "mileageKm": "Alaafin (km)",
+      "hoursUsed": "Wakati Lilo",
+      "vehicleUtilisationRate": "Sani Ilo á»Œká» Ayandun",
+      "actual": "% Gidi",
+      "operatingCostBreakdown": "Isunmo Idiyele Iá¹£iá¹£áº¹",
+      "usageTrend": "Isunmo Ilo (5 Ose)"
+    }
   }
 }

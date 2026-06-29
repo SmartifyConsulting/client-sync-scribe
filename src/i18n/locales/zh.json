@@ -197,7 +197,60 @@
     "todaysSchedule": "今日日程",
     "noAppointmentsToday": "今日无约会安排",
     "filterDoctor": "筛选医生",
-    "allDoctors": "诊所所有医生"
+    "allDoctors": "诊所所有医生",
+    "months": {
+      "january": "1月",
+      "february": "2月",
+      "march": "3月",
+      "april": "4月",
+      "may": "5月",
+      "june": "6月",
+      "july": "7月",
+      "august": "8月",
+      "september": "9月",
+      "october": "10月",
+      "november": "11月",
+      "december": "12月"
+    },
+    "monthsShort": {
+      "jan": "1月",
+      "feb": "2月",
+      "mar": "3月",
+      "apr": "4月",
+      "may": "5月",
+      "jun": "6月",
+      "jul": "7月",
+      "aug": "8月",
+      "sep": "9月",
+      "oct": "10月",
+      "nov": "11月",
+      "dec": "12月"
+    },
+    "days": {
+      "sunday": "星期日",
+      "monday": "星期一",
+      "tuesday": "星期二",
+      "wednesday": "星期三",
+      "thursday": "星期四",
+      "friday": "星期五",
+      "saturday": "星期六"
+    },
+    "daysShort": {
+      "sun": "日",
+      "mon": "一",
+      "tue": "二",
+      "wed": "三",
+      "thu": "四",
+      "fri": "五",
+      "sat": "六"
+    },
+    "daysNarrow": {
+      "s": "日",
+      "m": "一",
+      "t": "二",
+      "w": "三",
+      "f": "四"
+    }
   },
   "sessions": {
     "title": "会话",
@@ -373,5 +426,262 @@
     "sectionLabResults": "实验室结果",
     "sectionGeneticMarkers": "遗传标记",
     "sectionMentalHealth": "心理健康"
+  },
+  "emergencyDashboard": {
+    "statusBar": {
+      "activeMission": "æ´»è·ƒä»»åŠ¡",
+      "onShift": "å€¼ç­ä¸­"
+    },
+    "header": {
+      "subtitle": "ç´§æ€¥å“åº”",
+      "title": "ç´§æ€¥è¿è¥"
+    },
+    "stats": {
+      "new": "æ–°å»º",
+      "active": "æ´»è·ƒ",
+      "critical": "ä¸¥é‡"
+    },
+    "statsCard": {
+      "newRequests": "æ–°è¯·æ±‚",
+      "activeOperations": "æ´»è·ƒè¿è¥",
+      "criticalIncidents": "ä¸¥é‡äº‹ä»¶"
+    },
+    "tabs": {
+      "new": "æ–°å»º",
+      "active": "æ´»è·ƒ",
+      "completed": "å®Œæˆ"
+    },
+    "details": {
+      "location": "ä½ç½®",
+      "received": "æŽ¥æ”¶",
+      "fromHospital": "æ¥è‡ªåŒ»é™¢"
+    },
+    "actions": {
+      "acceptDispatch": "æŽ¥å—å¹¶å‘é€",
+      "decline": "æ‹’ç»",
+      "trackLive": "å®žæ—¶è·Ÿè¸ª",
+      "updateStatus": "æ›´æ–°çŠ¶æ€",
+      "viewReport": "æŸ¥çœ‹æŠ¥å‘Š"
+    }
+  },
+  "navigationScreen": {
+    "noActiveMission": "æ²¡æœ‰æ´»è·ƒä»»åŠ¡",
+    "acceptToStart": "æŽ¥å—ä¼ å…¥è¯·æ±‚ä»¥å¼€å§‹å¯¼èˆª",
+    "openIncomingSos": "æ‰“å¼€ä¼ å…¥çš„SOS",
+    "loadingMission": "æ­£åœ¨åŠ è½½ä»»åŠ¡æ•°æ®...",
+    "status": "çŠ¶æ€å·²æ›´æ–°ä¸º {{status}}",
+    "mission": "ä»»åŠ¡",
+    "eta": "é¢„è®¡åˆ°è¾¾æ—¶é—´:",
+    "actionPanel": "çŠ¶æ€æ›´æ–°",
+    "enRoute": "åœ¨é€”ä¸­",
+    "arrived": "å·²åˆ°è¾¾",
+    "patientLoaded": "å·²è£…è½½æ‚£è€…",
+    "toHospital": "å‰å¾€åŒ»é™¢",
+    "arrivedAtHospital": "å·²åˆ°è¾¾åŒ»é™¢",
+    "resolveIncident": "è§£å†³äº‹ä»¶",
+    "navigation": "å¯¼èˆª",
+    "fullConsole": "æ‰“å¼€å®Œæ•´æŽ§åˆ¶å°"
+  },
+  "provider": {
+    "emergencyResponseDispatch": "ç´§æ€¥å“åº”æ´¾é£"
+  },
+  "realTimeMonitoring": {
+    "header": {
+      "subtitle": "ç›‘æŽ§",
+      "title": "å®žæ—¶è¿è¥",
+      "description": "å®žæ—¶è½¦é˜Ÿè·Ÿè¸ªå’Œå®‰å…¨ç›‘æŽ§"
+    },
+    "tabs": {
+      "tracking": "è¿½è¸ª",
+      "safety": "å®‰å…¨"
+    },
+    "tracking": {
+      "vehiclesOnline": "åœ¨çº¿è½¦è¾†",
+      "allGpsConnected": "æ‰€æœ‰GPSå·²è¿žæŽ¥",
+      "avgSpeed": "å¹³å‡é€Ÿåº¦",
+      "withinLimits": "åœ¨é™åˆ¶å†…",
+      "fuelStatus": "ç‡ƒæ²¹çŠ¶æ€",
+      "goodLevels": "è‰¯å¥½æ°´å¹³",
+      "speed": "é€Ÿåº¦",
+      "fuel": "ç‡ƒæ²¹",
+      "track": "è¿½è¸ª",
+      "moving": "è¿è¡Œä¸­",
+      "stopped": "å·²åœæ­¢"
+    },
+    "safety": {
+      "criticalAlerts": "ä¸¥é‡è­¦æŠ¥",
+      "immediateAction": "ç«‹å³è¡ŒåŠ¨",
+      "safetyEvents": "å®‰å…¨äº‹ä»¶",
+      "thisWeek": "æœ¬å‘¨",
+      "fleetScore": "è½¦é˜Ÿè¯„åˆ†",
+      "excellentSafety": "å“è¶Šå®‰å…¨",
+      "critical": "ä¸¥é‡",
+      "alert": "è­¦æŠ¥",
+      "eventTypesMonitored": "ç›‘æŽ§çš„å®‰å…¨äº‹ä»¶ç±»åž‹",
+      "speedingEvents": "è¶…é€Ÿäº‹ä»¶",
+      "harshAcceleration": "æ€¥åŠ é€Ÿ/æ€¥åˆ¶åŠ¨",
+      "afterHoursUse": "éžå·¥ä½œæ—¶é—´è½¦è¾†ä½¿ç”¨",
+      "geofenceBreaches": "åœ°ç†å›´æ è¿è§„",
+      "routeDeviations": "è·¯çº¿åå·®",
+      "unauthorizedStops": "æœªæŽˆæƒåœé "
+    }
+  },
+  "vehicleProfile": {
+    "navigation": {
+      "back": "è¿”å›ž"
+    },
+    "header": {
+      "title": "æ•‘æŠ¤è½¦è¿è¥"
+    },
+    "information": {
+      "title": "è½¦è¾†ä¿¡æ¯",
+      "registration": "ç™»è®°",
+      "vin": "VINç ",
+      "year": "å¹´ä»½",
+      "makeModel": "å“ç‰Œ/åž‹å·",
+      "engine": "å‘åŠ¨æœº",
+      "seats": "åº§ä½",
+      "color": "é¢œè‰²"
+    },
+    "operational": {
+      "title": "è¿è¥çŠ¶æ€",
+      "mileage": "é‡Œç¨‹",
+      "engineHours": "å‘åŠ¨æœºå·¥æ—¶",
+      "fuelType": "ç‡ƒæ²¹ç±»åž‹",
+      "tankCapacity": "æ²¹ç®±å®¹é‡",
+      "fuelLevel": "ç‡ƒæ²¹æ¶²ä½",
+      "lastGpsCheck": "æœ€åŽGPSæ£€æŸ¥"
+    },
+    "maintenance": {
+      "title": "ç»´ä¿®å’Œä¿å…»",
+      "lastService": "ä¸Šæ¬¡ç»´ä¿®",
+      "nextService": "ä¸‹æ¬¡ç»´ä¿®",
+      "overdue": "é€¾æœŸ",
+      "days": "å¤©",
+      "lastInspection": "ä¸Šæ¬¡æ£€æŸ¥",
+      "insuranceExpiry": "ä¿é™©åˆ°æœŸ",
+      "motExpiry": "å¹´æ£€åˆ°æœŸ",
+      "scheduleService": "å®‰æŽ’ç»´ä¿®"
+    },
+    "equipment": {
+      "title": "è®¾å¤‡å’Œé…ç½®",
+      "viewEquipment": "æŸ¥çœ‹è®¾å¤‡"
+    },
+    "actions": {
+      "assign": "åˆ†é…",
+      "history": "åŽ†å²è®°å½•"
+    }
+  },
+  "vehicleAbuse": {
+    "header": {
+      "title": "è½¦è¾†æ»¥ç”¨é˜²æ­¢",
+      "description": "ç›‘æŽ§å¯ç–‘çš„è½¦è¾†æ´»åŠ¨ã€åœ°ç†å›´æ è¿è§„å’ŒæœªæŽˆæƒä½¿ç”¨ã€‚"
+    },
+    "stats": {
+      "criticalEvents": "å…³é”®äº‹ä»¶",
+      "highRisk": "é«˜é£Žé™©",
+      "mediumPriority": "ä¸­ç­‰ä¼˜å…ˆçº§",
+      "totalEvents": "æ€»äº‹ä»¶"
+    },
+    "tabs": {
+      "allEvents": "æ‰€æœ‰äº‹ä»¶",
+      "geofence": "åœ°ç†å›´æ ",
+      "afterHours": "å·¥ä½œæ—¶é—´å¤–",
+      "routes": "è·¯çº¿"
+    },
+    "dashboard": {
+      "noEvents": "æœªæ£€æµ‹åˆ°æ»¥ç”¨äº‹ä»¶ã€‚",
+      "review": "æŸ¥çœ‹"
+    },
+    "eventTypes": {
+      "geofenceBreach": "åœ°ç†å›´æ è¿è§„",
+      "speeding": "è¶…é€Ÿ",
+      "afterHoursUse": "å·¥ä½œæ—¶é—´å¤–ä½¿ç”¨",
+      "unlinkedTrip": "æœªå…³è”çš„è¡Œç¨‹",
+      "harshDriving": "æ¶åŠ£é©¾é©¶",
+      "routeDeviation": "è·¯çº¿åç¦»"
+    },
+    "geofenceTab": {
+      "title": "åœ°ç†å›´æ ç®¡ç†å’Œè¿è§„è­¦æŠ¥å³å°†æŽ¨å‡ºã€‚",
+      "description": "åˆ›å»ºåœ°ç†è¾¹ç•Œï¼Œå½“è½¦è¾†è¿è§„æ—¶èŽ·å¾—è­¦æŠ¥ã€‚"
+    },
+    "hoursTab": {
+      "title": "å·¥ä½œæ—¶é—´å¤–æ£€æµ‹å³å°†æŽ¨å‡ºã€‚",
+      "description": "è·Ÿè¸ªåœ¨è®¡åˆ’è¿è¥æ—¶é—´å¤–ä½¿ç”¨çš„è½¦è¾†ã€‚"
+    },
+    "routesTab": {
+      "title": "è·¯çº¿åç¦»å’Œè·Ÿè¸ªå³å°†æŽ¨å‡ºã€‚",
+      "description": "ç›‘æŽ§æ•‘æŠ¤è½¦æ˜¯å¦éµå¾ªè°ƒåº¦è·¯çº¿æˆ–åç¦»è·¯çº¿ã€‚"
+    }
+  },
+  "vehicleTypeManagement": {
+    "header": {
+      "category": "è½¦é˜Ÿé…ç½®",
+      "title": "è½¦åž‹",
+      "description": "ç®¡ç†æ•‘æŠ¤è½¦ç±»åž‹ã€è®¾å¤‡å’Œé…ç½®"
+    },
+    "summary": {
+      "totalVehicles": "è½¦è¾†æ€»æ•°",
+      "avgMonthlyCost": "å¹³å‡æœˆæˆæœ¬",
+      "totalCrewCapacity": "æ€»èˆ¹å‘˜å®¹é‡",
+      "title": "è½¦é˜Ÿæ‘˜è¦",
+      "totalTypes": "æ€»ç±»åž‹æ•°"
+    },
+    "specifications": {
+      "monthlyCost": "æœˆæˆæœ¬",
+      "capacity": "å®¹é‡",
+      "inFleet": "åœ¨è½¦é˜Ÿä¸­",
+      "vehicles": "è½¦è¾†",
+      "members": "æˆå‘˜",
+      "crewSize": "å·¥ä½œäººå‘˜è§„æ¨¡"
+    },
+    "editForm": {
+      "button": {
+        "cancel": "å–æ¶ˆ",
+        "save": "ä¿å­˜"
+      },
+      "placeholders": {
+        "name": "åç§°"
+      }
+    },
+    "button": {
+      "newType": "æ–°ç±»åž‹"
+    },
+    "equipment": {
+      "title": "æ ‡å‡†è®¾å¤‡"
+    }
+  },
+  "vehicleUtilisation": {
+    "metrics": {
+      "peakUsageHours": "å³°å€¼ä½¿ç”¨æ—¶é—´",
+      "costPerKm": "æˆæœ¬/å…¬é‡Œ",
+      "title": "è¯¦ç»†æŒ‡æ ‡",
+      "averageHoursDay": "å¹³å‡å°æ—¶/å¤©",
+      "downtime": "åœæœºæ—¶é—´ (ç»´æŠ¤)",
+      "averageDistanceDay": "å¹³å‡è·ç¦»/å¤©",
+      "fuelConsumption": "ç‡ƒæ²¹æ¶ˆè€—"
+    },
+    "keyMetrics": {
+      "totalTrips": "æ€»è¡Œç¨‹æ•°",
+      "totalMileage": "æ€»é‡Œç¨‹",
+      "perVehicleMonth": "æ¯è¾†è½¦/æœˆ",
+      "averageUtilisation": "å¹³å‡åˆ©ç”¨çŽ‡",
+      "kmThisMonth": "æœ¬æœˆå…¬é‡Œ",
+      "operatingCost": "è¿è¥æˆæœ¬"
+    },
+    "header": {
+      "description": "ç›‘æŽ§è½¦é˜Ÿä½¿ç”¨ã€æ•ˆçŽ‡å’Œæˆæœ¬",
+      "title": "è½¦è¾†åˆ©ç”¨çŽ‡",
+      "category": "è½¦é˜Ÿåˆ†æž"
+    },
+    "charts": {
+      "target": "ç›®æ ‡ %",
+      "mileageKm": "é‡Œç¨‹ (km)",
+      "hoursUsed": "ä½¿ç”¨å°æ—¶",
+      "vehicleUtilisationRate": "è½¦è¾†åˆ©ç”¨çŽ‡",
+      "actual": "å®žé™… %",
+      "operatingCostBreakdown": "è¿è¥æˆæœ¬åˆ†è§£",
+      "usageTrend": "ä½¿ç”¨è¶‹åŠ¿ (5 å‘¨)"
+    }
   }
 }

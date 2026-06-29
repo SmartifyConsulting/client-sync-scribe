@@ -1,12 +1,36 @@
-// Single source of truth derived from the i18n supported-languages list,
-// so every "Primary Language" / "Language" picker shows the same options
-// as the top-right flag switcher (incl. Igbo, Hausa, Yoruba, Shona, isiZulu, isiXhosa, etc.).
-import { SUPPORTED_LANGUAGES } from "@/i18n";
-
-export const LANGUAGES = SUPPORTED_LANGUAGES.map((l) => ({
-  code: l.code,
-  name: l.name,
-}));
+export const LANGUAGES = [
+  { code: "af", name: "Afrikaans" },
+  { code: "ar", name: "Arabic" },
+  { code: "nl", name: "Dutch" },
+  { code: "en", name: "English" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "el", name: "Greek" },
+  { code: "he", name: "Hebrew" },
+  { code: "ha", name: "Hausa" },
+  { code: "hi", name: "Hindi" },
+  { code: "ig", name: "Igbo" },
+  { code: "id", name: "Indonesian" },
+  { code: "it", name: "Italian" },
+  { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" },
+  { code: "ms", name: "Malay" },
+  { code: "zh", name: "Mandarin Chinese" },
+  { code: "pl", name: "Polish" },
+  { code: "pt", name: "Portuguese" },
+  { code: "ru", name: "Russian" },
+  { code: "st", name: "Sotho" },
+  { code: "es", name: "Spanish" },
+  { code: "sw", name: "Swahili" },
+  { code: "th", name: "Thai" },
+  { code: "tn", name: "Tswana" },
+  { code: "tr", name: "Turkish" },
+  { code: "uk", name: "Ukrainian" },
+  { code: "vi", name: "Vietnamese" },
+  { code: "xh", name: "Xhosa" },
+  { code: "yo", name: "Yoruba" },
+  { code: "zu", name: "Zulu" },
+];
 
 export const COMMON_SPECIALTIES = [
   "General Practice",

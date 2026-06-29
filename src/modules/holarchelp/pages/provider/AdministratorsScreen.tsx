@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 import { useProviderAccess } from "../../components/ProviderGate";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,8 +22,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Trash2, UserPlus, Loader2, ShieldCheck, Edit2, Search } from "lucide-react";
 import { toast } from "sonner";
+import HospitalNetworkScreen from "./ambulance/HospitalNetworkScreen";
 
 interface MemberRow {
   id: string;
@@ -64,6 +72,7 @@ export default function AdministratorsScreen() {
   const { providerId, providerType, userId } = useProviderAccess();
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [addOpen, setAddOpen] = useState(false);
   const [addEmail, setAddEmail] = useState("");
   const [addName, setAddName] = useState("");
@@ -74,6 +83,8 @@ export default function AdministratorsScreen() {
   const [ownerId, setOwnerId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+
+  const currentTab = searchParams.get("tab") || "users";
 
   const table =
     providerType === "hospital"
@@ -211,7 +222,7 @@ export default function AdministratorsScreen() {
           </p>
           <p className="text-[11px] opacity-70 mt-0.5">
             {[row.invited_email, row.phone].filter(Boolean).join(" · ")}
-            {row.user_id ? " · Active" : " · Pending"}
+            {row.user_id ? ` · ${t("administrators.users.active")}` : ` · ${t("administrators.users.pending")}`}
           </p>
         </div>
         <div className="flex items-center gap-1.5 ml-2">
@@ -241,63 +252,82 @@ export default function AdministratorsScreen() {
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Administration</p>
-        <h1 className="text-2xl font-extrabold mt-1">User Management</h1>
-        <p className="text-xs text-muted-foreground mt-1">Manage users, admins, and crew members</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("administrators.header.label")}</p>
+        <h1 className="text-2xl font-extrabold mt-1">
+          {currentTab === "hospital-network" ? t("administrators.header.hospitalNetwork") : t("administrators.header.userManagement")}
+        </h1>
+        <p className="text-xs text-muted-foreground mt-1">
+          {currentTab === "hospital-network"
+            ? t("administrators.header.hospitalDesc")
+            : t("administrators.header.userDesc")}
+        </p>
       </div>
 
-      {!isCurrentUserAdmin && (
+      {!isCurrentUserAdmin && currentTab === "users" && (
         <div className="rounded border bg-amber-50 border-amber-200 text-amber-800 p-2.5 text-xs">
-          <p className="font-semibold">📖 Read-Only View</p>
-          <p className="mt-0.5">Only Admin users can add, edit, or remove members</p>
+          <p className="font-semibold">📖 {t("administrators.readOnly.label")}</p>
+          <p className="mt-0.5">{t("administrators.readOnly.description")}</p>
         </div>
       )}
 
-      <div className="rounded-lg border bg-card overflow-hidden">
-        <div className="flex items-center justify-between px-3 py-2.5 border-b bg-card">
-          <h2 className="font-semibold text-sm flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-primary" />
-            Users ({members.length})
-          </h2>
-          {isCurrentUserAdmin && (
-            <Button size="sm" onClick={() => setAddOpen(true)} className="h-7 text-xs">
-              <UserPlus className="mr-1 h-3 w-3" /> Add
-            </Button>
-          )}
-        </div>
+      <Tabs value={currentTab} onValueChange={(val) => setSearchParams({ tab: val })} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 h-8">
+          <TabsTrigger value="users" className="text-xs">{t("administrators.tabs.users")}</TabsTrigger>
+          <TabsTrigger value="hospital-network" className="text-xs">{t("administrators.tabs.hospitals")}</TabsTrigger>
+        </TabsList>
 
-        <div className="p-2.5 space-y-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Search by name, email, or role..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 h-8 text-xs"
-            />
+        <TabsContent value="users" className="space-y-3">
+          <div className="rounded-lg border bg-card overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b bg-card">
+              <h2 className="font-semibold text-sm flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                {t("administrators.users.title")} ({members.length})
+              </h2>
+              {isCurrentUserAdmin && (
+                <Button size="sm" onClick={() => setAddOpen(true)} className="h-7 text-xs">
+                  <UserPlus className="mr-1 h-3 w-3" /> {t("common.add")}
+                </Button>
+              )}
+            </div>
+
+            <div className="p-2.5 space-y-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder={t("administrators.users.searchPlaceholder")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 h-8 text-xs"
+                />
+              </div>
+
+              {isLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground text-xs py-4">
+                  <Loader2 className="h-3 w-3 animate-spin" /> {t("common.loading")}
+                </div>
+              ) : filteredMembers.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-6">
+                  {searchQuery ? t("administrators.users.noMatch") : t("administrators.users.noUsers")}
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {filteredMembers.map(renderMemberCard)}
+                </div>
+              )}
+            </div>
           </div>
+        </TabsContent>
 
-          {isLoading ? (
-            <div className="flex items-center gap-2 text-muted-foreground text-xs py-4">
-              <Loader2 className="h-3 w-3 animate-spin" /> {t("common.loading")}
-            </div>
-          ) : filteredMembers.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-6">
-              {searchQuery ? "No users match your search" : "No users yet"}
-            </p>
-          ) : (
-            <div className="space-y-1">
-              {filteredMembers.map(renderMemberCard)}
-            </div>
-          )}
-        </div>
-      </div>
+        <TabsContent value="hospital-network" className="space-y-3">
+          <HospitalNetworkScreen />
+        </TabsContent>
+      </Tabs>
 
       {/* Add/Edit Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add User</DialogTitle>
+            <DialogTitle>{t("administrators.dialog.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1.5">
@@ -305,7 +335,7 @@ export default function AdministratorsScreen() {
               <Input
                 value={addName}
                 onChange={(e) => setAddName(e.target.value)}
-                placeholder="Full name"
+                placeholder={t("administrators.dialog.fullNamePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
@@ -314,7 +344,7 @@ export default function AdministratorsScreen() {
                 type="email"
                 value={addEmail}
                 onChange={(e) => setAddEmail(e.target.value)}
-                placeholder="user@example.com"
+                placeholder={t("administrators.dialog.emailPlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
@@ -337,7 +367,7 @@ export default function AdministratorsScreen() {
               <Input
                 value={addPhone}
                 onChange={(e) => setAddPhone(e.target.value)}
-                placeholder="+27 82 555 0000"
+                placeholder={t("administrators.dialog.phonePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
@@ -345,7 +375,7 @@ export default function AdministratorsScreen() {
               <Input
                 value={addShift}
                 onChange={(e) => setAddShift(e.target.value)}
-                placeholder="Mon–Fri 07:00–19:00"
+                placeholder={t("administrators.dialog.shiftPlaceholder")}
               />
             </div>
           </div>
