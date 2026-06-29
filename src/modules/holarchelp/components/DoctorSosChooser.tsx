@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -28,6 +29,7 @@ export function DoctorSosChooser({
   onSelectSelf,
   onPatientIncidentCreated,
 }: DoctorSosChooserProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [mode, setMode] = useState<Mode>("choose");
   const [patients, setPatients] = useState<PatientRow[]>([]);

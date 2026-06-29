@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2, ArrowLeftRight } from "lucide-react";
@@ -44,6 +45,7 @@ const AVAILABLE_AMBULANCES: Ambulance[] = [
 ];
 
 export default function DispatchReassignmentScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [selectedAmbulance, setSelectedAmbulance] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

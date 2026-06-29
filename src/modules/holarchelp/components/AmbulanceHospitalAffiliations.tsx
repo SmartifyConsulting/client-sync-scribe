@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,7 @@ type Affiliation = {
 };
 
 export default function AmbulanceHospitalAffiliations({ providerId }: { providerId: string | null }) {
+  const { t } = useTranslation();
   const [affiliations, setAffiliations] = useState<Affiliation[]>([]);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<HospitalRow[]>([]);

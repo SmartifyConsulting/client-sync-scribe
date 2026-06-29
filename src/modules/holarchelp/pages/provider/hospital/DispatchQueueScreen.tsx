@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { Clock, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
@@ -80,6 +81,7 @@ const PRIORITY_COLORS = {
 };
 
 export default function DispatchQueueScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [filter, setFilter] = useState<"all" | "waiting" | "active" | "delayed" | "completed">("all");
 
