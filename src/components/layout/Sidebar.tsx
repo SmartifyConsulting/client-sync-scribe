@@ -19,7 +19,9 @@ import {
   Siren,
   ListChecks,
   Users2,
+  Mic,
 } from "lucide-react";
+
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
@@ -37,6 +39,8 @@ interface NavItem {
 const doctorNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard", tour: "doctor-home" },
   { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+  { icon: Mic, label: "My Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
+
   { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },

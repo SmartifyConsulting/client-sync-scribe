@@ -28,6 +28,8 @@
   "nav": {
     "home": "Home",
     "myPatients": "My Patients",
+    "mySessions": "My Sessions",
+
     "myPractice": "My Practice",
     "myCalendar": "My Calendar",
     "myTasks": "My Tasks",
