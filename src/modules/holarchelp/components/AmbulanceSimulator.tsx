@@ -50,12 +50,11 @@ function isPreviewHost() {
 
 export function AmbulanceSimulator({ incidentId }: { incidentId?: string } = {}) {
   const { providerId } = useProviderAccess();
-  const { availableRoles } = useUserRole();
+  const { isAdmin } = useUserRole();
   const [running, setRunning] = useState(false);
   const stepRef = useRef(0);
   const timerRef = useRef<number | null>(null);
 
-  const isAdmin = availableRoles.includes("admin");
   const allowed = isPreviewHost() && isAdmin;
 
   useEffect(() => {
