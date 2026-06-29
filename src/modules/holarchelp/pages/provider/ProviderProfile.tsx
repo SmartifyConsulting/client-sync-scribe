@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../components/ProviderGate";
-import { useMapboxToken } from "../../hooks/useMapboxToken";
-import { MAPBOX_STYLE } from "../../config/mapbox";
+import { loadGoogleMaps } from "../../lib/googleMapsLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -183,47 +180,61 @@ const Field = ({ label, value, onChange, type = "text" }: { label: string; value
 );
 
 function PinMap({ latitude, longitude }: { latitude?: number | null; longitude?: number | null }) {
-  const { data: token } = useMapboxToken();
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const mapRef = useRef<any>(null);
+  const gmapsRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current || !token) return;
-    mapboxgl.accessToken = token;
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: MAPBOX_STYLE,
-      center: [longitude ?? 28.05, latitude ?? -26.1],
-      zoom: latitude && longitude ? 14 : 3,
-    });
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
-    mapRef.current = map;
-    requestAnimationFrame(() => map.resize());
+    if (!containerRef.current || mapRef.current) return;
+    let cancelled = false;
+    loadGoogleMaps()
+      .then((g) => {
+        if (cancelled || !containerRef.current) return;
+        gmapsRef.current = g.maps;
+        mapRef.current = new g.maps.Map(containerRef.current, {
+          center: { lat: latitude ?? -26.1, lng: longitude ?? 28.05 },
+          zoom: latitude && longitude ? 14 : 3,
+          streetViewControl: false,
+          mapTypeControl: false,
+          fullscreenControl: false,
+          clickableIcons: false,
+        });
+        setReady(true);
+      })
+      .catch(() => {});
     return () => {
-      markerRef.current?.remove();
-      map.remove();
-      mapRef.current = null;
+      cancelled = true;
+      markerRef.current?.setMap(null);
       markerRef.current = null;
+      mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
   useEffect(() => {
+    if (!ready) return;
+    const gmaps = gmapsRef.current;
     const map = mapRef.current;
-    if (!map) return;
-    markerRef.current?.remove();
+    if (!map || !gmaps) return;
+    markerRef.current?.setMap(null);
     markerRef.current = null;
     if (typeof latitude === "number" && typeof longitude === "number") {
-      const el = document.createElement("div");
-      el.innerHTML =
-        '<div style="width:18px;height:18px;border-radius:50%;background:#dc2626;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>';
-      markerRef.current = new mapboxgl.Marker({ element: el.firstElementChild as HTMLElement })
-        .setLngLat([longitude, latitude])
-        .addTo(map);
-      map.easeTo({ center: [longitude, latitude], zoom: 14 });
+      const url =
+        "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="7" fill="#dc2626" stroke="white" stroke-width="3"/></svg>`,
+        );
+      markerRef.current = new gmaps.Marker({
+        position: { lat: latitude, lng: longitude },
+        map,
+        icon: { url, scaledSize: new gmaps.Size(22, 22), anchor: new gmaps.Point(11, 11) },
+      });
+      map.panTo({ lat: latitude, lng: longitude });
+      map.setZoom(14);
     }
-  }, [latitude, longitude]);
+  }, [ready, latitude, longitude]);
 
   return <div ref={containerRef} className="h-[220px] w-full overflow-hidden rounded-xl border" />;
 }
