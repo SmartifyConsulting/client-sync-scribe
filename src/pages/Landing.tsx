@@ -41,65 +41,59 @@ import { Testimonials } from "@/components/landing/Testimonials";
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 
-const patientBenefits = [
+const getPatientBenefits = (t: any) => [
   {
     icon: Eye,
-    title: "Complete Health Picture",
-    description:
-      "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records.",
+    title: t("landing.patientBenefits.benefit1Title", "Complete Health Picture"),
+    description: t("landing.patientBenefits.benefit1Description", "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records."),
   },
   {
     icon: Users,
-    title: "Connect Your Care Team",
-    description: "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
+    title: t("landing.patientBenefits.benefit2Title", "Connect Your Care Team"),
+    description: t("landing.patientBenefits.benefit2Description", "Invite specialists, GPs, and other providers to collaborate on your care with your full consent."),
   },
   {
     icon: Shield,
-    title: "You're in Control",
-    description:
-      "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
+    title: t("landing.patientBenefits.benefit3Title", "You're in Control"),
+    description: t("landing.patientBenefits.benefit3Description", "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions."),
   },
   {
     icon: Calendar,
-    title: "Unified Appointments",
-    description: "All your healthcare appointments from every provider in one calendar—never miss a follow-up.",
+    title: t("landing.patientBenefits.benefit4Title", "Unified Appointments"),
+    description: t("landing.patientBenefits.benefit4Description", "All your healthcare appointments from every provider in one calendar—never miss a follow-up."),
   },
 ];
 
-const providerBenefits = [
+const getProviderBenefits = (t: any) => [
   {
     icon: Brain,
-    title: "AI-Powered Insights",
-    description:
-      "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
+    title: t("landing.providerBenefits.benefit1Title", "AI-Powered Insights"),
+    description: t("landing.providerBenefits.benefit1Description", "Get comprehensive patient history summaries and medication conflict alerts before every consultation."),
   },
   {
     icon: Share2,
-    title: "Seamless Collaboration",
-    description: "Round Table notes enable real-time communication with other specialists caring for the same patient.",
+    title: t("landing.providerBenefits.benefit2Title", "Seamless Collaboration"),
+    description: t("landing.providerBenefits.benefit2Description", "Round Table notes enable real-time communication with other specialists caring for the same patient."),
   },
   {
     icon: FileText,
-    title: "Automated Documentation",
-    description: "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
+    title: t("landing.providerBenefits.benefit3Title", "Automated Documentation"),
+    description: t("landing.providerBenefits.benefit3Description", "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work."),
   },
   {
     icon: Heart,
-    title: "Better Patient Outcomes",
-    description:
-      "Access complete patient history across all their providers—make informed decisions with the full picture.",
+    title: t("landing.providerBenefits.benefit4Title", "Better Patient Outcomes"),
+    description: t("landing.providerBenefits.benefit4Description", "Access complete patient history across all their providers—make informed decisions with the full picture."),
   },
   {
     icon: Ambulance,
-    title: "Emergency Service Providers",
-    description:
-      "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context.",
+    title: t("landing.providerBenefits.benefit5Title", "Emergency Service Providers"),
+    description: t("landing.providerBenefits.benefit5Description", "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context."),
   },
   {
     icon: Hospital,
-    title: "Hospital Partners",
-    description:
-      "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time.",
+    title: t("landing.providerBenefits.benefit6Title", "Hospital Partners"),
+    description: t("landing.providerBenefits.benefit6Description", "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time."),
   },
 ];
 
@@ -115,6 +109,7 @@ const ecosystemFeatures = [
 ];
 
 export default function Landing() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [showRoleDialog, setShowRoleDialog] = useState(false);
@@ -152,10 +147,10 @@ export default function Landing() {
                 onClick={() => navigate("/auth?mode=login")}
                 className="btn-pill text-base text-muted-foreground hover:text-foreground"
               >
-                Login
+                {t("landing.nav.login")}
               </Button>
               <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-base">
-                Get Started
+                {t("landing.nav.getStarted")}
               </Button>
             </div>
           </div>
@@ -189,12 +184,12 @@ export default function Landing() {
 
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1.5 text-xs font-medium mb-5">
               <Sparkles className="h-3.5 w-3.5" />
-              AI-powered · Patient-controlled · HIPAA-aligned
+              {t("landing.hero.badge")}
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.05] mb-5">
-              A revolutionary healthcare ecosystem
-              <span className="block text-gradient pb-3">built around you.</span>
+              {t("landing.hero.title")}
+              <span className="block text-gradient pb-3">{t("landing.hero.titleHighlight")}</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground mb-7 max-w-2xl lg:mx-0 mx-auto">
@@ -207,18 +202,18 @@ export default function Landing() {
             {/* Capability pills */}
             <div className="flex flex-wrap gap-2 justify-center lg:justify-start mb-8">
               {[
-                { icon: Mic, label: "Voice Consultations" },
-                { icon: Brain, label: "AI Summaries" },
-                { icon: Video, label: "Incentivized Adherence" },
-                { icon: Gift, label: "Rewards" },
-                { icon: Users, label: "Round Table" },
-                { icon: Pill, label: "Prescriptions" },
-                { icon: Hospital, label: "Hospital Admissions" },
-                { icon: ClipboardList, label: "Auto-Tasks" },
-                { icon: Calendar, label: "Unified Calendar" },
-                { icon: Siren, label: "Emergency SOS" },
-                { icon: Ambulance, label: "Emergency Response Dispatch" },
-                { icon: Building2, label: "Hospital Network" },
+                { icon: Mic, label: t("landing.capabilities.voiceConsultations") },
+                { icon: Brain, label: t("landing.capabilities.aiSummaries") },
+                { icon: Video, label: t("landing.capabilities.incentivizedAdherence") },
+                { icon: Gift, label: t("landing.capabilities.rewards") },
+                { icon: Users, label: t("landing.capabilities.roundTable") },
+                { icon: Pill, label: t("landing.capabilities.prescriptions") },
+                { icon: Hospital, label: t("landing.capabilities.hospitalAdmissions") },
+                { icon: ClipboardList, label: t("landing.capabilities.autoTasks") },
+                { icon: Calendar, label: t("landing.capabilities.unifiedCalendar") },
+                { icon: Siren, label: t("landing.capabilities.emergencySOS") },
+                { icon: Ambulance, label: t("landing.capabilities.emergencyResponseDispatch") },
+                { icon: Building2, label: t("landing.capabilities.hospitalNetwork") },
               ].map((p) => (
                 <span
                   key={p.label}
@@ -236,7 +231,7 @@ export default function Landing() {
                 onClick={() => setShowRoleDialog(true)}
                 className="btn-pill text-base px-7 py-6 shadow-lg hover:shadow-xl transition-shadow w-full sm:w-auto"
               >
-                Join the Ecosystem
+                {t("landing.hero.cta")}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <div className="flex gap-2 w-full sm:w-auto">
@@ -247,7 +242,7 @@ export default function Landing() {
                   className="btn-pill flex-1 sm:flex-initial"
                 >
                   <Stethoscope className="mr-2 h-5 w-5" />
-                  Doctors
+                  {t("landing.hero.doctorsButton")}
                 </Button>
                 <Button
                   size="lg"
@@ -256,7 +251,7 @@ export default function Landing() {
                   className="btn-pill flex-1 sm:flex-initial"
                 >
                   <UserCircle className="mr-2 h-5 w-5" />
-                  Patients
+                  {t("landing.hero.patientsButton")}
                 </Button>
               </div>
             </div>
@@ -273,9 +268,9 @@ export default function Landing() {
                   <Smartphone className="h-6 w-6" />
                 </div>
                 <div className="flex-1 text-center sm:text-left">
-                  <p className="text-base font-bold text-foreground">Get Holarc on your phone</p>
+                  <p className="text-base font-bold text-foreground">{t("landing.mobile.title")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Available on iOS and Android — your full health story in your pocket.
+                    {t("landing.mobile.description")}
                   </p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
@@ -442,19 +437,18 @@ export default function Landing() {
           >
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
               <UserCircle className="h-4 w-4" />
-              For Patients
+              {t("landing.patientBenefits.sectionBadge")}
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Your Health. <span className="text-primary">360°</span> View.
+              {t("landing.patientBenefits.sectionTitle")} <span className="text-primary">360°</span> {t("landing.patientBenefits.sectionTitleHighlight")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and
-              clinical note from every provider, unified in one place and entirely under your control.
+              {t("landing.patientBenefits.sectionDescription")}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {patientBenefits.map((benefit, index) => (
+            {getPatientBenefits(t).map((benefit, index) => (
               <motion.div
                 key={benefit.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -486,17 +480,16 @@ export default function Landing() {
           >
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-4">
               <Stethoscope className="h-4 w-4" />
-              For Healthcare Providers
+              {t("landing.providerBenefits.sectionBadge")}
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">Practice with the Full Picture</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">{t("landing.providerBenefits.sectionTitle")}</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              When patients grant you access, you see everything—their complete history across all providers. Make
-              better decisions with better information.
+              {t("landing.providerBenefits.sectionDescription")}
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {providerBenefits.map((benefit, index) => (
+            {getProviderBenefits(t).map((benefit, index) => (
               <motion.div
                 key={benefit.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -532,13 +525,12 @@ export default function Landing() {
             viewport={{ once: true }}
             className="card-modern p-12 bg-gradient-to-br from-primary/5 to-primary/10"
           >
-            <h2 className="text-3xl font-bold text-foreground mb-4">Ready for Healthcare That Works Together?</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">{t("landing.cta.title")}</h2>
             <p className="text-lg text-muted-foreground mb-8">
-              Join thousands of patients and providers building a better healthcare experience—one where your health
-              story is complete, connected, and under your control.
+              {t("landing.cta.description")}
             </p>
             <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-lg px-8 py-6">
-              Get Started Today
+              {t("landing.cta.button")}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
@@ -549,23 +541,23 @@ export default function Landing() {
       <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center text-2xl">Join Holarc</DialogTitle>
-            <DialogDescription className="text-center">How will you use the platform?</DialogDescription>
+            <DialogTitle className="text-center text-2xl">{t("landing.roleDialog.title")}</DialogTitle>
+            <DialogDescription className="text-center">{t("landing.roleDialog.description")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label htmlFor="join-role">I am a...</Label>
+              <Label htmlFor="join-role">{t("landing.roleDialog.label")}</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
                 <SelectTrigger id="join-role">
-                  <SelectValue placeholder="Select user type" />
+                  <SelectValue placeholder={t("landing.roleDialog.placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Patient</SelectItem>
-                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
-                  <SelectItem value="hospital">Hospital</SelectItem>
-                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
-                  <SelectItem value="insurance">Insurance Company</SelectItem>
-                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  <SelectItem value="patient">{t("landing.roleDialog.options.patient")}</SelectItem>
+                  <SelectItem value="doctor">{t("landing.roleDialog.options.doctor")}</SelectItem>
+                  <SelectItem value="hospital">{t("landing.roleDialog.options.hospital")}</SelectItem>
+                  <SelectItem value="emergency">{t("landing.roleDialog.options.emergency")}</SelectItem>
+                  <SelectItem value="insurance">{t("landing.roleDialog.options.insurance")}</SelectItem>
+                  <SelectItem value="pharmacy">{t("landing.roleDialog.options.pharmacy")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -575,7 +567,7 @@ export default function Landing() {
               disabled={!selectedRole}
               onClick={() => selectedRole && handleRoleSelect(selectedRole)}
             >
-              Continue
+              {t("landing.roleDialog.continueButton")}
             </Button>
           </div>
         </DialogContent>

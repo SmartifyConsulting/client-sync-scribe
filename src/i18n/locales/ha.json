@@ -1634,5 +1634,112 @@
       "operatingCostBreakdown": "Warwarewa Farashin Aiki",
       "usageTrend": "Yawan Amfani (5 Juma'a)"
     }
+  },
+  "landing": {
+    "nav": {
+      "login": "Login",
+      "getStarted": "Get Started"
+    },
+    "hero": {
+      "badge": "AI-powered · Patient-controlled · HIPAA-aligned",
+      "title": "A revolutionary healthcare ecosystem",
+      "titleHighlight": "built around you.",
+      "description": "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360° health story — from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
+      "cta": "Join the Ecosystem",
+      "doctorsButton": "Doctors",
+      "patientsButton": "Patients"
+    },
+    "capabilities": {
+      "voiceConsultations": "Voice Consultations",
+      "aiSummaries": "AI Summaries",
+      "incentivizedAdherence": "Incentivized Adherence",
+      "rewards": "Rewards",
+      "roundTable": "Round Table",
+      "prescriptions": "Prescriptions",
+      "hospitalAdmissions": "Hospital Admissions",
+      "autoTasks": "Auto-Tasks",
+      "unifiedCalendar": "Unified Calendar",
+      "emergencySOS": "Emergency SOS",
+      "emergencyResponseDispatch": "Emergency Response Dispatch",
+      "hospitalNetwork": "Hospital Network"
+    },
+    "mobile": {
+      "title": "Get Holarc on your phone",
+      "description": "Available on iOS and Android — your full health story in your pocket.",
+      "appStore": "App Store",
+      "googlePlay": "Google Play"
+    },
+    "trustStrip": {
+      "patientAccess": "Patient-granted access",
+      "collaboration": "Real-time collaboration",
+      "patientCentric": "Built around the patient"
+    },
+    "features": {
+      "transcribedSessions": "Transcribed Sessions",
+      "transcribedDescription": "Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks automatically.",
+      "medicationAdherence": "Medication Adherence",
+      "medicationDescription": "Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.",
+      "rewardsEarned": "+5 Rewards earned",
+      "roundTableFeature": "Round Table",
+      "roundTableDescription": "Specialists coordinate per patient with shared notes and read-receipts.",
+      "aiAssistant": "AI Clinical Assistant",
+      "aiAssistantDescription": "Patient history summaries · medication conflict alerts · imaging analysis · auto-generated documents.",
+      "holarcHelp": "Holarc Help (SOS)",
+      "holarcHelpDescription": "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
+      "emergencyResponders": "Emergency responders",
+      "hospitals": "Hospitals",
+      "bloodBanks": "Blood banks"
+    },
+    "patientBenefits": {
+      "sectionBadge": "For Patients",
+      "sectionTitle": "Your Health.",
+      "sectionTitleHighlight": "360° View.",
+      "sectionDescription": "Holarc gives you a complete 360-degree view of your health profile—every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
+      "benefit1Title": "Complete Health Picture",
+      "benefit1Description": "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records.",
+      "benefit2Title": "Connect Your Care Team",
+      "benefit2Description": "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
+      "benefit3Title": "You're in Control",
+      "benefit3Description": "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
+      "benefit4Title": "Unified Appointments",
+      "benefit4Description": "All your healthcare appointments from every provider in one calendar—never miss a follow-up."
+    },
+    "providerBenefits": {
+      "sectionBadge": "For Healthcare Providers",
+      "sectionTitle": "Practice with the Full Picture",
+      "sectionDescription": "When patients grant you access, you see everything—their complete history across all providers. Make better decisions with better information.",
+      "benefit1Title": "AI-Powered Insights",
+      "benefit1Description": "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
+      "benefit2Title": "Seamless Collaboration",
+      "benefit2Description": "Round Table notes enable real-time communication with other specialists caring for the same patient.",
+      "benefit3Title": "Automated Documentation",
+      "benefit3Description": "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
+      "benefit4Title": "Better Patient Outcomes",
+      "benefit4Description": "Access complete patient history across all their providers—make informed decisions with the full picture.",
+      "benefit5Title": "Emergency Service Providers",
+      "benefit5Description": "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient's full medical context.",
+      "benefit6Title": "Hospital Partners",
+      "benefit6Description": "Hospitals receive inbound emergencies with prefilled patient summaries, manage admissions, and coordinate with referring doctors in real time."
+    },
+    "cta": {
+      "title": "Ready for Healthcare That Works Together?",
+      "description": "Join thousands of patients and providers building a better healthcare experience—one where your health story is complete, connected, and under your control.",
+      "button": "Get Started Today"
+    },
+    "roleDialog": {
+      "title": "Join Holarc",
+      "description": "How will you use the platform?",
+      "label": "I am a...",
+      "placeholder": "Select user type",
+      "options": {
+        "patient": "Patient",
+        "doctor": "Healthcare Provider",
+        "hospital": "Hospital",
+        "emergency": "Emergency Service Provider",
+        "insurance": "Insurance Company",
+        "pharmacy": "Pharmacy"
+      },
+      "continueButton": "Continue"
+    }
   }
 }

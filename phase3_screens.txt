@@ -1,0 +1,41 @@
+PHASE 3 SCREENS (Non-Doctor, Non-Patient, Non-Provider):
+
+Core Pages:
+- src/pages/Landing.tsx
+- src/pages/Auth.tsx
+- src/pages/Dashboard.tsx
+- src/pages/TodoList.tsx
+- src/pages/Sessions.tsx
+- src/pages/Patients.tsx
+- src/pages/Documents.tsx
+- src/pages/MyPractice.tsx
+- src/pages/Profile.tsx
+- src/pages/Settings.tsx
+- src/pages/Notifications.tsx
+- src/pages/Connections.tsx
+- src/pages/Legal.tsx
+- src/pages/TermsAndConditions.tsx
+- src/pages/ForgotPassword.tsx
+- src/pages/ResetPassword.tsx
+- src/pages/NotFound.tsx
+- src/pages/VulaWallet.tsx
+- src/pages/ReferralDoctors.tsx
+- src/pages/PatientConsent.tsx
+- src/pages/BusinessAssociateAgreement.tsx
+- src/pages/CPDCertificates.tsx
+- src/pages/ExpiringRecordings.tsx
+- src/pages/SessionDetail.tsx
+- src/pages/ProviderSignup.tsx
+- src/pages/Admin.tsx
+
+Admin Pages:
+- src/pages/admin/BulkPasswordReset.tsx
+- src/pages/admin/GamificationAdmin.tsx
+- src/pages/admin/HolarcHelpAccountability.tsx
+- src/pages/admin/HolarcHelpProviderIncidents.tsx
+- src/pages/admin/HolarcHelpProviders.tsx
+- src/pages/admin/PricingAdmin.tsx
+- src/pages/admin/ProviderApprovalAction.tsx
+
+Shared Admin Components:
+- src/pages/admin/_shared/*.tsx
