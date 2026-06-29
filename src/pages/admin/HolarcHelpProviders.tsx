@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -95,6 +96,7 @@ const nounFor = (k: Kind) =>
 type EditState = { kind: Kind; row: any | null } | null;
 
 export default function HolarcHelpProviders() {
+  const { t } = useTranslation();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [tab, setTab] = useState<Kind>("hospital");
   const [status, setStatus] = useState<Status>("all");
@@ -149,7 +151,7 @@ export default function HolarcHelpProviders() {
     return (
       <div className="mx-auto max-w-md p-8 text-center">
         <ShieldAlert className="mx-auto h-10 w-10 text-destructive" />
-        <p className="mt-4 font-semibold">Admin access required</p>
+        <p className="mt-4 font-semibold">{t("holarcHelp.admin.messages.adminAccessRequired")}</p>
       </div>
     );
   }
@@ -159,18 +161,18 @@ export default function HolarcHelpProviders() {
     if (active) patch.approved_at = new Date().toISOString();
     const { error } = await supabase.from(tableFor(kind) as any).update(patch).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success(active ? "Activated" : "Deactivated"); load();
+    toast.success(active ? t("holarcHelp.admin.messages.activated") : t("holarcHelp.admin.messages.deactivated")); load();
   };
   const setTier = async (kind: Kind, id: string, tier: string) => {
     const { error } = await supabase.from(tableFor(kind) as any).update({ tier } as any).eq("id", id);
     if (error) return toast.error(error.message);
-    toast.success("Tier updated"); load();
+    toast.success(t("holarcHelp.admin.messages.tierUpdated")); load();
   };
   const removeRow = async () => {
     if (!confirmDelete) return;
     const { error } = await supabase.from(tableFor(confirmDelete.kind) as any).delete().eq("id", confirmDelete.id);
     if (error) return toast.error(error.message);
-    toast.success("Deleted"); setConfirmDelete(null); load();
+    toast.success(t("holarcHelp.admin.messages.deleted")); setConfirmDelete(null); load();
   };
 
 
@@ -208,7 +210,7 @@ export default function HolarcHelpProviders() {
           <div className="flex items-center gap-2">
             <Switch checked={active} onCheckedChange={(v) => setActiveFlag(kind, r.id, v)} />
             <span className={`text-[11px] font-semibold ${active ? "text-emerald-700" : "text-muted-foreground"}`}>
-              {active ? "Active" : "Inactive"}
+              {active ? t("holarcHelp.admin.status.active") : t("holarcHelp.admin.status.inactive")}
             </span>
           </div>
         </TableCell>
@@ -230,7 +232,7 @@ export default function HolarcHelpProviders() {
     );
   };
 
-  const headers = ["Name", "Contact", "City", "Tier", "Status", "Actions"];
+  const headers = [t("holarcHelp.admin.table.name"), t("holarcHelp.admin.table.contact"), t("holarcHelp.admin.table.city"), t("holarcHelp.admin.table.tier"), t("holarcHelp.admin.table.status"), t("holarcHelp.admin.table.actions")];
 
   const renderGroupedTable = (rows: any[], kind: Kind) => {
     const noun = nounFor(kind);
@@ -259,7 +261,7 @@ export default function HolarcHelpProviders() {
                       <AccordionTrigger className="px-3 hover:no-underline">
                         <div className="flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${TIER_CHIP[t]}`}>
-                            {t.replace("_", " ").replace("tier", "Tier")}
+                            {t(`holarcHelp.admin.tier.${t}`)}
                           </span>
                           <span className="text-xs text-muted-foreground">{tiers[t].length} {noun}</span>
                         </div>
@@ -316,7 +318,7 @@ export default function HolarcHelpProviders() {
     return (
       <AdminPanel
         title={`${list.length} ${noun}${q ? ` matching "${providerSearch[k]}"` : ""}`}
-        description="Grouped by country, then tier."
+        description={t("holarcHelp.admin.forms.groupedBy")}
         bodyClassName="p-0"
         actions={
           <div className="flex flex-wrap items-center gap-2">
@@ -325,7 +327,7 @@ export default function HolarcHelpProviders() {
               <Input
                 value={providerSearch[k]}
                 onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
-                placeholder={`Search ${noun}…`}
+                placeholder={t("holarcHelp.admin.actions.search", { noun })}
                 className="h-8 w-48 pl-7 text-[12px]"
               />
             </div>
@@ -340,13 +342,13 @@ export default function HolarcHelpProviders() {
                       : "text-[hsl(var(--admin-text-secondary))] hover:text-[hsl(var(--admin-text-primary))]"
                   }`}
                 >
-                  {s}
+                  {t(`holarcHelp.admin.status.${s}`)}
                 </button>
               ))}
             </div>
             {providerKindNeedsAdd(k) && (
               <Button size="sm" className="h-8 px-3 text-[12px]" onClick={() => { setTab(k); setChooserOpen(true); }}>
-                <Plus className="mr-1 h-3.5 w-3.5" />Add
+                <Plus className="mr-1 h-3.5 w-3.5" />{t("holarcHelp.admin.actions.add")}
               </Button>
             )}
           </div>
@@ -366,17 +368,17 @@ export default function HolarcHelpProviders() {
 
   return (
     <AdminPage
-      eyebrow="Admin"
-      title="User Management"
-      description="Manage users and accountability."
+      eyebrow={t("holarcHelp.admin.eyebrow")}
+      title={t("holarcHelp.admin.title")}
+      description={t("holarcHelp.admin.description")}
     >
       <Tabs defaultValue="users">
         <TabsList className={adminTabsListClass}>
           <TabsTrigger value="users" className={`${adminTabsTriggerClass} gap-1.5`}>
-            <Users className="h-3.5 w-3.5" />Users
+            <Users className="h-3.5 w-3.5" />{t("holarcHelp.admin.tabs.users")}
           </TabsTrigger>
           <TabsTrigger value="accountability" className={`${adminTabsTriggerClass} gap-1.5`}>
-            <BarChart3 className="h-3.5 w-3.5" />Accountability
+            <BarChart3 className="h-3.5 w-3.5" />{t("holarcHelp.admin.tabs.accountability")}
           </TabsTrigger>
         </TabsList>
 
@@ -443,20 +445,20 @@ export default function HolarcHelpProviders() {
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
-            <DialogTitle>Add provider</DialogTitle>
+            <DialogTitle>{t("holarcHelp.admin.actions.addProvider")}</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-3 gap-3 py-2">
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("hospital"); setEdit({ kind: "hospital", row: null }); }}>
               <Hospital className="h-6 w-6" />
-              <span className="text-xs font-semibold">Hospital</span>
+              <span className="text-xs font-semibold">{t("holarcHelp.admin.actions.hospital")}</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
               <Ambulance className="h-6 w-6" />
-              <span className="text-xs font-semibold">Emergency Response</span>
+              <span className="text-xs font-semibold">{t("holarcHelp.admin.actions.ambulance")}</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("pharmacy"); setEdit({ kind: "pharmacy", row: null }); }}>
               <Pill className="h-6 w-6" />
-              <span className="text-xs font-semibold">Pharmacy</span>
+              <span className="text-xs font-semibold">{t("holarcHelp.admin.actions.pharmacy")}</span>
             </Button>
           </div>
         </DialogContent>
@@ -465,15 +467,15 @@ export default function HolarcHelpProviders() {
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete provider?</AlertDialogTitle>
+            <AlertDialogTitle>{t("holarcHelp.admin.messages.deleteConfirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmDelete?.name} will be permanently removed.
+              {confirmDelete?.name} {t("holarcHelp.admin.messages.deleteMessage")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("holarcHelp.admin.actions.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={removeRow} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t("holarcHelp.admin.actions.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

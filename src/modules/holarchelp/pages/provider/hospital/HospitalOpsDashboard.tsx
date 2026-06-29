@@ -120,17 +120,17 @@ export default function HospitalOpsDashboard() {
                 <td className="px-3 py-2 text-xs">{r.incident_type ?? t("ambulance.emergency")}</td>
                 <td className="px-3 py-2 text-xs">
                   <span className="inline-flex items-center gap-1"><Ambulance className="h-3.5 w-3.5 text-destructive" />
-                    {crews[r.assigned_provider_id ?? ""] ?? "—"}
+                    {crews[r.assigned_provider_id ?? ""] ?? t("common.dash")}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-right">
                   {r.eta_minutes != null
                     ? <span className="text-base font-extrabold tabular-nums"><EtaCountdown etaMinutes={r.eta_minutes} lastUpdate={r.last_eta_update} /></span>
-                    : <span className="text-[10px] uppercase text-muted-foreground">—</span>}
+                    : <span className="text-[10px] uppercase text-muted-foreground">{t("common.dash")}</span>}
                 </td>
                 <td className="px-3 py-2">
-                  <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${statusTone(r.status)}`}>
-                    {r.status.replace(/_/g," ")}
+                  <span className={`rounded-full border px-1.5 py-0.5 text[10px] font-semibold ${statusTone(r.status)}`}>
+                    {t(`holarcHelp.emergency.dashboard.status.${r.status}`, { defaultValue: r.status.replace(/_/g," ") })}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-right">

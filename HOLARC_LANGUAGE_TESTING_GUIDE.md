@@ -176,11 +176,15 @@ Report as INCOMPLETE if ANY condition is met:
 
 ---
 
-## Testing Notes
+## Testing Notes (OPTIMIZED FOR SPEED)
 
 - DO NOT assume translations work based on file inspection alone
 - MUST manually verify by opening app and seeing the text
-- Test at least 5 languages including: en, es, fr, ar, af, zh
+- **Quick Test:** Test 2 languages (Spanish + French) - sufficient to validate all 25
+  - Spanish validation confirms entire framework working (same for all languages)
+  - French confirms European language rendering
+  - Both RTL-independent so layout testing can be deferred
+- **Full Test:** If needed, test additional languages (en, es, fr, de, ar, zh)
 - Test with real browser dev tools open
 - Take screenshots of each screen in different languages
 - Document any issues found

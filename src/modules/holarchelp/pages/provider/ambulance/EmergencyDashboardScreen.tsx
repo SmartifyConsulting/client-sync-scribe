@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, Clock, MapPin } from "lucide-react";
 
@@ -73,6 +74,7 @@ const STATUS_CONFIG = {
 };
 
 export default function EmergencyDashboardScreen() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<"new" | "active" | "completed">("new");
   const filteredIncidents = MOCK_INCIDENTS.filter((i) => i.status === filter);
 

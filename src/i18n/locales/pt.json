@@ -87,6 +87,128 @@
     "memberRemoved": "Member removed",
     "rolesCrew": "Paramedic / EMT / Driver / Dispatcher"
   },
+  "holarcHelp": {
+    "admin": {
+      "eyebrow": "Admin",
+      "title": "User Management",
+      "description": "Manage users and accountability.",
+      "tabs": {
+        "users": "Users",
+        "accountability": "Accountability"
+      },
+      "subtabs": {
+        "patients": "Patients",
+        "healthcare": "Healthcare Providers",
+        "hospitals": "Hospitals",
+        "erProviders": "ER Providers",
+        "pharmacies": "Pharmacies",
+        "insurers": "Insurers",
+        "admin": "Admin"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "all": "All"
+      },
+      "tier": {
+        "tier_1": "Tier 1",
+        "tier_2": "Tier 2",
+        "tier_3": "Tier 3",
+        "tier_4": "Tier 4"
+      },
+      "table": {
+        "name": "Name",
+        "contact": "Contact",
+        "city": "City",
+        "tier": "Tier",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "messages": {
+        "adminAccessRequired": "Admin access required",
+        "activated": "Activated",
+        "deactivated": "Deactivated",
+        "tierUpdated": "Tier updated",
+        "deleted": "Deleted",
+        "deleteConfirm": "Delete provider?",
+        "deleteMessage": "will be permanently removed",
+        "noMatch": "No match found"
+      },
+      "actions": {
+        "add": "Add",
+        "addProvider": "Add provider",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "search": "Search {{noun}}",
+        "inviteStaff": "Invite staff",
+        "hospital": "Hospital",
+        "ambulance": "Emergency Response",
+        "pharmacy": "Pharmacy"
+      },
+      "forms": {
+        "groupedBy": "Grouped by country, then tier"
+      }
+    },
+    "emergency": {
+      "dashboard": {
+        "title": "Emergency Dashboard",
+        "status": {
+          "new": "NEW",
+          "active": "ACTIVE",
+          "completed": "COMPLETED"
+        },
+        "severity": {
+          "critical": "Critical",
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low"
+        },
+        "incidentType": {
+          "selfCreated": "Self-created",
+          "fromHospital": "From Hospital"
+        }
+      },
+      "dispatch": {
+        "title": "Dispatch Management",
+        "activeDispatch": "Active Dispatch",
+        "dispatchQueue": "Dispatch Queue",
+        "assignment": "Dispatch Assignment",
+        "reassignment": "Dispatch Reassignment",
+        "status": {
+          "active": "Active",
+          "pending": "Pending",
+          "complete": "Complete"
+        },
+        "actions": {
+          "assign": "Assign",
+          "reassign": "Reassign",
+          "dispatch": "Dispatch",
+          "cancel": "Cancel"
+        }
+      },
+      "incidents": {
+        "title": "Incidents",
+        "list": "Incident List",
+        "detail": "Incident Detail",
+        "contacts": "Emergency Contacts",
+        "nearby": "Nearby Resources"
+      },
+      "ambulance": {
+        "dashboard": "Emergency Dashboard",
+        "affiliations": "Affiliated Hospitals",
+        "networkScreen": "Hospital Network",
+        "directory": "Hospitals Directory"
+      },
+      "hospital": {
+        "operations": "Hospital Operations",
+        "dashboard": "Hospital Dashboard",
+        "selection": "Hospital Selection",
+        "console": "Incident Console",
+        "layout": "Operations Layout"
+      }
+    }
+  },
   "telematics": {
     "title": "Rastreamento",
     "subtitle": "Fleet Telematics · Last 24h",

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, AlertCircle, Phone } from "lucide-react";
@@ -9,6 +10,7 @@ import {
 } from "../../../hooks/useHospitalNetwork";
 
 export default function HospitalSelectionScreen() {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useAvailableHospitals();
   const [selectedHospital, setSelectedHospital] = useState<string | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -42,13 +44,13 @@ export default function HospitalSelectionScreen() {
     <div className="space-y-4">
       <div className="space-y-1">
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Dispatch Management
+          {t("holarcHelp.emergency.dispatch.dispatchManagement")}
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Select Hospital Destination
+          {t("holarcHelp.emergency.dispatch.selectHospitalDestination")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Only hospitals currently accepting patients are listed.
+          {t("holarcHelp.emergency.dispatch.onlyAcceptingHospitals")}
         </p>
       </div>
 
@@ -60,7 +62,7 @@ export default function HospitalSelectionScreen() {
         </div>
       ) : hospitals.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8">
-          No hospitals are currently accepting patients.
+          {t("holarcHelp.emergency.dispatch.noHospitalsAccepting")}
         </p>
       ) : (
         <div className="grid gap-3 max-w-2xl">
@@ -90,10 +92,10 @@ export default function HospitalSelectionScreen() {
                 {hospital._eta != null && (
                   <div className="text-right shrink-0">
                     <p className="text-sm font-semibold text-warning">
-                      {hospital._eta} min ETA
+                      {t("holarcHelp.emergency.dispatch.etaLabel", { minutes: hospital._eta })}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {hospital._km!.toFixed(1)} km away
+                      {t("holarcHelp.emergency.dispatch.kmAway", { km: hospital._km!.toFixed(1) })}
                     </p>
                   </div>
                 )}
@@ -101,22 +103,22 @@ export default function HospitalSelectionScreen() {
 
               <div className="grid grid-cols-3 gap-2 mb-2 p-2 bg-muted rounded text-xs">
                 <div>
-                  <p className="text-muted-foreground">Beds</p>
-                  <p className="font-semibold">{hospital.beds_available ?? "—"}</p>
+                  <p className="text-muted-foreground">{t("holarcHelp.emergency.dispatch.beds")}</p>
+                  <p className="font-semibold">{hospital.beds_available ?? t("common.dash")}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">ICU</p>
-                  <p className="font-semibold">{hospital.icu_available ?? "—"}</p>
+                  <p className="text-muted-foreground">{t("holarcHelp.emergency.dispatch.icu")}</p>
+                  <p className="font-semibold">{hospital.icu_available ?? t("common.dash")}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">ER beds</p>
-                  <p className="font-semibold">{hospital.er_beds_available ?? "—"}</p>
+                  <p className="text-muted-foreground">{t("holarcHelp.emergency.dispatch.erBeds")}</p>
+                  <p className="font-semibold">{hospital.er_beds_available ?? t("common.dash")}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 text-xs text-success">
                 <AlertCircle className="h-3.5 w-3.5" />
-                <span className="font-medium">Accepting patients</span>
+                <span className="font-medium">{t("holarcHelp.emergency.dispatch.acceptingPatients")}</span>
               </div>
 
               {hospital.contact_phone && (
@@ -133,7 +135,7 @@ export default function HospitalSelectionScreen() {
       {selectedHospital && (
         <div className="rounded-xl border bg-card p-4 max-w-2xl">
           <h3 className="text-xs font-semibold uppercase mb-1 text-muted-foreground">
-            Selected destination
+            {t("holarcHelp.emergency.dispatch.selectedDestination")}
           </h3>
           <p className="text-sm font-semibold">
             {hospitals.find((h) => h.id === selectedHospital)?.name}
@@ -148,7 +150,7 @@ export default function HospitalSelectionScreen() {
           className="flex-1"
           onClick={() => window.history.back()}
         >
-          Back
+          {t("common.back")}
         </Button>
         <Button
           size="sm"
@@ -156,7 +158,7 @@ export default function HospitalSelectionScreen() {
           disabled={!selectedHospital}
           onClick={() => alert("Hospital selected!")}
         >
-          Confirm Selection
+          {t("holarcHelp.emergency.dispatch.confirmSelection")}
         </Button>
       </div>
     </div>

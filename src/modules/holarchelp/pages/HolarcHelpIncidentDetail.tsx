@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ import { getPublicTrackUrl } from "../lib/public-track-url";
 type Loc = { latitude: number; longitude: number; recorded_at: string };
 
 export default function HolarcHelpIncidentDetail() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -133,10 +135,10 @@ export default function HolarcHelpIncidentDetail() {
   const goHome = () => navigate("/patient/holarchelp");
   const shareLink = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: "Live emergency tracking", url: trackingUrl }); return; } catch { /* user cancelled */ }
+      try { await navigator.share({ title: t("holarcHelp.emergency.details.liveTracking"), url: trackingUrl }); return; } catch { /* user cancelled */ }
     }
     await navigator.clipboard.writeText(trackingUrl);
-    toast.success("Tracking link copied — share it with your contacts");
+    toast.success(t("holarcHelp.emergency.details.trackingLinkCopied"));
   };
 
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
@@ -244,11 +246,11 @@ export default function HolarcHelpIncidentDetail() {
       {isFresh && cancelSecondsLeft > 0 && isLive && (
         <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 text-amber-900 dark:bg-amber-950/20 dark:text-amber-100">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider">False alarm?</p>
-            <p className="text-sm">You can still cancel for the next {cancelSecondsLeft}s.</p>
+            <p className="text-xs font-bold uppercase tracking-wider">{t("holarcHelp.emergency.details.falseAlarm")}</p>
+            <p className="text-sm">{t("holarcHelp.emergency.details.canCancelFor", { seconds: cancelSecondsLeft })}</p>
           </div>
           <Button size="sm" variant="outline" className="shrink-0" onClick={cancelAlert}>
-            Cancel alert
+            {t("holarcHelp.emergency.details.cancelAlert")}
           </Button>
         </div>
       )}
@@ -256,7 +258,7 @@ export default function HolarcHelpIncidentDetail() {
       <div className="sticky top-0 z-30 -mx-4 mb-3 border-b bg-background/95 px-4 py-2 backdrop-blur md:mx-0 md:rounded-b-xl">
         <div className="flex items-center gap-1.5">
           <Button size="sm" variant="ghost" className="shrink-0 gap-1" onClick={goHome}>
-            <ArrowLeft className="h-4 w-4" /> SOS Home
+            <ArrowLeft className="h-4 w-4" /> {t("holarcHelp.emergency.details.sosHome")}
           </Button>
           <div className="flex-1" />
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
@@ -269,21 +271,21 @@ export default function HolarcHelpIncidentDetail() {
       </div>
 
       <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
+        <h1 className="text-xl font-bold">{isLive ? t("holarcHelp.emergency.details.activeEmergency") : t("holarcHelp.emergency.details.incidentClosed")}</h1>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
-          {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
+          {t(`holarcHelp.emergency.dashboard.status.${incident.status}`, { defaultValue: (incident.status ?? "").toUpperCase().replace(/_/g, " ") })}
         </span>
       </div>
-      <p className="mb-3 text-xs text-muted-foreground">Started {new Date(incident.created_at).toLocaleString()}</p>
+      <p className="mb-3 text-xs text-muted-foreground">{t("holarcHelp.emergency.details.started", { date: new Date(incident.created_at).toLocaleString() })}</p>
 
       {showNoResponders && (
         <div className="mb-3 flex items-start gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 p-3 text-sm dark:bg-red-950/20">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="flex-1">
-            <p className="font-semibold text-red-700">No emergency responder has accepted yet.</p>
-            <p className="text-xs text-red-700/80">We're still searching. Please consider calling an emergency line directly.</p>
+            <p className="font-semibold text-red-700">{t("holarcHelp.emergency.details.noResponderAccepted")}</p>
+            <p className="text-xs text-red-700/80">{t("holarcHelp.emergency.details.stillSearching")}</p>
             <Button size="sm" variant="destructive" className="mt-2 gap-1" onClick={callEmergency}>
-              <Phone className="h-4 w-4" /> Call 10177 now
+              <Phone className="h-4 w-4" /> {t("holarcHelp.emergency.details.callEmergency")}
             </Button>
           </div>
         </div>
@@ -297,8 +299,8 @@ export default function HolarcHelpIncidentDetail() {
         <div className="mb-3 flex items-start gap-2 rounded-2xl border-2 border-red-500/50 bg-red-50 p-3 text-sm dark:bg-red-950/20">
           <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600" />
           <div>
-            <p className="font-semibold text-red-700">Your responder is unable to continue.</p>
-            <p className="text-xs text-red-700/80">Finding the next available emergency responder…</p>
+            <p className="font-semibold text-red-700">{t("holarcHelp.emergency.details.responderUnableContinue")}</p>
+            <p className="text-xs text-red-700/80">{t("holarcHelp.emergency.details.findingNextResponder")}</p>
           </div>
         </div>
       )}
@@ -306,8 +308,8 @@ export default function HolarcHelpIncidentDetail() {
       {responder && incident.assigned_provider_id && (
         <div className="mb-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
           <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-            {responder.kind === "hospital" ? "🏥 Receiving hospital" : "🚑 Responding"}
-            {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
+            {responder.kind === "hospital" ? t("holarcHelp.emergency.details.receivingHospital") : t("holarcHelp.emergency.details.responding")}
+            {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">{t("holarcHelp.emergency.details.autoAssigned")}</span>}
           </p>
           <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">
@@ -326,7 +328,7 @@ export default function HolarcHelpIncidentDetail() {
           </div>
           {distanceKm != null && incident.provider_latitude == null && (
             <p className="mt-1 text-[11px] text-emerald-800/70 dark:text-emerald-200/60">
-              Estimate based on responder's registered location. Updates live once they start moving.
+              {t("holarcHelp.emergency.details.estimateBasedOnRegistered")}
             </p>
           )}
         </div>
@@ -337,17 +339,18 @@ export default function HolarcHelpIncidentDetail() {
       {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
         <div className="mt-4 rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your initial voice note</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">{t("holarcHelp.emergency.details.initialVoiceNote")}</p>
             {incident.voice_note_audio_url && (
               <Button
                 size="sm"
                 variant="outline"
                 className="h-7 text-xs"
+                title={t("holarcHelp.emergency.details.retryTranscription")}
                 onClick={async () => {
-                  toast.message("Re-transcribing…");
+                  toast.message(t("holarcHelp.emergency.details.reTranscribing"));
                   try {
                     const { data: signed } = await supabase.storage.from("session-audio").createSignedUrl(incident.voice_note_audio_url, 120);
-                    if (!signed?.signedUrl) throw new Error("Could not access audio");
+                    if (!signed?.signedUrl) throw new Error(t("holarcHelp.emergency.details.couldNotAccessAudio"));
                     const audioRes = await fetch(signed.signedUrl);
                     const blob = await audioRes.blob();
                     const b64 = await new Promise<string>((res, rej) => {
@@ -357,19 +360,19 @@ export default function HolarcHelpIncidentDetail() {
                       r.readAsDataURL(blob);
                     });
                     const { data, error } = await supabase.functions.invoke("transcribe-audio", {
-                      body: { audio: b64, patientName: "Patient", doctorName: "Responder" },
+                      body: { audio: b64, patientName: t("holarcHelp.emergency.details.patient"), doctorName: t("holarcHelp.emergency.details.responder") },
                     });
-                    if (error || !(data as any)?.text) throw new Error("Empty transcript");
+                    if (error || !(data as any)?.text) throw new Error(t("holarcHelp.emergency.details.emptyTranscript"));
                     await supabase.from("holarchelp_incidents" as any).update({
                       voice_note_transcript: String((data as any).text),
                     } as any).eq("id", id);
-                    toast.success("Transcript updated");
+                    toast.success(t("holarcHelp.emergency.details.transcriptUpdated"));
                   } catch (e: any) {
-                    toast.error(e?.message ?? "Retry failed");
+                    toast.error(e?.message ?? t("holarcHelp.emergency.details.retryFailed"));
                   }
                 }}
               >
-                Retry transcription
+                {t("holarcHelp.emergency.details.retryTranscription")}
               </Button>
             )}
           </div>
@@ -383,7 +386,7 @@ export default function HolarcHelpIncidentDetail() {
       {!isLive && incident.notes && (
         <div className="mt-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
           <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-            <FileText className="h-3.5 w-3.5" /> Closure summary
+            <FileText className="h-3.5 w-3.5" /> {t("holarcHelp.emergency.details.closureSummary")}
           </p>
           <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900 dark:text-emerald-100">{incident.notes}</p>
         </div>
@@ -395,7 +398,7 @@ export default function HolarcHelpIncidentDetail() {
 
       {isLive && contacts.length > 0 && (
         <div className="mt-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notify contacts on WhatsApp</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("holarcHelp.emergency.details.notifyContactsWhatsApp")}</p>
           <ul className="mt-3 space-y-2">
             {contacts.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 rounded-xl border p-3">
@@ -403,7 +406,7 @@ export default function HolarcHelpIncidentDetail() {
                 {c.phone && (
                   <Button asChild size="sm" className="gap-1.5 bg-[#25D366] text-white hover:bg-[#1ea952]">
                     <a href={waLink(c.phone, message)} target="_blank" rel="noreferrer">
-                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                      <MessageCircle className="h-4 w-4" /> {t("holarcHelp.emergency.details.whatsApp")}
                     </a>
                   </Button>
                 )}
@@ -415,35 +418,35 @@ export default function HolarcHelpIncidentDetail() {
 
       {isLive && (
         <Button onClick={() => setCloseOpen(true)} className="mt-6 h-14 w-full gap-2 rounded-2xl bg-primary text-base font-semibold">
-          <CheckCircle2 className="h-5 w-5" /> Close incident
+          <CheckCircle2 className="h-5 w-5" /> {t("holarcHelp.emergency.details.closeIncident")}
         </Button>
       )}
 
       <Dialog open={closeOpen} onOpenChange={(o) => !closing && setCloseOpen(o)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Close incident</DialogTitle>
+            <DialogTitle>{t("holarcHelp.emergency.details.closeIncident")}</DialogTitle>
             <DialogDescription>
-              Add a brief write-up of the last activity or interaction with the patient before closing.
+              {t("holarcHelp.emergency.details.addBriefWriteup")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1.5">
-            <Label htmlFor="closure-note">Last activity / interaction</Label>
+            <Label htmlFor="closure-note">{t("holarcHelp.emergency.details.lastActivity")}</Label>
             <Textarea
               id="closure-note"
               value={closureNote}
               onChange={(e) => setClosureNote(e.target.value)}
-              placeholder="e.g. Patient handed over to ER team at 14:52, conscious and stable."
+              placeholder={t("holarcHelp.emergency.details.closurePlaceholder")}
               rows={5}
               className="resize-none"
             />
-            <p className="text-[11px] text-muted-foreground">{closureNote.trim().length}/10 minimum characters</p>
+            <p className="text-[11px] text-muted-foreground">{closureNote.trim().length}/10 {t("holarcHelp.emergency.details.minimumCharacters")}</p>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" onClick={() => setCloseOpen(false)} disabled={closing}>Cancel</Button>
+            <Button variant="outline" onClick={() => setCloseOpen(false)} disabled={closing}>{t("common.cancel")}</Button>
             <Button onClick={resolve} disabled={closing || closureNote.trim().length < 10} className="gap-2">
               {closing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              Close incident
+              {t("holarcHelp.emergency.details.closeIncident")}
             </Button>
           </DialogFooter>
         </DialogContent>

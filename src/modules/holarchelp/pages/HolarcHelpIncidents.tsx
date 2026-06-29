@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 export default function HolarcHelpIncidents() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<any[]>([]);
@@ -51,12 +53,12 @@ export default function HolarcHelpIncidents() {
     <div className="mx-auto max-w-md px-4 pb-8">
       <div className="mb-4 flex items-center gap-2 pt-2">
         <Button variant="ghost" size="sm" className="gap-1" onClick={() => navigate("/patient/holarchelp")}>
-          <ArrowLeft className="h-4 w-4" /> Back
+          <ArrowLeft className="h-4 w-4" /> {t("common.back")}
         </Button>
       </div>
-      <h1 className="text-2xl font-extrabold">Incident history</h1>
+      <h1 className="text-2xl font-extrabold">{t("holarcHelp.emergency.incidents.title")}</h1>
       <ul className="mt-4 space-y-2">
-        {items.length === 0 && <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">No incidents yet</li>}
+        {items.length === 0 && <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">{t("holarcHelp.emergency.incidents.empty")}</li>}
         {items.map((i) => (
           <li key={i.id}>
             <Link to={`/patient/holarchelp/incident/${i.id}`} className="flex items-center justify-between rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
@@ -65,10 +67,10 @@ export default function HolarcHelpIncidents() {
                 {i.provider_name && (
                   <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 truncate">
                     {i.provider_name}
-                    {i.auto && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">AUTO</span>}
+                    {i.auto && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">{t("holarcHelp.emergency.incidents.auto")}</span>}
                   </p>
                 )}
-                <p className="text-xs text-muted-foreground">{i.resolved_at ? `Resolved ${new Date(i.resolved_at).toLocaleString()}` : "In progress"}</p>
+                <p className="text-xs text-muted-foreground">{i.resolved_at ? t("holarcHelp.emergency.incidents.resolved", { date: new Date(i.resolved_at).toLocaleString() }) : t("holarcHelp.emergency.incidents.inProgress")}</p>
               </div>
               <span className={`ml-2 shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${["completed","cancelled"].includes(i.status) ? "bg-secondary text-primary" : "bg-sos/10 text-sos"}`}>
                 {(i.status ?? "").toUpperCase().replace(/_/g, " ")}
