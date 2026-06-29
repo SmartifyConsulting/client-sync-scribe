@@ -22,7 +22,7 @@ import { TrialSignupSection } from "@/components/auth/TrialSignupSection";
 import { Footer } from "@/components/layout/Footer";
 import { Progress } from "@/components/ui/progress";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { DevErLoginButton } from "@/components/auth/DevErLoginButton";
+
 
 import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import { cn } from "@/lib/utils";
