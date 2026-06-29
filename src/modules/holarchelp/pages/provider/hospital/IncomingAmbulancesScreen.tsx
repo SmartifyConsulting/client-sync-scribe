@@ -12,7 +12,9 @@ type Row = {
   eta_minutes: number | null; last_eta_update: string | null;
   assigned_provider_id: string | null; created_at: string;
   pre_arrival_notes?: string | null;
+  incident_number?: string | null;
 };
+
 
 export default function IncomingAmbulancesScreen() {
   const { providerId } = useProviderAccess();
