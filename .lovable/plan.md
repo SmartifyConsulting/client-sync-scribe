@@ -1,66 +1,100 @@
-# Plan
+## 1. Merge the duplicate Kennedy patient records
 
-## 1. Remove "Sign in as NEMS Dispatcher (DEV Only)"
-- Delete `src/components/auth/DevErLoginButton.tsx`.
-- Remove its import and usage from `src/pages/Auth.tsx`.
-- Grep for stragglers so the button can't return.
+Canonical record = `projectmanager@smartify.co.za` (so the user can keep logging in and receive test emails). The other record (`sharon.kennedy@testmail.com`) is archived.
 
-## 2. Side-by-side Sign In / Sign Up tabs
-File: `src/pages/Auth.tsx`.
-- Replace the current "two-page" split with a single auth card whose top has **"Sign In" and "Sign Up" tabs** rendered side-by-side via shadcn `Tabs` (`grid-cols-2`, equal width).
-- Tab state replaces the `isLogin` boolean. Selecting "Sign Up" reveals the existing multi-step signup wizard inside the same card; "Sign In" shows the email/phone form.
-- Drop the standalone oversized "Create your free account" CTA since the tab makes signup equally prominent.
-- Preserve auth UX rules: `tabIndex={-1}` on Forgot Password, password eye toggles, `/forgot-password` and `/reset-password` flows.
+Steps:
 
-## 3. Move security trust pills to the bottom of the sign-in card
-- In `src/pages/Auth.tsx`, move the "Your data is encrypted / 2FA required / HIPAA-aligned" trust band so it renders **under** the auth card. Same compact pill styling as the screenshot. Applies to both tabs.
+- Reassign every FK pointing at the `sharon.kennedy@testmail.com` patient/user onto the projectmanager record:
+  - `prescriptions`, `medication_adherence`, `prescription_pill_references`, `prescription_renewal_requests`, `approved_daily_medications`
+  - `documents`, `health_photos`, `image_comparisons`, `session_drawings`
+  - `sessions`, `appointments`, `appointment_requests`, `visit_ratings`
+  - `hospital_admissions` and `admission_*` child tables, `referral_doctors`
+  - `patient_rewards`, `patient_streaks`, `doctor_patient_access`, `doctor_patient_checkins`, `patient_invitations`, `patient_profile_shares`, `patient_hidden_doctors`
+  - `holarchelp_incidents` (`user_id`, `triggered_by_user_id`), `holarchelp_emergency_contacts`
+  - `notifications`, `messages`, `todos`
+- For columns only populated on the testmail record, merge into the projectmanager row with `COALESCE(projectmanager_value, testmail_value)` so no clinical history is lost (allergies, surgeries, height/weight, pharmacy, contacts, etc.).
+- Rename the canonical row from `Sharon Elise Kennedy (merged)` to `Sharon Elise Kennedy` — drop the "(merged)" suffix.
+- Archive the testmail record:
+  - Update its `name` to `Sharon Kennedy (archived)` and set `status = 'archived'`.
+  - Disable the `sharon.kennedy@testmail.com` auth user (ban via `auth.users.banned_until = 'infinity'`) so it can no longer log in but historical audit trails are preserved.
+  - Do NOT hard-delete that auth user, so any old audit/event rows keep their FK.
 
-## 4. Sidebar nav reorder
-Files: desktop sidebar (`src/components/layout/AppSidebar.tsx` or equivalent) and mobile bottom nav.
-- Move **My Practice** to sit directly under **Home**.
-- Move **My Sessions** to sit directly under **My Calendar**.
-- Keep route paths, icons, and translation keys unchanged — reorder the items only. Apply the same order to mobile nav so desktop and mobile match.
+## 2. Stop notifying doctors about skipped/missed medication
 
-## 5. SOS incident recording — +5s and no hallucinated transcripts
-- `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx`: bump `MAX_SECONDS` 65 → **70**, update visible counter.
-- `src/modules/holarchelp/components/IncidentVoiceNoteRecorder.tsx`: same 70s cap; guard so that if no audio blob was captured (cancel / mic blocked / 0-byte clip) we skip the transcription edge function and skip inserting a `holarchelp_voice_notes` row. Toast "No recording captured".
-- Strictly discard whitespace / "[inaudible]" placeholder transcripts so nothing fabricated is persisted.
+- Remove the "Notify doctor" block in `MedicationAdherenceTab.tsx` (lines 231–267).
+- `check-missed-medications` only notifies the patient + emergency/NOK contacts — leave it.
+- `PillBaselineCapture`'s skip-notify panel keeps only Emergency contact / Next of kin / No one. No doctor option.
 
-## 6. Hospital Admission logging
-File: `src/features/sessions/admissions/ManualLogAdmissionDialog.tsx`.
+## 3. Seed hospitals around Johannesburg
 
-a. **Hospital dropdown** — replace free-text Hospital input with a Combobox of `holarchelp_hospitals` (approved/active). Selection writes `hospital` (name) and `hospital_provider_id` (id). Keep a "Type a hospital not listed" free-text fallback.
+Insert ~12 approved Johannesburg-area hospitals into `holarchelp_hospitals` with real lat/lng and `accepting_patients = true`:
 
-b. **Clinical codes field** — repeatable rows of `{ code, description }` (ICD-10 / CPT / procedure) with Add / Remove. Persist as JSONB.
+Charlotte Maxeke Academic, Helen Joseph, Chris Hani Baragwanath, Rahima Moosa Mother & Child, Netcare Milpark, Netcare Garden City, Netcare Linksfield, Life Fourways, Life Brenthurst, Life Roseacres, Netcare Sunninghill, Wits Donald Gordon. Each tagged in `notes` as seed data so the team can distinguish them from real registrations.
 
-Migration:
-```
-ALTER TABLE public.hospital_admissions
-  ADD COLUMN IF NOT EXISTS codes jsonb NOT NULL DEFAULT '[]'::jsonb;
-```
-No new table → existing policies cover the new column.
+## 4. Human-readable incident number end-to-end
 
-Render codes as chip list in `AdmissionsView.tsx` and `HospitalAdmissionEditor.tsx`.
+- Migration: add `incident_number text unique` to `holarchelp_incidents`, with a sequence-backed default `INC-2026-000123` (year + zero-padded sequence) and a `BEFORE INSERT` trigger to assign it. Backfill existing rows.
+- Surface the new `incident_number` everywhere the UUID slice is shown today:
+  - Patient `HolarcHelpIncidentDetail` header
+  - Provider `IncomingSosScreen`, `ParamedicAcceptDialog`, `AmbulanceIncidentConsole`, `NavigationScreen`
+  - Hospital `IncomingAmbulancesScreen`, `TriageScreen`, `AdmissionsScreen`, `IncidentTimelineScreen`
+  - Public tracking link copy (`PublicTrack`) and any SMS/email body that currently includes the short id
 
-## 7. Baseline recording explainer (one-time AI training)
-File: `src/features/rewards/components/PillBaselineCapture.tsx`.
+## 5. SOS → Accept → Hospital selection → Live route
 
-Expand the "Why we do this" block:
-- **What a baseline is** — one short video of you taking the medication normally; the AI watches hand/pill/mouth motion *once* to learn your pattern so future check-ins are auto-verified.
-- **One-time only** — you'll never be asked to repeat it for this medication.
-- **Privacy** — used only to compare against future adherence clips.
+This wires the missing flow the user described.
 
-Add an **"If you skip this medication"** sub-panel:
-- Reads `emergency_contact_*` and `next_of_kin_*` from `patients`; shows "We'll notify: **{name} ({relationship})**".
-- If both empty OR user chooses to override, inline picker:
-  - Radio: **Emergency contact / Next of kin / No one**
-  - Inline fields to fill name + phone + email if missing (writes back to `patients`).
-- Persist chosen target on `prescriptions` as `skip_notify_target` ('emergency' | 'nok' | 'none') and `skip_notify_contact` jsonb snapshot (add columns via migration; null = use patient-level default).
+**5a. ER Provider accepts → must pick destination hospital**
 
-## Technical notes
-- Hospital dropdown query: `holarchelp_hospitals` where `is_approved=true`, cached via React Query.
-- Codes JSONB shape: `[{ "code": "S83.5", "description": "Sprain of cruciate ligament of knee" }]`. Validate non-empty `code`.
-- All migrations run via `supabase--migration` with grants/RLS verified.
+`ParamedicAcceptDialog` becomes a two-step accept flow:
+
+1. Confirm ambulance + crew (already there).
+2. Required step: pick the destination hospital from `HospitalPicker`, filtered to hospitals with `accepting_patients = true` and ordered by distance from the incident.
+
+On confirm the dialog writes in one update:
+- `assigned_paramedic_user_id`, `assigned_ambulance_id`, `accepted_at`, `status = 'assigned'`
+- `destination_hospital_id` = the chosen hospital
+- Initial `eta_minutes` from current ambulance GPS via the existing Google Maps gateway helper
+
+It also:
+- Inserts a `notifications` row for the patient: `type = 'sos_accepted'`, body includes the incident number + paramedic name + ambulance call sign.
+- Inserts a `holarchelp_incident_events` row `accepted` for the timeline.
+- Inserts a second `notifications` row addressed to the destination hospital's owner/admin and emits a realtime event the hospital screens are already subscribed to — so the chosen hospital sees the incident appear in its **Incoming Ambulances** queue immediately, displayed with the same `incident_number` shown to the paramedic and patient.
+
+**5b. Patient side — `HolarcHelpIncidentDetail`**
+
+- Subscribe in realtime to the incident row (`assigned_paramedic_user_id`, `status`, `eta_minutes`, `provider_latitude/longitude`, `destination_hospital_id`).
+- On `open` → `assigned`: sticky toast + inline banner reading `Accepted by {Paramedic} · {Ambulance call sign} · heading to {Hospital name}` plus ETA.
+- `SosLiveMap` becomes visible on acceptance, drawing the route from the ambulance's current position to the patient (Google Maps Directions via the gateway). Distance and ETA come straight from the Routes API response and refresh every time `provider_location_updated_at` changes.
+- Live countdown timer ticking down from `eta_minutes`, reset whenever a new ETA arrives.
+- Status display ladder:
+  - `assigned` → "Ambulance accepting" + ETA
+  - `en_route` → live moving marker + km + min remaining
+  - `arrived` → "Ambulance has arrived"
+  - `patient_collected` / `en_route_to_hospital` → route switches to the chosen hospital, countdown restarts to hospital ETA
+  - `at_hospital` → "Arrived at {Hospital}"
+
+**5c. Provider side — `NavigationScreen`**
+
+Already pushes provider GPS. Confirm it continues to write `provider_latitude/longitude` + recomputed `eta_minutes` every 10s while `status in (assigned, en_route, en_route_to_hospital)`, and that the destination flips from patient pin to hospital pin when status becomes `patient_collected`.
+
+**5d. Hospital side — `IncomingAmbulancesScreen`**
+
+- Add an `incident_number` column to the card header.
+- Show `accepted_at`, paramedic name, ambulance call sign, current ETA, and live distance — same data the patient sees.
+- Already subscribes to `holarchelp_incidents` realtime; only the new column and header text change.
+
+## Technical details
+
+- All schema changes are migrations: `incident_number` column + sequence + trigger + backfill; no destructive ALTERs.
+- Patient merge runs as ordered `UPDATE ... SET patient_id = canonical WHERE patient_id = duplicate` per table in one migration, then a `COALESCE` field merge, then archive of the testmail patient row and ban of its auth user.
+- Joburg hospital seed is a single bulk insert.
+- ETA/route uses the existing Google Maps gateway helper from `SosLiveMap` — no new secrets.
+- `holarchelp_incidents` is already in `supabase_realtime`; we just add a focused channel in `HolarcHelpIncidentDetail` if missing and one in the hospital incoming screen.
+- All UI edits stay inside `src/modules/holarchelp/` and `src/features/rewards/components/MedicationAdherenceTab.tsx`.
 
 ## Out of scope
-- Existing SOS flow logic, prior stored transcripts, broader admissions styling.
+
+- Redesigning provider screens (already done).
+- Multi-paramedic auctioning — single accept-first model retained.
+- Patient-initiated cancellation flow — already exists via `holarchelp_incident_cancellations`.
