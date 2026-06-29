@@ -50,14 +50,29 @@ export default function MySessions() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
+      // Include sessions where the user is the patient (RLS allows this via
+      // patients.patient_user_id = auth.uid()), not just the recording doctor.
+      const { data: myPatients } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user.id);
+      const patientIds = (myPatients ?? []).map((p: any) => p.id);
+
+      let q = supabase
         .from("sessions")
         .select("id, title, status, started_at, duration_minutes, patient:patients(id, name)")
-        .eq("user_id", user.id)
         .order("started_at", { ascending: false })
         .limit(500);
+      q = patientIds.length
+        ? q.or(`user_id.eq.${user.id},patient_id.in.(${patientIds.join(",")})`)
+        : q.eq("user_id", user.id);
+
+      const { data } = await q;
+      const rows = ((data as any[]) || []).filter(
+        (r, i, arr) => arr.findIndex((x) => x.id === r.id) === i,
+      );
       if (!cancelled) {
-        setSessions((data as any) || []);
+        setSessions(rows as SessionRow[]);
         setLoading(false);
       }
     })();

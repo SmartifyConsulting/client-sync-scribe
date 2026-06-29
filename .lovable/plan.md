@@ -1,22 +1,40 @@
-## Where we are
-You've done Steps 1–5 in Google Cloud, so you should now have an API key (`AIza…`) that's restricted to `holarchealth.com` / `www.holarchealth.com` and has Maps JavaScript API + Routes API + Geocoding API enabled.
+## Why Sharon sees no sessions
+Sharon has **19 sessions** in the database, all tied to her patient record `Sharon Elise Kennedy` (`4b1032be-b2ad-4c96-b8da-3cd87d6b8dcb`). Each row's `user_id` is the **doctor** who recorded the consultation — not Sharon's auth user.
 
-## What I'll do next (in build mode)
-1. Call `standard_connectors--connect` for the **Google Maps Platform** connector. You'll see a dialog with your existing managed connection plus an option to **Add a new connection** — pick **Add new**.
-2. The dialog will ask for the API key. Paste the key from Step 4. Save.
-3. Lovable injects it as `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` (browser) and `GOOGLE_MAPS_API_KEY` (server). The existing `LiveMap`, `ProviderMap`, `PinMap`, and `routes-eta` edge function read those names already — **zero code changes**.
-4. Republish to `holarchealth.com`.
+`src/pages/MySessions.tsx` filters with:
+```ts
+.eq("user_id", user.id)
+```
+That returns the *doctor's* sessions. For a patient it returns 0, even though RLS would happily let her read them via the "Patients can view their own sessions" policy (which joins through `patients.patient_user_id = auth.uid()`).
 
-## Then we verify together
-1. Open `https://holarchealth.com` in an incognito window.
-2. Open the browser console (F12).
-3. Navigate to SOS / Active Mission / Fleet Live / a provider profile.
-4. Map tiles should render and the console should be clean — no `RefererNotAllowedMapError`, `ApiNotActivatedMapError`, or `REQUEST_DENIED`.
+## Fix (single file: `src/pages/MySessions.tsx`)
+Make the loader role‑aware:
 
-If anything errors, paste the console message and I'll map it back to which Google Cloud step needs a tweak (referrer typo, missing API, billing, etc.).
+1. Look up any patient records owned by the current user:
+   ```ts
+   const { data: myPatients } = await supabase
+     .from("patients")
+     .select("id")
+     .eq("patient_user_id", user.id);
+   const patientIds = (myPatients ?? []).map(p => p.id);
+   ```
+2. Build an OR query so the page works for **both** doctors and patients without a role check:
+   ```ts
+   let q = supabase
+     .from("sessions")
+     .select("id, title, status, started_at, duration_minutes, patient:patients(id, name)")
+     .order("started_at", { ascending: false })
+     .limit(500);
+   q = patientIds.length
+     ? q.or(`user_id.eq.${user.id},patient_id.in.(${patientIds.join(",")})`)
+     : q.eq("user_id", user.id);
+   ```
+3. De‑dupe by `id` before grouping (cheap guard if a doctor is also a patient on the same session).
 
-## Important: don't paste the API key into chat
-The connect dialog has a secure secret field. Paste the key **only** there — not into the chat. If it ever ends up in chat by accident, rotate it in Google Cloud Credentials and create a new one.
+That's the only change. RLS already permits the reads, the bucketing/UI stays identical, no migration needed.
 
-## What I need from you
-Reply **"approve"** and I'll trigger the connect dialog right away.
+## Verify
+- Log in as Sharon (`projectmanager@smartify.co.za`) → `/my-sessions` should show all 19 sessions grouped Today / Last week / Last month / Older.
+- Log in as a doctor → still sees only their own sessions (unchanged behaviour).
+
+Approve and I'll ship it.
