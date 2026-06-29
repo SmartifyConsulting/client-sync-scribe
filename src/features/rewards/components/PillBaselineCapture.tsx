@@ -513,15 +513,15 @@ export function PillBaselineCapture({
                 What is a baseline?
               </p>
               <p className="text-muted-foreground leading-relaxed mb-2">
-                A baseline is a one-time recording that teaches our AI what <strong className="text-foreground">your
-                medication</strong> looks like and <strong className="text-foreground">how you take it</strong>. After
-                this setup we'll recognise your tablet and your routine automatically — every future dose is just a
-                quick check-in.
+                A baseline is a <strong className="text-foreground">one short video</strong> of you taking
+                this medication normally. The AI watches your hands, the pill and your mouth motion <em>once</em> so
+                it learns what "you taking <strong className="text-foreground">{medicationName}</strong>" looks like.
+                After that, every future dose only needs a quick check-in — no setup, no repeats.
               </p>
               <ul className="text-muted-foreground list-disc list-inside space-y-0.5 text-xs">
-                <li>Helps the AI learn what your medication looks like.</li>
-                <li>Confirms the right tablet is being taken.</li>
-                <li>Done once per medication — never repeated.</li>
+                <li><strong className="text-foreground">One-time only</strong> — you'll never be asked to repeat this for {medicationName}.</li>
+                <li>Helps the AI learn what your tablet and routine look like.</li>
+                <li>The video is used only to compare against future check-ins — not shared.</li>
               </ul>
             </div>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
@@ -533,12 +533,92 @@ export function PillBaselineCapture({
               </ol>
             </div>
 
+            {/* Skip-notify panel */}
+            <div className="rounded-xl border border-amber-500/40 bg-amber-50/60 p-4 text-sm">
+              <p className="flex items-center gap-2 font-semibold text-foreground mb-1.5">
+                <BellRing className="h-4 w-4 text-amber-600" />
+                If you skip this medication, who should we contact?
+              </p>
+              <p className="text-muted-foreground text-xs mb-3">
+                Pulled from your Personal Information — you can change it here too.
+              </p>
+              <RadioGroup
+                value={skipNotifyTarget}
+                onValueChange={(v) => { setSkipNotifyTarget(v as any); setOverrideContact(false); }}
+                className="gap-2"
+              >
+                <label htmlFor="sn-em" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                  <RadioGroupItem id="sn-em" value="emergency" className="mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">Emergency contact</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {patientContacts?.emergency_contact_name
+                        ? `${patientContacts.emergency_contact_name}${patientContacts.emergency_contact_phone ? " · " + patientContacts.emergency_contact_phone : ""}`
+                        : "Not set yet"}
+                    </p>
+                  </div>
+                </label>
+                <label htmlFor="sn-nok" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                  <RadioGroupItem id="sn-nok" value="nok" className="mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">Next of kin</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {patientContacts?.next_of_kin_name
+                        ? `${patientContacts.next_of_kin_name}${patientContacts.next_of_kin_phone ? " · " + patientContacts.next_of_kin_phone : ""}`
+                        : "Not set yet"}
+                    </p>
+                  </div>
+                </label>
+                <label htmlFor="sn-none" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                  <RadioGroupItem id="sn-none" value="none" className="mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">No one</p>
+                    <p className="text-[11px] text-muted-foreground">Don't notify anyone if a dose is skipped.</p>
+                  </div>
+                </label>
+              </RadioGroup>
+
+              {skipNotifyTarget !== "none" && (() => {
+                const hasCurrent = skipNotifyTarget === "emergency"
+                  ? !!(patientContacts?.emergency_contact_name || patientContacts?.emergency_contact_phone)
+                  : !!(patientContacts?.next_of_kin_name || patientContacts?.next_of_kin_phone);
+                if (hasCurrent && !overrideContact) {
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setOverrideContact(true)}
+                      className="mt-2 text-[11px] text-primary hover:underline"
+                    >
+                      Use a different contact for this medication
+                    </button>
+                  );
+                }
+                return (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <Input
+                      placeholder="Name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="text-xs h-8"
+                    />
+                    <Input
+                      placeholder="Phone"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                      className="text-xs h-8"
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={handleClose}>Cancel</Button>
               <Button onClick={() => setStep("method")}>Next</Button>
             </div>
           </div>
         )}
+
 
         {/* STEP: intake method */}
         {step === "method" && (
