@@ -56,15 +56,7 @@ const createLocale = (t: any): Locale => ({
     t("calendar.daysShort.fri"),
     t("calendar.daysShort.sat"),
   ],
-  weekdaysNarrow: [
-    t("calendar.daysNarrow.s"),
-    t("calendar.daysNarrow.m"),
-    t("calendar.daysNarrow.t"),
-    t("calendar.daysNarrow.w"),
-    t("calendar.daysNarrow.t"),
-    t("calendar.daysNarrow.f"),
-    t("calendar.daysNarrow.s"),
-  ],
+  weekdaysNarrow: t("calendar.daysNarrow", { returnObjects: true }) || ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
   firstWeekContainsDate: 4,
 });
 

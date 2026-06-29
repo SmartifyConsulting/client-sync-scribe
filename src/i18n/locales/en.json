@@ -416,13 +416,7 @@
       "fri": "Fri",
       "sat": "Sat"
     },
-    "daysNarrow": {
-      "s": "S",
-      "m": "M",
-      "t": "T",
-      "w": "W",
-      "f": "F"
-    }
+    "daysNarrow": ["S", "M", "T", "W", "T", "F", "S"]
   },
   "sessions": {
     "title": "Sessions",
