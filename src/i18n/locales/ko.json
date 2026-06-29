@@ -3026,5 +3026,30 @@
                 "footerTagline": "Earn them. Use them. Keep them."
             }
         }
+    },
+    "admissions": {
+        "vitals": {
+            "title": "Add Vitals",
+            "heartRate": "Heart Rate (bpm)",
+            "spo2": "SpO₂ (%)",
+            "bpSystolic": "BP Systolic",
+            "bpDiastolic": "BP Diastolic",
+            "temperature": "Temperature (°C)",
+            "bmi": "BMI",
+            "height": "Height (cm)",
+            "weight": "Weight (kg)",
+            "notes": "Notes"
+        },
+        "lab": {
+            "title": "Add Lab Result",
+            "testName": "Test Name",
+            "result": "Result",
+            "units": "Units",
+            "refRange": "Reference Range",
+            "resultDate": "Result Date",
+            "attachPdf": "Attach PDF",
+            "attached": "Attached ✓",
+            "notes": "Notes"
+        }
     }
 }
