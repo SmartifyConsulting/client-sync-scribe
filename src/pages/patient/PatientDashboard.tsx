@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart, Mic } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +60,7 @@ const getSpecialtyColor = (specialty: string): string => {
 };
 
 export default function PatientDashboard() {
+  const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -295,20 +297,20 @@ export default function PatientDashboard() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-foreground">
-              {profile?.full_name ? `Welcome back, ${profile.full_name.split(" ")[0]}` : "Welcome back"}
+              {profile?.full_name ? `${t("patientDashboard.welcomeTitle")}, ${profile.full_name.split(" ")[0]}` : t("patientDashboard.welcomeTitle")}
             </h1>
-            <p className="text-muted-foreground text-[12px]">Your health dashboard at a glance</p>
+            <p className="text-muted-foreground text-[12px]">{t("patientDashboard.welcomeSubtitle")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Link to="/patient/calendar">
             <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-              <Calendar className="h-3.5 w-3.5" /> Calendar
+              <Calendar className="h-3.5 w-3.5" /> {t("patientDashboard.calendar")}
             </Button>
           </Link>
           <Link to="/patient/tasks?autoRecord=true">
             <Button size="sm" className="gap-1.5 text-xs bg-primary">
-              <Mic className="h-3.5 w-3.5" /> Record Task
+              <Mic className="h-3.5 w-3.5" /> {t("patientDashboard.recordTask")}
             </Button>
           </Link>
         </div>
@@ -319,7 +321,7 @@ export default function PatientDashboard() {
         <div className="rounded-xl border border-primary/20 bg-card shadow-sm overflow-hidden">
           <div className="px-3 py-2 bg-primary/5 border-b border-primary/10 flex items-center gap-2">
             <Clock className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold text-foreground">Recent Activity</span>
+            <span className="text-xs font-semibold text-foreground">{t("patientDashboard.recentActivity")}</span>
           </div>
           <div className="flex overflow-x-auto gap-2 p-2.5 scrollbar-hide">
             {recentNotifications.slice(0, 8).map((notif: any) => {
@@ -348,7 +350,7 @@ export default function PatientDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Sparkles className="h-4 w-4 text-primary" />
-                AI Health Summary
+                {t("patientDashboard.aiSummaryTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -363,7 +365,7 @@ export default function PatientDashboard() {
                   {cleanSummary(aiSummary.summary)}
                 </p>
               ) : (
-                <p className="text-[11px] text-muted-foreground italic">No health summary available yet. Visit your doctor to build your health profile.</p>
+                <p className="text-[11px] text-muted-foreground italic">{t("patientDashboard.aiSummaryEmpty")}</p>
               )}
             </CardContent>
           </Card>
@@ -373,18 +375,18 @@ export default function PatientDashboard() {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-primary" />
-              Upcoming Appointments
+              {t("patientDashboard.appointmentsTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {doctors.filter(d => d.nextAppointment).length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">No upcoming appointments.</p>
+              <p className="text-[11px] text-muted-foreground text-center py-4">{t("patientDashboard.appointmentsEmpty")}</p>
             ) : (
               <div className="space-y-1.5">
                 {doctors.filter(d => d.nextAppointment).map(doc => (
                   <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
                     <div>
-                      <p className="text-xs font-medium text-foreground">{doc.doctor_profile?.full_name || "Doctor"}</p>
+                      <p className="text-xs font-medium text-foreground">{doc.doctor_profile?.full_name || t("patientDashboard.doctorFallback")}</p>
                       <p className="text-[10px] text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
                     </div>
                     {doc.doctor_profile?.specialty && (
@@ -407,7 +409,7 @@ export default function PatientDashboard() {
                 <Trophy className="h-7 w-7 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">My Vula Vouchers</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{t("patientDashboard.vulaLabel")}</p>
                 <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -421,17 +423,17 @@ export default function PatientDashboard() {
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Trophy className="h-4 w-4 text-primary" />
-                Earn More Vulas
+                {t("patientDashboard.earnVulasTitle")}
               </CardTitle>
-              <CardDescription className="text-[10px]">Tips to boost your rewards</CardDescription>
+              <CardDescription className="text-[10px]">{t("patientDashboard.earnVulasDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {[
-                  { icon: Pill, text: "Log daily medication intake", link: "/patient/prescriptions" },
-                  { icon: ListChecks, text: "Complete tasks from your doctor", link: "/patient/tasks" },
-                  { icon: Camera, text: "Upload health photos regularly", link: "/patient/health-album" },
-                  { icon: Calendar, text: "Keep visit streaks going", link: "/patient/calendar" },
+                  { icon: Pill, text: t("patientDashboard.tip1"), link: "/patient/prescriptions" },
+                  { icon: ListChecks, text: t("patientDashboard.tip2"), link: "/patient/tasks" },
+                  { icon: Camera, text: t("patientDashboard.tip3"), link: "/patient/health-album" },
+                  { icon: Calendar, text: t("patientDashboard.tip4"), link: "/patient/calendar" },
                 ].map((tip, i) => (
                   <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
@@ -455,19 +457,19 @@ export default function PatientDashboard() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-sm">
                   <Receipt className="h-4 w-4 text-primary" />
-                  Recent Claims
+                  {t("patientDashboard.claimsTitle")}
                 </CardTitle>
                 <Link to="/patient/invoices">
                   <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                    All Invoices <ArrowRight className="h-4 w-4" />
+                    {t("patientDashboard.claimsAllInvoices")} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
-              <CardDescription className="text-[10px]">Invoices submitted to your medical aid</CardDescription>
+              <CardDescription className="text-[10px]">{t("patientDashboard.claimsDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentClaims.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground text-center py-4">No claims submitted recently.</p>
+                <p className="text-[11px] text-muted-foreground text-center py-4">{t("patientDashboard.claimsEmpty")}</p>
               ) : (
                 <div className="space-y-1.5">
                   {recentClaims.map((claim: any) => (
@@ -496,9 +498,9 @@ export default function PatientDashboard() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
                     <FileText className="h-4 w-4 text-primary" />
                   </div>
-                  Documentation
+                  {t("patientDashboard.documentationTitle")}
                 </CardTitle>
-                <CardDescription className="text-[10px]">View your documents and records</CardDescription>
+                <CardDescription className="text-[10px]">{t("patientDashboard.documentationDescription")}</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -517,15 +519,15 @@ export default function PatientDashboard() {
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <ListChecks className="h-4 w-4 text-primary" />
-                Assigned Tasks
+                {t("patientDashboard.tasksTitle")}
               </CardTitle>
               <Link to="/patient/rewards">
                 <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
-                  View All <ArrowRight className="h-4 w-4" />
+                  {t("patientDashboard.tasksViewAll")} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <CardDescription className="text-[10px]">Complete tasks to earn Vulas</CardDescription>
+            <CardDescription className="text-[10px]">{t("patientDashboard.tasksDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-1.5">
@@ -535,7 +537,7 @@ export default function PatientDashboard() {
                     <p className="text-xs font-medium truncate">{task.title}</p>
                     {task.due_date && (
                       <p className="text-[10px] text-muted-foreground mt-0.5">
-                        Due: {format(parseISO(task.due_date), "MMM d, yyyy")}
+                        {t("patientDashboard.tasksDue")}: {format(parseISO(task.due_date), "MMM d, yyyy")}
                       </p>
                     )}
                   </div>
