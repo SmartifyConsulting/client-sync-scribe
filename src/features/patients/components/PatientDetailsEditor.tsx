@@ -1280,17 +1280,19 @@ export function PatientDetailsEditor({
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
                 <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
-              <div
-                className={`absolute inset-0 flex items-center justify-center rounded-full transition-opacity ${avatarUrl ? "bg-black/40 opacity-0 group-hover:opacity-100" : "bg-black/30"}`}
-              >
+              {/* Always-visible camera badge so users notice the upload affordance */}
+              <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md border-2 border-background">
                 {uploadingAvatar ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 ) : (
-                  <Camera className="h-5 w-5 text-white" />
+                  <Camera className="h-3.5 w-3.5" />
                 )}
               </div>
             </div>
-            {!avatarUrl && <span className="text-[10px] text-muted-foreground">Tap to add photo</span>}
+            <span className="text-[10px] font-medium text-primary mt-0.5">
+              {avatarUrl ? "Change photo" : "Add photo"}
+            </span>
+
             <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </div>
           <div className="flex-1 min-w-0">
