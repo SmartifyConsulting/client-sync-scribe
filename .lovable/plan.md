@@ -1,37 +1,86 @@
-## Updated plan: Emergency Dashboard, User Admin roles, and LIVE Google Maps
+# ER Provider Portal — Workflow Rework
 
-### 1. Emergency Dashboard screen revamp
-- Replace the custom emergency dashboard header with the app's standard provider layout: compact title, muted subtitle, consistent spacing.
-- Remove duplicated status/count displays and unnecessary chips/buttons (mock ACTIVE MISSION / ON SHIFT chips that duplicate Active Mission and Shift Teams).
-- Keep incident counts in one compact stats row only.
-- Replace emoji filters with standard shadcn tabs: `New`, `Active`, `Completed` styled with the global teal `TabsList`.
-- Restyle incident rows as compact Holarc Health cards with one clear severity/status signal — no triple badge stacking.
-- Keep only useful actions per incident: Accept & Dispatch for new, Track / Update for active, View Report for completed.
+Goal: make the Ambulance portal match how EMS actually works and remove confusing UI. No new help page — the screens themselves must read intuitively.
 
-### 2. User Admin role sequencing and labels
-- Alphabetically sequence role accordion sections in User Admin (replace the current custom `ROLE_ORDER` with an A→Z sort).
-- Alphabetically sequence the role dropdown options in "Add member".
-- Rename the visible `ER admin` / `Er-admin` label to exactly `ER_Admin` wherever it appears (User Admin role labels, ProviderGate, testProfiles, sidebar headers).
-- Preserve existing collapsed accordion behavior and teal-border styling used across Doctor/Patient profiles.
+## How it will work (target workflow)
 
-### 3. LIVE Google Maps — replace SosLiveMap on Active Mission
-- The user wants the real Google Maps live experience on Active Mission, not the `SosLiveMap` wrapper.
-- Build a new `ActiveMissionGoogleMap` component that mounts a Google Map directly via the existing `loadGoogleMaps()` loader and:
-  - Renders standard `google.maps.Marker` for ambulance, patient, and destination hospital (no `mapId`, no `AdvancedMarkerElement`).
-  - Subscribes to realtime updates on `holarchelp_provider_locations` and `holarchelp_incidents` so the ambulance marker glides as live GPS rows arrive.
-  - Uses the Google Routes API (via the existing `routes-eta` edge function) to draw the actual road polyline between ambulance → patient and ambulance → destination hospital, instead of the current straight-line dashed overlay.
-  - Shows live ETA + distance pill that updates from Routes API responses.
-- Swap the `<SosLiveMap …/>` usage on `NavigationScreen.tsx` (Active Mission) for `<ActiveMissionGoogleMap …/>`.
-- Leave `SosLiveMap` in place for the patient-side SOS screen and hospital console for now (they have a different incident-tracking contract).
-- Keep `AmbulanceSimulator` mounted but clearly labeled as demo-only so live GPS still drives the real flow when present.
+```
+Provider (company)
+ └── Many Vehicles on shift simultaneously
+       └── Each Vehicle has a Crew (1 lead + optional partners) for that shift
+             └── A Vehicle is assigned to ONE active Incident at a time
+```
 
-### 4. Fix the attached Google Maps error
-- The "This page can't load Google Maps correctly" toast comes from the browser key failing for the current domain.
-- Confirm the app uses the user's custom Google Maps browser key env (`VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY`) and that the connection is linked to the project.
-- Improve the in-app fallback in `LiveMap`/the new map component: replace the generic Google error with a clear message instructing that the Google Maps key must allow the current domain (root + wildcard subdomain) under the connected key's HTTP referrer allowlist.
-- Keep loader compliant: `loading=async`, `callback`, `channel`, no `mapId`, classic `Marker`.
+Roles inside an ER Provider:
+- **Dispatcher** (desk): sees all incoming SOS, picks vehicle, assigns crew.
+- **Crew** (in the ambulance): clocks onto a vehicle, acknowledges assignments, drives the mission.
+- **ER_Admin**: manages fleet, members, hospitals.
 
-### 5. Scope
-- Frontend changes only: Emergency Dashboard, User Admin, new `ActiveMissionGoogleMap`, error fallback copy.
-- No DB schema changes; realtime on `holarchelp_provider_locations` is already enabled.
-- `SosLiveMap` is preserved for patient/hospital views; only Active Mission switches to live Google Maps.
+Dispatch rule (hybrid):
+- If a Dispatcher is on duty → SOS goes to Dispatcher console; crew gets "Acknowledge / Rolling".
+- If no Dispatcher is on duty → crew can self-accept from Incoming SOS (today's behavior).
+
+## Changes
+
+### 1. Data model (small additions)
+- `vehicle_shifts` (new): one row per vehicle currently on shift. Columns: `provider_id`, `vehicle_id`, `lead_user_id`, `status` (available/busy/off), `current_incident_id`, `started_at`, `ended_at`.
+- `vehicle_shift_crew` (new): `vehicle_shift_id`, `user_id`, `role` (lead/partner).
+- Keep `paramedic_shifts` for back-compat; new code reads/writes `vehicle_shifts`. Migrate the "1 crew = 1 vehicle" rows on the fly.
+- Add `dispatcher_on_duty` boolean on `holarchelp_ambulance_providers` (toggled by Dispatcher clocking in).
+
+### 2. Stats strip (`AmbulanceOpsLayout.tsx`)
+Reordered, deduped:
+```
+[ Start Shift / End Shift ]  [ ●ON SHIFT · busy/available ]  [ Active Mission #INC-… ]   …  [online]
+```
+- "Start Shift" action chip is first when off-shift.
+- On/Off status chip second.
+- Active Mission chip only renders when there IS one (no "Standing by" filler).
+- **Remove Open SOS chip** (already on dashboard).
+
+### 3. Start Shift dialog
+Now asks: **Vehicle** + **Crew partners (optional, multi-select from provider members)**. Lead = current user. Creates a `vehicle_shifts` row + crew rows.
+
+### 4. Incoming SOS screen (crew view)
+- If `dispatcher_on_duty` = true → banner "Dispatcher is assigning units" and the Accept button is replaced by **Acknowledge** which only appears once Dispatcher assigns this vehicle.
+- If `dispatcher_on_duty` = false → today's self-accept flow stays (renamed button to **Accept & Roll**).
+- Remove the word "Dispatch" from this screen.
+
+### 5. New Dispatcher Console (`/provider/ambulance/dispatch`)
+Sidebar item visible to users with role `dispatcher` or `er_admin`. Three columns:
+- Open SOS queue (sev-sorted)
+- Available vehicles (live, with crew names + GPS)
+- Selected incident detail → **Assign Vehicle** button opens picker, sets incident.assigned_provider/vehicle/lead, sets vehicle status busy, notifies crew.
+
+Toggle at top: **"I am on duty as Dispatcher"** → flips `dispatcher_on_duty`.
+
+### 6. Active Mission / Navigation
+No structural change — already vehicle-centric. Just shows assigned vehicle + crew names on the side panel.
+
+### 7. Fleet Live
+Group markers by vehicle; show crew names on hover. No change to map tech.
+
+## Why each of your points is addressed
+
+| Your concern | Fix |
+|---|---|
+| Can a shift have many vehicles? | Yes — shifts are now per-vehicle, provider has many concurrent `vehicle_shifts`. |
+| OFF SHIFT shows before ON SHIFT | Action chip (Start Shift) moves to position 1; status chip becomes secondary. |
+| Open SOS duplicated | Removed from strip; lives on dashboard only. |
+| What does Accept/Dispatch do? | Two clearly separated flows: Dispatcher **Assigns**, Crew **Acknowledges** (or **Accepts & Rolls** when no dispatcher). Word "Dispatch" only appears in the Dispatcher console. |
+| Shouldn't the dispatcher pick the vehicle? | New Dispatcher Console does exactly that. |
+
+## Out of scope
+- Multi-vehicle convoy on one incident (still 1 vehicle ↔ 1 incident).
+- Shift scheduling/rosters in advance (clock-in only, like today).
+- In-app help page (per your direction — UI must be self-explanatory).
+
+## Files touched
+- DB: new migration for `vehicle_shifts`, `vehicle_shift_crew`, `dispatcher_on_duty` column, RPCs `start_vehicle_shift`, `end_vehicle_shift`, `dispatcher_assign_vehicle`, `crew_acknowledge`.
+- `src/modules/holarchelp/pages/provider/ambulance/AmbulanceOpsLayout.tsx` — strip reorder, remove Open SOS chip, hide Active Mission when none.
+- `src/modules/holarchelp/components/StartShiftDialog.tsx` — vehicle + crew picker.
+- `src/modules/holarchelp/hooks/useParamedicShift.ts` → rename/extend to `useVehicleShift.ts`.
+- `src/modules/holarchelp/pages/provider/ambulance/IncomingSosScreen.tsx` — hybrid Accept/Acknowledge, remove "Dispatch" wording.
+- New `src/modules/holarchelp/pages/provider/ambulance/DispatchConsoleScreen.tsx` + route + sidebar entry (role-gated).
+- `FleetLiveScreen.tsx` — show crew names per vehicle.
+- i18n keys for new labels across all 25 locales.

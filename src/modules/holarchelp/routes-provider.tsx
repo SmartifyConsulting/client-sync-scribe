@@ -41,6 +41,8 @@ import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitor
 import BillingDashboardScreen from "./pages/provider/BillingDashboardScreen";
 import ExecutiveDashboardScreen from "./pages/provider/ExecutiveDashboardScreen";
 import AlertsCentreScreen from "./pages/provider/AlertsCentreScreen";
+import DispatcherConsoleScreen from "./pages/provider/ambulance/DispatcherConsoleScreen";
+import IncomingSosScreen from "./pages/provider/ambulance/IncomingSosScreen";
 
 // Incident & Dispatch Management screens
 import CreateIncidentScreen from "./pages/provider/hospital/CreateIncidentScreen";
@@ -114,6 +116,12 @@ export default function ProviderRoutes() {
         {/* Navigation Tool */}
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
+
+        {/* Incoming SOS (crew self-accept queue) */}
+        <Route path="incoming" element={<IncomingSosScreen />} />
+
+        {/* Dispatcher Console (desk: assigns vehicle to incident) */}
+        <Route path="dispatch" element={<DispatcherConsoleScreen />} />
 
         {/* Hospital Network now lives inside Admin */}
         <Route path="hospital-network" element={<Navigate to="/provider/ambulance/admins?tab=hospital-network" replace />} />

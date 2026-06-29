@@ -48,30 +48,7 @@ function AmbulanceStatsStrip() {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-card/60 p-2">
-      {stats.currentIncidentId ? (
-        <Link
-          to={`/provider/ambulance/incident/${stats.currentIncidentId}`}
-          className="inline-flex items-center gap-2 rounded-xl border border-sos/40 bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
-        >
-          <Siren className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
-          <span className="text-xs font-bold">#{stats.currentIncidentId.slice(0, 8)}</span>
-        </Link>
-      ) : (
-        <span className="inline-flex items-center gap-2 rounded-xl border bg-card px-2.5 py-1.5 text-muted-foreground">
-          <Siren className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">{t("provider.standingBy")}</span>
-        </span>
-      )}
-
-      <span className={cn(
-        "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
-        statusTone,
-      )}>
-        <Truck className="h-3.5 w-3.5" />
-        {!shift ? t("status.offShift") : shift.status === "busy" ? t("status.busy") : t("status.available")}
-      </span>
-
+      {/* 1. Action: Start / End Shift FIRST */}
       {!shift ? (
         <button
           onClick={() => setStartOpen(true)}
@@ -91,10 +68,26 @@ function AmbulanceStatsStrip() {
         </button>
       )}
 
-      <span className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-[11px]">
-        <Truck className="h-3.5 w-3.5 text-muted-foreground" />
-        {t("provider.openSos")} <strong className="tabular-nums">{stats.openSos}</strong>
+      {/* 2. Status badge */}
+      <span className={cn(
+        "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
+        statusTone,
+      )}>
+        <Truck className="h-3.5 w-3.5" />
+        {!shift ? t("status.offShift") : shift.status === "busy" ? t("status.busy") : t("status.available")}
       </span>
+
+      {/* 3. Active mission chip — ONLY when there is one */}
+      {stats.currentIncidentId && (
+        <Link
+          to={`/provider/ambulance/incident/${stats.currentIncidentId}`}
+          className="inline-flex items-center gap-2 rounded-xl border border-sos/40 bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
+        >
+          <Siren className="h-3.5 w-3.5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
+          <span className="text-xs font-bold">#{stats.currentIncidentId.slice(0, 8)}</span>
+        </Link>
+      )}
 
       <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
@@ -105,6 +98,7 @@ function AmbulanceStatsStrip() {
     </div>
   );
 }
+
 
 export default function AmbulanceOpsLayout() {
   return <ProviderAppLayout portal="ambulance" statsStrip={<AmbulanceStatsStrip />} />;

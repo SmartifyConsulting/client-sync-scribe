@@ -1595,6 +1595,9 @@ export type Database = {
           credential_score_updated_at: string | null
           directors: Json
           dispatch_priority: number
+          dispatcher_on_duty: boolean
+          dispatcher_on_duty_since: string | null
+          dispatcher_on_duty_user_id: string | null
           emergency_phone: string | null
           fleet_size: number | null
           id: string
@@ -1632,6 +1635,9 @@ export type Database = {
           credential_score_updated_at?: string | null
           directors?: Json
           dispatch_priority?: number
+          dispatcher_on_duty?: boolean
+          dispatcher_on_duty_since?: string | null
+          dispatcher_on_duty_user_id?: string | null
           emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
@@ -1669,6 +1675,9 @@ export type Database = {
           credential_score_updated_at?: string | null
           directors?: Json
           dispatch_priority?: number
+          dispatcher_on_duty?: boolean
+          dispatcher_on_duty_since?: string | null
+          dispatcher_on_duty_user_id?: string | null
           emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
@@ -3433,6 +3442,38 @@ export type Database = {
             columns: ["nurse_id"]
             isOneToOne: false
             referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paramedic_shift_partners: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          shift_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          shift_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          shift_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paramedic_shift_partners_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "paramedic_shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -5700,6 +5741,18 @@ export type Database = {
         Args: { _incident_id: string }
         Returns: Json
       }
+      holarchelp_crew_acknowledge: {
+        Args: { _incident_id: string }
+        Returns: undefined
+      }
+      holarchelp_dispatcher_assign: {
+        Args: {
+          _destination_hospital_id?: string
+          _incident_id: string
+          _shift_id: string
+        }
+        Returns: undefined
+      }
       holarchelp_eligible_paramedics: {
         Args: { _provider_ids: string[] }
         Returns: {
@@ -5792,6 +5845,10 @@ export type Database = {
       holarchelp_release_incident: {
         Args: { _incident_id: string; _reason?: string }
         Returns: Json
+      }
+      holarchelp_set_dispatcher_on_duty: {
+        Args: { _on: boolean; _provider_id: string }
+        Returns: undefined
       }
       holarchelp_set_incident_status: {
         Args: { _incident_id: string; _payload?: Json; _status: string }

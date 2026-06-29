@@ -33,6 +33,20 @@ export default function IncomingSosScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [startOpen, setStartOpen] = useState(false);
+  const [dispatcherOnDuty, setDispatcherOnDuty] = useState(false);
+
+  useEffect(() => {
+    if (!providerId) return;
+    supabase.from("holarchelp_ambulance_providers" as any)
+      .select("dispatcher_on_duty").eq("id", providerId).maybeSingle()
+      .then(({ data }) => setDispatcherOnDuty(!!(data as any)?.dispatcher_on_duty));
+    const ch = supabase.channel(`amb-prov-${providerId}`)
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "holarchelp_ambulance_providers", filter: `id=eq.${providerId}` },
+        (p) => setDispatcherOnDuty(!!(p.new as any).dispatcher_on_duty))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [providerId]);
 
   useEffect(() => {
     const load = async () => {
@@ -50,6 +64,7 @@ export default function IncomingSosScreen() {
     return () => { supabase.removeChannel(ch); };
   }, []);
 
+
   const isOffShift = !shift;
   const isBusy = shift?.status === "busy";
 
@@ -60,6 +75,13 @@ export default function IncomingSosScreen() {
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("incomingSos.title")}</h1>
         <p className="text-xs text-muted-foreground">{t("incomingSos.subtitle")}</p>
       </header>
+
+      {dispatcherOnDuty && !isOffShift && (
+        <div className="rounded-2xl border border-primary/40 bg-primary/5 p-3 text-xs text-foreground">
+          <span className="font-bold text-primary">Dispatcher on duty.</span> A controller is assigning units —
+          you will be paged on your phone when you're picked. You can still self-accept below if it's urgent.
+        </div>
+      )}
 
       {isOffShift && (
         <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-8 text-center">
@@ -115,12 +137,13 @@ export default function IncomingSosScreen() {
               {r.notes && <p className="mt-2 rounded-xl border bg-background/60 p-2 text-xs italic text-muted-foreground line-clamp-3">"{r.notes}"</p>}
 
               <Button size="lg" className="mt-3 h-12 w-full text-base font-extrabold" onClick={() => setPickFor(r.id)}>
-                {t("incomingSos.acceptIncident")}
+                Accept &amp; Roll
               </Button>
             </div>
           ))}
         </div>
       )}
+
 
       <ParamedicAcceptDialog
         incidentId={pickFor}
