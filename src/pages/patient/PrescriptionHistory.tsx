@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FileText, Calendar, User, Pill, Download, Eye, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,7 @@ const statusLabels: Record<string, string> = {
 
 export default function Documentation() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [patientId, setPatientId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -117,8 +119,8 @@ export default function Documentation() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Documentation</h1>
-        <p className="text-muted-foreground text-[12px]">View and manage your documents</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("patient.prescriptions.title")}</h1>
+        <p className="text-muted-foreground text-[12px]">{t("patient.prescriptions.subtitle")}</p>
       </div>
 
       {patientId && user?.id && (
@@ -130,7 +132,7 @@ export default function Documentation() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active Prescriptions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("patient.prescriptions.activePrescriptions")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{activePrescriptions}</div>
@@ -138,7 +140,7 @@ export default function Documentation() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Refills Available</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("patient.prescriptions.refillsAvailable")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-600">{refillNeeded}</div>
@@ -146,7 +148,7 @@ export default function Documentation() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Prescriptions</CardTitle>
+            <CardTitle className="text-sm font-medium">{t("patient.prescriptions.totalPrescriptions")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{prescriptions.length}</div>
@@ -159,12 +161,12 @@ export default function Documentation() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Patient Documents</CardTitle>
-              <CardDescription>Your complete documentation history</CardDescription>
+              <CardTitle>{t("patient.prescriptions.patientDocuments")}</CardTitle>
+              <CardDescription>{t("patient.prescriptions.completeDocumentationHistory")}</CardDescription>
             </div>
             <div className="flex gap-2">
               <Input
-                placeholder="Search medications..."
+                placeholder={t("patient.prescriptions.searchMedicationsPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-[200px]"
@@ -179,7 +181,7 @@ export default function Documentation() {
                 size="sm"
                 onClick={() => setFilter(status)}
               >
-                {status === "all" ? "All" : statusLabels[status] || status}
+                {status === "all" ? t("common.all") : statusLabels[status] || status}
               </Button>
             ))}
           </div>
@@ -188,9 +190,9 @@ export default function Documentation() {
           <div className="space-y-4">
             {filteredPrescriptions.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
-                {prescriptions.length === 0 
-                  ? "No prescriptions found. Your prescriptions will appear here once your doctor adds them."
-                  : "No prescriptions match your search criteria."
+                {prescriptions.length === 0
+                  ? t("patient.prescriptions.noPrescriptionsFound")
+                  : t("patient.prescriptions.noPrescriptionsMatchSearch")
                 }
               </p>
             ) : (
@@ -218,7 +220,7 @@ export default function Documentation() {
                     <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        Started: {format(parseISO(rx.start_date), "MMM d, yyyy")}
+                        {t("patient.prescriptions.started")}: {format(parseISO(rx.start_date), "MMM d, yyyy")}
                       </span>
                       {rx.doctor_profile?.full_name && (
                         <span className="flex items-center gap-1">
@@ -229,7 +231,7 @@ export default function Documentation() {
                       {rx.refills_remaining > 0 && (
                         <span className="flex items-center gap-1">
                           <FileText className="h-4 w-4" />
-                          {rx.refills_remaining} refill(s) remaining
+                          {t("patient.prescriptions.refillsRemaining", { count: rx.refills_remaining })}
                         </span>
                       )}
                     </div>

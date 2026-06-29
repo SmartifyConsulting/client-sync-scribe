@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
@@ -13,6 +14,7 @@ import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionB
 
 
 export default function MyDetails() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const rawSection = searchParams.get("section");
   const section = rawSection === "home" ? "health" : rawSection || "health";
@@ -72,7 +74,7 @@ export default function MyDetails() {
 
         if (insertErr) {
           toast({
-            title: "Could not initialize your record",
+            title: t("patient.myDetails.errorInitializeTitle"),
             description: insertErr.message,
             variant: "destructive",
           });
@@ -108,12 +110,12 @@ export default function MyDetails() {
       .eq("id", patient.id);
 
     if (error) {
-      toast({ title: "Error saving", description: error.message, variant: "destructive" });
+      toast({ title: t("patient.myDetails.errorSaveTitle"), description: error.message, variant: "destructive" });
       throw error;
     }
 
     setPatient((prev) => prev ? { ...prev, ...updates } : prev);
-    toast({ title: "Saved", description: "Your details have been updated." });
+    toast({ title: t("common.saved"), description: t("patient.myDetails.detailsUpdated") });
   };
 
   const isIncomplete = useMemo(() => {
@@ -141,10 +143,10 @@ export default function MyDetails() {
 
 
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
-    health: { title: "My Holarchive", subtitle: "View and update your personal and medical information" },
-    care: { title: "My Holarchy", subtitle: "Your healthcare team, sessions and coordination" },
-    admin: { title: "My Desk", subtitle: "Calendar, tasks and documents" },
-    rewards: { title: "My Rewards", subtitle: "Track your Vulas and adherence streaks" },
+    health: { title: t("patient.myDetails.myHolarchive"), subtitle: t("patient.myDetails.holarchiveSubtitle") },
+    care: { title: t("patient.myDetails.myHolarchy"), subtitle: t("patient.myDetails.holarchySubtitle") },
+    admin: { title: t("patient.myDetails.myDesk"), subtitle: t("patient.myDetails.deskSubtitle") },
+    rewards: { title: t("patient.myDetails.myRewards"), subtitle: t("patient.myDetails.rewardsSubtitle") },
   };
   const heading = sectionHeading[section] || sectionHeading.health;
 
@@ -172,7 +174,7 @@ export default function MyDetails() {
         />
       ) : (
         <div className="p-6 text-center text-muted-foreground border border-dashed border-border rounded-lg">
-          <p>Your medical record is being set up. Please refresh in a moment.</p>
+          <p>{t("patient.myDetails.recordSetupMessage")}</p>
         </div>
       )}
 

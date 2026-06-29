@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  User, 
-  Mail, 
-  Loader2, 
-  CheckCircle, 
+import {
+  User,
+  Mail,
+  Loader2,
+  CheckCircle,
   UserCheck,
   UserX,
   EyeOff,
@@ -28,6 +29,7 @@ interface PermissionOption {
   description: string;
 }
 
+// Note: Permission labels and descriptions will be translated dynamically in the component
 const permissionOptions: PermissionOption[] = [
   { id: "patient_info", label: "Patient Information", description: "View your personal and medical details" },
   { id: "calendar", label: "Calendar", description: "View and manage your appointments" },
@@ -57,6 +59,7 @@ interface IncomingInvitation {
 export default function PatientAccessManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [approvedInvites, setApprovedInvites] = useState<ApprovedInvite[]>([]);
   const [incomingInvitations, setIncomingInvitations] = useState<IncomingInvitation[]>([]);
@@ -165,7 +168,7 @@ export default function PatientAccessManagement() {
     } catch (error: any) {
       console.error("Error fetching invite data:", error);
       toast({
-        title: "Error loading data",
+        title: t("common.errorLoadingData"),
         description: error.message,
         variant: "destructive",
       });
@@ -189,8 +192,8 @@ export default function PatientAccessManagement() {
       const perms = permissionsPerInvitation[invitationId] || [];
       if (perms.length === 0) {
         toast({
-          title: "No permissions selected",
-          description: "Please select at least one permission to grant before accepting.",
+          title: t("patient.accessManagement.noPermissionsSelected"),
+          description: t("patient.accessManagement.selectPermissionBeforeAccepting"),
           variant: "destructive",
         });
         return;
@@ -199,7 +202,7 @@ export default function PatientAccessManagement() {
 
     try {
       const newStatus = action === "ignored" ? "declined" : action;
-      
+
       const { error } = await supabase
         .from("user_invitations")
         .update({ status: newStatus })
@@ -207,12 +210,12 @@ export default function PatientAccessManagement() {
 
       if (error) throw error;
 
-      const actionLabel = action === "accepted" ? "accepted" : action === "declined" ? "declined" : "ignored";
+      const actionLabel = action === "accepted" ? t("patient.accessManagement.actionAccepted") : action === "declined" ? t("patient.accessManagement.actionDeclined") : t("patient.accessManagement.actionIgnored");
       toast({
-        title: `Invitation ${actionLabel}`,
-        description: action === "accepted" 
-          ? "The doctor now has access to your profile." 
-          : `The invitation has been ${actionLabel}.`,
+        title: t("patient.accessManagement.invitationUpdate", { action: actionLabel }),
+        description: action === "accepted"
+          ? t("patient.accessManagement.doctorNowHasAccess")
+          : t("patient.accessManagement.invitationHasBeenUpdated", { action: actionLabel }),
       });
 
       if (action === "accepted") {
@@ -230,7 +233,7 @@ export default function PatientAccessManagement() {
       fetchData();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -250,14 +253,14 @@ export default function PatientAccessManagement() {
 
       setRoundTableEnabled(enabled);
       toast({
-        title: enabled ? "Round Table enabled" : "Round Table disabled",
-        description: enabled 
-          ? "All your doctors can now exchange thoughts about your care."
-          : "Doctors can no longer see the Round Table for your profile.",
+        title: enabled ? t("patient.accessManagement.roundTableEnabled") : t("patient.accessManagement.roundTableDisabled"),
+        description: enabled
+          ? t("patient.accessManagement.doctorsCanExchangeThoughts")
+          : t("patient.accessManagement.doctorsCannotSeeRoundTable"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -282,8 +285,8 @@ export default function PatientAccessManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Invites</h1>
-        <p className="text-muted-foreground text-[12px]">Manage your doctor invitations and preferences</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("patient.accessManagement.title")}</h1>
+        <p className="text-muted-foreground text-[12px]">{t("patient.accessManagement.subtitle")}</p>
       </div>
 
       {/* Round Table Access */}
@@ -291,20 +294,20 @@ export default function PatientAccessManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
-            Round Table Access
+            {t("patient.accessManagement.roundTableAccess")}
           </CardTitle>
           <CardDescription>
-            Allow all your doctors to exchange thoughts and collaborate on your care
+            {t("patient.accessManagement.roundTableDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between p-4 rounded-lg border border-border">
             <div className="space-y-1">
               <Label htmlFor="round-table-toggle" className="font-medium">
-                Enable Round Table
+                {t("patient.accessManagement.enableRoundTable")}
               </Label>
               <p className="text-sm text-muted-foreground">
-                When enabled, all doctors on your profile can view and contribute to your Round Table discussions.
+                {t("patient.accessManagement.roundTableHelpText")}
               </p>
             </div>
             <Switch
@@ -323,10 +326,10 @@ export default function PatientAccessManagement() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Pending Invitations
+              {t("patient.accessManagement.pendingInvitations")}
             </CardTitle>
             <CardDescription>
-              Invitations from doctors requesting to connect with you
+              {t("patient.accessManagement.pendingInvitationsDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -351,14 +354,14 @@ export default function PatientAccessManagement() {
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        Received {format(new Date(invitation.created_at), "MMM d, yyyy")}
+                        {t("patient.accessManagement.received")} {format(new Date(invitation.created_at), "MMM d, yyyy")}
                       </p>
                     </div>
                   </div>
 
                   {/* Permission checkboxes */}
                   <div className="px-4 pb-2">
-                    <Label className="text-sm font-medium">Grant access to:</Label>
+                    <Label className="text-sm font-medium">{t("patient.accessManagement.grantAccessTo")}</Label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                       {permissionOptions.map((perm) => (
                         <div
@@ -392,10 +395,10 @@ export default function PatientAccessManagement() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleInvitationAction(invitation.id, "ignored")}
-                      title="Ignore"
+                      title={t("patient.accessManagement.ignore")}
                     >
                       <EyeOff className="h-4 w-4 mr-1" />
-                      Ignore
+                      {t("patient.accessManagement.ignore")}
                     </Button>
                     <Button
                       variant="outline"
@@ -403,14 +406,14 @@ export default function PatientAccessManagement() {
                       onClick={() => handleInvitationAction(invitation.id, "declined")}
                     >
                       <UserX className="h-4 w-4 mr-1" />
-                      Decline
+                      {t("common.decline")}
                     </Button>
                     <Button
                       size="sm"
                       onClick={() => handleInvitationAction(invitation.id, "accepted")}
                     >
                       <UserCheck className="h-4 w-4 mr-1" />
-                      Accept
+                      {t("common.accept")}
                     </Button>
                   </div>
                 </div>
@@ -425,16 +428,16 @@ export default function PatientAccessManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5" />
-            Approved Invitations
+            {t("patient.accessManagement.approvedInvitations")}
           </CardTitle>
           <CardDescription>
-            Invitations you sent that have been approved by doctors
+            {t("patient.accessManagement.approvedInvitationsDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {approvedInvites.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              No approved invitations yet.
+              {t("patient.accessManagement.noApprovedInvitations")}
             </p>
           ) : (
             <div className="space-y-4">
@@ -449,17 +452,17 @@ export default function PatientAccessManagement() {
                     </div>
                     <div className="flex-1">
                       <p className="font-medium">
-                        {invite.doctor_name || `Practice: ${invite.doctor_practice_number}`}
+                        {invite.doctor_name || `${t("patient.accessManagement.practice")}: ${invite.doctor_practice_number}`}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Registration: {invite.doctor_registration_number}
+                        {t("patient.accessManagement.registration")}: {invite.doctor_registration_number}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Approved {format(new Date(invite.created_at), "MMM d, yyyy")}
+                        {t("patient.accessManagement.approved")} {format(new Date(invite.created_at), "MMM d, yyyy")}
                       </p>
                     </div>
                     <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                      Approved
+                      {t("patient.accessManagement.approvedStatus")}
                     </Badge>
                   </div>
                   {invite.permissions && invite.permissions.length > 0 && (

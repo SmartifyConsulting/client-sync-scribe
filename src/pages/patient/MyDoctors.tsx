@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,6 +55,7 @@ interface DoctorAccess {
 }
 
 export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean }) {
+  const { t } = useTranslation();
   const [nameQuery, setNameQuery] = useState("");
   const [specialtyQuery, setSpecialtyQuery] = useState<string>("any");
   const [languageQuery, setLanguageQuery] = useState<string>("any");
@@ -121,10 +123,10 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       doctor_id: access.doctor_id,
     } as any);
     if (error && !error.message.includes("duplicate")) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Doctor hidden", description: "They won't appear in your active list. Historic records remain." });
+    toast({ title: t("patient.myDoctors.doctorHiddenTitle"), description: t("patient.myDoctors.doctorHiddenDesc") });
     queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
   };
 
@@ -144,7 +146,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .update({ is_active: true, revoked_at: null } as any)
         .eq("id", access.id);
     }
-    toast({ title: "Doctor restored", description: "They're back in your active list." });
+    toast({ title: t("patient.myDoctors.doctorRestoredTitle"), description: t("patient.myDoctors.doctorRestoredDesc") });
     queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
   };
 
@@ -209,11 +211,11 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         .eq("id", uninviteTarget.id);
 
       // Intentionally do NOT notify the doctor when a patient revokes access.
-      toast({ title: "Doctor deactivated", description: "They no longer have live access. Historic records are preserved." });
+      toast({ title: t("patient.myDoctors.doctorDeactivatedTitle"), description: t("patient.myDoctors.doctorDeactivatedDesc") });
       queryClient.invalidateQueries({ queryKey: ["patient-doctors-with-hidden"] });
       setUninviteTarget(null);
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t("common.error"), description: err.message, variant: "destructive" });
     } finally {
       setUninviteLoading(false);
     }
@@ -233,13 +235,13 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="font-medium text-foreground">{doctor.full_name || "Unknown Doctor"}</span>
+              <span className="font-medium text-foreground">{doctor.full_name || t("patient.myDoctors.unknownDoctor")}</span>
               {doctor.practice_number && (
                 <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
               )}
               {mode === "hidden" && (
                 <span className="text-[10px] text-muted-foreground italic">
-                  {!access.is_active ? "Deactivated" : "Hidden"}
+                  {!access.is_active ? t("patient.myDoctors.statusDeactivated") : t("patient.myDoctors.statusHidden")}
                 </span>
               )}
             </div>
@@ -261,7 +263,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                     <Lock className="h-4 w-4 text-primary cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent side="left" className="max-w-[200px]">
-                    <p className="text-xs font-semibold mb-1">Access granted:</p>
+                    <p className="text-xs font-semibold mb-1">{t("patient.myDoctors.accessGrantedLabel")}:</p>
                     <ul className="text-xs space-y-0.5">
                       {filteredPermissions.map(p => (
                         <li key={p}>• {formatPermission(p)}</li>
@@ -286,7 +288,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                         <EyeOff className="h-3.5 w-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">Hide from your active list (keeps history)</TooltipContent>
+                    <TooltipContent side="left">{t("patient.myDoctors.hideTooltip")}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
                 <TooltipProvider>
@@ -302,7 +304,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                         <UserMinus className="h-3.5 w-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">Deactivate (revoke live access, keep history)</TooltipContent>
+                    <TooltipContent side="left">{t("patient.myDoctors.deactivateTooltip")}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </>
@@ -313,7 +315,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 className="h-7 text-xs gap-1"
                 onClick={() => handleRestore(access)}
               >
-                <Eye className="h-3.5 w-3.5" /> Restore
+                <Eye className="h-3.5 w-3.5" /> {t("patient.myDoctors.restoreButton")}
               </Button>
             )}
           </div>
@@ -329,10 +331,10 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           <div>
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">My Healthcare Providers</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t("patient.myDoctors.headerTitle")}</h3>
             </div>
             <p className="text-xs text-muted-foreground">
-              Healthcare providers with access to your profile
+              {t("patient.myDoctors.headerSubtitle")}
             </p>
           </div>
         </div>
@@ -341,33 +343,33 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       {/* Doctor Search */}
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
-          <CardTitle className="text-sm">Find a Healthcare Provider on Holarc</CardTitle>
-          <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
+          <CardTitle className="text-sm">{t("patient.myDoctors.findProviderTitle")}</CardTitle>
+          <CardDescription className="text-xs">{t("patient.myDoctors.findProviderDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 md:grid-cols-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Doctor name, practice or registration #"
+                placeholder={t("patient.myDoctors.searchPlaceholder")}
                 value={nameQuery}
                 onChange={(e) => setNameQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
             <Select value={specialtyQuery} onValueChange={setSpecialtyQuery}>
-              <SelectTrigger><SelectValue placeholder="Any specialty" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("patient.myDoctors.anySpecialty")} /></SelectTrigger>
               <SelectContent className="max-h-72">
-                <SelectItem value="any">Any specialty</SelectItem>
+                <SelectItem value="any">{t("patient.myDoctors.anySpecialty")}</SelectItem>
                 {COMMON_SPECIALTIES.map((s) => (
                   <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={languageQuery} onValueChange={setLanguageQuery}>
-              <SelectTrigger><SelectValue placeholder="Any language" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("patient.myDoctors.anyLanguage")} /></SelectTrigger>
               <SelectContent className="max-h-72">
-                <SelectItem value="any">Any language</SelectItem>
+                <SelectItem value="any">{t("patient.myDoctors.anyLanguage")}</SelectItem>
                 {LANGUAGES.map((l) => (
                   <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
                 ))}
@@ -382,15 +384,15 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               ) : searchResults.length === 0 ? (
                  <p className="text-sm text-muted-foreground text-center py-4">
                    {totalFound > 0
-                     ? "All matching providers are already on your profile."
-                     : "No healthcare providers found matching your search."}
+                     ? t("patient.myDoctors.allProvidersConnected")
+                     : t("patient.myDoctors.noProvidersFound")}
                  </p>
               ) : (
                 <div className="space-y-4">
                   {(['doctor','hospital','ambulance'] as const).map((groupKind) => {
                     const groupRows = searchResults.filter((r) => r.kind === groupKind);
                     if (groupRows.length === 0) return null;
-                    const groupLabel = groupKind === 'doctor' ? 'Doctors' : groupKind === 'hospital' ? 'Hospitals' : 'Emergency Responders';
+                    const groupLabel = groupKind === 'doctor' ? t("patient.myDoctors.groupDoctors") : groupKind === 'hospital' ? t("patient.myDoctors.groupHospitals") : t("patient.myDoctors.groupEmergency");
                     const GroupIcon = groupKind === 'hospital' ? Building2 : groupKind === 'ambulance' ? Ambulance : Stethoscope;
                     return (
                       <div key={groupKind} className="space-y-1">
@@ -401,9 +403,9 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                         <Table className="table-fixed w-full">
                           <TableHeader>
                             <TableRow>
-                              <TableHead className="w-[45%]">Provider</TableHead>
-                              <TableHead className="w-[30%]">{groupKind === 'doctor' ? 'Specialty' : 'Type'}</TableHead>
-                              <TableHead className="w-[25%]">Action</TableHead>
+                              <TableHead className="w-[45%]">{t("patient.myDoctors.columnProvider")}</TableHead>
+                              <TableHead className="w-[30%]">{groupKind === 'doctor' ? t("patient.myDoctors.columnSpecialty") : t("patient.myDoctors.columnType")}</TableHead>
+                              <TableHead className="w-[25%]">{t("patient.myDoctors.columnAction")}</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -420,7 +422,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                         </AvatarFallback>
                                       </Avatar>
                                       <div className="flex flex-col min-w-0">
-                                        <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
+                                        <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || t("patient.myDoctors.unknownProvider")}</span>
                                         <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                                           {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
                                             <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
@@ -502,21 +504,21 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       ) : (
         <Tabs defaultValue="active" className="w-full">
           <TabsList>
-            <TabsTrigger value="active">Active ({doctors.length})</TabsTrigger>
-            <TabsTrigger value="hidden">Hidden ({hiddenDoctors.length})</TabsTrigger>
+            <TabsTrigger value="active">{t("patient.myDoctors.tabActive")} ({doctors.length})</TabsTrigger>
+            <TabsTrigger value="hidden">{t("patient.myDoctors.tabHidden")} ({hiddenDoctors.length})</TabsTrigger>
           </TabsList>
           <TabsContent value="active">
             {doctors.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t("patient.myDoctors.noActiveProviders")}</p>
             ) : (
               <Card>
                 <CardContent className="p-0">
                   <Table className="table-fixed w-full">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[45%]">Provider</TableHead>
-                        <TableHead className="w-[35%]">Specialty</TableHead>
-                        <TableHead className="w-[20%]">Access</TableHead>
+                        <TableHead className="w-[45%]">{t("patient.myDoctors.columnProvider")}</TableHead>
+                        <TableHead className="w-[35%]">{t("patient.myDoctors.columnSpecialty")}</TableHead>
+                        <TableHead className="w-[20%]">{t("patient.myDoctors.columnAccess")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -533,16 +535,16 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </TabsContent>
           <TabsContent value="hidden">
             {hiddenDoctors.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t("patient.myDoctors.noHiddenProviders")}</p>
             ) : (
               <Card>
                 <CardContent className="p-0">
                   <Table className="table-fixed w-full">
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[45%]">Provider</TableHead>
-                        <TableHead className="w-[35%]">Specialty</TableHead>
-                        <TableHead className="w-[20%]">Action</TableHead>
+                        <TableHead className="w-[45%]">{t("patient.myDoctors.columnProvider")}</TableHead>
+                        <TableHead className="w-[35%]">{t("patient.myDoctors.columnSpecialty")}</TableHead>
+                        <TableHead className="w-[20%]">{t("patient.myDoctors.columnAction")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -564,16 +566,16 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       <Dialog open={!!uninviteTarget} onOpenChange={() => setUninviteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove Healthcare Provider</DialogTitle>
+            <DialogTitle>{t("patient.myDoctors.removeProviderTitle")}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove {uninviteTarget?.doctor?.full_name || "this doctor"} from your healthcare providers? They will lose access to your health information.
+              {t("patient.myDoctors.removeProviderDesc")} {uninviteTarget?.doctor?.full_name || t("patient.myDoctors.thisDoctor")}?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setUninviteTarget(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setUninviteTarget(null)}>{t("common.cancel")}</Button>
             <Button variant="destructive" onClick={handleUninvite} disabled={uninviteLoading}>
               {uninviteLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserMinus className="h-4 w-4 mr-2" />}
-              Remove
+              {t("patient.myDoctors.removeButton")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -590,7 +592,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                   {detailsDoctor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
                 </AvatarFallback>
               </Avatar>
-              <span>{detailsDoctor?.full_name || "Provider"}</span>
+              <span>{detailsDoctor?.full_name || t("patient.myDoctors.provider")}</span>
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 text-xs">
@@ -600,19 +602,19 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               ))}
               <span className="text-muted-foreground ml-1 capitalize">({detailsDoctor?.kind})</span>
             </div>
-            {detailsDoctor?.specialty && <div><span className="text-muted-foreground">Specialty:</span> {detailsDoctor.specialty}</div>}
-            {detailsDoctor?.registration && <div><span className="text-muted-foreground">Registration #:</span> {detailsDoctor.registration}</div>}
+            {detailsDoctor?.specialty && <div><span className="text-muted-foreground">{t("patient.myDoctors.labelSpecialty")}:</span> {detailsDoctor.specialty}</div>}
+            {detailsDoctor?.registration && <div><span className="text-muted-foreground">{t("patient.myDoctors.labelRegistration")}:</span> {detailsDoctor.registration}</div>}
             {detailsDoctor?.preferred_language && (
-              <div><span className="text-muted-foreground">Language:</span> {LANGUAGES.find(l => l.code === detailsDoctor.preferred_language)?.name || detailsDoctor.preferred_language}</div>
+              <div><span className="text-muted-foreground">{t("patient.myDoctors.labelLanguage")}:</span> {LANGUAGES.find(l => l.code === detailsDoctor.preferred_language)?.name || detailsDoctor.preferred_language}</div>
             )}
-            {detailsDoctor?.address && <div><span className="text-muted-foreground">Address:</span> {detailsDoctor.address}</div>}
-            {detailsDoctor?.phone && <div><span className="text-muted-foreground">Phone:</span> {detailsDoctor.phone}</div>}
+            {detailsDoctor?.address && <div><span className="text-muted-foreground">{t("patient.myDoctors.labelAddress")}:</span> {detailsDoctor.address}</div>}
+            {detailsDoctor?.phone && <div><span className="text-muted-foreground">{t("patient.myDoctors.labelPhone")}:</span> {detailsDoctor.phone}</div>}
             <div className="pt-2 border-t">
-              <div className="text-muted-foreground mb-1 font-medium">About Me</div>
+              <div className="text-muted-foreground mb-1 font-medium">{t("patient.myDoctors.labelAboutMe")}</div>
               {detailsDoctor?.about_me ? (
                 <p className="whitespace-pre-wrap leading-relaxed">{detailsDoctor.about_me}</p>
               ) : (
-                <p className="italic text-muted-foreground">Not provided yet.</p>
+                <p className="italic text-muted-foreground">{t("patient.myDoctors.notProvided")}</p>
               )}
             </div>
           </div>

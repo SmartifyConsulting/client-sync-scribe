@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Camera, Dumbbell, Utensils, Pill, Trash2, Calendar, Award, Loader2, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ export default function HealthAlbum() {
   const [stats, setStats] = useState({ total: 0, gym: 0, healthy_meal: 0, medication: 0, lollipops: 0 });
   const { toast } = useToast();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user) {
@@ -79,8 +81,8 @@ export default function HealthAlbum() {
     if (error) {
       console.error('Error fetching photos:', error);
       toast({
-        title: "Error",
-        description: "Failed to load photos",
+        title: t("common.error"),
+        description: t("patient.healthAlbum.failedToLoadPhotos"),
         variant: "destructive",
       });
     } else {
@@ -126,16 +128,16 @@ export default function HealthAlbum() {
       if (error) throw error;
 
       toast({
-        title: "Photo Deleted",
-        description: "The photo has been removed from your album",
+        title: t("patient.healthAlbum.photoDeleted"),
+        description: t("patient.healthAlbum.photoDeletedDescription"),
       });
 
       fetchPhotos();
     } catch (error) {
       console.error('Error deleting photo:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete photo",
+        title: t("common.error"),
+        description: t("patient.healthAlbum.failedToDeletePhoto"),
         variant: "destructive",
       });
     }
@@ -149,9 +151,9 @@ export default function HealthAlbum() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <Image className="h-16 w-16 text-muted-foreground mb-4" />
-        <h2 className="text-xl font-semibold mb-2">Health Album Not Available</h2>
+        <h2 className="text-xl font-semibold mb-2">{t("patient.healthAlbum.notAvailable")}</h2>
         <p className="text-muted-foreground">
-          You need to be linked as a patient to use the Health Album feature.
+          {t("patient.healthAlbum.notAvailableDescription")}
         </p>
       </div>
     );
@@ -162,9 +164,9 @@ export default function HealthAlbum() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Health Album</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("patient.healthAlbum.title")}</h1>
           <p className="text-muted-foreground text-[12px] mt-1">
-            Capture your healthy habits and earn rewards
+            {t("patient.healthAlbum.subtitle")}
           </p>
         </div>
         {patientId && (
@@ -177,31 +179,31 @@ export default function HealthAlbum() {
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-primary">{stats.total}</p>
-            <p className="text-xs text-muted-foreground">Total Photos</p>
+            <p className="text-xs text-muted-foreground">{t("patient.healthAlbum.totalPhotos")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-blue-600">{stats.gym}</p>
-            <p className="text-xs text-muted-foreground">Gym Sessions</p>
+            <p className="text-xs text-muted-foreground">{t("patient.healthAlbum.gymSessions")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-green-600">{stats.healthy_meal}</p>
-            <p className="text-xs text-muted-foreground">Healthy Meals</p>
+            <p className="text-xs text-muted-foreground">{t("patient.healthAlbum.healthyMeals")}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-purple-600">{stats.medication}</p>
-            <p className="text-xs text-muted-foreground">Medications</p>
+            <p className="text-xs text-muted-foreground">{t("patient.healthAlbum.medications")}</p>
           </CardContent>
         </Card>
         <Card className="col-span-2 sm:col-span-1">
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-yellow-600">{stats.lollipops}</p>
-            <p className="text-xs text-muted-foreground">Lollipops Earned</p>
+            <p className="text-xs text-muted-foreground">{t("patient.healthAlbum.lollipopsEarned")}</p>
           </CardContent>
         </Card>
       </div>
@@ -211,21 +213,21 @@ export default function HealthAlbum() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Photo Gallery
+            {t("patient.healthAlbum.photoGallery")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4 bg-primary">
-              <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">All</TabsTrigger>
+              <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-black text-white">{t("common.all")}</TabsTrigger>
               <TabsTrigger value="gym" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-                <Dumbbell className="h-4 w-4" /> Gym
+                <Dumbbell className="h-4 w-4" /> {t("patient.healthAlbum.gym")}
               </TabsTrigger>
               <TabsTrigger value="healthy_meal" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-                <Utensils className="h-4 w-4" /> Meals
+                <Utensils className="h-4 w-4" /> {t("patient.healthAlbum.meals")}
               </TabsTrigger>
               <TabsTrigger value="medication" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
-                <Pill className="h-4 w-4" /> Medication
+                <Pill className="h-4 w-4" /> {t("patient.healthAlbum.medication")}
               </TabsTrigger>
             </TabsList>
 
@@ -237,9 +239,9 @@ export default function HealthAlbum() {
               ) : filteredPhotos.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <Camera className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="font-medium text-foreground mb-1">No photos yet</h3>
+                  <h3 className="font-medium text-foreground mb-1">{t("patient.healthAlbum.noPhotosYet")}</h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Start capturing your healthy habits to earn lollipops!
+                    {t("patient.healthAlbum.startCapturingHabits")}
                   </p>
                   {patientId && (
                     <HealthPhotoCapture patientId={patientId} onPhotoSaved={fetchPhotos} />
@@ -302,15 +304,15 @@ export default function HealthAlbum() {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Photo?</AlertDialogTitle>
+                                  <AlertDialogTitle>{t("patient.healthAlbum.deletePhotoTitle")}</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This will permanently delete this photo from your album. This action cannot be undone.
+                                    {t("patient.healthAlbum.deletePhotoDescription")}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                                   <AlertDialogAction onClick={() => deletePhoto(photo)}>
-                                    Delete
+                                    {t("common.delete")}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
@@ -330,25 +332,25 @@ export default function HealthAlbum() {
       {/* Tips Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Tips for Earning Lollipops</CardTitle>
+          <CardTitle className="text-lg">{t("patient.healthAlbum.tipsTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-start gap-2">
               <Dumbbell className="h-4 w-4 text-blue-500 mt-0.5" />
-              <span><strong>Gym (2 lollipops):</strong> Capture yourself at the gym, exercising, or doing any physical activity</span>
+              <span><strong>{t("patient.healthAlbum.tipGym")}:</strong> {t("patient.healthAlbum.tipGymDescription")}</span>
             </li>
             <li className="flex items-start gap-2">
               <Utensils className="h-4 w-4 text-green-500 mt-0.5" />
-              <span><strong>Healthy Meals (1 lollipop):</strong> Take a photo of nutritious meals with vegetables, fruits, or balanced foods</span>
+              <span><strong>{t("patient.healthAlbum.tipMeal")}:</strong> {t("patient.healthAlbum.tipMealDescription")}</span>
             </li>
             <li className="flex items-start gap-2">
               <Pill className="h-4 w-4 text-purple-500 mt-0.5" />
-              <span><strong>Medication (3 lollipops):</strong> Capture yourself taking medication or your medication supplies (important for diabetes management!)</span>
+              <span><strong>{t("patient.healthAlbum.tipMedication")}:</strong> {t("patient.healthAlbum.tipMedicationDescription")}</span>
             </li>
             <li className="flex items-start gap-2 text-yellow-600">
               <Award className="h-4 w-4 mt-0.5" />
-              <span><strong>Note:</strong> You can only earn rewards once per category per day. Photos are validated by AI to ensure authenticity.</span>
+              <span><strong>{t("patient.healthAlbum.noteTitle")}:</strong> {t("patient.healthAlbum.noteDescription")}</span>
             </li>
           </ul>
         </CardContent>
