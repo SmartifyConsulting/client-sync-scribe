@@ -2145,6 +2145,7 @@ export type Database = {
           eta_minutes: number | null
           hospital_admission_status: string | null
           id: string
+          incident_number: string
           last_eta_update: string | null
           manually_logged: boolean
           notes: string | null
@@ -2189,6 +2190,7 @@ export type Database = {
           eta_minutes?: number | null
           hospital_admission_status?: string | null
           id?: string
+          incident_number: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
@@ -2233,6 +2235,7 @@ export type Database = {
           eta_minutes?: number | null
           hospital_admission_status?: string | null
           id?: string
+          incident_number?: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
@@ -5703,6 +5706,7 @@ export type Database = {
         }[]
       }
       holarchelp_end_shift: { Args: never; Returns: Json }
+      holarchelp_generate_incident_number: { Args: never; Returns: string }
       holarchelp_get_incident_offers: {
         Args: { _incident_id: string }
         Returns: {
@@ -5742,10 +5746,19 @@ export type Database = {
           recorded_at: string
         }[]
       }
-      holarchelp_paramedic_accept: {
-        Args: { _ambulance_id: string; _incident_id: string }
-        Returns: Json
-      }
+      holarchelp_paramedic_accept:
+        | {
+            Args: { _ambulance_id: string; _incident_id: string }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _ambulance_id: string
+              _destination_hospital_id?: string
+              _incident_id: string
+            }
+            Returns: Json
+          }
       holarchelp_patient_pick_provider: {
         Args: { _incident_id: string; _kind: string; _provider_id: string }
         Returns: Json
