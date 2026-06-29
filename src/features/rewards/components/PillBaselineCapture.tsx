@@ -54,6 +54,32 @@ export function PillBaselineCapture({
   const [intakeMethod, setIntakeMethod] = useState<string>("swallow");
   const [stream, setStream] = useState<MediaStream | null>(null);
 
+  // Skip-notify (who to alert if this medication is missed)
+  const [skipNotifyTarget, setSkipNotifyTarget] = useState<"emergency" | "nok" | "none">("emergency");
+  const [patientContacts, setPatientContacts] = useState<{
+    emergency_contact_name: string | null;
+    emergency_contact_phone: string | null;
+    next_of_kin_name: string | null;
+    next_of_kin_phone: string | null;
+  } | null>(null);
+  const [overrideContact, setOverrideContact] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+
+  // Load patient emergency/NOK contacts when dialog opens
+  useEffect(() => {
+    if (!open || !patientId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("patients")
+        .select("emergency_contact_name, emergency_contact_phone, next_of_kin_name, next_of_kin_phone")
+        .eq("id", patientId)
+        .maybeSingle();
+      if (data) setPatientContacts(data as any);
+    })();
+  }, [open, patientId]);
+
+
   // Stills (packaging + tablet close-up)
   const [packagingBlob, setPackagingBlob] = useState<Blob | null>(null);
   const [tabletBlob, setTabletBlob] = useState<Blob | null>(null);
