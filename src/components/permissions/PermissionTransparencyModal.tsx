@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   CheckCircle,
   XCircle,
@@ -19,49 +20,50 @@ interface PermissionItem {
   subItems?: string[];
 }
 
-const sharedItems: PermissionItem[] = [
-  { label: "Your AI Session Summaries" },
-  { label: "Your Patient Information" },
-  { label: "Your Patient Medical Overview" },
+// These will be populated from i18n translations
+const getSharedItems = (t: any): PermissionItem[] => [
+  { label: t("permissions.aiSessionSummaries") },
+  { label: t("permissions.patientInformation") },
+  { label: t("permissions.medicalOverview") },
   {
-    label: "Your Documents",
+    label: t("permissions.documents"),
     subItems: [
-      "Prescriptions",
-      "Hospital Admissions",
-      "Patient Images",
-      "Patient Videos",
-      "Test Results",
-      "Scans",
+      t("permissions.prescriptions"),
+      t("permissions.hospitalAdmissions"),
+      t("permissions.patientImages"),
+      t("permissions.patientVideos"),
+      t("permissions.testResults"),
+      t("permissions.scans"),
     ],
   },
 ];
 
-const privateItems: PermissionItem[] = [
-  { label: "Full Transcriptions" },
-  { label: "Raw Audio Recordings" },
-  { label: "AI Diagnostics" },
-  { label: "Clinical Drawings/Sketches" },
-  { label: "Invoices & Billing Data" },
-  { label: "Medical Certificates" },
+const getPrivateItems = (t: any): PermissionItem[] => [
+  { label: t("permissions.fullTranscriptions") },
+  { label: t("permissions.rawAudioRecordings") },
+  { label: t("permissions.aiDiagnostics") },
+  { label: t("permissions.clinicalDrawings") },
+  { label: t("permissions.invoicesAndBilling") },
+  { label: t("permissions.medicalCertificates") },
 ];
 
 // What other doctors on the patient's profile will see vs. what stays private to this practice
-const doctorSharedItems: PermissionItem[] = [
-  { label: "Your contribution to the patient's AI Summary" },
-  { label: "Your visit summary on the patient's timeline" },
-  { label: "Prescriptions you issue" },
-  { label: "Information relevant to the patient's ailments and medical history" },
-  { label: "Your Credentials" },
-  { label: "Your About Me" },
+const getDoctorSharedItems = (t: any): PermissionItem[] => [
+  { label: t("permissions.doctorContribution") },
+  { label: t("permissions.visitSummary") },
+  { label: t("permissions.issuedPrescriptions") },
+  { label: t("permissions.medicalHistory") },
+  { label: t("permissions.credentials") },
+  { label: t("permissions.aboutMe") },
 ];
 
-const doctorPrivateItems: PermissionItem[] = [
-  { label: "Full Session History details" },
-  { label: "Raw Audio Recordings" },
-  { label: "Full Transcriptions" },
-  { label: "Invoices & Billing for your practice" },
-  { label: "Medical Certificates you issue" },
-  { label: "Your Draft Notes" },
+const getDoctorPrivateItems = (t: any): PermissionItem[] => [
+  { label: t("permissions.sessionHistory") },
+  { label: t("permissions.rawAudioRecordings") },
+  { label: t("permissions.fullTranscriptions") },
+  { label: t("permissions.invoicesAndBilling") },
+  { label: t("permissions.medicalCertificates") },
+  { label: t("permissions.draftNotes") },
 ];
 
 interface PermissionTransparencyModalProps {
@@ -80,26 +82,27 @@ export function PermissionTransparencyModal({
   inline = false,
   isPatientFacing = false,
   onConfirm,
-  confirmLabel = "I Understand",
+  confirmLabel,
   mode = "patient_invites_doctor",
 }: PermissionTransparencyModalProps) {
+  const { t } = useTranslation();
   const [showHolisticWarning] = useState(false);
   const isDoctorMode = mode === "doctor_invites_patient";
 
   const sharedHeading = isDoctorMode
-    ? "Shared with Patient's Care Team"
-    : "Shared with Care Team";
+    ? t("dialogs.sharedWithPatientCareTeam")
+    : t("dialogs.sharedWithCareTeam");
   const privateHeading = isDoctorMode
-    ? "Private to Your Practice — Not Shared"
-    : "Private — Not Shared";
-  const sharedList = isDoctorMode ? doctorSharedItems : sharedItems;
-  const privateList = isDoctorMode ? doctorPrivateItems : privateItems;
+    ? t("dialogs.privateToYourPractice")
+    : t("dialogs.privateNotShared");
+  const sharedList = isDoctorMode ? getDoctorSharedItems(t) : getSharedItems(t);
+  const privateList = isDoctorMode ? getDoctorPrivateItems(t) : getPrivateItems(t);
 
   const content = (
     <div className="space-y-4">
       {isDoctorMode && (
         <p className="text-xs text-muted-foreground">
-          What other doctors on this patient's profile will and won't see from your sessions and records.
+          {t("dialogs.otherDoctorsWillSee")}
         </p>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -145,10 +148,9 @@ export function PermissionTransparencyModal({
           <div className="flex items-start gap-3">
             <Heart className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-foreground">Holistic Health Sharing</p>
+              <p className="text-sm font-medium text-foreground">{t("dialogs.holisticHealthSharing")}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Sharing your AI Session Summaries, Patient Information, and Medical Overview
-                helps your doctors see the full picture of your health for the safest and most accurate care.
+                {t("dialogs.holisticHealthDescription")}
               </p>
             </div>
           </div>
@@ -160,8 +162,7 @@ export function PermissionTransparencyModal({
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-xs">
-            <strong>Important:</strong> Limiting access to your profile may prevent your doctors
-            from seeing the holistic view of your health which ensures the safest and most accurate care.
+            {t("dialogs.limitingAccessWarning")}
           </AlertDescription>
         </Alert>
       )}
@@ -169,7 +170,7 @@ export function PermissionTransparencyModal({
       {onConfirm && (
         <div className="pt-2 border-t border-border">
           <Button className="w-full" onClick={onConfirm}>
-            {confirmLabel}
+            {confirmLabel || t("dialogs.iUnderstand")}
           </Button>
         </div>
       )}
@@ -186,7 +187,7 @@ export function PermissionTransparencyModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-primary" />
-            Data Sharing Transparency
+            {t("dialogs.dataSharing")}
           </DialogTitle>
         </DialogHeader>
         {content}
@@ -195,4 +196,11 @@ export function PermissionTransparencyModal({
   );
 }
 
-export { sharedItems, privateItems };
+// Re-export for backward compatibility
+export function getSharedItems(t: any) {
+  return getSharedItems(t);
+}
+
+export function getPrivateItems(t: any) {
+  return getPrivateItems(t);
+}

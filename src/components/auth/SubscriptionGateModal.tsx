@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Lock, CreditCard } from "lucide-react";
 
 export function SubscriptionGateModal() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -14,23 +16,23 @@ export function SubscriptionGateModal() {
 
         <div className="space-y-2">
           <h2 className="text-xl font-bold text-foreground">
-            Subscription Required
+            {t("dialogs.subscriptionRequired")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Subscribe to continue using all features of the app.
+            {t("dialogs.subscribeMessage")}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div className="p-3 rounded-lg bg-muted border border-border">
-            <p className="font-medium text-foreground">Monthly</p>
-            <p className="text-primary font-bold text-lg">From $9.99</p>
-            <p className="text-muted-foreground">per month</p>
+            <p className="font-medium text-foreground">{t("dialogs.subscribeMonthly")}</p>
+            <p className="text-primary font-bold text-lg">{t("dialogs.priceMonthly")}</p>
+            <p className="text-muted-foreground">{t("dialogs.perMonth")}</p>
           </div>
           <div className="p-3 rounded-lg bg-muted border border-border">
-            <p className="font-medium text-foreground">Annual</p>
-            <p className="text-primary font-bold text-lg">From $99.99</p>
-            <p className="text-muted-foreground">per year · Save 17%</p>
+            <p className="font-medium text-foreground">{t("dialogs.subscribeAnnual")}</p>
+            <p className="text-primary font-bold text-lg">{t("dialogs.priceAnnual")}</p>
+            <p className="text-muted-foreground">{t("dialogs.perYear")} · {t("dialogs.save17Percent")}</p>
           </div>
         </div>
 
@@ -40,11 +42,11 @@ export function SubscriptionGateModal() {
           size="lg"
         >
           <CreditCard className="h-4 w-4 mr-2" />
-          Subscribe Now
+          {t("dialogs.subscribeNow")}
         </Button>
 
         <p className="text-[10px] text-muted-foreground">
-          You can manage your subscription anytime from Settings.
+          {t("dialogs.subscriptionManagement")}
         </p>
       </div>
     </div>
