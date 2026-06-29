@@ -297,7 +297,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
       coordinator: "Coordinator",
       doctor: "Doctor",
       nurse: "Nurse",
-      er_admin: "ER Admin",
+      er_admin: "ER_Admin",
       paramedic: "Paramedic",
     },
     inviteStaff: {

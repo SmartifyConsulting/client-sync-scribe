@@ -311,8 +311,17 @@ export const LiveMap = ({
         className="overflow-hidden rounded-2xl border z-0"
       />
       {err && (
-        <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-destructive/90 px-3 py-1 text-xs font-medium text-destructive-foreground shadow">
-          {err}
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/85 px-4 text-center">
+          <div className="max-w-sm rounded-xl border border-destructive/40 bg-card p-3 shadow-lg">
+            <p className="text-xs font-semibold text-destructive">Google Maps could not load</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {err.toLowerCase().includes("referer") || err.toLowerCase().includes("not allowed")
+                ? "This domain is not on the Google Maps key's HTTP referrer allowlist. Add the domain in Google Cloud."
+                : err.toLowerCase().includes("key")
+                  ? "The Google Maps key is missing or not configured for this app."
+                  : err}
+            </p>
+          </div>
         </div>
       )}
       {!err && !hasAnyPoint && (

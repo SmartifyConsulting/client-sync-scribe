@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useLiveProviderLocation } from "../../../hooks/useLiveProviderLocation";
-import { SosLiveMap } from "../../../components/SosLiveMap";
+import { ActiveMissionGoogleMap } from "../../../components/ActiveMissionGoogleMap";
 import { HospitalPicker } from "../../../components/HospitalPicker";
 import { EtaCountdown } from "../../../components/EtaCountdown";
 import { AmbulanceSimulator } from "../../../components/AmbulanceSimulator";
@@ -123,7 +123,7 @@ export default function NavigationScreen() {
 
       <div className="grid gap-3 xl:grid-cols-[1fr_360px]">
         <div className="overflow-hidden rounded-2xl border bg-card">
-          <SosLiveMap incidentId={activeId} mode="ambulance" height={520} />
+          <ActiveMissionGoogleMap incidentId={activeId} height={520} />
         </div>
 
         <aside className="space-y-3">

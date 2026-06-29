@@ -53,43 +53,36 @@ interface MemberRow {
   profile_email?: string | null;
 }
 
-const ADMIN_ROLES = new Set(["admin", "owner", "manager"]);
-const CREW_ROLE_OPTIONS = [
-  "admin",
-  "manager",
-  "paramedic",
-  "emt",
-  "driver",
-  "dispatcher",
-  "nurse",
-  "supervisor",
-];
-
-const ROLE_ORDER = [
-  "admin",
-  "owner",
-  "manager",
-  "paramedic",
-  "emt",
-  "driver",
-  "dispatcher",
-  "nurse",
-  "supervisor",
-  "member",
-];
+const ADMIN_ROLES = new Set(["admin", "owner", "manager", "er_admin"]);
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrators",
-  owner: "Owners",
-  manager: "Managers",
-  paramedic: "Paramedics",
-  emt: "EMTs",
-  driver: "Drivers",
   dispatcher: "Dispatchers",
-  nurse: "Nurses",
-  supervisor: "Supervisors",
+  driver: "Drivers",
+  emt: "EMTs",
+  er_admin: "ER_Admin",
+  manager: "Managers",
   member: "Members",
+  nurse: "Nurses",
+  owner: "Owners",
+  paramedic: "Paramedics",
+  supervisor: "Supervisors",
 };
+
+// Alphabetically ordered crew role options for the Add member dropdown.
+const CREW_ROLE_OPTIONS = [
+  "admin",
+  "dispatcher",
+  "driver",
+  "emt",
+  "er_admin",
+  "manager",
+  "nurse",
+  "paramedic",
+  "supervisor",
+].sort((a, b) =>
+  (ROLE_LABELS[a] ?? a).localeCompare(ROLE_LABELS[b] ?? b),
+);
 
 export default function AdministratorsScreen() {
   const { providerId, providerType, userId } = useProviderAccess();
@@ -197,13 +190,15 @@ export default function AdministratorsScreen() {
       bucket.push(m);
       groups.set(key, bucket);
     }
-    // Stable order
+    // Alphabetical order by display label.
     const ordered: { role: string; rows: MemberRow[] }[] = [];
-    for (const role of ROLE_ORDER) {
-      if (groups.has(role)) ordered.push({ role, rows: groups.get(role)! });
-    }
-    for (const [role, rows] of groups) {
-      if (!ROLE_ORDER.includes(role)) ordered.push({ role, rows });
+    const keys = Array.from(groups.keys()).sort((a, b) => {
+      const la = ROLE_LABELS[a] ?? a;
+      const lb = ROLE_LABELS[b] ?? b;
+      return la.localeCompare(lb);
+    });
+    for (const role of keys) {
+      ordered.push({ role, rows: groups.get(role)! });
     }
     return ordered;
   }, [members, searchQuery]);
@@ -506,7 +501,7 @@ export default function AdministratorsScreen() {
                 <SelectContent>
                   {CREW_ROLE_OPTIONS.map((r) => (
                     <SelectItem key={r} value={r}>
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                      {ROLE_LABELS[r] ?? r.charAt(0).toUpperCase() + r.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>
