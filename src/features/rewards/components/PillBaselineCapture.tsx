@@ -378,6 +378,44 @@ export function PillBaselineCapture({
         { onConflict: "prescription_id" },
       );
 
+      // Persist skip-notify choice on the prescription
+      try {
+        const contactSnap = (() => {
+          if (skipNotifyTarget === "none") return null;
+          if (overrideContact) return { name: editName.trim() || null, phone: editPhone.trim() || null };
+          if (skipNotifyTarget === "emergency") return {
+            name: patientContacts?.emergency_contact_name || null,
+            phone: patientContacts?.emergency_contact_phone || null,
+          };
+          return {
+            name: patientContacts?.next_of_kin_name || null,
+            phone: patientContacts?.next_of_kin_phone || null,
+          };
+        })();
+        await supabase.from("prescriptions").update({
+          skip_notify_target: skipNotifyTarget,
+          skip_notify_contact: contactSnap as any,
+        } as any).eq("id", prescriptionId);
+
+        // If user filled in missing patient-level contact info, write it back
+        if (overrideContact && (editName.trim() || editPhone.trim())) {
+          const patch: any = {};
+          if (skipNotifyTarget === "emergency") {
+            if (editName.trim() && !patientContacts?.emergency_contact_name) patch.emergency_contact_name = editName.trim();
+            if (editPhone.trim() && !patientContacts?.emergency_contact_phone) patch.emergency_contact_phone = editPhone.trim();
+          } else if (skipNotifyTarget === "nok") {
+            if (editName.trim() && !patientContacts?.next_of_kin_name) patch.next_of_kin_name = editName.trim();
+            if (editPhone.trim() && !patientContacts?.next_of_kin_phone) patch.next_of_kin_phone = editPhone.trim();
+          }
+          if (Object.keys(patch).length) {
+            await supabase.from("patients").update(patch).eq("id", patientId);
+          }
+        }
+      } catch (e) {
+        console.warn("skip-notify save failed", e);
+      }
+
+
       toast({
         title: "Baseline saved",
         description: "We'll use this routine to recognise your future doses.",
