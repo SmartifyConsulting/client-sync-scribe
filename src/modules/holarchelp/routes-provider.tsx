@@ -117,6 +117,12 @@ export default function ProviderRoutes() {
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
 
+        {/* Incoming SOS (crew self-accept queue) */}
+        <Route path="incoming" element={<IncomingSosScreen />} />
+
+        {/* Dispatcher Console (desk: assigns vehicle to incident) */}
+        <Route path="dispatch" element={<DispatcherConsoleScreen />} />
+
         {/* Hospital Network now lives inside Admin */}
         <Route path="hospital-network" element={<Navigate to="/provider/ambulance/admins?tab=hospital-network" replace />} />
 
