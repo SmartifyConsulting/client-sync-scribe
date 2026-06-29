@@ -2050,12 +2050,18 @@
             "previous": "Previous",
             "first": "First",
             "last": "Last",
-            "page": "Page"
+            "page": "Page",
+            "previousPage": "Go to previous page",
+            "nextPage": "Go to next page",
+            "morePages": "More pages"
         },
         "empty": {
             "noItems": "No items found",
             "noResults": "No results",
             "tryAgain": "Try again"
+        },
+        "sidebar": {
+            "toggleSidebar": "Toggle Sidebar"
         }
     },
     "messages": {
