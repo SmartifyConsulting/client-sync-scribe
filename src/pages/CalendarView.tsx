@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Pencil, Link, Unlink, Loader2, X } from "lucide-react";
-import googleCalLogo from "@/assets/google-calendar-logo.png";
+import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Pencil, Link, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AppointmentRequestsPanel } from "@/components/appointments/AppointmentRequestsPanel";
 import { Button } from "@/components/ui/button";
@@ -41,7 +40,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePractice } from "@/hooks/usePractice";
@@ -107,7 +105,6 @@ export default function CalendarView() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { patients } = usePatients();
-  const { isConnected, isConnecting, connect, disconnect, loading: calendarLoading } = useGoogleCalendar();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -598,32 +595,6 @@ export default function CalendarView() {
                 ))}
               </SelectContent>
             </Select>
-          )}
-          {!calendarLoading && (
-            isConnected ? (
-              <div className="flex flex-col items-end">
-                <Button variant="outline" onClick={disconnect} className="gap-2">
-                  <Unlink className="h-4 w-4" />
-                  {t("calendar.disconnectGoogle")}
-                </Button>
-                <p className="text-[10px] text-muted-foreground max-w-[200px] mt-1 text-right">
-                  {t("calendar.googleSyncCaption")}
-                </p>
-              </div>
-            ) : (
-              <Button 
-                variant="ghost" 
-                onClick={connect} 
-                disabled={isConnecting}
-                className="gap-2 h-10 px-2"
-              >
-                {isConnecting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <img src={googleCalLogo} alt="Google Calendar" className="h-10 w-auto" />
-                )}
-              </Button>
-            )
           )}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
