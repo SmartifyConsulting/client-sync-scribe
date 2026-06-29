@@ -293,7 +293,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                       </span>
                     </div>
                     <Button size="sm" className="h-8" onClick={handleSaveAlias} disabled={isSavingAlias}>
-                      {isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                      {isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("myPractice.save")}
                     </Button>
                     <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingAlias(false)}>
                       Cancel
@@ -1053,7 +1053,7 @@ export default function MyPractice() {
               <AvatarImage
                 key={(profile as any)?.avatar_url}
                 src={(profile as any)?.avatar_url}
-                alt={combinedFullName || "Profile"}
+                alt={combinedFullName || t("myPractice.tabProfile")}
               />
               <AvatarFallback className="text-base bg-primary/10 text-primary">
                 {combinedFullName ? getInitials(combinedFullName) : "U"}
@@ -1814,7 +1814,7 @@ export default function MyPractice() {
                   </div>
                   <Button size="sm" onClick={addServicePrice} disabled={isAddingService} className="gap-1.5">
                     <Plus className="h-3.5 w-3.5" />
-                    {isAddingService ? "Adding..." : "Add Service"}
+                    {isAddingService ? "Adding..." : t("myPractice.addService")}
                   </Button>
                 </div>
               </AccordionContent>

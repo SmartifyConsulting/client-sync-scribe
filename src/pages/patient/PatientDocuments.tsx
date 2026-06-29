@@ -184,6 +184,7 @@ function deriveDocType(
 }
 
 export default function PatientDocuments({ hideHeader = false }: { hideHeader?: boolean }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<UnifiedDocument[]>([]);
@@ -823,7 +824,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <FileText className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-1">
-              {filter === "all" ? "No documents yet" : "No matching documents"}
+              {filter === "all" ? t("patientDocuments.noDocuments") : "No matching documents"}
             </h3>
             <p className="text-muted-foreground text-sm">
               Documents generated during your consultations will appear here.
@@ -1069,7 +1070,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                 }
               }}
             >
-              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+              {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("patientDocuments.delete")}
             </Button>
           </div>
         </DialogContent>
