@@ -1115,38 +1115,26 @@ export default function Auth() {
                   {useOtp ? "Sign in with password instead" : "Prefer a one-time code? Email it to me"}
                 </button>
 
-                <div className="relative pt-2">
-                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className="w-full border-t border-border" />
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="bg-background px-3 text-xs uppercase tracking-wide text-muted-foreground">
-                      New here?
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  size="lg"
-                  className="w-full font-bold text-base shadow-md hover:shadow-lg transition-shadow"
-                  onClick={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }}
-                >
-                  Create your free account
-                </Button>
-                <p className="text-center text-xs text-muted-foreground">
-                  Patients, practitioners and organisations welcome.
-                </p>
                 <button
                   type="button"
                   onClick={() => navigate("/provider-signup")}
-                  className="block w-full text-center text-xs font-medium text-primary hover:underline"
+                  className="block w-full text-center text-xs font-medium text-primary hover:underline pt-2"
                 >
                   Registering a hospital, emergency service or insurance company? Onboard your organisation →
                 </button>
               </div>
-
-              <DevErLoginButton />
+            </div>
+            {/* Trust band — moved to bottom of sign-in box */}
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+                <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+                <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
+              </span>
             </div>
           </div>
         </div>
@@ -1154,6 +1142,7 @@ export default function Auth() {
       </div>
     );
   }
+
 
   // Signup wizard
   return (
