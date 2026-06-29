@@ -1528,8 +1528,29 @@ export default function MyPractice() {
                   ))}
                 </div>
               )}
-              {showAddPartnerForm && (
-                <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
+              <Dialog
+                open={showAddPartnerForm}
+                onOpenChange={(o) => {
+                  if (!o) {
+                    setShowAddPartnerForm(false);
+                    setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
+                    setPartnerSearch("");
+                    setPartnerSearchResults([]);
+                  }
+                }}
+              >
+                <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <UserPlus className="h-5 w-5 text-primary" />
+                      Add Practice Partner
+                    </DialogTitle>
+                    <DialogDescription>
+                      Search for an existing Holarc practitioner, invite a new one by email, or share your practice link.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3">
+
                   <Tabs defaultValue="existing">
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="existing">Select existing</TabsTrigger>
@@ -1676,8 +1697,10 @@ export default function MyPractice() {
                       Close
                     </Button>
                   </div>
-                </div>
-              )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
 
             </div>
               </AccordionContent>
