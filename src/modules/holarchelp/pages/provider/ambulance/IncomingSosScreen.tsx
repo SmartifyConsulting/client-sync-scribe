@@ -33,6 +33,20 @@ export default function IncomingSosScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [startOpen, setStartOpen] = useState(false);
+  const [dispatcherOnDuty, setDispatcherOnDuty] = useState(false);
+
+  useEffect(() => {
+    if (!providerId) return;
+    supabase.from("holarchelp_ambulance_providers" as any)
+      .select("dispatcher_on_duty").eq("id", providerId).maybeSingle()
+      .then(({ data }) => setDispatcherOnDuty(!!(data as any)?.dispatcher_on_duty));
+    const ch = supabase.channel(`amb-prov-${providerId}`)
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "holarchelp_ambulance_providers", filter: `id=eq.${providerId}` },
+        (p) => setDispatcherOnDuty(!!(p.new as any).dispatcher_on_duty))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [providerId]);
 
   useEffect(() => {
     const load = async () => {
@@ -49,6 +63,7 @@ export default function IncomingSosScreen() {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
+
 
   const isOffShift = !shift;
   const isBusy = shift?.status === "busy";
