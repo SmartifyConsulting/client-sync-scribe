@@ -1,6 +1,8 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_maps";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
@@ -25,26 +27,45 @@ Deno.serve(async (req) => {
       return json({ error: "origin and destination {lat,lng} required" }, 400);
     }
 
-    const key = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
-    if (!key) return json({ error: "mapbox token not configured" }, 500);
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+    const gmapsKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
+    if (!lovableKey || !gmapsKey) {
+      return json({ fallback: true, reason: "google_maps_connector_not_configured" }, 200);
+    }
 
-    const coords = `${origin.lng},${origin.lat};${destination.lng},${destination.lat}`;
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/${coords}?geometries=polyline&overview=full&access_token=${key}`;
-    const resp = await fetch(url);
+    const resp = await fetch(`${GATEWAY_URL}/routes/directions/v2:computeRoutes`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": gmapsKey,
+        "Content-Type": "application/json",
+        "X-Goog-FieldMask":
+          "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline",
+      },
+      body: JSON.stringify({
+        origin: { location: { latLng: { latitude: origin.lat, longitude: origin.lng } } },
+        destination: { location: { latLng: { latitude: destination.lat, longitude: destination.lng } } },
+        travelMode: "DRIVE",
+        routingPreference: "TRAFFIC_AWARE",
+      }),
+    });
+
     if (!resp.ok) {
       const txt = await resp.text().catch(() => "");
-      return json({ fallback: true, reason: "mapbox_directions_failed", detail: txt }, 200);
+      return json({ fallback: true, reason: "google_routes_failed", status: resp.status, detail: txt }, 200);
     }
     const data = await resp.json();
     const route = data?.routes?.[0];
     if (!route) return json({ fallback: true, reason: "no_route" }, 200);
 
-    const seconds = Math.round(route.duration ?? 0);
+    // route.duration is an ISO-8601 duration string like "423s"
+    const durationStr = String(route.duration ?? "0s");
+    const seconds = Number(durationStr.replace(/s$/, "")) || 0;
     return json({
       duration_seconds: seconds,
       duration_minutes: Math.max(1, Math.round(seconds / 60)),
-      distance_meters: Math.round(route.distance ?? 0),
-      polyline: route.geometry ?? null,
+      distance_meters: Math.round(route.distanceMeters ?? 0),
+      polyline: route.polyline?.encodedPolyline ?? null,
     });
   } catch (e) {
     return json({ fallback: true, reason: String((e as Error).message ?? e) }, 200);
