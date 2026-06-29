@@ -1,7 +1,8 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker, type Locale } from "react-day-picker";
 import { enUS } from "date-fns/locale";
+import type { Locale } from "date-fns/locale/types";
+import { DayPicker } from "react-day-picker";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
