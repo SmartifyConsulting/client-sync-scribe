@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,7 @@ interface ToolbarProps {
 export function Toolbar({
   searchValue, onSearchChange, searchPlaceholder = "Search…", filters, actions, className,
 }: ToolbarProps) {
+  const { t } = useTranslation();
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       {onSearchChange && (

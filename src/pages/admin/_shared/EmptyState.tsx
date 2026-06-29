@@ -1,9 +1,11 @@
 import { LucideIcon, Inbox } from "lucide-react";
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 export function EmptyState({
   icon: Icon = Inbox, title, description, action,
 }: { icon?: LucideIcon; title: string; description?: string; action?: ReactNode }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
       <Icon className="h-6 w-6 text-[hsl(var(--admin-text-tertiary))]" />

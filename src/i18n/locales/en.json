@@ -2639,158 +2639,158 @@
                                       }
                 },
     "doctor":  {
-                    "invoices":  {
-                                      "title":  "Invoices",
-                                      "subtitle":  "Manage and track all patient invoices",
-                                      "status":  {
-                                                     "paid":  "Paid",
-                                                     "overdue":  "Overdue",
-                                                     "archived":  "Archived",
-                                                     "issued":  "Issued"
-                                                 },
-                                      "messages":  {
-                                                      "invoiceUpdated":  "Invoice Updated",
-                                                      "markedPaid":  "Invoice marked as paid",
-                                                      "invoiceArchived":  "Invoice Archived",
-                                                      "invoiceArchived_desc":  "Invoice has been archived",
-                                                      "detailsSaved":  "Invoice details have been saved",
-                                                      "sentToMedicalAid":  "Sent to Medical Aid",
-                                                      "paidInvoiceEmailed":  "Paid invoice emailed to",
-                                                      "pdfExported":  "PDF Exported",
-                                                      "pdfExportedDesc":  "Invoice report has been downloaded",
-                                                      "emailSent":  "Email Sent",
-                                                      "emailSentTo":  "Invoice report sent to",
-                                                      "invoiceCreated":  "Invoice Created",
-                                                      "invoiceCreatedDesc":  "Invoice {{invoiceNumber}} has been created successfully"
-                                                  },
-                                      "errors":  {
-                                                    "error":  "Error",
-                                                    "failedToLoad":  "Failed to load invoices",
-                                                    "noClaimsEmail":  "No Claims Email",
-                                                    "addClaimsEmail":  "Add a Medical Aid Claims Email on the patient profile to send claims.",
-                                                    "failedSendPaid":  "Failed to send paid invoice to medical aid",
-                                                    "sendFailed":  "Send Failed",
-                                                    "failedArchive":  "Failed to archive invoice",
-                                                    "previewFailed":  "Preview failed",
-                                                    "invalidAmount":  "Invalid Amount",
-                                                    "enterValidAmount":  "Please enter a valid amount",
-                                                    "enterValidAmountGtZero":  "Please enter a valid amount greater than 0",
-                                                    "invalidEmail":  "Invalid Email",
-                                                    "enterValidEmail":  "Please enter a valid email address",
-                                                    "noPatientSelected":  "No Patient Selected",
-                                                    "selectPatientFirst":  "Please select a patient first",
-                                                    "noClaimsEmailAutoSubmit":  "No Claims Email",
-                                                    "noClaimsEmailAutoSubmitDesc":  "Add a Medical Aid Claims Email on the patient profile to enable auto-submit."
-                                                },
-                                      "actions":  {
-                                                     "createInvoice":  "Create Invoice",
-                                                     "cancel":  "Cancel",
-                                                     "save":  "Save",
-                                                     "update":  "Update",
-                                                     "close":  "Close",
-                                                     "download":  "Download",
-                                                     "markPaid":  "Mark Paid",
-                                                     "sendToMedicalAid":  "Send to Medical Aid",
-                                                     "archive":  "Archive",
-                                                     "edit":  "Edit",
-                                                     "emailReport":  "Email Report",
-                                                     "downloadPdf":  "Download PDF",
-                                                     "printSavePdf":  "Print / Save PDF"
-                                                 },
-                                      "form":  {
-                                                   "patient":  "Patient",
-                                                   "selectPatient":  "Select a patient...",
-                                                   "searchPatients":  "Search patients...",
-                                                   "noPatientFound":  "No patient found.",
-                                                   "service":  "Service (Optional)",
-                                                   "selectService":  "Select a service...",
-                                                   "searchServices":  "Search services...",
-                                                   "noServiceFound":  "No service found.",
-                                                   "serviceHint":  "Select a service to auto-fill description and amount. You can override the price below.",
-                                                   "description":  "Description",
-                                                   "descriptionPlaceholder":  "Invoice description...",
-                                                   "amount":  "Amount",
-                                                   "dueDate":  "Due Date",
-                                                   "selectDescription":  "Select a patient and enter invoice details"
+                   "invoices":  {
+                                    "title":  "Invoices",
+                                    "subtitle":  "Manage and track all patient invoices",
+                                    "status":  {
+                                                   "paid":  "Paid",
+                                                   "overdue":  "Overdue",
+                                                   "archived":  "Archived",
+                                                   "issued":  "Issued"
                                                },
-                                      "table":  {
-                                                    "invoiceNumber":  "Invoice #",
-                                                    "patient":  "Patient",
-                                                    "description":  "Description",
-                                                    "amount":  "Amount",
-                                                    "dueDate":  "Due Date",
-                                                    "status":  "Status",
-                                                    "actions":  "Actions",
-                                                    "noInvoices":  "No invoices found",
-                                                    "setAmount":  "Set amount",
-                                                    "setAmountTitle":  "This invoice has no amount — click to set it",
-                                                    "previewTitle":  "Preview invoice",
-                                                    "editTitle":  "Edit invoice",
-                                                    "paidOn":  "Paid"
-                                                },
-                                      "stats":  {
-                                                    "issued":  "Issued",
-                                                    "overdue":  "Overdue",
-                                                    "paid":  "Paid",
-                                                    "outstanding":  "Outstanding"
-                                                },
-                                      "search":  {
-                                                     "placeholder":  "Search invoices..."
+                                    "messages":  {
+                                                     "invoiceUpdated":  "Invoice Updated",
+                                                     "markedPaid":  "Invoice marked as paid",
+                                                     "invoiceArchived":  "Invoice Archived",
+                                                     "invoiceArchived_desc":  "Invoice has been archived",
+                                                     "detailsSaved":  "Invoice details have been saved",
+                                                     "sentToMedicalAid":  "Sent to Medical Aid",
+                                                     "paidInvoiceEmailed":  "Paid invoice emailed to",
+                                                     "pdfExported":  "PDF Exported",
+                                                     "pdfExportedDesc":  "Invoice report has been downloaded",
+                                                     "emailSent":  "Email Sent",
+                                                     "emailSentTo":  "Invoice report sent to",
+                                                     "invoiceCreated":  "Invoice Created",
+                                                     "invoiceCreatedDesc":  "Invoice {{invoiceNumber}} has been created successfully"
                                                  },
-                                      "filter":  {
-                                                     "title":  "Filter by status",
-                                                     "issuedAndOverdue":  "Issued & Overdue",
-                                                     "all":  "All Invoices",
-                                                     "issuedOnly":  "Issued Only",
-                                                     "overdueOnly":  "Overdue Only",
-                                                     "paidOnly":  "Paid Only",
-                                                     "archived":  "Archived"
-                                                 },
-                                      "modal":  {
-                                                    "editTitle":  "Edit Invoice",
-                                                    "editDescription":  "Invoice {{invoiceNumber}}",
-                                                    "previewTitle":  "Invoice preview",
-                                                    "invoiceTitle":  "INVOICE",
-                                                    "from":  "From",
-                                                    "billTo":  "Bill To",
-                                                    "invoiceDate":  "Invoice Date",
-                                                    "dueDate":  "Due Date",
-                                                    "total":  "Total"
+                                    "errors":  {
+                                                   "error":  "Error",
+                                                   "failedToLoad":  "Failed to load invoices",
+                                                   "noClaimsEmail":  "No Claims Email",
+                                                   "addClaimsEmail":  "Add a Medical Aid Claims Email on the patient profile to send claims.",
+                                                   "failedSendPaid":  "Failed to send paid invoice to medical aid",
+                                                   "sendFailed":  "Send Failed",
+                                                   "failedArchive":  "Failed to archive invoice",
+                                                   "previewFailed":  "Preview failed",
+                                                   "invalidAmount":  "Invalid Amount",
+                                                   "enterValidAmount":  "Please enter a valid amount",
+                                                   "enterValidAmountGtZero":  "Please enter a valid amount greater than 0",
+                                                   "invalidEmail":  "Invalid Email",
+                                                   "enterValidEmail":  "Please enter a valid email address",
+                                                   "noPatientSelected":  "No Patient Selected",
+                                                   "selectPatientFirst":  "Please select a patient first",
+                                                   "noClaimsEmailAutoSubmit":  "No Claims Email",
+                                                   "noClaimsEmailAutoSubmitDesc":  "Add a Medical Aid Claims Email on the patient profile to enable auto-submit."
+                                               },
+                                    "actions":  {
+                                                    "createInvoice":  "Create Invoice",
+                                                    "cancel":  "Cancel",
+                                                    "save":  "Save",
+                                                    "update":  "Update",
+                                                    "close":  "Close",
+                                                    "download":  "Download",
+                                                    "markPaid":  "Mark Paid",
+                                                    "sendToMedicalAid":  "Send to Medical Aid",
+                                                    "archive":  "Archive",
+                                                    "edit":  "Edit",
+                                                    "emailReport":  "Email Report",
+                                                    "downloadPdf":  "Download PDF",
+                                                    "printSavePdf":  "Print / Save PDF"
                                                 },
-                                      "report":  {
-                                                     "title":  "Invoice Report",
-                                                     "description":  "View invoice summary by date range with monthly totals",
-                                                     "fromDate":  "From Date",
-                                                     "toDate":  "To Date",
-                                                     "selectDate":  "Select date",
-                                                     "totalInvoices":  "Total Invoices",
-                                                     "totalAmount":  "Total Amount",
-                                                     "paid":  "Paid",
-                                                     "outstanding":  "Outstanding",
-                                                     "monthlyBreakdown":  "Monthly Breakdown",
-                                                     "month":  "Month",
-                                                     "invoices":  "Invoices",
-                                                     "noInvoices":  "No invoices found in the selected date range",
-                                                     "emailPlaceholder":  "Enter email address"
-                                                 }
-                                  },
-                    "connections":  {
-                                        "title":  "Connections",
-                                        "subtitle":  "Manage your professional network and connections",
-                                        "tab":  {
+                                    "form":  {
+                                                 "patient":  "Patient",
+                                                 "selectPatient":  "Select a patient...",
+                                                 "searchPatients":  "Search patients...",
+                                                 "noPatientFound":  "No patient found.",
+                                                 "service":  "Service (Optional)",
+                                                 "selectService":  "Select a service...",
+                                                 "searchServices":  "Search services...",
+                                                 "noServiceFound":  "No service found.",
+                                                 "serviceHint":  "Select a service to auto-fill description and amount. You can override the price below.",
+                                                 "description":  "Description",
+                                                 "descriptionPlaceholder":  "Invoice description...",
+                                                 "amount":  "Amount",
+                                                 "dueDate":  "Due Date",
+                                                 "selectDescription":  "Select a patient and enter invoice details"
+                                             },
+                                    "table":  {
+                                                  "invoiceNumber":  "Invoice #",
+                                                  "patient":  "Patient",
+                                                  "description":  "Description",
+                                                  "amount":  "Amount",
+                                                  "dueDate":  "Due Date",
+                                                  "status":  "Status",
+                                                  "actions":  "Actions",
+                                                  "noInvoices":  "No invoices found",
+                                                  "setAmount":  "Set amount",
+                                                  "setAmountTitle":  "This invoice has no amount — click to set it",
+                                                  "previewTitle":  "Preview invoice",
+                                                  "editTitle":  "Edit invoice",
+                                                  "paidOn":  "Paid"
+                                              },
+                                    "stats":  {
+                                                  "issued":  "Issued",
+                                                  "overdue":  "Overdue",
+                                                  "paid":  "Paid",
+                                                  "outstanding":  "Outstanding"
+                                              },
+                                    "search":  {
+                                                   "placeholder":  "Search invoices..."
+                                               },
+                                    "filter":  {
+                                                   "title":  "Filter by status",
+                                                   "issuedAndOverdue":  "Issued \u0026 Overdue",
+                                                   "all":  "All Invoices",
+                                                   "issuedOnly":  "Issued Only",
+                                                   "overdueOnly":  "Overdue Only",
+                                                   "paidOnly":  "Paid Only",
+                                                   "archived":  "Archived"
+                                               },
+                                    "modal":  {
+                                                  "editTitle":  "Edit Invoice",
+                                                  "editDescription":  "Invoice {{invoiceNumber}}",
+                                                  "previewTitle":  "Invoice preview",
+                                                  "invoiceTitle":  "INVOICE",
+                                                  "from":  "From",
+                                                  "billTo":  "Bill To",
+                                                  "invoiceDate":  "Invoice Date",
+                                                  "dueDate":  "Due Date",
+                                                  "total":  "Total"
+                                              },
+                                    "report":  {
+                                                   "title":  "Invoice Report",
+                                                   "description":  "View invoice summary by date range with monthly totals",
+                                                   "fromDate":  "From Date",
+                                                   "toDate":  "To Date",
+                                                   "selectDate":  "Select date",
+                                                   "totalInvoices":  "Total Invoices",
+                                                   "totalAmount":  "Total Amount",
+                                                   "paid":  "Paid",
+                                                   "outstanding":  "Outstanding",
+                                                   "monthlyBreakdown":  "Monthly Breakdown",
+                                                   "month":  "Month",
+                                                   "invoices":  "Invoices",
+                                                   "noInvoices":  "No invoices found in the selected date range",
+                                                   "emailPlaceholder":  "Enter email address"
+                                               }
+                                },
+                   "connections":  {
+                                       "title":  "Connections",
+                                       "subtitle":  "Manage your professional network and connections",
+                                       "tab":  {
                                                    "connected":  "Connected",
                                                    "pending":  "Pending"
                                                },
-                                        "search":  {
+                                       "search":  {
                                                       "placeholder":  "Search..."
                                                   },
-                                        "empty":  {
+                                       "empty":  {
                                                      "title":  "No connections yet",
                                                      "description":  "Invite users to start building your network",
                                                      "pendingTitle":  "No pending invitations",
                                                      "pendingDescription":  "All your invitations have been responded to"
                                                  },
-                                        "card":  {
+                                       "card":  {
                                                     "unknownUser":  "Unknown User",
                                                     "connected":  "Connected",
                                                     "direction":  {
@@ -2798,12 +2798,12 @@
                                                                       "sent":  "Sent"
                                                                   }
                                                 },
-                                        "actions":  {
+                                       "actions":  {
                                                        "accept":  "Accept",
                                                        "decline":  "Decline",
                                                        "cancel":  "Cancel"
                                                    },
-                                        "messages":  {
+                                       "messages":  {
                                                         "acceptedTitle":  "Invitation accepted",
                                                         "acceptedDesc":  "You are now connected",
                                                         "declinedTitle":  "Invitation declined",
@@ -2812,7 +2812,7 @@
                                                         "disconnectedTitle":  "Disconnected",
                                                         "disconnectedDesc":  "You are no longer connected with"
                                                     },
-                                        "errors":  {
+                                       "errors":  {
                                                       "title":  "Error",
                                                       "failedLoad":  "Failed to load connections",
                                                       "failedAccept":  "Failed to accept invitation",
@@ -2820,57 +2820,54 @@
                                                       "failedDisconnect":  "Failed to disconnect",
                                                       "failedCancel":  "Failed to cancel invitation"
                                                   },
-                                        "dialog":  {
+                                       "dialog":  {
                                                       "title":  "Disconnect from",
                                                       "description":  "This will remove the connection between you and this user. You can always reconnect later by sending a new invitation."
                                                   }
-                                    },
-                    "referrals":  {
-                                      "title":  "Referrals",
-                                      "subtitle":  "Manage doctors you refer patients to",
-                                      "actions":  {
-                                                     "addDoctor":  "Add Doctor"
-                                                 },
-                                      "form":  {
-                                                   "title":  "Add Referral Doctor",
-                                                   "editTitle":  "Edit Referral Doctor",
-                                                   "search":  "Search for a doctor on Holarc",
-                                                   "searchPlaceholder":  "Type doctor name...",
-                                                   "notFound":  "Doctor not found on Holarc",
-                                                   "inviteButton":  "Send Invitation",
-                                                   "manualButton":  "Add Manually",
-                                                   "orManual":  "Or add manually without searching",
-                                                   "sendInvite":  "Send an email invitation to join Holarc Health",
-                                                   "doctorEmail":  "Doctor's Email",
-                                                   "emailPlaceholder":  "doctor@example.com",
-                                                   "firstName":  "First Name *",
-                                                   "lastName":  "Last Name *",
-                                                   "specialty":  "Specialty",
-                                                   "selectSpecialty":  "Select specialty",
-                                                   "other":  "Other...",
-                                                   "enterSpecialty":  "Enter specialty",
-                                                   "practiceNumber":  "Practice Number",
-                                                   "address":  "Address",
-                                                   "email":  "Email",
-                                                   "phone":  "Phone"
-                                               },
-                                      "table":  {
-                                                    "name":  "Name",
-                                                    "specialty":  "Specialty",
-                                                    "practiceNumber":  "Practice Number",
-                                                    "email":  "Email",
-                                                    "phone":  "Phone",
-                                                    "referrals":  "Referrals",
-                                                    "noData":  "No referral doctors found"
-                                                },
-                                      "actions":  {
+                                   },
+                   "referrals":  {
+                                     "title":  "Referrals",
+                                     "subtitle":  "Manage doctors you refer patients to",
+                                     "actions":  {
                                                      "save":  "Save",
                                                      "update":  "Update",
                                                      "cancel":  "Cancel",
                                                      "back":  "Back",
                                                      "addManually":  "Add manually instead"
                                                  },
-                                      "messages":  {
+                                     "form":  {
+                                                  "title":  "Add Referral Doctor",
+                                                  "editTitle":  "Edit Referral Doctor",
+                                                  "search":  "Search for a doctor on Holarc",
+                                                  "searchPlaceholder":  "Type doctor name...",
+                                                  "notFound":  "Doctor not found on Holarc",
+                                                  "inviteButton":  "Send Invitation",
+                                                  "manualButton":  "Add Manually",
+                                                  "orManual":  "Or add manually without searching",
+                                                  "sendInvite":  "Send an email invitation to join Holarc Health",
+                                                  "doctorEmail":  "Doctor\u0027s Email",
+                                                  "emailPlaceholder":  "doctor@example.com",
+                                                  "firstName":  "First Name *",
+                                                  "lastName":  "Last Name *",
+                                                  "specialty":  "Specialty",
+                                                  "selectSpecialty":  "Select specialty",
+                                                  "other":  "Other...",
+                                                  "enterSpecialty":  "Enter specialty",
+                                                  "practiceNumber":  "Practice Number",
+                                                  "address":  "Address",
+                                                  "email":  "Email",
+                                                  "phone":  "Phone"
+                                              },
+                                     "table":  {
+                                                   "name":  "Name",
+                                                   "specialty":  "Specialty",
+                                                   "practiceNumber":  "Practice Number",
+                                                   "email":  "Email",
+                                                   "phone":  "Phone",
+                                                   "referrals":  "Referrals",
+                                                   "noData":  "No referral doctors found"
+                                               },
+                                     "messages":  {
                                                       "addedTitle":  "Added",
                                                       "addedDesc":  "Referral doctor added",
                                                       "updatedTitle":  "Updated",
@@ -2880,80 +2877,77 @@
                                                       "inviteSentTitle":  "Invitation sent",
                                                       "inviteSentDesc":  "An invitation has been sent to"
                                                   },
-                                      "errors":  {
-                                                     "requiredTitle":  "Required",
-                                                     "requiredDesc":  "First and last name are required",
-                                                     "failedTitle":  "Error",
-                                                     "failedUpdateDesc":  "Failed to update",
-                                                     "failedAddDesc":  "Failed to add",
-                                                     "emailRequired":  "Email required",
-                                                     "emailRequiredDesc":  "Please enter the doctor's email address.",
-                                                     "inviteFailed":  "Failed to send invitation"
-                                                 }
+                                     "errors":  {
+                                                    "requiredTitle":  "Required",
+                                                    "requiredDesc":  "First and last name are required",
+                                                    "failedTitle":  "Error",
+                                                    "failedUpdateDesc":  "Failed to update",
+                                                    "failedAddDesc":  "Failed to add",
+                                                    "emailRequired":  "Email required",
+                                                    "emailRequiredDesc":  "Please enter the doctor\u0027s email address.",
+                                                    "inviteFailed":  "Failed to send invitation"
+                                                }
+                                 },
+                   "roundtable":  {
+                                      "title":  "Round Table",
+                                      "subtitle":  "Notes shared by your healthcare providers about your care.",
+                                      "empty":  "No notes yet",
+                                      "emptyDesc":  "When your doctors share round table notes, they will appear here."
                                   },
-                    "roundtable":  {
-                                       "title":  "Round Table",
-                                       "subtitle":  "Notes shared by your healthcare providers about your care.",
-                                       "empty":  "No notes yet",
-                                       "emptyDesc":  "When your doctors share round table notes, they will appear here."
-                                   },
-                    "wallet":  {
-                                   "title":  "Vula Vault",
-                                   "poweredBy":  "Powered by 6Dot50",
-                                   "description":  "Sign in to your Vula Vault to redeem your Vulas at participating retailers and partner apps in our rewards network.",
-                                   "actions":  {
-                                                   "continue":  "Continue to secure sign-in",
-                                                   "back":  "Back"
-                                               },
-                                   "security":  "You'll be taken to our secure partner's login page in a new tab. Your credentials are never stored by Holarc Health.",
-                                   "overlay":  {
-                                                   "title":  "Demo Branding Overlay",
-                                                   "description":  "For live demos, install the Vula Vault branding overlay. It visually rebrands the partner login page in your browser without changing any functionality.",
-                                                   "download":  "Download Demo Branding Overlay"
-                                               },
-                                   "install":  {
-                                                   "title":  "How to install (Chrome / Edge / Brave)",
-                                                   "step1":  "Unzip the downloaded vula-vault-overlay.zip.",
-                                                   "step2":  "Open chrome://extensions in your browser.",
-                                                   "step3":  "Enable Developer mode (top-right toggle).",
-                                                   "step4":  "Click Load unpacked and select the unzipped folder.",
-                                                   "step5":  "Visit the partner login — branding appears automatically."
-                                               },
-                                   "messages":  {
+                   "wallet":  {
+                                  "title":  "Vula Vault",
+                                  "poweredBy":  "Powered by 6Dot50",
+                                  "description":  "Sign in to your Vula Vault to redeem your Vulas at participating retailers and partner apps in our rewards network.",
+                                  "actions":  {
+                                                  "continue":  "Continue to secure sign-in",
+                                                  "back":  "Back"
+                                              },
+                                  "security":  "You\u0027ll be taken to our secure partner\u0027s login page in a new tab. Your credentials are never stored by Holarc Health.",
+                                  "overlay":  {
+                                                  "title":  "Demo Branding Overlay",
+                                                  "description":  "For live demos, install the Vula Vault branding overlay. It visually rebrands the partner login page in your browser without changing any functionality.",
+                                                  "download":  "Download Demo Branding Overlay"
+                                              },
+                                  "install":  {
+                                                  "title":  "How to install (Chrome / Edge / Brave)",
+                                                  "step1":  "Unzip the downloaded vula-vault-overlay.zip.",
+                                                  "step2":  "Open chrome://extensions in your browser.",
+                                                  "step3":  "Enable Developer mode (top-right toggle).",
+                                                  "step4":  "Click Load unpacked and select the unzipped folder.",
+                                                  "step5":  "Visit the partner login — branding appears automatically."
+                                              },
+                                  "messages":  {
                                                    "downloadSuccess":  "Overlay downloaded — see install steps below."
                                                },
-                                   "errors":  {
-                                                   "downloadFailed":  "Download failed"
-                                               }
-                                },
-                    "cpd":  {
-                                "title":  "Certificates",
-                                "subtitle":  "Track your continuing professional development",
-                                "totalPoints":  "CPD Points",
-                                "actions":  {
-                                               "addCertificate":  "Add Certificate"
-                                           },
-                                "form":  {
-                                             "title":  "Add Certificate",
-                                             "editTitle":  "Edit Certificate",
-                                             "name":  "Certificate Name *",
-                                             "namePlaceholder":  "e.g., Advanced Cardiac Life Support",
-                                             "issuingBody":  "Issuing Body",
-                                             "issuingBodyPlaceholder":  "e.g., HPCSA",
-                                             "dateEarned":  "Date Earned *",
-                                             "points":  "CPD Points",
-                                             "pointsPlaceholder":  "0",
-                                             "attach":  "Attach Certificate (PDF/Image)",
-                                             "chooseFile":  "Choose File",
-                                             "remove":  "Remove"
-                                         },
-                                "actions":  {
+                                  "errors":  {
+                                                 "downloadFailed":  "Download failed"
+                                             }
+                              },
+                   "cpd":  {
+                               "title":  "Certificates",
+                               "subtitle":  "Track your continuing professional development",
+                               "totalPoints":  "CPD Points",
+                               "actions":  {
                                                "save":  "Save",
                                                "update":  "Update",
                                                "uploading":  "Uploading...",
                                                "cancel":  "Cancel"
                                            },
-                                "table":  {
+                               "form":  {
+                                            "title":  "Add Certificate",
+                                            "editTitle":  "Edit Certificate",
+                                            "name":  "Certificate Name *",
+                                            "namePlaceholder":  "e.g., Advanced Cardiac Life Support",
+                                            "issuingBody":  "Issuing Body",
+                                            "issuingBodyPlaceholder":  "e.g., HPCSA",
+                                            "dateEarned":  "Date Earned *",
+                                            "points":  "CPD Points",
+                                            "pointsPlaceholder":  "0",
+                                            "attach":  "Attach Certificate (PDF/Image)",
+                                            "chooseFile":  "Choose File",
+                                            "remove":  "Remove"
+                                        },
+                               "table":  {
                                              "certificate":  "Certificate",
                                              "issuingBody":  "Issuing Body",
                                              "dateEarned":  "Date Earned",
@@ -2962,7 +2956,7 @@
                                              "view":  "View",
                                              "noData":  "No certificates recorded yet"
                                          },
-                                "messages":  {
+                               "messages":  {
                                                 "addedTitle":  "Added",
                                                 "addedDesc":  "Certificate added",
                                                 "updatedTitle":  "Updated",
@@ -2970,45 +2964,159 @@
                                                 "removedTitle":  "Removed",
                                                 "removedDesc":  "Certificate removed"
                                             },
-                                "errors":  {
-                                               "uploadTitle":  "Upload Error",
-                                               "requiredTitle":  "Required",
-                                               "requiredDesc":  "Certificate name and date are required",
-                                               "failedTitle":  "Error",
-                                               "failedUpdateDesc":  "Failed to update",
-                                               "failedAddDesc":  "Failed to add",
-                                               "openFailed":  "Unable to open file"
-                                           }
-                            },
-                    "recordings":  {
-                                       "title":  "Expiring Recordings",
-                                       "subtitle":  "Session recordings are automatically deleted after 7 days. Download any you want to keep.",
-                                       "empty":  "No recordings expiring soon.",
-                                       "emptyDesc":  "Recordings older than 7 days are automatically removed.",
-                                       "expiryToday":  "Expires today",
-                                       "expiryDays":  "day(s) left",
-                                       "actions":  {
+                               "errors":  {
+                                              "uploadTitle":  "Upload Error",
+                                              "requiredTitle":  "Required",
+                                              "requiredDesc":  "Certificate name and date are required",
+                                              "failedTitle":  "Error",
+                                              "failedUpdateDesc":  "Failed to update",
+                                              "failedAddDesc":  "Failed to add",
+                                              "openFailed":  "Unable to open file"
+                                          }
+                           },
+                   "recordings":  {
+                                      "title":  "Expiring Recordings",
+                                      "subtitle":  "Session recordings are automatically deleted after 7 days. Download any you want to keep.",
+                                      "empty":  "No recordings expiring soon.",
+                                      "emptyDesc":  "Recordings older than 7 days are automatically removed.",
+                                      "expiryToday":  "Expires today",
+                                      "expiryDays":  "day(s) left",
+                                      "actions":  {
                                                       "download":  "Download",
                                                       "delete":  "Delete"
                                                   },
-                                       "messages":  {
+                                      "messages":  {
                                                        "downloadStartedTitle":  "Download started",
                                                        "downloadStartedDesc":  "Your recording is being downloaded.",
                                                        "deletedTitle":  "Recording deleted",
                                                        "deletedDesc":  "The audio and transcript have been removed."
                                                    },
-                                       "errors":  {
-                                                      "downloadFailedTitle":  "Download failed",
-                                                      "downloadFailedDesc":  "Could not download the recording.",
-                                                      "deleteFailedTitle":  "Delete failed",
-                                                      "deleteFailedDesc":  "Could not delete the recording."
-                                                  },
-                                       "dialog":  {
-                                                      "title":  "Delete Recording?",
-                                                      "description":  "This will permanently remove the audio recording and transcript. The AI summary and action points will be preserved. This action cannot be undone.",
-                                                      "cancel":  "Cancel",
-                                                      "confirm":  "Delete Recording"
-                                                  }
-                                   }
-                }
+                                      "errors":  {
+                                                     "downloadFailedTitle":  "Download failed",
+                                                     "downloadFailedDesc":  "Could not download the recording.",
+                                                     "deleteFailedTitle":  "Delete failed",
+                                                     "deleteFailedDesc":  "Could not delete the recording."
+                                                 },
+                                      "dialog":  {
+                                                     "title":  "Delete Recording?",
+                                                     "description":  "This will permanently remove the audio recording and transcript. The AI summary and action points will be preserved. This action cannot be undone.",
+                                                     "cancel":  "Cancel",
+                                                     "confirm":  "Delete Recording"
+                                                 }
+                                  }
+               },
+    "IsReadOnly":  false,
+    "IsFixedSize":  false,
+    "IsSynchronized":  false,
+    "Keys":  [
+                 "admin",
+                 "common",
+                 "notFound",
+                 "legal"
+             ],
+    "Values":  [
+                   {
+                       "bulkPasswordReset":  {
+                                                 "results":  "Results",
+                                                 "resetting":  "Resetting…",
+                                                 "description":  "Admin-only. Sets the same password for every listed user via the secure backend.",
+                                                 "passwordLabel":  "New password",
+                                                 "emailsLabel":  "Emails (one per line)",
+                                                 "warning":  "Passwords are overwritten immediately. Affected users will be signed out of any active sessions and must use the new password on next login. If leaked-password protection is enabled, weak passwords (like Password123) may be rejected by the backend.",
+                                                 "targets":  "Targets",
+                                                 "title":  "Bulk password reset",
+                                                 "resetButton":  "Reset all passwords"
+                                             },
+                       "accountability":  {
+                                              "providerSuspended":  "Provider suspended",
+                                              "priorityLowered":  "Priority lowered",
+                                              "adminAccessRequired":  "Admin access required",
+                                              "priority":  "Priority",
+                                              "hospitals":  "Hospitals",
+                                              "avgRating":  "Avg Rating",
+                                              "provider":  "Provider",
+                                              "incidents":  "Incidents",
+                                              "approved":  "approved",
+                                              "emergencyResponse":  "Emergency Response",
+                                              "avgArr":  "Avg Arr (min)",
+                                              "none":  "None.",
+                                              "lower":  "Lower",
+                                              "stalled":  "Stalled",
+                                              "title":  "Accountability",
+                                              "noProviders":  "No providers yet.",
+                                              "suspend":  "Suspend",
+                                              "flags":  "Flags",
+                                              "critical":  "Critical",
+                                              "unapproved":  "unapproved",
+                                              "description":  "Provider performance based on objective signals.",
+                                              "cancels":  "Cancels",
+                                              "accepts":  "Accepts"
+                                          },
+                       "incidents":  {
+                                         "severity":  "Severity",
+                                         "rating":  "Rating",
+                                         "patient":  "Patient",
+                                         "resolved":  "Resolved",
+                                         "avgRating":  "Avg rating",
+                                         "title":  "Incident history",
+                                         "accepted":  "Accepted",
+                                         "arrived":  "Arrived",
+                                         "adminAccessRequired":  "Admin access required",
+                                         "backToAdmin":  "Back to admin",
+                                         "total":  "Total",
+                                         "date":  "Date",
+                                         "noIncidents":  "No incidents for this provider yet."
+                                     },
+                       "statusDot":  {
+                                         "suspended":  "Suspended",
+                                         "active":  "Active",
+                                         "pending":  "Pending",
+                                         "inactive":  "Inactive"
+                                     },
+                       "approval":  {
+                                        "approvedMessage":  "has been approved and can now sign in.",
+                                        "returnHome":  "Return Home",
+                                        "provider":  "The provider",
+                                        "approved":  "Approved",
+                                        "processingFailed":  "Could not process this approval.",
+                                        "rejected":  "Rejected",
+                                        "cannotProcess":  "Cannot process",
+                                        "processing":  "Processing…",
+                                        "linkExpired":  "This approval link has expired.",
+                                        "linkAlreadyUsed":  "This link has already been used ({{action}}).",
+                                        "linkInvalid":  "This approval link is invalid or has been revoked.",
+                                        "rejectedMessage":  "has been marked as rejected.",
+                                        "incompleteLink":  "This link is incomplete or invalid.",
+                                        "application":  "The application"
+                                    }
+                   },
+                   {
+                       "admin":  "Admin",
+                       "status":  "Status",
+                       "actions":  "Actions"
+                   },
+                   {
+                       "contactSupport":  "Contact Support",
+                       "title":  "Page not found",
+                       "description":  "The page you\u0027re looking for doesn\u0027t exist or has moved. Let\u0027s get you back on track.",
+                       "backToHome":  "Back to Home"
+                   },
+                   {
+                       "title":  "Legal Terms",
+                       "introduction":  "The following agreements set out your rights and obligations on the platform. Each opens in a focused reading view.",
+                       "subtitle":  "The agreements that govern your use of Holarc Health.",
+                       "documents":  {
+                                         "termsTitle":  "Terms and Conditions",
+                                         "termsDescription":  "Master agreement governing your use of the Holarc platform, including intellectual property and anti-cloning terms.",
+                                         "consentDescription":  "How your health information is collected, used and shared on the platform.",
+                                         "providerDescription":  "HIPAA Business Associate Agreement and provider-specific obligations.",
+                                         "providerTitle":  "Healthcare Provider Agreement",
+                                         "consentTitle":  "Patient Consent and Authorization"
+                                     }
+                   }
+               ],
+    "SyncRoot":  {
+
+                 },
+    "Count":  4
 }

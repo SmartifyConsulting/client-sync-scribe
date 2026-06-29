@@ -1,10 +1,12 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Home, LifeBuoy } from "lucide-react";
 import holarcLogo from "@/assets/holarc-logo-clear.png";
 
 const NotFound = () => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   useEffect(() => {
@@ -23,23 +25,22 @@ const NotFound = () => {
           404
         </p>
         <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3">
-          Page not found
+          {t('notFound.title')}
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground mb-8">
-          The page you're looking for doesn't exist or has moved. Let's get you
-          back on track.
+          {t('notFound.description')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild className="min-h-12">
             <Link to="/">
               <Home className="h-4 w-4 mr-2" />
-              Back to Home
+              {t('notFound.backToHome')}
             </Link>
           </Button>
           <Button asChild variant="outline" className="min-h-12">
             <a href="mailto:support@holarchealth.com">
               <LifeBuoy className="h-4 w-4 mr-2" />
-              Contact Support
+              {t('notFound.contactSupport')}
             </a>
           </Button>
         </div>

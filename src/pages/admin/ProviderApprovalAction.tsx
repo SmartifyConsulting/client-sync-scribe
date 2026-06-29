@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, XCircle, Loader2, AlertTriangle } from "lucide-react";
@@ -11,6 +12,7 @@ type State =
   | { kind: "error"; message: string };
 
 export default function ProviderApprovalAction() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get("token");
@@ -19,7 +21,7 @@ export default function ProviderApprovalAction() {
 
   useEffect(() => {
     if (!token || (action !== "approve" && action !== "reject")) {
-      setState({ kind: "error", message: "This link is incomplete or invalid." });
+      setState({ kind: "error", message: t('admin.approval.incompleteLink') });
       return;
     }
     (async () => {
@@ -40,12 +42,12 @@ export default function ProviderApprovalAction() {
       if (!res?.ok) {
         const msg =
           res?.error === "already_used"
-            ? `This link has already been used (${res?.action ?? "actioned"}).`
+            ? t('admin.approval.linkAlreadyUsed', { action: res?.action ?? "actioned" })
             : res?.error === "expired"
-              ? "This approval link has expired."
+              ? t('admin.approval.linkExpired')
               : res?.error === "invalid_token"
-                ? "This approval link is invalid or has been revoked."
-                : (res?.error ?? "Could not process this approval.");
+                ? t('admin.approval.linkInvalid')
+                : (res?.error ?? t('admin.approval.processingFailed'));
         setState({ kind: "error", message: msg });
         return;
       }
@@ -65,36 +67,36 @@ export default function ProviderApprovalAction() {
           {state.kind === "loading" && (
             <>
               <Loader2 className="h-10 w-10 animate-spin mx-auto text-primary" />
-              <h1 className="text-xl font-semibold">Processing…</h1>
+              <h1 className="text-xl font-semibold">{t('admin.approval.processing')}</h1>
             </>
           )}
           {state.kind === "success" && state.action === "approve" && (
             <>
               <CheckCircle2 className="h-12 w-12 mx-auto text-emerald-600" />
-              <h1 className="text-xl font-semibold">Approved</h1>
+              <h1 className="text-xl font-semibold">{t('admin.approval.approved')}</h1>
               <p className="text-muted-foreground">
-                {state.orgName ?? "The provider"} has been approved and can now sign in.
+                {state.orgName ?? t('admin.approval.provider')} {t('admin.approval.approvedMessage')}
               </p>
             </>
           )}
           {state.kind === "success" && state.action === "reject" && (
             <>
               <XCircle className="h-12 w-12 mx-auto text-red-600" />
-              <h1 className="text-xl font-semibold">Rejected</h1>
+              <h1 className="text-xl font-semibold">{t('admin.approval.rejected')}</h1>
               <p className="text-muted-foreground">
-                {state.orgName ?? "The application"} has been marked as rejected.
+                {state.orgName ?? t('admin.approval.application')} {t('admin.approval.rejectedMessage')}
               </p>
             </>
           )}
           {state.kind === "error" && (
             <>
               <AlertTriangle className="h-12 w-12 mx-auto text-amber-600" />
-              <h1 className="text-xl font-semibold">Cannot process</h1>
+              <h1 className="text-xl font-semibold">{t('admin.approval.cannotProcess')}</h1>
               <p className="text-muted-foreground">{state.message}</p>
             </>
           )}
           <Button onClick={() => navigate("/")} className="w-full mt-2">
-            Return Home
+            {t('admin.approval.returnHome')}
           </Button>
         </CardContent>
       </Card>

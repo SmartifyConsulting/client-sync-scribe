@@ -1,19 +1,22 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { LegalDocLayout } from "@/components/legal/LegalDocLayout";
 import { FileText, ChevronRight } from "lucide-react";
 
-const docs = [
-  { to: "/terms-and-conditions", title: "Terms and Conditions", description: "Master agreement governing your use of the Holarc platform, including intellectual property and anti-cloning terms." },
-  { to: "/business-associate-agreement", title: "Healthcare Provider Agreement", description: "HIPAA Business Associate Agreement and provider-specific obligations." },
-  { to: "/patient-consent", title: "Patient Consent and Authorization", description: "How your health information is collected, used and shared on the platform." },
-];
-
 export default function Legal() {
+  const { t } = useTranslation();
+
+  const docs = [
+    { to: "/terms-and-conditions", title: t('legal.documents.termsTitle'), description: t('legal.documents.termsDescription') },
+    { to: "/business-associate-agreement", title: t('legal.documents.providerTitle'), description: t('legal.documents.providerDescription') },
+    { to: "/patient-consent", title: t('legal.documents.consentTitle'), description: t('legal.documents.consentDescription') },
+  ];
+
   return (
-    <LegalDocLayout title="Legal Terms" subtitle="The agreements that govern your use of Holarc Health.">
+    <LegalDocLayout title={t('legal.title')} subtitle={t('legal.subtitle')}>
       <>
         <p>
-          The following agreements set out your rights and obligations on the platform. Each opens in a focused reading view.
+          {t('legal.introduction')}
         </p>
         <ul className="list-none p-0 m-0 flex flex-col gap-5 [&>li]:before:hidden">
           {docs.map((d) => (

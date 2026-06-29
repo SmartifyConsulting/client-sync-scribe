@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ type Row = {
 };
 
 export default function BulkPasswordReset() {
+  const { t } = useTranslation();
   const { isAdmin, isLoading } = useIsAdmin();
   const [emailsText, setEmailsText] = useState(DEFAULT_EMAILS);
   const [password, setPassword] = useState("Password123");
@@ -82,9 +84,9 @@ export default function BulkPasswordReset() {
   return (
     <div className="container max-w-3xl py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Bulk password reset</h1>
+        <h1 className="text-2xl font-semibold text-foreground">{t('admin.bulkPasswordReset.title')}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Admin-only. Sets the same password for every listed user via the secure backend.
+          {t('admin.bulkPasswordReset.description')}
         </p>
       </div>
 
@@ -92,21 +94,18 @@ export default function BulkPasswordReset() {
         <CardContent className="pt-6 flex items-start gap-3">
           <AlertTriangle className="h-5 w-5 text-yellow-700 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
           <p className="text-sm text-foreground">
-            Passwords are overwritten immediately. Affected users will be signed out of any
-            active sessions and must use the new password on next login. If leaked-password
-            protection is enabled, weak passwords (like <code>Password123</code>) may be
-            rejected by the backend.
+            {t('admin.bulkPasswordReset.warning')}
           </p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Targets</CardTitle>
+          <CardTitle className="text-base">{t('admin.bulkPasswordReset.targets')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="emails">Emails (one per line)</Label>
+            <Label htmlFor="emails">{t('admin.bulkPasswordReset.emailsLabel')}</Label>
             <Textarea
               id="emails"
               value={emailsText}
@@ -117,7 +116,7 @@ export default function BulkPasswordReset() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">New password</Label>
+            <Label htmlFor="password">{t('admin.bulkPasswordReset.passwordLabel')}</Label>
             <Input
               id="password"
               value={password}
@@ -129,10 +128,10 @@ export default function BulkPasswordReset() {
             {running ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Resetting…
+                {t('admin.bulkPasswordReset.resetting')}
               </>
             ) : (
-              "Reset all passwords"
+              t('admin.bulkPasswordReset.resetButton')
             )}
           </Button>
         </CardContent>
@@ -141,7 +140,7 @@ export default function BulkPasswordReset() {
       {rows.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Results</CardTitle>
+            <CardTitle className="text-base">{t('admin.bulkPasswordReset.results')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="divide-y divide-border">
