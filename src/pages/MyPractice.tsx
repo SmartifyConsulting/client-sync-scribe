@@ -1531,58 +1531,155 @@ export default function MyPractice() {
               )}
               {showAddPartnerForm && (
                 <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label>Full Name *</Label>
+                  <Tabs defaultValue="existing">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="existing">Select existing</TabsTrigger>
+                      <TabsTrigger value="invite">Invite by email</TabsTrigger>
+                      <TabsTrigger value="share">Share app link</TabsTrigger>
+                    </TabsList>
+
+                    {/* ── Existing user ── */}
+                    <TabsContent value="existing" className="space-y-2 pt-3">
+                      <Label className="text-xs">Search Holarc users by name or registration #</Label>
                       <Input
-                        value={newPartner.full_name}
-                        onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })}
-                        placeholder="Dr. Jane Doe"
+                        value={partnerSearch}
+                        onChange={(e) => setPartnerSearch(e.target.value)}
+                        placeholder="Start typing a name…"
                       />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Registration Number *</Label>
-                      <Input
-                        value={newPartner.registration_number}
-                        onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })}
-                        placeholder="e.g., MP654321"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Mobile (Optional)</Label>
-                      <Input
-                        value={newPartner.mobile_number}
-                        onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Email *</Label>
-                      <Input
-                        type="email"
-                        value={newPartner.email}
-                        onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
-                        placeholder="partner@example.com"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5">
-                      <Save className="h-3.5 w-3.5" />
-                      {isAddingPartner ? "Saving..." : "Save"}
-                    </Button>
+                      <div className="max-h-56 overflow-y-auto space-y-1">
+                        {searchingPartners && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1.5 px-2 py-2">
+                            <Loader2 className="h-3 w-3 animate-spin" /> Searching…
+                          </p>
+                        )}
+                        {!searchingPartners && partnerSearch.length >= 2 && partnerSearchResults.length === 0 && (
+                          <p className="text-xs text-muted-foreground px-2 py-2">No matching users found.</p>
+                        )}
+                        {partnerSearchResults.map((r) => (
+                          <button
+                            key={r.id}
+                            onClick={() => addExistingPartner(r)}
+                            disabled={isAddingPartner}
+                            className="w-full text-left p-2 rounded-md border border-border hover:bg-accent/40 flex items-center justify-between gap-2"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{r.full_name || "Unnamed"}</p>
+                              <p className="text-[11px] text-muted-foreground truncate">
+                                {r.doctor_number ? `Reg: ${r.doctor_number}` : "No registration #"}
+                              </p>
+                            </div>
+                            <Plus className="h-4 w-4 text-primary shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    {/* ── Invite by email ── */}
+                    <TabsContent value="invite" className="space-y-3 pt-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <Label>Full Name *</Label>
+                          <Input
+                            value={newPartner.full_name}
+                            onChange={(e) => setNewPartner({ ...newPartner, full_name: e.target.value })}
+                            placeholder="Dr. Jane Doe"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Registration Number *</Label>
+                          <Input
+                            value={newPartner.registration_number}
+                            onChange={(e) => setNewPartner({ ...newPartner, registration_number: e.target.value })}
+                            placeholder="e.g., MP654321"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Mobile (Optional)</Label>
+                          <Input
+                            value={newPartner.mobile_number}
+                            onChange={(e) => setNewPartner({ ...newPartner, mobile_number: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label>Email *</Label>
+                          <Input
+                            type="email"
+                            value={newPartner.email}
+                            onChange={(e) => setNewPartner({ ...newPartner, email: e.target.value })}
+                            placeholder="partner@example.com"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5">
+                          <Save className="h-3.5 w-3.5" />
+                          {isAddingPartner ? "Saving..." : "Send Invite"}
+                        </Button>
+                      </div>
+                    </TabsContent>
+
+                    {/* ── Share link ── */}
+                    <TabsContent value="share" className="space-y-3 pt-3">
+                      <p className="text-xs text-muted-foreground">
+                        Share this link with a colleague — they can sign up and be linked to your practice.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Input value={partnerShareLink} readOnly className="font-mono text-xs" />
+                        <Button size="sm" variant="outline" onClick={copyShareLink} className="gap-1.5 shrink-0">
+                          {copiedShareLink ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                          {copiedShareLink ? "Copied" : "Copy"}
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          asChild
+                          className="gap-1.5"
+                        >
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(`Join me on Holarc Health: ${partnerShareLink}`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            WhatsApp
+                          </a>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          asChild
+                          className="gap-1.5"
+                        >
+                          <a
+                            href={`mailto:?subject=${encodeURIComponent("Join my practice on Holarc Health")}&body=${encodeURIComponent(`Hi,\n\nJoin me on Holarc Health: ${partnerShareLink}`)}`}
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                            Email
+                          </a>
+                        </Button>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+
+                  <div className="flex justify-end pt-1">
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => {
                         setShowAddPartnerForm(false);
                         setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
+                        setPartnerSearch("");
+                        setPartnerSearchResults([]);
                       }}
                     >
-                      Cancel
+                      Close
                     </Button>
                   </div>
                 </div>
               )}
+
             </div>
               </AccordionContent>
             </AccordionItem>
