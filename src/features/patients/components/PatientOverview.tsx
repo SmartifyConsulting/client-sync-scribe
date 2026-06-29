@@ -707,7 +707,8 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-6 px-2 transition-opacity"
+
                       onClick={() => toggleStatus("conditions", i)}
                     >
                       {cond.status === "active" ? (
@@ -754,7 +755,8 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-6 px-2 transition-opacity"
+
                       onClick={() => toggleStatus("medications", i)}
                     >
                       {med.status === "active" ? (
@@ -793,7 +795,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-6 px-2 transition-opacity"
                       onClick={() => toggleStatus("symptoms", i)}
                     >
                       {symptom.status === "active" ? (
