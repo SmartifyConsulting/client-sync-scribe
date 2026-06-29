@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets } from "lucide-react";
+import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,10 +24,16 @@ interface PatientOverviewProps {
     allergies?: string | null;
     is_chronic?: boolean | null;
     blood_type?: string | null;
+    emergency_contact_name?: string | null;
+    emergency_contact_phone?: string | null;
+    emergency_contact_email?: string | null;
+    emergency_contact_relationship?: string | null;
+    emergency_contacts?: Array<{ name?: string; phone?: string; email?: string; relationship?: string }> | null;
   };
   sessions: Session[];
   isSelfService?: boolean;
 }
+
 
 interface StatusItem {
   name: string;
