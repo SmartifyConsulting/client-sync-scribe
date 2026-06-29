@@ -1,7 +1,6 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { enUS } from "date-fns/locale";
-import type { Locale } from "date-fns/locale/types";
 import { DayPicker } from "react-day-picker";
 import { useTranslation } from "react-i18next";
 
@@ -18,7 +17,7 @@ import {
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 // Custom locale objects for each language using i18n translations
-const createLocale = (t: any): Locale => {
+const createLocale = (t: any) => {
   const months = getCalendarMonthNames(t);
   const monthsShort = getCalendarShortMonthNames(t);
   const weekdays = getCalendarWeekdayNames(t);
@@ -36,7 +35,7 @@ const createLocale = (t: any): Locale => {
         return weekdaysShort[day];
       },
     },
-  } as Locale;
+  } as typeof enUS;
 };
 
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
