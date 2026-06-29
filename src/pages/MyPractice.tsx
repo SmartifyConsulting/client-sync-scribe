@@ -272,7 +272,14 @@ function MailboxSection({ userId }: { userId?: string }) {
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm text-foreground">Document Mailbox</p>
           <p className="text-xs text-muted-foreground mt-0.5">External parties can email documents to this address.</p>
+          <div className="mt-2 flex items-start gap-1.5 rounded-md border border-primary/30 bg-primary/5 p-2">
+            <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+            <p className="text-[11px] leading-snug text-foreground/80">
+              This address is solely for emailing files (scans, referrals, lab results) directly to your <strong>My Documents</strong> tab — it is not for standard messaging and you will not receive replies in your normal inbox. Share it with anyone sending you medical records so they are routed straight to your Holarc Health profile.
+            </p>
+          </div>
           {displayEmail ? (
+
             <div className="mt-2 space-y-2">
               <div className="flex items-center gap-2">
                 <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-foreground border border-border truncate">
