@@ -1,95 +1,66 @@
-## Goals
+# Plan
 
-Five tightly scoped fixes to the doctor and patient experience.
+## 1. Remove "Sign in as NEMS Dispatcher (DEV Only)"
+- Delete `src/components/auth/DevErLoginButton.tsx`.
+- Remove its import and usage from `src/pages/Auth.tsx`.
+- Grep for stragglers so the button can't return.
 
----
+## 2. Side-by-side Sign In / Sign Up tabs
+File: `src/pages/Auth.tsx`.
+- Replace the current "two-page" split with a single auth card whose top has **"Sign In" and "Sign Up" tabs** rendered side-by-side via shadcn `Tabs` (`grid-cols-2`, equal width).
+- Tab state replaces the `isLogin` boolean. Selecting "Sign Up" reveals the existing multi-step signup wizard inside the same card; "Sign In" shows the email/phone form.
+- Drop the standalone oversized "Create your free account" CTA since the tab makes signup equally prominent.
+- Preserve auth UX rules: `tabIndex={-1}` on Forgot Password, password eye toggles, `/forgot-password` and `/reset-password` flows.
 
-### 1. Add Partner — proper modal with visible search
+## 3. Move security trust pills to the bottom of the sign-in card
+- In `src/pages/Auth.tsx`, move the "Your data is encrypted / 2FA required / HIPAA-aligned" trust band so it renders **under** the auth card. Same compact pill styling as the screenshot. Applies to both tabs.
 
-**Problem:** The "Add Partner" inline form on `/my-practice` doesn't surface the search-existing-doctor field clearly, so users never see it.
+## 4. Sidebar nav reorder
+Files: desktop sidebar (`src/components/layout/AppSidebar.tsx` or equivalent) and mobile bottom nav.
+- Move **My Practice** to sit directly under **Home**.
+- Move **My Sessions** to sit directly under **My Calendar**.
+- Keep route paths, icons, and translation keys unchanged — reorder the items only. Apply the same order to mobile nav so desktop and mobile match.
 
-**Change in `src/pages/MyPractice.tsx`:**
+## 5. SOS incident recording — +5s and no hallucinated transcripts
+- `src/modules/holarchelp/components/SosVoiceNoteDialog.tsx`: bump `MAX_SECONDS` 65 → **70**, update visible counter.
+- `src/modules/holarchelp/components/IncidentVoiceNoteRecorder.tsx`: same 70s cap; guard so that if no audio blob was captured (cancel / mic blocked / 0-byte clip) we skip the transcription edge function and skip inserting a `holarchelp_voice_notes` row. Toast "No recording captured".
+- Strictly discard whitespace / "[inaudible]" placeholder transcripts so nothing fabricated is persisted.
 
-- Replace the inline `showAddPartnerForm` block with a `Dialog` modal (`AddPartnerDialog`) opened by the existing "+ Add Partner" button.
-- Modal layout, in order:
-  1. **Search existing practitioners** — search input (pre-focused) labelled "Search by name or practice number", live results list with avatar + name + reg number + "Add" button.
-  2. Divider with "or".
-  3. **Invite by email** — full name, registration number, mobile (with `PhoneNumberInput`), email → sends invite.
-  4. Divider with "or".
-  5. **Share invite link** — read-only link + Copy button.
-- Reuse existing state (`partnerSearch`, `partnerSearchResults`, `addExistingPartner`, `addPartner`, `partnerShareLink`). No backend changes.
+## 6. Hospital Admission logging
+File: `src/features/sessions/admissions/ManualLogAdmissionDialog.tsx`.
 
----
+a. **Hospital dropdown** — replace free-text Hospital input with a Combobox of `holarchelp_hospitals` (approved/active). Selection writes `hospital` (name) and `hospital_provider_id` (id). Keep a "Type a hospital not listed" free-text fallback.
 
-### 2. Language icon on the Hero/Landing page
+b. **Clinical codes field** — repeatable rows of `{ code, description }` (ICD-10 / CPT / procedure) with Add / Remove. Persist as JSONB.
 
-**Problem:** Unauthenticated visitors on `/` cannot change language; the app auto-picks language from browser/country.
+Migration:
+```
+ALTER TABLE public.hospital_admissions
+  ADD COLUMN IF NOT EXISTS codes jsonb NOT NULL DEFAULT '[]'::jsonb;
+```
+No new table → existing policies cover the new column.
 
-**Changes:**
+Render codes as chip list in `AdmissionsView.tsx` and `HospitalAdmissionEditor.tsx`.
 
-- `src/pages/Landing.tsx`: mount `<LanguageSwitcher />` in the top-right of the hero (same royal-blue pill style already used in the app bar). It works without `user` — the existing component already no-ops the profile save when there is no user.
-- `src/i18n/index.ts`: change detection order to `['localStorage']` only (remove `navigator` and any country-derived fallback). Default language stays English. Once a logged-in user has `profiles.preferred_language`, `LanguageSwitcher` continues to adopt it on profile load/switch.
-- Result: language follows the user's explicit choice (persisted to localStorage for guests, to `profiles.preferred_language` for signed-in users), never the browser locale or phone country code.
+## 7. Baseline recording explainer (one-time AI training)
+File: `src/features/rewards/components/PillBaselineCapture.tsx`.
 
----
+Expand the "Why we do this" block:
+- **What a baseline is** — one short video of you taking the medication normally; the AI watches hand/pill/mouth motion *once* to learn your pattern so future check-ins are auto-verified.
+- **One-time only** — you'll never be asked to repeat it for this medication.
+- **Privacy** — used only to compare against future adherence clips.
 
-### 3. Baseline explainer (one-time, friendly)
+Add an **"If you skip this medication"** sub-panel:
+- Reads `emergency_contact_*` and `next_of_kin_*` from `patients`; shows "We'll notify: **{name} ({relationship})**".
+- If both empty OR user chooses to override, inline picker:
+  - Radio: **Emergency contact / Next of kin / No one**
+  - Inline fields to fill name + phone + email if missing (writes back to `patients`).
+- Persist chosen target on `prescriptions` as `skip_notify_target` ('emergency' | 'nok' | 'none') and `skip_notify_contact` jsonb snapshot (add columns via migration; null = use patient-level default).
 
-**Problem:** Patients don't know what a "baseline" is or that it's a one-time setup.
+## Technical notes
+- Hospital dropdown query: `holarchelp_hospitals` where `is_approved=true`, cached via React Query.
+- Codes JSONB shape: `[{ "code": "S83.5", "description": "Sprain of cruciate ligament of knee" }]`. Validate non-empty `code`.
+- All migrations run via `supabase--migration` with grants/RLS verified.
 
-**Change in `src/features/rewards/components/PillBaselineCapture.tsx`:**
-
-- Rewrite the `DialogTitle` + `DialogDescription` to plain-language copy:
-  - Title: "Teach the app how you take **{medication}**"
-  - Description: "A baseline is a quick one-time setup. Show the packaging, the tablet, and how you take it. After that, the app recognises your routine and you only need a short daily clip to earn your Vula reward — you won't have to do this setup again."
-- Add a 3-bullet "Why we do this" block in the `intro` step:
-  - "Helps the AI learn what your medication looks like."
-  - "Confirms the right tablet is being taken."
-  - "Done once per medication — never repeated."
-- Keep all existing capture steps and logic unchanged.
-
----
-
-### 4. Remove "Round Tables" and "All Sessions" buttons from Patients header
-
-**Problem:** Redundant — Round Tables lives in the sidebar, and "My Sessions" will be the canonical sessions entry under My Practice.
-
-**Changes:**
-
-- `src/pages/Patients.tsx` (lines 404–412): delete the two `Button`s for `patients.roundTables` and `patients.allSessions`. Keep `Import` and `+ Patient`. Change grid to `grid-cols-2` (already correct).
-- Sidebar already exposes "My Round Tables" and "My Sessions" — no nav changes needed for this step.
-
----
-
-### 5. First-visit screen tips — show once, then never
-
-**Status:** `src/lib/screenTips.ts` and `RouteTipHost` already exist and persist dismissals to `user_screen_tips_seen`. Audit + extend so every key screen has a tip and nothing repeats.
-
-**Changes:**
-
-- `src/lib/screenTips.ts`: add missing entries for screens a doctor commonly hits first, each with a concrete navigational hint:
-  - `/my-practice` → "Add partners, set service prices, design your letterhead, and configure how patients reach you."
-  - `/my-sessions` → "Today's sessions are expanded. Tap a date group to expand last week, last month, or older."
-  - `/patients` → update body to: "Use **Import** to bulk-add patients from a spreadsheet, or **+ Patient** to add one manually. Tap any row to open the record."
-  - `/doctor/round-tables` → "Multidisciplinary spaces shared across a patient's care team."
-  - `/holarchelp` / SOS screens → brief orientation.
-- Confirm `RouteTipHost` writes to `user_screen_tips_seen` on dismiss (it does) and only renders if the tip's id is absent for `auth.uid()` — so each tip fires exactly once per user across devices.
-- No DB migration needed; the `user_screen_tips_seen` table already stores `(user_id, tip_id)`.
-
----
-
-## Technical Notes
-
-- No new tables, no new edge functions, no schema migrations.
-- `LanguageSwitcher` works pre-auth because its profile update is gated by `if (user)`.
-- The Add Partner modal reuses existing debounced search (`profiles.full_name`/`doctor_number`) and existing insert into `practice_partners` — no policy changes.
-- Removing the `i18next-browser-languagedetector` `navigator` source is a one-line config change; falling back to localStorage preserves guest choices across reloads.
-
-## Files Touched
-
-- `src/pages/MyPractice.tsx` — extract Add Partner inline form into a `Dialog`.
-- `src/pages/Landing.tsx` — mount `LanguageSwitcher` in hero.
-- `src/i18n/index.ts` — detection order = `['localStorage']`, fallback `en`.
-- `src/features/rewards/components/PillBaselineCapture.tsx` — explainer copy + intro bullets.
-- `src/pages/Patients.tsx` — remove Round Tables / All Sessions buttons.
-- `src/lib/screenTips.ts` — add/refine tips for new and high-traffic routes.
+## Out of scope
+- Existing SOS flow logic, prior stored transcripts, broader admissions styling.
