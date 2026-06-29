@@ -1153,8 +1153,32 @@ export default function Auth() {
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
               <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
             </button>
-            <p className="text-muted-foreground mt-2">Create your account</p>
-            <div className="mt-3"><Progress value={progress} className="h-1.5" /></div>
+          </div>
+          {/* Sign In / Sign Up tabs */}
+          <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 mb-4">
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              className={cn(
+                "rounded-lg py-2 text-sm font-semibold transition-colors",
+                "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLogin(false)}
+              className={cn(
+                "rounded-lg py-2 text-sm font-semibold transition-colors",
+                "bg-card text-foreground shadow-sm"
+              )}
+            >
+              Sign Up
+            </button>
+          </div>
+          <div className="text-center mb-3">
+            <div className="mt-1"><Progress value={progress} className="h-1.5" /></div>
             <p className="text-[10px] text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
@@ -1177,13 +1201,18 @@ export default function Auth() {
                 </Button>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setIsLogin(true)}
-              className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline mt-4 text-center"
-            >
-              Already have an account? Sign in
-            </button>
+          </div>
+          {/* Trust band — bottom of signup box */}
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+              <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+              <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
+            </span>
           </div>
         </div>
       </div>
@@ -1191,3 +1220,4 @@ export default function Auth() {
     </div>
   );
 }
+
