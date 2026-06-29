@@ -2549,6 +2549,7 @@ export type Database = {
           provider_id: string
           provider_kind: string
           recorded_at: string
+          simulated: boolean
           speed: number | null
           updated_at: string
           user_id: string
@@ -2564,6 +2565,7 @@ export type Database = {
           provider_id: string
           provider_kind: string
           recorded_at?: string
+          simulated?: boolean
           speed?: number | null
           updated_at?: string
           user_id: string
@@ -2579,6 +2581,7 @@ export type Database = {
           provider_id?: string
           provider_kind?: string
           recorded_at?: string
+          simulated?: boolean
           speed?: number | null
           updated_at?: string
           user_id?: string
