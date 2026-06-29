@@ -1,4 +1,81 @@
 {
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email Address",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up here",
+      "invalidCredentials": "Invalid email or password",
+      "accountLocked": "Account locked"
+    },
+    "signup": {
+      "title": "Create Account",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "agreeTerms": "I agree to Terms and Conditions",
+      "create": "Create Account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgot": {
+      "title": "Forgot Password?",
+      "instructions": "Enter your email to reset password",
+      "email": "Email Address",
+      "submit": "Send Reset Link",
+      "checkEmail": "Check email for reset link"
+    },
+    "reset": {
+      "title": "Reset Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "reset": "Reset Password",
+      "success": "Password reset successfully"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread": "Unread",
+    "markAsRead": "Mark as Read",
+    "clearAll": "Clear All",
+    "noNotifications": "No notifications",
+    "appointmentReminder": "Appointment Reminder",
+    "messageReceived": "New Message",
+    "medicationReminder": "Medication Reminder"
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "contactInfo": "Contact Information",
+    "preferences": "Preferences",
+    "privacy": "Privacy Settings",
+    "securitySettings": "Security Settings",
+    "edit": "Edit Profile",
+    "save": "Save Changes",
+    "changePassword": "Change Password",
+    "logout": "Log Out"
+  },
+  "legal": {
+    "termsAndConditions": {
+      "title": "Terms and Conditions",
+      "accept": "Accept",
+      "reject": "Reject"
+    },
+    "patientConsent": {
+      "title": "Patient Consent",
+      "accept": "Accept Consent",
+      "decline": "Decline"
+    },
+    "businessAssociate": {
+      "title": "Business Associate Agreement",
+      "agree": "I agree"
+    }
+  },
   "common": {
     "language": "भाषा",
     "changeLanguage": "भाषा बदलें",

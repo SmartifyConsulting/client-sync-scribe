@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import {
   Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone,
@@ -85,6 +86,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
   
   const modeParam = searchParams.get("mode");
@@ -668,7 +670,7 @@ export default function Auth() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="user-type-doctor-step">I am a...</Label>
+              <Label htmlFor="user-type-doctor-step">{t("auth.signup.iAm")}</Label>
               <Select
                 value={userRole}
                 onValueChange={(v) => {
@@ -680,33 +682,33 @@ export default function Auth() {
                 }}
               >
                 <SelectTrigger id="user-type-doctor-step">
-                  <SelectValue placeholder="Select user type" />
+                  <SelectValue placeholder={t("auth.signup.selectUserType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Patient</SelectItem>
-                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
-                  <SelectItem value="hospital">Hospital</SelectItem>
-                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
-                  <SelectItem value="insurance">Insurance Company</SelectItem>
-                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  <SelectItem value="patient">{t("auth.signup.userTypes.patient")}</SelectItem>
+                  <SelectItem value="doctor">{t("auth.signup.userTypes.provider")}</SelectItem>
+                  <SelectItem value="hospital">{t("auth.signup.userTypes.hospital")}</SelectItem>
+                  <SelectItem value="emergency">{t("auth.signup.userTypes.emergency")}</SelectItem>
+                  <SelectItem value="insurance">{t("auth.signup.userTypes.insurance")}</SelectItem>
+                  <SelectItem value="pharmacy">{t("auth.signup.userTypes.pharmacy")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name(s)</Label>
+                <Label htmlFor="firstName">{t("auth.signup.firstName")}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input id="firstName" placeholder="John" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="pl-10" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t("auth.signup.lastName")}</Label>
                 <Input id="lastName" placeholder="Smith" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Profile Picture (optional)</Label>
+              <Label>{t("auth.signup.profilePicture")}</Label>
               <div className="flex items-center gap-3">
                 <Avatar className="h-16 w-16 border-2 border-primary/40">
                   {avatarPreview && <AvatarImage src={avatarPreview} alt="Profile preview" />}
@@ -723,15 +725,15 @@ export default function Auth() {
                     onChange={handleAvatarChange}
                   />
                   <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
-                    {avatarPreview ? "Change photo" : "Upload photo"}
+                    {avatarPreview ? t("auth.signup.changePhoto") : t("auth.signup.uploadPhoto")}
                   </Button>
-                  <p className="text-[10px] text-muted-foreground">Shown on your profile and to patients.</p>
+                  <p className="text-[10px] text-muted-foreground">{t("auth.signup.profilePhotoHint")}</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="practiceNumber">Practice Number <span className="text-destructive">*</span></Label>
+                <Label htmlFor="practiceNumber">{t("auth.signup.practiceNumber")} <span className="text-destructive">*</span></Label>
                 <Input
                   id="practiceNumber"
                   placeholder="e.g. 0123456"
@@ -742,7 +744,7 @@ export default function Auth() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="doctorNumber">License / Registration No. <span className="text-destructive">*</span></Label>
+                <Label htmlFor="doctorNumber">{t("auth.signup.licenseNumber")} <span className="text-destructive">*</span></Label>
                 <Input
                   id="doctorNumber"
                   placeholder="e.g. MP123456"
@@ -754,21 +756,21 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Sign up with</Label>
+              <Label>{t("auth.signup.signUpWith")}</Label>
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
                   className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
-                  <Mail className="h-4 w-4 mx-auto mb-1" /> Email
+                  <Mail className="h-4 w-4 mx-auto mb-1" /> {t("auth.signup.email")}
                 </button>
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("phone")} disabled={accountCreated}
                   className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
-                  <Phone className="h-4 w-4 mx-auto mb-1" /> Phone Number
+                  <Phone className="h-4 w-4 mx-auto mb-1" /> {t("auth.signup.phoneNumber")}
                 </button>
               </div>
             </div>
             {signupMethod === "email" ? (
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.signup.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
@@ -776,7 +778,7 @@ export default function Auth() {
               </div>
             ) : (
               <div className="space-y-2">
-                <Label>Phone Number (used to sign in)</Label>
+                <Label>{t("auth.signup.phoneNumberSignIn")}</Label>
                 <div className="flex gap-2">
                   <CountrySelector />
                   <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" required disabled={accountCreated} />
@@ -785,7 +787,7 @@ export default function Auth() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.signup.password")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
@@ -795,12 +797,12 @@ export default function Auth() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Mobile Number</Label>
+              <Label>{t("auth.signup.mobileNumber")}</Label>
               <div className="flex gap-2">
                 <CountrySelector />
                 <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" />
               </div>
-              <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
+              <p className="text-xs text-muted-foreground">{t("auth.signup.languageWillBe", { lang: selectedCountry.lang })}</p>
             </div>
           </div>
         );
@@ -820,7 +822,7 @@ export default function Auth() {
         return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="user-type-patient-step">I am a...</Label>
+              <Label htmlFor="user-type-patient-step">{t("auth.signup.iAm")}</Label>
               <Select
                 value={userRole}
                 disabled={!!inviteToken}
@@ -833,48 +835,48 @@ export default function Auth() {
                 }}
               >
                 <SelectTrigger id="user-type-patient-step">
-                  <SelectValue placeholder="Select user type" />
+                  <SelectValue placeholder={t("auth.signup.selectUserType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Patient</SelectItem>
-                  <SelectItem value="doctor">Healthcare Provider</SelectItem>
-                  <SelectItem value="hospital">Hospital</SelectItem>
-                  <SelectItem value="emergency">Emergency Service Provider</SelectItem>
-                  <SelectItem value="insurance">Insurance Company</SelectItem>
-                  <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                  <SelectItem value="patient">{t("auth.signup.userTypes.patient")}</SelectItem>
+                  <SelectItem value="doctor">{t("auth.signup.userTypes.provider")}</SelectItem>
+                  <SelectItem value="hospital">{t("auth.signup.userTypes.hospital")}</SelectItem>
+                  <SelectItem value="emergency">{t("auth.signup.userTypes.emergency")}</SelectItem>
+                  <SelectItem value="insurance">{t("auth.signup.userTypes.insurance")}</SelectItem>
+                  <SelectItem value="pharmacy">{t("auth.signup.userTypes.pharmacy")}</SelectItem>
                 </SelectContent>
               </Select>
-              {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a doctor's invitation</p>}
+              {inviteToken && <p className="text-xs text-muted-foreground mt-2">{t("auth.signup.doctorInvitation")}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name(s)</Label>
+                <Label htmlFor="firstName">{t("auth.signup.firstName")}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input id="firstName" placeholder="John" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="pl-10" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
+                <Label htmlFor="lastName">{t("auth.signup.lastName")}</Label>
                 <Input id="lastName" placeholder="Smith" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Sign up with</Label>
+              <Label>{t("auth.signup.signUpWith")}</Label>
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
                   className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
-                  <Mail className="h-4 w-4 mx-auto mb-1" /> Email
+                  <Mail className="h-4 w-4 mx-auto mb-1" /> {t("auth.signup.email")}
                 </button>
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("phone")} disabled={accountCreated}
                   className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
-                  <Phone className="h-4 w-4 mx-auto mb-1" /> Phone Number
+                  <Phone className="h-4 w-4 mx-auto mb-1" /> {t("auth.signup.phoneNumber")}
                 </button>
               </div>
             </div>
             {signupMethod === "email" ? (
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.signup.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required disabled={accountCreated} />
@@ -882,7 +884,7 @@ export default function Auth() {
               </div>
             ) : (
               <div className="space-y-2">
-                <Label>Phone Number (used to sign in)</Label>
+                <Label>{t("auth.signup.phoneNumberSignIn")}</Label>
                 <div className="flex gap-2">
                   <CountrySelector />
                   <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" required disabled={accountCreated} />
@@ -891,7 +893,7 @@ export default function Auth() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.signup.password")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
@@ -902,12 +904,12 @@ export default function Auth() {
               <PasswordStrength password={password} breached={breachedPassword} />
             </div>
             <div className="space-y-2">
-              <Label>Mobile Number</Label>
+              <Label>{t("auth.signup.mobileNumber")}</Label>
               <div className="flex gap-2">
                 <CountrySelector />
                 <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" />
               </div>
-              <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
+              <p className="text-xs text-muted-foreground">{t("auth.signup.languageWillBe", { lang: selectedCountry.lang })}</p>
             </div>
           </div>
         );
@@ -933,18 +935,18 @@ export default function Auth() {
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
                 <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
               </button>
-              <p className="text-muted-foreground mt-2">Sign In</p>
+              <p className="text-muted-foreground mt-2">{t("auth.login.title")}</p>
             </div>
             {/* Trust band */}
             <div className="mb-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-                <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
+                <Lock className="h-3.5 w-3.5 text-primary" /> {t("auth.trustBand.encrypted")}
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-                <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
+                <KeyRound className="h-3.5 w-3.5 text-primary" /> {t("auth.trustBand.2fa")}
               </span>
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> {t("auth.trustBand.hipaa")}
               </span>
             </div>
             <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
@@ -960,7 +962,7 @@ export default function Auth() {
                         loginTab === "email" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      <Mail className="h-3.5 w-3.5" /> Email
+                      <Mail className="h-3.5 w-3.5" /> {t("auth.login.email")}
                     </button>
                     <button
                       type="button"
@@ -970,13 +972,13 @@ export default function Auth() {
                         loginTab === "phone" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      <Phone className="h-3.5 w-3.5" /> Phone
+                      <Phone className="h-3.5 w-3.5" /> {t("auth.login.phone")}
                     </button>
                   </div>
 
                   {loginTab === "email" ? (
                     <div className="space-y-2">
-                      <Label htmlFor="loginId">Email address</Label>
+                      <Label htmlFor="loginId">{t("auth.login.emailAddress")}</Label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -994,7 +996,7 @@ export default function Auth() {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <Label htmlFor="loginPhone">Phone number</Label>
+                      <Label htmlFor="loginPhone">{t("auth.login.phoneNumber")}</Label>
                       <div className="flex gap-2">
                         <CountrySelector />
                         <div className="relative flex-1">
@@ -1022,8 +1024,8 @@ export default function Auth() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
-                      <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
+                      <Label htmlFor="password">{t("auth.login.password")}</Label>
+                      <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">{t("auth.login.forgotPassword")}</button>
                     </div>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -1034,13 +1036,13 @@ export default function Auth() {
                     </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Sign In
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("auth.login.signIn")}
                   </Button>
                 </form>
               ) : (
                 <form onSubmit={handleVerifyOtp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="otp-email">Email</Label>
+                    <Label htmlFor="otp-email">{t("auth.login.email")}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                       <Input
@@ -1058,12 +1060,12 @@ export default function Auth() {
 
                   {!otpSent ? (
                     <Button type="button" onClick={handleSendOtp} className="w-full" disabled={loading}>
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Send code
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("auth.login.sendCode")}
                     </Button>
                   ) : (
                     <>
                       <div className="space-y-2">
-                        <Label htmlFor="otp">Enter 6-digit code</Label>
+                        <Label htmlFor="otp">{t("auth.login.enterCode")}</Label>
                         <div className="flex justify-center">
                           <InputOTP maxLength={6} value={otpCode} onChange={setOtpCode}>
                             <InputOTPGroup>
@@ -1077,11 +1079,11 @@ export default function Auth() {
                           </InputOTP>
                         </div>
                         <p className="text-xs text-muted-foreground text-center">
-                          Or click the magic link we emailed you.
+                          {t("auth.login.orMagicLink")}
                         </p>
                       </div>
                       <Button type="submit" className="w-full" disabled={loading || otpCode.length !== 6}>
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Verify & sign in
+                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("auth.login.verifyAndSignIn")}
                       </Button>
                       <button
                         type="button"
@@ -1089,7 +1091,7 @@ export default function Auth() {
                         disabled={loading || otpCooldown > 0}
                         className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline disabled:opacity-50"
                       >
-                        {otpCooldown > 0 ? `Resend code in ${otpCooldown}s` : "Resend code"}
+                        {otpCooldown > 0 ? t("auth.login.resendCountdown", { count: otpCooldown }) : t("auth.login.resendCode")}
                       </button>
                     </>
                   )}
@@ -1101,7 +1103,7 @@ export default function Auth() {
                   onClick={() => { setUseOtp(!useOtp); setOtpSent(false); setOtpCode(""); setPassword(""); }}
                   className="block w-full text-center text-xs text-muted-foreground hover:text-primary hover:underline"
                 >
-                  {useOtp ? "Sign in with password instead" : "Prefer a one-time code? Email it to me"}
+                  {useOtp ? t("auth.login.signInWithPassword") : t("auth.login.preferOtp")}
                 </button>
 
                 <div className="relative pt-2">
@@ -1110,7 +1112,7 @@ export default function Auth() {
                   </div>
                   <div className="relative flex justify-center">
                     <span className="bg-background px-3 text-xs uppercase tracking-wide text-muted-foreground">
-                      New here?
+                      {t("auth.login.newHere")}
                     </span>
                   </div>
                 </div>
@@ -1121,17 +1123,17 @@ export default function Auth() {
                   className="w-full font-bold text-base shadow-md hover:shadow-lg transition-shadow"
                   onClick={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }}
                 >
-                  Create your free account
+                  {t("auth.login.createAccount")}
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
-                  Patients, practitioners and organisations welcome.
+                  {t("auth.login.allWelcome")}
                 </p>
                 <button
                   type="button"
                   onClick={() => navigate("/provider-signup")}
                   className="block w-full text-center text-xs font-medium text-primary hover:underline"
                 >
-                  Registering a hospital, emergency service or insurance company? Onboard your organisation →
+                  {t("auth.login.onboardOrganization")}
                 </button>
               </div>
 
@@ -1153,7 +1155,7 @@ export default function Auth() {
             <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
               <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
             </button>
-            <p className="text-muted-foreground mt-2">Create your account</p>
+            <p className="text-muted-foreground mt-2">{t("auth.signup.createAccount")}</p>
             <div className="mt-3"><Progress value={progress} className="h-1.5" /></div>
             <p className="text-[10px] text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
@@ -1162,18 +1164,18 @@ export default function Auth() {
             <div className="flex gap-2 mt-6">
               {currentStep > 0 && (
                 <Button type="button" variant="outline" onClick={handlePrev} disabled={loading} className="flex-1">
-                  <ChevronLeft className="h-4 w-4 mr-1" /> Back
+                  <ChevronLeft className="h-4 w-4 mr-1" /> {t("auth.common.back")}
                 </Button>
               )}
               {!isLastStep ? (
                 <Button type="button" onClick={handleNext} disabled={loading} className="flex-1">
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Next <ChevronRight className="h-4 w-4 ml-1" />
+                  {t("auth.common.next")} <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               ) : (
                 <Button type="button" onClick={handleFinalSubmit} disabled={loading} className="flex-1">
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create account
+                  {t("auth.signup.create")}
                 </Button>
               )}
             </div>
@@ -1182,7 +1184,7 @@ export default function Auth() {
               onClick={() => setIsLogin(true)}
               className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline mt-4 text-center"
             >
-              Already have an account? Sign in
+              {t("auth.signup.haveAccount")}
             </button>
           </div>
         </div>

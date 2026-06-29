@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import holarcLogo from "@/assets/holarc-logo-clear-2.png";
 import { Lock, Loader2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Footer } from "@/components/layout/Footer";
 export default function ResetPassword() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,8 +51,8 @@ export default function ResetPassword() {
       if (!recoveryVerifiedRef.current) {
         setInitialLoading(false);
         toast({
-          title: "Invalid or expired link",
-          description: "Please request a new password reset link",
+          title: t("auth.reset.invalidLink"),
+          description: t("auth.reset.linkExpiredMessage"),
           variant: "destructive",
         });
         navigate("/forgot-password");
@@ -71,8 +73,8 @@ export default function ResetPassword() {
 
     if (password !== confirmPassword) {
       toast({
-        title: "Passwords don't match",
-        description: "Please make sure both passwords are the same",
+        title: t("auth.common.error"),
+        description: t("auth.reset.passwordsNotMatch"),
         variant: "destructive",
       });
       return;
@@ -80,8 +82,8 @@ export default function ResetPassword() {
 
     if (password.length < 6) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters",
+        title: t("auth.common.error"),
+        description: t("auth.reset.passwordTooShort"),
         variant: "destructive",
       });
       return;
@@ -95,8 +97,8 @@ export default function ResetPassword() {
 
       setSuccess(true);
       toast({
-        title: "Password updated",
-        description: "Your password has been successfully reset",
+        title: t("auth.reset.success"),
+        description: t("auth.reset.successDescription"),
       });
 
       // Clean URL hash to prevent re-trigger
@@ -128,8 +130,8 @@ export default function ResetPassword() {
       }
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to reset password",
+        title: t("auth.common.error"),
+        description: error.message || t("auth.reset.failedReset"),
         variant: "destructive",
       });
     } finally {
@@ -145,15 +147,15 @@ export default function ResetPassword() {
             <div className="flex justify-center mb-4">
               <img src={holarcLogo} alt="Holarc Health" className="h-[81px] w-auto" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Holarc</h1>
-            <p className="text-muted-foreground mt-2">Set your new password</p>
+            <h1 className="text-2xl font-bold text-foreground">{t("auth.reset.title")}</h1>
+            <p className="text-muted-foreground mt-2">{t("auth.reset.instructions")}</p>
           </div>
 
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             {initialLoading ? (
               <div className="text-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-muted-foreground">Verifying your reset link...</p>
+                <p className="text-muted-foreground">{t("auth.reset.verifying")}</p>
               </div>
             ) : success ? (
               <div className="text-center py-4">
@@ -162,13 +164,13 @@ export default function ResetPassword() {
                     <CheckCircle className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h2 className="text-lg font-semibold text-foreground mb-2">Password Reset Successful</h2>
-                <p className="text-muted-foreground">Redirecting you...</p>
+                <h2 className="text-lg font-semibold text-foreground mb-2">{t("auth.reset.successHeading")}</h2>
+                <p className="text-muted-foreground">{t("auth.reset.redirecting")}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password">New Password</Label>
+                  <Label htmlFor="password">{t("auth.reset.newPassword")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -185,7 +187,7 @@ export default function ResetPassword() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Label htmlFor="confirmPassword">{t("auth.reset.confirmPassword")}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -203,7 +205,7 @@ export default function ResetPassword() {
 
                 <Button type="submit" className="w-full" disabled={loading || !authReady}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Reset Password
+                  {t("auth.reset.reset")}
                 </Button>
               </form>
             )}

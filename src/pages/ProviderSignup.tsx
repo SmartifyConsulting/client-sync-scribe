@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Building2, CheckCircle2, Copy, Check, Loader2, Clock } from "lucide-react";
@@ -30,6 +31,7 @@ function generatePassword(): string {
 export default function ProviderSignup() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
 
   const initialKind: ProviderKind = (() => {
@@ -45,10 +47,10 @@ export default function ProviderSignup() {
   const [copied, setCopied] = useState(false);
 
   const kindLabel =
-    kind === "hospital" ? "Hospital"
-    : kind === "insurance" ? "Insurance Company"
-    : kind === "pharmacy" ? "Pharmacy"
-    : "Emergency Service Provider";
+    kind === "hospital" ? t("auth.provider.hospital")
+    : kind === "insurance" ? t("auth.provider.insurance")
+    : kind === "pharmacy" ? t("auth.provider.pharmacy")
+    : t("auth.provider.emergency");
 
   const dupType =
     kind === "hospital" ? "hospital"
@@ -59,20 +61,20 @@ export default function ProviderSignup() {
   const submit = async () => {
     const parsed = providerVettingSchema.safeParse(vetting);
     if (!parsed.success) {
-      const first = Object.values(parsed.error.flatten().fieldErrors)[0]?.[0] || "Please fill in all required fields";
-      toast({ title: "Form incomplete", description: first, variant: "destructive" });
+      const first = Object.values(parsed.error.flatten().fieldErrors)[0]?.[0] || t("auth.common.error");
+      toast({ title: t("auth.provider.formIncomplete"), description: first, variant: "destructive" });
       return;
     }
     if (!vetting.license_file) {
       toast({
-        title: "License required",
-        description: "Upload a certified copy of the license.",
+        title: t("auth.provider.licenseRequired"),
+        description: t("auth.provider.licenseMessage"),
         variant: "destructive",
       });
       return;
     }
     if (!vetting.auto_gen_password && vetting.manual_password.length < 8) {
-      toast({ title: "Password must be at least 8 characters", variant: "destructive" });
+      toast({ title: t("auth.provider.passwordRequired"), variant: "destructive" });
       return;
     }
 
@@ -87,7 +89,7 @@ export default function ProviderSignup() {
       });
       if (dup && typeof dup === "object" && (dup as any).exists) {
         toast({
-          title: "Application already exists",
+          title: t("auth.provider.applicationExists"),
           description: `A matching application is already on file (${(dup as any).name}). Please contact onboarding@holarchealth.com.`,
           variant: "destructive",
         });
@@ -108,13 +110,13 @@ export default function ProviderSignup() {
       if (authErr) {
         if (/already|registered|exists/i.test(authErr.message)) {
           toast({
-            title: "Email already registered",
+            title: t("auth.provider.emailAlreadyRegistered"),
             description:
               "An account with this administrator email exists. Sign in first, then submit the application from your dashboard.",
             variant: "destructive",
           });
         } else {
-          toast({ title: "Sign-up failed", description: authErr.message, variant: "destructive" });
+          toast({ title: t("auth.provider.signupFailed"), description: authErr.message, variant: "destructive" });
         }
         setBusy(false);
         return;
@@ -214,8 +216,8 @@ export default function ProviderSignup() {
 
       setResult({ email: vetting.admin_email.trim(), password });
       toast({
-        title: "Application received",
-        description: "Pending approval — typically within 6 hours.",
+        title: t("auth.provider.applicationReceived"),
+        description: t("auth.provider.pendingApproval"),
       });
     } catch (e: any) {
       toast({ title: "Submission failed", description: e.message, variant: "destructive" });
@@ -236,7 +238,7 @@ export default function ProviderSignup() {
       <header className="border-b">
         <div className="mx-auto flex max-w-4xl items-center gap-2 px-4 py-3">
           <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Home
+            <ArrowLeft className="mr-2 h-4 w-4" /> {t("auth.common.home")}
           </Button>
         </div>
       </header>
@@ -245,10 +247,9 @@ export default function ProviderSignup() {
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
           <Building2 className="h-8 w-8 text-primary" />
         </div>
-        <h1 className="text-center text-3xl font-extrabold">Onboard your organisation</h1>
+        <h1 className="text-center text-3xl font-extrabold">{t("auth.provider.title")}</h1>
         <p className="mt-3 text-center text-muted-foreground">
-          Register a hospital, emergency-response service, insurance company or pharmacy. Our team reviews
-          applications within minutes.
+          {t("auth.provider.subtitle")}
         </p>
 
         {result ? (
@@ -257,7 +258,7 @@ export default function ProviderSignup() {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0" />
                 <div>
-                  <h2 className="text-xl font-semibold">Application received</h2>
+                  <h2 className="text-xl font-semibold">{t("auth.provider.applicationReceived")}</h2>
                   <p className="text-sm text-muted-foreground mt-1">
                     We aim to approve all applications within <strong>6 hours</strong>. You'll be able to sign in once
                     your administrator account is approved.
@@ -266,7 +267,7 @@ export default function ProviderSignup() {
               </div>
 
               <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
-                <p className="font-bold text-amber-900 dark:text-amber-200">Save your password now</p>
+                <p className="font-bold text-amber-900 dark:text-amber-200">{t("auth.provider.savePassword")}</p>
                 <p className="text-amber-900/80 dark:text-amber-200/80">
                   This password is shown only once. Your administrator will need it to sign in after approval.
                 </p>
@@ -284,11 +285,11 @@ export default function ProviderSignup() {
 
               <Button onClick={copyCreds} variant="outline" className="w-full gap-2">
                 {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copied" : "Copy email + password"}
+                {copied ? t("auth.provider.copied") : t("auth.provider.copyCredentials")}
               </Button>
 
               <Button className="w-full" onClick={() => navigate("/")}>
-                Return to Home
+                {t("auth.common.returnHome")}
               </Button>
             </CardContent>
           </Card>
@@ -296,14 +297,14 @@ export default function ProviderSignup() {
           <Card className="mt-8">
             <CardContent className="space-y-5 p-6">
               <div className="space-y-1.5">
-                <Label htmlFor="org_kind">Organisation type</Label>
+                <Label htmlFor="org_kind">{t("auth.provider.organizationType")}</Label>
                 <Select value={kind} onValueChange={(v) => setKind(v as ProviderKind)} disabled={busy}>
                   <SelectTrigger id="org_kind"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hospital">Hospital</SelectItem>
-                    <SelectItem value="esp">Emergency Service Provider</SelectItem>
-                    <SelectItem value="insurance">Insurance Company</SelectItem>
-                    <SelectItem value="pharmacy">Pharmacy</SelectItem>
+                    <SelectItem value="hospital">{t("auth.provider.hospital")}</SelectItem>
+                    <SelectItem value="esp">{t("auth.provider.emergency")}</SelectItem>
+                    <SelectItem value="insurance">{t("auth.provider.insurance")}</SelectItem>
+                    <SelectItem value="pharmacy">{t("auth.provider.pharmacy")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -323,7 +324,7 @@ export default function ProviderSignup() {
 
               <Button onClick={submit} disabled={busy} size="lg" className="w-full">
                 {busy ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Submit {kindLabel} application
+                {t("auth.common.continue")} {kindLabel} {t("auth.provider.applicationLabel")}
               </Button>
             </CardContent>
           </Card>
@@ -331,7 +332,7 @@ export default function ProviderSignup() {
 
         <div className="mt-6 text-center">
           <Button variant="outline" onClick={() => navigate("/auth")}>
-            I already have an account — sign in
+            {t("auth.provider.alreadyHaveAccount")}
           </Button>
         </div>
       </main>
