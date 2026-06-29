@@ -418,12 +418,15 @@ export function PillBaselineCapture({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pill className="h-5 w-5 text-primary" />
-            Set up <strong className="ml-1">{medicationName}</strong>
+            Teach the app how you take <strong className="ml-1">{medicationName}</strong>
           </DialogTitle>
           <DialogDescription>
-            One-time baseline so we can recognise your routine.
+            A <strong>baseline</strong> is a quick one-time setup. Show us the packet, the tablet, and how you take it.
+            From then on the app recognises your routine and you only need a short daily clip to earn your Vula reward —
+            you won't have to do this setup again.
           </DialogDescription>
         </DialogHeader>
+
 
         {showStepIndicator && (
           <div className="flex items-center justify-between gap-2 px-1">
@@ -441,13 +444,19 @@ export function PillBaselineCapture({
             <div className="rounded-xl border border-teal-500/40 bg-teal-50/60 p-4 text-sm">
               <p className="flex items-center gap-2 font-semibold text-foreground mb-1.5">
                 <Info className="h-4 w-4 text-teal-600" />
-                One-time setup — you won't need to do this again
+                What is a baseline?
               </p>
-              <p className="text-muted-foreground leading-relaxed">
-                These three quick captures teach our AI what <strong className="text-foreground">your medication</strong> looks like
-                and <strong className="text-foreground">how you take it</strong>. From the next dose onwards, we'll recognise
-                your tablet and your face automatically — no more set-up, just a quick check-in.
+              <p className="text-muted-foreground leading-relaxed mb-2">
+                A baseline is a one-time recording that teaches our AI what <strong className="text-foreground">your
+                medication</strong> looks like and <strong className="text-foreground">how you take it</strong>. After
+                this setup we'll recognise your tablet and your routine automatically — every future dose is just a
+                quick check-in.
               </p>
+              <ul className="text-muted-foreground list-disc list-inside space-y-0.5 text-xs">
+                <li>Helps the AI learn what your medication looks like.</li>
+                <li>Confirms the right tablet is being taken.</li>
+                <li>Done once per medication — never repeated.</li>
+              </ul>
             </div>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
               <p className="font-medium mb-1">Three quick steps</p>
@@ -457,6 +466,7 @@ export function PillBaselineCapture({
                 <li>A short video of you <strong className="text-foreground">taking the dose</strong> ({INGEST_SECONDS}s, not stored)</li>
               </ol>
             </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={handleClose}>Cancel</Button>
               <Button onClick={() => setStep("method")}>Next</Button>

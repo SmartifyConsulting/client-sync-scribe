@@ -40,6 +40,8 @@ import { SecurityBadges } from "@/components/landing/SecurityBadges";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { InstallAppButton } from "@/components/InstallAppButton";
 import { InstallAppPrompt } from "@/components/InstallAppPrompt";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+
 
 const getPatientBenefits = (t: any) => [
   {
@@ -140,7 +142,9 @@ export default function Landing() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3" />
             <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageSwitcher />
               <InstallAppButton variant="compact" className="hidden sm:inline-flex" />
+
               <Button
                 size="lg"
                 variant="ghost"

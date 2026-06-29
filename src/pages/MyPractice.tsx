@@ -58,6 +58,8 @@ import { getSignedUrl } from "@/utils/storageUrls";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -1407,17 +1409,16 @@ export default function MyPractice() {
                 <p className="text-sm text-muted-foreground">
                   Add partners of the same practice. Their information will be available on documents.
                 </p>
-                {!showAddPartnerForm && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAddPartnerForm(true)}
-                    className="gap-1.5 shrink-0"
-                  >
-                    <Plus className="h-3.5 w-3.5" />
-                    Add Partner
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddPartnerForm(true)}
+                  className="gap-1.5 shrink-0"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Partner
+                </Button>
+
               </div>
               {partners.length > 0 && (
                 <div className="space-y-2">
@@ -1529,8 +1530,29 @@ export default function MyPractice() {
                   ))}
                 </div>
               )}
-              {showAddPartnerForm && (
-                <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
+              <Dialog
+                open={showAddPartnerForm}
+                onOpenChange={(o) => {
+                  if (!o) {
+                    setShowAddPartnerForm(false);
+                    setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
+                    setPartnerSearch("");
+                    setPartnerSearchResults([]);
+                  }
+                }}
+              >
+                <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <UserPlus className="h-5 w-5 text-primary" />
+                      Add Practice Partner
+                    </DialogTitle>
+                    <DialogDescription>
+                      Search for an existing Holarc practitioner, invite a new one by email, or share your practice link.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3">
+
                   <Tabs defaultValue="existing">
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="existing">Select existing</TabsTrigger>
@@ -1677,8 +1699,10 @@ export default function MyPractice() {
                       Close
                     </Button>
                   </div>
-                </div>
-              )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
 
             </div>
               </AccordionContent>

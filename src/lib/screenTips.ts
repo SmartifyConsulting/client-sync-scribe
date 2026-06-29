@@ -33,7 +33,7 @@ export const SCREEN_TIPS: ScreenTip[] = [
 
   // Doctor / shared
   { id: "doctor.dashboard", match: "/doctor/dashboard", title: "Doctor Briefing", body: "Your daily clinical briefing — today's appointments, AI summaries and outstanding tasks." },
-  { id: "doctor.patients", match: "/patients", title: "Your Patients", body: "Search, filter and open any patient record. Use the + button to invite or add a new patient." },
+  { id: "doctor.patients.v2", match: "/patients", title: "Your Patients", body: "Use Import to bulk-add patients from a spreadsheet, or + Patient to add one manually. Tap any row to open the record." },
   { id: "doctor.sessions", match: "/sessions", title: "Sessions", body: "Recorded consultations with transcripts, AI summaries and documents drafted from each visit." },
   { id: "doctor.documents", match: "/documents", title: "Documents", body: "Letters, scripts and certificates. Create from templates or auto-draft from a session." },
   { id: "doctor.calendar", match: "/calendar", title: "Calendar", body: "All appointments. Drag to reschedule and color-code by appointment type." },
@@ -41,7 +41,10 @@ export const SCREEN_TIPS: ScreenTip[] = [
   { id: "doctor.invoices", match: "/doctor/invoices", title: "Invoices", body: "Create, send and track invoices. Line items pre-fill from your service prices." },
   { id: "doctor.referrals", match: "/referrals", title: "Referral Doctors", body: "Your network of referral practitioners. Invite new GPs and specialists." },
   { id: "doctor.connections", match: "/connections", title: "Connections", body: "Pending patient invites, doctor access requests and partner approvals." },
-  { id: "doctor.practice", match: "/my-practice", title: "My Practice", body: "Your practice profile — branding, partners, billing and template letterheads." },
+  { id: "doctor.practice", match: "/my-practice", title: "My Practice", body: "Add partners (search existing practitioners or invite by email), set service prices, design your letterhead, and configure how patients reach you." },
+  { id: "doctor.mySessions", match: "/my-sessions", title: "My Sessions", body: "Today's sessions are expanded by default. Tap a date group to expand last week, last month, or older." },
+  { id: "shared.holarchelp", match: "/holarchelp", title: "HolarcHelp SOS", body: "One-tap emergency request. Your nominated next of kin and nearby ambulance providers are alerted with your location." },
+
   { id: "doctor.rewards", match: "/doctor/rewards", title: "Practitioner Rewards", body: "Track Vulas earned through patient onboarding and check-ins." },
   { id: "doctor.cpd", match: "/cpd-certificates", title: "CPD Certificates", body: "Upload and track your CPD points. Earn a gold award once you hit the annual threshold." },
 
