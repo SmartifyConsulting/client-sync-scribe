@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Ambulance, Loader2 } from "lucide-react";
@@ -22,6 +23,7 @@ function fmt(secs: number) {
 }
 
 export function AvailableResponders({ incidentId, createdAt }: { incidentId: string; createdAt: string }) {
+  const { t } = useTranslation();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [picking, setPicking] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
@@ -76,7 +78,7 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
     });
     setPicking(null);
     if (error) return toast.error(error.message);
-    toast.success(`${o.name} assigned`);
+    toast.success(t("holarcHelp.emergency.responders.assigned", { name: o.name }));
   };
 
   if (!offers.length) return null;
@@ -84,8 +86,8 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
   return (
     <div className="mb-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">Available ER providers ({offers.length})</p>
-        <p className="text-xs font-mono tabular-nums text-muted-foreground">Auto-assign in {fmt(remainingSec)}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-primary">{t("holarcHelp.emergency.responders.available", { count: offers.length })}</p>
+        <p className="text-xs font-mono tabular-nums text-muted-foreground">{t("holarcHelp.emergency.responders.autoAssignIn", { time: fmt(remainingSec) })}</p>
       </div>
       <ul className="space-y-2">
         {offers.map((o) => (
@@ -100,13 +102,13 @@ export function AvailableResponders({ incidentId, createdAt }: { incidentId: str
               </p>
             </div>
             <Button size="sm" className="h-8 shrink-0" onClick={() => pick(o)} disabled={!!picking}>
-              {picking === o.provider_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Pick"}
+              {picking === o.provider_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("holarcHelp.emergency.responders.pick")}
             </Button>
           </li>
         ))}
       </ul>
       <p className="mt-2 text-[11px] text-muted-foreground">
-        Pick a responder, or we'll auto-assign the closest one in {fmt(remainingSec)}.
+        {t("holarcHelp.emergency.responders.pickOrAutoAssign", { time: fmt(remainingSec) })}
       </p>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export function AmbulanceFormDialog({ open, onOpenChange, providerId, initial, onSaved }: Props) {
+  const { t } = useTranslation();
   const isEdit = !!initial?.id;
   const [vehicleCode, setVehicleCode] = useState("");
   const [reg, setReg] = useState("");
@@ -45,7 +47,7 @@ export function AmbulanceFormDialog({ open, onOpenChange, providerId, initial, o
 
   const submit = async () => {
     if (!vehicleCode.trim()) {
-      toast.error("Vehicle code is required");
+      toast.error(t("holarcHelp.ambulance.vehicleCodeRequired"));
       return;
     }
     setSaving(true);
@@ -62,11 +64,11 @@ export function AmbulanceFormDialog({ open, onOpenChange, providerId, initial, o
         : supabase.from("ambulances" as any).insert(payload);
       const { error } = await q;
       if (error) throw error;
-      toast.success(isEdit ? "Ambulance updated" : "Ambulance added");
+      toast.success(isEdit ? t("holarcHelp.ambulance.updated") : t("holarcHelp.ambulance.added"));
       onOpenChange(false);
       onSaved?.();
     } catch (e: any) {
-      toast.error(e?.message ?? "Save failed");
+      toast.error(e?.message ?? t("common.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -76,36 +78,36 @@ export function AmbulanceFormDialog({ open, onOpenChange, providerId, initial, o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit ambulance" : "Add ambulance"}</DialogTitle>
+          <DialogTitle>{isEdit ? t("holarcHelp.ambulance.editTitle") : t("holarcHelp.ambulance.addTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
-            <Label>Vehicle code *</Label>
+            <Label>{t("holarcHelp.ambulance.vehicleCode")} *</Label>
             <Input value={vehicleCode} onChange={(e) => setVehicleCode(e.target.value)} placeholder="ELD-01" autoFocus />
           </div>
           <div className="space-y-1.5">
-            <Label>Registration number</Label>
+            <Label>{t("holarcHelp.ambulance.registrationNumber")}</Label>
             <Input value={reg} onChange={(e) => setReg(e.target.value)} placeholder="GP-ELDETTE-01" />
           </div>
           <div className="space-y-1.5">
-            <Label>Status</Label>
+            <Label>{t("common.status")}</Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {STATUSES.map((s) => <SelectItem key={s} value={s}>{s.replace(/_/g, " ")}</SelectItem>)}
+                {STATUSES.map((s) => <SelectItem key={s} value={s}>{t(`holarcHelp.ambulance.status.${s}`, { defaultValue: s.replace(/_/g, " ") })}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Notes</Label>
+            <Label>{t("common.notes")}</Label>
             <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
           <Button onClick={submit} disabled={saving || !vehicleCode.trim()}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isEdit ? "Save" : "Add"}
+            {isEdit ? t("common.save") : t("common.add")}
           </Button>
         </DialogFooter>
       </DialogContent>
