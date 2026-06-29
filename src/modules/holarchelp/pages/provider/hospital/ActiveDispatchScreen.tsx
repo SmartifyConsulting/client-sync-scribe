@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Clock, Zap, AlertCircle } from "lucide-react";
@@ -30,6 +31,7 @@ const MOCK_DISPATCH: ActiveDispatch = {
 };
 
 export default function ActiveDispatchScreen() {
+  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [dispatch] = useState<ActiveDispatch>(MOCK_DISPATCH);
 
@@ -51,13 +53,13 @@ export default function ActiveDispatchScreen() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "en_route":
-        return "En Route";
+        return t("holarcHelp.dispatch.status.enRoute");
       case "on_scene":
-        return "On Scene";
+        return t("holarcHelp.dispatch.status.onScene");
       case "transporting":
-        return "Transporting Patient";
+        return t("holarcHelp.dispatch.status.transporting");
       case "arrived":
-        return "Arrived at Hospital";
+        return t("holarcHelp.dispatch.status.arrived");
       default:
         return status;
     }
@@ -67,11 +69,11 @@ export default function ActiveDispatchScreen() {
     <div className="space-y-6">
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Real-time Tracking
+          {t("holarcHelp.dispatch.realTimeTracking")}
         </p>
-        <h1 className="text-3xl font-extrabold">Active Dispatch: {dispatch.ambulance_id}</h1>
+        <h1 className="text-3xl font-extrabold">{t("holarcHelp.dispatch.activeDispatch", { id: dispatch.ambulance_id })}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Monitor live dispatch status and communication
+          {t("holarcHelp.dispatch.monitorStatus")}
         </p>
       </header>
 
@@ -80,7 +82,7 @@ export default function ActiveDispatchScreen() {
         <div className="rounded-2xl border bg-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs text-muted-foreground">DISPATCH STATUS</p>
+              <p className="text-xs text-muted-foreground">{t("holarcHelp.dispatch.statusLabel")}</p>
               <h2 className="text-2xl font-bold mt-1">{dispatch.ambulance_id}</h2>
             </div>
             <div
