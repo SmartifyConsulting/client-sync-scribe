@@ -929,25 +929,36 @@ export default function Auth() {
       <div className="min-h-screen flex flex-col bg-background">
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-md">
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
               <button type="button" onClick={() => navigate("/")} className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity">
                 <img src={holarcLogo} alt="Holarc Health" className="h-[117px] w-auto" />
               </button>
-              <p className="text-muted-foreground mt-2">Sign In</p>
             </div>
-            {/* Trust band */}
-            <div className="mb-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-                <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-                <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
-              </span>
+            {/* Sign In / Sign Up tabs */}
+            <div className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 mb-4">
+              <button
+                type="button"
+                onClick={() => setIsLogin(true)}
+                className={cn(
+                  "rounded-lg py-2 text-sm font-semibold transition-colors",
+                  isLogin ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsLogin(false); setCurrentStep(0); setAccountCreated(false); }}
+                className={cn(
+                  "rounded-lg py-2 text-sm font-semibold transition-colors",
+                  !isLogin ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Sign Up
+              </button>
             </div>
             <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
+
               {!useOtp ? (
                 <form onSubmit={handleLogin} className="space-y-4">
                   {/* Email / Phone tab switch */}
