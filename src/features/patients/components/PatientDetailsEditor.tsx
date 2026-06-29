@@ -311,7 +311,19 @@ const RelationshipSelect = ({ value, onChange }: { value: string; onChange: (v: 
       <SelectTrigger className="text-sm">
         <SelectValue placeholder="Select relationship" />
       </SelectTrigger>
-      <SelectContent>
+      {/* Prevent the known Radix-in-Dialog issue where closing without a selection
+          leaves pointer-events:none on the body, making the trigger feel disabled. */}
+      <SelectContent
+        onCloseAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={() => {
+          // Ensure the body regains pointer events after a dismiss-without-select.
+          requestAnimationFrame(() => {
+            if (document.body.style.pointerEvents === "none") {
+              document.body.style.pointerEvents = "";
+            }
+          });
+        }}
+      >
         {RELATIONSHIP_OPTIONS.map((r) => (
           <SelectItem key={r} value={r}>
             {r}
@@ -322,6 +334,7 @@ const RelationshipSelect = ({ value, onChange }: { value: string; onChange: (v: 
     </Select>
   );
 };
+
 
 // Format surgery date based on precision
 const formatSurgeryDate = (date: string, precision?: string) => {

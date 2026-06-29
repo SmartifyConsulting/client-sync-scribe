@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Camera, X, Check, Loader2, Dumbbell, Utensils, Pill } from "lucide-react";
+import { mapCameraError } from "@/lib/cameraErrors";
+
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -43,12 +45,14 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
       setIsCapturing(true);
     } catch (error) {
       console.error('Camera access error:', error);
+      const friendly = mapCameraError(error);
       toast({
-        title: "Camera Error",
-        description: "Could not access camera. Please ensure camera permissions are granted.",
+        title: friendly.title,
+        description: friendly.description,
         variant: "destructive",
       });
     }
+
   }, [toast]);
 
   const stopCamera = useCallback(() => {
