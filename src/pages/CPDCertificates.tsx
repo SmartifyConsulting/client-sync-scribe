@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Pencil, Loader2, Award, Upload, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ interface CPDCertificate {
 }
 
 export default function CPDCertificates() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
   const [certs, setCerts] = useState<CPDCertificate[]>([]);
@@ -59,7 +61,7 @@ export default function CPDCertificates() {
     const filePath = `${user.id}/${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("cpd-certificates").upload(filePath, file);
     if (error) {
-      toast({ title: "Upload Error", description: error.message, variant: "destructive" });
+      toast({ title: t("doctor.cpd.upload_error"), description: error.message, variant: "destructive" });
       return null;
     }
     // Bucket is private — store the path; signed URLs are generated on demand.
@@ -69,7 +71,7 @@ export default function CPDCertificates() {
   const openCertificate = async (pathOrUrl: string) => {
     const url = await getSignedUrl("cpd-certificates", pathOrUrl);
     if (!url) {
-      toast({ title: "Unable to open file", variant: "destructive" });
+      toast({ title: t("doctor.cpd.unable_to_open"), variant: "destructive" });
       return;
     }
     window.open(url, "_blank", "noopener,noreferrer");
@@ -77,7 +79,7 @@ export default function CPDCertificates() {
 
   const handleSave = async () => {
     if (!user || !form.certificate_name.trim() || !form.date_earned) {
-      toast({ title: "Required", description: "Certificate name and date are required", variant: "destructive" });
+      toast({ title: t("doctor.cpd.required"), description: t("doctor.cpd.required_message"), variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -99,12 +101,12 @@ export default function CPDCertificates() {
 
     if (editingId) {
       const { error } = await supabase.from("cpd_certificates").update(record).eq("id", editingId);
-      if (error) toast({ title: "Error", description: "Failed to update", variant: "destructive" });
-      else toast({ title: "Updated", description: "Certificate updated" });
+      if (error) toast({ title: t("common.error"), description: t("doctor.cpd.error_update"), variant: "destructive" });
+      else toast({ title: t("doctor.cpd.updated"), description: t("doctor.cpd.updated_message") });
     } else {
       const { error } = await supabase.from("cpd_certificates").insert({ ...record, user_id: user.id });
-      if (error) toast({ title: "Error", description: "Failed to add", variant: "destructive" });
-      else toast({ title: "Added", description: "Certificate added" });
+      if (error) toast({ title: t("common.error"), description: t("doctor.cpd.error_add"), variant: "destructive" });
+      else toast({ title: t("doctor.cpd.added"), description: t("doctor.cpd.added_message") });
     }
     setSaving(false);
     setShowForm(false);
@@ -130,7 +132,7 @@ export default function CPDCertificates() {
     const { error } = await supabase.from("cpd_certificates").delete().eq("id", id);
     if (!error) {
       setCerts(certs.filter(c => c.id !== id));
-      toast({ title: "Removed", description: "Certificate removed" });
+      toast({ title: t("doctor.cpd.removed"), description: t("doctor.cpd.removed_message") });
     }
   };
 
@@ -138,31 +140,31 @@ export default function CPDCertificates() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Certificates</h1>
-          <p className="mt-1 text-muted-foreground text-[12px]">Track your continuing professional development</p>
+          <h1 className="text-3xl font-bold text-foreground">{t("doctor.cpd.title")}</h1>
+          <p className="mt-1 text-muted-foreground text-[12px]">{t("doctor.cpd.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="secondary" className="text-base px-4 py-2 gap-2">
             <Award className="h-4 w-4 text-primary" />
-            {totalPoints} CPD Points
+            {totalPoints} {t("doctor.cpd.cpd_points")}
           </Badge>
           <Button onClick={() => { setShowForm(true); setEditingId(null); setForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" }); setCertificateFile(null); }} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Certificate
+            <Plus className="h-4 w-4" /> {t("doctor.cpd.add_certificate")}
           </Button>
         </div>
       </div>
 
       {showForm && (
         <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
-          <h3 className="font-semibold text-foreground">{editingId ? "Edit" : "Add"} Certificate</h3>
+          <h3 className="font-semibold text-foreground">{editingId ? t("doctor.cpd.edit_title") : t("doctor.cpd.add_title")}</h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2"><Label>Certificate Name *</Label><Input value={form.certificate_name} onChange={(e) => setForm({ ...form, certificate_name: e.target.value })} placeholder="e.g., Advanced Cardiac Life Support" /></div>
-            <div className="space-y-2"><Label>Issuing Body</Label><Input value={form.issuing_body} onChange={(e) => setForm({ ...form, issuing_body: e.target.value })} placeholder="e.g., HPCSA" /></div>
-            <div className="space-y-2"><Label>Date Earned *</Label><Input type="date" value={form.date_earned} onChange={(e) => setForm({ ...form, date_earned: e.target.value })} /></div>
-            <div className="space-y-2"><Label>CPD Points</Label><Input type="number" min="0" value={form.cpd_points} onChange={(e) => setForm({ ...form, cpd_points: e.target.value })} placeholder="0" /></div>
+            <div className="space-y-2"><Label>{t("doctor.cpd.certificate_name")}</Label><Input value={form.certificate_name} onChange={(e) => setForm({ ...form, certificate_name: e.target.value })} placeholder={t("doctor.cpd.certificate_placeholder")} /></div>
+            <div className="space-y-2"><Label>{t("doctor.cpd.issuing_body")}</Label><Input value={form.issuing_body} onChange={(e) => setForm({ ...form, issuing_body: e.target.value })} placeholder={t("doctor.cpd.issuing_body_placeholder")} /></div>
+            <div className="space-y-2"><Label>{t("doctor.cpd.date_earned")}</Label><Input type="date" value={form.date_earned} onChange={(e) => setForm({ ...form, date_earned: e.target.value })} /></div>
+            <div className="space-y-2"><Label>{t("doctor.cpd.cpd_points")}</Label><Input type="number" min="0" value={form.cpd_points} onChange={(e) => setForm({ ...form, cpd_points: e.target.value })} placeholder="0" /></div>
           </div>
           <div className="space-y-2">
-            <Label>Attach Certificate (PDF/Image)</Label>
+            <Label>{t("doctor.cpd.attach_certificate")}</Label>
             <div className="flex items-center gap-3">
               <input
                 ref={fileInputRef}
@@ -173,19 +175,19 @@ export default function CPDCertificates() {
               />
               <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => fileInputRef.current?.click()}>
                 <Upload className="h-4 w-4" />
-                {certificateFile ? certificateFile.name : "Choose File"}
+                {certificateFile ? certificateFile.name : t("doctor.cpd.choose_file")}
               </Button>
               {certificateFile && (
-                <Button type="button" variant="ghost" size="sm" onClick={() => setCertificateFile(null)}>Remove</Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setCertificateFile(null)}>{t("doctor.cpd.remove")}</Button>
               )}
             </div>
           </div>
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={saving || uploading}>
               {(saving || uploading) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              {uploading ? "Uploading..." : editingId ? "Update" : "Save"}
+              {uploading ? t("doctor.cpd.uploading") : editingId ? t("common.update") : t("common.save")}
             </Button>
-            <Button variant="outline" onClick={() => { setShowForm(false); setEditingId(null); setCertificateFile(null); }}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setShowForm(false); setEditingId(null); setCertificateFile(null); }}>{t("common.cancel")}</Button>
           </div>
         </div>
       )}
@@ -194,16 +196,16 @@ export default function CPDCertificates() {
         {loading ? (
           <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
         ) : certs.length === 0 ? (
-          <div className="p-10 text-center text-muted-foreground">No certificates recorded yet</div>
+          <div className="p-10 text-center text-muted-foreground">{t("doctor.cpd.no_certificates")}</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Certificate</TableHead>
-                <TableHead>Issuing Body</TableHead>
-                <TableHead>Date Earned</TableHead>
-                <TableHead className="text-center">Points</TableHead>
-                <TableHead>File</TableHead>
+                <TableHead>{t("doctor.cpd.table_certificate")}</TableHead>
+                <TableHead>{t("doctor.cpd.table_issuing_body")}</TableHead>
+                <TableHead>{t("doctor.cpd.table_date_earned")}</TableHead>
+                <TableHead className="text-center">{t("doctor.cpd.table_points")}</TableHead>
+                <TableHead>{t("doctor.cpd.table_file")}</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -223,7 +225,7 @@ export default function CPDCertificates() {
                         onClick={() => openCertificate(cert.certificate_url!)}
                         className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                       >
-                        <ExternalLink className="h-3.5 w-3.5" /> View
+                        <ExternalLink className="h-3.5 w-3.5" /> {t("doctor.cpd.view")}
                       </button>
                     ) : (
                       <span className="text-muted-foreground text-sm">-</span>

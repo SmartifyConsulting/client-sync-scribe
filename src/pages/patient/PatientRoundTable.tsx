@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { MessageSquare, User } from "lucide-react";
@@ -14,6 +15,7 @@ interface RoundTableNote {
 }
 
 export default function PatientRoundTable({ hideHeader = false }: { hideHeader?: boolean }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [notes, setNotes] = useState<RoundTableNote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,9 +51,9 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
     <div className="space-y-6">
       {!hideHeader && (
         <div>
-          <h1 className="text-[16px] font-semibold text-foreground">Round Table</h1>
+          <h1 className="text-[16px] font-semibold text-foreground">{t("doctor.roundtable.title")}</h1>
           <p className="text-muted-foreground text-[11px]">
-            Notes shared by your healthcare providers about your care.
+            {t("doctor.roundtable.subtitle")}
           </p>
         </div>
       )}
@@ -64,9 +66,9 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <MessageSquare className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-[13px] font-semibold text-foreground mb-1">No notes yet</h3>
+            <h3 className="text-[13px] font-semibold text-foreground mb-1">{t("doctor.roundtable.no_notes")}</h3>
             <p className="text-muted-foreground text-[11px]">
-              When your doctors share round table notes, they will appear here.
+              {t("doctor.roundtable.no_notes_description")}
             </p>
           </CardContent>
         </Card>

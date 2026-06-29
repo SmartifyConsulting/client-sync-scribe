@@ -107,17 +107,17 @@
                                         }
               },
     "common":  {
-                   "language":  "ì–¸ì–´",
-                   "changeLanguage":  "ì–¸ì–´ ë³€ê²½",
-                   "signOut":  "ë¡œê·¸ì•„ì›ƒ",
-                   "save":  "ì €ìž¥",
-                   "edit":  "íŽ¸ì§‘",
-                   "add":  "ì¶”ê°€",
-                   "send":  "ë³´ë‚´ê¸°",
-                   "confirm":  "í™•ì¸",
-                   "search":  "ê²€ìƒ‰",
-                   "loading":  "ë¡œë”© ì¤‘...",
-                   "settings":  "ì„¤ì •",
+                   "language":  "Ã¬â€“Â¸Ã¬â€“Â´",
+                   "changeLanguage":  "Ã¬â€“Â¸Ã¬â€“Â´ Ã«Â³â‚¬ÃªÂ²Â½",
+                   "signOut":  "Ã«Â¡Å“ÃªÂ·Â¸Ã¬â€¢â€žÃ¬â€ºÆ’",
+                   "save":  "Ã¬Â â‚¬Ã¬Å¾Â¥",
+                   "edit":  "Ã­Å½Â¸Ã¬Â§â€˜",
+                   "add":  "Ã¬Â¶â€ÃªÂ°â‚¬",
+                   "send":  "Ã«Â³Â´Ã«â€šÂ´ÃªÂ¸Â°",
+                   "confirm":  "Ã­â„¢â€¢Ã¬ÂÂ¸",
+                   "search":  "ÃªÂ²â‚¬Ã¬Æ’â€°",
+                   "loading":  "Ã«Â¡Å“Ã«â€Â© Ã¬Â¤â€˜...",
+                   "settings":  "Ã¬â€žÂ¤Ã¬Â â€¢",
                    "noData":  "No data",
                    "active":  "Active",
                    "inactive":  "Inactive",
@@ -143,23 +143,23 @@
                    "vulas":  "Vulas"
                },
     "nav":  {
-                "home":  "í™ˆ",
-                "myPatients":  "ë‚´ í™˜ìž",
-                "myPractice":  "ë‚´ ì§„ë£Œì‹¤",
-                "myCalendar":  "ë‚´ ìº˜ë¦°ë”",
-                "myTasks":  "ë‚´ ì—…ë¬´",
-                "myDocuments":  "ë‚´ ë¬¸ì„œ",
-                "myRoundTables":  "ì›íƒíšŒì˜",
-                "myRewards":  "ë‚´ ë³´ìƒ",
+                "home":  "Ã­â„¢Ë†",
+                "myPatients":  "Ã«â€šÂ´ Ã­â„¢ËœÃ¬Å¾Â",
+                "myPractice":  "Ã«â€šÂ´ Ã¬Â§â€žÃ«Â£Å’Ã¬â€¹Â¤",
+                "myCalendar":  "Ã«â€šÂ´ Ã¬ÂºËœÃ«Â¦Â°Ã«Ââ€",
+                "myTasks":  "Ã«â€šÂ´ Ã¬â€”â€¦Ã«Â¬Â´",
+                "myDocuments":  "Ã«â€šÂ´ Ã«Â¬Â¸Ã¬â€žÅ“",
+                "myRoundTables":  "Ã¬â€ºÂÃ­Æ’ÂÃ­Å¡Å’Ã¬ÂËœ",
+                "myRewards":  "Ã«â€šÂ´ Ã«Â³Â´Ã¬Æ’Â",
                 "sos":  "SOS",
-                "myProfile":  "ë‚´ í”„ë¡œí•„",
-                "myHolarchy":  "ë‚´ Holarchy",
-                "admin":  "ê´€ë¦¬ìž",
-                "users":  "ì‚¬ìš©ìž",
-                "pricing":  "ê°€ê²©",
-                "rewards":  "ë³´ìƒ",
-                "hospitalPortal":  "ë³‘ì› í¬í„¸",
-                "erPortal":  "ì‘ê¸‰ì‹¤ í¬í„¸",
+                "myProfile":  "Ã«â€šÂ´ Ã­â€â€žÃ«Â¡Å“Ã­â€¢â€ž",
+                "myHolarchy":  "Ã«â€šÂ´ Holarchy",
+                "admin":  "ÃªÂ´â‚¬Ã«Â¦Â¬Ã¬Å¾Â",
+                "users":  "Ã¬â€šÂ¬Ã¬Å¡Â©Ã¬Å¾Â",
+                "pricing":  "ÃªÂ°â‚¬ÃªÂ²Â©",
+                "rewards":  "Ã«Â³Â´Ã¬Æ’Â",
+                "hospitalPortal":  "Ã«Â³â€˜Ã¬â€ºÂ Ã­ÂÂ¬Ã­â€žÂ¸",
+                "erPortal":  "Ã¬Ââ€˜ÃªÂ¸â€°Ã¬â€¹Â¤ Ã­ÂÂ¬Ã­â€žÂ¸",
                 "userAdmin":  "User Admin",
                 "telematics":  "Telematics",
                 "teamStatus":  "Team Status",
@@ -179,13 +179,13 @@
                 "activeIncidents":  "Active Incidents",
                 "providerProfile":  "Provider Profile",
                 "backToAdmin":  "Back to Admin",
-                "liveSOS":  "ì‹¤ì‹œê°„ SOS"
+                "liveSOS":  "Ã¬â€¹Â¤Ã¬â€¹Å“ÃªÂ°â€ž SOS"
             },
     "topbar":  {
-                   "reportBug":  "ë²„ê·¸ ì‹ ê³ ",
-                   "calendar":  "ìº˜ë¦°ë”",
-                   "recordTask":  "ìž‘ì—… ë…¹ìŒ",
-                   "notifications":  "ì•Œë¦¼"
+                   "reportBug":  "Ã«Â²â€žÃªÂ·Â¸ Ã¬â€¹Â ÃªÂ³Â ",
+                   "calendar":  "Ã¬ÂºËœÃ«Â¦Â°Ã«Ââ€",
+                   "recordTask":  "Ã¬Å¾â€˜Ã¬â€”â€¦ Ã«â€¦Â¹Ã¬ÂÅ’",
+                   "notifications":  "Ã¬â€¢Å’Ã«Â¦Â¼"
                },
     "userAdmin":  {
                       "title":  "User Admin",
@@ -195,7 +195,7 @@
                       "addCrew":  "Add Crew Member",
                       "owner":  "Owner",
                       "organisationOwner":  "Organisation owner",
-                      "ownerCannotRemove":  "Initial registrant â€” cannot be removed",
+                      "ownerCannotRemove":  "Initial registrant Ã¢â‚¬â€ cannot be removed",
                       "noAdmins":  "No additional administrators yet.",
                       "noCrew":  "No crew members yet.",
                       "shiftPattern":  "Shift pattern",
@@ -328,7 +328,7 @@
                    },
     "telematics":  {
                        "title":  "Driver Tracking",
-                       "subtitle":  "Fleet Telematics Â· Last 24h",
+                       "subtitle":  "Fleet Telematics Ã‚Â· Last 24h",
                        "liveFleet":  "Live Fleet",
                        "tripsStops":  "Trips \u0026 Stops",
                        "moving":  "Moving",
@@ -336,7 +336,7 @@
                        "onMission":  "On mission",
                        "freeRoam":  "Free roam",
                        "noActive":  "No active drivers in the last 24 hours.",
-                       "noTrips":  "No trip data yet â€” start a shift to begin recording telematics.",
+                       "noTrips":  "No trip data yet Ã¢â‚¬â€ start a shift to begin recording telematics.",
                        "pings":  "pings",
                        "driver":  "Driver",
                        "drivers":  "drivers",
@@ -350,69 +350,69 @@
                        "vehicle":  "Vehicle"
                    },
     "doctorDashboard":  {
-                            "greetingMorning":  "ì¢‹ì€ ì•„ì¹¨ìž…ë‹ˆë‹¤",
-                            "greetingAfternoon":  "ì¢‹ì€ ì˜¤í›„ìž…ë‹ˆë‹¤",
-                            "greetingEvening":  "ì¢‹ì€ ì €ë…ìž…ë‹ˆë‹¤",
-                            "subtitle":  "ì˜¤ëŠ˜ ì§„ë£Œì†Œì˜ í˜„í™©ìž…ë‹ˆë‹¤,",
-                            "totalPatients":  "ì´ í™˜ìž",
-                            "thisWeek":  "ì´ë²ˆ ì£¼",
-                            "doctorRating":  "ì˜ì‚¬ í‰ì ",
-                            "noRatings":  "ì•„ì§ í‰ì  ì—†ìŒ",
-                            "vulaVouchers":  "Vula ë°”ìš°ì²˜",
-                            "myRoundTables":  "ë‚´ ë¼ìš´ë“œ í…Œì´ë¸”",
-                            "searchRoundTable":  "ë¼ìš´ë“œ í…Œì´ë¸”ì„ ì‹œìž‘í•  í™˜ìž ê²€ìƒ‰...",
-                            "noPatientsFound":  "í™˜ìžë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŒ",
-                            "todoList":  "í•  ì¼ ëª©ë¡",
-                            "addTask":  "ìž‘ì—… ì¶”ê°€...",
-                            "active":  "í™œì„±",
-                            "done":  "ì™„ë£Œ",
-                            "noActiveTasks":  "í™œì„± ìž‘ì—… ì—†ìŒ",
-                            "noCompletedTasks":  "ì™„ë£Œëœ ìž‘ì—… ì—†ìŒ",
-                            "recentActivity":  "ìµœê·¼ í™œë™",
-                            "sessionCompleted":  "ì„¸ì…˜ ì™„ë£Œ",
-                            "documentGenerated":  "ë¬¸ì„œ ìƒì„±ë¨",
-                            "taskCompleted":  "ìž‘ì—… ì™„ë£Œ",
-                            "followUpSent":  "í›„ì† ì¡°ì¹˜ ì „ì†¡",
-                            "gettingStarted":  "ì‹œìž‘í•˜ê¸°",
-                            "addFirstPatient":  "ì²« í™˜ìžë¥¼ ì¶”ê°€í•˜ì„¸ìš”",
-                            "justNow":  "ë°©ê¸ˆ ì „"
+                            "greetingMorning":  "Ã¬Â¢â€¹Ã¬Ââ‚¬ Ã¬â€¢â€žÃ¬Â¹Â¨Ã¬Å¾â€¦Ã«â€¹Ë†Ã«â€¹Â¤",
+                            "greetingAfternoon":  "Ã¬Â¢â€¹Ã¬Ââ‚¬ Ã¬ËœÂ¤Ã­â€ºâ€žÃ¬Å¾â€¦Ã«â€¹Ë†Ã«â€¹Â¤",
+                            "greetingEvening":  "Ã¬Â¢â€¹Ã¬Ââ‚¬ Ã¬Â â‚¬Ã«â€¦ÂÃ¬Å¾â€¦Ã«â€¹Ë†Ã«â€¹Â¤",
+                            "subtitle":  "Ã¬ËœÂ¤Ã«Å Ëœ Ã¬Â§â€žÃ«Â£Å’Ã¬â€ Å’Ã¬ÂËœ Ã­Ëœâ€žÃ­â„¢Â©Ã¬Å¾â€¦Ã«â€¹Ë†Ã«â€¹Â¤,",
+                            "totalPatients":  "Ã¬Â´Â Ã­â„¢ËœÃ¬Å¾Â",
+                            "thisWeek":  "Ã¬ÂÂ´Ã«Â²Ë† Ã¬Â£Â¼",
+                            "doctorRating":  "Ã¬ÂËœÃ¬â€šÂ¬ Ã­Ââ€°Ã¬Â Â",
+                            "noRatings":  "Ã¬â€¢â€žÃ¬Â§Â Ã­Ââ€°Ã¬Â Â Ã¬â€”â€ Ã¬ÂÅ’",
+                            "vulaVouchers":  "Vula Ã«Â°â€Ã¬Å¡Â°Ã¬Â²Ëœ",
+                            "myRoundTables":  "Ã«â€šÂ´ Ã«ÂÂ¼Ã¬Å¡Â´Ã«â€œÅ“ Ã­â€¦Å’Ã¬ÂÂ´Ã«Â¸â€",
+                            "searchRoundTable":  "Ã«ÂÂ¼Ã¬Å¡Â´Ã«â€œÅ“ Ã­â€¦Å’Ã¬ÂÂ´Ã«Â¸â€Ã¬Ââ€ž Ã¬â€¹Å“Ã¬Å¾â€˜Ã­â€¢Â  Ã­â„¢ËœÃ¬Å¾Â ÃªÂ²â‚¬Ã¬Æ’â€°...",
+                            "noPatientsFound":  "Ã­â„¢ËœÃ¬Å¾ÂÃ«Â¥Â¼ Ã¬Â°Â¾Ã¬Ââ€ž Ã¬Ë†Ëœ Ã¬â€”â€ Ã¬ÂÅ’",
+                            "todoList":  "Ã­â€¢Â  Ã¬ÂÂ¼ Ã«ÂªÂ©Ã«Â¡Â",
+                            "addTask":  "Ã¬Å¾â€˜Ã¬â€”â€¦ Ã¬Â¶â€ÃªÂ°â‚¬...",
+                            "active":  "Ã­â„¢Å“Ã¬â€žÂ±",
+                            "done":  "Ã¬â„¢â€žÃ«Â£Å’",
+                            "noActiveTasks":  "Ã­â„¢Å“Ã¬â€žÂ± Ã¬Å¾â€˜Ã¬â€”â€¦ Ã¬â€”â€ Ã¬ÂÅ’",
+                            "noCompletedTasks":  "Ã¬â„¢â€žÃ«Â£Å’Ã«ÂÅ“ Ã¬Å¾â€˜Ã¬â€”â€¦ Ã¬â€”â€ Ã¬ÂÅ’",
+                            "recentActivity":  "Ã¬ÂµÅ“ÃªÂ·Â¼ Ã­â„¢Å“Ã«Ââ„¢",
+                            "sessionCompleted":  "Ã¬â€žÂ¸Ã¬â€¦Ëœ Ã¬â„¢â€žÃ«Â£Å’",
+                            "documentGenerated":  "Ã«Â¬Â¸Ã¬â€žÅ“ Ã¬Æ’ÂÃ¬â€žÂ±Ã«ÂÂ¨",
+                            "taskCompleted":  "Ã¬Å¾â€˜Ã¬â€”â€¦ Ã¬â„¢â€žÃ«Â£Å’",
+                            "followUpSent":  "Ã­â€ºâ€žÃ¬â€ Â Ã¬Â¡Â°Ã¬Â¹Ëœ Ã¬Â â€žÃ¬â€ Â¡",
+                            "gettingStarted":  "Ã¬â€¹Å“Ã¬Å¾â€˜Ã­â€¢ËœÃªÂ¸Â°",
+                            "addFirstPatient":  "Ã¬Â²Â« Ã­â„¢ËœÃ¬Å¾ÂÃ«Â¥Â¼ Ã¬Â¶â€ÃªÂ°â‚¬Ã­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€",
+                            "justNow":  "Ã«Â°Â©ÃªÂ¸Ë† Ã¬Â â€ž"
                         },
     "briefing":  {
-                     "todaysBriefing":  "ì˜¤ëŠ˜ì˜ ë¸Œë¦¬í•‘",
-                     "briefingFor":  "{{day}} ë¸Œë¦¬í•‘",
-                     "completedOf":  "{{total}}ê°œì˜ ì•½ì† ì¤‘ {{done}}ê°œ ì™„ë£Œ",
-                     "noAppointments":  "ì˜¤ëŠ˜ ì˜ˆì •ëœ ì•½ì†ì´ ì—†ìŠµë‹ˆë‹¤.",
-                     "narrate":  "ì„¤ëª…",
-                     "preparing":  "ì¤€ë¹„ ì¤‘...",
-                     "pause":  "ì¼ì‹œ ì •ì§€",
-                     "resume":  "ë‹¤ì‹œ ì‹œìž‘",
-                     "stop":  "ì¤‘ì§€",
-                     "previousDay":  "ì´ì „ ë‚ ",
-                     "nextDay":  "ë‹¤ìŒ ë‚ ",
-                     "translating":  "ë¸Œë¦¬í•‘ ë²ˆì—­ ì¤‘...",
-                     "allergies":  "ì•Œë ˆë¥´ê¸°",
-                     "lastSession":  "ì§€ë‚œ ì„¸ì…˜",
-                     "noPreviousSession":  "ì´ì „ ì„¸ì…˜ ë…¸íŠ¸ ì—†ìŒ",
-                     "unreadNote":  "ì½ì§€ ì•Šì€ ìª½ì§€",
-                     "unreadNotes":  "ì½ì§€ ì•Šì€ ìª½ì§€"
+                     "todaysBriefing":  "Ã¬ËœÂ¤Ã«Å ËœÃ¬ÂËœ Ã«Â¸Å’Ã«Â¦Â¬Ã­â€¢â€˜",
+                     "briefingFor":  "{{day}} Ã«Â¸Å’Ã«Â¦Â¬Ã­â€¢â€˜",
+                     "completedOf":  "{{total}}ÃªÂ°Å“Ã¬ÂËœ Ã¬â€¢Â½Ã¬â€ Â Ã¬Â¤â€˜ {{done}}ÃªÂ°Å“ Ã¬â„¢â€žÃ«Â£Å’",
+                     "noAppointments":  "Ã¬ËœÂ¤Ã«Å Ëœ Ã¬ËœË†Ã¬Â â€¢Ã«ÂÅ“ Ã¬â€¢Â½Ã¬â€ ÂÃ¬ÂÂ´ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤.",
+                     "narrate":  "Ã¬â€žÂ¤Ã«Âªâ€¦",
+                     "preparing":  "Ã¬Â¤â‚¬Ã«Â¹â€ž Ã¬Â¤â€˜...",
+                     "pause":  "Ã¬ÂÂ¼Ã¬â€¹Å“ Ã¬Â â€¢Ã¬Â§â‚¬",
+                     "resume":  "Ã«â€¹Â¤Ã¬â€¹Å“ Ã¬â€¹Å“Ã¬Å¾â€˜",
+                     "stop":  "Ã¬Â¤â€˜Ã¬Â§â‚¬",
+                     "previousDay":  "Ã¬ÂÂ´Ã¬Â â€ž Ã«â€šÂ ",
+                     "nextDay":  "Ã«â€¹Â¤Ã¬ÂÅ’ Ã«â€šÂ ",
+                     "translating":  "Ã«Â¸Å’Ã«Â¦Â¬Ã­â€¢â€˜ Ã«Â²Ë†Ã¬â€”Â­ Ã¬Â¤â€˜...",
+                     "allergies":  "Ã¬â€¢Å’Ã«Â Ë†Ã«Â¥Â´ÃªÂ¸Â°",
+                     "lastSession":  "Ã¬Â§â‚¬Ã«â€šÅ“ Ã¬â€žÂ¸Ã¬â€¦Ëœ",
+                     "noPreviousSession":  "Ã¬ÂÂ´Ã¬Â â€ž Ã¬â€žÂ¸Ã¬â€¦Ëœ Ã«â€¦Â¸Ã­Å Â¸ Ã¬â€”â€ Ã¬ÂÅ’",
+                     "unreadNote":  "Ã¬ÂÂ½Ã¬Â§â‚¬ Ã¬â€¢Å Ã¬Ââ‚¬ Ã¬ÂªÂ½Ã¬Â§â‚¬",
+                     "unreadNotes":  "Ã¬ÂÂ½Ã¬Â§â‚¬ Ã¬â€¢Å Ã¬Ââ‚¬ Ã¬ÂªÂ½Ã¬Â§â‚¬"
                  },
     "patients":  {
-                     "title":  "í™˜ìž",
-                     "subtitle":  "í™˜ìž ê¸°ë¡ ê´€ë¦¬",
-                     "searchPlaceholder":  "í™˜ìž ê²€ìƒ‰...",
-                     "addPatient":  "í™˜ìž ì¶”ê°€",
-                     "importPatients":  "ê°€ì ¸ì˜¤ê¸°",
-                     "noPatients":  "ì•„ì§ í™˜ìž ì—†ìŒ",
-                     "allStatuses":  "ëª¨ë“  ìƒíƒœ",
-                     "active":  "í™œì„±",
-                     "inactive":  "ë¹„í™œì„±",
-                     "roundTables":  "ì›íƒ íšŒì˜",
-                     "share":  "ê³µìœ ",
-                     "viewProfile":  "í”„ë¡œí•„ ë³´ê¸°",
-                     "tabAll":  "ëª¨ë‘",
-                     "tabMine":  "ë‚´ ê²ƒ",
-                     "tabShared":  "ê³µìœ ë¨",
-                     "tabPending":  "ëŒ€ê¸° ì¤‘",
+                     "title":  "Ã­â„¢ËœÃ¬Å¾Â",
+                     "subtitle":  "Ã­â„¢ËœÃ¬Å¾Â ÃªÂ¸Â°Ã«Â¡Â ÃªÂ´â‚¬Ã«Â¦Â¬",
+                     "searchPlaceholder":  "Ã­â„¢ËœÃ¬Å¾Â ÃªÂ²â‚¬Ã¬Æ’â€°...",
+                     "addPatient":  "Ã­â„¢ËœÃ¬Å¾Â Ã¬Â¶â€ÃªÂ°â‚¬",
+                     "importPatients":  "ÃªÂ°â‚¬Ã¬Â Â¸Ã¬ËœÂ¤ÃªÂ¸Â°",
+                     "noPatients":  "Ã¬â€¢â€žÃ¬Â§Â Ã­â„¢ËœÃ¬Å¾Â Ã¬â€”â€ Ã¬ÂÅ’",
+                     "allStatuses":  "Ã«ÂªÂ¨Ã«â€œÂ  Ã¬Æ’ÂÃ­Æ’Å“",
+                     "active":  "Ã­â„¢Å“Ã¬â€žÂ±",
+                     "inactive":  "Ã«Â¹â€žÃ­â„¢Å“Ã¬â€žÂ±",
+                     "roundTables":  "Ã¬â€ºÂÃ­Æ’Â Ã­Å¡Å’Ã¬ÂËœ",
+                     "share":  "ÃªÂ³ÂµÃ¬Å“Â ",
+                     "viewProfile":  "Ã­â€â€žÃ«Â¡Å“Ã­â€¢â€ž Ã«Â³Â´ÃªÂ¸Â°",
+                     "tabAll":  "Ã«ÂªÂ¨Ã«â€˜Â",
+                     "tabMine":  "Ã«â€šÂ´ ÃªÂ²Æ’",
+                     "tabShared":  "ÃªÂ³ÂµÃ¬Å“Â Ã«ÂÂ¨",
+                     "tabPending":  "Ã«Å’â‚¬ÃªÂ¸Â° Ã¬Â¤â€˜",
                      "button":  {
                                     "roundTables":  "Round Tables",
                                     "allSessions":  "All Sessions",
@@ -492,7 +492,7 @@
                                    "columnLastSeen":  "Last Seen",
                                    "columnSince":  "Since",
                                    "columnActions":  "Actions",
-                                   "noData":  "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"
+                                   "noData":  "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"
                                },
                      "menu":  {
                                   "startSession":  "Start Session",
@@ -509,104 +509,104 @@
                                }
                  },
     "calendar":  {
-                     "title":  "ìº˜ë¦°ë”",
-                     "subtitle":  "ì•½ì†ì„ ê´€ë¦¬í•˜ê³  ì¼ì •ì„ ìž¡ìœ¼ì„¸ìš”",
-                     "today":  "ì˜¤ëŠ˜",
-                     "day":  "ì¼",
-                     "week":  "ì£¼",
-                     "month":  "ì›”",
-                     "year":  "ë…„",
-                     "newAppointment":  "ìƒˆ ì•½ì†",
-                     "previous":  "ì´ì „",
-                     "next":  "ë‹¤ìŒ",
-                     "allDay":  "í•˜ë£¨ ì¢…ì¼",
-                     "noEvents":  "ì¼ì • ì—†ìŒ",
-                     "myCalendar":  "ë‚´ ìº˜ë¦°ë”",
-                     "practiceCalendar":  "ì§„ë£Œì‹¤ ìº˜ë¦°ë”",
-                     "googleCalendar":  "êµ¬ê¸€ ìº˜ë¦°ë”",
-                     "disconnectGoogle":  "êµ¬ê¸€ ì—°ê²° í•´ì œ",
-                     "googleSyncCaption":  "êµ¬ê¸€ ë™ê¸°í™”ëŠ” ë³¸ì¸ì˜ ì•½ì†ë§Œ ë°˜ì˜í•©ë‹ˆë‹¤.",
-                     "book":  "ì˜ˆì•½",
-                     "todaysSchedule":  "ì˜¤ëŠ˜ì˜ ì¼ì •",
-                     "noAppointmentsToday":  "ì˜¤ëŠ˜ ì˜ˆì •ëœ ì•½ì†ì´ ì—†ìŠµë‹ˆë‹¤",
-                     "filterDoctor":  "ì˜ì‚¬ í•„í„°ë§",
-                     "allDoctors":  "ì§„ë£Œì‹¤ì˜ ëª¨ë“  ì˜ì‚¬",
+                     "title":  "Ã¬ÂºËœÃ«Â¦Â°Ã«Ââ€",
+                     "subtitle":  "Ã¬â€¢Â½Ã¬â€ ÂÃ¬Ââ€ž ÃªÂ´â‚¬Ã«Â¦Â¬Ã­â€¢ËœÃªÂ³Â  Ã¬ÂÂ¼Ã¬Â â€¢Ã¬Ââ€ž Ã¬Å¾Â¡Ã¬Å“Â¼Ã¬â€žÂ¸Ã¬Å¡â€",
+                     "today":  "Ã¬ËœÂ¤Ã«Å Ëœ",
+                     "day":  "Ã¬ÂÂ¼",
+                     "week":  "Ã¬Â£Â¼",
+                     "month":  "Ã¬â€ºâ€",
+                     "year":  "Ã«â€¦â€ž",
+                     "newAppointment":  "Ã¬Æ’Ë† Ã¬â€¢Â½Ã¬â€ Â",
+                     "previous":  "Ã¬ÂÂ´Ã¬Â â€ž",
+                     "next":  "Ã«â€¹Â¤Ã¬ÂÅ’",
+                     "allDay":  "Ã­â€¢ËœÃ«Â£Â¨ Ã¬Â¢â€¦Ã¬ÂÂ¼",
+                     "noEvents":  "Ã¬ÂÂ¼Ã¬Â â€¢ Ã¬â€”â€ Ã¬ÂÅ’",
+                     "myCalendar":  "Ã«â€šÂ´ Ã¬ÂºËœÃ«Â¦Â°Ã«Ââ€",
+                     "practiceCalendar":  "Ã¬Â§â€žÃ«Â£Å’Ã¬â€¹Â¤ Ã¬ÂºËœÃ«Â¦Â°Ã«Ââ€",
+                     "googleCalendar":  "ÃªÂµÂ¬ÃªÂ¸â‚¬ Ã¬ÂºËœÃ«Â¦Â°Ã«Ââ€",
+                     "disconnectGoogle":  "ÃªÂµÂ¬ÃªÂ¸â‚¬ Ã¬â€”Â°ÃªÂ²Â° Ã­â€¢Â´Ã¬Â Å“",
+                     "googleSyncCaption":  "ÃªÂµÂ¬ÃªÂ¸â‚¬ Ã«Ââ„¢ÃªÂ¸Â°Ã­â„¢â€Ã«Å â€ Ã«Â³Â¸Ã¬ÂÂ¸Ã¬ÂËœ Ã¬â€¢Â½Ã¬â€ ÂÃ«Â§Å’ Ã«Â°ËœÃ¬ËœÂÃ­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤.",
+                     "book":  "Ã¬ËœË†Ã¬â€¢Â½",
+                     "todaysSchedule":  "Ã¬ËœÂ¤Ã«Å ËœÃ¬ÂËœ Ã¬ÂÂ¼Ã¬Â â€¢",
+                     "noAppointmentsToday":  "Ã¬ËœÂ¤Ã«Å Ëœ Ã¬ËœË†Ã¬Â â€¢Ã«ÂÅ“ Ã¬â€¢Â½Ã¬â€ ÂÃ¬ÂÂ´ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤",
+                     "filterDoctor":  "Ã¬ÂËœÃ¬â€šÂ¬ Ã­â€¢â€žÃ­â€žÂ°Ã«Â§Â",
+                     "allDoctors":  "Ã¬Â§â€žÃ«Â£Å’Ã¬â€¹Â¤Ã¬ÂËœ Ã«ÂªÂ¨Ã«â€œÂ  Ã¬ÂËœÃ¬â€šÂ¬",
                      "months":  {
-                                    "january":  "1ì›”",
-                                    "february":  "2ì›”",
-                                    "march":  "3ì›”",
-                                    "april":  "4ì›”",
-                                    "may":  "5ì›”",
-                                    "june":  "6ì›”",
-                                    "july":  "7ì›”",
-                                    "august":  "8ì›”",
-                                    "september":  "9ì›”",
-                                    "october":  "10ì›”",
-                                    "november":  "11ì›”",
-                                    "december":  "12ì›”"
+                                    "january":  "1Ã¬â€ºâ€",
+                                    "february":  "2Ã¬â€ºâ€",
+                                    "march":  "3Ã¬â€ºâ€",
+                                    "april":  "4Ã¬â€ºâ€",
+                                    "may":  "5Ã¬â€ºâ€",
+                                    "june":  "6Ã¬â€ºâ€",
+                                    "july":  "7Ã¬â€ºâ€",
+                                    "august":  "8Ã¬â€ºâ€",
+                                    "september":  "9Ã¬â€ºâ€",
+                                    "october":  "10Ã¬â€ºâ€",
+                                    "november":  "11Ã¬â€ºâ€",
+                                    "december":  "12Ã¬â€ºâ€"
                                 },
                      "monthsShort":  {
-                                         "jan":  "1ì›”",
-                                         "feb":  "2ì›”",
-                                         "mar":  "3ì›”",
-                                         "apr":  "4ì›”",
-                                         "may":  "5ì›”",
-                                         "jun":  "6ì›”",
-                                         "jul":  "7ì›”",
-                                         "aug":  "8ì›”",
-                                         "sep":  "9ì›”",
-                                         "oct":  "10ì›”",
-                                         "nov":  "11ì›”",
-                                         "dec":  "12ì›”"
+                                         "jan":  "1Ã¬â€ºâ€",
+                                         "feb":  "2Ã¬â€ºâ€",
+                                         "mar":  "3Ã¬â€ºâ€",
+                                         "apr":  "4Ã¬â€ºâ€",
+                                         "may":  "5Ã¬â€ºâ€",
+                                         "jun":  "6Ã¬â€ºâ€",
+                                         "jul":  "7Ã¬â€ºâ€",
+                                         "aug":  "8Ã¬â€ºâ€",
+                                         "sep":  "9Ã¬â€ºâ€",
+                                         "oct":  "10Ã¬â€ºâ€",
+                                         "nov":  "11Ã¬â€ºâ€",
+                                         "dec":  "12Ã¬â€ºâ€"
                                      },
                      "days":  {
-                                  "sunday":  "ì¼ìš”ì¼",
-                                  "monday":  "ì›”ìš”ì¼",
-                                  "tuesday":  "í™”ìš”ì¼",
-                                  "wednesday":  "ìˆ˜ìš”ì¼",
-                                  "thursday":  "ëª©ìš”ì¼",
-                                  "friday":  "ê¸ˆìš”ì¼",
-                                  "saturday":  "í† ìš”ì¼"
+                                  "sunday":  "Ã¬ÂÂ¼Ã¬Å¡â€Ã¬ÂÂ¼",
+                                  "monday":  "Ã¬â€ºâ€Ã¬Å¡â€Ã¬ÂÂ¼",
+                                  "tuesday":  "Ã­â„¢â€Ã¬Å¡â€Ã¬ÂÂ¼",
+                                  "wednesday":  "Ã¬Ë†ËœÃ¬Å¡â€Ã¬ÂÂ¼",
+                                  "thursday":  "Ã«ÂªÂ©Ã¬Å¡â€Ã¬ÂÂ¼",
+                                  "friday":  "ÃªÂ¸Ë†Ã¬Å¡â€Ã¬ÂÂ¼",
+                                  "saturday":  "Ã­â€ Â Ã¬Å¡â€Ã¬ÂÂ¼"
                               },
                      "daysShort":  {
-                                       "sun":  "ì¼",
-                                       "mon":  "ì›”",
-                                       "tue":  "í™”",
-                                       "wed":  "ìˆ˜",
-                                       "thu":  "ëª©",
-                                       "fri":  "ê¸ˆ",
-                                       "sat":  "í† "
+                                       "sun":  "Ã¬ÂÂ¼",
+                                       "mon":  "Ã¬â€ºâ€",
+                                       "tue":  "Ã­â„¢â€",
+                                       "wed":  "Ã¬Ë†Ëœ",
+                                       "thu":  "Ã«ÂªÂ©",
+                                       "fri":  "ÃªÂ¸Ë†",
+                                       "sat":  "Ã­â€ Â "
                                    },
                      "daysNarrow":  {
-                                        "s":  "ì¼",
-                                        "m":  "ì›”",
-                                        "t":  "í™”",
-                                        "w":  "ìˆ˜",
-                                        "f":  "ëª©"
+                                        "s":  "Ã¬ÂÂ¼",
+                                        "m":  "Ã¬â€ºâ€",
+                                        "t":  "Ã­â„¢â€",
+                                        "w":  "Ã¬Ë†Ëœ",
+                                        "f":  "Ã«ÂªÂ©"
                                     }
                  },
     "sessions":  {
-                     "title":  "ì„¸ì…˜",
-                     "sessionMode":  "ì„¸ì…˜ ëª¨ë“œ",
-                     "selectPatient":  "í™˜ìž ì„ íƒ",
-                     "readyToStart":  "ì‹œìž‘í•  ì¤€ë¹„ ì™„ë£Œ",
-                     "searchByPatient":  "í™˜ìž ì´ë¦„ìœ¼ë¡œ ê²€ìƒ‰...",
-                     "newSession":  "ìƒˆ ì„¸ì…˜",
-                     "allSessions":  "ëª¨ë“  ì„¸ì…˜",
-                     "noPatientsFound":  "í™˜ìžë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.",
-                     "searchByName":  "ì´ë¦„ìœ¼ë¡œ ê²€ìƒ‰...",
-                     "today":  "ì˜¤ëŠ˜",
-                     "lastWeek":  "ì§€ë‚œì£¼",
-                     "lastMonth":  "ì§€ë‚œë‹¬",
-                     "older":  "ì´ì „",
-                     "tapToRecord":  "íƒ­í•˜ì—¬ ë…¹ìŒ",
-                     "recording":  "ë…¹ìŒ ì¤‘... íƒ­í•˜ì—¬ ì¤‘ì§€",
-                     "paused":  "ì¼ì‹œ ì¤‘ì§€ë¨ â€” ìž¬ìƒì„ íƒ­í•˜ì—¬ ìž¬ê°œ",
-                     "transcribing":  "ìŒì„± ë³€í™˜ ì¤‘...",
-                     "endSessionTip":  "ìžë™ìœ¼ë¡œ ë…¹ìŒ ì¤‘ì§€í•˜ë ¤ë©´ \"ì„¸ì…˜ ì¢…ë£Œ\"ë¼ê³  ë§í•´ì£¼ì„¸ìš”",
-                     "generateAnalysis":  "ë¶„ì„ ìƒì„±",
-                     "regenerate":  "ë‹¤ì‹œ ìƒì„±",
-                     "currentSession":  "í˜„ìž¬ ì„¸ì…˜",
+                     "title":  "Ã¬â€žÂ¸Ã¬â€¦Ëœ",
+                     "sessionMode":  "Ã¬â€žÂ¸Ã¬â€¦Ëœ Ã«ÂªÂ¨Ã«â€œÅ“",
+                     "selectPatient":  "Ã­â„¢ËœÃ¬Å¾Â Ã¬â€žÂ Ã­Æ’Â",
+                     "readyToStart":  "Ã¬â€¹Å“Ã¬Å¾â€˜Ã­â€¢Â  Ã¬Â¤â‚¬Ã«Â¹â€ž Ã¬â„¢â€žÃ«Â£Å’",
+                     "searchByPatient":  "Ã­â„¢ËœÃ¬Å¾Â Ã¬ÂÂ´Ã«Â¦â€žÃ¬Å“Â¼Ã«Â¡Å“ ÃªÂ²â‚¬Ã¬Æ’â€°...",
+                     "newSession":  "Ã¬Æ’Ë† Ã¬â€žÂ¸Ã¬â€¦Ëœ",
+                     "allSessions":  "Ã«ÂªÂ¨Ã«â€œÂ  Ã¬â€žÂ¸Ã¬â€¦Ëœ",
+                     "noPatientsFound":  "Ã­â„¢ËœÃ¬Å¾ÂÃ«Â¥Â¼ Ã¬Â°Â¾Ã¬Ââ€ž Ã¬Ë†Ëœ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤.",
+                     "searchByName":  "Ã¬ÂÂ´Ã«Â¦â€žÃ¬Å“Â¼Ã«Â¡Å“ ÃªÂ²â‚¬Ã¬Æ’â€°...",
+                     "today":  "Ã¬ËœÂ¤Ã«Å Ëœ",
+                     "lastWeek":  "Ã¬Â§â‚¬Ã«â€šÅ“Ã¬Â£Â¼",
+                     "lastMonth":  "Ã¬Â§â‚¬Ã«â€šÅ“Ã«â€¹Â¬",
+                     "older":  "Ã¬ÂÂ´Ã¬Â â€ž",
+                     "tapToRecord":  "Ã­Æ’Â­Ã­â€¢ËœÃ¬â€”Â¬ Ã«â€¦Â¹Ã¬ÂÅ’",
+                     "recording":  "Ã«â€¦Â¹Ã¬ÂÅ’ Ã¬Â¤â€˜... Ã­Æ’Â­Ã­â€¢ËœÃ¬â€”Â¬ Ã¬Â¤â€˜Ã¬Â§â‚¬",
+                     "paused":  "Ã¬ÂÂ¼Ã¬â€¹Å“ Ã¬Â¤â€˜Ã¬Â§â‚¬Ã«ÂÂ¨ Ã¢â‚¬â€ Ã¬Å¾Â¬Ã¬Æ’ÂÃ¬Ââ€ž Ã­Æ’Â­Ã­â€¢ËœÃ¬â€”Â¬ Ã¬Å¾Â¬ÃªÂ°Å“",
+                     "transcribing":  "Ã¬ÂÅ’Ã¬â€žÂ± Ã«Â³â‚¬Ã­â„¢Ëœ Ã¬Â¤â€˜...",
+                     "endSessionTip":  "Ã¬Å¾ÂÃ«Ââ„¢Ã¬Å“Â¼Ã«Â¡Å“ Ã«â€¦Â¹Ã¬ÂÅ’ Ã¬Â¤â€˜Ã¬Â§â‚¬Ã­â€¢ËœÃ«Â Â¤Ã«Â©Â´ \"Ã¬â€žÂ¸Ã¬â€¦Ëœ Ã¬Â¢â€¦Ã«Â£Å’\"Ã«ÂÂ¼ÃªÂ³Â  Ã«Â§ÂÃ­â€¢Â´Ã¬Â£Â¼Ã¬â€žÂ¸Ã¬Å¡â€",
+                     "generateAnalysis":  "Ã«Â¶â€žÃ¬â€žÂ Ã¬Æ’ÂÃ¬â€žÂ±",
+                     "regenerate":  "Ã«â€¹Â¤Ã¬â€¹Å“ Ã¬Æ’ÂÃ¬â€žÂ±",
+                     "currentSession":  "Ã­Ëœâ€žÃ¬Å¾Â¬ Ã¬â€žÂ¸Ã¬â€¦Ëœ",
                      "actionPointsTodo":  "Action Points / TO-DO",
                      "referralLetter":  "Referral Letter",
                      "generatedFromSession":  "Generated from session content",
@@ -650,11 +650,11 @@
                      "sessionNotes":  "Session Notes",
                      "referralLetterCreated":  "Referral Letter created",
                      "download":  "Download...",
-                     "noPrivateNotes":  "No private notes yet — click Edit to add notes only you can see.",
+                     "noPrivateNotes":  "No private notes yet â€” click Edit to add notes only you can see.",
                      "privateNotesSaved":  "Private notes saved",
                      "sessionNotFound":  "Session not found",
                      "prescriptionCreated":  "Prescription created",
-                     "writePrivateNotes":  "Write notes only you can see…",
+                     "writePrivateNotes":  "Write notes only you can seeâ€¦",
                      "audio":  "Audio",
                      "translationError":  "Could not translate the summary",
                      "translate":  "Translate...",
@@ -671,53 +671,53 @@
                      "deleteSessionConfirm":  "This action cannot be undone. This will permanently delete the session record."
                  },
     "roundTables":  {
-                        "title":  "ë‚´ ë¼ìš´ë“œ í…Œì´ë¸”",
-                        "noTables":  "ì•„ì§ ë¼ìš´ë“œ í…Œì´ë¸”ì´ ì—†ìŠµë‹ˆë‹¤.",
-                        "unread":  "ì½ì§€ ì•ŠìŒ",
-                        "lastUpdate":  "ë§ˆì§€ë§‰ ì—…ë°ì´íŠ¸",
-                        "openTable":  "ì—´ê¸°",
-                        "newTopic":  "ìƒˆ í† í”½"
+                        "title":  "Ã«â€šÂ´ Ã«ÂÂ¼Ã¬Å¡Â´Ã«â€œÅ“ Ã­â€¦Å’Ã¬ÂÂ´Ã«Â¸â€",
+                        "noTables":  "Ã¬â€¢â€žÃ¬Â§Â Ã«ÂÂ¼Ã¬Å¡Â´Ã«â€œÅ“ Ã­â€¦Å’Ã¬ÂÂ´Ã«Â¸â€Ã¬ÂÂ´ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤.",
+                        "unread":  "Ã¬ÂÂ½Ã¬Â§â‚¬ Ã¬â€¢Å Ã¬ÂÅ’",
+                        "lastUpdate":  "Ã«Â§Ë†Ã¬Â§â‚¬Ã«Â§â€° Ã¬â€”â€¦Ã«ÂÂ°Ã¬ÂÂ´Ã­Å Â¸",
+                        "openTable":  "Ã¬â€”Â´ÃªÂ¸Â°",
+                        "newTopic":  "Ã¬Æ’Ë† Ã­â€ Â Ã­â€Â½"
                     },
     "doctorRewards":  {
-                          "title":  "ë‚´ ë³´ìƒ",
-                          "tabOverview":  "ê°œìš”",
-                          "tabMilestones":  "ë§ˆì¼ìŠ¤í†¤",
-                          "tabStreaks":  "ì—°ì† ê¸°ë¡",
-                          "tabHistory":  "ê¸°ë¡",
-                          "tabRedeem":  "êµí™˜",
-                          "totalVulas":  "ì´ Vula",
-                          "currentStreak":  "í˜„ìž¬ ì—°ì† ê¸°ë¡",
-                          "patientsAdhering":  "í™˜ìž ë³µì•½ ìˆœì‘ë„"
+                          "title":  "Ã«â€šÂ´ Ã«Â³Â´Ã¬Æ’Â",
+                          "tabOverview":  "ÃªÂ°Å“Ã¬Å¡â€",
+                          "tabMilestones":  "Ã«Â§Ë†Ã¬ÂÂ¼Ã¬Å Â¤Ã­â€ Â¤",
+                          "tabStreaks":  "Ã¬â€”Â°Ã¬â€ Â ÃªÂ¸Â°Ã«Â¡Â",
+                          "tabHistory":  "ÃªÂ¸Â°Ã«Â¡Â",
+                          "tabRedeem":  "ÃªÂµÂÃ­â„¢Ëœ",
+                          "totalVulas":  "Ã¬Â´Â Vula",
+                          "currentStreak":  "Ã­Ëœâ€žÃ¬Å¾Â¬ Ã¬â€”Â°Ã¬â€ Â ÃªÂ¸Â°Ã«Â¡Â",
+                          "patientsAdhering":  "Ã­â„¢ËœÃ¬Å¾Â Ã«Â³ÂµÃ¬â€¢Â½ Ã¬Ë†Å“Ã¬Ââ€˜Ã«Ââ€ž"
                       },
     "liveSos":  {
-                    "title":  "ë¼ì´ë¸Œ SOS",
-                    "subtitle":  "ì‹¤ì‹œê°„ ê¸´ê¸‰ í”¼ë“œ",
-                    "active":  "í™œì„±",
-                    "critical":  "ì‹¬ê°",
-                    "recent":  "ìµœê·¼",
-                    "activeNow":  "í˜„ìž¬ í™œì„±",
-                    "allClear":  "ëª¨ë‘ ì •ìƒ â€” í™œì„± SOS ì‚¬ê³  ì—†ìŒ.",
-                    "selectIncident":  "ì„¸ë¶€ ì •ë³´ë¥¼ ë³´ë ¤ë©´ ì‚¬ê³ ë¥¼ ì„ íƒí•˜ì„¸ìš”.",
-                    "sosIncident":  "SOS ì‚¬ê³ ",
-                    "muted":  "ìŒì†Œê±°ë¨",
-                    "alertsOn":  "ì•Œë¦¼ ì¼œì§",
-                    "consciousness":  "ì˜ì‹",
-                    "responsive":  "ë°˜ì‘",
-                    "adequate":  "ì ì ˆí•œ",
-                    "ambulance":  "êµ¬ê¸‰ì°¨",
-                    "eta":  "ë„ì°© ì˜ˆì • ì‹œê°„",
-                    "location":  "ìœ„ì¹˜",
-                    "openInMaps":  "ì§€ë„ì—ì„œ ì—´ê¸°",
-                    "openConsole":  "ì½˜ì†” ì—´ê¸°"
+                    "title":  "Ã«ÂÂ¼Ã¬ÂÂ´Ã«Â¸Å’ SOS",
+                    "subtitle":  "Ã¬â€¹Â¤Ã¬â€¹Å“ÃªÂ°â€ž ÃªÂ¸Â´ÃªÂ¸â€° Ã­â€Â¼Ã«â€œÅ“",
+                    "active":  "Ã­â„¢Å“Ã¬â€žÂ±",
+                    "critical":  "Ã¬â€¹Â¬ÃªÂ°Â",
+                    "recent":  "Ã¬ÂµÅ“ÃªÂ·Â¼",
+                    "activeNow":  "Ã­Ëœâ€žÃ¬Å¾Â¬ Ã­â„¢Å“Ã¬â€žÂ±",
+                    "allClear":  "Ã«ÂªÂ¨Ã«â€˜Â Ã¬Â â€¢Ã¬Æ’Â Ã¢â‚¬â€ Ã­â„¢Å“Ã¬â€žÂ± SOS Ã¬â€šÂ¬ÃªÂ³Â  Ã¬â€”â€ Ã¬ÂÅ’.",
+                    "selectIncident":  "Ã¬â€žÂ¸Ã«Â¶â‚¬ Ã¬Â â€¢Ã«Â³Â´Ã«Â¥Â¼ Ã«Â³Â´Ã«Â Â¤Ã«Â©Â´ Ã¬â€šÂ¬ÃªÂ³Â Ã«Â¥Â¼ Ã¬â€žÂ Ã­Æ’ÂÃ­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€.",
+                    "sosIncident":  "SOS Ã¬â€šÂ¬ÃªÂ³Â ",
+                    "muted":  "Ã¬ÂÅ’Ã¬â€ Å’ÃªÂ±Â°Ã«ÂÂ¨",
+                    "alertsOn":  "Ã¬â€¢Å’Ã«Â¦Â¼ Ã¬Â¼Å“Ã¬Â§Â",
+                    "consciousness":  "Ã¬ÂËœÃ¬â€¹Â",
+                    "responsive":  "Ã«Â°ËœÃ¬Ââ€˜",
+                    "adequate":  "Ã¬Â ÂÃ¬Â Ë†Ã­â€¢Å“",
+                    "ambulance":  "ÃªÂµÂ¬ÃªÂ¸â€°Ã¬Â°Â¨",
+                    "eta":  "Ã«Ââ€žÃ¬Â°Â© Ã¬ËœË†Ã¬Â â€¢ Ã¬â€¹Å“ÃªÂ°â€ž",
+                    "location":  "Ã¬Å“â€žÃ¬Â¹Ëœ",
+                    "openInMaps":  "Ã¬Â§â‚¬Ã«Ââ€žÃ¬â€”ÂÃ¬â€žÅ“ Ã¬â€”Â´ÃªÂ¸Â°",
+                    "openConsole":  "Ã¬Â½ËœÃ¬â€ â€ Ã¬â€”Â´ÃªÂ¸Â°"
                 },
     "myPractice":  {
-                       "tabPractice":  "ë‚˜ì˜ ì—°ìŠµ",
+                       "tabPractice":  "Ã«â€šËœÃ¬ÂËœ Ã¬â€”Â°Ã¬Å Âµ",
                        "tabReferrals":  "Referrals",
-                       "tabCredentials":  "ìžê²© ì¦ëª…",
+                       "tabCredentials":  "Ã¬Å¾ÂÃªÂ²Â© Ã¬Â¦ÂÃ«Âªâ€¦",
                        "tabRewards":  "Rewards",
-                       "aboutMe":  "ìžê¸° ì†Œê°œ",
-                       "aboutMeHelper":  "ì§„ë£Œì™€ ì ‘ê·¼ ë°©ì‹ì— ëŒ€í•œ ì§§ì€ ì†Œê°œë¥¼ ê³µìœ í•˜ì„¸ìš”. í™˜ìžëŠ” í”„ë¡œí•„ì„ ë³¼ ë•Œ ì´ê²ƒì„ ë´…ë‹ˆë‹¤. ìµœëŒ€ 600ë‹¨ì–´.",
-                       "wordCount":  "{{count}} / 600 ë‹¨ì–´",
+                       "aboutMe":  "Ã¬Å¾ÂÃªÂ¸Â° Ã¬â€ Å’ÃªÂ°Å“",
+                       "aboutMeHelper":  "Ã¬Â§â€žÃ«Â£Å’Ã¬â„¢â‚¬ Ã¬Â â€˜ÃªÂ·Â¼ Ã«Â°Â©Ã¬â€¹ÂÃ¬â€”Â Ã«Å’â‚¬Ã­â€¢Å“ Ã¬Â§Â§Ã¬Ââ‚¬ Ã¬â€ Å’ÃªÂ°Å“Ã«Â¥Â¼ ÃªÂ³ÂµÃ¬Å“Â Ã­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€. Ã­â„¢ËœÃ¬Å¾ÂÃ«Å â€ Ã­â€â€žÃ«Â¡Å“Ã­â€¢â€žÃ¬Ââ€ž Ã«Â³Â¼ Ã«â€¢Å’ Ã¬ÂÂ´ÃªÂ²Æ’Ã¬Ââ€ž Ã«Â´â€¦Ã«â€¹Ë†Ã«â€¹Â¤. Ã¬ÂµÅ“Ã«Å’â‚¬ 600Ã«â€¹Â¨Ã¬â€“Â´.",
+                       "wordCount":  "{{count}} / 600 Ã«â€¹Â¨Ã¬â€“Â´",
                        "save":  "Save",
                        "tabProfile":  "Profile",
                        "tabServices":  "Services",
@@ -791,46 +791,46 @@
                        "noPatients":  "No patients connected yet"
                    },
     "patientRewards":  {
-                           "progressTitle":  "ë‹¤ìŒ ëª©í‘œê¹Œì§€ì˜ ì§„í–‰ ìƒí™©",
+                           "progressTitle":  "Ã«â€¹Â¤Ã¬ÂÅ’ Ã«ÂªÂ©Ã­â€˜Å“ÃªÂ¹Å’Ã¬Â§â‚¬Ã¬ÂËœ Ã¬Â§â€žÃ­â€“â€° Ã¬Æ’ÂÃ­â„¢Â©",
                            "progressLabel":  "{{current}} / {{target}} Vulas \"{{milestone}}\"",
-                           "moreToGo":  "{{count}} ë” ë‚¨ì•˜ìŠµë‹ˆë‹¤!",
-                           "recentRewards":  "ìµœê·¼ ë³´ìƒ",
-                           "empty":  "ì•„ì§ ë³´ìƒì´ ì—†ìŠµë‹ˆë‹¤. ê±´ê°• ì—¬ì •ì„ ì‹œìž‘í•˜ì„¸ìš”!"
+                           "moreToGo":  "{{count}} Ã«Ââ€ Ã«â€šÂ¨Ã¬â€¢ËœÃ¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤!",
+                           "recentRewards":  "Ã¬ÂµÅ“ÃªÂ·Â¼ Ã«Â³Â´Ã¬Æ’Â",
+                           "empty":  "Ã¬â€¢â€žÃ¬Â§Â Ã«Â³Â´Ã¬Æ’ÂÃ¬ÂÂ´ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤. ÃªÂ±Â´ÃªÂ°â€¢ Ã¬â€”Â¬Ã¬Â â€¢Ã¬Ââ€ž Ã¬â€¹Å“Ã¬Å¾â€˜Ã­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€!"
                        },
     "todo":  {
-                 "addNewTask":  "ìƒˆ ìž‘ì—… ì¶”ê°€",
-                 "tapToRecord":  "ë…¹ìŒí•˜ë ¤ë©´ íƒ­í•˜ì„¸ìš”",
-                 "transcribing":  "ì „ì‚¬ ì¤‘...",
-                 "aiProcessing":  "AI ì²˜ë¦¬ ì¤‘...",
-                 "listening":  "ë“£ëŠ” ì¤‘... ìž ì‹œ í›„ ì¤‘ì§€ë©ë‹ˆë‹¤.",
-                 "typeTask":  "ë˜ëŠ” ì—¬ê¸°ì— ìž‘ì—…ì„ ìž…ë ¥í•˜ì„¸ìš”...",
-                 "add":  "ì¶”ê°€",
-                 "priority":  "ìš°ì„  ìˆœìœ„:",
-                 "low":  "ë‚®ìŒ",
-                 "medium":  "ì¤‘ê°„",
-                 "high":  "ë†’ìŒ",
-                 "aiProcess":  "AI í”„ë¡œì„¸ìŠ¤",
-                 "active":  "í™œì„±",
-                 "completed":  "ì™„ë£Œë¨",
-                 "all":  "ëª¨ë‘",
-                 "approve":  "ìŠ¹ì¸",
-                 "noMatchingPatient":  "ì¼ì¹˜í•˜ëŠ” í™˜ìžë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤."
+                 "addNewTask":  "Ã¬Æ’Ë† Ã¬Å¾â€˜Ã¬â€”â€¦ Ã¬Â¶â€ÃªÂ°â‚¬",
+                 "tapToRecord":  "Ã«â€¦Â¹Ã¬ÂÅ’Ã­â€¢ËœÃ«Â Â¤Ã«Â©Â´ Ã­Æ’Â­Ã­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€",
+                 "transcribing":  "Ã¬Â â€žÃ¬â€šÂ¬ Ã¬Â¤â€˜...",
+                 "aiProcessing":  "AI Ã¬Â²ËœÃ«Â¦Â¬ Ã¬Â¤â€˜...",
+                 "listening":  "Ã«â€œÂ£Ã«Å â€ Ã¬Â¤â€˜... Ã¬Å¾Â Ã¬â€¹Å“ Ã­â€ºâ€ž Ã¬Â¤â€˜Ã¬Â§â‚¬Ã«ÂÂ©Ã«â€¹Ë†Ã«â€¹Â¤.",
+                 "typeTask":  "Ã«ËœÂÃ«Å â€ Ã¬â€”Â¬ÃªÂ¸Â°Ã¬â€”Â Ã¬Å¾â€˜Ã¬â€”â€¦Ã¬Ââ€ž Ã¬Å¾â€¦Ã«Â Â¥Ã­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€...",
+                 "add":  "Ã¬Â¶â€ÃªÂ°â‚¬",
+                 "priority":  "Ã¬Å¡Â°Ã¬â€žÂ  Ã¬Ë†Å“Ã¬Å“â€ž:",
+                 "low":  "Ã«â€šÂ®Ã¬ÂÅ’",
+                 "medium":  "Ã¬Â¤â€˜ÃªÂ°â€ž",
+                 "high":  "Ã«â€ â€™Ã¬ÂÅ’",
+                 "aiProcess":  "AI Ã­â€â€žÃ«Â¡Å“Ã¬â€žÂ¸Ã¬Å Â¤",
+                 "active":  "Ã­â„¢Å“Ã¬â€žÂ±",
+                 "completed":  "Ã¬â„¢â€žÃ«Â£Å’Ã«ÂÂ¨",
+                 "all":  "Ã«ÂªÂ¨Ã«â€˜Â",
+                 "approve":  "Ã¬Å Â¹Ã¬ÂÂ¸",
+                 "noMatchingPatient":  "Ã¬ÂÂ¼Ã¬Â¹ËœÃ­â€¢ËœÃ«Å â€ Ã­â„¢ËœÃ¬Å¾ÂÃ«Â¥Â¼ Ã¬Â°Â¾Ã¬Ââ€ž Ã¬Ë†Ëœ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤."
              },
     "documents":  {
-                      "title":  "ë¬¸ì„œ",
-                      "tabDocuments":  "ë¬¸ì„œ",
-                      "tabTemplates":  "í…œí”Œë¦¿",
-                      "tabHeaderFooter":  "ë¨¸ë¦¬ê¸€ ë° ë°”ë‹¥ê¸€",
-                      "tabContent":  "ì½˜í…ì¸  í…œí”Œë¦¿",
-                      "contentHelper":  "ë¬¸ì„œ ì½˜í…ì¸  í…œí”Œë¦¿ì„ ìƒì„±í•©ë‹ˆë‹¤ (ë¨¸ë¦¬ê¸€/ë°”ë‹¥ê¸€ì€ ì„ íƒí•œ ë ˆì´ì•„ì›ƒì—ì„œ ì ìš©ë©ë‹ˆë‹¤)",
-                      "newContent":  "ìƒˆ ì½˜í…ì¸  í…œí”Œë¦¿",
-                      "searchContent":  "ì½˜í…ì¸  í…œí”Œë¦¿ ê²€ìƒ‰...",
-                      "createTemplate":  "í…œí”Œë¦¿ ìƒì„±",
-                      "patientDocuments":  "í™˜ìž ë¬¸ì„œ",
-                      "searchDocuments":  "ë¬¸ì„œ ê²€ìƒ‰...",
-                      "letterhead":  "íŽ¸ì§€ì§€:",
-                      "letterheadHeaderFooter":  "ë¨¸ë¦¬ê¸€ ë° ë°”ë‹¥ê¸€",
-                      "letterheadDefault":  "ê¸°ë³¸ê°’",
+                      "title":  "Ã«Â¬Â¸Ã¬â€žÅ“",
+                      "tabDocuments":  "Ã«Â¬Â¸Ã¬â€žÅ“",
+                      "tabTemplates":  "Ã­â€¦Å“Ã­â€Å’Ã«Â¦Â¿",
+                      "tabHeaderFooter":  "Ã«Â¨Â¸Ã«Â¦Â¬ÃªÂ¸â‚¬ Ã«Â°Â Ã«Â°â€Ã«â€¹Â¥ÃªÂ¸â‚¬",
+                      "tabContent":  "Ã¬Â½ËœÃ­â€¦ÂÃ¬Â¸Â  Ã­â€¦Å“Ã­â€Å’Ã«Â¦Â¿",
+                      "contentHelper":  "Ã«Â¬Â¸Ã¬â€žÅ“ Ã¬Â½ËœÃ­â€¦ÂÃ¬Â¸Â  Ã­â€¦Å“Ã­â€Å’Ã«Â¦Â¿Ã¬Ââ€ž Ã¬Æ’ÂÃ¬â€žÂ±Ã­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤ (Ã«Â¨Â¸Ã«Â¦Â¬ÃªÂ¸â‚¬/Ã«Â°â€Ã«â€¹Â¥ÃªÂ¸â‚¬Ã¬Ââ‚¬ Ã¬â€žÂ Ã­Æ’ÂÃ­â€¢Å“ Ã«Â Ë†Ã¬ÂÂ´Ã¬â€¢â€žÃ¬â€ºÆ’Ã¬â€”ÂÃ¬â€žÅ“ Ã¬Â ÂÃ¬Å¡Â©Ã«ÂÂ©Ã«â€¹Ë†Ã«â€¹Â¤)",
+                      "newContent":  "Ã¬Æ’Ë† Ã¬Â½ËœÃ­â€¦ÂÃ¬Â¸Â  Ã­â€¦Å“Ã­â€Å’Ã«Â¦Â¿",
+                      "searchContent":  "Ã¬Â½ËœÃ­â€¦ÂÃ¬Â¸Â  Ã­â€¦Å“Ã­â€Å’Ã«Â¦Â¿ ÃªÂ²â‚¬Ã¬Æ’â€°...",
+                      "createTemplate":  "Ã­â€¦Å“Ã­â€Å’Ã«Â¦Â¿ Ã¬Æ’ÂÃ¬â€žÂ±",
+                      "patientDocuments":  "Ã­â„¢ËœÃ¬Å¾Â Ã«Â¬Â¸Ã¬â€žÅ“",
+                      "searchDocuments":  "Ã«Â¬Â¸Ã¬â€žÅ“ ÃªÂ²â‚¬Ã¬Æ’â€°...",
+                      "letterhead":  "Ã­Å½Â¸Ã¬Â§â‚¬Ã¬Â§â‚¬:",
+                      "letterheadHeaderFooter":  "Ã«Â¨Â¸Ã«Â¦Â¬ÃªÂ¸â‚¬ Ã«Â°Â Ã«Â°â€Ã«â€¹Â¥ÃªÂ¸â‚¬",
+                      "letterheadDefault":  "ÃªÂ¸Â°Ã«Â³Â¸ÃªÂ°â€™",
                       "subtitle":  "All your prescriptions, invoices, certificates and uploaded files.",
                       "button":  {
                                      "recordAudio":  "Record Audio",
@@ -939,250 +939,250 @@
                                      }
                   },
     "roundTablesMeta":  {
-                            "noteOne":  "{{count}} ë©”ëª¨",
-                            "noteOther":  "{{count}} ë©”ëª¨",
-                            "lastActivity":  "ë§ˆì§€ë§‰ í™œë™ {{date}}"
+                            "noteOne":  "{{count}} Ã«Â©â€Ã«ÂªÂ¨",
+                            "noteOther":  "{{count}} Ã«Â©â€Ã«ÂªÂ¨",
+                            "lastActivity":  "Ã«Â§Ë†Ã¬Â§â‚¬Ã«Â§â€° Ã­â„¢Å“Ã«Ââ„¢ {{date}}"
                         },
     "sos":  {
-                "emergencyAssistance":  "ê¸´ê¸‰ ì§€ì›",
-                "helpAlerted":  "ì¦‰ì‹œ ë„ì›€ ìš”ì²­ì´ ì „ë‹¬ë©ë‹ˆë‹¤",
-                "ackHeading":  "SOSë¥¼ ì‚¬ìš©í•˜ê¸° ì „ì— ë‹¤ìŒì„ ì¸ì •í•˜ì‹­ì‹œì˜¤:",
-                "ackA":  "SOS ì§€ì›ì€ ìµœì„ ì˜ ë…¸ë ¥ìœ¼ë¡œ ì œê³µë˜ë©° ê¸´ê¸‰ ëŒ€ì‘ì„ ë³´ìž¥í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.",
-                "ackB":  "SOSëŠ” ë„¤íŠ¸ì›Œí¬, ìž¥ì¹˜ ìƒíƒœ, ìœ„ì¹˜ ì•¡ì„¸ìŠ¤ ë° íƒ€ì‚¬ ì‘ë‹µìžì— ë”°ë¼ ë‹¬ë¼ì§‘ë‹ˆë‹¤.",
-                "ackC":  "SOSì—ëŠ” ìœ„ì¹˜ ê¶Œí•œ, ë°°í„°ë¦¬ ì „ì› ë° ì¸í„°ë„· ë˜ëŠ” ì…€ë£°ëŸ¬ ì—°ê²°ì´ í•„ìš”í•©ë‹ˆë‹¤.",
+                "emergencyAssistance":  "ÃªÂ¸Â´ÃªÂ¸â€° Ã¬Â§â‚¬Ã¬â€ºÂ",
+                "helpAlerted":  "Ã¬Â¦â€°Ã¬â€¹Å“ Ã«Ââ€žÃ¬â€ºâ‚¬ Ã¬Å¡â€Ã¬Â²Â­Ã¬ÂÂ´ Ã¬Â â€žÃ«â€¹Â¬Ã«ÂÂ©Ã«â€¹Ë†Ã«â€¹Â¤",
+                "ackHeading":  "SOSÃ«Â¥Â¼ Ã¬â€šÂ¬Ã¬Å¡Â©Ã­â€¢ËœÃªÂ¸Â° Ã¬Â â€žÃ¬â€”Â Ã«â€¹Â¤Ã¬ÂÅ’Ã¬Ââ€ž Ã¬ÂÂ¸Ã¬Â â€¢Ã­â€¢ËœÃ¬â€¹Â­Ã¬â€¹Å“Ã¬ËœÂ¤:",
+                "ackA":  "SOS Ã¬Â§â‚¬Ã¬â€ºÂÃ¬Ââ‚¬ Ã¬ÂµÅ“Ã¬â€žÂ Ã¬ÂËœ Ã«â€¦Â¸Ã«Â Â¥Ã¬Å“Â¼Ã«Â¡Å“ Ã¬Â Å“ÃªÂ³ÂµÃ«ÂËœÃ«Â©Â° ÃªÂ¸Â´ÃªÂ¸â€° Ã«Å’â‚¬Ã¬Ââ€˜Ã¬Ââ€ž Ã«Â³Â´Ã¬Å¾Â¥Ã­â€¢Â  Ã¬Ë†Ëœ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤.",
+                "ackB":  "SOSÃ«Å â€ Ã«â€žÂ¤Ã­Å Â¸Ã¬â€ºÅ’Ã­ÂÂ¬, Ã¬Å¾Â¥Ã¬Â¹Ëœ Ã¬Æ’ÂÃ­Æ’Å“, Ã¬Å“â€žÃ¬Â¹Ëœ Ã¬â€¢Â¡Ã¬â€žÂ¸Ã¬Å Â¤ Ã«Â°Â Ã­Æ’â‚¬Ã¬â€šÂ¬ Ã¬Ââ€˜Ã«â€¹ÂµÃ¬Å¾ÂÃ¬â€”Â Ã«â€Â°Ã«ÂÂ¼ Ã«â€¹Â¬Ã«ÂÂ¼Ã¬Â§â€˜Ã«â€¹Ë†Ã«â€¹Â¤.",
+                "ackC":  "SOSÃ¬â€”ÂÃ«Å â€ Ã¬Å“â€žÃ¬Â¹Ëœ ÃªÂ¶Å’Ã­â€¢Å“, Ã«Â°Â°Ã­â€žÂ°Ã«Â¦Â¬ Ã¬Â â€žÃ¬â€ºÂ Ã«Â°Â Ã¬ÂÂ¸Ã­â€žÂ°Ã«â€žÂ· Ã«ËœÂÃ«Å â€ Ã¬â€¦â‚¬Ã«Â£Â°Ã«Å¸Â¬ Ã¬â€”Â°ÃªÂ²Â°Ã¬ÂÂ´ Ã­â€¢â€žÃ¬Å¡â€Ã­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤.",
                 "sosLabel":  "SOS",
-                "tapForHelp":  "ë„ì›€ì´ í•„ìš”í•˜ë©´ íƒ­í•˜ì„¸ìš”",
-                "footerCaption":  "SOSë¥¼ íƒ­í•˜ë©´ ìœ„ì¹˜ê°€ ê³µìœ ë˜ê³  ë¹„ìƒ ì—°ë½ì²˜ì— í†µì§€ë©ë‹ˆë‹¤.",
-                "manageContacts":  "ë¹„ìƒ ì—°ë½ì²˜ ê´€ë¦¬",
-                "viewHistory":  "ì‚¬ê³  ê¸°ë¡ ë³´ê¸°"
+                "tapForHelp":  "Ã«Ââ€žÃ¬â€ºâ‚¬Ã¬ÂÂ´ Ã­â€¢â€žÃ¬Å¡â€Ã­â€¢ËœÃ«Â©Â´ Ã­Æ’Â­Ã­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€",
+                "footerCaption":  "SOSÃ«Â¥Â¼ Ã­Æ’Â­Ã­â€¢ËœÃ«Â©Â´ Ã¬Å“â€žÃ¬Â¹ËœÃªÂ°â‚¬ ÃªÂ³ÂµÃ¬Å“Â Ã«ÂËœÃªÂ³Â  Ã«Â¹â€žÃ¬Æ’Â Ã¬â€”Â°Ã«ÂÂ½Ã¬Â²ËœÃ¬â€”Â Ã­â€ ÂµÃ¬Â§â‚¬Ã«ÂÂ©Ã«â€¹Ë†Ã«â€¹Â¤.",
+                "manageContacts":  "Ã«Â¹â€žÃ¬Æ’Â Ã¬â€”Â°Ã«ÂÂ½Ã¬Â²Ëœ ÃªÂ´â‚¬Ã«Â¦Â¬",
+                "viewHistory":  "Ã¬â€šÂ¬ÃªÂ³Â  ÃªÂ¸Â°Ã«Â¡Â Ã«Â³Â´ÃªÂ¸Â°"
             },
     "patientProfile":  {
-                           "backToPatients":  "í™˜ìž ëª©ë¡ìœ¼ë¡œ ëŒì•„ê°€ê¸°",
-                           "patientNotFound":  "í™˜ìžë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤",
-                           "schedule":  "ì¼ì •",
-                           "startSession":  "ì„¸ì…˜ ì‹œìž‘",
-                           "checkIn":  "ì²´í¬ì¸",
-                           "totalSessions":  "ì´ ì„¸ì…˜ ìˆ˜",
-                           "lastSeen":  "ë§ˆì§€ë§‰ ë°©ë¬¸",
-                           "since":  "ì´í›„",
+                           "backToPatients":  "Ã­â„¢ËœÃ¬Å¾Â Ã«ÂªÂ©Ã«Â¡ÂÃ¬Å“Â¼Ã«Â¡Å“ Ã«ÂÅ’Ã¬â€¢â€žÃªÂ°â‚¬ÃªÂ¸Â°",
+                           "patientNotFound":  "Ã­â„¢ËœÃ¬Å¾ÂÃ«Â¥Â¼ Ã¬Â°Â¾Ã¬Ââ€ž Ã¬Ë†Ëœ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤",
+                           "schedule":  "Ã¬ÂÂ¼Ã¬Â â€¢",
+                           "startSession":  "Ã¬â€žÂ¸Ã¬â€¦Ëœ Ã¬â€¹Å“Ã¬Å¾â€˜",
+                           "checkIn":  "Ã¬Â²Â´Ã­ÂÂ¬Ã¬ÂÂ¸",
+                           "totalSessions":  "Ã¬Â´Â Ã¬â€žÂ¸Ã¬â€¦Ëœ Ã¬Ë†Ëœ",
+                           "lastSeen":  "Ã«Â§Ë†Ã¬Â§â‚¬Ã«Â§â€° Ã«Â°Â©Ã«Â¬Â¸",
+                           "since":  "Ã¬ÂÂ´Ã­â€ºâ€ž",
                            "vulas":  "Vulas",
-                           "tabDetails":  "ì„¸ë¶€ ì •ë³´",
-                           "tabOverview":  "ê°œìš”",
-                           "tabSessions":  "ì„¸ì…˜ ê¸°ë¡",
-                           "tabAdmissions":  "ìž…ì› ê¸°ë¡",
-                           "tabProviders":  "ì˜ë£Œ ì œê³µìž",
-                           "tabDocuments":  "ë¬¸ì„œ",
-                           "tabRoundTable":  "ë¼ìš´ë“œ í…Œì´ë¸”",
-                           "togglePersonal":  "ê°œì¸ ì •ë³´",
-                           "toggleMedical":  "ì˜í•™ ì •ë³´",
-                           "personalHeading":  "ê°œì¸ ì •ë³´",
-                           "personalHelper":  "ê°œì¸ ì •ë³´ë¥¼ ë³´ê³  ê´€ë¦¬í•©ë‹ˆë‹¤",
-                           "medicalHeading":  "ì˜í•™ ì •ë³´",
-                           "medicalHelper":  "ì˜í•™ ì •ë³´ë¥¼ ë³´ê³  ê´€ë¦¬í•©ë‹ˆë‹¤",
-                           "saved":  "ì €ìž¥ë¨",
-                           "sectionAddresses":  "ì£¼ì†Œ",
-                           "sectionEmergencyContacts":  "ì‘ê¸‰ ì—°ë½ì²˜",
-                           "sectionNextOfKin":  "ê°€ì¡±",
-                           "sectionInsurance":  "ë³´í—˜ / ì˜ë£Œ ì§€ì›",
-                           "sectionEmployer":  "ê³ ìš©ì£¼",
-                           "sectionLifestyle":  "ìƒí™œ ìŠµê´€",
-                           "sectionConsents":  "ë™ì˜ì„œ",
-                           "sectionAllergies":  "ì•Œë ˆë¥´ê¸°",
-                           "sectionChronic":  "ë§Œì„± ì§ˆí™˜",
-                           "sectionMedications":  "í˜„ìž¬ ë³µìš© ì¤‘ì¸ ì•½",
-                           "sectionFamilyHistory":  "ê°€ì¡±ë ¥",
-                           "sectionSurgicalHistory":  "ìˆ˜ìˆ  ì´ë ¥",
-                           "sectionImmunizations":  "ì˜ˆë°© ì ‘ì¢…",
-                           "sectionVitals":  "í™œë ¥ ì§•í›„",
-                           "sectionLabResults":  "ê²€ì‚¬ ê²°ê³¼",
-                           "sectionGeneticMarkers":  "ìœ ì „ í‘œì§€ìž",
-                           "sectionMentalHealth":  "ì •ì‹  ê±´ê°•"
+                           "tabDetails":  "Ã¬â€žÂ¸Ã«Â¶â‚¬ Ã¬Â â€¢Ã«Â³Â´",
+                           "tabOverview":  "ÃªÂ°Å“Ã¬Å¡â€",
+                           "tabSessions":  "Ã¬â€žÂ¸Ã¬â€¦Ëœ ÃªÂ¸Â°Ã«Â¡Â",
+                           "tabAdmissions":  "Ã¬Å¾â€¦Ã¬â€ºÂ ÃªÂ¸Â°Ã«Â¡Â",
+                           "tabProviders":  "Ã¬ÂËœÃ«Â£Å’ Ã¬Â Å“ÃªÂ³ÂµÃ¬Å¾Â",
+                           "tabDocuments":  "Ã«Â¬Â¸Ã¬â€žÅ“",
+                           "tabRoundTable":  "Ã«ÂÂ¼Ã¬Å¡Â´Ã«â€œÅ“ Ã­â€¦Å’Ã¬ÂÂ´Ã«Â¸â€",
+                           "togglePersonal":  "ÃªÂ°Å“Ã¬ÂÂ¸ Ã¬Â â€¢Ã«Â³Â´",
+                           "toggleMedical":  "Ã¬ÂËœÃ­â€¢â„¢ Ã¬Â â€¢Ã«Â³Â´",
+                           "personalHeading":  "ÃªÂ°Å“Ã¬ÂÂ¸ Ã¬Â â€¢Ã«Â³Â´",
+                           "personalHelper":  "ÃªÂ°Å“Ã¬ÂÂ¸ Ã¬Â â€¢Ã«Â³Â´Ã«Â¥Â¼ Ã«Â³Â´ÃªÂ³Â  ÃªÂ´â‚¬Ã«Â¦Â¬Ã­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤",
+                           "medicalHeading":  "Ã¬ÂËœÃ­â€¢â„¢ Ã¬Â â€¢Ã«Â³Â´",
+                           "medicalHelper":  "Ã¬ÂËœÃ­â€¢â„¢ Ã¬Â â€¢Ã«Â³Â´Ã«Â¥Â¼ Ã«Â³Â´ÃªÂ³Â  ÃªÂ´â‚¬Ã«Â¦Â¬Ã­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤",
+                           "saved":  "Ã¬Â â‚¬Ã¬Å¾Â¥Ã«ÂÂ¨",
+                           "sectionAddresses":  "Ã¬Â£Â¼Ã¬â€ Å’",
+                           "sectionEmergencyContacts":  "Ã¬Ââ€˜ÃªÂ¸â€° Ã¬â€”Â°Ã«ÂÂ½Ã¬Â²Ëœ",
+                           "sectionNextOfKin":  "ÃªÂ°â‚¬Ã¬Â¡Â±",
+                           "sectionInsurance":  "Ã«Â³Â´Ã­â€”Ëœ / Ã¬ÂËœÃ«Â£Å’ Ã¬Â§â‚¬Ã¬â€ºÂ",
+                           "sectionEmployer":  "ÃªÂ³Â Ã¬Å¡Â©Ã¬Â£Â¼",
+                           "sectionLifestyle":  "Ã¬Æ’ÂÃ­â„¢Å“ Ã¬Å ÂµÃªÂ´â‚¬",
+                           "sectionConsents":  "Ã«Ââ„¢Ã¬ÂËœÃ¬â€žÅ“",
+                           "sectionAllergies":  "Ã¬â€¢Å’Ã«Â Ë†Ã«Â¥Â´ÃªÂ¸Â°",
+                           "sectionChronic":  "Ã«Â§Å’Ã¬â€žÂ± Ã¬Â§Ë†Ã­â„¢Ëœ",
+                           "sectionMedications":  "Ã­Ëœâ€žÃ¬Å¾Â¬ Ã«Â³ÂµÃ¬Å¡Â© Ã¬Â¤â€˜Ã¬ÂÂ¸ Ã¬â€¢Â½",
+                           "sectionFamilyHistory":  "ÃªÂ°â‚¬Ã¬Â¡Â±Ã«Â Â¥",
+                           "sectionSurgicalHistory":  "Ã¬Ë†ËœÃ¬Ë†Â  Ã¬ÂÂ´Ã«Â Â¥",
+                           "sectionImmunizations":  "Ã¬ËœË†Ã«Â°Â© Ã¬Â â€˜Ã¬Â¢â€¦",
+                           "sectionVitals":  "Ã­â„¢Å“Ã«Â Â¥ Ã¬Â§â€¢Ã­â€ºâ€ž",
+                           "sectionLabResults":  "ÃªÂ²â‚¬Ã¬â€šÂ¬ ÃªÂ²Â°ÃªÂ³Â¼",
+                           "sectionGeneticMarkers":  "Ã¬Å“Â Ã¬Â â€ž Ã­â€˜Å“Ã¬Â§â‚¬Ã¬Å¾Â",
+                           "sectionMentalHealth":  "Ã¬Â â€¢Ã¬â€¹Â  ÃªÂ±Â´ÃªÂ°â€¢"
                        },
     "emergencyDashboard":  {
                                "statusBar":  {
-                                                 "activeMission":  "ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â± ÃƒÂ«Ã‚Â¯Ã‚Â¸ÃƒÂ¬Ã¢â‚¬Â¦Ã‹Å“",
-                                                 "onShift":  "ÃƒÂªÃ‚Â·Ã‚Â¼ÃƒÂ«Ã‚Â¬Ã‚Â´ ÃƒÂ¬Ã‚Â¤Ã¢â‚¬Ëœ"
+                                                 "activeMission":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â± ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¯Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦Ãƒâ€¹Ã…â€œ",
+                                                 "onShift":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â·Ãƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“"
                                              },
                                "header":  {
-                                              "subtitle":  "ÃƒÂªÃ‚Â¸Ã‚Â´ÃƒÂªÃ‚Â¸Ã¢â‚¬Â° ÃƒÂ«Ã…â€™Ã¢â€šÂ¬ÃƒÂ¬Ã‚ÂÃ¢â‚¬Ëœ",
-                                              "title":  "ÃƒÂªÃ‚Â¸Ã‚Â´ÃƒÂªÃ‚Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â"
+                                              "subtitle":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“",
+                                              "title":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â"
                                           },
                                "stats":  {
-                                             "new":  "ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â ÃƒÂªÃ‚Â·Ã…â€œ",
-                                             "active":  "ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±",
-                                             "critical":  "ÃƒÂ¬Ã‚Â¤Ã¢â‚¬ËœÃƒÂ¬Ã…Â¡Ã¢â‚¬Â"
+                                             "new":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â·Ãƒâ€¦Ã¢â‚¬Å“",
+                                             "active":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â±",
+                                             "critical":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"
                                          },
                                "statsCard":  {
-                                                 "newRequests":  "ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â ÃƒÂªÃ‚Â·Ã…â€œ ÃƒÂ¬Ã…Â¡Ã¢â‚¬ÂÃƒÂ¬Ã‚Â²Ã‚Â­",
-                                                 "activeOperations":  "ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â± ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â",
-                                                 "criticalIncidents":  "ÃƒÂ¬Ã‚Â¤Ã¢â‚¬ËœÃƒÂ¬Ã…Â¡Ã¢â‚¬Â ÃƒÂ¬Ã‚ÂÃ‚Â¸ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ­Ã…Â Ã‚Â¸"
+                                                 "newRequests":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â·Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â­",
+                                                 "activeOperations":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â± ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â",
+                                                 "criticalIncidents":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¹Ã…â€œÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸"
                                              },
                                "tabs":  {
-                                            "new":  "ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â ÃƒÂªÃ‚Â·Ã…â€œ",
-                                            "active":  "ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±",
-                                            "completed":  "ÃƒÂ¬Ã¢â€žÂ¢Ã¢â‚¬Å¾ÃƒÂ«Ã‚Â£Ã…â€™"
+                                            "new":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â·Ãƒâ€¦Ã¢â‚¬Å“",
+                                            "active":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â±",
+                                            "completed":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢"
                                         },
                                "details":  {
-                                               "location":  "ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ¬Ã‚Â¹Ã‹Å“",
-                                               "received":  "ÃƒÂ¬Ã‹â€ Ã‹Å“ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â ÃƒÂ«Ã‚ÂÃ‚Â¨",
-                                               "fromHospital":  "ÃƒÂ«Ã‚Â³Ã¢â‚¬ËœÃƒÂ¬Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¬Ã¢â‚¬â€Ã‚ÂÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œ"
+                                               "location":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¹Ãƒâ€¹Ã…â€œ",
+                                               "received":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¨",
+                                               "fromHospital":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂºÃƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€¦Ã¢â‚¬Å“"
                                            },
                                "actions":  {
-                                               "acceptDispatch":  "ÃƒÂ¬Ã‹â€ Ã‹Å“ÃƒÂ«Ã‚ÂÃ‚Â½ ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ÃƒÂ¬Ã¢â‚¬Â Ã‚Â¡",
-                                               "decline":  "ÃƒÂªÃ‚Â±Ã‚Â°ÃƒÂ¬Ã‚Â Ã‹â€ ",
-                                               "trackLive":  "ÃƒÂ«Ã‚ÂÃ‚Â¼ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â¸Ã…â€™ ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã‚Â Ã‚Â",
-                                               "updateStatus":  "ÃƒÂ¬Ã†â€™Ã‚ÂÃƒÂ­Ã†â€™Ã…â€œ ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚ÂÃ‚Â°ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ­Ã…Â Ã‚Â¸",
-                                               "viewReport":  "ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂªÃ‚Â³Ã‚Â ÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œ ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂªÃ‚Â¸Ã‚Â°"
+                                               "acceptDispatch":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â½ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚Â¡",
+                                               "decline":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â±Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€¹Ã¢â‚¬Â ",
+                                               "trackLive":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¸Ãƒâ€¦Ã¢â‚¬â„¢ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¶ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚Â",
+                                               "updateStatus":  "ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸",
+                                               "viewReport":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â°"
                                            }
                            },
     "navigationScreen":  {
-                             "noActiveMission":  "ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â± ÃƒÂ«Ã‚Â¯Ã‚Â¸ÃƒÂ¬Ã¢â‚¬Â¦Ã‹Å“ ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â ÃƒÂ¬Ã‚ÂÃ…â€™",
-                             "acceptToStart":  "ÃƒÂ«Ã¢â‚¬Å¾Ã‚Â¤ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂªÃ‚Â²Ã…â€™ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ¬Ã¢â‚¬Â¦Ã‹Å“ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂ¬Ã…Â¾Ã¢â‚¬ËœÃƒÂ­Ã¢â‚¬Â¢Ã‹Å“ÃƒÂ«Ã‚Â Ã‚Â¤ÃƒÂ«Ã‚Â©Ã‚Â´ ÃƒÂ«Ã¢â‚¬Å“Ã‚Â¤ÃƒÂ¬Ã¢â‚¬â€œÃ‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ«Ã…Â Ã¢â‚¬Â ÃƒÂ¬Ã…Â¡Ã¢â‚¬ÂÃƒÂ¬Ã‚Â²Ã‚Â­ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ¬Ã‹â€ Ã‹Å“ÃƒÂ«Ã‚ÂÃ‚Â½ÃƒÂ­Ã¢â‚¬Â¢Ã‹Å“ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â¸ÃƒÂ¬Ã…Â¡Ã¢â‚¬Â",
-                             "openIncomingSos":  "ÃƒÂ¬Ã‹â€ Ã‹Å“ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â  SOS ÃƒÂ¬Ã¢â‚¬â€Ã‚Â´ÃƒÂªÃ‚Â¸Ã‚Â°",
-                             "loadingMission":  "ÃƒÂ«Ã‚Â¯Ã‚Â¸ÃƒÂ¬Ã¢â‚¬Â¦Ã‹Å“ ÃƒÂ«Ã‚ÂÃ‚Â°ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ­Ã¢â‚¬Å¾Ã‚Â° ÃƒÂ«Ã‚Â¡Ã…â€œÃƒÂ«Ã¢â‚¬Å“Ã…â€œ ÃƒÂ¬Ã‚Â¤Ã¢â‚¬Ëœ...",
-                             "status":  "ÃƒÂ¬Ã†â€™Ã‚ÂÃƒÂ­Ã†â€™Ã…â€œÃƒÂªÃ‚Â°Ã¢â€šÂ¬ {{status}}ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚ÂÃ‚Â°ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ­Ã…Â Ã‚Â¸ÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ¬Ã¢â‚¬â€Ã‹â€ ÃƒÂ¬Ã…Â Ã‚ÂµÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤",
-                             "mission":  "ÃƒÂ«Ã‚Â¯Ã‚Â¸ÃƒÂ¬Ã¢â‚¬Â¦Ã‹Å“",
-                             "eta":  "ÃƒÂ¬Ã‹Å“Ã‹â€ ÃƒÂ¬Ã†â€™Ã‚Â ÃƒÂ«Ã‚ÂÃ¢â‚¬Å¾ÃƒÂ¬Ã‚Â°Ã‚Â© ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾:",
-                             "actionPanel":  "ÃƒÂ¬Ã†â€™Ã‚ÂÃƒÂ­Ã†â€™Ã…â€œ ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚ÂÃ‚Â°ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ­Ã…Â Ã‚Â¸",
-                             "enRoute":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚ÂÃ¢â€žÂ¢ ÃƒÂ¬Ã‚Â¤Ã¢â‚¬Ëœ",
-                             "arrived":  "ÃƒÂ«Ã‚ÂÃ¢â‚¬Å¾ÃƒÂ¬Ã‚Â°Ã‚Â©ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â¨",
-                             "patientLoaded":  "ÃƒÂ­Ã¢â€žÂ¢Ã‹Å“ÃƒÂ¬Ã…Â¾Ã‚Â ÃƒÂ­Ã†â€™Ã¢â‚¬ËœÃƒÂ¬Ã…Â Ã‚Â¹",
-                             "toHospital":  "ÃƒÂ«Ã‚Â³Ã¢â‚¬ËœÃƒÂ¬Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¬Ã…â€œÃ‚Â¼ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚ÂÃ¢â€žÂ¢ ÃƒÂ¬Ã‚Â¤Ã¢â‚¬Ëœ",
-                             "arrivedAtHospital":  "ÃƒÂ«Ã‚Â³Ã¢â‚¬ËœÃƒÂ¬Ã¢â‚¬ÂºÃ‚Â ÃƒÂ«Ã‚ÂÃ¢â‚¬Å¾ÃƒÂ¬Ã‚Â°Ã‚Â©",
-                             "resolveIncident":  "ÃƒÂ¬Ã‚ÂÃ‚Â¸ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ­Ã…Â Ã‚Â¸ ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â´ÃƒÂªÃ‚Â²Ã‚Â°",
-                             "navigation":  "ÃƒÂ«Ã¢â‚¬Å¾Ã‚Â¤ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂªÃ‚Â²Ã…â€™ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ¬Ã¢â‚¬Â¦Ã‹Å“",
-                             "fullConsole":  "ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ÃƒÂ¬Ã‚Â²Ã‚Â´ ÃƒÂ¬Ã‚Â½Ã‹Å“ÃƒÂ¬Ã¢â‚¬Â Ã¢â‚¬Â ÃƒÂ¬Ã¢â‚¬â€Ã‚Â´ÃƒÂªÃ‚Â¸Ã‚Â°"
+                             "noActiveMission":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â± ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¯Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦Ãƒâ€¹Ã…â€œ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬â„¢",
+                             "acceptToStart":  "ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â©Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â­ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â",
+                             "openIncomingSos":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â  SOS ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â°",
+                             "loadingMission":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¯Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦Ãƒâ€¹Ã…â€œ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â° ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“...",
+                             "status":  "ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ {{status}}ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚ÂµÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤",
+                             "mission":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¯Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦Ãƒâ€¹Ã…â€œ",
+                             "eta":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â© ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾:",
+                             "actionPanel":  "ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸",
+                             "enRoute":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“",
+                             "arrived":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â¨",
+                             "patientLoaded":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¾Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¹",
+                             "toHospital":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂºÃƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“Ãƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“",
+                             "arrivedAtHospital":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂºÃƒâ€šÃ‚Â ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â©",
+                             "resolveIncident":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¹Ã…â€œÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸ ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â°",
+                             "navigation":  "ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦Ãƒâ€¹Ã…â€œ",
+                             "fullConsole":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â½Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â°"
                          },
     "provider":  {
-                     "emergencyResponseDispatch":  "ÃƒÂªÃ‚Â¸Ã‚Â´ÃƒÂªÃ‚Â¸Ã¢â‚¬Â° ÃƒÂ«Ã…â€™Ã¢â€šÂ¬ÃƒÂ¬Ã‚ÂÃ¢â‚¬Ëœ ÃƒÂ­Ã…â€™Ã…â€™ÃƒÂªÃ‚Â²Ã‚Â¬"
+                     "emergencyResponseDispatch":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã¢â‚¬â„¢Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¬"
                  },
     "realTimeMonitoring":  {
                                "header":  {
-                                              "subtitle":  "ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ­Ã¢â‚¬Å¾Ã‚Â°ÃƒÂ«Ã‚Â§Ã‚Â",
-                                              "title":  "ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â¤ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â",
-                                              "description":  "ÃƒÂ«Ã‚ÂÃ‚Â¼ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â¸Ã…â€™ ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°ÃƒÂªÃ‚ÂµÃ‚Â° ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã‚Â Ã‚Â ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ¬Ã¢â‚¬Â¢Ã‹â€ ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ­Ã¢â‚¬Å¾Ã‚Â°ÃƒÂ«Ã‚Â§Ã‚Â"
+                                              "subtitle":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€šÃ‚Â",
+                                              "title":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â",
+                                              "description":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¸Ãƒâ€¦Ã¢â‚¬â„¢ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚ÂµÃƒâ€šÃ‚Â° ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¶ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€šÃ‚Â"
                                           },
                                "tabs":  {
-                                            "tracking":  "ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã‚Â Ã‚Â",
-                                            "safety":  "ÃƒÂ¬Ã¢â‚¬Â¢Ã‹â€ ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾"
+                                            "tracking":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¶ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚Â",
+                                            "safety":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾"
                                         },
                                "tracking":  {
-                                                "vehiclesOnline":  "ÃƒÂ¬Ã‹Å“Ã‚Â¨ÃƒÂ«Ã‚ÂÃ‚Â¼ÃƒÂ¬Ã‚ÂÃ‚Â¸ ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°",
-                                                "allGpsConnected":  "ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Å“Ã‚Â  GPS ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂªÃ‚Â²Ã‚Â°ÃƒÂ«Ã‚ÂÃ‚Â¨",
-                                                "avgSpeed":  "ÃƒÂ­Ã‚ÂÃ¢â‚¬Â°ÃƒÂªÃ‚Â·Ã‚Â  ÃƒÂ¬Ã¢â‚¬Â Ã‚ÂÃƒÂ«Ã‚ÂÃ¢â‚¬Å¾",
-                                                "withinLimits":  "ÃƒÂ­Ã¢â‚¬Â¢Ã…â€œÃƒÂ«Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ«Ã¢â‚¬Å¡Ã‚Â´",
-                                                "fuelStatus":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂ«Ã‚Â£Ã…â€™ ÃƒÂ¬Ã†â€™Ã‚ÂÃƒÂ­Ã†â€™Ã…â€œ",
-                                                "goodLevels":  "ÃƒÂ¬Ã¢â‚¬â€œÃ¢â‚¬ËœÃƒÂ­Ã‹Å“Ã‚Â¸ÃƒÂ­Ã¢â‚¬Â¢Ã…â€œ ÃƒÂ¬Ã‹â€ Ã‹Å“ÃƒÂ¬Ã‚Â¤Ã¢â€šÂ¬",
-                                                "speed":  "ÃƒÂ¬Ã¢â‚¬Â Ã‚ÂÃƒÂ«Ã‚ÂÃ¢â‚¬Å¾",
-                                                "fuel":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂ«Ã‚Â£Ã…â€™",
-                                                "track":  "ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã‚Â Ã‚Â",
-                                                "moving":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚ÂÃ¢â€žÂ¢ ÃƒÂ¬Ã‚Â¤Ã¢â‚¬Ëœ",
-                                                "stopped":  "ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚ÂÃ‚Â¨"
+                                                "vehiclesOnline":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¸ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°",
+                                                "allGpsConnected":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â  GPS ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¨",
+                                                "avgSpeed":  "ÃƒÆ’Ã‚Â­Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â·Ãƒâ€šÃ‚Â  ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                                "withinLimits":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â´",
+                                                "fuelStatus":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢ ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¦Ã¢â‚¬Å“",
+                                                "goodLevels":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â­Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬",
+                                                "speed":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                                "fuel":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢",
+                                                "track":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¶ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚Â",
+                                                "moving":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“",
+                                                "stopped":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¨"
                                             },
                                "safety":  {
-                                              "criticalAlerts":  "ÃƒÂ¬Ã‚Â¤Ã¢â‚¬ËœÃƒÂ¬Ã…Â¡Ã¢â‚¬Â ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂªÃ‚Â³Ã‚Â ",
-                                              "immediateAction":  "ÃƒÂ¬Ã‚Â¦Ã¢â‚¬Â°ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œ ÃƒÂ¬Ã‚Â¡Ã‚Â°ÃƒÂ¬Ã‚Â¹Ã‹Å“",
-                                              "safetyEvents":  "ÃƒÂ¬Ã¢â‚¬Â¢Ã‹â€ ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸",
-                                              "thisWeek":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‹â€  ÃƒÂ¬Ã‚Â£Ã‚Â¼",
-                                              "fleetScore":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°ÃƒÂªÃ‚ÂµÃ‚Â° ÃƒÂ¬Ã‚Â Ã‚ÂÃƒÂ¬Ã‹â€ Ã‹Å“",
-                                              "excellentSafety":  "ÃƒÂ¬Ã…Â¡Ã‚Â°ÃƒÂ¬Ã‹â€ Ã‹Å“ÃƒÂ­Ã¢â‚¬Â¢Ã…â€œ ÃƒÂ¬Ã¢â‚¬Â¢Ã‹â€ ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾",
-                                              "critical":  "ÃƒÂ¬Ã‚Â¤Ã¢â‚¬ËœÃƒÂ¬Ã…Â¡Ã¢â‚¬Â",
-                                              "alert":  "ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂªÃ‚Â³Ã‚Â ",
-                                              "eventTypesMonitored":  "ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ­Ã¢â‚¬Å¾Ã‚Â°ÃƒÂ«Ã‚Â§Ã‚ÂÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ«Ã…Â Ã¢â‚¬Â ÃƒÂ¬Ã¢â‚¬Â¢Ã‹â€ ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸ ÃƒÂ¬Ã…â€œÃ‚Â ÃƒÂ­Ã‹Å“Ã¢â‚¬Â¢",
-                                              "speedingEvents":  "ÃƒÂªÃ‚Â³Ã‚Â¼ÃƒÂ¬Ã¢â‚¬Â Ã‚Â ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸",
-                                              "harshAcceleration":  "ÃƒÂªÃ‚Â¸Ã¢â‚¬Â°ÃƒÂªÃ‚Â°Ã¢â€šÂ¬ÃƒÂ¬Ã¢â‚¬Â Ã‚Â/ÃƒÂªÃ‚Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚Â Ã…â€œÃƒÂ«Ã‚ÂÃ¢â€žÂ¢",
-                                              "afterHoursUse":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â¬Ã‚Â´ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸ ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©",
-                                              "geofenceBreaches":  "ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ­Ã…Â½Ã…â€œÃƒÂ¬Ã…Â Ã‚Â¤ ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ«Ã‚Â°Ã‹Å“",
-                                              "routeDeviations":  "ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂ­Ã…Â½Ã‚Â¸ÃƒÂ¬Ã‚Â°Ã‚Â¨",
-                                              "unauthorizedStops":  "ÃƒÂ«Ã‚Â¯Ã‚Â¸ÃƒÂ¬Ã…Â Ã‚Â¹ÃƒÂ¬Ã‚ÂÃ‚Â¸ ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬"
+                                              "criticalAlerts":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â ",
+                                              "immediateAction":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¹Ãƒâ€¹Ã…â€œ",
+                                              "safetyEvents":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸",
+                                              "thisWeek":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€¹Ã¢â‚¬Â  ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â£Ãƒâ€šÃ‚Â¼",
+                                              "fleetScore":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚ÂµÃƒâ€šÃ‚Â° ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œ",
+                                              "excellentSafety":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                              "critical":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â",
+                                              "alert":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â ",
+                                              "eventTypesMonitored":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¹Ã…â€œÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â­Ãƒâ€¹Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢",
+                                              "speedingEvents":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸",
+                                              "harshAcceleration":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚Â/ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢",
+                                              "afterHoursUse":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€šÃ‚Â¸ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â©",
+                                              "geofenceBreaches":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â½Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€¹Ã…â€œ",
+                                              "routeDeviations":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â½Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨",
+                                              "unauthorizedStops":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¯Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¹ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¸ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬"
                                           }
                            },
     "vehicleProfile":  {
                            "navigation":  {
-                                              "back":  "ÃƒÂ«Ã¢â‚¬â„¢Ã‚Â¤ÃƒÂ«Ã‚Â¡Ã…â€œ"
+                                              "back":  "ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“"
                                           },
                            "header":  {
-                                          "title":  "ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂªÃ‚Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚Â°Ã‚Â¨ ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â"
+                                          "title":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚ÂµÃƒâ€šÃ‚Â¬ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â"
                                       },
                            "information":  {
-                                               "title":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂ«Ã‚Â³Ã‚Â´",
-                                               "registration":  "ÃƒÂ«Ã¢â‚¬Å“Ã‚Â±ÃƒÂ«Ã‚Â¡Ã‚Â",
+                                               "title":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â´",
+                                               "registration":  "ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â±ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€šÃ‚Â",
                                                "vin":  "VIN",
-                                               "year":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂ«Ã‚ÂÃ¢â‚¬Å¾",
-                                               "makeModel":  "ÃƒÂ¬Ã‚Â Ã…â€œÃƒÂ¬Ã‚Â¡Ã‚Â°ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬/ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã‚ÂÃ‚Â¸",
-                                               "engine":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬ÂÃƒÂ¬Ã‚Â§Ã¢â‚¬Å¾",
-                                               "seats":  "ÃƒÂ¬Ã‚Â¢Ã…â€™ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â",
-                                               "color":  "ÃƒÂ¬Ã†â€™Ã¢â‚¬Â°ÃƒÂ¬Ã†â€™Ã‚Â"
+                                               "year":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                               "makeModel":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬/ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¸",
+                                               "engine":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                               "seats":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¢Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â",
+                                               "color":  "ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â"
                                            },
                            "operational":  {
-                                               "title":  "ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â ÃƒÂ¬Ã†â€™Ã‚ÂÃƒÂ­Ã†â€™Ã…â€œ",
-                                               "mileage":  "ÃƒÂ¬Ã‚Â£Ã‚Â¼ÃƒÂ­Ã¢â‚¬â€œÃ¢â‚¬Â°ÃƒÂªÃ‚Â±Ã‚Â°ÃƒÂ«Ã‚Â¦Ã‚Â¬",
-                                               "engineHours":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬ÂÃƒÂ¬Ã‚Â§Ã¢â‚¬Å¾ ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾",
-                                               "fuelType":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂ«Ã‚Â£Ã…â€™ ÃƒÂ¬Ã‚Â¢Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â¥Ã‹Å“",
-                                               "tankCapacity":  "ÃƒÂ­Ã†â€™Ã‚Â±ÃƒÂ­Ã‚ÂÃ‚Â¬ ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°",
-                                               "fuelLevel":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂ«Ã‚Â£Ã…â€™ ÃƒÂ¬Ã‹â€ Ã‹Å“ÃƒÂ¬Ã‚Â¤Ã¢â€šÂ¬",
-                                               "lastGpsCheck":  "ÃƒÂ«Ã‚Â§Ã‹â€ ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚Â§Ã¢â‚¬Â° GPS ÃƒÂ­Ã¢â€žÂ¢Ã¢â‚¬Â¢ÃƒÂ¬Ã‚ÂÃ‚Â¸"
+                                               "title":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¦Ã¢â‚¬Å“",
+                                               "mileage":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â£Ãƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â±Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¦Ãƒâ€šÃ‚Â¬",
+                                               "engineHours":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                               "fuelType":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¥Ãƒâ€¹Ã…â€œ",
+                                               "tankCapacity":  "ÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â±ÃƒÆ’Ã‚Â­Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¬ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°",
+                                               "fuelLevel":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢ ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬",
+                                               "lastGpsCheck":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° GPS ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¸"
                                            },
                            "maintenance":  {
-                                               "title":  "ÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â Ã‚Â¤ ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ¬Ã…â€œÃ‚Â ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂ¬Ã‹â€ Ã‹Å“",
-                                               "lastService":  "ÃƒÂ«Ã‚Â§Ã‹â€ ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚Â§Ã¢â‚¬Â° ÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â Ã‚Â¤",
-                                               "nextService":  "ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤ÃƒÂ¬Ã‚ÂÃ…â€™ ÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â Ã‚Â¤",
-                                               "overdue":  "ÃƒÂ«Ã‚Â§Ã…â€™ÃƒÂ«Ã‚Â£Ã…â€™ÃƒÂ«Ã‚ÂÃ‚Â¨",
-                                               "days":  "ÃƒÂ¬Ã‚ÂÃ‚Â¼",
-                                               "lastInspection":  "ÃƒÂ«Ã‚Â§Ã‹â€ ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚Â§Ã¢â‚¬Â° ÃƒÂªÃ‚Â²Ã¢â€šÂ¬ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬",
-                                               "insuranceExpiry":  "ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂ­Ã¢â‚¬â€Ã‹Å“ ÃƒÂ«Ã‚Â§Ã…â€™ÃƒÂ«Ã‚Â£Ã…â€™",
-                                               "motExpiry":  "ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂªÃ‚Â¸Ã‚Â°ÃƒÂªÃ‚Â²Ã¢â€šÂ¬ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÂ«Ã‚Â§Ã…â€™ÃƒÂ«Ã‚Â£Ã…â€™",
-                                               "scheduleService":  "ÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â Ã‚Â¤ ÃƒÂ¬Ã‹Å“Ã‹â€ ÃƒÂ¬Ã¢â‚¬Â¢Ã‚Â½"
+                                               "title":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¹Ã…â€œ",
+                                               "lastService":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤",
+                                               "nextService":  "ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬â„¢ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤",
+                                               "overdue":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¨",
+                                               "days":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â¼",
+                                               "lastInspection":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬",
+                                               "insuranceExpiry":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€¹Ã…â€œ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢",
+                                               "motExpiry":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â£Ãƒâ€¦Ã¢â‚¬â„¢",
+                                               "scheduleService":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â½"
                                            },
                            "equipment":  {
-                                             "title":  "ÃƒÂ¬Ã…Â¾Ã‚Â¥ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±",
-                                             "viewEquipment":  "ÃƒÂ¬Ã…Â¾Ã‚Â¥ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂªÃ‚Â¸Ã‚Â°"
+                                             "title":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¾Ãƒâ€šÃ‚Â¥ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚ÂµÃƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â±",
+                                             "viewEquipment":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¾Ãƒâ€šÃ‚Â¥ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¹ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â°"
                                          },
                            "actions":  {
-                                           "assign":  "ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¹",
-                                           "history":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â Ã‚Â¥"
+                                           "assign":  "ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¹",
+                                           "history":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚Â¥"
                                        }
                        },
     "vehicleAbuse":  {
                          "header":  {
-                                        "title":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ«Ã‚Â°Ã‚Â©ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬",
-                                        "description":  "ÃƒÂ¬Ã‚ÂÃ‹Å“ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â¬ÃƒÂ¬Ã…Â Ã‚Â¤ÃƒÂ«Ã…Â¸Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â´ ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ«Ã‚ÂÃ¢â€žÂ¢, ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ­Ã…Â½Ã…â€œÃƒÂ¬Ã…Â Ã‚Â¤ ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ«Ã‚Â°Ã‹Å“ ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ«Ã‚Â¬Ã‚Â´ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¨ ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ­Ã¢â‚¬Å¾Ã‚Â°ÃƒÂ«Ã‚Â§Ã‚ÂÃƒÂ­Ã¢â‚¬Â¢Ã‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤."
+                                        "title":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â© ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬",
+                                        "description":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â° ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢, ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â½Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€¹Ã…â€œ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¨ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤."
                                     },
                          "stats":  {
-                                       "criticalEvents":  "ÃƒÂ¬Ã‚Â¤Ã¢â‚¬ËœÃƒÂ¬Ã…Â¡Ã¢â‚¬Â ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸",
-                                       "highRisk":  "ÃƒÂ«Ã¢â‚¬Â Ã¢â‚¬â„¢ÃƒÂ¬Ã‚ÂÃ¢â€šÂ¬ ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ­Ã¢â‚¬â€Ã‹Å“",
-                                       "mediumPriority":  "ÃƒÂ¬Ã‚Â¤Ã¢â‚¬ËœÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã…Â¡Ã‚Â°ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â ÃƒÂ¬Ã‹â€ Ã…â€œÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾",
-                                       "totalEvents":  "ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ÃƒÂ¬Ã‚Â²Ã‚Â´ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸"
+                                       "criticalEvents":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸",
+                                       "highRisk":  "ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€¹Ã…â€œ",
+                                       "mediumPriority":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¤ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                       "totalEvents":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸"
                                    },
                          "tabs":  {
-                                      "allEvents":  "ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Å“Ã‚Â  ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸",
-                                      "geofence":  "ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ­Ã…Â½Ã…â€œÃƒÂ¬Ã…Â Ã‚Â¤",
-                                      "afterHours":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â¬Ã‚Â´ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸",
-                                      "routes":  "ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂ«Ã‚Â¡Ã…â€œ"
+                                      "allEvents":  "ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â  ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸",
+                                      "geofence":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â½Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤",
+                                      "afterHours":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€šÃ‚Â¸",
+                                      "routes":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“"
                                   },
                          "dashboard":  {
-                                           "noEvents":  "ÃƒÂªÃ‚Â°Ã‚ÂÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚ÂÃ…â€œ ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸ÃƒÂªÃ‚Â°Ã¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â ÃƒÂ¬Ã…Â Ã‚ÂµÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤.",
-                                           "review":  "ÃƒÂªÃ‚Â²Ã¢â€šÂ¬ÃƒÂ­Ã¢â‚¬Â Ã‚Â "
+                                           "noEvents":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â© ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚ÂµÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤.",
+                                           "review":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚Â "
                                        },
                          "eventTypes":  {
-                                            "geofenceBreach":  "ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ­Ã…Â½Ã…â€œÃƒÂ¬Ã…Â Ã‚Â¤ ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ«Ã‚Â°Ã‹Å“",
-                                            "speeding":  "ÃƒÂªÃ‚Â³Ã‚Â¼ÃƒÂ¬Ã¢â‚¬Â Ã‚Â",
-                                            "afterHoursUse":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â¬Ã‚Â´ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸ ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©",
-                                            "unlinkedTrip":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂªÃ‚Â²Ã‚Â°ÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬Â¢Ã…Â ÃƒÂ¬Ã‚ÂÃ¢â€šÂ¬ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚ÂÃ¢â€žÂ¢",
-                                            "harshDriving":  "ÃƒÂ«Ã¢â‚¬Å¡Ã…â€œÃƒÂ­Ã‚ÂÃ‚Â­ ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾",
-                                            "routeDeviation":  "ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ­Ã†â€™Ã‹â€ "
+                                            "geofenceBreach":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â½Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€¹Ã…â€œ",
+                                            "speeding":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚Â",
+                                            "afterHoursUse":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€šÃ‚Â¸ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â©",
+                                            "unlinkedTrip":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¹Ã…â€œÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¦Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢",
+                                            "harshDriving":  "ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â­Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â­ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾",
+                                            "routeDeviation":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¹Ã¢â‚¬Â "
                                         },
                          "geofenceTab":  {
-                                             "title":  "ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ¬Ã‹Å“Ã‚Â¤ÃƒÂ­Ã…Â½Ã…â€œÃƒÂ¬Ã…Â Ã‚Â¤ ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬ ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ«Ã‚Â°Ã‹Å“ ÃƒÂ¬Ã¢â‚¬Â¢Ã…â€™ÃƒÂ«Ã‚Â¦Ã‚Â¼ÃƒÂ¬Ã‚ÂÃ‚Â´ ÃƒÂªÃ‚Â³Ã‚Â§ ÃƒÂ¬Ã‚Â Ã…â€œÃƒÂªÃ‚Â³Ã‚ÂµÃƒÂ«Ã‚ÂÃ‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤.",
-                                             "description":  "ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬ÃƒÂ¬Ã‚Â Ã‚Â ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂªÃ‚Â³Ã¢â‚¬Å¾ÃƒÂ«Ã‚Â¥Ã‚Â¼ ÃƒÂ«Ã‚Â§Ã…â€™ÃƒÂ«Ã¢â‚¬Å“Ã‚Â¤ÃƒÂªÃ‚Â³Ã‚Â  ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚ÂÃ‚Â´ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â¥Ã‚Â¼ ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ«Ã‚Â°Ã‹Å“ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â  ÃƒÂ«Ã¢â‚¬Â¢Ã…â€™ ÃƒÂ¬Ã¢â‚¬Â¢Ã…â€™ÃƒÂ«Ã‚Â¦Ã‚Â¼ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ«Ã‚Â°Ã¢â‚¬ÂºÃƒÂ¬Ã…Â Ã‚ÂµÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤."
+                                             "title":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚Â­Ãƒâ€¦Ã‚Â½Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â´ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¦Ãƒâ€šÃ‚Â¬ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€¹Ã…â€œ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¦Ãƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â§ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚ÂµÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤.",
+                                             "description":  "ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¦Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¥Ãƒâ€šÃ‚Â¼ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒâ€šÃ‚Â¤ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â  ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¥Ãƒâ€šÃ‚Â¼ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â  ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¦Ã¢â‚¬â„¢ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¦Ãƒâ€šÃ‚Â¼ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂºÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚ÂµÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤."
                                          },
                          "hoursTab":  {
-                                          "title":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â¬Ã‚Â´ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸ ÃƒÂªÃ‚Â°Ã‚ÂÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂªÃ‚Â°Ã¢â€šÂ¬ ÃƒÂªÃ‚Â³Ã‚Â§ ÃƒÂ¬Ã‚Â Ã…â€œÃƒÂªÃ‚Â³Ã‚ÂµÃƒÂ«Ã‚ÂÃ‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤.",
-                                          "description":  "ÃƒÂ¬Ã‹Å“Ã‹â€ ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂ«Ã‚ÂÃ…â€œ ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸ÃƒÂ¬Ã¢â‚¬â€Ã‚Â ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ«Ã…Â Ã¢â‚¬Â ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã‚Â Ã‚ÂÃƒÂ­Ã¢â‚¬Â¢Ã‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤."
+                                          "title":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â´ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€šÃ‚Â¸ ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â§ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚ÂµÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤.",
+                                          "description":  "ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â¬Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¹Ã…â€œÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¶ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤."
                                       },
                          "routesTab":  {
-                                           "title":  "ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ­Ã†â€™Ã‹â€  ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã‚Â Ã‚ÂÃƒÂ¬Ã‚ÂÃ‚Â´ ÃƒÂªÃ‚Â³Ã‚Â§ ÃƒÂ¬Ã‚Â Ã…â€œÃƒÂªÃ‚Â³Ã‚ÂµÃƒÂ«Ã‚ÂÃ‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤.",
-                                           "description":  "ÃƒÂ¬Ã¢â‚¬Â¢Ã‚Â°ÃƒÂ«Ã‚Â·Ã‚Â¸ÃƒÂ«Ã…Â¸Ã‚Â°ÃƒÂ¬Ã…Â Ã‚Â¤ÃƒÂªÃ‚Â°Ã¢â€šÂ¬ ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂ«Ã‚ÂÃ…â€œ ÃƒÂªÃ‚Â²Ã‚Â½ÃƒÂ«Ã‚Â¡Ã…â€œÃƒÂ«Ã‚Â¥Ã‚Â¼ ÃƒÂ«Ã¢â‚¬ÂÃ‚Â°ÃƒÂ«Ã‚Â¥Ã‚Â´ÃƒÂ«Ã…Â Ã¢â‚¬ÂÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ ÃƒÂ«Ã‹Å“Ã‚ÂÃƒÂ«Ã…Â Ã¢â‚¬Â ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ­Ã†â€™Ã‹â€ ÃƒÂ­Ã¢â‚¬Â¢Ã‹Å“ÃƒÂ«Ã…Â Ã¢â‚¬ÂÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ­Ã¢â‚¬Å¾Ã‚Â°ÃƒÂ«Ã‚Â§Ã‚ÂÃƒÂ­Ã¢â‚¬Â¢Ã‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤."
+                                           "title":  "ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¹Ã¢â‚¬Â  ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â°Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â¶ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚Â§ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â³Ãƒâ€šÃ‚ÂµÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤.",
+                                           "description":  "ÃƒÆ’Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â·Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â¸Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â¬Ãƒâ€¦Ã‚Â Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â°ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬Å“ ÃƒÆ’Ã‚ÂªÃƒâ€šÃ‚Â²Ãƒâ€šÃ‚Â½ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¡Ãƒâ€¦Ã¢â‚¬Å“ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¥Ãƒâ€šÃ‚Â¼ ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â¥Ãƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â«Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚ÂÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚ÂÃƒâ€šÃ‚Â´ÃƒÆ’Ã‚Â­Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€¹Ã…â€œÃƒÆ’Ã‚Â«Ãƒâ€¦Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÆ’Ã‚Â¬Ãƒâ€šÃ‚Â§ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚ÂªÃƒâ€šÃ‚Â¨ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â°ÃƒÆ’Ã‚Â«Ãƒâ€šÃ‚Â§Ãƒâ€šÃ‚ÂÃƒÆ’Ã‚Â­ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢Ãƒâ€šÃ‚Â©ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€¹Ã¢â‚¬Â ÃƒÆ’Ã‚Â«ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹Ãƒâ€šÃ‚Â¤."
                                        }
                      },
     "dashboard":  {
@@ -1245,7 +1245,7 @@
                                    },
                      "aboutMe":  {
                                      "description":  "Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.",
-                                     "placeholder":  "Tell patients about your background, philosophy of care, and what makes your practice uniqueÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦",
+                                     "placeholder":  "Tell patients about your background, philosophy of care, and what makes your practice uniqueÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦",
                                      "wordLimit":  "600 words"
                                  },
                      "form":  {
@@ -1339,7 +1339,7 @@
                                           "description":  "This information appears on your document templates and letterheads."
                                       },
                      "calendar":  {
-                                      "description":  "Share a single calendar across multiple doctors. Each doctor\u0027s appointments show in their assigned color. Google Calendar sync stays personal ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only your own appointments mirror.",
+                                      "description":  "Share a single calendar across multiple doctors. Each doctor\u0027s appointments show in their assigned color. Google Calendar sync stays personal ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â only your own appointments mirror.",
                                       "invitationPrefix":  "Invitation to join",
                                       "defaultPracticeName":  "a practice",
                                       "invitationFrom":  "From",
@@ -1411,7 +1411,7 @@
                                                },
                              "task":  {
                                           "dueLabel":  "Due:",
-                                          "rewardLabel":  "+{number} ÃƒÂ¢Ã¢â‚¬Å“Ã¢â‚¬Å¡ÃƒÂ¯Ã‚Â¸Ã‚Â"
+                                          "rewardLabel":  "+{number} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â"
                                       },
                              "welcomeTitle":  "Welcome back",
                              "welcomeSubtitle":  "Your health dashboard at a glance",
@@ -1447,7 +1447,7 @@
                       "subtitle":  "Healthcare providers with access to your profile",
                       "search":  {
                                      "title":  "Find a Healthcare Provider on Holarc",
-                                     "description":  "Filter by name, specialty, language ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â or any combination",
+                                     "description":  "Filter by name, specialty, language ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â or any combination",
                                      "namePlaceholder":  "Doctor name, practice or registration #",
                                      "specialtyPlaceholder":  "Any specialty",
                                      "languagePlaceholder":  "Any language",
@@ -1522,7 +1522,7 @@
                           },
     "doctorDocuments":  {
                             "search":  {
-                                           "placeholder":  "Search documentsÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦"
+                                           "placeholder":  "Search documentsÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"
                                        },
                             "empty":  {
                                           "message":  "No documents yet."
@@ -1532,65 +1532,65 @@
                                        }
                         },
     "afterHours":  {
-                       "subtitle":  "Ã¬Â°Â¨Ã«Å¸â€° Ã«â€šÂ¨Ã¬Å¡Â© Ã«Â°Â©Ã¬Â§â‚¬",
-                       "title":  "Ã¬â€”â€¦Ã«Â¬Â´ Ã¬â€¹Å“ÃªÂ°â€ž Ã¬â„¢Â¸ Ã¬Â°Â¨Ã«Å¸â€° Ã¬â€šÂ¬Ã¬Å¡Â©",
-                       "description":  "Ã¬ËœË†Ã¬Â â€¢Ã«ÂÅ“ Ã¬Å¡Â´Ã¬ËœÂ Ã¬â€¹Å“ÃªÂ°â€ž Ã¬â„¢Â¸Ã¬â€”Â Ã¬â€šÂ¬Ã¬Å¡Â©Ã«ÂËœÃ«Å â€ Ã¬Â°Â¨Ã«Å¸â€°Ã¬Ââ€ž Ã¬Â¶â€Ã¬Â ÂÃ­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤.",
+                       "subtitle":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ«Ã¢â‚¬Å¡Ã‚Â¨ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ«Ã‚Â°Ã‚Â©ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬",
+                       "title":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â¬Ã‚Â´ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸ ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©",
+                       "description":  "ÃƒÂ¬Ã‹Å“Ã‹â€ ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂ«Ã‚ÂÃ…â€œ ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸ÃƒÂ¬Ã¢â‚¬â€Ã‚Â ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ«Ã…Â Ã¢â‚¬Â ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã‚Â Ã‚ÂÃƒÂ­Ã¢â‚¬Â¢Ã‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤.",
                        "stats":  {
-                                     "critical":  "Ã¬Â¤â€˜Ã¬Å¡â€ Ã¬ÂÂ´Ã«Â²Â¤Ã­Å Â¸",
-                                     "highRisk":  "Ã«â€ â€™Ã¬Ââ‚¬ Ã¬Å“â€žÃ­â€”Ëœ",
-                                     "total":  "Ã¬Â â€žÃ¬Â²Â´ Ã¬ÂÂ´Ã«Â²Â¤Ã­Å Â¸"
+                                     "critical":  "ÃƒÂ¬Ã‚Â¤Ã¢â‚¬ËœÃƒÂ¬Ã…Â¡Ã¢â‚¬Â ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸",
+                                     "highRisk":  "ÃƒÂ«Ã¢â‚¬Â Ã¢â‚¬â„¢ÃƒÂ¬Ã‚ÂÃ¢â€šÂ¬ ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ­Ã¢â‚¬â€Ã‹Å“",
+                                     "total":  "ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ÃƒÂ¬Ã‚Â²Ã‚Â´ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸"
                                  },
                        "messages":  {
-                                        "noEvents":  "Ã¬â€”â€¦Ã«Â¬Â´ Ã¬â€¹Å“ÃªÂ°â€ž Ã¬â„¢Â¸ Ã¬ÂÂ´Ã«Â²Â¤Ã­Å Â¸ÃªÂ°â‚¬ ÃªÂ°ÂÃ¬Â§â‚¬Ã«ÂËœÃ¬Â§â‚¬ Ã¬â€¢Å Ã¬â€¢ËœÃ¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤."
+                                        "noEvents":  "ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â¬Ã‚Â´ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ¬Ã¢â€žÂ¢Ã‚Â¸ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‚Â¤ÃƒÂ­Ã…Â Ã‚Â¸ÃƒÂªÃ‚Â°Ã¢â€šÂ¬ ÃƒÂªÃ‚Â°Ã‚ÂÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬Â¢Ã…Â ÃƒÂ¬Ã¢â‚¬Â¢Ã‹Å“ÃƒÂ¬Ã…Â Ã‚ÂµÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤."
                                     },
                        "events":  {
-                                      "unauthorizedStart":  "Ã¬Å Â¹Ã¬ÂÂ¸Ã«ÂËœÃ¬Â§â‚¬ Ã¬â€¢Å Ã¬Ââ‚¬ Ã¬â€¹Å“Ã¬Å¾â€˜",
-                                      "extendedHours":  "Ã¬â€”Â°Ã¬Å¾Â¥Ã«ÂÅ“ Ã¬â€¹Å“ÃªÂ°â€ž",
-                                      "unauthorizedMovement":  "Ã¬Å Â¹Ã¬ÂÂ¸Ã«ÂËœÃ¬Â§â‚¬ Ã¬â€¢Å Ã¬Ââ‚¬ Ã¬ÂÂ´Ã«Ââ„¢"
+                                      "unauthorizedStart":  "ÃƒÂ¬Ã…Â Ã‚Â¹ÃƒÂ¬Ã‚ÂÃ‚Â¸ÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬Â¢Ã…Â ÃƒÂ¬Ã‚ÂÃ¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂ¬Ã…Â¾Ã¢â‚¬Ëœ",
+                                      "extendedHours":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂ¬Ã…Â¾Ã‚Â¥ÃƒÂ«Ã‚ÂÃ…â€œ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾",
+                                      "unauthorizedMovement":  "ÃƒÂ¬Ã…Â Ã‚Â¹ÃƒÂ¬Ã‚ÂÃ‚Â¸ÃƒÂ«Ã‚ÂÃ‹Å“ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬Â¢Ã…Â ÃƒÂ¬Ã‚ÂÃ¢â€šÂ¬ ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚ÂÃ¢â€žÂ¢"
                                   },
                        "labels":  {
-                                      "time":  "Ã¬â€¹Å“ÃªÂ°â€ž",
-                                      "location":  "Ã¬Å“â€žÃ¬Â¹Ëœ",
-                                      "duration":  "ÃªÂ¸Â°ÃªÂ°â€ž",
-                                      "authorizedShiftEnd":  "Ã¬Å Â¹Ã¬ÂÂ¸Ã«ÂÅ“ Ã¬â€¹Å“Ã­â€â€žÃ­Å Â¸ Ã¬Â¢â€¦Ã«Â£Å’"
+                                      "time":  "ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾",
+                                      "location":  "ÃƒÂ¬Ã…â€œÃ¢â‚¬Å¾ÃƒÂ¬Ã‚Â¹Ã‹Å“",
+                                      "duration":  "ÃƒÂªÃ‚Â¸Ã‚Â°ÃƒÂªÃ‚Â°Ã¢â‚¬Å¾",
+                                      "authorizedShiftEnd":  "ÃƒÂ¬Ã…Â Ã‚Â¹ÃƒÂ¬Ã‚ÂÃ‚Â¸ÃƒÂ«Ã‚ÂÃ…â€œ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂ­Ã¢â‚¬ÂÃ¢â‚¬Å¾ÃƒÂ­Ã…Â Ã‚Â¸ ÃƒÂ¬Ã‚Â¢Ã¢â‚¬Â¦ÃƒÂ«Ã‚Â£Ã…â€™"
                                   },
                        "units":  {
-                                     "minutes":  "Ã«Â¶â€ž"
+                                     "minutes":  "ÃƒÂ«Ã‚Â¶Ã¢â‚¬Å¾"
                                  },
                        "buttons":  {
-                                       "investigate":  "Ã¬Â¡Â°Ã¬â€šÂ¬"
+                                       "investigate":  "ÃƒÂ¬Ã‚Â¡Ã‚Â°ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬"
                                    }
                    },
     "driverManagement":  {
                              "header":  {
-                                            "subtitle":  "Ã­Å’â‚¬ ÃªÂ´â‚¬Ã«Â¦Â¬",
-                                            "title":  "Ã¬Å¡Â´Ã¬Â â€žÃ¬Å¾Â Ã«Â°Â Ã¬Å Â¹Ã«Â¬Â´Ã¬â€ºÂ ÃªÂ´â‚¬Ã«Â¦Â¬",
-                                            "description":  "Ã¬â€”Â­Ã­â€¢Â Ã«Â³â€žÃ«Â¡Å“ Ã«ÂªÂ¨Ã«â€œÂ  Ã­Å’â‚¬ ÃªÂµÂ¬Ã¬â€žÂ±Ã¬â€ºÂÃ¬Ââ€ž Ã«Â³Â´ÃªÂ³Â  Ã¬Â â€¢Ã«Â¦Â¬Ã­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤"
+                                            "subtitle":  "ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬",
+                                            "title":  "ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¾Ã‚Â ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ¬Ã…Â Ã‚Â¹ÃƒÂ«Ã‚Â¬Ã‚Â´ÃƒÂ¬Ã¢â‚¬ÂºÃ‚Â ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬",
+                                            "description":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â­ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â ÃƒÂ«Ã‚Â³Ã¢â‚¬Å¾ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Å“Ã‚Â  ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±ÃƒÂ¬Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂªÃ‚Â³Ã‚Â  ÃƒÂ¬Ã‚Â Ã¢â‚¬Â¢ÃƒÂ«Ã‚Â¦Ã‚Â¬ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤"
                                         },
                              "readOnly":  {
-                                              "label":  "Ã¬ÂÂ½ÃªÂ¸Â° Ã¬Â â€žÃ¬Å¡Â© Ã«Â³Â´ÃªÂ¸Â°",
-                                              "description":  "Ã­Å’â‚¬ Ã«Â©Â¤Ã«Â²â€žÃ«Â¥Â¼ Ã¬Â¶â€ÃªÂ°â‚¬Ã­â€¢ËœÃªÂ±Â°Ã«â€šËœ ÃªÂ´â‚¬Ã«Â¦Â¬Ã­â€¢ËœÃ«Â Â¤Ã«Â©Â´ Ã¬â€šÂ¬Ã¬Å¡Â©Ã¬Å¾Â ÃªÂ´â‚¬Ã«Â¦Â¬ Ã­â„¢â€Ã«Â©Â´Ã¬Ââ€ž Ã¬â€šÂ¬Ã¬Å¡Â©Ã­â€¢ËœÃ¬â€žÂ¸Ã¬Å¡â€"
+                                              "label":  "ÃƒÂ¬Ã‚ÂÃ‚Â½ÃƒÂªÃ‚Â¸Ã‚Â° ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂªÃ‚Â¸Ã‚Â°",
+                                              "description":  "ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ ÃƒÂ«Ã‚Â©Ã‚Â¤ÃƒÂ«Ã‚Â²Ã¢â‚¬Å¾ÃƒÂ«Ã‚Â¥Ã‚Â¼ ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂªÃ‚Â°Ã¢â€šÂ¬ÃƒÂ­Ã¢â‚¬Â¢Ã‹Å“ÃƒÂªÃ‚Â±Ã‚Â°ÃƒÂ«Ã¢â‚¬Å¡Ã‹Å“ ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬ÃƒÂ­Ã¢â‚¬Â¢Ã‹Å“ÃƒÂ«Ã‚Â Ã‚Â¤ÃƒÂ«Ã‚Â©Ã‚Â´ ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ¬Ã…Â¾Ã‚Â ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬ ÃƒÂ­Ã¢â€žÂ¢Ã¢â‚¬ÂÃƒÂ«Ã‚Â©Ã‚Â´ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ­Ã¢â‚¬Â¢Ã‹Å“ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â¸ÃƒÂ¬Ã…Â¡Ã¢â‚¬Â"
                                           },
                              "search":  {
-                                            "placeholder":  "Ã¬ÂÂ´Ã«Â¦â€ž Ã«ËœÂÃ«Å â€ Ã¬â€”Â­Ã­â€¢Â Ã«Â¡Å“ ÃªÂ²â‚¬Ã¬Æ’â€°..."
+                                            "placeholder":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â¦Ã¢â‚¬Å¾ ÃƒÂ«Ã‹Å“Ã‚ÂÃƒÂ«Ã…Â Ã¢â‚¬Â ÃƒÂ¬Ã¢â‚¬â€Ã‚Â­ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂªÃ‚Â²Ã¢â€šÂ¬ÃƒÂ¬Ã†â€™Ã¢â‚¬Â°..."
                                         },
                              "roles":  {
-                                           "paramedics":  "Ã¬Ââ€˜ÃªÂ¸â€°Ã¬ÂËœÃ«Â£Å’Ã¬â€šÂ¬",
-                                           "drivers":  "Ã¬Å¡Â´Ã¬Â â€žÃ¬Å¾Â",
-                                           "emts":  "Ã¬Ââ€˜ÃªÂ¸â€°Ã¬ÂËœÃ«Â£Å’ÃªÂ¸Â°Ã¬Ë†Â Ã¬Å¾Â"
+                                           "paramedics":  "ÃƒÂ¬Ã‚ÂÃ¢â‚¬ËœÃƒÂªÃ‚Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚ÂÃ‹Å“ÃƒÂ«Ã‚Â£Ã…â€™ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬",
+                                           "drivers":  "ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‚Â Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¾Ã‚Â",
+                                           "emts":  "ÃƒÂ¬Ã‚ÂÃ¢â‚¬ËœÃƒÂªÃ‚Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚ÂÃ‹Å“ÃƒÂ«Ã‚Â£Ã…â€™ÃƒÂªÃ‚Â¸Ã‚Â°ÃƒÂ¬Ã‹â€ Ã‚Â ÃƒÂ¬Ã…Â¾Ã‚Â"
                                        },
                              "messages":  {
-                                              "noMembers":  "Ã¬ÂÂ´ ÃªÂ·Â¸Ã«Â£Â¹Ã¬â€”Â ÃªÂµÂ¬Ã¬â€žÂ±Ã¬â€ºÂÃ¬ÂÂ´ Ã¬â€”â€ Ã¬Å ÂµÃ«â€¹Ë†Ã«â€¹Â¤"
+                                              "noMembers":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ ÃƒÂªÃ‚Â·Ã‚Â¸ÃƒÂ«Ã‚Â£Ã‚Â¹ÃƒÂ¬Ã¢â‚¬â€Ã‚Â ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±ÃƒÂ¬Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¬Ã‚ÂÃ‚Â´ ÃƒÂ¬Ã¢â‚¬â€Ã¢â‚¬Â ÃƒÂ¬Ã…Â Ã‚ÂµÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤"
                                           },
                              "status":  {
-                                            "active":  "Ã­â„¢Å“Ã¬â€žÂ±",
-                                            "inactive":  "Ã«Â¹â€žÃ­â„¢Å“Ã¬â€žÂ±"
+                                            "active":  "ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±",
+                                            "inactive":  "ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±"
                                         },
                              "helpSection":  {
-                                                 "title":  "Ã­Å’â‚¬Ã¬Ââ€ž ÃªÂ´â‚¬Ã«Â¦Â¬Ã­â€¢ËœÃ«Å â€ Ã«Â°Â©Ã«Â²â€¢",
-                                                 "step1":  "Ã¬â€šÂ¬Ã¬Å¡Â©Ã¬Å¾Â ÃªÂ´â‚¬Ã«Â¦Â¬ Ã­â„¢â€Ã«Â©Â´Ã¬â€”ÂÃ¬â€žÅ“ Ã­Å’â‚¬ ÃªÂµÂ¬Ã¬â€žÂ±Ã¬â€ºÂÃ¬Ââ€ž Ã¬Â¶â€ÃªÂ°â‚¬Ã­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤",
-                                                 "step2":  "Ã¬ÂÂ´ Ã­â„¢â€Ã«Â©Â´Ã¬â€”ÂÃ¬â€žÅ“ Ã¬â€”Â­Ã­â€¢Â Ã«Â³â€žÃ«Â¡Å“ ÃªÂ·Â¸Ã«Â£Â¹Ã­â„¢â€Ã«ÂÅ“ Ã«ÂªÂ¨Ã«â€œÂ  Ã­â„¢Å“Ã¬â€žÂ± Ã­Å’â‚¬Ã¬Ââ€ž Ã«Â´â€¦Ã«â€¹Ë†Ã«â€¹Â¤",
-                                                 "step3":  "Ã­Å’â‚¬ Ã¬Æ’ÂÃ­Æ’Å“ Ã­â„¢â€Ã«Â©Â´Ã¬â€”ÂÃ¬â€žÅ“ Ã­Å’â‚¬ ÃªÂµÂ¬Ã¬â€žÂ±Ã¬â€ºÂÃ¬Ââ€ž Ã¬â€¹Å“Ã­â€â€žÃ­Å Â¸Ã¬â€”Â Ã­â€¢Â Ã«â€¹Â¹Ã­â€¢Â©Ã«â€¹Ë†Ã«â€¹Â¤"
+                                                 "title":  "ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬ÃƒÂ­Ã¢â‚¬Â¢Ã‹Å“ÃƒÂ«Ã…Â Ã¢â‚¬Â ÃƒÂ«Ã‚Â°Ã‚Â©ÃƒÂ«Ã‚Â²Ã¢â‚¬Â¢",
+                                                 "step1":  "ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ¬Ã…Â¾Ã‚Â ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬ ÃƒÂ­Ã¢â€žÂ¢Ã¢â‚¬ÂÃƒÂ«Ã‚Â©Ã‚Â´ÃƒÂ¬Ã¢â‚¬â€Ã‚ÂÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œ ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±ÃƒÂ¬Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂªÃ‚Â°Ã¢â€šÂ¬ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤",
+                                                 "step2":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ ÃƒÂ­Ã¢â€žÂ¢Ã¢â‚¬ÂÃƒÂ«Ã‚Â©Ã‚Â´ÃƒÂ¬Ã¢â‚¬â€Ã‚ÂÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œ ÃƒÂ¬Ã¢â‚¬â€Ã‚Â­ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â ÃƒÂ«Ã‚Â³Ã¢â‚¬Å¾ÃƒÂ«Ã‚Â¡Ã…â€œ ÃƒÂªÃ‚Â·Ã‚Â¸ÃƒÂ«Ã‚Â£Ã‚Â¹ÃƒÂ­Ã¢â€žÂ¢Ã¢â‚¬ÂÃƒÂ«Ã‚ÂÃ…â€œ ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Å“Ã‚Â  ÃƒÂ­Ã¢â€žÂ¢Ã…â€œÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â± ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ«Ã‚Â´Ã¢â‚¬Â¦ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤",
+                                                 "step3":  "ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ ÃƒÂ¬Ã†â€™Ã‚ÂÃƒÂ­Ã†â€™Ã…â€œ ÃƒÂ­Ã¢â€žÂ¢Ã¢â‚¬ÂÃƒÂ«Ã‚Â©Ã‚Â´ÃƒÂ¬Ã¢â‚¬â€Ã‚ÂÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œ ÃƒÂ­Ã…â€™Ã¢â€šÂ¬ ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±ÃƒÂ¬Ã¢â‚¬ÂºÃ‚ÂÃƒÂ¬Ã‚ÂÃ¢â‚¬Å¾ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂ­Ã¢â‚¬ÂÃ¢â‚¬Å¾ÃƒÂ­Ã…Â Ã‚Â¸ÃƒÂ¬Ã¢â‚¬â€Ã‚Â ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¹ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â©ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤"
                                              }
                          },
     "geofence":  {
@@ -1603,7 +1603,7 @@
                                    "restricted":  "Restricted Zones",
                                    "coverage":  "Coverage Area"
                                },
-                     "alert":  "Ã°Å¸â€™Â¡ Create geofences around depots, hospitals, and restricted areas. Vehicles will be monitored for breaches.",
+                     "alert":  "ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¡ Create geofences around depots, hospitals, and restricted areas. Vehicles will be monitored for breaches.",
                      "table":  {
                                    "name":  "Name",
                                    "type":  "Type",
@@ -1674,7 +1674,7 @@
                                              "crew":  "Crew"
                                          },
                              "status":  {
-                                            "available":  "Ã¢Å“â€œ Available",
+                                            "available":  "ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ Available",
                                             "enRoute":  "En Route"
                                         },
                              "summary":  {
@@ -1713,7 +1713,7 @@
                                         },
                            "patient":  {
                                            "title":  "Patient Status",
-                                           "vitalStable":  "Ã¢Å“â€œ Patient vitals stable and normal"
+                                           "vitalStable":  "ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ Patient vitals stable and normal"
                                        },
                            "communication":  {
                                                  "title":  "Crew Communication",
@@ -1996,72 +1996,72 @@
                     },
     "vehicleTypeManagement":  {
                                   "header":  {
-                                                 "category":  "Ã­â€¢Â¨Ã«Å’â‚¬ ÃªÂµÂ¬Ã¬â€žÂ±",
-                                                 "title":  "Ã¬Â°Â¨Ã«Å¸â€° Ã¬Å“Â Ã­Ëœâ€¢",
-                                                 "description":  "ÃªÂµÂ¬ÃªÂ¸â€°Ã¬Â°Â¨ Ã¬Å“Â Ã­Ëœâ€¢, Ã¬Å¾Â¥Ã«Â¹â€ž Ã«Â°Â ÃªÂµÂ¬Ã¬â€žÂ± ÃªÂ´â‚¬Ã«Â¦Â¬"
+                                                 "category":  "ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â¨ÃƒÂ«Ã…â€™Ã¢â€šÂ¬ ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â±",
+                                                 "title":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã…â€œÃ‚Â ÃƒÂ­Ã‹Å“Ã¢â‚¬Â¢",
+                                                 "description":  "ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂªÃ‚Â¸Ã¢â‚¬Â°ÃƒÂ¬Ã‚Â°Ã‚Â¨ ÃƒÂ¬Ã…â€œÃ‚Â ÃƒÂ­Ã‹Å“Ã¢â‚¬Â¢, ÃƒÂ¬Ã…Â¾Ã‚Â¥ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂªÃ‚ÂµÃ‚Â¬ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â± ÃƒÂªÃ‚Â´Ã¢â€šÂ¬ÃƒÂ«Ã‚Â¦Ã‚Â¬"
                                              },
                                   "summary":  {
-                                                  "totalVehicles":  "Ã¬Â´Â Ã¬Â°Â¨Ã«Å¸â€°",
-                                                  "avgMonthlyCost":  "Ã­Ââ€°ÃªÂ·Â  Ã¬â€ºâ€ÃªÂ°â€ž Ã«Â¹â€žÃ¬Å¡Â©",
-                                                  "totalCrewCapacity":  "Ã¬Â´Â Ã¬Å Â¹Ã«Â¬Â´Ã¬â€ºÂ Ã¬Å¡Â©Ã«Å¸â€°",
-                                                  "title":  "Ã­â€¢Â¨Ã«Å’â‚¬ Ã¬Å¡â€Ã¬â€¢Â½",
-                                                  "totalTypes":  "Ã¬Â´Â Ã¬Å“Â Ã­Ëœâ€¢"
+                                                  "totalVehicles":  "ÃƒÂ¬Ã‚Â´Ã‚Â ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°",
+                                                  "avgMonthlyCost":  "ÃƒÂ­Ã‚ÂÃ¢â‚¬Â°ÃƒÂªÃ‚Â·Ã‚Â  ÃƒÂ¬Ã¢â‚¬ÂºÃ¢â‚¬ÂÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¡Ã‚Â©",
+                                                  "totalCrewCapacity":  "ÃƒÂ¬Ã‚Â´Ã‚Â ÃƒÂ¬Ã…Â Ã‚Â¹ÃƒÂ«Ã‚Â¬Ã‚Â´ÃƒÂ¬Ã¢â‚¬ÂºÃ‚Â ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°",
+                                                  "title":  "ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â¨ÃƒÂ«Ã…â€™Ã¢â€šÂ¬ ÃƒÂ¬Ã…Â¡Ã¢â‚¬ÂÃƒÂ¬Ã¢â‚¬Â¢Ã‚Â½",
+                                                  "totalTypes":  "ÃƒÂ¬Ã‚Â´Ã‚Â ÃƒÂ¬Ã…â€œÃ‚Â ÃƒÂ­Ã‹Å“Ã¢â‚¬Â¢"
                                               },
                                   "specifications":  {
-                                                         "monthlyCost":  "Ã¬â€ºâ€ÃªÂ°â€ž Ã«Â¹â€žÃ¬Å¡Â©",
-                                                         "capacity":  "Ã¬Å¡Â©Ã«Å¸â€°",
-                                                         "inFleet":  "Ã­â€¢Â¨Ã«Å’â‚¬Ã¬â€”ÂÃ¬â€žÅ“",
-                                                         "vehicles":  "Ã¬Â°Â¨Ã«Å¸â€°",
-                                                         "members":  "Ã«Â©Â¤Ã«Â²â€ž",
-                                                         "crewSize":  "Ã¬Å Â¹Ã«Â¬Â´Ã¬â€ºÂ ÃªÂ·Å“Ã«ÂªÂ¨"
+                                                         "monthlyCost":  "ÃƒÂ¬Ã¢â‚¬ÂºÃ¢â‚¬ÂÃƒÂªÃ‚Â°Ã¢â‚¬Å¾ ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¡Ã‚Â©",
+                                                         "capacity":  "ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°",
+                                                         "inFleet":  "ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â¨ÃƒÂ«Ã…â€™Ã¢â€šÂ¬ÃƒÂ¬Ã¢â‚¬â€Ã‚ÂÃƒÂ¬Ã¢â‚¬Å¾Ã…â€œ",
+                                                         "vehicles":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°",
+                                                         "members":  "ÃƒÂ«Ã‚Â©Ã‚Â¤ÃƒÂ«Ã‚Â²Ã¢â‚¬Å¾",
+                                                         "crewSize":  "ÃƒÂ¬Ã…Â Ã‚Â¹ÃƒÂ«Ã‚Â¬Ã‚Â´ÃƒÂ¬Ã¢â‚¬ÂºÃ‚Â ÃƒÂªÃ‚Â·Ã…â€œÃƒÂ«Ã‚ÂªÃ‚Â¨"
                                                      },
                                   "editForm":  {
                                                    "button":  {
-                                                                  "cancel":  "Ã¬Â·Â¨Ã¬â€ Å’",
-                                                                  "save":  "Ã¬Â â‚¬Ã¬Å¾Â¥"
+                                                                  "cancel":  "ÃƒÂ¬Ã‚Â·Ã‚Â¨ÃƒÂ¬Ã¢â‚¬Â Ã…â€™",
+                                                                  "save":  "ÃƒÂ¬Ã‚Â Ã¢â€šÂ¬ÃƒÂ¬Ã…Â¾Ã‚Â¥"
                                                               },
                                                    "placeholders":  {
-                                                                        "name":  "Ã¬ÂÂ´Ã«Â¦â€ž"
+                                                                        "name":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â¦Ã¢â‚¬Å¾"
                                                                     }
                                                },
                                   "button":  {
-                                                 "newType":  "Ã¬Æ’Ë† Ã¬Å“Â Ã­Ëœâ€¢"
+                                                 "newType":  "ÃƒÂ¬Ã†â€™Ã‹â€  ÃƒÂ¬Ã…â€œÃ‚Â ÃƒÂ­Ã‹Å“Ã¢â‚¬Â¢"
                                              },
                                   "equipment":  {
-                                                    "title":  "Ã­â€˜Å“Ã¬Â¤â‚¬ Ã¬Å¾Â¥Ã«Â¹â€ž"
+                                                    "title":  "ÃƒÂ­Ã¢â‚¬ËœÃ…â€œÃƒÂ¬Ã‚Â¤Ã¢â€šÂ¬ ÃƒÂ¬Ã…Â¾Ã‚Â¥ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾"
                                                 }
                               },
     "vehicleUtilisation":  {
                                "metrics":  {
-                                               "peakUsageHours":  "Ã¬ÂµÅ“Ã«Å’â‚¬ Ã¬â€šÂ¬Ã¬Å¡Â© Ã¬â€¹Å“ÃªÂ°â€ž",
-                                               "costPerKm":  "Ã«Â¹â€žÃ¬Å¡Â©/km",
-                                               "title":  "Ã¬Æ’ÂÃ¬â€žÂ¸ Ã«Â©â€Ã­Å Â¸Ã«Â¦Â­",
-                                               "averageHoursDay":  "Ã­Ââ€°ÃªÂ·Â  Ã¬â€¹Å“ÃªÂ°â€ž/Ã¬ÂÂ¼",
-                                               "downtime":  "Ã«â€¹Â¤Ã¬Å¡Â´Ã­Æ’â‚¬Ã¬Å¾â€ž (Ã¬Å“Â Ã¬Â§â‚¬Ã«Â³Â´Ã¬Ë†Ëœ)",
-                                               "averageDistanceDay":  "Ã­Ââ€°ÃªÂ·Â  ÃªÂ±Â°Ã«Â¦Â¬/Ã¬ÂÂ¼",
-                                               "fuelConsumption":  "Ã¬â€”Â°Ã«Â£Å’ Ã¬â€ Å’Ã«Â¹â€ž"
+                                               "peakUsageHours":  "ÃƒÂ¬Ã‚ÂµÃ…â€œÃƒÂ«Ã…â€™Ã¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾",
+                                               "costPerKm":  "ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¡Ã‚Â©/km",
+                                               "title":  "ÃƒÂ¬Ã†â€™Ã‚ÂÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â¸ ÃƒÂ«Ã‚Â©Ã¢â‚¬ÂÃƒÂ­Ã…Â Ã‚Â¸ÃƒÂ«Ã‚Â¦Ã‚Â­",
+                                               "averageHoursDay":  "ÃƒÂ­Ã‚ÂÃ¢â‚¬Â°ÃƒÂªÃ‚Â·Ã‚Â  ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾/ÃƒÂ¬Ã‚ÂÃ‚Â¼",
+                                               "downtime":  "ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¤ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ­Ã†â€™Ã¢â€šÂ¬ÃƒÂ¬Ã…Â¾Ã¢â‚¬Å¾ (ÃƒÂ¬Ã…â€œÃ‚Â ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ÃƒÂ«Ã‚Â³Ã‚Â´ÃƒÂ¬Ã‹â€ Ã‹Å“)",
+                                               "averageDistanceDay":  "ÃƒÂ­Ã‚ÂÃ¢â‚¬Â°ÃƒÂªÃ‚Â·Ã‚Â  ÃƒÂªÃ‚Â±Ã‚Â°ÃƒÂ«Ã‚Â¦Ã‚Â¬/ÃƒÂ¬Ã‚ÂÃ‚Â¼",
+                                               "fuelConsumption":  "ÃƒÂ¬Ã¢â‚¬â€Ã‚Â°ÃƒÂ«Ã‚Â£Ã…â€™ ÃƒÂ¬Ã¢â‚¬Â Ã…â€™ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾"
                                            },
                                "keyMetrics":  {
-                                                  "totalTrips":  "Ã¬Â´Â Ã¬â€”Â¬Ã­â€“â€° Ã¬Ë†Ëœ",
-                                                  "totalMileage":  "Ã¬Â´Â Ã«Â§Ë†Ã¬ÂÂ¼Ã«Â¦Â¬Ã¬Â§â‚¬",
-                                                  "perVehicleMonth":  "Ã¬Â°Â¨Ã«Å¸â€°/Ã¬â€ºâ€Ã«â€¹Â¹",
-                                                  "averageUtilisation":  "Ã­Ââ€°ÃªÂ·Â  Ã¬â€šÂ¬Ã¬Å¡Â©Ã«Â¥Â ",
-                                                  "kmThisMonth":  "Ã¬ÂÂ´Ã«Â²Ë† Ã«â€¹Â¬ km",
-                                                  "operatingCost":  "Ã¬Å¡Â´Ã¬ËœÂ Ã«Â¹â€žÃ¬Å¡Â©"
+                                                  "totalTrips":  "ÃƒÂ¬Ã‚Â´Ã‚Â ÃƒÂ¬Ã¢â‚¬â€Ã‚Â¬ÃƒÂ­Ã¢â‚¬â€œÃ¢â‚¬Â° ÃƒÂ¬Ã‹â€ Ã‹Å“",
+                                                  "totalMileage":  "ÃƒÂ¬Ã‚Â´Ã‚Â ÃƒÂ«Ã‚Â§Ã‹â€ ÃƒÂ¬Ã‚ÂÃ‚Â¼ÃƒÂ«Ã‚Â¦Ã‚Â¬ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬",
+                                                  "perVehicleMonth":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â°/ÃƒÂ¬Ã¢â‚¬ÂºÃ¢â‚¬ÂÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¹",
+                                                  "averageUtilisation":  "ÃƒÂ­Ã‚ÂÃ¢â‚¬Â°ÃƒÂªÃ‚Â·Ã‚Â  ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã‚Â¥Ã‚Â ",
+                                                  "kmThisMonth":  "ÃƒÂ¬Ã‚ÂÃ‚Â´ÃƒÂ«Ã‚Â²Ã‹â€  ÃƒÂ«Ã¢â‚¬Â¹Ã‚Â¬ km",
+                                                  "operatingCost":  "ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¡Ã‚Â©"
                                               },
                                "header":  {
-                                              "description":  "Ã­â€¢Â¨Ã«Å’â‚¬ Ã¬â€šÂ¬Ã¬Å¡Â©, Ã­Å¡Â¨Ã¬Å“Â¨ Ã«Â°Â Ã«Â¹â€žÃ¬Å¡Â© Ã«ÂªÂ¨Ã«â€¹Ë†Ã­â€žÂ°Ã«Â§Â",
-                                              "title":  "Ã¬Â°Â¨Ã«Å¸â€° Ã¬â€šÂ¬Ã¬Å¡Â©Ã«Â¥Â ",
-                                              "category":  "Ã­â€¢Â¨Ã«Å’â‚¬ Ã«Â¶â€žÃ¬â€žÂ"
+                                              "description":  "ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â¨ÃƒÂ«Ã…â€™Ã¢â€šÂ¬ ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©, ÃƒÂ­Ã…Â¡Ã‚Â¨ÃƒÂ¬Ã…â€œÃ‚Â¨ ÃƒÂ«Ã‚Â°Ã‚Â ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ«Ã‚ÂªÃ‚Â¨ÃƒÂ«Ã¢â‚¬Â¹Ã‹â€ ÃƒÂ­Ã¢â‚¬Å¾Ã‚Â°ÃƒÂ«Ã‚Â§Ã‚Â",
+                                              "title":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã‚Â¥Ã‚Â ",
+                                              "category":  "ÃƒÂ­Ã¢â‚¬Â¢Ã‚Â¨ÃƒÂ«Ã…â€™Ã¢â€šÂ¬ ÃƒÂ«Ã‚Â¶Ã¢â‚¬Å¾ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â"
                                           },
                                "charts":  {
-                                              "target":  "Ã«ÂªÂ©Ã­â€˜Å“ %",
-                                              "mileageKm":  "Ã«Â§Ë†Ã¬ÂÂ¼Ã«Â¦Â¬Ã¬Â§â‚¬ (km)",
-                                              "hoursUsed":  "Ã¬â€šÂ¬Ã¬Å¡Â©Ã­â€¢Å“ Ã¬â€¹Å“ÃªÂ°â€ž",
-                                              "vehicleUtilisationRate":  "Ã¬Â°Â¨Ã«Å¸â€° Ã¬â€šÂ¬Ã¬Å¡Â©Ã«Â¥Â ",
-                                              "actual":  "Ã¬â€¹Â¤Ã¬Â Å“ %",
-                                              "operatingCostBreakdown":  "Ã¬Å¡Â´Ã¬ËœÂ Ã«Â¹â€žÃ¬Å¡Â© Ã«Â¶â€žÃ¬â€žÂ",
-                                              "usageTrend":  "Ã¬â€šÂ¬Ã¬Å¡Â© Ã¬Â¶â€Ã¬â€žÂ¸ (5Ã¬Â£Â¼)"
+                                              "target":  "ÃƒÂ«Ã‚ÂªÃ‚Â©ÃƒÂ­Ã¢â‚¬ËœÃ…â€œ %",
+                                              "mileageKm":  "ÃƒÂ«Ã‚Â§Ã‹â€ ÃƒÂ¬Ã‚ÂÃ‚Â¼ÃƒÂ«Ã‚Â¦Ã‚Â¬ÃƒÂ¬Ã‚Â§Ã¢â€šÂ¬ (km)",
+                                              "hoursUsed":  "ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ­Ã¢â‚¬Â¢Ã…â€œ ÃƒÂ¬Ã¢â‚¬Â¹Ã…â€œÃƒÂªÃ‚Â°Ã¢â‚¬Å¾",
+                                              "vehicleUtilisationRate":  "ÃƒÂ¬Ã‚Â°Ã‚Â¨ÃƒÂ«Ã…Â¸Ã¢â‚¬Â° ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â©ÃƒÂ«Ã‚Â¥Ã‚Â ",
+                                              "actual":  "ÃƒÂ¬Ã¢â‚¬Â¹Ã‚Â¤ÃƒÂ¬Ã‚Â Ã…â€œ %",
+                                              "operatingCostBreakdown":  "ÃƒÂ¬Ã…Â¡Ã‚Â´ÃƒÂ¬Ã‹Å“Ã‚Â ÃƒÂ«Ã‚Â¹Ã¢â‚¬Å¾ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ«Ã‚Â¶Ã¢â‚¬Å¾ÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â",
+                                              "usageTrend":  "ÃƒÂ¬Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¬Ã…Â¡Ã‚Â© ÃƒÂ¬Ã‚Â¶Ã¢â‚¬ÂÃƒÂ¬Ã¢â‚¬Å¾Ã‚Â¸ (5ÃƒÂ¬Ã‚Â£Ã‚Â¼)"
                                           }
                            },
     "landing":  {
@@ -2070,10 +2070,10 @@
                                 "getStarted":  "Get Started"
                             },
                     "hero":  {
-                                 "badge":  "AI-powered Â· Patient-controlled Â· HIPAA-aligned",
+                                 "badge":  "AI-powered Ã‚Â· Patient-controlled Ã‚Â· HIPAA-aligned",
                                  "title":  "A revolutionary healthcare ecosystem",
                                  "titleHighlight":  "built around you.",
-                                 "description":  "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360Â° health story â€” from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
+                                 "description":  "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360Ã‚Â° health story Ã¢â‚¬â€ from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
                                  "cta":  "Join the Ecosystem",
                                  "doctorsButton":  "Doctors",
                                  "patientsButton":  "Patients"
@@ -2094,7 +2094,7 @@
                                      },
                     "mobile":  {
                                    "title":  "Get Holarc on your phone",
-                                   "description":  "Available on iOS and Android â€” your full health story in your pocket.",
+                                   "description":  "Available on iOS and Android Ã¢â‚¬â€ your full health story in your pocket.",
                                    "appStore":  "App Store",
                                    "googlePlay":  "Google Play"
                                },
@@ -2112,7 +2112,7 @@
                                      "roundTableFeature":  "Round Table",
                                      "roundTableDescription":  "Specialists coordinate per patient with shared notes and read-receipts.",
                                      "aiAssistant":  "AI Clinical Assistant",
-                                     "aiAssistantDescription":  "Patient history summaries Â· medication conflict alerts Â· imaging analysis Â· auto-generated documents.",
+                                     "aiAssistantDescription":  "Patient history summaries Ã‚Â· medication conflict alerts Ã‚Â· imaging analysis Ã‚Â· auto-generated documents.",
                                      "holarcHelp":  "Holarc Help (SOS)",
                                      "holarcHelpDescription":  "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
                                      "emergencyResponders":  "Emergency responders",
@@ -2123,21 +2123,21 @@
                     "patientBenefits":  {
                                             "sectionBadge":  "For Patients",
                                             "sectionTitle":  "Your Health.",
-                                            "sectionTitleHighlight":  "360Â° View.",
-                                            "sectionDescription":  "Holarc gives you a complete 360-degree view of your health profileâ€”every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
+                                            "sectionTitleHighlight":  "360Ã‚Â° View.",
+                                            "sectionDescription":  "Holarc gives you a complete 360-degree view of your health profileÃ¢â‚¬â€every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
                                             "benefit1Title":  "Complete Health Picture",
-                                            "benefit1Description":  "See your entire medical history, prescriptions, and care team in one unified viewâ€”no more scattered records.",
+                                            "benefit1Description":  "See your entire medical history, prescriptions, and care team in one unified viewÃ¢â‚¬â€no more scattered records.",
                                             "benefit2Title":  "Connect Your Care Team",
                                             "benefit2Description":  "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
                                             "benefit3Title":  "You\u0027re in Control",
                                             "benefit3Description":  "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
                                             "benefit4Title":  "Unified Appointments",
-                                            "benefit4Description":  "All your healthcare appointments from every provider in one calendarâ€”never miss a follow-up."
+                                            "benefit4Description":  "All your healthcare appointments from every provider in one calendarÃ¢â‚¬â€never miss a follow-up."
                                         },
                     "providerBenefits":  {
                                              "sectionBadge":  "For Healthcare Providers",
                                              "sectionTitle":  "Practice with the Full Picture",
-                                             "sectionDescription":  "When patients grant you access, you see everythingâ€”their complete history across all providers. Make better decisions with better information.",
+                                             "sectionDescription":  "When patients grant you access, you see everythingÃ¢â‚¬â€their complete history across all providers. Make better decisions with better information.",
                                              "benefit1Title":  "AI-Powered Insights",
                                              "benefit1Description":  "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
                                              "benefit2Title":  "Seamless Collaboration",
@@ -2145,7 +2145,7 @@
                                              "benefit3Title":  "Automated Documentation",
                                              "benefit3Description":  "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
                                              "benefit4Title":  "Better Patient Outcomes",
-                                             "benefit4Description":  "Access complete patient history across all their providersâ€”make informed decisions with the full picture.",
+                                             "benefit4Description":  "Access complete patient history across all their providersÃ¢â‚¬â€make informed decisions with the full picture.",
                                              "benefit5Title":  "Emergency Service Providers",
                                              "benefit5Description":  "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient\u0027s full medical context.",
                                              "benefit6Title":  "Hospital Partners",
@@ -2153,7 +2153,7 @@
                                          },
                     "cta":  {
                                 "title":  "Ready for Healthcare That Works Together?",
-                                "description":  "Join thousands of patients and providers building a better healthcare experienceâ€”one where your health story is complete, connected, and under your control.",
+                                "description":  "Join thousands of patients and providers building a better healthcare experienceÃ¢â‚¬â€one where your health story is complete, connected, and under your control.",
                                 "button":  "Get Started Today"
                             },
                     "roleDialog":  {
@@ -2270,7 +2270,7 @@
                                       "findProviderTitle":  "Find a Healthcare Provider on Holarc",
                                       "statusHidden":  "Hidden",
                                       "anyLanguage":  "Any language",
-                                      "findProviderDesc":  "Filter by name, specialty, language — or any combination",
+                                      "findProviderDesc":  "Filter by name, specialty, language â€” or any combination",
                                       "doctorRestoredDesc":  "They\u0027re back in your active list",
                                       "hideTooltip":  "Hide from your active list",
                                       "groupDoctors":  "Doctors",
@@ -2455,5 +2455,379 @@
                                           "patientDocumentsTitle":  "Patient Documents",
                                           "filterCancelledButton":  "Cancelled"
                                       }
+                },
+    "doctor":  {
+                    "invoices":  {
+                                      "title":  "Invoices",
+                                      "subtitle":  "Manage and track all patient invoices",
+                                      "status":  {
+                                                     "paid":  "Paid",
+                                                     "overdue":  "Overdue",
+                                                     "archived":  "Archived",
+                                                     "issued":  "Issued"
+                                                 },
+                                      "messages":  {
+                                                      "invoiceUpdated":  "Invoice Updated",
+                                                      "markedPaid":  "Invoice marked as paid",
+                                                      "invoiceArchived":  "Invoice Archived",
+                                                      "invoiceArchived_desc":  "Invoice has been archived",
+                                                      "detailsSaved":  "Invoice details have been saved",
+                                                      "sentToMedicalAid":  "Sent to Medical Aid",
+                                                      "paidInvoiceEmailed":  "Paid invoice emailed to",
+                                                      "pdfExported":  "PDF Exported",
+                                                      "pdfExportedDesc":  "Invoice report has been downloaded",
+                                                      "emailSent":  "Email Sent",
+                                                      "emailSentTo":  "Invoice report sent to",
+                                                      "invoiceCreated":  "Invoice Created",
+                                                      "invoiceCreatedDesc":  "Invoice {{invoiceNumber}} has been created successfully"
+                                                  },
+                                      "errors":  {
+                                                    "error":  "Error",
+                                                    "failedToLoad":  "Failed to load invoices",
+                                                    "noClaimsEmail":  "No Claims Email",
+                                                    "addClaimsEmail":  "Add a Medical Aid Claims Email on the patient profile to send claims.",
+                                                    "failedSendPaid":  "Failed to send paid invoice to medical aid",
+                                                    "sendFailed":  "Send Failed",
+                                                    "failedArchive":  "Failed to archive invoice",
+                                                    "previewFailed":  "Preview failed",
+                                                    "invalidAmount":  "Invalid Amount",
+                                                    "enterValidAmount":  "Please enter a valid amount",
+                                                    "enterValidAmountGtZero":  "Please enter a valid amount greater than 0",
+                                                    "invalidEmail":  "Invalid Email",
+                                                    "enterValidEmail":  "Please enter a valid email address",
+                                                    "noPatientSelected":  "No Patient Selected",
+                                                    "selectPatientFirst":  "Please select a patient first",
+                                                    "noClaimsEmailAutoSubmit":  "No Claims Email",
+                                                    "noClaimsEmailAutoSubmitDesc":  "Add a Medical Aid Claims Email on the patient profile to enable auto-submit."
+                                                },
+                                      "actions":  {
+                                                     "createInvoice":  "Create Invoice",
+                                                     "cancel":  "Cancel",
+                                                     "save":  "Save",
+                                                     "update":  "Update",
+                                                     "close":  "Close",
+                                                     "download":  "Download",
+                                                     "markPaid":  "Mark Paid",
+                                                     "sendToMedicalAid":  "Send to Medical Aid",
+                                                     "archive":  "Archive",
+                                                     "edit":  "Edit",
+                                                     "emailReport":  "Email Report",
+                                                     "downloadPdf":  "Download PDF",
+                                                     "printSavePdf":  "Print / Save PDF"
+                                                 },
+                                      "form":  {
+                                                   "patient":  "Patient",
+                                                   "selectPatient":  "Select a patient...",
+                                                   "searchPatients":  "Search patients...",
+                                                   "noPatientFound":  "No patient found.",
+                                                   "service":  "Service (Optional)",
+                                                   "selectService":  "Select a service...",
+                                                   "searchServices":  "Search services...",
+                                                   "noServiceFound":  "No service found.",
+                                                   "serviceHint":  "Select a service to auto-fill description and amount. You can override the price below.",
+                                                   "description":  "Description",
+                                                   "descriptionPlaceholder":  "Invoice description...",
+                                                   "amount":  "Amount",
+                                                   "dueDate":  "Due Date",
+                                                   "selectDescription":  "Select a patient and enter invoice details"
+                                               },
+                                      "table":  {
+                                                    "invoiceNumber":  "Invoice #",
+                                                    "patient":  "Patient",
+                                                    "description":  "Description",
+                                                    "amount":  "Amount",
+                                                    "dueDate":  "Due Date",
+                                                    "status":  "Status",
+                                                    "actions":  "Actions",
+                                                    "noInvoices":  "No invoices found",
+                                                    "setAmount":  "Set amount",
+                                                    "setAmountTitle":  "This invoice has no amount â€” click to set it",
+                                                    "previewTitle":  "Preview invoice",
+                                                    "editTitle":  "Edit invoice",
+                                                    "paidOn":  "Paid"
+                                                },
+                                      "stats":  {
+                                                    "issued":  "Issued",
+                                                    "overdue":  "Overdue",
+                                                    "paid":  "Paid",
+                                                    "outstanding":  "Outstanding"
+                                                },
+                                      "search":  {
+                                                     "placeholder":  "Search invoices..."
+                                                 },
+                                      "filter":  {
+                                                     "title":  "Filter by status",
+                                                     "issuedAndOverdue":  "Issued & Overdue",
+                                                     "all":  "All Invoices",
+                                                     "issuedOnly":  "Issued Only",
+                                                     "overdueOnly":  "Overdue Only",
+                                                     "paidOnly":  "Paid Only",
+                                                     "archived":  "Archived"
+                                                 },
+                                      "modal":  {
+                                                    "editTitle":  "Edit Invoice",
+                                                    "editDescription":  "Invoice {{invoiceNumber}}",
+                                                    "previewTitle":  "Invoice preview",
+                                                    "invoiceTitle":  "INVOICE",
+                                                    "from":  "From",
+                                                    "billTo":  "Bill To",
+                                                    "invoiceDate":  "Invoice Date",
+                                                    "dueDate":  "Due Date",
+                                                    "total":  "Total"
+                                                },
+                                      "report":  {
+                                                     "title":  "Invoice Report",
+                                                     "description":  "View invoice summary by date range with monthly totals",
+                                                     "fromDate":  "From Date",
+                                                     "toDate":  "To Date",
+                                                     "selectDate":  "Select date",
+                                                     "totalInvoices":  "Total Invoices",
+                                                     "totalAmount":  "Total Amount",
+                                                     "paid":  "Paid",
+                                                     "outstanding":  "Outstanding",
+                                                     "monthlyBreakdown":  "Monthly Breakdown",
+                                                     "month":  "Month",
+                                                     "invoices":  "Invoices",
+                                                     "noInvoices":  "No invoices found in the selected date range",
+                                                     "emailPlaceholder":  "Enter email address"
+                                                 }
+                                  },
+                    "connections":  {
+                                        "title":  "Connections",
+                                        "subtitle":  "Manage your professional network and connections",
+                                        "tab":  {
+                                                   "connected":  "Connected",
+                                                   "pending":  "Pending"
+                                               },
+                                        "search":  {
+                                                      "placeholder":  "Search..."
+                                                  },
+                                        "empty":  {
+                                                     "title":  "No connections yet",
+                                                     "description":  "Invite users to start building your network",
+                                                     "pendingTitle":  "No pending invitations",
+                                                     "pendingDescription":  "All your invitations have been responded to"
+                                                 },
+                                        "card":  {
+                                                    "unknownUser":  "Unknown User",
+                                                    "connected":  "Connected",
+                                                    "direction":  {
+                                                                      "received":  "Received",
+                                                                      "sent":  "Sent"
+                                                                  }
+                                                },
+                                        "actions":  {
+                                                       "accept":  "Accept",
+                                                       "decline":  "Decline",
+                                                       "cancel":  "Cancel"
+                                                   },
+                                        "messages":  {
+                                                        "acceptedTitle":  "Invitation accepted",
+                                                        "acceptedDesc":  "You are now connected",
+                                                        "declinedTitle":  "Invitation declined",
+                                                        "cancelledTitle":  "Invitation cancelled",
+                                                        "cancelledDesc":  "The invitation has been cancelled",
+                                                        "disconnectedTitle":  "Disconnected",
+                                                        "disconnectedDesc":  "You are no longer connected with"
+                                                    },
+                                        "errors":  {
+                                                      "title":  "Error",
+                                                      "failedLoad":  "Failed to load connections",
+                                                      "failedAccept":  "Failed to accept invitation",
+                                                      "failedDecline":  "Failed to decline invitation",
+                                                      "failedDisconnect":  "Failed to disconnect",
+                                                      "failedCancel":  "Failed to cancel invitation"
+                                                  },
+                                        "dialog":  {
+                                                      "title":  "Disconnect from",
+                                                      "description":  "This will remove the connection between you and this user. You can always reconnect later by sending a new invitation."
+                                                  }
+                                    },
+                    "referrals":  {
+                                      "title":  "Referrals",
+                                      "subtitle":  "Manage doctors you refer patients to",
+                                      "actions":  {
+                                                     "addDoctor":  "Add Doctor"
+                                                 },
+                                      "form":  {
+                                                   "title":  "Add Referral Doctor",
+                                                   "editTitle":  "Edit Referral Doctor",
+                                                   "search":  "Search for a doctor on Holarc",
+                                                   "searchPlaceholder":  "Type doctor name...",
+                                                   "notFound":  "Doctor not found on Holarc",
+                                                   "inviteButton":  "Send Invitation",
+                                                   "manualButton":  "Add Manually",
+                                                   "orManual":  "Or add manually without searching",
+                                                   "sendInvite":  "Send an email invitation to join Holarc Health",
+                                                   "doctorEmail":  "Doctor's Email",
+                                                   "emailPlaceholder":  "doctor@example.com",
+                                                   "firstName":  "First Name *",
+                                                   "lastName":  "Last Name *",
+                                                   "specialty":  "Specialty",
+                                                   "selectSpecialty":  "Select specialty",
+                                                   "other":  "Other...",
+                                                   "enterSpecialty":  "Enter specialty",
+                                                   "practiceNumber":  "Practice Number",
+                                                   "address":  "Address",
+                                                   "email":  "Email",
+                                                   "phone":  "Phone"
+                                               },
+                                      "table":  {
+                                                    "name":  "Name",
+                                                    "specialty":  "Specialty",
+                                                    "practiceNumber":  "Practice Number",
+                                                    "email":  "Email",
+                                                    "phone":  "Phone",
+                                                    "referrals":  "Referrals",
+                                                    "noData":  "No referral doctors found"
+                                                },
+                                      "actions":  {
+                                                     "save":  "Save",
+                                                     "update":  "Update",
+                                                     "cancel":  "Cancel",
+                                                     "back":  "Back",
+                                                     "addManually":  "Add manually instead"
+                                                 },
+                                      "messages":  {
+                                                      "addedTitle":  "Added",
+                                                      "addedDesc":  "Referral doctor added",
+                                                      "updatedTitle":  "Updated",
+                                                      "updatedDesc":  "Referral doctor updated",
+                                                      "removedTitle":  "Removed",
+                                                      "removedDesc":  "Referral doctor removed",
+                                                      "inviteSentTitle":  "Invitation sent",
+                                                      "inviteSentDesc":  "An invitation has been sent to"
+                                                  },
+                                      "errors":  {
+                                                     "requiredTitle":  "Required",
+                                                     "requiredDesc":  "First and last name are required",
+                                                     "failedTitle":  "Error",
+                                                     "failedUpdateDesc":  "Failed to update",
+                                                     "failedAddDesc":  "Failed to add",
+                                                     "emailRequired":  "Email required",
+                                                     "emailRequiredDesc":  "Please enter the doctor's email address.",
+                                                     "inviteFailed":  "Failed to send invitation"
+                                                 }
+                                  },
+                    "roundtable":  {
+                                       "title":  "Round Table",
+                                       "subtitle":  "Notes shared by your healthcare providers about your care.",
+                                       "empty":  "No notes yet",
+                                       "emptyDesc":  "When your doctors share round table notes, they will appear here."
+                                   },
+                    "wallet":  {
+                                   "title":  "Vula Vault",
+                                   "poweredBy":  "Powered by 6Dot50",
+                                   "description":  "Sign in to your Vula Vault to redeem your Vulas at participating retailers and partner apps in our rewards network.",
+                                   "actions":  {
+                                                   "continue":  "Continue to secure sign-in",
+                                                   "back":  "Back"
+                                               },
+                                   "security":  "You'll be taken to our secure partner's login page in a new tab. Your credentials are never stored by Holarc Health.",
+                                   "overlay":  {
+                                                   "title":  "Demo Branding Overlay",
+                                                   "description":  "For live demos, install the Vula Vault branding overlay. It visually rebrands the partner login page in your browser without changing any functionality.",
+                                                   "download":  "Download Demo Branding Overlay"
+                                               },
+                                   "install":  {
+                                                   "title":  "How to install (Chrome / Edge / Brave)",
+                                                   "step1":  "Unzip the downloaded vula-vault-overlay.zip.",
+                                                   "step2":  "Open chrome://extensions in your browser.",
+                                                   "step3":  "Enable Developer mode (top-right toggle).",
+                                                   "step4":  "Click Load unpacked and select the unzipped folder.",
+                                                   "step5":  "Visit the partner login â€” branding appears automatically."
+                                               },
+                                   "messages":  {
+                                                   "downloadSuccess":  "Overlay downloaded â€” see install steps below."
+                                               },
+                                   "errors":  {
+                                                   "downloadFailed":  "Download failed"
+                                               }
+                                },
+                    "cpd":  {
+                                "title":  "Certificates",
+                                "subtitle":  "Track your continuing professional development",
+                                "totalPoints":  "CPD Points",
+                                "actions":  {
+                                               "addCertificate":  "Add Certificate"
+                                           },
+                                "form":  {
+                                             "title":  "Add Certificate",
+                                             "editTitle":  "Edit Certificate",
+                                             "name":  "Certificate Name *",
+                                             "namePlaceholder":  "e.g., Advanced Cardiac Life Support",
+                                             "issuingBody":  "Issuing Body",
+                                             "issuingBodyPlaceholder":  "e.g., HPCSA",
+                                             "dateEarned":  "Date Earned *",
+                                             "points":  "CPD Points",
+                                             "pointsPlaceholder":  "0",
+                                             "attach":  "Attach Certificate (PDF/Image)",
+                                             "chooseFile":  "Choose File",
+                                             "remove":  "Remove"
+                                         },
+                                "actions":  {
+                                               "save":  "Save",
+                                               "update":  "Update",
+                                               "uploading":  "Uploading...",
+                                               "cancel":  "Cancel"
+                                           },
+                                "table":  {
+                                             "certificate":  "Certificate",
+                                             "issuingBody":  "Issuing Body",
+                                             "dateEarned":  "Date Earned",
+                                             "points":  "Points",
+                                             "file":  "File",
+                                             "view":  "View",
+                                             "noData":  "No certificates recorded yet"
+                                         },
+                                "messages":  {
+                                                "addedTitle":  "Added",
+                                                "addedDesc":  "Certificate added",
+                                                "updatedTitle":  "Updated",
+                                                "updatedDesc":  "Certificate updated",
+                                                "removedTitle":  "Removed",
+                                                "removedDesc":  "Certificate removed"
+                                            },
+                                "errors":  {
+                                               "uploadTitle":  "Upload Error",
+                                               "requiredTitle":  "Required",
+                                               "requiredDesc":  "Certificate name and date are required",
+                                               "failedTitle":  "Error",
+                                               "failedUpdateDesc":  "Failed to update",
+                                               "failedAddDesc":  "Failed to add",
+                                               "openFailed":  "Unable to open file"
+                                           }
+                            },
+                    "recordings":  {
+                                       "title":  "Expiring Recordings",
+                                       "subtitle":  "Session recordings are automatically deleted after 7 days. Download any you want to keep.",
+                                       "empty":  "No recordings expiring soon.",
+                                       "emptyDesc":  "Recordings older than 7 days are automatically removed.",
+                                       "expiryToday":  "Expires today",
+                                       "expiryDays":  "day(s) left",
+                                       "actions":  {
+                                                      "download":  "Download",
+                                                      "delete":  "Delete"
+                                                  },
+                                       "messages":  {
+                                                       "downloadStartedTitle":  "Download started",
+                                                       "downloadStartedDesc":  "Your recording is being downloaded.",
+                                                       "deletedTitle":  "Recording deleted",
+                                                       "deletedDesc":  "The audio and transcript have been removed."
+                                                   },
+                                       "errors":  {
+                                                      "downloadFailedTitle":  "Download failed",
+                                                      "downloadFailedDesc":  "Could not download the recording.",
+                                                      "deleteFailedTitle":  "Delete failed",
+                                                      "deleteFailedDesc":  "Could not delete the recording."
+                                                  },
+                                       "dialog":  {
+                                                      "title":  "Delete Recording?",
+                                                      "description":  "This will permanently remove the audio recording and transcript. The AI summary and action points will be preserved. This action cannot be undone.",
+                                                      "cancel":  "Cancel",
+                                                      "confirm":  "Delete Recording"
+                                                  }
+                                   }
                 }
 }
+

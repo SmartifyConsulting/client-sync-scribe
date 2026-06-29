@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -53,6 +54,7 @@ interface PendingInvitation {
 }
 
 export default function Connections() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
@@ -224,12 +226,12 @@ export default function Connections() {
 
       if (error) throw error;
 
-      toast({ title: "Invitation accepted", description: "You are now connected" });
+      toast({ title: t("doctor.connections.accepted"), description: t("doctor.connections.now_connected") });
       fetchPendingInvitations();
       fetchConnections();
     } catch (error: any) {
       console.error("Error accepting invitation:", error);
-      toast({ title: "Error", description: "Failed to accept invitation", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("doctor.connections.error_accept"), variant: "destructive" });
     }
   };
 
@@ -242,11 +244,11 @@ export default function Connections() {
 
       if (error) throw error;
 
-      toast({ title: "Invitation declined" });
+      toast({ title: t("doctor.connections.declined") });
       fetchPendingInvitations();
     } catch (error: any) {
       console.error("Error declining invitation:", error);
-      toast({ title: "Error", description: "Failed to decline invitation", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("doctor.connections.error_decline"), variant: "destructive" });
     }
   };
 
@@ -264,16 +266,16 @@ export default function Connections() {
       if (error) throw error;
 
       toast({
-        title: "Disconnected",
-        description: `You are no longer connected with ${disconnectDialog.connection.full_name || "this user"}`,
+        title: t("doctor.connections.disconnected"),
+        description: t("doctor.connections.disconnected_message", { name: disconnectDialog.connection.full_name || t("doctor.connections.unknown_user") }),
       });
 
       fetchConnections();
     } catch (error: any) {
       console.error("Error disconnecting:", error);
       toast({
-        title: "Error",
-        description: "Failed to disconnect",
+        title: t("common.error"),
+        description: t("doctor.connections.error_disconnect"),
         variant: "destructive",
       });
     } finally {
@@ -292,16 +294,16 @@ export default function Connections() {
       if (error) throw error;
 
       toast({
-        title: "Invitation cancelled",
-        description: "The invitation has been cancelled",
+        title: t("doctor.connections.cancelled"),
+        description: t("doctor.connections.invitation_cancelled"),
       });
 
       fetchPendingInvitations();
     } catch (error: any) {
       console.error("Error cancelling invitation:", error);
       toast({
-        title: "Error",
-        description: "Failed to cancel invitation",
+        title: t("common.error"),
+        description: t("doctor.connections.error_cancel"),
         variant: "destructive",
       });
     }
@@ -343,9 +345,9 @@ export default function Connections() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Connections</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("doctor.connections.title")}</h1>
           <p className="mt-1 text-muted-foreground text-[12px]">
-            Manage your professional network and connections
+            {t("doctor.connections.subtitle")}
           </p>
         </div>
         <InviteUserDialog />
@@ -356,7 +358,7 @@ export default function Connections() {
           <TabsList className="bg-primary">
             <TabsTrigger value="connections" className="gap-2 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               <UserCheck className="h-4 w-4" />
-              Connected
+              {t("doctor.connections.tab_connected")}
               {connections.length > 0 && (
                 <Badge variant="secondary" className="ml-1">
                   {connections.length}
@@ -365,7 +367,7 @@ export default function Connections() {
             </TabsTrigger>
             <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               <Clock className="h-4 w-4" />
-              Pending
+              {t("doctor.connections.tab_pending")}
               {pendingInvitations.length > 0 && (
                 <Badge variant="outline" className="ml-1 border-white/50 text-white data-[state=active]:border-border data-[state=active]:text-foreground">
                   {pendingInvitations.length}
@@ -377,7 +379,7 @@ export default function Connections() {
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search..."
+              placeholder={t("doctor.connections.search")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 w-48"
@@ -389,8 +391,8 @@ export default function Connections() {
           {filteredConnections.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
               <Users className="h-12 w-12 mb-4" />
-              <p className="text-lg font-medium">No connections yet</p>
-              <p className="text-sm">Invite users to start building your network</p>
+              <p className="text-lg font-medium">{t("doctor.connections.no_connections")}</p>
+              <p className="text-sm">{t("doctor.connections.invite_to_build")}</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -408,7 +410,7 @@ export default function Connections() {
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-foreground truncate">
-                        {connection.full_name || "Unknown User"}
+                        {connection.full_name || t("doctor.connections.unknown_user")}
                       </p>
                       {connection.specialty && (
                         <p className="text-sm text-muted-foreground truncate">
@@ -424,7 +426,7 @@ export default function Connections() {
                   </div>
                   <div className="mt-4 flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">
-                      Connected {format(new Date(connection.connected_at), "dd MMM yyyy")}
+                      {t("doctor.connections.connected_date", { date: format(new Date(connection.connected_at), "dd MMM yyyy") })}
                     </span>
                     <Button
                       variant="ghost"
@@ -445,8 +447,8 @@ export default function Connections() {
           {filteredPending.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
               <Mail className="h-12 w-12 mb-4" />
-              <p className="text-lg font-medium">No pending invitations</p>
-              <p className="text-sm">All your invitations have been responded to</p>
+              <p className="text-lg font-medium">{t("doctor.connections.no_pending")}</p>
+              <p className="text-sm">{t("doctor.connections.all_responded")}</p>
             </div>
           ) : (
             <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden divide-y divide-border">
@@ -468,11 +470,11 @@ export default function Connections() {
                     <div>
                       <p className="font-medium text-foreground">
                         {invitation.direction === "received"
-                          ? invitation.sender_name || "Unknown User"
+                          ? invitation.sender_name || t("doctor.connections.unknown_user")
                           : invitation.recipient_email}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {invitation.direction === "received" ? "Received" : "Sent"}{" "}
+                        {t(invitation.direction === "received" ? "doctor.connections.direction_received" : "doctor.connections.direction_sent")}{" "}
                         {format(new Date(invitation.created_at), "dd MMM yyyy")}
                         {invitation.message && ` • "${invitation.message}"`}
                       </p>
@@ -486,7 +488,7 @@ export default function Connections() {
                           onClick={() => acceptInvitation(invitation.id)}
                         >
                           <UserCheck className="h-4 w-4 mr-1" />
-                          Accept
+                          {t("doctor.connections.accept")}
                         </Button>
                         <Button
                           variant="ghost"
@@ -494,7 +496,7 @@ export default function Connections() {
                           className="text-muted-foreground hover:text-destructive"
                           onClick={() => declineInvitation(invitation.id)}
                         >
-                          Decline
+                          {t("doctor.connections.decline")}
                         </Button>
                       </>
                     ) : (
@@ -504,7 +506,7 @@ export default function Connections() {
                         className="text-muted-foreground hover:text-destructive"
                         onClick={() => cancelPendingInvitation(invitation.id)}
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </Button>
                     )}
                   </div>
@@ -522,13 +524,13 @@ export default function Connections() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Disconnect from {disconnectDialog.connection?.full_name}?</AlertDialogTitle>
+            <AlertDialogTitle>{t("doctor.connections.disconnect_title", { name: disconnectDialog.connection?.full_name })}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove the connection between you and this user. You can always reconnect later by sending a new invitation.
+              {t("doctor.connections.disconnect_description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDisconnect}
               disabled={isDisconnecting}

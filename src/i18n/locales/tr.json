@@ -108,15 +108,15 @@
               },
     "common":  {
                    "language":  "Dil",
-                   "changeLanguage":  "Dili deÄŸiÅŸtir",
-                   "signOut":  "Ã‡Ä±kÄ±ÅŸ",
+                   "changeLanguage":  "Dili deÃ„Å¸iÃ…Å¸tir",
+                   "signOut":  "Ãƒâ€¡Ã„Â±kÃ„Â±Ã…Å¸",
                    "save":  "Kaydet",
-                   "edit":  "DÃ¼zenle",
+                   "edit":  "DÃƒÂ¼zenle",
                    "add":  "Ekle",
-                   "send":  "GÃ¶nder",
+                   "send":  "GÃƒÂ¶nder",
                    "confirm":  "Onayla",
                    "search":  "Ara",
-                   "loading":  "YÃ¼kleniyor...",
+                   "loading":  "YÃƒÂ¼kleniyor...",
                    "settings":  "Ayarlar",
                    "noData":  "No data",
                    "active":  "Active",
@@ -144,22 +144,22 @@
                },
     "nav":  {
                 "home":  "Ana Sayfa",
-                "myPatients":  "HastalarÄ±m",
+                "myPatients":  "HastalarÃ„Â±m",
                 "myPractice":  "Muayenehanem",
                 "myCalendar":  "Takvimim",
-                "myTasks":  "GÃ¶revlerim",
+                "myTasks":  "GÃƒÂ¶revlerim",
                 "myDocuments":  "Belgelerim",
-                "myRoundTables":  "Yuvarlak MasalarÄ±m",
-                "myRewards":  "Ã–dÃ¼llerim",
+                "myRoundTables":  "Yuvarlak MasalarÃ„Â±m",
+                "myRewards":  "Ãƒâ€“dÃƒÂ¼llerim",
                 "sos":  "SOS",
                 "myProfile":  "Profilim",
                 "myHolarchy":  "Holarchy\u0027im",
-                "admin":  "YÃ¶netici",
-                "users":  "KullanÄ±cÄ±lar",
-                "pricing":  "FiyatlandÄ±rma",
-                "rewards":  "Ã–dÃ¼ller",
-                "hospitalPortal":  "Hastane PortalÄ±",
-                "erPortal":  "Acil PortalÄ±",
+                "admin":  "YÃƒÂ¶netici",
+                "users":  "KullanÃ„Â±cÃ„Â±lar",
+                "pricing":  "FiyatlandÃ„Â±rma",
+                "rewards":  "Ãƒâ€“dÃƒÂ¼ller",
+                "hospitalPortal":  "Hastane PortalÃ„Â±",
+                "erPortal":  "Acil PortalÃ„Â±",
                 "userAdmin":  "User Admin",
                 "telematics":  "Telematics",
                 "teamStatus":  "Team Status",
@@ -179,12 +179,12 @@
                 "activeIncidents":  "Active Incidents",
                 "providerProfile":  "Provider Profile",
                 "backToAdmin":  "Back to Admin",
-                "liveSOS":  "CanlÄ± SOS"
+                "liveSOS":  "CanlÃ„Â± SOS"
             },
     "topbar":  {
                    "reportBug":  "Hata bildir",
                    "calendar":  "Takvim",
-                   "recordTask":  "GÃ¶rev kaydet",
+                   "recordTask":  "GÃƒÂ¶rev kaydet",
                    "notifications":  "Bildirimler"
                },
     "userAdmin":  {
@@ -195,7 +195,7 @@
                       "addCrew":  "Add Crew Member",
                       "owner":  "Owner",
                       "organisationOwner":  "Organisation owner",
-                      "ownerCannotRemove":  "Initial registrant â€” cannot be removed",
+                      "ownerCannotRemove":  "Initial registrant Ã¢â‚¬â€ cannot be removed",
                       "noAdmins":  "No additional administrators yet.",
                       "noCrew":  "No crew members yet.",
                       "shiftPattern":  "Shift pattern",
@@ -328,7 +328,7 @@
                    },
     "telematics":  {
                        "title":  "Driver Tracking",
-                       "subtitle":  "Fleet Telematics Â· Last 24h",
+                       "subtitle":  "Fleet Telematics Ã‚Â· Last 24h",
                        "liveFleet":  "Live Fleet",
                        "tripsStops":  "Trips \u0026 Stops",
                        "moving":  "Moving",
@@ -336,7 +336,7 @@
                        "onMission":  "On mission",
                        "freeRoam":  "Free roam",
                        "noActive":  "No active drivers in the last 24 hours.",
-                       "noTrips":  "No trip data yet â€” start a shift to begin recording telematics.",
+                       "noTrips":  "No trip data yet Ã¢â‚¬â€ start a shift to begin recording telematics.",
                        "pings":  "pings",
                        "driver":  "Driver",
                        "drivers":  "drivers",
@@ -350,116 +350,116 @@
                        "vehicle":  "Vehicle"
                    },
     "doctorDashboard":  {
-                            "greetingMorning":  "GÃ¼naydÄ±n",
-                            "greetingAfternoon":  "Ä°yi Ã¶ÄŸleden sonra",
-                            "greetingEvening":  "Ä°yi akÅŸamlar",
-                            "subtitle":  "BugÃ¼n muayenehanenizde olanlar,",
+                            "greetingMorning":  "GÃƒÂ¼naydÃ„Â±n",
+                            "greetingAfternoon":  "Ã„Â°yi ÃƒÂ¶Ã„Å¸leden sonra",
+                            "greetingEvening":  "Ã„Â°yi akÃ…Å¸amlar",
+                            "subtitle":  "BugÃƒÂ¼n muayenehanenizde olanlar,",
                             "totalPatients":  "Toplam Hasta",
                             "thisWeek":  "Bu Hafta",
-                            "doctorRating":  "Doktor PuanÄ±",
-                            "noRatings":  "HenÃ¼z puan yok",
-                            "vulaVouchers":  "Vula KuponlarÄ±",
-                            "myRoundTables":  "Yuvarlak MasalarÄ±m",
-                            "searchRoundTable":  "Yuvarlak masa baÅŸlatmak iÃ§in hasta ara...",
-                            "noPatientsFound":  "Hasta bulunamadÄ±",
-                            "todoList":  "GÃ¶rev Listesi",
-                            "addTask":  "GÃ¶rev ekle...",
+                            "doctorRating":  "Doktor PuanÃ„Â±",
+                            "noRatings":  "HenÃƒÂ¼z puan yok",
+                            "vulaVouchers":  "Vula KuponlarÃ„Â±",
+                            "myRoundTables":  "Yuvarlak MasalarÃ„Â±m",
+                            "searchRoundTable":  "Yuvarlak masa baÃ…Å¸latmak iÃƒÂ§in hasta ara...",
+                            "noPatientsFound":  "Hasta bulunamadÃ„Â±",
+                            "todoList":  "GÃƒÂ¶rev Listesi",
+                            "addTask":  "GÃƒÂ¶rev ekle...",
                             "active":  "Etkin",
-                            "done":  "TamamlandÄ±",
-                            "noActiveTasks":  "Etkin gÃ¶rev yok",
-                            "noCompletedTasks":  "TamamlanmÄ±ÅŸ gÃ¶rev yok",
+                            "done":  "TamamlandÃ„Â±",
+                            "noActiveTasks":  "Etkin gÃƒÂ¶rev yok",
+                            "noCompletedTasks":  "TamamlanmÃ„Â±Ã…Å¸ gÃƒÂ¶rev yok",
                             "recentActivity":  "Son Etkinlik",
-                            "sessionCompleted":  "Oturum tamamlandÄ±",
-                            "documentGenerated":  "Belge oluÅŸturuldu",
-                            "taskCompleted":  "GÃ¶rev tamamlandÄ±",
-                            "followUpSent":  "Takip gÃ¶nderildi",
-                            "gettingStarted":  "BaÅŸlangÄ±Ã§",
-                            "addFirstPatient":  "BaÅŸlamak iÃ§in ilk hastanÄ±zÄ± ekleyin",
-                            "justNow":  "Az Ã¶nce"
+                            "sessionCompleted":  "Oturum tamamlandÃ„Â±",
+                            "documentGenerated":  "Belge oluÃ…Å¸turuldu",
+                            "taskCompleted":  "GÃƒÂ¶rev tamamlandÃ„Â±",
+                            "followUpSent":  "Takip gÃƒÂ¶nderildi",
+                            "gettingStarted":  "BaÃ…Å¸langÃ„Â±ÃƒÂ§",
+                            "addFirstPatient":  "BaÃ…Å¸lamak iÃƒÂ§in ilk hastanÃ„Â±zÃ„Â± ekleyin",
+                            "justNow":  "Az ÃƒÂ¶nce"
                         },
     "briefing":  {
-                     "todaysBriefing":  "BugÃ¼nÃ¼n Ã–zeti",
-                     "briefingFor":  "{{day}} Ã–zeti",
-                     "completedOf":  "{{total}} randevudan {{done}} tanesi tamamlandÄ±",
-                     "noAppointments":  "BugÃ¼n iÃ§in randevu planlanmadÄ±.",
+                     "todaysBriefing":  "BugÃƒÂ¼nÃƒÂ¼n Ãƒâ€“zeti",
+                     "briefingFor":  "{{day}} Ãƒâ€“zeti",
+                     "completedOf":  "{{total}} randevudan {{done}} tanesi tamamlandÃ„Â±",
+                     "noAppointments":  "BugÃƒÂ¼n iÃƒÂ§in randevu planlanmadÃ„Â±.",
                      "narrate":  "Anlat",
-                     "preparing":  "HazÄ±rlanÄ±yor...",
+                     "preparing":  "HazÃ„Â±rlanÃ„Â±yor...",
                      "pause":  "Duraklat",
                      "resume":  "Devam Et",
                      "stop":  "Durdur",
-                     "previousDay":  "Ã–nceki gÃ¼n",
-                     "nextDay":  "Sonraki gÃ¼n",
-                     "translating":  "Ã–zet Ã§evriliyor...",
+                     "previousDay":  "Ãƒâ€“nceki gÃƒÂ¼n",
+                     "nextDay":  "Sonraki gÃƒÂ¼n",
+                     "translating":  "Ãƒâ€“zet ÃƒÂ§evriliyor...",
                      "allergies":  "Alerjiler",
                      "lastSession":  "Son seans",
-                     "noPreviousSession":  "Ã–nceki seans notu yok",
-                     "unreadNote":  "okunmamÄ±ÅŸ not",
-                     "unreadNotes":  "okunmamÄ±ÅŸ notlar"
+                     "noPreviousSession":  "Ãƒâ€“nceki seans notu yok",
+                     "unreadNote":  "okunmamÃ„Â±Ã…Å¸ not",
+                     "unreadNotes":  "okunmamÃ„Â±Ã…Å¸ notlar"
                  },
     "patients":  {
                      "title":  "Hastalar",
-                     "subtitle":  "Hasta kayÄ±tlarÄ±nÄ±zÄ± yÃ¶netin",
-                     "searchPlaceholder":  "Hasta arayÄ±n...",
+                     "subtitle":  "Hasta kayÃ„Â±tlarÃ„Â±nÃ„Â±zÃ„Â± yÃƒÂ¶netin",
+                     "searchPlaceholder":  "Hasta arayÃ„Â±n...",
                      "addPatient":  "Hasta Ekle",
-                     "importPatients":  "Ä°Ã§e Aktar",
-                     "noPatients":  "HenÃ¼z hasta yok",
-                     "allStatuses":  "TÃ¼m durumlar",
+                     "importPatients":  "Ã„Â°ÃƒÂ§e Aktar",
+                     "noPatients":  "HenÃƒÂ¼z hasta yok",
+                     "allStatuses":  "TÃƒÂ¼m durumlar",
                      "active":  "Aktif",
                      "inactive":  "Pasif",
                      "roundTables":  "Yuvarlak Masalar",
-                     "share":  "PaylaÅŸ",
-                     "viewProfile":  "Profili GÃ¶rÃ¼ntÃ¼le",
-                     "tabAll":  "TÃ¼mÃ¼",
+                     "share":  "PaylaÃ…Å¸",
+                     "viewProfile":  "Profili GÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼le",
+                     "tabAll":  "TÃƒÂ¼mÃƒÂ¼",
                      "tabMine":  "Benimkiler",
-                     "tabShared":  "PaylaÅŸÄ±lanlar",
+                     "tabShared":  "PaylaÃ…Å¸Ã„Â±lanlar",
                      "tabPending":  "Beklemede"
                  },
     "calendar":  {
                      "title":  "Takvim",
-                     "subtitle":  "RandevularÄ±nÄ±zÄ± ve programÄ±nÄ±zÄ± yÃ¶netin",
-                     "today":  "BugÃ¼n",
-                     "day":  "GÃ¼n",
+                     "subtitle":  "RandevularÃ„Â±nÃ„Â±zÃ„Â± ve programÃ„Â±nÃ„Â±zÃ„Â± yÃƒÂ¶netin",
+                     "today":  "BugÃƒÂ¼n",
+                     "day":  "GÃƒÂ¼n",
                      "week":  "Hafta",
                      "month":  "Ay",
-                     "year":  "YÄ±l",
+                     "year":  "YÃ„Â±l",
                      "newAppointment":  "Yeni Randevu",
-                     "previous":  "Ã–nceki",
+                     "previous":  "Ãƒâ€“nceki",
                      "next":  "Sonraki",
-                     "allDay":  "TÃ¼m GÃ¼n",
+                     "allDay":  "TÃƒÂ¼m GÃƒÂ¼n",
                      "noEvents":  "Etkinlik yok",
                      "myCalendar":  "Takvimim",
                      "practiceCalendar":  "Muayenehane Takvimi",
                      "googleCalendar":  "Google Takvim",
-                     "disconnectGoogle":  "Google\u0027Ä± KaldÄ±r",
-                     "googleSyncCaption":  "Google senkronizasyonu yalnÄ±zca kendi randevularÄ±nÄ±zÄ± yansÄ±tÄ±r.",
+                     "disconnectGoogle":  "Google\u0027Ã„Â± KaldÃ„Â±r",
+                     "googleSyncCaption":  "Google senkronizasyonu yalnÃ„Â±zca kendi randevularÃ„Â±nÃ„Â±zÃ„Â± yansÃ„Â±tÃ„Â±r.",
                      "book":  "Rezervasyon Yap",
-                     "todaysSchedule":  "BugÃ¼nÃ¼n ProgramÄ±",
-                     "noAppointmentsToday":  "BugÃ¼n iÃ§in planlanmÄ±ÅŸ randevu yok",
+                     "todaysSchedule":  "BugÃƒÂ¼nÃƒÂ¼n ProgramÃ„Â±",
+                     "noAppointmentsToday":  "BugÃƒÂ¼n iÃƒÂ§in planlanmÃ„Â±Ã…Å¸ randevu yok",
                      "filterDoctor":  "Doktoru Filtrele",
-                     "allDoctors":  "Muayenehanedeki tÃ¼m doktorlar",
+                     "allDoctors":  "Muayenehanedeki tÃƒÂ¼m doktorlar",
                      "months":  {
                                     "january":  "Ocak",
-                                    "february":  "Åžubat",
+                                    "february":  "Ã…Å¾ubat",
                                     "march":  "Mart",
                                     "april":  "Nisan",
-                                    "may":  "MayÄ±s",
+                                    "may":  "MayÃ„Â±s",
                                     "june":  "Haziran",
                                     "july":  "Temmuz",
-                                    "august":  "AÄŸustos",
-                                    "september":  "EylÃ¼l",
+                                    "august":  "AÃ„Å¸ustos",
+                                    "september":  "EylÃƒÂ¼l",
                                     "october":  "Ekim",
-                                    "november":  "KasÄ±m",
-                                    "december":  "AralÄ±k"
+                                    "november":  "KasÃ„Â±m",
+                                    "december":  "AralÃ„Â±k"
                                 },
                      "monthsShort":  {
                                          "jan":  "Oca",
-                                         "feb":  "Åžub",
+                                         "feb":  "Ã…Å¾ub",
                                          "mar":  "Mar",
                                          "apr":  "Nis",
                                          "may":  "May",
                                          "jun":  "Haz",
                                          "jul":  "Tem",
-                                         "aug":  "AÄŸu",
+                                         "aug":  "AÃ„Å¸u",
                                          "sep":  "Eyl",
                                          "oct":  "Eki",
                                          "nov":  "Kas",
@@ -468,9 +468,9 @@
                      "days":  {
                                   "sunday":  "Pazar",
                                   "monday":  "Pazartesi",
-                                  "tuesday":  "SalÄ±",
-                                  "wednesday":  "Ã‡arÅŸamba",
-                                  "thursday":  "PerÅŸembe",
+                                  "tuesday":  "SalÃ„Â±",
+                                  "wednesday":  "Ãƒâ€¡arÃ…Å¸amba",
+                                  "thursday":  "PerÃ…Å¸embe",
                                   "friday":  "Cuma",
                                   "saturday":  "Cumartesi"
                               },
@@ -478,7 +478,7 @@
                                        "sun":  "Paz",
                                        "mon":  "Pzt",
                                        "tue":  "Sal",
-                                       "wed":  "Ã‡ar",
+                                       "wed":  "Ãƒâ€¡ar",
                                        "thu":  "Per",
                                        "fri":  "Cum",
                                        "sat":  "Cmt"
@@ -487,31 +487,31 @@
                                         "s":  "P",
                                         "m":  "P",
                                         "t":  "S",
-                                        "w":  "Ã‡",
+                                        "w":  "Ãƒâ€¡",
                                         "f":  "P"
                                     }
                  },
     "sessions":  {
                      "title":  "Seanslar",
                      "sessionMode":  "Seans Modu",
-                     "selectPatient":  "Bir Hasta SeÃ§in",
-                     "readyToStart":  "BaÅŸlamaya HazÄ±r",
-                     "searchByPatient":  "Hasta adÄ±na gÃ¶re arayÄ±n...",
+                     "selectPatient":  "Bir Hasta SeÃƒÂ§in",
+                     "readyToStart":  "BaÃ…Å¸lamaya HazÃ„Â±r",
+                     "searchByPatient":  "Hasta adÃ„Â±na gÃƒÂ¶re arayÃ„Â±n...",
                      "newSession":  "Yeni Seans",
-                     "allSessions":  "TÃ¼m Seanslar",
-                     "noPatientsFound":  "Hasta bulunamadÄ±.",
-                     "searchByName":  "Ada gÃ¶re ara...",
-                     "today":  "BugÃ¼n",
-                     "lastWeek":  "GeÃ§en hafta",
-                     "lastMonth":  "GeÃ§en ay",
+                     "allSessions":  "TÃƒÂ¼m Seanslar",
+                     "noPatientsFound":  "Hasta bulunamadÃ„Â±.",
+                     "searchByName":  "Ada gÃƒÂ¶re ara...",
+                     "today":  "BugÃƒÂ¼n",
+                     "lastWeek":  "GeÃƒÂ§en hafta",
+                     "lastMonth":  "GeÃƒÂ§en ay",
                      "older":  "Daha eski",
-                     "tapToRecord":  "Kaydetmek iÃ§in dokunun",
-                     "recording":  "Kaydediliyor... Durdurmak iÃ§in dokunun",
-                     "paused":  "DuraklatÄ±ldÄ± â€” devam etmek iÃ§in oynat dÃ¼ÄŸmesine dokunun",
-                     "transcribing":  "DeÅŸifre ediliyor...",
-                     "endSessionTip":  "KaydÄ± otomatik durdurmak iÃ§in \"SeansÄ± Bitir\" deyin",
-                     "generateAnalysis":  "Analiz OluÅŸtur",
-                     "regenerate":  "Yeniden OluÅŸtur",
+                     "tapToRecord":  "Kaydetmek iÃƒÂ§in dokunun",
+                     "recording":  "Kaydediliyor... Durdurmak iÃƒÂ§in dokunun",
+                     "paused":  "DuraklatÃ„Â±ldÃ„Â± Ã¢â‚¬â€ devam etmek iÃƒÂ§in oynat dÃƒÂ¼Ã„Å¸mesine dokunun",
+                     "transcribing":  "DeÃ…Å¸ifre ediliyor...",
+                     "endSessionTip":  "KaydÃ„Â± otomatik durdurmak iÃƒÂ§in \"SeansÃ„Â± Bitir\" deyin",
+                     "generateAnalysis":  "Analiz OluÃ…Å¸tur",
+                     "regenerate":  "Yeniden OluÃ…Å¸tur",
                      "currentSession":  "Mevcut Seans",
                      "actionPointsTodo":  "Action Points / TO-DO",
                      "referralLetter":  "Referral Letter",
@@ -556,11 +556,11 @@
                      "sessionNotes":  "Session Notes",
                      "referralLetterCreated":  "Referral Letter created",
                      "download":  "Download...",
-                     "noPrivateNotes":  "No private notes yet — click Edit to add notes only you can see.",
+                     "noPrivateNotes":  "No private notes yet â€” click Edit to add notes only you can see.",
                      "privateNotesSaved":  "Private notes saved",
                      "sessionNotFound":  "Session not found",
                      "prescriptionCreated":  "Prescription created",
-                     "writePrivateNotes":  "Write notes only you can see…",
+                     "writePrivateNotes":  "Write notes only you can seeâ€¦",
                      "audio":  "Audio",
                      "translationError":  "Could not translate the summary",
                      "translate":  "Translate...",
@@ -577,52 +577,52 @@
                      "deleteSessionConfirm":  "This action cannot be undone. This will permanently delete the session record."
                  },
     "roundTables":  {
-                        "title":  "Yuvarlak MasalarÄ±m",
-                        "noTables":  "HenÃ¼z yuvarlak masanÄ±z yok.",
-                        "unread":  "okunmadÄ±",
-                        "lastUpdate":  "Son gÃ¼ncelleme",
-                        "openTable":  "AÃ§",
+                        "title":  "Yuvarlak MasalarÃ„Â±m",
+                        "noTables":  "HenÃƒÂ¼z yuvarlak masanÃ„Â±z yok.",
+                        "unread":  "okunmadÃ„Â±",
+                        "lastUpdate":  "Son gÃƒÂ¼ncelleme",
+                        "openTable":  "AÃƒÂ§",
                         "newTopic":  "Yeni Konu"
                     },
     "doctorRewards":  {
-                          "title":  "Ã–dÃ¼llerim",
-                          "tabOverview":  "Genel BakÄ±ÅŸ",
-                          "tabMilestones":  "DÃ¶nÃ¼m NoktalarÄ±",
+                          "title":  "Ãƒâ€“dÃƒÂ¼llerim",
+                          "tabOverview":  "Genel BakÃ„Â±Ã…Å¸",
+                          "tabMilestones":  "DÃƒÂ¶nÃƒÂ¼m NoktalarÃ„Â±",
                           "tabStreaks":  "Seriler",
-                          "tabHistory":  "GeÃ§miÅŸ",
+                          "tabHistory":  "GeÃƒÂ§miÃ…Å¸",
                           "tabRedeem":  "Kullan",
                           "totalVulas":  "Toplam Vula",
                           "currentStreak":  "Mevcut Seri",
                           "patientsAdhering":  "Uyumlu Hastalar"
                       },
     "liveSos":  {
-                    "title":  "CanlÄ± SOS",
-                    "subtitle":  "GerÃ§ek zamanlÄ± acil durum akÄ±ÅŸÄ±",
+                    "title":  "CanlÃ„Â± SOS",
+                    "subtitle":  "GerÃƒÂ§ek zamanlÃ„Â± acil durum akÃ„Â±Ã…Å¸Ã„Â±",
                     "active":  "Aktif",
                     "critical":  "Kritik",
-                    "recent":  "YakÄ±n Zamanda",
-                    "activeNow":  "Åžu an aktif",
-                    "allClear":  "TÃ¼mÃ¼ temiz â€” aktif SOS olayÄ± yok.",
-                    "selectIncident":  "DetaylarÄ± gÃ¶rmek iÃ§in bir olay seÃ§in.",
-                    "sosIncident":  "SOS olayÄ±",
-                    "muted":  "Sessize alÄ±ndÄ±",
-                    "alertsOn":  "UyarÄ±lar aÃ§Ä±k",
-                    "consciousness":  "BilinÃ§",
+                    "recent":  "YakÃ„Â±n Zamanda",
+                    "activeNow":  "Ã…Å¾u an aktif",
+                    "allClear":  "TÃƒÂ¼mÃƒÂ¼ temiz Ã¢â‚¬â€ aktif SOS olayÃ„Â± yok.",
+                    "selectIncident":  "DetaylarÃ„Â± gÃƒÂ¶rmek iÃƒÂ§in bir olay seÃƒÂ§in.",
+                    "sosIncident":  "SOS olayÃ„Â±",
+                    "muted":  "Sessize alÃ„Â±ndÃ„Â±",
+                    "alertsOn":  "UyarÃ„Â±lar aÃƒÂ§Ã„Â±k",
+                    "consciousness":  "BilinÃƒÂ§",
                     "responsive":  "Tepkili",
                     "adequate":  "Yeterli",
                     "ambulance":  "Ambulans",
-                    "eta":  "Tahmini varÄ±ÅŸ zamanÄ±",
+                    "eta":  "Tahmini varÃ„Â±Ã…Å¸ zamanÃ„Â±",
                     "location":  "Konum",
-                    "openInMaps":  "Haritalarda aÃ§",
-                    "openConsole":  "Konsolu aÃ§"
+                    "openInMaps":  "Haritalarda aÃƒÂ§",
+                    "openConsole":  "Konsolu aÃƒÂ§"
                 },
     "myPractice":  {
                        "tabPractice":  "Benim Uygulamam",
                        "tabReferrals":  "Referrals",
                        "tabCredentials":  "Kimlik Bilgileri",
                        "tabRewards":  "Rewards",
-                       "aboutMe":  "HakkÄ±mda",
-                       "aboutMeHelper":  "UygulamanÄ±z ve yaklaÅŸÄ±mÄ±nÄ±z hakkÄ±nda kÄ±sa bir tanÄ±tÄ±m yapÄ±n. Hastalar profilinizi gÃ¶rÃ¼ntÃ¼lerken bunu gÃ¶rÃ¼r. Maksimum 600 kelime.",
+                       "aboutMe":  "HakkÃ„Â±mda",
+                       "aboutMeHelper":  "UygulamanÃ„Â±z ve yaklaÃ…Å¸Ã„Â±mÃ„Â±nÃ„Â±z hakkÃ„Â±nda kÃ„Â±sa bir tanÃ„Â±tÃ„Â±m yapÃ„Â±n. Hastalar profilinizi gÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼lerken bunu gÃƒÂ¶rÃƒÂ¼r. Maksimum 600 kelime.",
                        "wordCount":  "{{count}} / 600 kelime",
                        "save":  "Save",
                        "tabProfile":  "Profile",
@@ -697,46 +697,46 @@
                        "noPatients":  "No patients connected yet"
                    },
     "patientRewards":  {
-                           "progressTitle":  "Sonraki Kilometre TaÅŸÄ± Ä°Ã§in Ä°lerleme",
-                           "progressLabel":  "\"{{milestone}}\" Ä°Ã§in {{current}} / {{target}} Vula",
+                           "progressTitle":  "Sonraki Kilometre TaÃ…Å¸Ã„Â± Ã„Â°ÃƒÂ§in Ã„Â°lerleme",
+                           "progressLabel":  "\"{{milestone}}\" Ã„Â°ÃƒÂ§in {{current}} / {{target}} Vula",
                            "moreToGo":  "{{count}} tane daha var!",
-                           "recentRewards":  "Son Ã–dÃ¼ller",
-                           "empty":  "HenÃ¼z Ã¶dÃ¼l yok. SaÄŸlÄ±k yolculuÄŸunuza baÅŸlayÄ±n!"
+                           "recentRewards":  "Son Ãƒâ€“dÃƒÂ¼ller",
+                           "empty":  "HenÃƒÂ¼z ÃƒÂ¶dÃƒÂ¼l yok. SaÃ„Å¸lÃ„Â±k yolculuÃ„Å¸unuza baÃ…Å¸layÃ„Â±n!"
                        },
     "todo":  {
-                 "addNewTask":  "Yeni GÃ¶rev Ekle",
-                 "tapToRecord":  "KayÄ±t Ä°Ã§in Dokunun",
-                 "transcribing":  "TercÃ¼me Ediliyor...",
-                 "aiProcessing":  "Yapay Zeka Ä°ÅŸleniyor...",
+                 "addNewTask":  "Yeni GÃƒÂ¶rev Ekle",
+                 "tapToRecord":  "KayÃ„Â±t Ã„Â°ÃƒÂ§in Dokunun",
+                 "transcribing":  "TercÃƒÂ¼me Ediliyor...",
+                 "aiProcessing":  "Yapay Zeka Ã„Â°Ã…Å¸leniyor...",
                  "listening":  "Dinleniyor... Bir duraklamadan sonra durur",
-                 "typeTask":  "Veya gÃ¶revinizi buraya yazÄ±n...",
+                 "typeTask":  "Veya gÃƒÂ¶revinizi buraya yazÃ„Â±n...",
                  "add":  "Ekle",
-                 "priority":  "Ã–ncelik:",
-                 "low":  "DÃ¼ÅŸÃ¼k",
+                 "priority":  "Ãƒâ€“ncelik:",
+                 "low":  "DÃƒÂ¼Ã…Å¸ÃƒÂ¼k",
                  "medium":  "Orta",
-                 "high":  "YÃ¼ksek",
-                 "aiProcess":  "Yapay Zeka Ä°ÅŸlemi",
+                 "high":  "YÃƒÂ¼ksek",
+                 "aiProcess":  "Yapay Zeka Ã„Â°Ã…Å¸lemi",
                  "active":  "Aktif",
                  "completed":  "Tamamlanan",
-                 "all":  "TÃ¼mÃ¼",
+                 "all":  "TÃƒÂ¼mÃƒÂ¼",
                  "approve":  "Onayla",
-                 "noMatchingPatient":  "EÅŸleÅŸen hasta bulunamadÄ±"
+                 "noMatchingPatient":  "EÃ…Å¸leÃ…Å¸en hasta bulunamadÃ„Â±"
              },
     "documents":  {
                       "title":  "Belgeler",
                       "tabDocuments":  "Belgeler",
-                      "tabTemplates":  "Åžablonlar",
-                      "tabHeaderFooter":  "Ãœstbilgi ve Altbilgi",
-                      "tabContent":  "Ä°Ã§erik ÅžablonlarÄ±",
-                      "contentHelper":  "Belge iÃ§eriÄŸi ÅŸablonlarÄ± oluÅŸturun (Ã¼stbilgi/altbilgi seÃ§tiÄŸiniz dÃ¼zenden uygulanacaktÄ±r)",
-                      "newContent":  "Yeni Ä°Ã§erik Åžablonu",
-                      "searchContent":  "Ä°Ã§erik ÅŸablonlarÄ±nÄ± ara...",
-                      "createTemplate":  "Åžablon OluÅŸtur",
+                      "tabTemplates":  "Ã…Å¾ablonlar",
+                      "tabHeaderFooter":  "ÃƒÅ“stbilgi ve Altbilgi",
+                      "tabContent":  "Ã„Â°ÃƒÂ§erik Ã…Å¾ablonlarÃ„Â±",
+                      "contentHelper":  "Belge iÃƒÂ§eriÃ„Å¸i Ã…Å¸ablonlarÃ„Â± oluÃ…Å¸turun (ÃƒÂ¼stbilgi/altbilgi seÃƒÂ§tiÃ„Å¸iniz dÃƒÂ¼zenden uygulanacaktÃ„Â±r)",
+                      "newContent":  "Yeni Ã„Â°ÃƒÂ§erik Ã…Å¾ablonu",
+                      "searchContent":  "Ã„Â°ÃƒÂ§erik Ã…Å¸ablonlarÃ„Â±nÃ„Â± ara...",
+                      "createTemplate":  "Ã…Å¾ablon OluÃ…Å¸tur",
                       "patientDocuments":  "Hasta Belgeleri",
                       "searchDocuments":  "Belgeleri ara...",
-                      "letterhead":  "Antetli KaÄŸÄ±t:",
-                      "letterheadHeaderFooter":  "Ãœstbilgi ve Altbilgi",
-                      "letterheadDefault":  "VarsayÄ±lan"
+                      "letterhead":  "Antetli KaÃ„Å¸Ã„Â±t:",
+                      "letterheadHeaderFooter":  "ÃƒÅ“stbilgi ve Altbilgi",
+                      "letterheadDefault":  "VarsayÃ„Â±lan"
                   },
     "roundTablesMeta":  {
                             "noteOne":  "{{count}} not",
@@ -744,67 +744,67 @@
                             "lastActivity":  "Son etkinlik {{date}}"
                         },
     "sos":  {
-                "emergencyAssistance":  "Acil YardÄ±m",
-                "helpAlerted":  "YardÄ±m anÄ±nda uyarÄ±lacaktÄ±r",
-                "ackHeading":  "SOS\u0027U KULLANMADAN Ã–NCE, LÃœTFEN KABUL EDÄ°N:",
-                "ackA":  "SOS desteÄŸi, elinden gelenin en iyisini yapma esasÄ±na gÃ¶re saÄŸlanÄ±r ve acil mÃ¼dahale garanti edilemez.",
-                "ackB":  "SOS aÄŸ, cihaz durumu, konum eriÅŸimi ve Ã¼Ã§Ã¼ncÃ¼ taraf mÃ¼dahale ekiplerine baÄŸlÄ±dÄ±r.",
-                "ackC":  "SOS konum izinleri, pil gÃ¼cÃ¼ ve internet veya hÃ¼cresel baÄŸlantÄ± gerektirir.",
+                "emergencyAssistance":  "Acil YardÃ„Â±m",
+                "helpAlerted":  "YardÃ„Â±m anÃ„Â±nda uyarÃ„Â±lacaktÃ„Â±r",
+                "ackHeading":  "SOS\u0027U KULLANMADAN Ãƒâ€“NCE, LÃƒÅ“TFEN KABUL EDÃ„Â°N:",
+                "ackA":  "SOS desteÃ„Å¸i, elinden gelenin en iyisini yapma esasÃ„Â±na gÃƒÂ¶re saÃ„Å¸lanÃ„Â±r ve acil mÃƒÂ¼dahale garanti edilemez.",
+                "ackB":  "SOS aÃ„Å¸, cihaz durumu, konum eriÃ…Å¸imi ve ÃƒÂ¼ÃƒÂ§ÃƒÂ¼ncÃƒÂ¼ taraf mÃƒÂ¼dahale ekiplerine baÃ„Å¸lÃ„Â±dÃ„Â±r.",
+                "ackC":  "SOS konum izinleri, pil gÃƒÂ¼cÃƒÂ¼ ve internet veya hÃƒÂ¼cresel baÃ„Å¸lantÃ„Â± gerektirir.",
                 "sosLabel":  "SOS",
-                "tapForHelp":  "YARDIM Ä°Ã‡Ä°N DOKUNUN",
-                "footerCaption":  "SOS\u0027a dokunmak konumunuzu paylaÅŸÄ±r ve acil durum kiÅŸilerinizi bildirir.",
-                "manageContacts":  "Acil durum kiÅŸilerini yÃ¶net",
-                "viewHistory":  "Olay geÃ§miÅŸini gÃ¶rÃ¼ntÃ¼le"
+                "tapForHelp":  "YARDIM Ã„Â°Ãƒâ€¡Ã„Â°N DOKUNUN",
+                "footerCaption":  "SOS\u0027a dokunmak konumunuzu paylaÃ…Å¸Ã„Â±r ve acil durum kiÃ…Å¸ilerinizi bildirir.",
+                "manageContacts":  "Acil durum kiÃ…Å¸ilerini yÃƒÂ¶net",
+                "viewHistory":  "Olay geÃƒÂ§miÃ…Å¸ini gÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼le"
             },
     "patientProfile":  {
-                           "backToPatients":  "HastalarÄ±na Geri DÃ¶n",
-                           "patientNotFound":  "Hasta bulunamadÄ±",
+                           "backToPatients":  "HastalarÃ„Â±na Geri DÃƒÂ¶n",
+                           "patientNotFound":  "Hasta bulunamadÃ„Â±",
                            "schedule":  "Program",
-                           "startSession":  "Oturumu BaÅŸlat",
-                           "checkIn":  "GiriÅŸ Yap",
+                           "startSession":  "Oturumu BaÃ…Å¸lat",
+                           "checkIn":  "GiriÃ…Å¸ Yap",
                            "totalSessions":  "Toplam Oturum",
-                           "lastSeen":  "Son GÃ¶rÃ¼lme",
+                           "lastSeen":  "Son GÃƒÂ¶rÃƒÂ¼lme",
                            "since":  "Beridir",
                            "vulas":  "Vulas",
                            "tabDetails":  "Detaylar",
-                           "tabOverview":  "Genel BakÄ±ÅŸ",
-                           "tabSessions":  "Oturum GeÃ§miÅŸi",
+                           "tabOverview":  "Genel BakÃ„Â±Ã…Å¸",
+                           "tabSessions":  "Oturum GeÃƒÂ§miÃ…Å¸i",
                            "tabAdmissions":  "Kabuller",
-                           "tabProviders":  "SaÄŸlÄ±k Hizmet SaÄŸlayÄ±cÄ±larÄ±",
+                           "tabProviders":  "SaÃ„Å¸lÃ„Â±k Hizmet SaÃ„Å¸layÃ„Â±cÃ„Â±larÃ„Â±",
                            "tabDocuments":  "Belgeler",
                            "tabRoundTable":  "Yuvarlak Masa",
-                           "togglePersonal":  "KiÅŸisel Bilgiler",
-                           "toggleMedical":  "TÄ±bbi Bilgiler",
-                           "personalHeading":  "KiÅŸisel Bilgiler",
-                           "personalHelper":  "KiÅŸisel detaylarÄ± gÃ¶rÃ¼ntÃ¼leyin ve yÃ¶netin",
-                           "medicalHeading":  "TÄ±bbi Bilgiler",
-                           "medicalHelper":  "TÄ±bbi detaylarÄ± gÃ¶rÃ¼ntÃ¼leyin ve yÃ¶netin",
+                           "togglePersonal":  "KiÃ…Å¸isel Bilgiler",
+                           "toggleMedical":  "TÃ„Â±bbi Bilgiler",
+                           "personalHeading":  "KiÃ…Å¸isel Bilgiler",
+                           "personalHelper":  "KiÃ…Å¸isel detaylarÃ„Â± gÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼leyin ve yÃƒÂ¶netin",
+                           "medicalHeading":  "TÃ„Â±bbi Bilgiler",
+                           "medicalHelper":  "TÃ„Â±bbi detaylarÃ„Â± gÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼leyin ve yÃƒÂ¶netin",
                            "saved":  "Kaydedildi",
                            "sectionAddresses":  "Adresler",
-                           "sectionEmergencyContacts":  "Acil Durum KontaklarÄ±",
-                           "sectionNextOfKin":  "YakÄ±n Akraba",
-                           "sectionInsurance":  "Sigorta / TÄ±bbi YardÄ±m",
-                           "sectionEmployer":  "Ä°ÅŸveren",
-                           "sectionLifestyle":  "YaÅŸam TarzÄ±",
+                           "sectionEmergencyContacts":  "Acil Durum KontaklarÃ„Â±",
+                           "sectionNextOfKin":  "YakÃ„Â±n Akraba",
+                           "sectionInsurance":  "Sigorta / TÃ„Â±bbi YardÃ„Â±m",
+                           "sectionEmployer":  "Ã„Â°Ã…Å¸veren",
+                           "sectionLifestyle":  "YaÃ…Å¸am TarzÃ„Â±",
                            "sectionConsents":  "Onaylar",
                            "sectionAllergies":  "Alerjiler",
                            "sectionChronic":  "Kronik Durumlar",
-                           "sectionMedications":  "Mevcut Ä°laÃ§lar",
-                           "sectionFamilyHistory":  "Aile Ã–ykÃ¼sÃ¼",
-                           "sectionSurgicalHistory":  "Ameliyat Ã–ykÃ¼sÃ¼",
-                           "sectionImmunizations":  "AÅŸÄ±lar",
-                           "sectionVitals":  "YaÅŸam BulgularÄ±",
-                           "sectionLabResults":  "Laboratuvar SonuÃ§larÄ±",
-                           "sectionGeneticMarkers":  "Genetik BelirteÃ§ler",
-                           "sectionMentalHealth":  "Ruh SaÄŸlÄ±ÄŸÄ±"
+                           "sectionMedications":  "Mevcut Ã„Â°laÃƒÂ§lar",
+                           "sectionFamilyHistory":  "Aile Ãƒâ€“ykÃƒÂ¼sÃƒÂ¼",
+                           "sectionSurgicalHistory":  "Ameliyat Ãƒâ€“ykÃƒÂ¼sÃƒÂ¼",
+                           "sectionImmunizations":  "AÃ…Å¸Ã„Â±lar",
+                           "sectionVitals":  "YaÃ…Å¸am BulgularÃ„Â±",
+                           "sectionLabResults":  "Laboratuvar SonuÃƒÂ§larÃ„Â±",
+                           "sectionGeneticMarkers":  "Genetik BelirteÃƒÂ§ler",
+                           "sectionMentalHealth":  "Ruh SaÃ„Å¸lÃ„Â±Ã„Å¸Ã„Â±"
                        },
     "emergencyDashboard":  {
                                "statusBar":  {
-                                                 "activeMission":  "AKTÃ„Â°F GÃƒâ€“REVi",
-                                                 "onShift":  "GÃƒâ€“REVDEKÃ„Â°"
+                                                 "activeMission":  "AKTÃƒâ€žÃ‚Â°F GÃƒÆ’Ã¢â‚¬â€œREVi",
+                                                 "onShift":  "GÃƒÆ’Ã¢â‚¬â€œREVDEKÃƒâ€žÃ‚Â°"
                                              },
                                "header":  {
-                                              "subtitle":  "Acil YanÃ„Â±t",
+                                              "subtitle":  "Acil YanÃƒâ€žÃ‚Â±t",
                                               "title":  "Acil Operasyonlar"
                                           },
                                "stats":  {
@@ -813,87 +813,87 @@
                                              "critical":  "kritik"
                                          },
                                "statsCard":  {
-                                                 "newRequests":  "Yeni Ã„Â°stekler",
+                                                 "newRequests":  "Yeni Ãƒâ€žÃ‚Â°stekler",
                                                  "activeOperations":  "Etkin Operasyonlar",
                                                  "criticalIncidents":  "Kritik Olaylar"
                                              },
                                "tabs":  {
                                             "new":  "Yeni",
                                             "active":  "Etkin",
-                                            "completed":  "TamamlandÃ„Â±"
+                                            "completed":  "TamamlandÃƒâ€žÃ‚Â±"
                                         },
                                "details":  {
                                                "location":  "Konum",
-                                               "received":  "AlÃ„Â±ndÃ„Â±",
+                                               "received":  "AlÃƒâ€žÃ‚Â±ndÃƒâ€žÃ‚Â±",
                                                "fromHospital":  "Hastaneden"
                                            },
                                "actions":  {
-                                               "acceptDispatch":  "Kabul Et ve GÃƒÂ¶nder",
+                                               "acceptDispatch":  "Kabul Et ve GÃƒÆ’Ã‚Â¶nder",
                                                "decline":  "Reddet",
-                                               "trackLive":  "CanlÃ„Â± Takip",
-                                               "updateStatus":  "Durumu GÃƒÂ¼ncelle",
-                                               "viewReport":  "Raporu GÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼le"
+                                               "trackLive":  "CanlÃƒâ€žÃ‚Â± Takip",
+                                               "updateStatus":  "Durumu GÃƒÆ’Ã‚Â¼ncelle",
+                                               "viewReport":  "Raporu GÃƒÆ’Ã‚Â¶rÃƒÆ’Ã‚Â¼ntÃƒÆ’Ã‚Â¼le"
                                            }
                            },
     "navigationScreen":  {
-                             "noActiveMission":  "Aktif GÃƒÂ¶rev Yok",
-                             "acceptToStart":  "Navigasyonu baÃ…Å¸latmak iÃƒÂ§in gelen bir isteÃ„Å¸i kabul edin",
-                             "openIncomingSos":  "Gelen SOS\u0027u AÃƒÂ§",
-                             "loadingMission":  "GÃƒÂ¶rev verileri yÃƒÂ¼kleniyor...",
-                             "status":  "Durum {{status}} olarak gÃƒÂ¼ncellendi",
-                             "mission":  "GÃƒÂ¶rev",
-                             "eta":  "Tahmini VarÃ„Â±Ã…Å¸ Saati:",
-                             "actionPanel":  "Durum GÃƒÂ¼ncellemeleri",
+                             "noActiveMission":  "Aktif GÃƒÆ’Ã‚Â¶rev Yok",
+                             "acceptToStart":  "Navigasyonu baÃƒâ€¦Ã…Â¸latmak iÃƒÆ’Ã‚Â§in gelen bir isteÃƒâ€žÃ…Â¸i kabul edin",
+                             "openIncomingSos":  "Gelen SOS\u0027u AÃƒÆ’Ã‚Â§",
+                             "loadingMission":  "GÃƒÆ’Ã‚Â¶rev verileri yÃƒÆ’Ã‚Â¼kleniyor...",
+                             "status":  "Durum {{status}} olarak gÃƒÆ’Ã‚Â¼ncellendi",
+                             "mission":  "GÃƒÆ’Ã‚Â¶rev",
+                             "eta":  "Tahmini VarÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸ Saati:",
+                             "actionPanel":  "Durum GÃƒÆ’Ã‚Â¼ncellemeleri",
                              "enRoute":  "Yolda",
                              "arrived":  "Geldi",
-                             "patientLoaded":  "Hasta YÃƒÂ¼klendi",
+                             "patientLoaded":  "Hasta YÃƒÆ’Ã‚Â¼klendi",
                              "toHospital":  "Hastaneye Yolda",
                              "arrivedAtHospital":  "Hastaneye Geldi",
-                             "resolveIncident":  "OlayÃ„Â± Ãƒâ€¡ÃƒÂ¶z",
+                             "resolveIncident":  "OlayÃƒâ€žÃ‚Â± ÃƒÆ’Ã¢â‚¬Â¡ÃƒÆ’Ã‚Â¶z",
                              "navigation":  "Navigasyon",
-                             "fullConsole":  "Tam Konsolu AÃƒÂ§"
+                             "fullConsole":  "Tam Konsolu AÃƒÆ’Ã‚Â§"
                          },
     "provider":  {
-                     "emergencyResponseDispatch":  "Acil YanÃ„Â±t GÃƒÂ¶nderimi"
+                     "emergencyResponseDispatch":  "Acil YanÃƒâ€žÃ‚Â±t GÃƒÆ’Ã‚Â¶nderimi"
                  },
     "realTimeMonitoring":  {
                                "header":  {
-                                              "subtitle":  "Ã„Â°zleme",
-                                              "title":  "GerÃƒÂ§ek ZamanlÃ„Â± Operasyonlar",
-                                              "description":  "CanlÃ„Â± filo izleme ve gÃƒÂ¼venlik izlemesi"
+                                              "subtitle":  "Ãƒâ€žÃ‚Â°zleme",
+                                              "title":  "GerÃƒÆ’Ã‚Â§ek ZamanlÃƒâ€žÃ‚Â± Operasyonlar",
+                                              "description":  "CanlÃƒâ€žÃ‚Â± filo izleme ve gÃƒÆ’Ã‚Â¼venlik izlemesi"
                                           },
                                "tabs":  {
-                                            "tracking":  "Ã„Â°zleme",
-                                            "safety":  "GÃƒÂ¼venlik"
+                                            "tracking":  "Ãƒâ€žÃ‚Â°zleme",
+                                            "safety":  "GÃƒÆ’Ã‚Â¼venlik"
                                         },
                                "tracking":  {
-                                                "vehiclesOnline":  "Ãƒâ€¡evrimiÃƒÂ§i AraÃƒÂ§lar",
-                                                "allGpsConnected":  "TÃƒÂ¼m GPS BaÃ„Å¸lÃ„Â±",
-                                                "avgSpeed":  "Ortalama HÃ„Â±z",
-                                                "withinLimits":  "SÃ„Â±nÃ„Â±rlar Ã„Â°ÃƒÂ§inde",
-                                                "fuelStatus":  "YakÃ„Â±t Durumu",
-                                                "goodLevels":  "Ã„Â°yi Seviyeler",
-                                                "speed":  "HÃ„Â±z",
-                                                "fuel":  "YakÃ„Â±t",
-                                                "track":  "Ã„Â°zle",
+                                                "vehiclesOnline":  "ÃƒÆ’Ã¢â‚¬Â¡evrimiÃƒÆ’Ã‚Â§i AraÃƒÆ’Ã‚Â§lar",
+                                                "allGpsConnected":  "TÃƒÆ’Ã‚Â¼m GPS BaÃƒâ€žÃ…Â¸lÃƒâ€žÃ‚Â±",
+                                                "avgSpeed":  "Ortalama HÃƒâ€žÃ‚Â±z",
+                                                "withinLimits":  "SÃƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â±rlar Ãƒâ€žÃ‚Â°ÃƒÆ’Ã‚Â§inde",
+                                                "fuelStatus":  "YakÃƒâ€žÃ‚Â±t Durumu",
+                                                "goodLevels":  "Ãƒâ€žÃ‚Â°yi Seviyeler",
+                                                "speed":  "HÃƒâ€žÃ‚Â±z",
+                                                "fuel":  "YakÃƒâ€žÃ‚Â±t",
+                                                "track":  "Ãƒâ€žÃ‚Â°zle",
                                                 "moving":  "HAREKET HALINDE",
                                                 "stopped":  "DURDURULDU"
                                             },
                                "safety":  {
-                                              "criticalAlerts":  "Kritik UyarÃ„Â±lar",
-                                              "immediateAction":  "Acil Ã„Â°Ã…Å¸lem",
-                                              "safetyEvents":  "GÃƒÂ¼venlik OlaylarÃ„Â±",
+                                              "criticalAlerts":  "Kritik UyarÃƒâ€žÃ‚Â±lar",
+                                              "immediateAction":  "Acil Ãƒâ€žÃ‚Â°Ãƒâ€¦Ã…Â¸lem",
+                                              "safetyEvents":  "GÃƒÆ’Ã‚Â¼venlik OlaylarÃƒâ€žÃ‚Â±",
                                               "thisWeek":  "Bu Hafta",
-                                              "fleetScore":  "Filo PuanÃ„Â±",
-                                              "excellentSafety":  "MÃƒÂ¼kemmel GÃƒÂ¼venlik",
-                                              "critical":  "KRÃ„Â°TÃ„Â°K",
+                                              "fleetScore":  "Filo PuanÃƒâ€žÃ‚Â±",
+                                              "excellentSafety":  "MÃƒÆ’Ã‚Â¼kemmel GÃƒÆ’Ã‚Â¼venlik",
+                                              "critical":  "KRÃƒâ€žÃ‚Â°TÃƒâ€žÃ‚Â°K",
                                               "alert":  "UYARI",
-                                              "eventTypesMonitored":  "Ã„Â°zlenen GÃƒÂ¼venlik OlayÃ„Â± TÃƒÂ¼rleri",
-                                              "speedingEvents":  "HÃ„Â±z Ã„Â°hlali OlaylarÃ„Â±",
-                                              "harshAcceleration":  "Sert HÃ„Â±zlanma/Frenlem",
-                                              "afterHoursUse":  "Ãƒâ€¡alÃ„Â±Ã…Å¸ma Saatleri DÃ„Â±Ã…Å¸Ã„Â±nda AraÃƒÂ§ KullanÃ„Â±mÃ„Â±",
-                                              "geofenceBreaches":  "CoÃ„Å¸rafi SÃ„Â±nÃ„Â±r Ã„Â°hlalleri",
-                                              "routeDeviations":  "Rota SapmalarÃ„Â±",
+                                              "eventTypesMonitored":  "Ãƒâ€žÃ‚Â°zlenen GÃƒÆ’Ã‚Â¼venlik OlayÃƒâ€žÃ‚Â± TÃƒÆ’Ã‚Â¼rleri",
+                                              "speedingEvents":  "HÃƒâ€žÃ‚Â±z Ãƒâ€žÃ‚Â°hlali OlaylarÃƒâ€žÃ‚Â±",
+                                              "harshAcceleration":  "Sert HÃƒâ€žÃ‚Â±zlanma/Frenlem",
+                                              "afterHoursUse":  "ÃƒÆ’Ã¢â‚¬Â¡alÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸ma Saatleri DÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€žÃ‚Â±nda AraÃƒÆ’Ã‚Â§ KullanÃƒâ€žÃ‚Â±mÃƒâ€žÃ‚Â±",
+                                              "geofenceBreaches":  "CoÃƒâ€žÃ…Â¸rafi SÃƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â±r Ãƒâ€žÃ‚Â°hlalleri",
+                                              "routeDeviations":  "Rota SapmalarÃƒâ€žÃ‚Â±",
                                               "unauthorizedStops":  "Yetkisiz Durdurmalar"
                                           }
                            },
@@ -902,13 +902,13 @@
                                               "back":  "Geri"
                                           },
                            "header":  {
-                                          "title":  "Ambulans OperasyonlarÃ„Â±"
+                                          "title":  "Ambulans OperasyonlarÃƒâ€žÃ‚Â±"
                                       },
                            "information":  {
-                                               "title":  "AraÃƒÂ§ Bilgileri",
-                                               "registration":  "KayÃ„Â±t",
+                                               "title":  "AraÃƒÆ’Ã‚Â§ Bilgileri",
+                                               "registration":  "KayÃƒâ€žÃ‚Â±t",
                                                "vin":  "VIN",
-                                               "year":  "YÃ„Â±l",
+                                               "year":  "YÃƒâ€žÃ‚Â±l",
                                                "makeModel":  "Marka/Model",
                                                "engine":  "Motor",
                                                "seats":  "Koltuklar",
@@ -918,97 +918,97 @@
                                                "title":  "Operasyon Durumu",
                                                "mileage":  "Kilometre",
                                                "engineHours":  "Motor Saati",
-                                               "fuelType":  "YakÃ„Â±t TÃƒÂ¼rÃƒÂ¼",
+                                               "fuelType":  "YakÃƒâ€žÃ‚Â±t TÃƒÆ’Ã‚Â¼rÃƒÆ’Ã‚Â¼",
                                                "tankCapacity":  "Tank Kapasitesi",
-                                               "fuelLevel":  "YakÃ„Â±t Seviyesi",
-                                               "lastGpsCheck":  "Son GPS KontrolÃƒÂ¼"
+                                               "fuelLevel":  "YakÃƒâ€žÃ‚Â±t Seviyesi",
+                                               "lastGpsCheck":  "Son GPS KontrolÃƒÆ’Ã‚Â¼"
                                            },
                            "maintenance":  {
-                                               "title":  "Servis ve BakÃ„Â±m",
+                                               "title":  "Servis ve BakÃƒâ€žÃ‚Â±m",
                                                "lastService":  "Son Servis",
                                                "nextService":  "Sonraki Servis",
-                                               "overdue":  "GEÃƒâ€¡ KALMÃ„Â±Ã…Å¾",
-                                               "days":  "gÃƒÂ¼n",
+                                               "overdue":  "GEÃƒÆ’Ã¢â‚¬Â¡ KALMÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¾",
+                                               "days":  "gÃƒÆ’Ã‚Â¼n",
                                                "lastInspection":  "Son Muayene",
-                                               "insuranceExpiry":  "Sigorta SÃƒÂ¼resi DoluÃ…Å¸",
-                                               "motExpiry":  "Muayene SÃƒÂ¼resi DoluÃ…Å¸",
+                                               "insuranceExpiry":  "Sigorta SÃƒÆ’Ã‚Â¼resi DoluÃƒâ€¦Ã…Â¸",
+                                               "motExpiry":  "Muayene SÃƒÆ’Ã‚Â¼resi DoluÃƒâ€¦Ã…Â¸",
                                                "scheduleService":  "Servis Randevusu Al"
                                            },
                            "equipment":  {
-                                             "title":  "Ekipman ve YapÃ„Â±landÃ„Â±rma",
-                                             "viewEquipment":  "EkipmanÃ„Â± GÃƒÂ¶rÃƒÂ¼ntÃƒÂ¼le"
+                                             "title":  "Ekipman ve YapÃƒâ€žÃ‚Â±landÃƒâ€žÃ‚Â±rma",
+                                             "viewEquipment":  "EkipmanÃƒâ€žÃ‚Â± GÃƒÆ’Ã‚Â¶rÃƒÆ’Ã‚Â¼ntÃƒÆ’Ã‚Â¼le"
                                          },
                            "actions":  {
                                            "assign":  "Ata",
-                                           "history":  "GeÃƒÂ§miÃ…Å¸"
+                                           "history":  "GeÃƒÆ’Ã‚Â§miÃƒâ€¦Ã…Â¸"
                                        }
                        },
     "vehicleAbuse":  {
                          "header":  {
-                                        "title":  "AraÃƒÂ§ KÃƒÂ¶tÃƒÂ¼ye KullanÃ„Â±m Ãƒâ€“nleme",
-                                        "description":  "Ã…Å¾ÃƒÂ¼pheli araÃƒÂ§ aktivitesini, coÃ„Å¸rafi sÃ„Â±nÃ„Â±r ihlallerini ve yetkisiz kullanÃ„Â±mÃ„Â± izleyin."
+                                        "title":  "AraÃƒÆ’Ã‚Â§ KÃƒÆ’Ã‚Â¶tÃƒÆ’Ã‚Â¼ye KullanÃƒâ€žÃ‚Â±m ÃƒÆ’Ã¢â‚¬â€œnleme",
+                                        "description":  "Ãƒâ€¦Ã…Â¾ÃƒÆ’Ã‚Â¼pheli araÃƒÆ’Ã‚Â§ aktivitesini, coÃƒâ€žÃ…Â¸rafi sÃƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â±r ihlallerini ve yetkisiz kullanÃƒâ€žÃ‚Â±mÃƒâ€žÃ‚Â± izleyin."
                                     },
                          "stats":  {
                                        "criticalEvents":  "Kritik Olaylar",
-                                       "highRisk":  "YÃƒÂ¼ksek Risk",
-                                       "mediumPriority":  "Orta Ãƒâ€“ncelik",
+                                       "highRisk":  "YÃƒÆ’Ã‚Â¼ksek Risk",
+                                       "mediumPriority":  "Orta ÃƒÆ’Ã¢â‚¬â€œncelik",
                                        "totalEvents":  "Toplam Olaylar"
                                    },
                          "tabs":  {
-                                      "allEvents":  "TÃƒÂ¼m Olaylar",
-                                      "geofence":  "CoÃ„Å¸rafi SÃ„Â±nÃ„Â±r",
-                                      "afterHours":  "Ãƒâ€¡alÃ„Â±Ã…Å¸ma Saatleri DÃ„Â±Ã…Å¸Ã„Â±nda",
+                                      "allEvents":  "TÃƒÆ’Ã‚Â¼m Olaylar",
+                                      "geofence":  "CoÃƒâ€žÃ…Â¸rafi SÃƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â±r",
+                                      "afterHours":  "ÃƒÆ’Ã¢â‚¬Â¡alÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸ma Saatleri DÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€žÃ‚Â±nda",
                                       "routes":  "Rotalar"
                                   },
                          "dashboard":  {
-                                           "noEvents":  "KÃƒÂ¶tÃƒÂ¼ye kullanÃ„Â±m olayÃ„Â± tespit edilmedi.",
-                                           "review":  "Ã„Â°nceleme"
+                                           "noEvents":  "KÃƒÆ’Ã‚Â¶tÃƒÆ’Ã‚Â¼ye kullanÃƒâ€žÃ‚Â±m olayÃƒâ€žÃ‚Â± tespit edilmedi.",
+                                           "review":  "Ãƒâ€žÃ‚Â°nceleme"
                                        },
                          "eventTypes":  {
-                                            "geofenceBreach":  "CoÃ„Å¸rafi SÃ„Â±nÃ„Â±r Ã„Â°hlali",
-                                            "speeding":  "HÃ„Â±z YapmasÃ„Â±",
-                                            "afterHoursUse":  "Ãƒâ€¡alÃ„Â±Ã…Å¸ma Saatleri DÃ„Â±Ã…Å¸Ã„Â±nda KullanÃ„Â±m",
-                                            "unlinkedTrip":  "BaÃ„Å¸lÃ„Â± Olmayan Yolculuk",
-                                            "harshDriving":  "Sert SÃƒÂ¼rÃƒÂ¼Ã…Å¸",
-                                            "routeDeviation":  "Rota SapmasÃ„Â±"
+                                            "geofenceBreach":  "CoÃƒâ€žÃ…Â¸rafi SÃƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â±r Ãƒâ€žÃ‚Â°hlali",
+                                            "speeding":  "HÃƒâ€žÃ‚Â±z YapmasÃƒâ€žÃ‚Â±",
+                                            "afterHoursUse":  "ÃƒÆ’Ã¢â‚¬Â¡alÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸ma Saatleri DÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€žÃ‚Â±nda KullanÃƒâ€žÃ‚Â±m",
+                                            "unlinkedTrip":  "BaÃƒâ€žÃ…Â¸lÃƒâ€žÃ‚Â± Olmayan Yolculuk",
+                                            "harshDriving":  "Sert SÃƒÆ’Ã‚Â¼rÃƒÆ’Ã‚Â¼Ãƒâ€¦Ã…Â¸",
+                                            "routeDeviation":  "Rota SapmasÃƒâ€žÃ‚Â±"
                                         },
                          "geofenceTab":  {
-                                             "title":  "CoÃ„Å¸rafi SÃ„Â±nÃ„Â±r YÃƒÂ¶netimi ve Ã„Â°hlal UyarÃ„Â±larÃ„Â± YakÃ„Â±nda.",
-                                             "description":  "CoÃ„Å¸rafi sÃ„Â±nÃ„Â±rlar oluÃ…Å¸turun ve araÃƒÂ§lar bunlarÃ„Â± ihlal ettiÃ„Å¸inde uyarÃ„Â± alÃ„Â±n."
+                                             "title":  "CoÃƒâ€žÃ…Â¸rafi SÃƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â±r YÃƒÆ’Ã‚Â¶netimi ve Ãƒâ€žÃ‚Â°hlal UyarÃƒâ€žÃ‚Â±larÃƒâ€žÃ‚Â± YakÃƒâ€žÃ‚Â±nda.",
+                                             "description":  "CoÃƒâ€žÃ…Â¸rafi sÃƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â±rlar oluÃƒâ€¦Ã…Â¸turun ve araÃƒÆ’Ã‚Â§lar bunlarÃƒâ€žÃ‚Â± ihlal ettiÃƒâ€žÃ…Â¸inde uyarÃƒâ€žÃ‚Â± alÃƒâ€žÃ‚Â±n."
                                          },
                          "hoursTab":  {
-                                          "title":  "Ãƒâ€¡alÃ„Â±Ã…Å¸ma Saatleri DÃ„Â±Ã…Å¸Ã„Â±nda Tespit YakÃ„Â±nda.",
-                                          "description":  "Planlanan ÃƒÂ§alÃ„Â±Ã…Å¸ma saatleri dÃ„Â±Ã…Å¸Ã„Â±nda kullanÃ„Â±lan araÃƒÂ§larÃ„Â± takip edin."
+                                          "title":  "ÃƒÆ’Ã¢â‚¬Â¡alÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸ma Saatleri DÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€žÃ‚Â±nda Tespit YakÃƒâ€žÃ‚Â±nda.",
+                                          "description":  "Planlanan ÃƒÆ’Ã‚Â§alÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸ma saatleri dÃƒâ€žÃ‚Â±Ãƒâ€¦Ã…Â¸Ãƒâ€žÃ‚Â±nda kullanÃƒâ€žÃ‚Â±lan araÃƒÆ’Ã‚Â§larÃƒâ€žÃ‚Â± takip edin."
                                       },
                          "routesTab":  {
-                                           "title":  "Rota SapmasÃ„Â± ve Ã„Â°zleme YakÃ„Â±nda.",
-                                           "description":  "AmbulanslarÃ„Â±n gÃƒÂ¶nderilen rotalarÃ„Â± takip edip etmediÃ„Å¸ini veya sapmadÃ„Â±Ã„Å¸Ã„Â±nÃ„Â± izleyin."
+                                           "title":  "Rota SapmasÃƒâ€žÃ‚Â± ve Ãƒâ€žÃ‚Â°zleme YakÃƒâ€žÃ‚Â±nda.",
+                                           "description":  "AmbulanslarÃƒâ€žÃ‚Â±n gÃƒÆ’Ã‚Â¶nderilen rotalarÃƒâ€žÃ‚Â± takip edip etmediÃƒâ€žÃ…Â¸ini veya sapmadÃƒâ€žÃ‚Â±Ãƒâ€žÃ…Â¸Ãƒâ€žÃ‚Â±nÃƒâ€žÃ‚Â± izleyin."
                                        }
                      },
     "vehicleTypeManagement":  {
                                   "header":  {
-                                                 "category":  "Filo YapÃ„Â±landÃ„Â±rmasÃ„Â±",
-                                                 "title":  "AraÃƒÂ§ TÃƒÂ¼rleri",
-                                                 "description":  "Ambulans tÃƒÂ¼rlerini, ekipmanlarÃ„Â± ve yapÃ„Â±landÃ„Â±rmalarÃ„Â± yÃƒÂ¶netin"
+                                                 "category":  "Filo YapÃƒâ€žÃ‚Â±landÃƒâ€žÃ‚Â±rmasÃƒâ€žÃ‚Â±",
+                                                 "title":  "AraÃƒÆ’Ã‚Â§ TÃƒÆ’Ã‚Â¼rleri",
+                                                 "description":  "Ambulans tÃƒÆ’Ã‚Â¼rlerini, ekipmanlarÃƒâ€žÃ‚Â± ve yapÃƒâ€žÃ‚Â±landÃƒâ€žÃ‚Â±rmalarÃƒâ€žÃ‚Â± yÃƒÆ’Ã‚Â¶netin"
                                              },
                                   "summary":  {
-                                                  "totalVehicles":  "Toplam AraÃƒÂ§lar",
-                                                  "avgMonthlyCost":  "Ortalama AylÃ„Â±k Maliyet",
-                                                  "totalCrewCapacity":  "Toplam Gemi MÃƒÂ¼rettebatÃ„Â± Kapasitesi",
-                                                  "title":  "Filo Ãƒâ€“zeti",
-                                                  "totalTypes":  "Toplam TÃƒÂ¼r"
+                                                  "totalVehicles":  "Toplam AraÃƒÆ’Ã‚Â§lar",
+                                                  "avgMonthlyCost":  "Ortalama AylÃƒâ€žÃ‚Â±k Maliyet",
+                                                  "totalCrewCapacity":  "Toplam Gemi MÃƒÆ’Ã‚Â¼rettebatÃƒâ€žÃ‚Â± Kapasitesi",
+                                                  "title":  "Filo ÃƒÆ’Ã¢â‚¬â€œzeti",
+                                                  "totalTypes":  "Toplam TÃƒÆ’Ã‚Â¼r"
                                               },
                                   "specifications":  {
-                                                         "monthlyCost":  "AylÃ„Â±k Maliyet",
+                                                         "monthlyCost":  "AylÃƒâ€žÃ‚Â±k Maliyet",
                                                          "capacity":  "Kapasite",
                                                          "inFleet":  "Filosunda",
-                                                         "vehicles":  "AraÃƒÂ§lar",
-                                                         "members":  "ÃƒÅ“yeler",
-                                                         "crewSize":  "Gemi MÃƒÂ¼rettebatÃ„Â± Boyutu"
+                                                         "vehicles":  "AraÃƒÆ’Ã‚Â§lar",
+                                                         "members":  "ÃƒÆ’Ã…â€œyeler",
+                                                         "crewSize":  "Gemi MÃƒÆ’Ã‚Â¼rettebatÃƒâ€žÃ‚Â± Boyutu"
                                                      },
                                   "editForm":  {
                                                    "button":  {
-                                                                  "cancel":  "Ã„Â°ptal",
+                                                                  "cancel":  "Ãƒâ€žÃ‚Â°ptal",
                                                                   "save":  "Kaydet"
                                                               },
                                                    "placeholders":  {
@@ -1016,43 +1016,43 @@
                                                                     }
                                                },
                                   "button":  {
-                                                 "newType":  "Yeni TÃƒÂ¼r"
+                                                 "newType":  "Yeni TÃƒÆ’Ã‚Â¼r"
                                              },
                                   "equipment":  {
-                                                    "title":  "Standart DonanÃ„Â±m"
+                                                    "title":  "Standart DonanÃƒâ€žÃ‚Â±m"
                                                 }
                               },
     "vehicleUtilisation":  {
                                "metrics":  {
-                                               "peakUsageHours":  "Pik KullanÃ„Â±m Saatleri",
+                                               "peakUsageHours":  "Pik KullanÃƒâ€žÃ‚Â±m Saatleri",
                                                "costPerKm":  "Maliyet/km",
-                                               "title":  "AyrÃ„Â±ntÃ„Â±lÃ„Â± Metrikler",
-                                               "averageHoursDay":  "Ortalama Saatler/GÃƒÂ¼n",
-                                               "downtime":  "KapalÃ„Â± Kalma SÃƒÂ¼resi (BakÃ„Â±m)",
-                                               "averageDistanceDay":  "Ortalama Mesafe/GÃƒÂ¼n",
-                                               "fuelConsumption":  "YakÃ„Â±t TÃƒÂ¼ketimi"
+                                               "title":  "AyrÃƒâ€žÃ‚Â±ntÃƒâ€žÃ‚Â±lÃƒâ€žÃ‚Â± Metrikler",
+                                               "averageHoursDay":  "Ortalama Saatler/GÃƒÆ’Ã‚Â¼n",
+                                               "downtime":  "KapalÃƒâ€žÃ‚Â± Kalma SÃƒÆ’Ã‚Â¼resi (BakÃƒâ€žÃ‚Â±m)",
+                                               "averageDistanceDay":  "Ortalama Mesafe/GÃƒÆ’Ã‚Â¼n",
+                                               "fuelConsumption":  "YakÃƒâ€žÃ‚Â±t TÃƒÆ’Ã‚Â¼ketimi"
                                            },
                                "keyMetrics":  {
                                                   "totalTrips":  "Toplam Geziler",
                                                   "totalMileage":  "Toplam Kilometre",
-                                                  "perVehicleMonth":  "araÃƒÂ§ baÃ…Å¸Ã„Â±na/ay",
-                                                  "averageUtilisation":  "Ortalama KullanÃ„Â±m",
+                                                  "perVehicleMonth":  "araÃƒÆ’Ã‚Â§ baÃƒâ€¦Ã…Â¸Ãƒâ€žÃ‚Â±na/ay",
+                                                  "averageUtilisation":  "Ortalama KullanÃƒâ€žÃ‚Â±m",
                                                   "kmThisMonth":  "bu ay km",
-                                                  "operatingCost":  "Ã„Â°Ã…Å¸letme Maliyeti"
+                                                  "operatingCost":  "Ãƒâ€žÃ‚Â°Ãƒâ€¦Ã…Â¸letme Maliyeti"
                                               },
                                "header":  {
-                                              "description":  "Filo kullanÃ„Â±mÃ„Â±, verimlilik ve maliyetleri izleyin",
-                                              "title":  "AraÃƒÂ§ KullanÃ„Â±mÃ„Â±",
+                                              "description":  "Filo kullanÃƒâ€žÃ‚Â±mÃƒâ€žÃ‚Â±, verimlilik ve maliyetleri izleyin",
+                                              "title":  "AraÃƒÆ’Ã‚Â§ KullanÃƒâ€žÃ‚Â±mÃƒâ€žÃ‚Â±",
                                               "category":  "Filo Analizi"
                                           },
                                "charts":  {
                                               "target":  "Hedef %",
                                               "mileageKm":  "Kilometre (km)",
-                                              "hoursUsed":  "KullanÃ„Â±lan Saatler",
-                                              "vehicleUtilisationRate":  "AraÃƒÂ§ KullanÃ„Â±m OranÃ„Â±",
-                                              "actual":  "GerÃƒÂ§ek %",
-                                              "operatingCostBreakdown":  "Ã„Â°Ã…Å¸letme Maliyeti DaÃ„Å¸Ã„Â±lÃ„Â±mÃ„Â±",
-                                              "usageTrend":  "KullanÃ„Â±m EÃ„Å¸ilimi (5 Hafta)"
+                                              "hoursUsed":  "KullanÃƒâ€žÃ‚Â±lan Saatler",
+                                              "vehicleUtilisationRate":  "AraÃƒÆ’Ã‚Â§ KullanÃƒâ€žÃ‚Â±m OranÃƒâ€žÃ‚Â±",
+                                              "actual":  "GerÃƒÆ’Ã‚Â§ek %",
+                                              "operatingCostBreakdown":  "Ãƒâ€žÃ‚Â°Ãƒâ€¦Ã…Â¸letme Maliyeti DaÃƒâ€žÃ…Â¸Ãƒâ€žÃ‚Â±lÃƒâ€žÃ‚Â±mÃƒâ€žÃ‚Â±",
+                                              "usageTrend":  "KullanÃƒâ€žÃ‚Â±m EÃƒâ€žÃ…Â¸ilimi (5 Hafta)"
                                           }
                            },
     "landing":  {
@@ -1061,10 +1061,10 @@
                                 "getStarted":  "Get Started"
                             },
                     "hero":  {
-                                 "badge":  "AI-powered Â· Patient-controlled Â· HIPAA-aligned",
+                                 "badge":  "AI-powered Ã‚Â· Patient-controlled Ã‚Â· HIPAA-aligned",
                                  "title":  "A revolutionary healthcare ecosystem",
                                  "titleHighlight":  "built around you.",
-                                 "description":  "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360Â° health story â€” from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
+                                 "description":  "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360Ã‚Â° health story Ã¢â‚¬â€ from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
                                  "cta":  "Join the Ecosystem",
                                  "doctorsButton":  "Doctors",
                                  "patientsButton":  "Patients"
@@ -1085,7 +1085,7 @@
                                      },
                     "mobile":  {
                                    "title":  "Get Holarc on your phone",
-                                   "description":  "Available on iOS and Android â€” your full health story in your pocket.",
+                                   "description":  "Available on iOS and Android Ã¢â‚¬â€ your full health story in your pocket.",
                                    "appStore":  "App Store",
                                    "googlePlay":  "Google Play"
                                },
@@ -1103,7 +1103,7 @@
                                      "roundTableFeature":  "Round Table",
                                      "roundTableDescription":  "Specialists coordinate per patient with shared notes and read-receipts.",
                                      "aiAssistant":  "AI Clinical Assistant",
-                                     "aiAssistantDescription":  "Patient history summaries Â· medication conflict alerts Â· imaging analysis Â· auto-generated documents.",
+                                     "aiAssistantDescription":  "Patient history summaries Ã‚Â· medication conflict alerts Ã‚Â· imaging analysis Ã‚Â· auto-generated documents.",
                                      "holarcHelp":  "Holarc Help (SOS)",
                                      "holarcHelpDescription":  "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
                                      "emergencyResponders":  "Emergency responders",
@@ -1114,21 +1114,21 @@
                     "patientBenefits":  {
                                             "sectionBadge":  "For Patients",
                                             "sectionTitle":  "Your Health.",
-                                            "sectionTitleHighlight":  "360Â° View.",
-                                            "sectionDescription":  "Holarc gives you a complete 360-degree view of your health profileâ€”every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
+                                            "sectionTitleHighlight":  "360Ã‚Â° View.",
+                                            "sectionDescription":  "Holarc gives you a complete 360-degree view of your health profileÃ¢â‚¬â€every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
                                             "benefit1Title":  "Complete Health Picture",
-                                            "benefit1Description":  "See your entire medical history, prescriptions, and care team in one unified viewâ€”no more scattered records.",
+                                            "benefit1Description":  "See your entire medical history, prescriptions, and care team in one unified viewÃ¢â‚¬â€no more scattered records.",
                                             "benefit2Title":  "Connect Your Care Team",
                                             "benefit2Description":  "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
                                             "benefit3Title":  "You\u0027re in Control",
                                             "benefit3Description":  "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
                                             "benefit4Title":  "Unified Appointments",
-                                            "benefit4Description":  "All your healthcare appointments from every provider in one calendarâ€”never miss a follow-up."
+                                            "benefit4Description":  "All your healthcare appointments from every provider in one calendarÃ¢â‚¬â€never miss a follow-up."
                                         },
                     "providerBenefits":  {
                                              "sectionBadge":  "For Healthcare Providers",
                                              "sectionTitle":  "Practice with the Full Picture",
-                                             "sectionDescription":  "When patients grant you access, you see everythingâ€”their complete history across all providers. Make better decisions with better information.",
+                                             "sectionDescription":  "When patients grant you access, you see everythingÃ¢â‚¬â€their complete history across all providers. Make better decisions with better information.",
                                              "benefit1Title":  "AI-Powered Insights",
                                              "benefit1Description":  "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
                                              "benefit2Title":  "Seamless Collaboration",
@@ -1136,7 +1136,7 @@
                                              "benefit3Title":  "Automated Documentation",
                                              "benefit3Description":  "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
                                              "benefit4Title":  "Better Patient Outcomes",
-                                             "benefit4Description":  "Access complete patient history across all their providersâ€”make informed decisions with the full picture.",
+                                             "benefit4Description":  "Access complete patient history across all their providersÃ¢â‚¬â€make informed decisions with the full picture.",
                                              "benefit5Title":  "Emergency Service Providers",
                                              "benefit5Description":  "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient\u0027s full medical context.",
                                              "benefit6Title":  "Hospital Partners",
@@ -1144,7 +1144,7 @@
                                          },
                     "cta":  {
                                 "title":  "Ready for Healthcare That Works Together?",
-                                "description":  "Join thousands of patients and providers building a better healthcare experienceâ€”one where your health story is complete, connected, and under your control.",
+                                "description":  "Join thousands of patients and providers building a better healthcare experienceÃ¢â‚¬â€one where your health story is complete, connected, and under your control.",
                                 "button":  "Get Started Today"
                             },
                     "roleDialog":  {
@@ -1291,7 +1291,7 @@
                                       "findProviderTitle":  "Find a Healthcare Provider on Holarc",
                                       "statusHidden":  "Hidden",
                                       "anyLanguage":  "Any language",
-                                      "findProviderDesc":  "Filter by name, specialty, language — or any combination",
+                                      "findProviderDesc":  "Filter by name, specialty, language â€” or any combination",
                                       "doctorRestoredDesc":  "They\u0027re back in your active list",
                                       "hideTooltip":  "Hide from your active list",
                                       "groupDoctors":  "Doctors",
@@ -1476,5 +1476,379 @@
                                           "patientDocumentsTitle":  "Patient Documents",
                                           "filterCancelledButton":  "Cancelled"
                                       }
+                },
+    "doctor":  {
+                    "invoices":  {
+                                      "title":  "Invoices",
+                                      "subtitle":  "Manage and track all patient invoices",
+                                      "status":  {
+                                                     "paid":  "Paid",
+                                                     "overdue":  "Overdue",
+                                                     "archived":  "Archived",
+                                                     "issued":  "Issued"
+                                                 },
+                                      "messages":  {
+                                                      "invoiceUpdated":  "Invoice Updated",
+                                                      "markedPaid":  "Invoice marked as paid",
+                                                      "invoiceArchived":  "Invoice Archived",
+                                                      "invoiceArchived_desc":  "Invoice has been archived",
+                                                      "detailsSaved":  "Invoice details have been saved",
+                                                      "sentToMedicalAid":  "Sent to Medical Aid",
+                                                      "paidInvoiceEmailed":  "Paid invoice emailed to",
+                                                      "pdfExported":  "PDF Exported",
+                                                      "pdfExportedDesc":  "Invoice report has been downloaded",
+                                                      "emailSent":  "Email Sent",
+                                                      "emailSentTo":  "Invoice report sent to",
+                                                      "invoiceCreated":  "Invoice Created",
+                                                      "invoiceCreatedDesc":  "Invoice {{invoiceNumber}} has been created successfully"
+                                                  },
+                                      "errors":  {
+                                                    "error":  "Error",
+                                                    "failedToLoad":  "Failed to load invoices",
+                                                    "noClaimsEmail":  "No Claims Email",
+                                                    "addClaimsEmail":  "Add a Medical Aid Claims Email on the patient profile to send claims.",
+                                                    "failedSendPaid":  "Failed to send paid invoice to medical aid",
+                                                    "sendFailed":  "Send Failed",
+                                                    "failedArchive":  "Failed to archive invoice",
+                                                    "previewFailed":  "Preview failed",
+                                                    "invalidAmount":  "Invalid Amount",
+                                                    "enterValidAmount":  "Please enter a valid amount",
+                                                    "enterValidAmountGtZero":  "Please enter a valid amount greater than 0",
+                                                    "invalidEmail":  "Invalid Email",
+                                                    "enterValidEmail":  "Please enter a valid email address",
+                                                    "noPatientSelected":  "No Patient Selected",
+                                                    "selectPatientFirst":  "Please select a patient first",
+                                                    "noClaimsEmailAutoSubmit":  "No Claims Email",
+                                                    "noClaimsEmailAutoSubmitDesc":  "Add a Medical Aid Claims Email on the patient profile to enable auto-submit."
+                                                },
+                                      "actions":  {
+                                                     "createInvoice":  "Create Invoice",
+                                                     "cancel":  "Cancel",
+                                                     "save":  "Save",
+                                                     "update":  "Update",
+                                                     "close":  "Close",
+                                                     "download":  "Download",
+                                                     "markPaid":  "Mark Paid",
+                                                     "sendToMedicalAid":  "Send to Medical Aid",
+                                                     "archive":  "Archive",
+                                                     "edit":  "Edit",
+                                                     "emailReport":  "Email Report",
+                                                     "downloadPdf":  "Download PDF",
+                                                     "printSavePdf":  "Print / Save PDF"
+                                                 },
+                                      "form":  {
+                                                   "patient":  "Patient",
+                                                   "selectPatient":  "Select a patient...",
+                                                   "searchPatients":  "Search patients...",
+                                                   "noPatientFound":  "No patient found.",
+                                                   "service":  "Service (Optional)",
+                                                   "selectService":  "Select a service...",
+                                                   "searchServices":  "Search services...",
+                                                   "noServiceFound":  "No service found.",
+                                                   "serviceHint":  "Select a service to auto-fill description and amount. You can override the price below.",
+                                                   "description":  "Description",
+                                                   "descriptionPlaceholder":  "Invoice description...",
+                                                   "amount":  "Amount",
+                                                   "dueDate":  "Due Date",
+                                                   "selectDescription":  "Select a patient and enter invoice details"
+                                               },
+                                      "table":  {
+                                                    "invoiceNumber":  "Invoice #",
+                                                    "patient":  "Patient",
+                                                    "description":  "Description",
+                                                    "amount":  "Amount",
+                                                    "dueDate":  "Due Date",
+                                                    "status":  "Status",
+                                                    "actions":  "Actions",
+                                                    "noInvoices":  "No invoices found",
+                                                    "setAmount":  "Set amount",
+                                                    "setAmountTitle":  "This invoice has no amount â€” click to set it",
+                                                    "previewTitle":  "Preview invoice",
+                                                    "editTitle":  "Edit invoice",
+                                                    "paidOn":  "Paid"
+                                                },
+                                      "stats":  {
+                                                    "issued":  "Issued",
+                                                    "overdue":  "Overdue",
+                                                    "paid":  "Paid",
+                                                    "outstanding":  "Outstanding"
+                                                },
+                                      "search":  {
+                                                     "placeholder":  "Search invoices..."
+                                                 },
+                                      "filter":  {
+                                                     "title":  "Filter by status",
+                                                     "issuedAndOverdue":  "Issued & Overdue",
+                                                     "all":  "All Invoices",
+                                                     "issuedOnly":  "Issued Only",
+                                                     "overdueOnly":  "Overdue Only",
+                                                     "paidOnly":  "Paid Only",
+                                                     "archived":  "Archived"
+                                                 },
+                                      "modal":  {
+                                                    "editTitle":  "Edit Invoice",
+                                                    "editDescription":  "Invoice {{invoiceNumber}}",
+                                                    "previewTitle":  "Invoice preview",
+                                                    "invoiceTitle":  "INVOICE",
+                                                    "from":  "From",
+                                                    "billTo":  "Bill To",
+                                                    "invoiceDate":  "Invoice Date",
+                                                    "dueDate":  "Due Date",
+                                                    "total":  "Total"
+                                                },
+                                      "report":  {
+                                                     "title":  "Invoice Report",
+                                                     "description":  "View invoice summary by date range with monthly totals",
+                                                     "fromDate":  "From Date",
+                                                     "toDate":  "To Date",
+                                                     "selectDate":  "Select date",
+                                                     "totalInvoices":  "Total Invoices",
+                                                     "totalAmount":  "Total Amount",
+                                                     "paid":  "Paid",
+                                                     "outstanding":  "Outstanding",
+                                                     "monthlyBreakdown":  "Monthly Breakdown",
+                                                     "month":  "Month",
+                                                     "invoices":  "Invoices",
+                                                     "noInvoices":  "No invoices found in the selected date range",
+                                                     "emailPlaceholder":  "Enter email address"
+                                                 }
+                                  },
+                    "connections":  {
+                                        "title":  "Connections",
+                                        "subtitle":  "Manage your professional network and connections",
+                                        "tab":  {
+                                                   "connected":  "Connected",
+                                                   "pending":  "Pending"
+                                               },
+                                        "search":  {
+                                                      "placeholder":  "Search..."
+                                                  },
+                                        "empty":  {
+                                                     "title":  "No connections yet",
+                                                     "description":  "Invite users to start building your network",
+                                                     "pendingTitle":  "No pending invitations",
+                                                     "pendingDescription":  "All your invitations have been responded to"
+                                                 },
+                                        "card":  {
+                                                    "unknownUser":  "Unknown User",
+                                                    "connected":  "Connected",
+                                                    "direction":  {
+                                                                      "received":  "Received",
+                                                                      "sent":  "Sent"
+                                                                  }
+                                                },
+                                        "actions":  {
+                                                       "accept":  "Accept",
+                                                       "decline":  "Decline",
+                                                       "cancel":  "Cancel"
+                                                   },
+                                        "messages":  {
+                                                        "acceptedTitle":  "Invitation accepted",
+                                                        "acceptedDesc":  "You are now connected",
+                                                        "declinedTitle":  "Invitation declined",
+                                                        "cancelledTitle":  "Invitation cancelled",
+                                                        "cancelledDesc":  "The invitation has been cancelled",
+                                                        "disconnectedTitle":  "Disconnected",
+                                                        "disconnectedDesc":  "You are no longer connected with"
+                                                    },
+                                        "errors":  {
+                                                      "title":  "Error",
+                                                      "failedLoad":  "Failed to load connections",
+                                                      "failedAccept":  "Failed to accept invitation",
+                                                      "failedDecline":  "Failed to decline invitation",
+                                                      "failedDisconnect":  "Failed to disconnect",
+                                                      "failedCancel":  "Failed to cancel invitation"
+                                                  },
+                                        "dialog":  {
+                                                      "title":  "Disconnect from",
+                                                      "description":  "This will remove the connection between you and this user. You can always reconnect later by sending a new invitation."
+                                                  }
+                                    },
+                    "referrals":  {
+                                      "title":  "Referrals",
+                                      "subtitle":  "Manage doctors you refer patients to",
+                                      "actions":  {
+                                                     "addDoctor":  "Add Doctor"
+                                                 },
+                                      "form":  {
+                                                   "title":  "Add Referral Doctor",
+                                                   "editTitle":  "Edit Referral Doctor",
+                                                   "search":  "Search for a doctor on Holarc",
+                                                   "searchPlaceholder":  "Type doctor name...",
+                                                   "notFound":  "Doctor not found on Holarc",
+                                                   "inviteButton":  "Send Invitation",
+                                                   "manualButton":  "Add Manually",
+                                                   "orManual":  "Or add manually without searching",
+                                                   "sendInvite":  "Send an email invitation to join Holarc Health",
+                                                   "doctorEmail":  "Doctor's Email",
+                                                   "emailPlaceholder":  "doctor@example.com",
+                                                   "firstName":  "First Name *",
+                                                   "lastName":  "Last Name *",
+                                                   "specialty":  "Specialty",
+                                                   "selectSpecialty":  "Select specialty",
+                                                   "other":  "Other...",
+                                                   "enterSpecialty":  "Enter specialty",
+                                                   "practiceNumber":  "Practice Number",
+                                                   "address":  "Address",
+                                                   "email":  "Email",
+                                                   "phone":  "Phone"
+                                               },
+                                      "table":  {
+                                                    "name":  "Name",
+                                                    "specialty":  "Specialty",
+                                                    "practiceNumber":  "Practice Number",
+                                                    "email":  "Email",
+                                                    "phone":  "Phone",
+                                                    "referrals":  "Referrals",
+                                                    "noData":  "No referral doctors found"
+                                                },
+                                      "actions":  {
+                                                     "save":  "Save",
+                                                     "update":  "Update",
+                                                     "cancel":  "Cancel",
+                                                     "back":  "Back",
+                                                     "addManually":  "Add manually instead"
+                                                 },
+                                      "messages":  {
+                                                      "addedTitle":  "Added",
+                                                      "addedDesc":  "Referral doctor added",
+                                                      "updatedTitle":  "Updated",
+                                                      "updatedDesc":  "Referral doctor updated",
+                                                      "removedTitle":  "Removed",
+                                                      "removedDesc":  "Referral doctor removed",
+                                                      "inviteSentTitle":  "Invitation sent",
+                                                      "inviteSentDesc":  "An invitation has been sent to"
+                                                  },
+                                      "errors":  {
+                                                     "requiredTitle":  "Required",
+                                                     "requiredDesc":  "First and last name are required",
+                                                     "failedTitle":  "Error",
+                                                     "failedUpdateDesc":  "Failed to update",
+                                                     "failedAddDesc":  "Failed to add",
+                                                     "emailRequired":  "Email required",
+                                                     "emailRequiredDesc":  "Please enter the doctor's email address.",
+                                                     "inviteFailed":  "Failed to send invitation"
+                                                 }
+                                  },
+                    "roundtable":  {
+                                       "title":  "Round Table",
+                                       "subtitle":  "Notes shared by your healthcare providers about your care.",
+                                       "empty":  "No notes yet",
+                                       "emptyDesc":  "When your doctors share round table notes, they will appear here."
+                                   },
+                    "wallet":  {
+                                   "title":  "Vula Vault",
+                                   "poweredBy":  "Powered by 6Dot50",
+                                   "description":  "Sign in to your Vula Vault to redeem your Vulas at participating retailers and partner apps in our rewards network.",
+                                   "actions":  {
+                                                   "continue":  "Continue to secure sign-in",
+                                                   "back":  "Back"
+                                               },
+                                   "security":  "You'll be taken to our secure partner's login page in a new tab. Your credentials are never stored by Holarc Health.",
+                                   "overlay":  {
+                                                   "title":  "Demo Branding Overlay",
+                                                   "description":  "For live demos, install the Vula Vault branding overlay. It visually rebrands the partner login page in your browser without changing any functionality.",
+                                                   "download":  "Download Demo Branding Overlay"
+                                               },
+                                   "install":  {
+                                                   "title":  "How to install (Chrome / Edge / Brave)",
+                                                   "step1":  "Unzip the downloaded vula-vault-overlay.zip.",
+                                                   "step2":  "Open chrome://extensions in your browser.",
+                                                   "step3":  "Enable Developer mode (top-right toggle).",
+                                                   "step4":  "Click Load unpacked and select the unzipped folder.",
+                                                   "step5":  "Visit the partner login â€” branding appears automatically."
+                                               },
+                                   "messages":  {
+                                                   "downloadSuccess":  "Overlay downloaded â€” see install steps below."
+                                               },
+                                   "errors":  {
+                                                   "downloadFailed":  "Download failed"
+                                               }
+                                },
+                    "cpd":  {
+                                "title":  "Certificates",
+                                "subtitle":  "Track your continuing professional development",
+                                "totalPoints":  "CPD Points",
+                                "actions":  {
+                                               "addCertificate":  "Add Certificate"
+                                           },
+                                "form":  {
+                                             "title":  "Add Certificate",
+                                             "editTitle":  "Edit Certificate",
+                                             "name":  "Certificate Name *",
+                                             "namePlaceholder":  "e.g., Advanced Cardiac Life Support",
+                                             "issuingBody":  "Issuing Body",
+                                             "issuingBodyPlaceholder":  "e.g., HPCSA",
+                                             "dateEarned":  "Date Earned *",
+                                             "points":  "CPD Points",
+                                             "pointsPlaceholder":  "0",
+                                             "attach":  "Attach Certificate (PDF/Image)",
+                                             "chooseFile":  "Choose File",
+                                             "remove":  "Remove"
+                                         },
+                                "actions":  {
+                                               "save":  "Save",
+                                               "update":  "Update",
+                                               "uploading":  "Uploading...",
+                                               "cancel":  "Cancel"
+                                           },
+                                "table":  {
+                                             "certificate":  "Certificate",
+                                             "issuingBody":  "Issuing Body",
+                                             "dateEarned":  "Date Earned",
+                                             "points":  "Points",
+                                             "file":  "File",
+                                             "view":  "View",
+                                             "noData":  "No certificates recorded yet"
+                                         },
+                                "messages":  {
+                                                "addedTitle":  "Added",
+                                                "addedDesc":  "Certificate added",
+                                                "updatedTitle":  "Updated",
+                                                "updatedDesc":  "Certificate updated",
+                                                "removedTitle":  "Removed",
+                                                "removedDesc":  "Certificate removed"
+                                            },
+                                "errors":  {
+                                               "uploadTitle":  "Upload Error",
+                                               "requiredTitle":  "Required",
+                                               "requiredDesc":  "Certificate name and date are required",
+                                               "failedTitle":  "Error",
+                                               "failedUpdateDesc":  "Failed to update",
+                                               "failedAddDesc":  "Failed to add",
+                                               "openFailed":  "Unable to open file"
+                                           }
+                            },
+                    "recordings":  {
+                                       "title":  "Expiring Recordings",
+                                       "subtitle":  "Session recordings are automatically deleted after 7 days. Download any you want to keep.",
+                                       "empty":  "No recordings expiring soon.",
+                                       "emptyDesc":  "Recordings older than 7 days are automatically removed.",
+                                       "expiryToday":  "Expires today",
+                                       "expiryDays":  "day(s) left",
+                                       "actions":  {
+                                                      "download":  "Download",
+                                                      "delete":  "Delete"
+                                                  },
+                                       "messages":  {
+                                                       "downloadStartedTitle":  "Download started",
+                                                       "downloadStartedDesc":  "Your recording is being downloaded.",
+                                                       "deletedTitle":  "Recording deleted",
+                                                       "deletedDesc":  "The audio and transcript have been removed."
+                                                   },
+                                       "errors":  {
+                                                      "downloadFailedTitle":  "Download failed",
+                                                      "downloadFailedDesc":  "Could not download the recording.",
+                                                      "deleteFailedTitle":  "Delete failed",
+                                                      "deleteFailedDesc":  "Could not delete the recording."
+                                                  },
+                                       "dialog":  {
+                                                      "title":  "Delete Recording?",
+                                                      "description":  "This will permanently remove the audio recording and transcript. The AI summary and action points will be preserved. This action cannot be undone.",
+                                                      "cancel":  "Cancel",
+                                                      "confirm":  "Delete Recording"
+                                                  }
+                                   }
                 }
 }
+

@@ -117,7 +117,7 @@
                    "confirm":  "Confirmar",
                    "search":  "Pesquisar",
                    "loading":  "A carregar...",
-                   "settings":  "DefiniÃ§Ãµes",
+                   "settings":  "DefiniÃƒÂ§ÃƒÂµes",
                    "noData":  "No data",
                    "active":  "Active",
                    "inactive":  "Inactive",
@@ -143,10 +143,10 @@
                    "vulas":  "Vulas"
                },
     "nav":  {
-                "home":  "InÃ­cio",
+                "home":  "InÃƒÂ­cio",
                 "myPatients":  "Meus Pacientes",
-                "myPractice":  "Minha ClÃ­nica",
-                "myCalendar":  "Meu CalendÃ¡rio",
+                "myPractice":  "Minha ClÃƒÂ­nica",
+                "myCalendar":  "Meu CalendÃƒÂ¡rio",
                 "myTasks":  "Minhas Tarefas",
                 "myDocuments":  "Meus Documentos",
                 "myRoundTables":  "Minhas Mesas Redondas",
@@ -156,18 +156,18 @@
                 "myHolarchy":  "Meu Holarchy",
                 "admin":  "Admin",
                 "users":  "Utilizadores",
-                "pricing":  "PreÃ§os",
+                "pricing":  "PreÃƒÂ§os",
                 "rewards":  "Recompensas",
                 "hospitalPortal":  "Portal Hospital",
-                "erPortal":  "Portal EmergÃªncia",
-                "userAdmin":  "Admin de UsuÃ¡rios",
-                "telematics":  "TelemÃ¡tica",
+                "erPortal":  "Portal EmergÃƒÂªncia",
+                "userAdmin":  "Admin de UsuÃƒÂ¡rios",
+                "telematics":  "TelemÃƒÂ¡tica",
                 "teamStatus":  "Equipe",
                 "fleet":  "Frota",
                 "navigation":  "Navigation",
                 "hospitals":  "Hospitais",
                 "affiliatedHospitals":  "Afiliados",
-                "incidentHistory":  "HistÃ³rico",
+                "incidentHistory":  "HistÃƒÂ³rico",
                 "incomingSos":  "SOS",
                 "incomingEr":  "Incoming ER",
                 "triage":  "Triage",
@@ -183,19 +183,19 @@
             },
     "topbar":  {
                    "reportBug":  "Reportar erro",
-                   "calendar":  "CalendÃ¡rio",
+                   "calendar":  "CalendÃƒÂ¡rio",
                    "recordTask":  "Gravar tarefa",
-                   "notifications":  "NotificaÃ§Ãµes"
+                   "notifications":  "NotificaÃƒÂ§ÃƒÂµes"
                },
     "userAdmin":  {
-                      "title":  "Admin de UsuÃ¡rios",
+                      "title":  "Admin de UsuÃƒÂ¡rios",
                       "tabAdmins":  "Admins",
-                      "tabCrew":  "TripulaÃ§Ã£o",
+                      "tabCrew":  "TripulaÃƒÂ§ÃƒÂ£o",
                       "inviteAdmin":  "Invite admin",
                       "addCrew":  "Add Crew Member",
                       "owner":  "Owner",
                       "organisationOwner":  "Organisation owner",
-                      "ownerCannotRemove":  "Initial registrant â€” cannot be removed",
+                      "ownerCannotRemove":  "Initial registrant Ã¢â‚¬â€ cannot be removed",
                       "noAdmins":  "No additional administrators yet.",
                       "noCrew":  "No crew members yet.",
                       "shiftPattern":  "Shift pattern",
@@ -328,7 +328,7 @@
                    },
     "telematics":  {
                        "title":  "Rastreamento",
-                       "subtitle":  "Fleet Telematics Â· Last 24h",
+                       "subtitle":  "Fleet Telematics Ã‚Â· Last 24h",
                        "liveFleet":  "Frota ao vivo",
                        "tripsStops":  "Viagens",
                        "moving":  "Moving",
@@ -336,7 +336,7 @@
                        "onMission":  "On mission",
                        "freeRoam":  "Free roam",
                        "noActive":  "No active drivers in the last 24 hours.",
-                       "noTrips":  "No trip data yet â€” start a shift to begin recording telematics.",
+                       "noTrips":  "No trip data yet Ã¢â‚¬â€ start a shift to begin recording telematics.",
                        "pings":  "pings",
                        "driver":  "Driver",
                        "drivers":  "drivers",
@@ -353,11 +353,11 @@
                             "greetingMorning":  "Bom dia",
                             "greetingAfternoon":  "Boa tarde",
                             "greetingEvening":  "Boa noite",
-                            "subtitle":  "Eis o que estÃ¡ a acontecer no seu consultÃ³rio hoje,",
+                            "subtitle":  "Eis o que estÃƒÂ¡ a acontecer no seu consultÃƒÂ³rio hoje,",
                             "totalPatients":  "Total de pacientes",
                             "thisWeek":  "Esta semana",
-                            "doctorRating":  "ClassificaÃ§Ã£o do mÃ©dico",
-                            "noRatings":  "Sem classificaÃ§Ãµes ainda",
+                            "doctorRating":  "ClassificaÃƒÂ§ÃƒÂ£o do mÃƒÂ©dico",
+                            "noRatings":  "Sem classificaÃƒÂ§ÃƒÂµes ainda",
                             "vulaVouchers":  "Vouchers Vula",
                             "myRoundTables":  "Minhas mesas redondas",
                             "searchRoundTable":  "Buscar paciente para iniciar mesa redonda...",
@@ -365,22 +365,22 @@
                             "todoList":  "Lista de tarefas",
                             "addTask":  "Adicionar tarefa...",
                             "active":  "Ativas",
-                            "done":  "ConcluÃ­das",
+                            "done":  "ConcluÃƒÂ­das",
                             "noActiveTasks":  "Sem tarefas ativas",
-                            "noCompletedTasks":  "Sem tarefas concluÃ­das",
+                            "noCompletedTasks":  "Sem tarefas concluÃƒÂ­das",
                             "recentActivity":  "Atividade recente",
-                            "sessionCompleted":  "SessÃ£o concluÃ­da",
+                            "sessionCompleted":  "SessÃƒÂ£o concluÃƒÂ­da",
                             "documentGenerated":  "Documento gerado",
-                            "taskCompleted":  "Tarefa concluÃ­da",
+                            "taskCompleted":  "Tarefa concluÃƒÂ­da",
                             "followUpSent":  "Acompanhamento enviado",
-                            "gettingStarted":  "ComeÃ§ar",
-                            "addFirstPatient":  "Adicione o seu primeiro paciente para comeÃ§ar",
+                            "gettingStarted":  "ComeÃƒÂ§ar",
+                            "addFirstPatient":  "Adicione o seu primeiro paciente para comeÃƒÂ§ar",
                             "justNow":  "Agora mesmo"
                         },
     "briefing":  {
                      "todaysBriefing":  "Resumo de hoje",
                      "briefingFor":  "Resumo para {{day}}",
-                     "completedOf":  "{{done}} de {{total}} consultas concluÃ­das",
+                     "completedOf":  "{{done}} de {{total}} consultas concluÃƒÂ­das",
                      "noAppointments":  "Nenhum compromisso agendado para hoje.",
                      "narrate":  "Narrar",
                      "preparing":  "Preparando...",
@@ -388,13 +388,13 @@
                      "resume":  "Retomar",
                      "stop":  "Parar",
                      "previousDay":  "Dia anterior",
-                     "nextDay":  "PrÃ³ximo dia",
+                     "nextDay":  "PrÃƒÂ³ximo dia",
                      "translating":  "Traduzindo resumo...",
                      "allergies":  "Alergias",
-                     "lastSession":  "Ãšltima sessÃ£o",
-                     "noPreviousSession":  "Sem anotaÃ§Ãµes de sessÃµes anteriores",
-                     "unreadNote":  "nota nÃ£o lida",
-                     "unreadNotes":  "notas nÃ£o lidas"
+                     "lastSession":  "ÃƒÅ¡ltima sessÃƒÂ£o",
+                     "noPreviousSession":  "Sem anotaÃƒÂ§ÃƒÂµes de sessÃƒÂµes anteriores",
+                     "unreadNote":  "nota nÃƒÂ£o lida",
+                     "unreadNotes":  "notas nÃƒÂ£o lidas"
                  },
     "patients":  {
                      "title":  "Pacientes",
@@ -492,7 +492,7 @@
                                    "columnLastSeen":  "Last Seen",
                                    "columnSince":  "Since",
                                    "columnActions":  "Actions",
-                                   "noData":  "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"
+                                   "noData":  "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â"
                                },
                      "menu":  {
                                   "startSession":  "Start Session",
@@ -534,7 +534,7 @@
                      "months":  {
                                     "january":  "Janeiro",
                                     "february":  "Fevereiro",
-                                    "march":  "MarÃ§o",
+                                    "march":  "MarÃƒÂ§o",
                                     "april":  "Abril",
                                     "may":  "Maio",
                                     "june":  "Junho",
@@ -562,11 +562,11 @@
                      "days":  {
                                   "sunday":  "Domingo",
                                   "monday":  "Segunda",
-                                  "tuesday":  "TerÃ§a",
+                                  "tuesday":  "TerÃƒÂ§a",
                                   "wednesday":  "Quarta",
                                   "thursday":  "Quinta",
                                   "friday":  "Sexta",
-                                  "saturday":  "SÃ¡bado"
+                                  "saturday":  "SÃƒÂ¡bado"
                               },
                      "daysShort":  {
                                        "sun":  "Dom",
@@ -588,27 +588,27 @@
                                     ]
                  },
     "sessions":  {
-                     "title":  "SessÃµes",
-                     "sessionMode":  "Modo de SessÃ£o",
+                     "title":  "SessÃƒÂµes",
+                     "sessionMode":  "Modo de SessÃƒÂ£o",
                      "selectPatient":  "Selecione um Paciente",
-                     "readyToStart":  "Pronto para ComeÃ§ar",
+                     "readyToStart":  "Pronto para ComeÃƒÂ§ar",
                      "searchByPatient":  "Procurar por nome de paciente...",
-                     "newSession":  "Nova SessÃ£o",
-                     "allSessions":  "Todas as SessÃµes",
+                     "newSession":  "Nova SessÃƒÂ£o",
+                     "allSessions":  "Todas as SessÃƒÂµes",
                      "noPatientsFound":  "Nenhum paciente encontrado.",
                      "searchByName":  "Procurar por nome...",
                      "today":  "Hoje",
                      "lastWeek":  "Semana passada",
-                     "lastMonth":  "MÃªs passado",
+                     "lastMonth":  "MÃƒÂªs passado",
                      "older":  "Mais antigos",
                      "tapToRecord":  "Toque para gravar",
                      "recording":  "Gravando... Toque para parar",
                      "paused":  "Pausado - toque em reproduzir para continuar",
                      "transcribing":  "Transcrevendo...",
-                     "endSessionTip":  "Diga \"Terminar SessÃ£o\" para parar a gravaÃ§Ã£o automaticamente",
-                     "generateAnalysis":  "Gerar AnÃ¡lise",
+                     "endSessionTip":  "Diga \"Terminar SessÃƒÂ£o\" para parar a gravaÃƒÂ§ÃƒÂ£o automaticamente",
+                     "generateAnalysis":  "Gerar AnÃƒÂ¡lise",
                      "regenerate":  "Regenerar",
-                     "currentSession":  "SessÃ£o Atual",
+                     "currentSession":  "SessÃƒÂ£o Atual",
                      "actionPointsTodo":  "Action Points / TO-DO",
                      "referralLetter":  "Referral Letter",
                      "generatedFromSession":  "Generated from session content",
@@ -652,11 +652,11 @@
                      "sessionNotes":  "Session Notes",
                      "referralLetterCreated":  "Referral Letter created",
                      "download":  "Download...",
-                     "noPrivateNotes":  "No private notes yet — click Edit to add notes only you can see.",
+                     "noPrivateNotes":  "No private notes yet â€” click Edit to add notes only you can see.",
                      "privateNotesSaved":  "Private notes saved",
                      "sessionNotFound":  "Session not found",
                      "prescriptionCreated":  "Prescription created",
-                     "writePrivateNotes":  "Write notes only you can see…",
+                     "writePrivateNotes":  "Write notes only you can seeâ€¦",
                      "audio":  "Audio",
                      "translationError":  "Could not translate the summary",
                      "translate":  "Translate...",
@@ -674,51 +674,51 @@
                  },
     "roundTables":  {
                         "title":  "Minhas Mesas Redondas",
-                        "noTables":  "VocÃª nÃ£o tem mesas redondas ainda.",
-                        "unread":  "nÃ£o lido",
-                        "lastUpdate":  "Ãšltima atualizaÃ§Ã£o",
+                        "noTables":  "VocÃƒÂª nÃƒÂ£o tem mesas redondas ainda.",
+                        "unread":  "nÃƒÂ£o lido",
+                        "lastUpdate":  "ÃƒÅ¡ltima atualizaÃƒÂ§ÃƒÂ£o",
                         "openTable":  "Abrir",
-                        "newTopic":  "Novo TÃ³pico"
+                        "newTopic":  "Novo TÃƒÂ³pico"
                     },
     "doctorRewards":  {
                           "title":  "Minhas Recompensas",
-                          "tabOverview":  "VisÃ£o Geral",
+                          "tabOverview":  "VisÃƒÂ£o Geral",
                           "tabMilestones":  "Marcos",
-                          "tabStreaks":  "SequÃªncias",
-                          "tabHistory":  "HistÃ³rico",
+                          "tabStreaks":  "SequÃƒÂªncias",
+                          "tabHistory":  "HistÃƒÂ³rico",
                           "tabRedeem":  "Resgatar",
                           "totalVulas":  "Vulas Totais",
-                          "currentStreak":  "SequÃªncia Atual",
+                          "currentStreak":  "SequÃƒÂªncia Atual",
                           "patientsAdhering":  "Pacientes Aderindo"
                       },
     "liveSos":  {
                     "title":  "SOS ao vivo",
-                    "subtitle":  "Feed de emergÃªncia em tempo real",
+                    "subtitle":  "Feed de emergÃƒÂªncia em tempo real",
                     "active":  "Ativo",
-                    "critical":  "CrÃ­tico",
+                    "critical":  "CrÃƒÂ­tico",
                     "recent":  "Recente",
                     "activeNow":  "Ativo agora",
-                    "allClear":  "Tudo limpo â€” sem incidentes SOS ativos.",
+                    "allClear":  "Tudo limpo Ã¢â‚¬â€ sem incidentes SOS ativos.",
                     "selectIncident":  "Selecione um incidente para ver os detalhes.",
                     "sosIncident":  "Incidente SOS",
                     "muted":  "Silenciado",
                     "alertsOn":  "Alertas ativados",
-                    "consciousness":  "ConsciÃªncia",
+                    "consciousness":  "ConsciÃƒÂªncia",
                     "responsive":  "Responsivo",
                     "adequate":  "Adequado",
-                    "ambulance":  "AmbulÃ¢ncia",
+                    "ambulance":  "AmbulÃƒÂ¢ncia",
                     "eta":  "ETA",
-                    "location":  "LocalizaÃ§Ã£o",
+                    "location":  "LocalizaÃƒÂ§ÃƒÂ£o",
                     "openInMaps":  "Abrir no Mapas",
                     "openConsole":  "Abrir Console"
                 },
     "myPractice":  {
-                       "tabPractice":  "Minha ClÃ­nica",
+                       "tabPractice":  "Minha ClÃƒÂ­nica",
                        "tabReferrals":  "Referrals",
                        "tabCredentials":  "Credenciais",
                        "tabRewards":  "Rewards",
                        "aboutMe":  "Sobre Mim",
-                       "aboutMeHelper":  "Compartilhe um breve resumo sobre sua prÃ¡tica e abordagem. Os pacientes verÃ£o isso ao visualizar seu perfil. MÃ¡ximo de 600 palavras.",
+                       "aboutMeHelper":  "Compartilhe um breve resumo sobre sua prÃƒÂ¡tica e abordagem. Os pacientes verÃƒÂ£o isso ao visualizar seu perfil. MÃƒÂ¡ximo de 600 palavras.",
                        "wordCount":  "{{count}} / 600 palavras",
                        "save":  "Save",
                        "tabProfile":  "Profile",
@@ -793,27 +793,27 @@
                        "noPatients":  "No patients connected yet"
                    },
     "patientRewards":  {
-                           "progressTitle":  "Progresso para o PrÃ³ximo Marco",
+                           "progressTitle":  "Progresso para o PrÃƒÂ³ximo Marco",
                            "progressLabel":  "{{current}} / {{target}} Vulas para \"{{milestone}}\"",
                            "moreToGo":  "Faltam {{count}}!",
                            "recentRewards":  "Recompensas Recentes",
-                           "empty":  "Ainda nÃ£o hÃ¡ recompensas. Comece sua jornada de saÃºde!"
+                           "empty":  "Ainda nÃƒÂ£o hÃƒÂ¡ recompensas. Comece sua jornada de saÃƒÂºde!"
                        },
     "todo":  {
                  "addNewTask":  "Adicionar Nova Tarefa",
                  "tapToRecord":  "Toque para gravar",
                  "transcribing":  "Transcrevendo...",
                  "aiProcessing":  "Processando IA...",
-                 "listening":  "Ouvindo... para apÃ³s uma pausa",
+                 "listening":  "Ouvindo... para apÃƒÂ³s uma pausa",
                  "typeTask":  "Ou digite sua tarefa aqui...",
                  "add":  "Adicionar",
                  "priority":  "Prioridade:",
                  "low":  "Baixa",
-                 "medium":  "MÃ©dia",
+                 "medium":  "MÃƒÂ©dia",
                  "high":  "Alta",
                  "aiProcess":  "Processo de IA",
                  "active":  "Ativo",
-                 "completed":  "ConcluÃ­do",
+                 "completed":  "ConcluÃƒÂ­do",
                  "all":  "Todos",
                  "approve":  "Aprovar",
                  "noMatchingPatient":  "Nenhum paciente correspondente encontrado"
@@ -822,17 +822,17 @@
                       "title":  "Documentos",
                       "tabDocuments":  "Documentos",
                       "tabTemplates":  "Modelos",
-                      "tabHeaderFooter":  "CabeÃ§alho e RodapÃ©",
-                      "tabContent":  "Modelos de ConteÃºdo",
-                      "contentHelper":  "Crie modelos de conteÃºdo de documentos (cabeÃ§alho/rodapÃ© serÃ£o aplicados a partir do layout selecionado)",
-                      "newContent":  "Novo Modelo de ConteÃºdo",
-                      "searchContent":  "Pesquisar modelos de conteÃºdo...",
+                      "tabHeaderFooter":  "CabeÃƒÂ§alho e RodapÃƒÂ©",
+                      "tabContent":  "Modelos de ConteÃƒÂºdo",
+                      "contentHelper":  "Crie modelos de conteÃƒÂºdo de documentos (cabeÃƒÂ§alho/rodapÃƒÂ© serÃƒÂ£o aplicados a partir do layout selecionado)",
+                      "newContent":  "Novo Modelo de ConteÃƒÂºdo",
+                      "searchContent":  "Pesquisar modelos de conteÃƒÂºdo...",
                       "createTemplate":  "Criar Modelo",
                       "patientDocuments":  "Documentos do Paciente",
                       "searchDocuments":  "Pesquisar documentos...",
                       "letterhead":  "Papel Timbrado:",
-                      "letterheadHeaderFooter":  "CabeÃ§alho e RodapÃ©",
-                      "letterheadDefault":  "PadrÃ£o",
+                      "letterheadHeaderFooter":  "CabeÃƒÂ§alho e RodapÃƒÂ©",
+                      "letterheadDefault":  "PadrÃƒÂ£o",
                       "subtitle":  "All your prescriptions, invoices, certificates and uploaded files.",
                       "button":  {
                                      "recordAudio":  "Record Audio",
@@ -943,89 +943,89 @@
     "roundTablesMeta":  {
                             "noteOne":  "{{count}} nota",
                             "noteOther":  "{{count}} notas",
-                            "lastActivity":  "Ãšltima atividade {{date}}"
+                            "lastActivity":  "ÃƒÅ¡ltima atividade {{date}}"
                         },
     "sos":  {
-                "emergencyAssistance":  "AssistÃªncia de EmergÃªncia",
-                "helpAlerted":  "A ajuda serÃ¡ alertada instantaneamente",
-                "ackHeading":  "ANTES DE USAR O SOS, POR FAVOR, RECONHEÃ‡A:",
-                "ackA":  "O suporte SOS Ã© fornecido com base no melhor esforÃ§o possÃ­vel e nÃ£o pode garantir resposta de emergÃªncia.",
-                "ackB":  "O SOS depende de rede, status do dispositivo, acesso Ã  localizaÃ§Ã£o e respondedores de terceiros.",
-                "ackC":  "O SOS requer permissÃµes de localizaÃ§Ã£o, carga de bateria e conectividade com a internet ou celular.",
+                "emergencyAssistance":  "AssistÃƒÂªncia de EmergÃƒÂªncia",
+                "helpAlerted":  "A ajuda serÃƒÂ¡ alertada instantaneamente",
+                "ackHeading":  "ANTES DE USAR O SOS, POR FAVOR, RECONHEÃƒâ€¡A:",
+                "ackA":  "O suporte SOS ÃƒÂ© fornecido com base no melhor esforÃƒÂ§o possÃƒÂ­vel e nÃƒÂ£o pode garantir resposta de emergÃƒÂªncia.",
+                "ackB":  "O SOS depende de rede, status do dispositivo, acesso ÃƒÂ  localizaÃƒÂ§ÃƒÂ£o e respondedores de terceiros.",
+                "ackC":  "O SOS requer permissÃƒÂµes de localizaÃƒÂ§ÃƒÂ£o, carga de bateria e conectividade com a internet ou celular.",
                 "sosLabel":  "SOS",
                 "tapForHelp":  "TOQUE PARA AJUDA",
-                "footerCaption":  "Tocar no SOS compartilha sua localizaÃ§Ã£o e notifica seus contatos de emergÃªncia.",
-                "manageContacts":  "Gerenciar contatos de emergÃªncia",
-                "viewHistory":  "Ver histÃ³rico de incidentes"
+                "footerCaption":  "Tocar no SOS compartilha sua localizaÃƒÂ§ÃƒÂ£o e notifica seus contatos de emergÃƒÂªncia.",
+                "manageContacts":  "Gerenciar contatos de emergÃƒÂªncia",
+                "viewHistory":  "Ver histÃƒÂ³rico de incidentes"
             },
     "patientProfile":  {
                            "backToPatients":  "Voltar aos Pacientes",
-                           "patientNotFound":  "Paciente nÃ£o encontrado",
+                           "patientNotFound":  "Paciente nÃƒÂ£o encontrado",
                            "schedule":  "Agenda",
-                           "startSession":  "Iniciar SessÃ£o",
+                           "startSession":  "Iniciar SessÃƒÂ£o",
                            "checkIn":  "Check-in",
-                           "totalSessions":  "SessÃµes Totais",
-                           "lastSeen":  "Visto pela Ãºltima vez",
+                           "totalSessions":  "SessÃƒÂµes Totais",
+                           "lastSeen":  "Visto pela ÃƒÂºltima vez",
                            "since":  "Desde",
                            "vulas":  "Vulas",
                            "tabDetails":  "Detalhes",
-                           "tabOverview":  "VisÃ£o Geral",
-                           "tabSessions":  "HistÃ³rico de SessÃµes",
-                           "tabAdmissions":  "AdmissÃµes",
-                           "tabProviders":  "Profissionais de SaÃºde",
+                           "tabOverview":  "VisÃƒÂ£o Geral",
+                           "tabSessions":  "HistÃƒÂ³rico de SessÃƒÂµes",
+                           "tabAdmissions":  "AdmissÃƒÂµes",
+                           "tabProviders":  "Profissionais de SaÃƒÂºde",
                            "tabDocuments":  "Documentos",
                            "tabRoundTable":  "Mesa Redonda",
-                           "togglePersonal":  "InformaÃ§Ãµes Pessoais",
-                           "toggleMedical":  "InformaÃ§Ãµes MÃ©dicas",
-                           "personalHeading":  "InformaÃ§Ãµes Pessoais",
+                           "togglePersonal":  "InformaÃƒÂ§ÃƒÂµes Pessoais",
+                           "toggleMedical":  "InformaÃƒÂ§ÃƒÂµes MÃƒÂ©dicas",
+                           "personalHeading":  "InformaÃƒÂ§ÃƒÂµes Pessoais",
                            "personalHelper":  "Visualize e gerencie detalhes pessoais",
-                           "medicalHeading":  "InformaÃ§Ãµes MÃ©dicas",
-                           "medicalHelper":  "Visualize e gerencie detalhes mÃ©dicos",
+                           "medicalHeading":  "InformaÃƒÂ§ÃƒÂµes MÃƒÂ©dicas",
+                           "medicalHelper":  "Visualize e gerencie detalhes mÃƒÂ©dicos",
                            "saved":  "Salvo",
-                           "sectionAddresses":  "EndereÃ§os",
-                           "sectionEmergencyContacts":  "Contatos de EmergÃªncia",
-                           "sectionNextOfKin":  "PrÃ³ximo de Parentesco",
-                           "sectionInsurance":  "Seguro / ConvÃªnio MÃ©dico",
+                           "sectionAddresses":  "EndereÃƒÂ§os",
+                           "sectionEmergencyContacts":  "Contatos de EmergÃƒÂªncia",
+                           "sectionNextOfKin":  "PrÃƒÂ³ximo de Parentesco",
+                           "sectionInsurance":  "Seguro / ConvÃƒÂªnio MÃƒÂ©dico",
                            "sectionEmployer":  "Empregador",
                            "sectionLifestyle":  "Estilo de Vida",
                            "sectionConsents":  "Consentimentos",
                            "sectionAllergies":  "Alergias",
-                           "sectionChronic":  "CondiÃ§Ãµes CrÃ´nicas",
-                           "sectionMedications":  "MedicaÃ§Ã£o Atual",
-                           "sectionFamilyHistory":  "HistÃ³rico Familiar",
-                           "sectionSurgicalHistory":  "HistÃ³rico CirÃºrgico",
-                           "sectionImmunizations":  "ImunizaÃ§Ãµes",
+                           "sectionChronic":  "CondiÃƒÂ§ÃƒÂµes CrÃƒÂ´nicas",
+                           "sectionMedications":  "MedicaÃƒÂ§ÃƒÂ£o Atual",
+                           "sectionFamilyHistory":  "HistÃƒÂ³rico Familiar",
+                           "sectionSurgicalHistory":  "HistÃƒÂ³rico CirÃƒÂºrgico",
+                           "sectionImmunizations":  "ImunizaÃƒÂ§ÃƒÂµes",
                            "sectionVitals":  "Sinais Vitais",
-                           "sectionLabResults":  "Resultados de LaboratÃ³rio",
-                           "sectionGeneticMarkers":  "Marcadores GenÃ©ticos",
-                           "sectionMentalHealth":  "SaÃºde Mental"
+                           "sectionLabResults":  "Resultados de LaboratÃƒÂ³rio",
+                           "sectionGeneticMarkers":  "Marcadores GenÃƒÂ©ticos",
+                           "sectionMentalHealth":  "SaÃƒÂºde Mental"
                        },
     "emergencyDashboard":  {
                                "statusBar":  {
-                                                 "activeMission":  "MISSÃƒÆ’Ã†â€™O ATIVA",
-                                                 "onShift":  "EM SERVIÃƒÆ’Ã¢â‚¬Â¡O"
+                                                 "activeMission":  "MISSÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢O ATIVA",
+                                                 "onShift":  "EM SERVIÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¡O"
                                              },
                                "header":  {
-                                              "subtitle":  "Resposta de EmergÃƒÆ’Ã‚Âªncia",
-                                              "title":  "OperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de EmergÃƒÆ’Ã‚Âªncia"
+                                              "subtitle":  "Resposta de EmergÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncia",
+                                              "title":  "OperaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes de EmergÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncia"
                                           },
                                "stats":  {
                                              "new":  "nova",
                                              "active":  "ativa",
-                                             "critical":  "crÃƒÆ’Ã‚Â­tica"
+                                             "critical":  "crÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­tica"
                                          },
                                "statsCard":  {
-                                                 "newRequests":  "Novas SolicitaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes",
-                                                 "activeOperations":  "OperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes Ativas",
-                                                 "criticalIncidents":  "Incidentes CrÃƒÆ’Ã‚Â­ticos"
+                                                 "newRequests":  "Novas SolicitaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes",
+                                                 "activeOperations":  "OperaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes Ativas",
+                                                 "criticalIncidents":  "Incidentes CrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­ticos"
                                              },
                                "tabs":  {
                                             "new":  "Nova",
                                             "active":  "Ativa",
-                                            "completed":  "ConcluÃƒÆ’Ã‚Â­da"
+                                            "completed":  "ConcluÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­da"
                                         },
                                "details":  {
-                                               "location":  "LocalizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
+                                               "location":  "LocalizaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
                                                "received":  "Recebida",
                                                "fromHospital":  "Do Hospital"
                                            },
@@ -1034,69 +1034,69 @@
                                                "decline":  "Recusar",
                                                "trackLive":  "Rastrear ao Vivo",
                                                "updateStatus":  "Atualizar Status",
-                                               "viewReport":  "Exibir RelatÃƒÆ’Ã‚Â³rio"
+                                               "viewReport":  "Exibir RelatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³rio"
                                            }
                            },
     "navigationScreen":  {
-                             "noActiveMission":  "Nenhuma MissÃƒÆ’Ã‚Â£o Ativa",
-                             "acceptToStart":  "Aceite uma solicitaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o recebida para iniciar a navegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
+                             "noActiveMission":  "Nenhuma MissÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o Ativa",
+                             "acceptToStart":  "Aceite uma solicitaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o recebida para iniciar a navegaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
                              "openIncomingSos":  "Abrir SOS Recebido",
-                             "loadingMission":  "Carregando dados da missÃƒÆ’Ã‚Â£o...",
+                             "loadingMission":  "Carregando dados da missÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o...",
                              "status":  "Status atualizado para {{status}}",
-                             "mission":  "MissÃƒÆ’Ã‚Â£o",
+                             "mission":  "MissÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
                              "eta":  "ETA:",
-                             "actionPanel":  "AtualizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de Status",
+                             "actionPanel":  "AtualizaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes de Status",
                              "enRoute":  "A Caminho",
                              "arrived":  "Chegou",
                              "patientLoaded":  "Paciente Carregado",
                              "toHospital":  "A Caminho do Hospital",
                              "arrivedAtHospital":  "Chegou ao Hospital",
                              "resolveIncident":  "Resolver Incidente",
-                             "navigation":  "NavegaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
+                             "navigation":  "NavegaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
                              "fullConsole":  "Abrir Console Completo"
                          },
     "provider":  {
-                     "emergencyResponseDispatch":  "Envio de Resposta de EmergÃƒÆ’Ã‚Âªncia"
+                     "emergencyResponseDispatch":  "Envio de Resposta de EmergÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªncia"
                  },
     "realTimeMonitoring":  {
                                "header":  {
                                               "subtitle":  "Monitoramento",
-                                              "title":  "OperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes em Tempo Real",
-                                              "description":  "Rastreamento da frota ao vivo e monitoramento de seguranÃƒÆ’Ã‚Â§a"
+                                              "title":  "OperaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes em Tempo Real",
+                                              "description":  "Rastreamento da frota ao vivo e monitoramento de seguranÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§a"
                                           },
                                "tabs":  {
                                             "tracking":  "Rastreamento",
-                                            "safety":  "SeguranÃƒÆ’Ã‚Â§a"
+                                            "safety":  "SeguranÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§a"
                                         },
                                "tracking":  {
-                                                "vehiclesOnline":  "VeÃƒÆ’Ã‚Â­culos Online",
+                                                "vehiclesOnline":  "VeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­culos Online",
                                                 "allGpsConnected":  "Todos os GPS Conectados",
-                                                "avgSpeed":  "Velocidade MÃƒÆ’Ã‚Â©dia",
+                                                "avgSpeed":  "Velocidade MÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©dia",
                                                 "withinLimits":  "Dentro dos Limites",
-                                                "fuelStatus":  "Status do CombustÃƒÆ’Ã‚Â­vel",
-                                                "goodLevels":  "Bons NÃƒÆ’Ã‚Â­veis",
+                                                "fuelStatus":  "Status do CombustÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel",
+                                                "goodLevels":  "Bons NÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­veis",
                                                 "speed":  "Velocidade",
-                                                "fuel":  "CombustÃƒÆ’Ã‚Â­vel",
+                                                "fuel":  "CombustÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel",
                                                 "track":  "Rastrear",
                                                 "moving":  "MOVIMENTANDO-SE",
                                                 "stopped":  "PARADO"
                                             },
                                "safety":  {
-                                              "criticalAlerts":  "Alertas CrÃƒÆ’Ã‚Â­ticos",
-                                              "immediateAction":  "AÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o Imediata",
-                                              "safetyEvents":  "Eventos de SeguranÃƒÆ’Ã‚Â§a",
+                                              "criticalAlerts":  "Alertas CrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­ticos",
+                                              "immediateAction":  "AÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o Imediata",
+                                              "safetyEvents":  "Eventos de SeguranÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§a",
                                               "thisWeek":  "Esta Semana",
-                                              "fleetScore":  "PontuaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o da Frota",
-                                              "excellentSafety":  "SeguranÃƒÆ’Ã‚Â§a Excelente",
-                                              "critical":  "CRÃƒÆ’Ã‚ÂTICO",
+                                              "fleetScore":  "PontuaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o da Frota",
+                                              "excellentSafety":  "SeguranÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§a Excelente",
+                                              "critical":  "CRÃƒÆ’Ã†â€™Ãƒâ€šÃ‚ÂTICO",
                                               "alert":  "ALERTA",
-                                              "eventTypesMonitored":  "Tipos de Eventos de SeguranÃƒÆ’Ã‚Â§a Monitorados",
+                                              "eventTypesMonitored":  "Tipos de Eventos de SeguranÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§a Monitorados",
                                               "speedingEvents":  "Eventos de Excesso de Velocidade",
-                                              "harshAcceleration":  "AceleraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o/Frenagem Brusca",
-                                              "afterHoursUse":  "Uso do VeÃƒÆ’Ã‚Â­culo Fora do HorÃƒÆ’Ã‚Â¡rio",
-                                              "geofenceBreaches":  "ViolaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de Geofence",
+                                              "harshAcceleration":  "AceleraÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o/Frenagem Brusca",
+                                              "afterHoursUse":  "Uso do VeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­culo Fora do HorÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio",
+                                              "geofenceBreaches":  "ViolaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes de Geofence",
                                               "routeDeviations":  "Desvios de Rota",
-                                              "unauthorizedStops":  "Paradas NÃƒÆ’Ã‚Â£o Autorizadas"
+                                              "unauthorizedStops":  "Paradas NÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o Autorizadas"
                                           }
                            },
     "vehicleProfile":  {
@@ -1104,11 +1104,11 @@
                                               "back":  "Voltar"
                                           },
                            "header":  {
-                                          "title":  "OperaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de AmbulÃƒÆ’Ã‚Â¢ncia"
+                                          "title":  "OperaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes de AmbulÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ncia"
                                       },
                            "information":  {
-                                               "title":  "InformaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do VeÃƒÆ’Ã‚Â­culo",
-                                               "registration":  "MatriculaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
+                                               "title":  "InformaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes do VeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­culo",
+                                               "registration":  "MatriculaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
                                                "vin":  "VIN",
                                                "year":  "Ano",
                                                "makeModel":  "Marca/Modelo",
@@ -1120,46 +1120,46 @@
                                                "title":  "Status Operacional",
                                                "mileage":  "Quilometragem",
                                                "engineHours":  "Horas de Motor",
-                                               "fuelType":  "Tipo de CombustÃƒÆ’Ã‚Â­vel",
-                                               "tankCapacity":  "Capacidade do DepÃƒÆ’Ã‚Â³sito",
-                                               "fuelLevel":  "NÃƒÆ’Ã‚Â­vel de CombustÃƒÆ’Ã‚Â­vel",
-                                               "lastGpsCheck":  "ÃƒÆ’Ã…Â¡ltima VerificaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o GPS"
+                                               "fuelType":  "Tipo de CombustÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel",
+                                               "tankCapacity":  "Capacidade do DepÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³sito",
+                                               "fuelLevel":  "NÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel de CombustÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­vel",
+                                               "lastGpsCheck":  "ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â¡ltima VerificaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o GPS"
                                            },
                            "maintenance":  {
-                                               "title":  "ServiÃƒÆ’Ã‚Â§o e ManutenÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
-                                               "lastService":  "ÃƒÆ’Ã…Â¡ltimo ServiÃƒÆ’Ã‚Â§o",
-                                               "nextService":  "PrÃƒÆ’Ã‚Â³ximo ServiÃƒÆ’Ã‚Â§o",
+                                               "title":  "ServiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o e ManutenÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
+                                               "lastService":  "ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â¡ltimo ServiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o",
+                                               "nextService":  "PrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ximo ServiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o",
                                                "overdue":  "VENCIDO",
                                                "days":  "dias",
-                                               "lastInspection":  "ÃƒÆ’Ã…Â¡ltima InspeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
+                                               "lastInspection":  "ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â¡ltima InspeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
                                                "insuranceExpiry":  "Vencimento do Seguro",
-                                               "motExpiry":  "Vencimento da InspeÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
-                                               "scheduleService":  "Agendar ServiÃƒÆ’Ã‚Â§o"
+                                               "motExpiry":  "Vencimento da InspeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
+                                               "scheduleService":  "Agendar ServiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§o"
                                            },
                            "equipment":  {
-                                             "title":  "Equipamento e ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
+                                             "title":  "Equipamento e ConfiguraÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o",
                                              "viewEquipment":  "Ver Equipamento"
                                          },
                            "actions":  {
                                            "assign":  "Atribuir",
-                                           "history":  "HistÃƒÆ’Ã‚Â³rico"
+                                           "history":  "HistÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³rico"
                                        }
                        },
     "vehicleAbuse":  {
                          "header":  {
-                                        "title":  "PrevenÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de Abuso de VeÃƒÆ’Ã‚Â­culos",
-                                        "description":  "Monitore atividades suspeitas de veÃƒÆ’Ã‚Â­culos, violaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes de geofence e uso nÃƒÆ’Ã‚Â£o autorizado."
+                                        "title":  "PrevenÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Abuso de VeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­culos",
+                                        "description":  "Monitore atividades suspeitas de veÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­culos, violaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes de geofence e uso nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o autorizado."
                                     },
                          "stats":  {
-                                       "criticalEvents":  "Eventos CrÃƒÆ’Ã‚Â­ticos",
+                                       "criticalEvents":  "Eventos CrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­ticos",
                                        "highRisk":  "Alto Risco",
-                                       "mediumPriority":  "Prioridade MÃƒÆ’Ã‚Â©dia",
+                                       "mediumPriority":  "Prioridade MÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â©dia",
                                        "totalEvents":  "Eventos Totais"
                                    },
                          "tabs":  {
                                       "allEvents":  "Todos os Eventos",
                                       "geofence":  "Geofence",
-                                      "afterHours":  "Fora do HorÃƒÆ’Ã‚Â¡rio",
+                                      "afterHours":  "Fora do HorÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio",
                                       "routes":  "Rotas"
                                   },
                          "dashboard":  {
@@ -1167,24 +1167,24 @@
                                            "review":  "Revisar"
                                        },
                          "eventTypes":  {
-                                            "geofenceBreach":  "ViolaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de Geofence",
+                                            "geofenceBreach":  "ViolaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de Geofence",
                                             "speeding":  "Excesso de Velocidade",
-                                            "afterHoursUse":  "Uso Fora do HorÃƒÆ’Ã‚Â¡rio",
-                                            "unlinkedTrip":  "Viagem NÃƒÆ’Ã‚Â£o Vinculada",
-                                            "harshDriving":  "ConduÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o Agressiva",
+                                            "afterHoursUse":  "Uso Fora do HorÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio",
+                                            "unlinkedTrip":  "Viagem NÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o Vinculada",
+                                            "harshDriving":  "ConduÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o Agressiva",
                                             "routeDeviation":  "Desvio de Rota"
                                         },
                          "geofenceTab":  {
-                                             "title":  "Gerenciamento de Geofence e Alertas de ViolaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o em Breve.",
-                                             "description":  "Crie limites geogrÃƒÆ’Ã‚Â¡ficos e receba alertas quando os veÃƒÆ’Ã‚Â­culos os violarem."
+                                             "title":  "Gerenciamento de Geofence e Alertas de ViolaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o em Breve.",
+                                             "description":  "Crie limites geogrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ficos e receba alertas quando os veÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­culos os violarem."
                                          },
                          "hoursTab":  {
-                                          "title":  "DetecÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o Fora do HorÃƒÆ’Ã‚Â¡rio em Breve.",
-                                          "description":  "Acompanhe veÃƒÆ’Ã‚Â­culos utilizados fora das horas operacionais programadas."
+                                          "title":  "DetecÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o Fora do HorÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio em Breve.",
+                                          "description":  "Acompanhe veÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­culos utilizados fora das horas operacionais programadas."
                                       },
                          "routesTab":  {
                                            "title":  "Desvio de Rota e Rastreamento em Breve.",
-                                           "description":  "Monitore se as ambulÃƒÆ’Ã‚Â¢ncias seguem as rotas despachadas ou se desviam."
+                                           "description":  "Monitore se as ambulÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ncias seguem as rotas despachadas ou se desviam."
                                        }
                      },
     "dashboard":  {
@@ -1247,7 +1247,7 @@
                                    },
                      "aboutMe":  {
                                      "description":  "Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.",
-                                     "placeholder":  "Tell patients about your background, philosophy of care, and what makes your practice uniqueÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦",
+                                     "placeholder":  "Tell patients about your background, philosophy of care, and what makes your practice uniqueÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦",
                                      "wordLimit":  "600 words"
                                  },
                      "form":  {
@@ -1341,7 +1341,7 @@
                                           "description":  "This information appears on your document templates and letterheads."
                                       },
                      "calendar":  {
-                                      "description":  "Share a single calendar across multiple doctors. Each doctor\u0027s appointments show in their assigned color. Google Calendar sync stays personal ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â only your own appointments mirror.",
+                                      "description":  "Share a single calendar across multiple doctors. Each doctor\u0027s appointments show in their assigned color. Google Calendar sync stays personal ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â only your own appointments mirror.",
                                       "invitationPrefix":  "Invitation to join",
                                       "defaultPracticeName":  "a practice",
                                       "invitationFrom":  "From",
@@ -1413,7 +1413,7 @@
                                                },
                              "task":  {
                                           "dueLabel":  "Due:",
-                                          "rewardLabel":  "+{number} ÃƒÂ¢Ã¢â‚¬Å“Ã¢â‚¬Å¡ÃƒÂ¯Ã‚Â¸Ã‚Â"
+                                          "rewardLabel":  "+{number} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã‚Â¯Ãƒâ€šÃ‚Â¸Ãƒâ€šÃ‚Â"
                                       },
                              "welcomeTitle":  "Welcome back",
                              "welcomeSubtitle":  "Your health dashboard at a glance",
@@ -1449,7 +1449,7 @@
                       "subtitle":  "Healthcare providers with access to your profile",
                       "search":  {
                                      "title":  "Find a Healthcare Provider on Holarc",
-                                     "description":  "Filter by name, specialty, language ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â or any combination",
+                                     "description":  "Filter by name, specialty, language ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â or any combination",
                                      "namePlaceholder":  "Doctor name, practice or registration #",
                                      "specialtyPlaceholder":  "Any specialty",
                                      "languagePlaceholder":  "Any language",
@@ -1524,7 +1524,7 @@
                           },
     "doctorDocuments":  {
                             "search":  {
-                                           "placeholder":  "Search documentsÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦"
+                                           "placeholder":  "Search documentsÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"
                                        },
                             "empty":  {
                                           "message":  "No documents yet."
@@ -1534,26 +1534,26 @@
                                        }
                         },
     "afterHours":  {
-                       "subtitle":  "PrevenÃƒÂ§ÃƒÂ£o de abuso de veÃƒÂ­culo",
-                       "title":  "Uso de veÃƒÂ­culo fora do horÃƒÂ¡rio",
-                       "description":  "Rastreie veÃƒÂ­culos usados fora do horÃƒÂ¡rio operacional programado.",
+                       "subtitle":  "PrevenÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de abuso de veÃƒÆ’Ã‚Â­culo",
+                       "title":  "Uso de veÃƒÆ’Ã‚Â­culo fora do horÃƒÆ’Ã‚Â¡rio",
+                       "description":  "Rastreie veÃƒÆ’Ã‚Â­culos usados fora do horÃƒÆ’Ã‚Â¡rio operacional programado.",
                        "stats":  {
-                                     "critical":  "Eventos crÃƒÂ­ticos",
+                                     "critical":  "Eventos crÃƒÆ’Ã‚Â­ticos",
                                      "highRisk":  "Alto risco",
                                      "total":  "Eventos totais"
                                  },
                        "messages":  {
-                                        "noEvents":  "Nenhum evento fora do horÃƒÂ¡rio detectado."
+                                        "noEvents":  "Nenhum evento fora do horÃƒÆ’Ã‚Â¡rio detectado."
                                     },
                        "events":  {
-                                      "unauthorizedStart":  "InÃƒÂ­cio nÃƒÂ£o autorizado",
+                                      "unauthorizedStart":  "InÃƒÆ’Ã‚Â­cio nÃƒÆ’Ã‚Â£o autorizado",
                                       "extendedHours":  "Horas estendidas",
-                                      "unauthorizedMovement":  "Movimento nÃƒÂ£o autorizado"
+                                      "unauthorizedMovement":  "Movimento nÃƒÆ’Ã‚Â£o autorizado"
                                   },
                        "labels":  {
                                       "time":  "Hora",
-                                      "location":  "LocalizaÃƒÂ§ÃƒÂ£o",
-                                      "duration":  "DuraÃƒÂ§ÃƒÂ£o",
+                                      "location":  "LocalizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
+                                      "duration":  "DuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o",
                                       "authorizedShiftEnd":  "Fim do turno autorizado"
                                   },
                        "units":  {
@@ -1567,19 +1567,19 @@
                              "header":  {
                                             "subtitle":  "Gerenciamento de Equipe",
                                             "title":  "Gerenciamento de Motoristas e Equipe",
-                                            "description":  "Visualize e organize todos os membros da equipe por funÃƒÂ§ÃƒÂ£o"
+                                            "description":  "Visualize e organize todos os membros da equipe por funÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o"
                                         },
                              "readOnly":  {
-                                              "label":  "VisualizaÃƒÂ§ÃƒÂ£o Somente Leitura",
-                                              "description":  "Para adicionar ou gerenciar membros da equipe, use a tela Admin do UsuÃƒÂ¡rio"
+                                              "label":  "VisualizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o Somente Leitura",
+                                              "description":  "Para adicionar ou gerenciar membros da equipe, use a tela Admin do UsuÃƒÆ’Ã‚Â¡rio"
                                           },
                              "search":  {
-                                            "placeholder":  "Pesquisar por nome ou funÃƒÂ§ÃƒÂ£o..."
+                                            "placeholder":  "Pesquisar por nome ou funÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o..."
                                         },
                              "roles":  {
-                                           "paramedics":  "ParamÃƒÂ©dicos",
+                                           "paramedics":  "ParamÃƒÆ’Ã‚Â©dicos",
                                            "drivers":  "Motoristas",
-                                           "emts":  "TÃƒÂ©cnicos em EmergÃƒÂªncias MÃƒÂ©dicas"
+                                           "emts":  "TÃƒÆ’Ã‚Â©cnicos em EmergÃƒÆ’Ã‚Âªncias MÃƒÆ’Ã‚Â©dicas"
                                        },
                              "messages":  {
                                               "noMembers":  "Nenhum membro neste grupo"
@@ -1590,8 +1590,8 @@
                                         },
                              "helpSection":  {
                                                  "title":  "Como gerenciar equipe",
-                                                 "step1":  "Adicione membros da equipe na tela Admin do UsuÃƒÂ¡rio",
-                                                 "step2":  "Visualize toda a equipe ativa agrupada por funÃƒÂ§ÃƒÂ£o nesta tela",
+                                                 "step1":  "Adicione membros da equipe na tela Admin do UsuÃƒÆ’Ã‚Â¡rio",
+                                                 "step2":  "Visualize toda a equipe ativa agrupada por funÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o nesta tela",
                                                  "step3":  "Atribua membros da equipe a turnos na tela Team Status"
                                              }
                          },
@@ -1605,7 +1605,7 @@
                                    "restricted":  "Restricted Zones",
                                    "coverage":  "Coverage Area"
                                },
-                     "alert":  "Ã°Å¸â€™Â¡ Create geofences around depots, hospitals, and restricted areas. Vehicles will be monitored for breaches.",
+                     "alert":  "ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¡ Create geofences around depots, hospitals, and restricted areas. Vehicles will be monitored for breaches.",
                      "table":  {
                                    "name":  "Name",
                                    "type":  "Type",
@@ -1676,7 +1676,7 @@
                                              "crew":  "Crew"
                                          },
                              "status":  {
-                                            "available":  "Ã¢Å“â€œ Available",
+                                            "available":  "ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ Available",
                                             "enRoute":  "En Route"
                                         },
                              "summary":  {
@@ -1715,7 +1715,7 @@
                                         },
                            "patient":  {
                                            "title":  "Patient Status",
-                                           "vitalStable":  "Ã¢Å“â€œ Patient vitals stable and normal"
+                                           "vitalStable":  "ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ Patient vitals stable and normal"
                                        },
                            "communication":  {
                                                  "title":  "Crew Communication",
@@ -1998,13 +1998,13 @@
                     },
     "vehicleTypeManagement":  {
                                   "header":  {
-                                                 "category":  "ConfiguraÃƒÂ§ÃƒÂ£o da Frota",
-                                                 "title":  "Tipos de VeÃƒÂ­culos",
-                                                 "description":  "Gerenciar tipos de ambulÃƒÂ¢ncias, equipamentos e configuraÃƒÂ§ÃƒÂµes"
+                                                 "category":  "ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o da Frota",
+                                                 "title":  "Tipos de VeÃƒÆ’Ã‚Â­culos",
+                                                 "description":  "Gerenciar tipos de ambulÃƒÆ’Ã‚Â¢ncias, equipamentos e configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes"
                                              },
                                   "summary":  {
-                                                  "totalVehicles":  "Total de VeÃƒÂ­culos",
-                                                  "avgMonthlyCost":  "Custo MÃƒÂ©dio Mensal",
+                                                  "totalVehicles":  "Total de VeÃƒÆ’Ã‚Â­culos",
+                                                  "avgMonthlyCost":  "Custo MÃƒÆ’Ã‚Â©dio Mensal",
                                                   "totalCrewCapacity":  "Capacidade Total da Equipe",
                                                   "title":  "Resumo da Frota",
                                                   "totalTypes":  "Total de Tipos"
@@ -2013,7 +2013,7 @@
                                                          "monthlyCost":  "Custo Mensal",
                                                          "capacity":  "Capacidade",
                                                          "inFleet":  "Na Frota",
-                                                         "vehicles":  "VeÃƒÂ­culos",
+                                                         "vehicles":  "VeÃƒÆ’Ã‚Â­culos",
                                                          "members":  "Membros",
                                                          "crewSize":  "Tamanho da Equipe"
                                                      },
@@ -2030,40 +2030,40 @@
                                                  "newType":  "Novo Tipo"
                                              },
                                   "equipment":  {
-                                                    "title":  "Equipamento PadrÃƒÂ£o"
+                                                    "title":  "Equipamento PadrÃƒÆ’Ã‚Â£o"
                                                 }
                               },
     "vehicleUtilisation":  {
                                "metrics":  {
                                                "peakUsageHours":  "Horas de Uso Pico",
                                                "costPerKm":  "Custo/km",
-                                               "title":  "MÃƒÂ©tricas Detalhadas",
-                                               "averageHoursDay":  "Horas MÃƒÂ©dias/Dia",
-                                               "downtime":  "Tempo de Inatividade (ManutenÃƒÂ§ÃƒÂ£o)",
-                                               "averageDistanceDay":  "DistÃƒÂ¢ncia MÃƒÂ©dia/Dia",
-                                               "fuelConsumption":  "Consumo de CombustÃƒÂ­vel"
+                                               "title":  "MÃƒÆ’Ã‚Â©tricas Detalhadas",
+                                               "averageHoursDay":  "Horas MÃƒÆ’Ã‚Â©dias/Dia",
+                                               "downtime":  "Tempo de Inatividade (ManutenÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o)",
+                                               "averageDistanceDay":  "DistÃƒÆ’Ã‚Â¢ncia MÃƒÆ’Ã‚Â©dia/Dia",
+                                               "fuelConsumption":  "Consumo de CombustÃƒÆ’Ã‚Â­vel"
                                            },
                                "keyMetrics":  {
                                                   "totalTrips":  "Total de Viagens",
                                                   "totalMileage":  "Quilometragem Total",
-                                                  "perVehicleMonth":  "por veÃƒÂ­culo/mÃƒÂªs",
-                                                  "averageUtilisation":  "UtilizaÃƒÂ§ÃƒÂ£o MÃƒÂ©dia",
-                                                  "kmThisMonth":  "km este mÃƒÂªs",
+                                                  "perVehicleMonth":  "por veÃƒÆ’Ã‚Â­culo/mÃƒÆ’Ã‚Âªs",
+                                                  "averageUtilisation":  "UtilizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o MÃƒÆ’Ã‚Â©dia",
+                                                  "kmThisMonth":  "km este mÃƒÆ’Ã‚Âªs",
                                                   "operatingCost":  "Custo Operacional"
                                               },
                                "header":  {
-                                              "description":  "Monitorar uso, eficiÃƒÂªncia e custos da frota",
-                                              "title":  "UtilizaÃƒÂ§ÃƒÂ£o de VeÃƒÂ­culos",
-                                              "category":  "AnÃƒÂ¡lise da Frota"
+                                              "description":  "Monitorar uso, eficiÃƒÆ’Ã‚Âªncia e custos da frota",
+                                              "title":  "UtilizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de VeÃƒÆ’Ã‚Â­culos",
+                                              "category":  "AnÃƒÆ’Ã‚Â¡lise da Frota"
                                           },
                                "charts":  {
                                               "target":  "% Alvo",
                                               "mileageKm":  "Quilometragem (km)",
                                               "hoursUsed":  "Horas Usadas",
-                                              "vehicleUtilisationRate":  "Taxa de UtilizaÃƒÂ§ÃƒÂ£o de VeÃƒÂ­culos",
+                                              "vehicleUtilisationRate":  "Taxa de UtilizaÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de VeÃƒÆ’Ã‚Â­culos",
                                               "actual":  "% Real",
                                               "operatingCostBreakdown":  "Detalhamento de Custo Operacional",
-                                              "usageTrend":  "TendÃƒÂªncia de Uso (5 Semanas)"
+                                              "usageTrend":  "TendÃƒÆ’Ã‚Âªncia de Uso (5 Semanas)"
                                           }
                            },
     "landing":  {
@@ -2072,10 +2072,10 @@
                                 "getStarted":  "Get Started"
                             },
                     "hero":  {
-                                 "badge":  "AI-powered Â· Patient-controlled Â· HIPAA-aligned",
+                                 "badge":  "AI-powered Ã‚Â· Patient-controlled Ã‚Â· HIPAA-aligned",
                                  "title":  "A revolutionary healthcare ecosystem",
                                  "titleHighlight":  "built around you.",
-                                 "description":  "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360Â° health story â€” from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
+                                 "description":  "Holarc is one connected platform where doctors run their entire practice and patients own their entire 360Ã‚Â° health story Ã¢â‚¬â€ from voice-recorded consultations and AI summaries, to video-verified medication adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a unified care calendar.",
                                  "cta":  "Join the Ecosystem",
                                  "doctorsButton":  "Doctors",
                                  "patientsButton":  "Patients"
@@ -2096,7 +2096,7 @@
                                      },
                     "mobile":  {
                                    "title":  "Get Holarc on your phone",
-                                   "description":  "Available on iOS and Android â€” your full health story in your pocket.",
+                                   "description":  "Available on iOS and Android Ã¢â‚¬â€ your full health story in your pocket.",
                                    "appStore":  "App Store",
                                    "googlePlay":  "Google Play"
                                },
@@ -2114,7 +2114,7 @@
                                      "roundTableFeature":  "Round Table",
                                      "roundTableDescription":  "Specialists coordinate per patient with shared notes and read-receipts.",
                                      "aiAssistant":  "AI Clinical Assistant",
-                                     "aiAssistantDescription":  "Patient history summaries Â· medication conflict alerts Â· imaging analysis Â· auto-generated documents.",
+                                     "aiAssistantDescription":  "Patient history summaries Ã‚Â· medication conflict alerts Ã‚Â· imaging analysis Ã‚Â· auto-generated documents.",
                                      "holarcHelp":  "Holarc Help (SOS)",
                                      "holarcHelpDescription":  "One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking, and full medical context shared on arrival.",
                                      "emergencyResponders":  "Emergency responders",
@@ -2125,21 +2125,21 @@
                     "patientBenefits":  {
                                             "sectionBadge":  "For Patients",
                                             "sectionTitle":  "Your Health.",
-                                            "sectionTitleHighlight":  "360Â° View.",
-                                            "sectionDescription":  "Holarc gives you a complete 360-degree view of your health profileâ€”every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
+                                            "sectionTitleHighlight":  "360Ã‚Â° View.",
+                                            "sectionDescription":  "Holarc gives you a complete 360-degree view of your health profileÃ¢â‚¬â€every consultation, prescription, and clinical note from every provider, unified in one place and entirely under your control.",
                                             "benefit1Title":  "Complete Health Picture",
-                                            "benefit1Description":  "See your entire medical history, prescriptions, and care team in one unified viewâ€”no more scattered records.",
+                                            "benefit1Description":  "See your entire medical history, prescriptions, and care team in one unified viewÃ¢â‚¬â€no more scattered records.",
                                             "benefit2Title":  "Connect Your Care Team",
                                             "benefit2Description":  "Invite specialists, GPs, and other providers to collaborate on your care with your full consent.",
                                             "benefit3Title":  "You\u0027re in Control",
                                             "benefit3Description":  "Decide exactly which doctors see your records. Grant or revoke access anytime with granular permissions.",
                                             "benefit4Title":  "Unified Appointments",
-                                            "benefit4Description":  "All your healthcare appointments from every provider in one calendarâ€”never miss a follow-up."
+                                            "benefit4Description":  "All your healthcare appointments from every provider in one calendarÃ¢â‚¬â€never miss a follow-up."
                                         },
                     "providerBenefits":  {
                                              "sectionBadge":  "For Healthcare Providers",
                                              "sectionTitle":  "Practice with the Full Picture",
-                                             "sectionDescription":  "When patients grant you access, you see everythingâ€”their complete history across all providers. Make better decisions with better information.",
+                                             "sectionDescription":  "When patients grant you access, you see everythingÃ¢â‚¬â€their complete history across all providers. Make better decisions with better information.",
                                              "benefit1Title":  "AI-Powered Insights",
                                              "benefit1Description":  "Get comprehensive patient history summaries and medication conflict alerts before every consultation.",
                                              "benefit2Title":  "Seamless Collaboration",
@@ -2147,7 +2147,7 @@
                                              "benefit3Title":  "Automated Documentation",
                                              "benefit3Description":  "Voice-to-text notes, auto-populated templates, and AI summaries save hours of administrative work.",
                                              "benefit4Title":  "Better Patient Outcomes",
-                                             "benefit4Description":  "Access complete patient history across all their providersâ€”make informed decisions with the full picture.",
+                                             "benefit4Description":  "Access complete patient history across all their providersÃ¢â‚¬â€make informed decisions with the full picture.",
                                              "benefit5Title":  "Emergency Service Providers",
                                              "benefit5Description":  "Emergency response crews onboard in minutes, accept SOS incidents with one tap, share live ETA, and arrive with the patient\u0027s full medical context.",
                                              "benefit6Title":  "Hospital Partners",
@@ -2155,7 +2155,7 @@
                                          },
                     "cta":  {
                                 "title":  "Ready for Healthcare That Works Together?",
-                                "description":  "Join thousands of patients and providers building a better healthcare experienceâ€”one where your health story is complete, connected, and under your control.",
+                                "description":  "Join thousands of patients and providers building a better healthcare experienceÃ¢â‚¬â€one where your health story is complete, connected, and under your control.",
                                 "button":  "Get Started Today"
                             },
                     "roleDialog":  {
@@ -2272,7 +2272,7 @@
                                       "findProviderTitle":  "Find a Healthcare Provider on Holarc",
                                       "statusHidden":  "Hidden",
                                       "anyLanguage":  "Any language",
-                                      "findProviderDesc":  "Filter by name, specialty, language — or any combination",
+                                      "findProviderDesc":  "Filter by name, specialty, language â€” or any combination",
                                       "doctorRestoredDesc":  "They\u0027re back in your active list",
                                       "hideTooltip":  "Hide from your active list",
                                       "groupDoctors":  "Doctors",
@@ -2457,5 +2457,379 @@
                                           "patientDocumentsTitle":  "Patient Documents",
                                           "filterCancelledButton":  "Cancelled"
                                       }
+                },
+    "doctor":  {
+                    "invoices":  {
+                                      "title":  "Invoices",
+                                      "subtitle":  "Manage and track all patient invoices",
+                                      "status":  {
+                                                     "paid":  "Paid",
+                                                     "overdue":  "Overdue",
+                                                     "archived":  "Archived",
+                                                     "issued":  "Issued"
+                                                 },
+                                      "messages":  {
+                                                      "invoiceUpdated":  "Invoice Updated",
+                                                      "markedPaid":  "Invoice marked as paid",
+                                                      "invoiceArchived":  "Invoice Archived",
+                                                      "invoiceArchived_desc":  "Invoice has been archived",
+                                                      "detailsSaved":  "Invoice details have been saved",
+                                                      "sentToMedicalAid":  "Sent to Medical Aid",
+                                                      "paidInvoiceEmailed":  "Paid invoice emailed to",
+                                                      "pdfExported":  "PDF Exported",
+                                                      "pdfExportedDesc":  "Invoice report has been downloaded",
+                                                      "emailSent":  "Email Sent",
+                                                      "emailSentTo":  "Invoice report sent to",
+                                                      "invoiceCreated":  "Invoice Created",
+                                                      "invoiceCreatedDesc":  "Invoice {{invoiceNumber}} has been created successfully"
+                                                  },
+                                      "errors":  {
+                                                    "error":  "Error",
+                                                    "failedToLoad":  "Failed to load invoices",
+                                                    "noClaimsEmail":  "No Claims Email",
+                                                    "addClaimsEmail":  "Add a Medical Aid Claims Email on the patient profile to send claims.",
+                                                    "failedSendPaid":  "Failed to send paid invoice to medical aid",
+                                                    "sendFailed":  "Send Failed",
+                                                    "failedArchive":  "Failed to archive invoice",
+                                                    "previewFailed":  "Preview failed",
+                                                    "invalidAmount":  "Invalid Amount",
+                                                    "enterValidAmount":  "Please enter a valid amount",
+                                                    "enterValidAmountGtZero":  "Please enter a valid amount greater than 0",
+                                                    "invalidEmail":  "Invalid Email",
+                                                    "enterValidEmail":  "Please enter a valid email address",
+                                                    "noPatientSelected":  "No Patient Selected",
+                                                    "selectPatientFirst":  "Please select a patient first",
+                                                    "noClaimsEmailAutoSubmit":  "No Claims Email",
+                                                    "noClaimsEmailAutoSubmitDesc":  "Add a Medical Aid Claims Email on the patient profile to enable auto-submit."
+                                                },
+                                      "actions":  {
+                                                     "createInvoice":  "Create Invoice",
+                                                     "cancel":  "Cancel",
+                                                     "save":  "Save",
+                                                     "update":  "Update",
+                                                     "close":  "Close",
+                                                     "download":  "Download",
+                                                     "markPaid":  "Mark Paid",
+                                                     "sendToMedicalAid":  "Send to Medical Aid",
+                                                     "archive":  "Archive",
+                                                     "edit":  "Edit",
+                                                     "emailReport":  "Email Report",
+                                                     "downloadPdf":  "Download PDF",
+                                                     "printSavePdf":  "Print / Save PDF"
+                                                 },
+                                      "form":  {
+                                                   "patient":  "Patient",
+                                                   "selectPatient":  "Select a patient...",
+                                                   "searchPatients":  "Search patients...",
+                                                   "noPatientFound":  "No patient found.",
+                                                   "service":  "Service (Optional)",
+                                                   "selectService":  "Select a service...",
+                                                   "searchServices":  "Search services...",
+                                                   "noServiceFound":  "No service found.",
+                                                   "serviceHint":  "Select a service to auto-fill description and amount. You can override the price below.",
+                                                   "description":  "Description",
+                                                   "descriptionPlaceholder":  "Invoice description...",
+                                                   "amount":  "Amount",
+                                                   "dueDate":  "Due Date",
+                                                   "selectDescription":  "Select a patient and enter invoice details"
+                                               },
+                                      "table":  {
+                                                    "invoiceNumber":  "Invoice #",
+                                                    "patient":  "Patient",
+                                                    "description":  "Description",
+                                                    "amount":  "Amount",
+                                                    "dueDate":  "Due Date",
+                                                    "status":  "Status",
+                                                    "actions":  "Actions",
+                                                    "noInvoices":  "No invoices found",
+                                                    "setAmount":  "Set amount",
+                                                    "setAmountTitle":  "This invoice has no amount â€” click to set it",
+                                                    "previewTitle":  "Preview invoice",
+                                                    "editTitle":  "Edit invoice",
+                                                    "paidOn":  "Paid"
+                                                },
+                                      "stats":  {
+                                                    "issued":  "Issued",
+                                                    "overdue":  "Overdue",
+                                                    "paid":  "Paid",
+                                                    "outstanding":  "Outstanding"
+                                                },
+                                      "search":  {
+                                                     "placeholder":  "Search invoices..."
+                                                 },
+                                      "filter":  {
+                                                     "title":  "Filter by status",
+                                                     "issuedAndOverdue":  "Issued & Overdue",
+                                                     "all":  "All Invoices",
+                                                     "issuedOnly":  "Issued Only",
+                                                     "overdueOnly":  "Overdue Only",
+                                                     "paidOnly":  "Paid Only",
+                                                     "archived":  "Archived"
+                                                 },
+                                      "modal":  {
+                                                    "editTitle":  "Edit Invoice",
+                                                    "editDescription":  "Invoice {{invoiceNumber}}",
+                                                    "previewTitle":  "Invoice preview",
+                                                    "invoiceTitle":  "INVOICE",
+                                                    "from":  "From",
+                                                    "billTo":  "Bill To",
+                                                    "invoiceDate":  "Invoice Date",
+                                                    "dueDate":  "Due Date",
+                                                    "total":  "Total"
+                                                },
+                                      "report":  {
+                                                     "title":  "Invoice Report",
+                                                     "description":  "View invoice summary by date range with monthly totals",
+                                                     "fromDate":  "From Date",
+                                                     "toDate":  "To Date",
+                                                     "selectDate":  "Select date",
+                                                     "totalInvoices":  "Total Invoices",
+                                                     "totalAmount":  "Total Amount",
+                                                     "paid":  "Paid",
+                                                     "outstanding":  "Outstanding",
+                                                     "monthlyBreakdown":  "Monthly Breakdown",
+                                                     "month":  "Month",
+                                                     "invoices":  "Invoices",
+                                                     "noInvoices":  "No invoices found in the selected date range",
+                                                     "emailPlaceholder":  "Enter email address"
+                                                 }
+                                  },
+                    "connections":  {
+                                        "title":  "Connections",
+                                        "subtitle":  "Manage your professional network and connections",
+                                        "tab":  {
+                                                   "connected":  "Connected",
+                                                   "pending":  "Pending"
+                                               },
+                                        "search":  {
+                                                      "placeholder":  "Search..."
+                                                  },
+                                        "empty":  {
+                                                     "title":  "No connections yet",
+                                                     "description":  "Invite users to start building your network",
+                                                     "pendingTitle":  "No pending invitations",
+                                                     "pendingDescription":  "All your invitations have been responded to"
+                                                 },
+                                        "card":  {
+                                                    "unknownUser":  "Unknown User",
+                                                    "connected":  "Connected",
+                                                    "direction":  {
+                                                                      "received":  "Received",
+                                                                      "sent":  "Sent"
+                                                                  }
+                                                },
+                                        "actions":  {
+                                                       "accept":  "Accept",
+                                                       "decline":  "Decline",
+                                                       "cancel":  "Cancel"
+                                                   },
+                                        "messages":  {
+                                                        "acceptedTitle":  "Invitation accepted",
+                                                        "acceptedDesc":  "You are now connected",
+                                                        "declinedTitle":  "Invitation declined",
+                                                        "cancelledTitle":  "Invitation cancelled",
+                                                        "cancelledDesc":  "The invitation has been cancelled",
+                                                        "disconnectedTitle":  "Disconnected",
+                                                        "disconnectedDesc":  "You are no longer connected with"
+                                                    },
+                                        "errors":  {
+                                                      "title":  "Error",
+                                                      "failedLoad":  "Failed to load connections",
+                                                      "failedAccept":  "Failed to accept invitation",
+                                                      "failedDecline":  "Failed to decline invitation",
+                                                      "failedDisconnect":  "Failed to disconnect",
+                                                      "failedCancel":  "Failed to cancel invitation"
+                                                  },
+                                        "dialog":  {
+                                                      "title":  "Disconnect from",
+                                                      "description":  "This will remove the connection between you and this user. You can always reconnect later by sending a new invitation."
+                                                  }
+                                    },
+                    "referrals":  {
+                                      "title":  "Referrals",
+                                      "subtitle":  "Manage doctors you refer patients to",
+                                      "actions":  {
+                                                     "addDoctor":  "Add Doctor"
+                                                 },
+                                      "form":  {
+                                                   "title":  "Add Referral Doctor",
+                                                   "editTitle":  "Edit Referral Doctor",
+                                                   "search":  "Search for a doctor on Holarc",
+                                                   "searchPlaceholder":  "Type doctor name...",
+                                                   "notFound":  "Doctor not found on Holarc",
+                                                   "inviteButton":  "Send Invitation",
+                                                   "manualButton":  "Add Manually",
+                                                   "orManual":  "Or add manually without searching",
+                                                   "sendInvite":  "Send an email invitation to join Holarc Health",
+                                                   "doctorEmail":  "Doctor's Email",
+                                                   "emailPlaceholder":  "doctor@example.com",
+                                                   "firstName":  "First Name *",
+                                                   "lastName":  "Last Name *",
+                                                   "specialty":  "Specialty",
+                                                   "selectSpecialty":  "Select specialty",
+                                                   "other":  "Other...",
+                                                   "enterSpecialty":  "Enter specialty",
+                                                   "practiceNumber":  "Practice Number",
+                                                   "address":  "Address",
+                                                   "email":  "Email",
+                                                   "phone":  "Phone"
+                                               },
+                                      "table":  {
+                                                    "name":  "Name",
+                                                    "specialty":  "Specialty",
+                                                    "practiceNumber":  "Practice Number",
+                                                    "email":  "Email",
+                                                    "phone":  "Phone",
+                                                    "referrals":  "Referrals",
+                                                    "noData":  "No referral doctors found"
+                                                },
+                                      "actions":  {
+                                                     "save":  "Save",
+                                                     "update":  "Update",
+                                                     "cancel":  "Cancel",
+                                                     "back":  "Back",
+                                                     "addManually":  "Add manually instead"
+                                                 },
+                                      "messages":  {
+                                                      "addedTitle":  "Added",
+                                                      "addedDesc":  "Referral doctor added",
+                                                      "updatedTitle":  "Updated",
+                                                      "updatedDesc":  "Referral doctor updated",
+                                                      "removedTitle":  "Removed",
+                                                      "removedDesc":  "Referral doctor removed",
+                                                      "inviteSentTitle":  "Invitation sent",
+                                                      "inviteSentDesc":  "An invitation has been sent to"
+                                                  },
+                                      "errors":  {
+                                                     "requiredTitle":  "Required",
+                                                     "requiredDesc":  "First and last name are required",
+                                                     "failedTitle":  "Error",
+                                                     "failedUpdateDesc":  "Failed to update",
+                                                     "failedAddDesc":  "Failed to add",
+                                                     "emailRequired":  "Email required",
+                                                     "emailRequiredDesc":  "Please enter the doctor's email address.",
+                                                     "inviteFailed":  "Failed to send invitation"
+                                                 }
+                                  },
+                    "roundtable":  {
+                                       "title":  "Round Table",
+                                       "subtitle":  "Notes shared by your healthcare providers about your care.",
+                                       "empty":  "No notes yet",
+                                       "emptyDesc":  "When your doctors share round table notes, they will appear here."
+                                   },
+                    "wallet":  {
+                                   "title":  "Vula Vault",
+                                   "poweredBy":  "Powered by 6Dot50",
+                                   "description":  "Sign in to your Vula Vault to redeem your Vulas at participating retailers and partner apps in our rewards network.",
+                                   "actions":  {
+                                                   "continue":  "Continue to secure sign-in",
+                                                   "back":  "Back"
+                                               },
+                                   "security":  "You'll be taken to our secure partner's login page in a new tab. Your credentials are never stored by Holarc Health.",
+                                   "overlay":  {
+                                                   "title":  "Demo Branding Overlay",
+                                                   "description":  "For live demos, install the Vula Vault branding overlay. It visually rebrands the partner login page in your browser without changing any functionality.",
+                                                   "download":  "Download Demo Branding Overlay"
+                                               },
+                                   "install":  {
+                                                   "title":  "How to install (Chrome / Edge / Brave)",
+                                                   "step1":  "Unzip the downloaded vula-vault-overlay.zip.",
+                                                   "step2":  "Open chrome://extensions in your browser.",
+                                                   "step3":  "Enable Developer mode (top-right toggle).",
+                                                   "step4":  "Click Load unpacked and select the unzipped folder.",
+                                                   "step5":  "Visit the partner login â€” branding appears automatically."
+                                               },
+                                   "messages":  {
+                                                   "downloadSuccess":  "Overlay downloaded â€” see install steps below."
+                                               },
+                                   "errors":  {
+                                                   "downloadFailed":  "Download failed"
+                                               }
+                                },
+                    "cpd":  {
+                                "title":  "Certificates",
+                                "subtitle":  "Track your continuing professional development",
+                                "totalPoints":  "CPD Points",
+                                "actions":  {
+                                               "addCertificate":  "Add Certificate"
+                                           },
+                                "form":  {
+                                             "title":  "Add Certificate",
+                                             "editTitle":  "Edit Certificate",
+                                             "name":  "Certificate Name *",
+                                             "namePlaceholder":  "e.g., Advanced Cardiac Life Support",
+                                             "issuingBody":  "Issuing Body",
+                                             "issuingBodyPlaceholder":  "e.g., HPCSA",
+                                             "dateEarned":  "Date Earned *",
+                                             "points":  "CPD Points",
+                                             "pointsPlaceholder":  "0",
+                                             "attach":  "Attach Certificate (PDF/Image)",
+                                             "chooseFile":  "Choose File",
+                                             "remove":  "Remove"
+                                         },
+                                "actions":  {
+                                               "save":  "Save",
+                                               "update":  "Update",
+                                               "uploading":  "Uploading...",
+                                               "cancel":  "Cancel"
+                                           },
+                                "table":  {
+                                             "certificate":  "Certificate",
+                                             "issuingBody":  "Issuing Body",
+                                             "dateEarned":  "Date Earned",
+                                             "points":  "Points",
+                                             "file":  "File",
+                                             "view":  "View",
+                                             "noData":  "No certificates recorded yet"
+                                         },
+                                "messages":  {
+                                                "addedTitle":  "Added",
+                                                "addedDesc":  "Certificate added",
+                                                "updatedTitle":  "Updated",
+                                                "updatedDesc":  "Certificate updated",
+                                                "removedTitle":  "Removed",
+                                                "removedDesc":  "Certificate removed"
+                                            },
+                                "errors":  {
+                                               "uploadTitle":  "Upload Error",
+                                               "requiredTitle":  "Required",
+                                               "requiredDesc":  "Certificate name and date are required",
+                                               "failedTitle":  "Error",
+                                               "failedUpdateDesc":  "Failed to update",
+                                               "failedAddDesc":  "Failed to add",
+                                               "openFailed":  "Unable to open file"
+                                           }
+                            },
+                    "recordings":  {
+                                       "title":  "Expiring Recordings",
+                                       "subtitle":  "Session recordings are automatically deleted after 7 days. Download any you want to keep.",
+                                       "empty":  "No recordings expiring soon.",
+                                       "emptyDesc":  "Recordings older than 7 days are automatically removed.",
+                                       "expiryToday":  "Expires today",
+                                       "expiryDays":  "day(s) left",
+                                       "actions":  {
+                                                      "download":  "Download",
+                                                      "delete":  "Delete"
+                                                  },
+                                       "messages":  {
+                                                       "downloadStartedTitle":  "Download started",
+                                                       "downloadStartedDesc":  "Your recording is being downloaded.",
+                                                       "deletedTitle":  "Recording deleted",
+                                                       "deletedDesc":  "The audio and transcript have been removed."
+                                                   },
+                                       "errors":  {
+                                                      "downloadFailedTitle":  "Download failed",
+                                                      "downloadFailedDesc":  "Could not download the recording.",
+                                                      "deleteFailedTitle":  "Delete failed",
+                                                      "deleteFailedDesc":  "Could not delete the recording."
+                                                  },
+                                       "dialog":  {
+                                                      "title":  "Delete Recording?",
+                                                      "description":  "This will permanently remove the audio recording and transcript. The AI summary and action points will be preserved. This action cannot be undone.",
+                                                      "cancel":  "Cancel",
+                                                      "confirm":  "Delete Recording"
+                                                  }
+                                   }
                 }
 }
+
