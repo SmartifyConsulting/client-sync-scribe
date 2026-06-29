@@ -1,112 +1,65 @@
+## Goal
+Replace Mapbox with Google Maps across the live tracking experience (SOS, Active Mission, Fleet Live, Public Track, Incident Detail) for a more polished, familiar look — without losing the smooth ambulance tweening, route line, distance pill, or realtime updates we already have.
 
-## 1. Unify Ambulance + Hospital portal styling with the main app
+## Why it failed last time (and how we avoid it)
+Google Maps needs three things lined up correctly. Last time at least one was missing:
 
-Today `provider/ambulance/*` and `provider/hospital/*` use ad‑hoc headers, raw `text-2xl font-semibold`, emoji tab buttons (📍 🛡️), and hardcoded Tailwind colors (`bg-red-100`, `text-white`). The Doctor / Patient app uses: `PageHeader` (eyebrow + bold title + short description), shadcn `Tabs` with the teal `TabsList`, accordions with the global teal border, and semantic tokens (`bg-card`, `border-border`, `text-primary`, `text-destructive`).
+1. **A connection to the Google Maps Platform connector.** Lovable injects a *browser key* (`VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY`) for the in-page map, and a *server key* for gateway calls like Routes/ETA.
+2. **Async loading with a `callback`.** With `loading=async`, `google.maps.Map` is not ready at script `onload` — we must wait for an `initMap` callback. This is the most common cause of a blank map.
+3. **No `mapId` and no `AdvancedMarkerElement`.** Those require Cloud Console setup users don't have. We'll use classic `google.maps.Marker` + custom HTML overlays so it just works.
 
-Apply across every provider screen:
-- Same `PageHeader` pattern (eyebrow uppercase + h1 + description).
-- Replace custom tab strips with shadcn `<Tabs>` + teal `TabsList`. Remove emoji from tab labels.
-- Apply the teal‑border accordion style (`mem://design/ui-frame-standardization`) to every grouped list.
-- Swap all hardcoded colors for semantic tokens so light/dark and the Holarc palette stay consistent.
-- Standardize spacing: `space-y-4` page rhythm, `rounded-2xl border border-border bg-card` cards.
+The managed Lovable key is restricted to `*.lovable.app` / `*.lovableproject.com`. It will work on the preview and `holarchealth.lovable.app` out of the box. For `holarchealth.com` / `www.holarchealth.com` (custom domain), you'll need your own Google Cloud API key with those domains in the HTTP-referrer allowlist — I'll walk you through it when we publish.
 
-## 2. User Admin — accordions with phone + email visible
+## What changes (user-visible)
+- Same map UI surface area — but rendered by Google Maps with the standard Google road styling, traffic-aware route line, and Google's familiar controls.
+- Patient = blue dot, ambulance = red circle with ambulance icon, hospital = red cross marker (same icons we use today, just on Google tiles).
+- Ambulance still glides smoothly between GPS pings (tweened over ~800 ms).
+- Distance pill stays on the route midpoint.
+- "Waiting for first GPS fix…" overlay preserved.
+- Realtime Supabase subscription unchanged — only the renderer swaps.
 
-In `AdministratorsScreen.tsx` (the screen being renamed to **User Admin**):
-- Group rows by role: Admin, Manager, Paramedic, EMT, Driver, Dispatcher, Nurse, Supervisor.
-- Each role becomes a teal‑bordered accordion item. **Default: all collapsed.** Search auto‑expands matching groups.
-- Each accordion header shows role label + total count + small "active/inactive" pill.
-- Each row inside an accordion shows:
-  - Full name (bold)
-  - **Phone number** with a click‑to‑copy + `tel:` link
-  - **Email address** with a click‑to‑copy + `mailto:` link
-  - Status pill (Active / Pending invite) and role badge
-  - Edit / Remove icons (admins only)
-- Phone and email are already on `holarchelp_ambulance_members` / `holarchelp_hospital_members`; no schema change needed. For rows with a linked `user_id`, fall back to `profiles.phone` / `auth.users.email` (via the existing profile join) when the invited fields are blank.
+## Technical plan
 
-## 3. Retire Driver Management
+### 1. Connect Google Maps Platform
+Use the `Google Maps Platform` connector. This provisions:
+- `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` (browser, referrer-restricted)
+- `GOOGLE_MAPS_API_KEY` + `LOVABLE_API_KEY` (server, for the gateway)
+- `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID` (channel param)
 
-`DriverManagementScreen.tsx` is mock data showing the same paramedic/EMT/driver roster that User Admin already manages from real `holarchelp_ambulance_members`. Edits there don't persist — it's confusing.
+### 2. New `LiveMap` (Google Maps version)
+Rewrite `src/modules/holarchelp/components/LiveMap.tsx` to:
+- Lazy-load the Maps JS API once via a shared loader util (`src/modules/holarchelp/lib/googleMapsLoader.ts`) using `loading=async&callback=__lovableInitGmaps&channel=…`. The loader returns a promise that resolves when the callback fires — every map mount awaits it.
+- Create a `google.maps.Map` with no `mapId`, default Google styling, `disableDefaultUI: false`, `zoomControl: true`, `streetViewControl: false`.
+- Render markers with `google.maps.Marker` using inline-SVG `icon` URLs (same visual as today's HTML markers).
+- Draw the route as a `google.maps.Polyline` with `strokeColor` red/teal and a dashed `icons` pattern.
+- Distance pill = `google.maps.OverlayView` anchored at route midpoint (so it scales with the map and stays styled like today's pill).
+- Ambulance tween: same `requestAnimationFrame` loop, just call `marker.setPosition({lat,lng})` and update the polyline's path each frame.
+- Fit bounds with `map.fitBounds(bounds, {padding:64})`; single-point centers with `map.panTo` + zoom 13.
 
-- Delete the file and its sidebar entry / route.
-- All crew management lives in **User Admin** under the role accordions.
+### 3. Replace Mapbox ETA with Google Routes
+Rewrite `supabase/functions/routes-eta/index.ts` to call Google Routes API through the gateway:
+- `POST https://connector-gateway.lovable.dev/google_maps/routes/directions/v2:computeRoutes`
+- Headers: `Authorization: Bearer ${LOVABLE_API_KEY}`, `X-Connection-Api-Key: ${GOOGLE_MAPS_API_KEY}`, `X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline`
+- Same response shape returned to the client (`duration_seconds`, `duration_minutes`, `distance_meters`, `polyline`) so no caller changes.
+- Decode the encoded polyline client-side with `google.maps.geometry.encoding.decodePath` (load `libraries=geometry` in the script URL).
 
-## 4. Rename Admin → User Admin
+### 4. Drop Mapbox config
+- Delete `src/modules/holarchelp/config/mapbox.ts`.
+- Delete `src/modules/holarchelp/hooks/useMapboxToken.ts`.
+- Keep `supabase/functions/mapbox-config` in place for one release (in case any cached client still calls it), then remove next pass.
+- Remove `mapbox-gl` from `package.json` and `import "mapbox-gl/dist/mapbox-gl.css"`.
 
-- Sidebar label and `PageHeader` title change to **User Admin**.
-- Route path stays the same to avoid breaking deep links — only the label and translations change (across the 25 locales).
+### 5. Custom domain prep (later, at publish time)
+When you're ready to publish to `holarchealth.com`, I'll walk you through:
+1. Create/select a Google Cloud project, enable billing, enable **Maps JavaScript API**, **Routes API**, **Places API (New)** (if we add search later).
+2. Create an API key, restrict to HTTP referrers: `https://holarchealth.com/*` and `https://*.holarchealth.com/*`.
+3. In Lovable connector settings, add a *custom* Google Maps connection with that key alongside the managed one.
 
-## 5. Navigation vs Real‑Time Monitoring — clarify
+Until then, preview + `holarchealth.lovable.app` work with the managed key automatically.
 
-They sound similar but do different jobs:
-- **NavigationScreen** = a single paramedic's turn‑by‑turn console for the one mission they accepted (status stepper, hospital picker, live ETA).
-- **RealTimeMonitoringScreen** = dispatcher / manager view of all vehicles, speed, fuel, geofence, safety alerts.
+## What I need from you to start
+1. Approve this plan.
+2. After approval (in build mode) I'll call the connector — you'll get a one-click prompt to connect Google Maps Platform.
 
-Fix:
-- Rename **Navigation → Active Mission**. Only show it in the sidebar while the current user is a paramedic with an assigned/in‑progress incident; otherwise hide it. Place under an "On Shift" sidebar section.
-- Rename **Real‑Time Monitoring → Fleet Live**. Drop the redundant "Live Tracking" sub‑tab (the screen *is* live tracking); keep "Safety Alerts" as a sibling tab. Place under "Operations".
-- Add one‑line helper text under each title: "Your current mission" vs "All vehicles, live".
-
-## 6. Dynamically moving map — wire Google Maps + demo simulator
-
-### What we'll build (code)
-- Use the existing Google Maps connector (browser key `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` for Maps JS; gateway proxy for Routes).
-- On `Fleet Live` and `Active Mission` / `HolarcHelpIncidentDetail`, subscribe to Realtime `INSERT` on `holarchelp_provider_locations` and **tween the marker** between the previous and new point over the GPS update interval so it visibly glides instead of teleporting.
-- Draw the route polyline from the ambulance's current position → patient (then → destination hospital once `status = patient_collected`) using the **Routes API** through the connector gateway. Distance + ETA come straight from the Routes response and refresh whenever `provider_location_updated_at` changes.
-- Live ETA countdown ticker, reset on each new ETA.
-- Enable Realtime on the locations table:
-  ```sql
-  ALTER PUBLICATION supabase_realtime ADD TABLE public.holarchelp_provider_locations;
-  ```
-
-### Demo simulator (temporary, dev/preview only)
-Goal: you can see the map move even when no paramedic device is online.
-
-- Add a **"Simulate ambulance"** toggle button on `Fleet Live` and inside an active incident, visible only when:
-  - the environment is preview (`import.meta.env.DEV === true` **or** hostname is a `*.lovable.app` / `*.lovableproject.com` preview domain), **and**
-  - the current user has the `admin` role.
-- When toggled on, a client‑side interval (every 3s) walks a fake ambulance along a pre‑computed Joburg route (Sandton → Charlotte Maxeke). On each tick it `upsert`s a row into `holarchelp_provider_locations` with a flag `simulated = true`.
-- Migration adds `simulated boolean default false` to `holarchelp_provider_locations`. Map markers from simulated rows render with a dashed outline and a small "DEMO" chip so it's never mistaken for a live unit.
-- Toggling off stops the interval and clears the simulated row.
-- Hard guards: the simulator button never renders on `holarchealth.com` (production custom domain), and the edge gate also rejects writes with `simulated = true` from any user that isn't `admin`.
-
-### Proving the real thing works
-After the simulator is in place we'll verify the live path end‑to‑end without faking anything:
-1. Open `/provider/ambulance` in one browser, signed in as a paramedic, start a shift, grant browser location permission. The `useLiveProviderLocation` hook will post real GPS into `holarchelp_provider_locations` every ~10s.
-2. Open the matching patient incident in a second browser / phone — the map shows the real marker tweening between real GPS points, with a real Routes‑API polyline and ETA.
-3. Walk a few metres (or refresh GPS) and confirm the marker glides and the ETA drops.
-4. Flip `status` through `en_route → arrived → patient_collected → en_route_to_hospital → at_hospital` and confirm the destination pin and route swap from patient → chosen hospital at the right step.
-5. Screenshot each stage so we have a live‑traffic record alongside the simulator's demo recording.
-
-### What you need to do
-- **Browser location**: confirm Chrome / Safari allows location for `holarchealth.com` and the preview domain.
-- **Custom‑domain Maps key (production only)**: the Lovable‑managed Google key is restricted to `*.lovable.app`. For maps on `holarchealth.com` you need your own Google Cloud API key with Maps JavaScript API + Routes API enabled and HTTP referrer allowlist set to both `https://holarchealth.com/*` and `https://*.holarchealth.com/*`. Once you have the key, we'll wire it via a custom Google Maps connection — until then maps work on the preview domain.
-
-## Technical details
-
-```text
-Files to edit
-  src/modules/holarchelp/pages/provider/**           → PageHeader + tokens + tabs
-  src/modules/holarchelp/pages/provider/AdministratorsScreen.tsx
-    → "User Admin", role accordions (collapsed), phone/email rows
-  src/modules/holarchelp/pages/provider/ambulance/RealTimeMonitoringScreen.tsx
-    → rename "Fleet Live", drop emoji tabs, drop Live Tracking sub-tab
-  src/modules/holarchelp/pages/provider/ambulance/NavigationScreen.tsx
-    → rename "Active Mission", conditional sidebar visibility
-  src/modules/holarchelp/components/SosLiveMap.tsx   → marker tweening + Routes polyline + ETA
-  src/modules/holarchelp/components/AmbulanceSimulator.tsx  → NEW, dev/preview-only
-  src/components/layout/ProviderAppLayout.tsx        → sidebar labels & grouping
-  src/i18n/locales/*.json + uiTranslations.ts        → label updates
-
-Files to delete
-  src/modules/holarchelp/pages/provider/ambulance/DriverManagementScreen.tsx
-  (+ its route entry in routes-provider.tsx)
-
-Database (migration)
-  ALTER PUBLICATION supabase_realtime ADD TABLE public.holarchelp_provider_locations;
-  ALTER TABLE public.holarchelp_provider_locations
-    ADD COLUMN IF NOT EXISTS simulated boolean NOT NULL DEFAULT false;
-  -- RLS: only admins may insert/update rows with simulated = true
-```
-
-No business logic changes outside removing the redundant Driver Management mock screen and adding the simulator.
+## Risk / rollback
+The change is isolated to `LiveMap.tsx`, `routes-eta`, and removal of two Mapbox-only files. If anything looks off we can revert just those files in one shot.
