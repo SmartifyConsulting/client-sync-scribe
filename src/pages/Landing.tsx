@@ -193,10 +193,7 @@ export default function Landing() {
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground mb-7 max-w-2xl lg:mx-0 mx-auto">
-              Holarc is one connected platform where doctors run their entire practice and patients own their entire
-              360° health story — from voice-recorded consultations and AI summaries, to video-verified medication
-              adherence rewards, cross-specialist Round Tables, hospital admissions, prescriptions, billing, and a
-              unified care calendar.
+              {t("landing.hero.description")}
             </p>
 
             {/* Capability pills */}
@@ -282,7 +279,7 @@ export default function Landing() {
                   >
                     <a href="#" aria-label="Download on the App Store">
                       <Apple className="mr-1.5 h-4 w-4" />
-                      App Store
+                      {t("landing.mobile.appStore")}
                     </a>
                   </Button>
                   <Button
@@ -293,7 +290,7 @@ export default function Landing() {
                   >
                     <a href="#" aria-label="Get it on Google Play">
                       <Play className="mr-1.5 h-4 w-4" />
-                      Google Play
+                      {t("landing.mobile.googlePlay")}
                     </a>
                   </Button>
                 </div>
@@ -303,13 +300,13 @@ export default function Landing() {
             {/* Trust strip */}
             <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5 text-primary" /> Patient-granted access
+                <Shield className="h-3.5 w-3.5 text-primary" /> {t("landing.trustStrip.patientAccess")}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Activity className="h-3.5 w-3.5 text-primary" /> Real-time collaboration
+                <Activity className="h-3.5 w-3.5 text-primary" /> {t("landing.trustStrip.collaboration")}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Heart className="h-3.5 w-3.5 text-[#E01837]" /> Built around the patient
+                <Heart className="h-3.5 w-3.5 text-[#E01837]" /> {t("landing.trustStrip.patientCentric")}
               </span>
             </div>
           </motion.div>
@@ -330,14 +327,13 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-foreground text-sm">Transcribed Sessions</p>
+                      <p className="font-semibold text-foreground text-sm">{t("landing.features.transcribedSessions")}</p>
                       <span className="inline-flex items-center gap-1 text-[10px] font-medium text-destructive">
                         <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> REC
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Voice transcribed in real time. AI extracts diagnoses, prescriptions and follow-up tasks
-                      automatically.
+                      {t("landing.features.transcribedDescription")}
                     </p>
                     <div className="mt-3 flex items-end gap-1.5 h-10">
                       {[18, 32, 24, 40, 28, 36, 22, 30, 26, 34, 20, 38].map((h, i) => (
@@ -353,13 +349,13 @@ export default function Landing() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#E01837]/10 mb-2">
                   <Video className="h-5 w-5 text-[#E01837]" />
                 </div>
-                <p className="text-sm font-semibold text-foreground">Medication Adherence</p>
+                <p className="text-sm font-semibold text-foreground">{t("landing.features.medicationAdherence")}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  Verified ingestion. Confidence scored. Provisional doses auto-approved monthly.
+                  {t("landing.features.medicationDescription")}
                 </p>
                 <div className="mt-3 flex items-center gap-1.5">
                   <Gift className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-[11px] font-semibold text-primary">+5 Rewards earned</span>
+                  <span className="text-[11px] font-semibold text-primary">{t("landing.features.rewardsEarned")}</span>
                 </div>
               </div>
 
@@ -368,9 +364,9 @@ export default function Landing() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 mb-2">
                   <Users className="h-5 w-5 text-primary" />
                 </div>
-                <p className="text-sm font-semibold text-foreground">Round Table</p>
+                <p className="text-sm font-semibold text-foreground">{t("landing.features.roundTable")}</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  Specialists coordinate per patient with shared notes and read-receipts.
+                  {t("landing.features.roundTableDescription")}
                 </p>
                 <div className="mt-3 flex -space-x-1.5">
                   {["bg-primary", "bg-[#E01837]", "bg-amber-500", "bg-teal-500"].map((c, i) => (
@@ -386,10 +382,9 @@ export default function Landing() {
                     <Brain className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-foreground">AI Clinical Assistant</p>
+                    <p className="text-sm font-semibold text-foreground">{t("landing.features.aiAssistant")}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Patient history summaries · medication conflict alerts · imaging analysis · auto-generated
-                      documents.
+                      {t("landing.features.aiAssistantDescription")}
                     </p>
                   </div>
                 </div>
@@ -402,18 +397,21 @@ export default function Landing() {
                     <Siren className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm">Holarc Help (SOS)</p>
+                    <p className="font-semibold text-foreground text-sm">{t("landing.features.holarcHelp")}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      One-tap dispatch to nearby emergency responders and hospitals with live location, ETA tracking,
-                      and full medical context shared on arrival.
+                      {t("landing.features.holarcHelpDescription")}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      {["Emergency responders", "Hospitals", "Blood banks"].map((b) => (
+                      {[
+                        { key: "emergencyResponders", label: t("landing.features.emergencyResponders") },
+                        { key: "hospitals", label: t("landing.features.hospitals") },
+                        { key: "bloodBanks", label: t("landing.features.bloodBanks") },
+                      ].map((b) => (
                         <span
-                          key={b}
+                          key={b.key}
                           className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2 py-0.5 text-[10px] text-foreground/80"
                         >
-                          {b}
+                          {b.label}
                         </span>
                       ))}
                     </div>
