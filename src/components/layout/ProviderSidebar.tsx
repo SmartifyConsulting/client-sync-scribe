@@ -54,6 +54,8 @@ const hospitalNav: NavItem[] = [
 const ambulanceNav: NavItem[] = [
   // EMERGENCY RESPONSE TIER
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
+  { icon: Zap, labelKey: "nav.dispatcherConsole", to: "/provider/ambulance/dispatch" },
+  { icon: Siren, labelKey: "nav.incomingSos", to: "/provider/ambulance/incoming" },
   { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
   // TEAM & FLEET TIER
   { icon: Users, labelKey: "nav.shiftTeams", to: "/provider/ambulance/team" },
@@ -63,6 +65,7 @@ const ambulanceNav: NavItem[] = [
   // USER ADMIN (Hospital Network lives as a tab inside)
   { icon: UserCheck, labelKey: "nav.userAdmin", to: "/provider/ambulance/admins" },
 ];
+
 
 interface ProviderSidebarProps {
   portal: "hospital" | "ambulance";
