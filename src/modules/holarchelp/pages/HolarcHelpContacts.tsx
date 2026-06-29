@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,6 +45,7 @@ const initials = (name: string) =>
   name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2) || "?";
 
 export default function HolarcHelpContacts() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -148,29 +150,29 @@ export default function HolarcHelpContacts() {
         className="mb-2 h-8 -ml-2 gap-1 text-muted-foreground hover:text-foreground"
         onClick={() => navigate("/patient/holarchelp")}
       >
-        <ChevronLeft className="h-4 w-4" /> Back to SOS
+        <ChevronLeft className="h-4 w-4" /> {t("common.back")}
       </Button>
 
-      <h1 className="text-2xl font-extrabold">Emergency contacts</h1>
+      <h1 className="text-2xl font-extrabold">{t("holarcHelp.emergency.contacts.title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Defaults from your Personal Information. Add or edit contacts here for SOS-specific severity rules.
+        {t("holarcHelp.emergency.contacts.description")}
       </p>
 
       <div className="mt-3 flex items-start gap-2 rounded-xl border border-primary/40 bg-primary/5 p-3 text-xs text-foreground">
         <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
         <span>
-          Contacts marked as <em>from Personal Information</em> are kept in sync with My Holarchive. Add manual contacts here when the recipient should only be notified at higher severity.
+          {t("holarcHelp.emergency.contacts.infoText")}
         </span>
       </div>
 
       {/* Contact list — scannable first */}
       <ul className="mt-5 space-y-2">
         {loading && (
-          <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">Loading…</li>
+          <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">{t("common.loading")}</li>
         )}
         {!loading && contacts.length === 0 && (
           <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">
-            No contacts yet — add one below.
+            {t("holarcHelp.emergency.contacts.noContacts")}
           </li>
         )}
         {contacts.map((c) => {
@@ -188,19 +190,19 @@ export default function HolarcHelpContacts() {
                   {isEditing ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <div>
-                        <Label className="text-[11px]">Name</Label>
+                        <Label className="text-[11px]">{t("common.name")}</Label>
                         <Input value={(editDraft.name ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))} />
                       </div>
                       <div>
-                        <Label className="text-[11px]">Relationship</Label>
+                        <Label className="text-[11px]">{t("holarcHelp.emergency.contacts.relationship")}</Label>
                         <Input value={(editDraft.relationship ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, relationship: e.target.value }))} />
                       </div>
                       <div>
-                        <Label className="text-[11px]">Phone</Label>
+                        <Label className="text-[11px]">{t("common.phone")}</Label>
                         <Input value={(editDraft.phone ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, phone: e.target.value }))} />
                       </div>
                       <div>
-                        <Label className="text-[11px]">Email</Label>
+                        <Label className="text-[11px]">{t("common.email")}</Label>
                         <Input type="email" value={(editDraft.email ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, email: e.target.value }))} />
                       </div>
                     </div>
@@ -213,7 +215,7 @@ export default function HolarcHelpContacts() {
                         )}
                         {c.source === "personal_info_seed" && (
                           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                            From Personal Information
+                            {t("holarcHelp.emergency.contacts.fromPersonalInfo")}
                           </span>
                         )}
                       </div>
@@ -236,19 +238,19 @@ export default function HolarcHelpContacts() {
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   {isEditing ? (
                     <>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" onClick={() => saveEdit(c.id)} aria-label="Save">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" onClick={() => saveEdit(c.id)} aria-label={t("common.save")}>
                         <Check className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelEdit} aria-label="Cancel">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={cancelEdit} aria-label={t("common.cancel")}>
                         <X className="h-4 w-4" />
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(c)} aria-label="Edit">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(c)} aria-label={t("common.edit")}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => remove(c.id)} aria-label="Remove">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => remove(c.id)} aria-label={t("common.delete")}>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </>
@@ -265,7 +267,7 @@ export default function HolarcHelpContacts() {
         <CollapsibleTrigger className="group flex w-full items-center justify-between p-3 hover:bg-muted/40 transition-colors rounded-2xl">
           <span className="flex items-center gap-2 text-sm font-semibold">
             <UserPlus className="h-4 w-4 text-primary" />
-            Add a new emergency contact
+            {t("holarcHelp.emergency.contacts.addNew")}
           </span>
           <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
         </CollapsibleTrigger>
@@ -273,34 +275,34 @@ export default function HolarcHelpContacts() {
           <form onSubmit={add} className="grid gap-3 p-4 pt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="grid gap-1.5">
-                <Label htmlFor="cname">Name</Label>
+                <Label htmlFor="cname">{t("common.name")}</Label>
                 <Input id="cname" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="crel">Relationship (optional)</Label>
-                <Input id="crel" value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })} placeholder="Spouse, parent, friend…" />
+                <Label htmlFor="crel">{t("holarcHelp.emergency.contacts.relationshipOptional")}</Label>
+                <Input id="crel" value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })} placeholder={t("holarcHelp.emergency.contacts.relationshipPlaceholder")} />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="cphone">Phone (with country code)</Label>
+                <Label htmlFor="cphone">{t("holarcHelp.emergency.contacts.phoneWithCountry")}</Label>
                 <Input id="cphone" type="tel" placeholder="+27821234567" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="cemail">Email</Label>
+                <Label htmlFor="cemail">{t("common.email")}</Label>
                 <Input id="cemail" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
               </div>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="csev">Notify when incident is</Label>
+              <Label htmlFor="csev">{t("holarcHelp.emergency.contacts.notifyWhen")}</Label>
               <Select value={form.notify_min_severity} onValueChange={(v) => setForm({ ...form, notify_min_severity: v as Severity })}>
                 <SelectTrigger id="csev"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {SEVERITIES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">Contact will only be alerted for incidents at this severity or higher.</p>
+              <p className="text-xs text-muted-foreground">{t("holarcHelp.emergency.contacts.notifyHint")}</p>
             </div>
             <Button type="submit" className="h-11 gap-2 rounded-xl">
-              <UserPlus className="h-4 w-4" /> Add contact
+              <UserPlus className="h-4 w-4" /> {t("holarcHelp.emergency.contacts.addContactButton")}
             </Button>
           </form>
         </CollapsibleContent>
