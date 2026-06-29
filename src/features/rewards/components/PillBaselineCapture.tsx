@@ -6,6 +6,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { mapCameraError } from "@/lib/cameraErrors";
+
 
 interface PillBaselineCaptureProps {
   open: boolean;
@@ -96,9 +98,11 @@ export function PillBaselineCapture({
       });
       setStream(ms);
       if (videoRef.current) videoRef.current.srcObject = ms;
-    } catch {
-      toast({ title: "Camera error", description: "Could not access camera.", variant: "destructive" });
+    } catch (err) {
+      const friendly = mapCameraError(err);
+      toast({ title: friendly.title, description: friendly.description, variant: "destructive" });
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 

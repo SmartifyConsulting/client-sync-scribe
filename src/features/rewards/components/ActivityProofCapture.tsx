@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { mapCameraError } from "@/lib/cameraErrors";
+
 
 interface Task {
   id: string;
@@ -44,8 +46,10 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
         videoRef.current.srcObject = mediaStream;
       }
     } catch (error) {
-      toast({ title: "Camera Error", description: "Could not access camera.", variant: "destructive" });
+      const friendly = mapCameraError(error);
+      toast({ title: friendly.title, description: friendly.description, variant: "destructive" });
     }
+
   }, [toast]);
 
   const stopCamera = useCallback(() => {

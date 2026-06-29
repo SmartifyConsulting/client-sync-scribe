@@ -7,6 +7,8 @@ import { Plus, Trash2, ShieldAlert, ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { isValidOptionalEmail } from "@/lib/validation";
+
 import type { EmergencyContact } from "./EmergencyContactsSection";
 import type { NextOfKinMember } from "@/hooks/usePatients";
 
@@ -144,8 +146,18 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
                   </div>
                   <div>
                     <Label className="text-[11px]">Email</Label>
-                    <Input type="email" value={c.email ?? ""} onChange={(e) => updateContact(c.id, { email: e.target.value })} />
+                    <Input
+                      type="email"
+                      value={c.email ?? ""}
+                      onChange={(e) => updateContact(c.id, { email: e.target.value })}
+                      aria-invalid={!isValidOptionalEmail(c.email)}
+                      className={!isValidOptionalEmail(c.email) ? "border-destructive focus-visible:ring-destructive" : undefined}
+                    />
+                    {!isValidOptionalEmail(c.email) && (
+                      <p className="text-[10px] text-destructive mt-0.5">Enter a valid email address.</p>
+                    )}
                   </div>
+
                 </div>
                 <div className="flex flex-wrap items-center gap-3 pt-1">
                   <label className="flex items-center gap-2 text-[11px]">
