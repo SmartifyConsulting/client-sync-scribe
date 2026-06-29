@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import {
@@ -64,6 +65,7 @@ interface Notification {
 
 export default function Notifications() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,8 +81,8 @@ export default function Notifications() {
     setNotificationsEnabled(granted);
     if (granted) {
       toast({
-        title: "Notifications Enabled",
-        description: "You'll receive browser notifications for new alerts",
+        title: t("notifications.enabled"),
+        description: t("notifications.enabledDescription"),
       });
     }
   };
@@ -178,8 +180,8 @@ export default function Notifications() {
     } catch (error: any) {
       console.error("Error fetching notifications:", error);
       toast({
-        title: "Error",
-        description: "Failed to load notifications",
+        title: t("common.error"),
+        description: t("notifications.loadError"),
         variant: "destructive",
       });
     } finally {
@@ -212,8 +214,8 @@ export default function Notifications() {
 
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       toast({
-        title: "Done",
-        description: "All notifications marked as read",
+        title: t("common.done"),
+        description: t("notifications.markedAsRead"),
       });
     } catch (error) {
       console.error("Error marking all as read:", error);
@@ -268,8 +270,8 @@ export default function Notifications() {
     } catch (error: any) {
       console.error("Error fetching messages:", error);
       toast({
-        title: "Error",
-        description: "Failed to load messages",
+        title: t("common.error"),
+        description: t("notifications.loadMessagesError"),
         variant: "destructive",
       });
     } finally {
@@ -305,14 +307,14 @@ export default function Notifications() {
       setSelectedMessage(null);
       
       toast({
-        title: "Message Deleted",
-        description: "The message has been deleted",
+        title: t("notifications.messageDeleted"),
+        description: t("notifications.messageDeletedDescription"),
       });
     } catch (error: any) {
       console.error("Error deleting message:", error);
       toast({
-        title: "Error",
-        description: "Failed to delete message",
+        title: t("common.error"),
+        description: t("notifications.deleteError"),
         variant: "destructive",
       });
     }
@@ -391,7 +393,7 @@ export default function Notifications() {
           <div className="flex items-center justify-between mb-6">
             <Button variant="ghost" onClick={() => setSelectedMessage(null)} className="gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Back to {activeTab === "messages" ? "Messages" : "Sent"}
+              {t(`notifications.backTo${activeTab === "messages" ? "Messages" : "Sent"}`)}
             </Button>
             <div className="flex items-center gap-2">
               {activeTab === "messages" && (
@@ -418,7 +420,7 @@ export default function Notifications() {
               <h2 className="text-xl font-semibold text-foreground">{selectedMessage.subject}</h2>
               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                 <span>
-                  {activeTab === "messages" ? "From" : "To"}: <span className="font-medium text-foreground">
+                  {t(activeTab === "messages" ? "notifications.from" : "notifications.to")}: <span className="font-medium text-foreground">
                     {activeTab === "messages" ? selectedMessage.sender?.full_name : selectedMessage.recipient?.full_name}
                   </span>
                 </span>
@@ -450,7 +452,7 @@ export default function Notifications() {
               <TabsList>
                 <TabsTrigger value="notifications" className="gap-2">
                   <Bell className="h-4 w-4" />
-                  Alerts
+                  {t("notifications.alerts")}
                   {unreadNotificationsCount > 0 && (
                     <Badge variant="destructive" className="ml-1 h-5 min-w-5 p-0 justify-center">
                       {unreadNotificationsCount}
@@ -459,7 +461,7 @@ export default function Notifications() {
                 </TabsTrigger>
                 <TabsTrigger value="messages" className="gap-2">
                   <Mail className="h-4 w-4" />
-                  Messages
+                  {t("notifications.messages")}
                   {unreadMessagesCount > 0 && (
                     <Badge variant="destructive" className="ml-1 h-5 min-w-5 p-0 justify-center">
                       {unreadMessagesCount}
@@ -468,7 +470,7 @@ export default function Notifications() {
                 </TabsTrigger>
                 <TabsTrigger value="sent" className="gap-2">
                   <Send className="h-4 w-4" />
-                  Sent
+                  {t("notifications.sent")}
                 </TabsTrigger>
               </TabsList>
 
@@ -476,13 +478,13 @@ export default function Notifications() {
                 {activeTab === "notifications" && unreadNotificationsCount > 0 && (
                   <Button variant="outline" size="sm" onClick={markAllNotificationsAsRead}>
                     <CheckCircle2 className="h-4 w-4 mr-2" />
-                    Mark all read
+                    {t("notifications.markAllRead")}
                   </Button>
                 )}
                 <div className="relative max-w-sm">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Search..."
+                    placeholder={t("common.search")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 w-48"
@@ -588,18 +590,16 @@ function NotificationList({
       }
 
       toast({
-        title: accept ? "Invitation accepted" : "Invitation declined",
-        description: accept 
-          ? "You are now connected with this user" 
-          : "The invitation has been declined",
+        title: t(accept ? "notifications.invitationAccepted" : "notifications.invitationDeclined"),
+        description: t(accept ? "notifications.nowConnected" : "notifications.invitationDeclinedDesc"),
       });
 
       onRefresh();
     } catch (error: any) {
       console.error("Error responding to invitation:", error);
       toast({
-        title: "Error",
-        description: "Failed to respond to invitation",
+        title: t("common.error"),
+        description: t("notifications.respondError"),
         variant: "destructive",
       });
     } finally {
@@ -611,8 +611,8 @@ function NotificationList({
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Bell className="h-12 w-12 mb-4" />
-        <p className="text-sm font-medium">No notifications</p>
-        <p className="text-sm">You're all caught up!</p>
+        <p className="text-sm font-medium">{t("notifications.noNotifications")}</p>
+        <p className="text-sm">{t("notifications.allCaughtUp")}</p>
       </div>
     );
   }
@@ -736,7 +736,7 @@ function NotificationList({
                   ) : (
                     <UserCheck className="h-3.5 w-3.5" />
                   )}
-                  Accept
+                  {t("common.accept")}
                 </Button>
                 <Button
                   size="sm"
@@ -749,7 +749,7 @@ function NotificationList({
                   className="gap-1.5"
                 >
                   <UserX className="h-3.5 w-3.5" />
-                  Decline
+                  {t("common.decline")}
                 </Button>
               </div>
             )}
@@ -766,7 +766,7 @@ function NotificationList({
                   className="gap-1.5 bg-yellow-500 hover:bg-yellow-600 text-white"
                 >
                   <Star className="h-3.5 w-3.5" />
-                  Rate Visit
+                  {t("notifications.rateVisit")}
                 </Button>
               </div>
             )}
@@ -790,11 +790,12 @@ function MessageList({
   showSender: boolean;
 }) {
   if (messages.length === 0) {
+    const { t } = useTranslation();
     return (
       <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
         <Mail className="h-12 w-12 mb-4" />
-        <p className="text-sm font-medium">No messages</p>
-        <p className="text-sm">Your {showSender ? "inbox" : "sent messages"} is empty</p>
+        <p className="text-sm font-medium">{t("notifications.noMessages")}</p>
+        <p className="text-sm">{t(`notifications.${showSender ? "inboxEmpty" : "sentEmpty"}`)}</p>
       </div>
     );
   }
