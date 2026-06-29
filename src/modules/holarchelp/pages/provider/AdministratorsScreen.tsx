@@ -148,7 +148,7 @@ export default function AdministratorsScreen() {
       if (userIds.length) {
         const { data: profiles } = await supabase
           .from("profiles")
-          .select("id, full_name, phone, email")
+          .select("id, full_name")
           .in("id", userIds);
         const map = new Map(
           ((profiles as any[]) ?? []).map((p) => [p.id, p]),
@@ -158,8 +158,6 @@ export default function AdministratorsScreen() {
             const p = map.get(r.user_id);
             if (p) {
               r.full_name = p.full_name ?? null;
-              r.profile_phone = p.phone ?? null;
-              r.profile_email = p.email ?? null;
             }
           }
         });
