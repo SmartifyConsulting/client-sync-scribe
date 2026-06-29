@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -76,6 +77,7 @@ const LANGUAGES = [
 ];
 
 export default function SessionDetail() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -157,12 +159,12 @@ export default function SessionDetail() {
         .update({ status: 'completed', completed_at: new Date().toISOString() }) as any)
         .eq('document_id', doc.id);
 
-      setSessionDocs(prev => prev.map(d => 
+      setSessionDocs(prev => prev.map(d =>
         d.id === doc.id ? { ...d, email_sent_at: new Date().toISOString(), is_draft: false } : d
       ));
-      toast({ title: "Document sent", description: `${doc.name} has been sent successfully.` });
+      toast({ title: t('sessions.documentSent'), description: t('sessions.documentSentMessage', { name: doc.name }) });
     } catch (err) {
-      toast({ title: "Send failed", variant: "destructive" });
+      toast({ title: t('sessions.sendFailed'), variant: "destructive" });
     } finally {
       setSendingDocId(null);
     }
@@ -188,7 +190,7 @@ export default function SessionDetail() {
       setTranslatedSummary(data?.translatedText || data?.summary || session.summary);
     } catch (err) {
       console.error('Translation error:', err);
-      toast({ title: "Translation failed", description: "Could not translate the summary", variant: "destructive" });
+      toast({ title: t('sessions.translationFailed'), description: t('sessions.translationError'), variant: "destructive" });
     } finally {
       setIsTranslating(false);
     }
@@ -208,8 +210,8 @@ export default function SessionDetail() {
     if (!id) return;
     await deleteSession(id);
     toast({
-      title: "Session deleted",
-      description: "The session has been removed.",
+      title: t('sessions.sessionDeleted'),
+      description: t('sessions.sessionRemovedMessage'),
     });
     navigate(-1);
   };
@@ -223,11 +225,11 @@ export default function SessionDetail() {
         .update({ private_notes: privateNotesDraft } as any) as any)
         .eq('id', id);
       if (error) throw error;
-      toast({ title: "Private notes saved" });
+      toast({ title: t('sessions.privateNotesSaved') });
       setEditingPrivateNotes(false);
       refetch();
     } catch (err: any) {
-      toast({ title: "Failed to save notes", description: err?.message, variant: "destructive" });
+      toast({ title: t('sessions.saveNotesFailed'), description: err?.message, variant: "destructive" });
     } finally {
       setSavingPrivateNotes(false);
     }
@@ -249,10 +251,10 @@ export default function SessionDetail() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t('common.back')}
         </button>
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-muted-foreground">Session not found</p>
+          <p className="text-muted-foreground">{t('sessions.sessionNotFound')}</p>
         </div>
       </div>
     );
@@ -267,7 +269,7 @@ export default function SessionDetail() {
           className="inline-flex items-center gap-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to {session.patient.name}
+          {t('sessions.backToPatient', { name: session.patient.name })}
         </Link>
       ) : (
         <button
@@ -275,7 +277,7 @@ export default function SessionDetail() {
           className="inline-flex items-center gap-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t('common.back')}
         </button>
       )}
 
@@ -287,12 +289,12 @@ export default function SessionDetail() {
           </div>
           <div>
             <h1 className="text-[16px] font-semibold text-foreground">
-              Session - {format(new Date(session.started_at), "MMMM d, yyyy")}
+              {t('sessions.sessionTitle')} - {format(new Date(session.started_at), "MMMM d, yyyy")}
             </h1>
             <div className="mt-1 flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
               <span>{format(new Date(session.started_at), "h:mm a")}</span>
               {session.duration_minutes && (
-                <span>· {session.duration_minutes} minutes</span>
+                <span>· {t('sessions.minutesLabel', { count: session.duration_minutes })}</span>
               )}
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
@@ -301,7 +303,7 @@ export default function SessionDetail() {
                     : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
                 }`}
               >
-                {session.status === "completed" ? "Completed" : "In Progress"}
+                {session.status === "completed" ? t('sessions.completed') : t('sessions.inProgress')}
               </span>
               <PrivacyBadge />
             </div>
@@ -321,19 +323,19 @@ export default function SessionDetail() {
           <AlertDialogTrigger asChild>
             <Button variant="destructive" size="sm" className="gap-2 text-[11px]">
               <Trash2 className="h-4 w-4" />
-              Delete Session
+              {t('sessions.deleteSession')}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Session</AlertDialogTitle>
+              <AlertDialogTitle>{t('sessions.deleteSession')}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the session record.
+                {t('sessions.deleteSessionConfirm')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>{t('common.delete')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -344,56 +346,56 @@ export default function SessionDetail() {
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-primary bg-card p-6">
-          <h2 className="text-[12px] font-semibold text-foreground mb-4">Quick Actions</h2>
+          <h2 className="text-[12px] font-semibold text-foreground mb-4">{t('sessions.quickActions')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
               className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowPrescriptionEditor(true)}
             >
               <Pill className="h-4 w-4 shrink-0" />
-              <span className="truncate">Prescription</span>
+              <span className="truncate">{t('sessions.prescription')}</span>
             </Button>
             <Button
               className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowInvoiceEditor(true)}
             >
               <Receipt className="h-4 w-4 shrink-0" />
-              <span className="truncate">Invoice</span>
+              <span className="truncate">{t('sessions.invoice')}</span>
             </Button>
             <Button
               className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowMedicalCertificateEditor(true)}
             >
               <FileBadge className="h-4 w-4 shrink-0" />
-              <span className="truncate">Medical Certificate</span>
+              <span className="truncate">{t('sessions.medicalCertificate')}</span>
             </Button>
             <Button
               className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowReferralLetterEditor(true)}
             >
               <FileText className="h-4 w-4 shrink-0" />
-              <span className="truncate">Referral Letter</span>
+              <span className="truncate">{t('sessions.referralLetter')}</span>
             </Button>
             <Button
               className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowGeneralLetterEditor(true)}
             >
               <FileEdit className="h-4 w-4 shrink-0" />
-              <span className="truncate">General Letter</span>
+              <span className="truncate">{t('sessions.generalLetter')}</span>
             </Button>
             <Button
               className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowDrawingPad(true)}
             >
               <PenTool className="h-4 w-4 shrink-0" />
-              <span className="truncate">Drawing Pad</span>
+              <span className="truncate">{t('sessions.drawingPad')}</span>
             </Button>
             <Button
               className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowHospitalAdmissionEditor(true)}
             >
               <Hospital className="h-4 w-4 shrink-0" />
-              <span className="truncate">Hospital Admission</span>
+              <span className="truncate">{t('sessions.hospitalAdmission')}</span>
             </Button>
           </div>
         </div>
@@ -408,8 +410,8 @@ export default function SessionDetail() {
                 <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="text-[12px] font-semibold text-foreground">AI Summary</h2>
-                <p className="text-[11px] text-muted-foreground">Generated from session content</p>
+                <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.aiSummary')}</h2>
+                <p className="text-[11px] text-muted-foreground">{t('sessions.generatedFromSession')}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -417,7 +419,7 @@ export default function SessionDetail() {
               <Select value={selectedLanguage} onValueChange={handleTranslate}>
                 <SelectTrigger className="w-[160px] h-8 text-[11px]">
                   <Languages className="h-3.5 w-3.5 mr-1.5" />
-                  <SelectValue placeholder="Translate..." />
+                  <SelectValue placeholder={t('sessions.translate')} />
                 </SelectTrigger>
                 <SelectContent>
                   {LANGUAGES.map(lang => (
@@ -429,7 +431,7 @@ export default function SessionDetail() {
               </Select>
               {translatedSummary && (
                 <Button variant="ghost" size="sm" className="text-[11px] h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
-                  Original
+                  {t('sessions.original')}
                 </Button>
               )}
             </div>
@@ -447,8 +449,8 @@ export default function SessionDetail() {
                 <Volume2 className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <h2 className="text-[12px] font-semibold text-foreground">Session Notes</h2>
-                <p className="text-[11px] text-muted-foreground">Audio, transcript, and manual notes from the consultation</p>
+                <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.sessionNotes')}</h2>
+                <p className="text-[11px] text-muted-foreground">{t('sessions.notesDescription')}</p>
               </div>
             </div>
             {(session.audio_url || session.transcript) && (
@@ -468,14 +470,14 @@ export default function SessionDetail() {
               >
                 <SelectTrigger className="w-[160px] h-8 text-[11px]">
                   <Download className="h-3.5 w-3.5 mr-1.5" />
-                  <SelectValue placeholder="Download..." />
+                  <SelectValue placeholder={t('sessions.download')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="audio" disabled={!session.audio_url} className="text-[11px]">
-                    Download audio
+                    {t('sessions.downloadAudio')}
                   </SelectItem>
                   <SelectItem value="transcript" disabled={!session.transcript} className="text-[11px]">
-                    Download transcript
+                    {t('sessions.downloadTranscript')}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -485,15 +487,14 @@ export default function SessionDetail() {
           {/* Audio subsection */}
           {session.audio_url && (
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Audio</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('sessions.audio')}</p>
               <audio controls className="w-full" src={signedAudioUrl || ''}>
-                Your browser does not support the audio element.
+                {t('sessions.audioNotSupported')}
               </audio>
               <Alert className="border-amber-500/30 bg-amber-500/5">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-[11px] text-amber-700">
-                  Voice recordings and transcriptions are automatically deleted after 7 days. Download them to keep.
-                  AI summaries remain permanently.
+                  {t('sessions.recordingDeleteWarning')}
                 </AlertDescription>
               </Alert>
             </div>
@@ -504,7 +505,7 @@ export default function SessionDetail() {
             <>
               {session.audio_url && <hr className="my-4 border-border/60" />}
               <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Transcript</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('sessions.transcript')}</p>
                 <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-2">
                   {session.transcript.split('\n').map((line, index) => {
                     const colonIndex = line.indexOf(':');
@@ -533,7 +534,7 @@ export default function SessionDetail() {
             <>
               {(session.audio_url || session.transcript) && <hr className="my-4 border-border/60" />}
               <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('sessions.notes')}</p>
                 <p className="text-[12px] text-foreground whitespace-pre-wrap">{session.notes}</p>
               </div>
             </>
@@ -549,8 +550,8 @@ export default function SessionDetail() {
               <Lock className="h-4 w-4 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-[12px] font-semibold text-foreground">Private Notes</h2>
-              <p className="text-[11px] text-muted-foreground">Only visible to you. Not shared with the patient or other doctors.</p>
+              <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.privateNotes')}</h2>
+              <p className="text-[11px] text-muted-foreground">{t('sessions.privateNotesDescription')}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -565,7 +566,7 @@ export default function SessionDetail() {
                 }}
               >
                 <Edit3 className="h-3.5 w-3.5 mr-1.5" />
-                Edit
+                {t('common.edit')}
               </Button>
             ) : (
               <>
@@ -576,7 +577,7 @@ export default function SessionDetail() {
                   disabled={savingPrivateNotes}
                   onClick={() => { setEditingPrivateNotes(false); setPrivateNotesDraft(""); }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   size="sm"
@@ -584,7 +585,7 @@ export default function SessionDetail() {
                   disabled={savingPrivateNotes}
                   onClick={handleSavePrivateNotes}
                 >
-                  {savingPrivateNotes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                  {savingPrivateNotes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t('common.save')}
                 </Button>
               </>
             )}
@@ -594,13 +595,13 @@ export default function SessionDetail() {
           <Textarea
             value={privateNotesDraft}
             onChange={(e) => setPrivateNotesDraft(e.target.value)}
-            placeholder="Write notes only you can see…"
+            placeholder={t('sessions.writePrivateNotes')}
             className="text-[12px] min-h-[140px]"
           />
         ) : (session as any).private_notes ? (
           <p className="text-[12px] whitespace-pre-wrap text-foreground">{(session as any).private_notes}</p>
         ) : (
-          <p className="text-[11px] text-muted-foreground italic">No private notes yet — click Edit to add notes only you can see.</p>
+          <p className="text-[11px] text-muted-foreground italic">{t('sessions.noPrivateNotes')}</p>
         )}
       </div>
 
@@ -612,8 +613,8 @@ export default function SessionDetail() {
               <FileText className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-[12px] font-semibold text-foreground">Session Documents</h2>
-              <p className="text-[11px] text-muted-foreground">Auto-generated documents from this session</p>
+              <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.sessionDocuments')}</h2>
+              <p className="text-[11px] text-muted-foreground">{t('sessions.documentsDescription')}</p>
             </div>
           </div>
           <div className="space-y-2">
@@ -623,7 +624,7 @@ export default function SessionDetail() {
                 <span className="flex-1 text-[12px] font-semibold text-foreground truncate">{doc.name}</span>
                 {doc.is_draft && !doc.email_sent_at && (
                   <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">
-                    DRAFT
+                    {t('sessions.draft')}
                   </Badge>
                 )}
                 <Button
@@ -661,8 +662,8 @@ export default function SessionDetail() {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <h2 className="text-[12px] font-semibold text-foreground">Action Points / TO-DO</h2>
-              <p className="text-[11px] text-muted-foreground">Tasks extracted from this session</p>
+              <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.actionPointsTodo')}</h2>
+              <p className="text-[11px] text-muted-foreground">{t('sessions.tasksExtracted')}</p>
             </div>
           </div>
           <ul className="space-y-2 ml-4">
@@ -682,7 +683,7 @@ export default function SessionDetail() {
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-[11px] text-muted-foreground">No content recorded for this session yet.</p>
+          <p className="text-[11px] text-muted-foreground">{t('sessions.noContent')}</p>
         </div>
       )}
 
@@ -694,8 +695,8 @@ export default function SessionDetail() {
           onClose={() => setShowPrescriptionEditor(false)}
           onSave={(prescription) => {
             toast({
-              title: "Prescription created",
-              description: "The prescription has been saved successfully.",
+              title: t('sessions.prescriptionCreated'),
+              description: t('sessions.prescriptionSavedMessage'),
             });
           }}
         />
@@ -710,8 +711,8 @@ export default function SessionDetail() {
           onClose={() => setShowInvoiceEditor(false)}
           onSave={(invoice) => {
             toast({
-              title: "Invoice created",
-              description: `Invoice #${invoice.invoice_number} has been created.`,
+              title: t('sessions.invoiceCreated'),
+              description: t('sessions.invoiceCreatedMessage', { number: invoice.invoice_number }),
             });
           }}
         />
@@ -726,8 +727,8 @@ export default function SessionDetail() {
           onClose={() => setShowMedicalCertificateEditor(false)}
           onSave={() => {
             toast({
-              title: "Medical Certificate created",
-              description: "The medical certificate has been saved.",
+              title: t('sessions.medicalCertificateCreated'),
+              description: t('sessions.medicalCertificateSavedMessage'),
             });
           }}
         />
@@ -742,8 +743,8 @@ export default function SessionDetail() {
           onClose={() => setShowReferralLetterEditor(false)}
           onSave={() => {
             toast({
-              title: "Referral Letter created",
-              description: "The referral letter has been saved.",
+              title: t('sessions.referralLetterCreated'),
+              description: t('sessions.referralLetterSavedMessage'),
             });
           }}
         />
@@ -758,8 +759,8 @@ export default function SessionDetail() {
           onClose={() => setShowGeneralLetterEditor(false)}
           onSave={() => {
             toast({
-              title: "General Letter created",
-              description: "The letter has been saved.",
+              title: t('sessions.generalLetterCreated'),
+              description: t('sessions.generalLetterSavedMessage'),
             });
           }}
         />
@@ -774,8 +775,8 @@ export default function SessionDetail() {
           onClose={() => setShowHospitalAdmissionEditor(false)}
           onSave={() => {
             toast({
-              title: "Hospital Admission Form created",
-              description: "The form has been saved.",
+              title: t('sessions.hospitalAdmissionFormCreated'),
+              description: t('sessions.hospitalAdmissionFormSavedMessage'),
             });
           }}
         />
@@ -787,7 +788,7 @@ export default function SessionDetail() {
           <DialogHeader className="px-4 py-3 border-b">
             <DialogTitle className="flex items-center gap-2">
               <PenTool className="h-5 w-5 text-primary" />
-              Drawing Pad - {session.patient?.name}
+              {t('sessions.drawingPadTitle', { name: session.patient?.name })}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-hidden h-full">

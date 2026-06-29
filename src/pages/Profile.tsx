@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from 'react-i18next';
 import { Loader2, Search, Plus, MoreVertical, Trash2, Upload, Send } from "lucide-react";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient, usePatients } from "@/hooks/usePatients";
@@ -30,6 +31,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: (record: Patient) => void }) {
+  const { t } = useTranslation();
   const [creating, setCreating] = useState(false);
   const { toast } = useToast();
 
@@ -52,14 +54,14 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
           surgeries: [],
           pharmacies: [],
           family_history: [],
-          
+
           next_of_kin_members: [],
           current_medications: [],
         } as unknown as Patient);
-        toast({ title: "Record created", description: "Your Holarchive has been initialized." });
+        toast({ title: t('patient.recordCreated'), description: t('patient.holarchiveInitialized') });
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: t('common.error'), description: err.message, variant: "destructive" });
     } finally {
       setCreating(false);
     }
@@ -67,15 +69,16 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
 
   return (
     <div className="rounded-xl border border-primary bg-card p-8 text-center space-y-4">
-      <p className="text-muted-foreground">No clinical record found. Create your Holarchive to start managing your health information.</p>
+      <p className="text-muted-foreground">{t('patient.noRecordFound')}</p>
       <Button onClick={handleCreate} disabled={creating}>
-        {creating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : "Create My Holarchive"}
+        {creating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{t('patient.creating')}</> : t('patient.createHolarchive')}
       </Button>
     </div>
   );
 }
 
 function DoctorPatientsTab() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -120,7 +123,7 @@ function DoctorPatientsTab() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search patients..."
+            placeholder={t('patient.searchPatients')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -130,31 +133,31 @@ function DoctorPatientsTab() {
           trigger={
             <Button variant="outline" size="sm" className="gap-1">
               <Upload className="h-4 w-4" />
-              Import
+              {t('patient.import')}
             </Button>
           }
           onImportComplete={() => fetchPatients()}
         />
         <Button size="sm" className="gap-1" onClick={() => navigate("/patients")}>
           <Plus className="h-4 w-4" />
-          Add
+          {t('patient.add')}
         </Button>
       </div>
 
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {sortedPatients.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            {searchQuery ? "No patients found" : "No patients yet"}
+            {searchQuery ? t('patient.noPatientsFound') : t('patient.noPatientsYet')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-primary">
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Patient</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Contact</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Status</th>
-                  <th className="px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">Actions</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">{t('patient.patient')}</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">{t('patient.contact')}</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">{t('patient.status')}</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">{t('patient.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -193,20 +196,20 @@ function DoctorPatientsTab() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
-                              View Profile
+                              {t('patient.viewProfile')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => navigate(`/sessions?patient=${patient.id}`)}>
-                              Start Session
+                              {t('patient.startSession')}
                             </DropdownMenuItem>
                             {!isMe && (
                               <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => {
-                                  if (confirm(`Delete ${patient.name}?`)) deletePatient(patient.id);
+                                  if (confirm(t('patient.deleteConfirm', { name: patient.name }))) deletePatient(patient.id);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
+                                {t('common.delete')}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
@@ -225,6 +228,7 @@ function DoctorPatientsTab() {
 }
 
 export default function Profile() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { role } = useUserRole();
@@ -267,13 +271,13 @@ export default function Profile() {
       }
     };
     fetchPatientRecord();
-  }, [user]);
+  }, [user, t]);
 
   return (
     <div className="space-y-4 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">My Holarchive</h1>
-        <p className="text-muted-foreground text-[12px]">Manage your health information</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('patient.myHolarchive')}</h1>
+        <p className="text-muted-foreground text-[12px]">{t('patient.manageHealthInfo')}</p>
       </div>
 
       {patientLoading ? (
@@ -289,11 +293,11 @@ export default function Profile() {
               .update(updates as any)
               .eq("id", patientRecord.id);
             if (error) {
-              toast({ title: "Error saving", description: error.message, variant: "destructive" });
+              toast({ title: t('patient.errorSaving'), description: error.message, variant: "destructive" });
               throw error;
             }
             setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
-            toast({ title: "Saved", description: "Your details have been updated." });
+            toast({ title: t('patient.saved'), description: t('patient.detailsUpdated') });
           }}
           isSelfService
         />
