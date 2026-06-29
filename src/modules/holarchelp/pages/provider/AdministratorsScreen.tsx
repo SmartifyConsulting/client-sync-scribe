@@ -53,43 +53,36 @@ interface MemberRow {
   profile_email?: string | null;
 }
 
-const ADMIN_ROLES = new Set(["admin", "owner", "manager"]);
-const CREW_ROLE_OPTIONS = [
-  "admin",
-  "manager",
-  "paramedic",
-  "emt",
-  "driver",
-  "dispatcher",
-  "nurse",
-  "supervisor",
-];
-
-const ROLE_ORDER = [
-  "admin",
-  "owner",
-  "manager",
-  "paramedic",
-  "emt",
-  "driver",
-  "dispatcher",
-  "nurse",
-  "supervisor",
-  "member",
-];
+const ADMIN_ROLES = new Set(["admin", "owner", "manager", "er_admin"]);
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrators",
-  owner: "Owners",
-  manager: "Managers",
-  paramedic: "Paramedics",
-  emt: "EMTs",
-  driver: "Drivers",
   dispatcher: "Dispatchers",
-  nurse: "Nurses",
-  supervisor: "Supervisors",
+  driver: "Drivers",
+  emt: "EMTs",
+  er_admin: "ER_Admin",
+  manager: "Managers",
   member: "Members",
+  nurse: "Nurses",
+  owner: "Owners",
+  paramedic: "Paramedics",
+  supervisor: "Supervisors",
 };
+
+// Alphabetically ordered crew role options for the Add member dropdown.
+const CREW_ROLE_OPTIONS = [
+  "admin",
+  "dispatcher",
+  "driver",
+  "emt",
+  "er_admin",
+  "manager",
+  "nurse",
+  "paramedic",
+  "supervisor",
+].sort((a, b) =>
+  (ROLE_LABELS[a] ?? a).localeCompare(ROLE_LABELS[b] ?? b),
+);
 
 export default function AdministratorsScreen() {
   const { providerId, providerType, userId } = useProviderAccess();
