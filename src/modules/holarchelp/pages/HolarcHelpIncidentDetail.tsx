@@ -393,9 +393,10 @@ export default function HolarcHelpIncidentDetail() {
             {incident.accepted_at && (
               <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}
-            {autoAssigned && autoAssignedAt && autoChangeSecondsLeft > 0 && (
+            {assignmentAnchorAt && autoChangeSecondsLeft > 0 && (
               <span className="text-xs font-semibold">Change ER Provider: {autoChangeSecondsLeft}s left</span>
             )}
+
           </div>
           {distanceKm != null && incident.provider_latitude == null && (
             <p className="mt-1 text-[11px] text-emerald-800/70 dark:text-emerald-200/60">
