@@ -1,44 +1,53 @@
-## Plan
+# SOS Severity Modal — Headcount Steppers
 
-1. **Fix the Google Maps error message on SOS maps**
-   - Add a clearer in-app overlay for `BillingNotEnabledMapError`, explaining that Google Cloud billing must be enabled on the Maps project.
-   - Keep the map area usable-looking instead of relying only on Google’s default “This page can’t load Google Maps correctly” popup.
-   - Also note in-app if the issue is a domain/referrer restriction or missing key.
+Replace the Yes/No/Skip questions on step 2 of `SeverityPicker` with three tap-to-adjust counters using − / + buttons.
 
-2. **Show the incident number on the patient SOS screen**
-   - Display the human-readable incident number, e.g. `INC-2026-000123`, near the “Active emergency” heading and in the sticky top bar.
-   - Add it to the patient incident history cards so the same number can be matched with the ER Provider / Dispatcher screens.
+## UI changes (`src/modules/holarchelp/components/SeverityPicker.tsx`)
 
-3. **Keep the ER provider list visible during the first 30 seconds**
-   - When the SOS is first created, show available ER providers with distance and a countdown.
-   - If the system auto-assigns the closest provider after 30 seconds, keep the list visible briefly as a “Change ER Provider” selector when still inside the 30-second decision window.
+Step 2 ("Quick check") becomes three stepper rows:
 
-4. **Allow changing from auto-assigned to selected ER Provider within 30 seconds**
-   - Add a backend RPC such as `holarchelp_patient_change_provider` that only allows the patient who owns the incident to change provider if:
-     - the incident is still live,
-     - the incident was auto-assigned,
-     - less than 30 seconds have passed from the incident creation / auto-assignment window,
-     - the new provider is a valid pending ER provider offer.
-   - Record the change in `holarchelp_incident_events` as `patient_changed_provider` / `reassigned` so the ER workflow timeline shows it.
-   - Supersede the old provider offer and mark the newly selected provider as picked.
+1. **People needing help** — total count (min 1, default 1)
+2. **Breathing** — count (min 0, default 0)
+3. **Unconscious** — count (min 0, default 0)
 
-5. **Make the patient SOS workflow easier to follow**
-   - In the responder card, show:
-     - incident number,
-     - current assigned ER Provider,
-     - whether it was auto-assigned,
-     - remaining seconds to change provider when available.
-   - After the 30-second window closes, replace the selector with a locked state explaining that the responder is now fixed unless ER dispatch reassigns it.
+Each row:
+```text
+[ Label                ]
+[  −   ]   42   [  +   ]
+```
 
-## Technical details
+- Large 44px square − / + buttons (touch-friendly, no keyboard entry).
+- Center shows the current number in a bold, large font.
+- Disable − at min; cap + at the "people needing help" total for the breathing/unconscious rows (auto-clamp if total decreased).
+- Replace `YesNoSkip` with a new `CountStepper` subcomponent in the same file.
 
-- Frontend files to update:
-  - `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx`
-  - `src/modules/holarchelp/pages/HolarcHelpIncidents.tsx`
-  - `src/modules/holarchelp/components/AvailableResponders.tsx`
-  - `src/modules/holarchelp/components/LiveMap.tsx`
-- Backend changes:
-  - Add a migration for the new patient-change-provider RPC.
-  - Reuse existing `holarchelp_incident_offers`, `holarchelp_incident_events`, and `holarchelp_incidents.assigned_provider_id` workflow.
-- Google Maps note:
-  - The screenshot error is specifically `BillingNotEnabledMapError`, so the real fix outside code is to ensure billing is enabled in the Google Cloud project that owns the Maps API key. The code can explain this clearly, but billing must be enabled in Google Cloud for the map to render normally.
+## Data changes
+
+- Extend `SeverityResult` to:
+  ```ts
+  export type SeverityResult = {
+    severity: Severity;
+    peopleCount: number;
+    breathingCount: number;
+    unconsciousCount: number;
+    // kept for backwards compatibility, derived:
+    conscious: boolean | null;
+    breathing: boolean | null;
+  };
+  ```
+- Derive legacy `conscious`/`breathing` booleans so existing consumers keep working:
+  - `breathing = breathingCount > 0 ? true : (unconsciousCount > 0 ? false : null)`
+  - `conscious = (peopleCount - unconsciousCount) > 0 ? true : (unconsciousCount > 0 ? false : null)`
+- For `moderate` severity, submit with `peopleCount: 1` and zero counts (skips step 2 as today).
+
+## i18n
+
+Add keys under `severityPicker`:
+- `peopleNeedHelp`, `breathingCount`, `unconsciousCount`, `decrease`, `increase` (aria-labels).
+
+Wire English first; other 24 locales fall back to English until a follow-up translation pass.
+
+## Out of scope
+
+- No DB schema changes (counts ride along in the existing in-memory result; persistence wiring is unchanged).
+- No changes to step 1 severity tiles.
