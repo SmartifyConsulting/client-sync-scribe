@@ -78,8 +78,8 @@ export default function DispatcherConsoleScreen() {
       })),
     );
     setLoading(false);
-    loadActiveMissions();
   };
+
 
   useEffect(() => {
     loadAll();
