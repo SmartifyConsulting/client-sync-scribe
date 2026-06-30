@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
+import { SosVoiceNoteDialog, type PreStartedRecording } from "../components/SosVoiceNoteDialog";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { SosLiveMap } from "../components/SosLiveMap";
@@ -149,9 +149,12 @@ export default function HolarcHelpIncidentDetail() {
     return () => clearInterval(t);
   }, [incident?.created_at]);
   const showNoResponders = isUnassignedOpen && pendingOffers === 0 && elapsed > 90;
-  const autoChangeSecondsLeft = autoAssignedAt
-    ? Math.max(0, Math.floor((new Date(autoAssignedAt).getTime() + 30000 - clock) / 1000))
+  // Treat any recent assignment (auto OR manual) as a change window
+  const assignmentAnchorAt = autoAssignedAt ?? incident?.accepted_at ?? incident?.assigned_at ?? null;
+  const autoChangeSecondsLeft = assignmentAnchorAt
+    ? Math.max(0, Math.floor((new Date(assignmentAnchorAt).getTime() + 30000 - clock) / 1000))
     : 0;
+
 
   const callEmergency = () => { window.location.href = "tel:10177"; };
   const goHome = () => navigate("/patient/holarchelp");
@@ -166,9 +169,11 @@ export default function HolarcHelpIncidentDetail() {
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
-  // Fresh-trigger flow: voice note → severity picker, plus 10s cancel window
-  const [voiceNoteOpen, setVoiceNoteOpen] = useState(isFresh);
-  const [severityOpen, setSeverityOpen] = useState(false);
+  // Fresh-trigger flow: severity picker → background-record voice note (no clipped opening words)
+  const [severityOpen, setSeverityOpen] = useState(isFresh);
+  const [voiceNoteOpen, setVoiceNoteOpen] = useState(false);
+  const [preStarted, setPreStarted] = useState<PreStartedRecording | null>(null);
+  const preStartedRef = useRef<PreStartedRecording | null>(null);
   const [cancelSecondsLeft, setCancelSecondsLeft] = useState(isFresh ? 10 : 0);
 
   useEffect(() => {
@@ -178,15 +183,44 @@ export default function HolarcHelpIncidentDetail() {
     return () => clearTimeout(t);
   }, [isFresh, cancelSecondsLeft]);
 
+  const startBackgroundRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.start();
+      const pre: PreStartedRecording = { stream, recorder, chunks, startedAt: Date.now() };
+      preStartedRef.current = pre;
+      setPreStarted(pre);
+    } catch (err) {
+      // Mic denied or unavailable — dialog will fall back to its own prompt
+      preStartedRef.current = null;
+      setPreStarted(null);
+    }
+  };
+
   const finishSeverity = async (severity: SeverityResult | null) => {
     setSeverityOpen(false);
-    if (!id || !severity) return;
-    await supabase.from("holarchelp_incidents" as any).update({
-      severity: severity.severity,
-      conscious: severity.conscious,
-      breathing: severity.breathing,
-    } as any).eq("id", id);
+    if (id && severity) {
+      await supabase.from("holarchelp_incidents" as any).update({
+        severity: severity.severity,
+        conscious: severity.conscious,
+        breathing: severity.breathing,
+      } as any).eq("id", id);
+    }
+    if (isFresh) setVoiceNoteOpen(true);
   };
+
+  // Kick off mic capture the moment a severity is tapped (user gesture satisfies autoplay policy)
+  const handleSeveritySubmit = (severity: SeverityResult) => {
+    void startBackgroundRecording();
+    void finishSeverity(severity);
+  };
+  const handleSeveritySkip = () => {
+    void finishSeverity(null);
+  };
+
 
   const cancelAlert = async () => {
     if (!id) return;
@@ -258,12 +292,14 @@ export default function HolarcHelpIncidentDetail() {
 
   return (
     <div className="mx-auto max-w-md pb-6">
+      <SeverityPicker open={severityOpen} onSubmit={handleSeveritySubmit} onSkip={handleSeveritySkip} />
       <SosVoiceNoteDialog
         open={voiceNoteOpen}
         incidentId={id ?? null}
-        onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
+        preStarted={preStarted}
+        onClose={() => { setVoiceNoteOpen(false); setPreStarted(null); preStartedRef.current = null; }}
       />
-      <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
+
 
       {isFresh && cancelSecondsLeft > 0 && isLive && (
         <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 text-amber-900 dark:bg-amber-950/20 dark:text-amber-100">
@@ -357,9 +393,10 @@ export default function HolarcHelpIncidentDetail() {
             {incident.accepted_at && (
               <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}
-            {autoAssigned && autoAssignedAt && autoChangeSecondsLeft > 0 && (
+            {assignmentAnchorAt && autoChangeSecondsLeft > 0 && (
               <span className="text-xs font-semibold">Change ER Provider: {autoChangeSecondsLeft}s left</span>
             )}
+
           </div>
           {distanceKm != null && incident.provider_latitude == null && (
             <p className="mt-1 text-[11px] text-emerald-800/70 dark:text-emerald-200/60">
@@ -369,14 +406,15 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      {isLive && responder && incident.assigned_provider_id && autoAssigned && autoAssignedAt && (
+      {isLive && responder && incident.assigned_provider_id && assignmentAnchorAt && autoChangeSecondsLeft > 0 && (
         <AvailableResponders
           incidentId={id!}
           createdAt={incident.created_at}
           assignedProviderId={incident.assigned_provider_id}
-          autoAssignedAt={autoAssignedAt}
+          autoAssignedAt={assignmentAnchorAt}
         />
       )}
+
 
       <SosLiveMap incidentId={id!} mode="patient" height={320} />
 

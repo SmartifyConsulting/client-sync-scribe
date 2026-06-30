@@ -11,10 +11,18 @@ const SILENCE_MS = 9000; // +5s before auto-stop on silence
 const MIN_RECORD_MS = 2000;
 const SILENCE_RMS = 0.015; // amplitude threshold
 
+export type PreStartedRecording = {
+  stream: MediaStream;
+  recorder: MediaRecorder;
+  chunks: Blob[];
+  startedAt: number;
+};
+
 interface Props {
   open: boolean;
   incidentId: string | null;
   onClose: () => void;
+  preStarted?: PreStartedRecording | null;
 }
 
 const blobToBase64 = (blob: Blob) =>
@@ -28,7 +36,7 @@ const blobToBase64 = (blob: Blob) =>
     reader.readAsDataURL(blob);
   });
 
-export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
+export function SosVoiceNoteDialog({ open, incidentId, onClose, preStarted }: Props) {
   const { t } = useTranslation();
   const [phase, setPhase] = useState<"recording" | "uploading">("recording");
   const [seconds, setSeconds] = useState(0);
@@ -64,7 +72,21 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let stream: MediaStream;
+      let mr: MediaRecorder;
+      let initialChunks: Blob[] = [];
+      let startedAt = Date.now();
+
+      if (preStarted) {
+        stream = preStarted.stream;
+        mr = preStarted.recorder;
+        initialChunks = preStarted.chunks;
+        startedAt = preStarted.startedAt;
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
+        mr.start();
+      }
       streamRef.current = stream;
 
       // Audio analyser for silence detection
@@ -95,16 +117,15 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
         rafRef.current = requestAnimationFrame(tick);
       };
 
-      const mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
       recorderRef.current = mr;
-      chunksRef.current = [];
+      chunksRef.current = initialChunks;
       mr.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
       mr.onstop = handleStop;
-      mr.start();
-      startedAtRef.current = Date.now();
+      startedAtRef.current = startedAt;
       lastVoiceAtRef.current = Date.now();
       setPhase("recording");
-      setSeconds(0);
+      const elapsedInit = Math.floor((Date.now() - startedAt) / 1000);
+      setSeconds(elapsedInit);
       timerRef.current = window.setInterval(() => {
         setSeconds((s) => {
           if (s + 1 >= MAX_SECONDS) {
@@ -119,6 +140,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       onClose();
     }
   };
+
 
   useEffect(() => {
     if (open) {
