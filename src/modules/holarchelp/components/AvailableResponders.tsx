@@ -82,6 +82,7 @@ export function AvailableResponders({
   const canExtend = remainingSec > 0 && extensionMs < EXTEND_MAX_MS;
 
   useEffect(() => {
+    if (DISABLE_SELECTION_TIMER) return;
     if (isChangeMode || remainingSec > 0) return;
     if (!offers.length) return;
     supabase.rpc("holarchelp_auto_assign_incident" as any, { _incident_id: incidentId }).then(() => {}, () => {});
