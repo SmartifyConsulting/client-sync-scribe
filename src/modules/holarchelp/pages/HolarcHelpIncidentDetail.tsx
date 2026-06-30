@@ -281,9 +281,7 @@ export default function HolarcHelpIncidentDetail() {
             <ArrowLeft className="h-4 w-4" /> SOS Home
           </Button>
           {incident.incident_number && (
-            <span className="rounded-full border bg-card px-2 py-1 font-mono text-[11px] font-bold text-primary">
-              {incident.incident_number}
-            </span>
+            <IncidentNumberBadge number={incident.incident_number} size="md" />
           )}
           <div className="flex-1" />
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
