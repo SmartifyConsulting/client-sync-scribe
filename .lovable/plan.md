@@ -1,43 +1,44 @@
-## 1. Make the Incident Number visible exactly once (and bolder)
+## 1. Make the Incident # badge match the "Assigned" badge — but green
 
-Currently `HolarcHelpIncidentDetail.tsx` renders `<IncidentNumberBadge>` twice — once inside the sticky quick-action bar (line 286) and again under the page heading (lines 301–305). That's the duplication you're seeing.
+Currently `IncidentNumberBadge` is a large pill with a `Hash` icon, "INCIDENT #" label, copy button, `border-2 border-primary` frame, and `text-base/lg` font. The "Assigned" badge it should match is a small flat pill:
 
-Changes:
+```
+rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900
+```
 
-- **Remove** the second badge under the H1 (lines 301–305).
-- Keep a **single** badge inside the sticky bar so it stays visible as you scroll.
-- Reformat `src/components/IncidentNumberBadge.tsx` to be more prominent:
-  - Bump the visual size: `md` → `text-base px-3 py-1.5`, `lg` → `text-lg px-3.5 py-2`.
-  - Stronger frame: `border-2 border-primary bg-primary/10 text-primary shadow-sm`.
-  - Render the number in `font-mono font-extrabold tracking-[0.18em] tabular-nums`.
-  - Label changes from "Ref" to **"Incident #"** (single label), still copyable.
-- Use `size="lg"` in the sticky bar so the single badge reads clearly.
-- Same single-badge treatment is already used on the ER/Hospital screens via the shared component — they automatically inherit the new look.
+Changes in `src/components/IncidentNumberBadge.tsx`:
+- Drop the border, shadow, `Hash` icon, uppercase "INCIDENT #" label, and copy button.
+- Render a single compact green pill: `inline-flex items-center rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900` (and a dark-mode equivalent `dark:bg-emerald-900/40 dark:text-emerald-100`).
+- Content is just `Incident {number}` in the same `text-[10px] font-semibold` weight — no font-mono, no extra letter spacing — so it visually sits next to the AUTO-ASSIGNED / ASSIGNED chips at identical size.
+- Keep the `size` prop for back-compat but ignore it (all callers now render the same compact green chip).
 
-## 2. Test A — Patient picks Renken for INC-2026-001070
+No change to `HolarcHelpIncidentDetail.tsx` callers — the existing single placement in the sticky bar (line 286) and the existing chip on the assigned-responder card (lines 342–345) will both shrink to the same green pill automatically.
 
-`INC-2026-001070` is currently `status = assigned` to **Ferndale Emergency Response** (auto-assigned), and the 90-second patient change window is long past, so the "Change ER Provider" UI is hidden on the patient detail page.
+## 2. Show Renken (and every nearby approved ER provider) by default
 
-To run the test cleanly without code changes, the plan is to reset the incident server-side so the patient can pick Renken from scratch:
+Root cause: `holarchelp_get_incident_offers` only returns rows from `holarchelp_incident_offers`. For `INC-2026-001070` that table is empty (no client wrote offers, and the reset migration didn't seed any), so `AvailableResponders` correctly renders nothing — Renken, ER24 Joburg South, etc. all sit silent.
 
-1. Reopen the incident: set `status = 'open'`, clear `assigned_provider_id`, `assigned_paramedic_user_id`, `accepted_at`, and the auto-assign event flags.
-2. Reload `/patient/holarchelp/incident/e8add7b5-…` as Sharon (the patient on the incident).
-3. The `AvailableResponders` panel will reappear with the list of providers — pick **Renken Ambulance Service** (Cresta).
-4. Confirm the badge reads **Incident # INC-2026-001070** once, the assigned provider becomes Renken, and a Renken shift sees the assignment under **Active Mission**.
+Fix in two parts:
 
-## 3. Test B — Renken self-accepts from the Incoming SOS feed
+**A. Migration — backfill offers for the in-flight test incident**
 
-For this run we need the same incident sitting unassigned in Renken's queue:
+Insert one `pending` offer per approved + accepting ambulance provider into `holarchelp_incident_offers` for incident `e8add7b5-808c-4651-8483-c809cea7e0c8`, with `distance_km` computed from the incident's reporter location (look up the most recent `holarchelp_locations` row for `user_id 9ceb1207-…` — fallback to Sandton lat/lng `-26.1076, 28.0567` if absent). This immediately puts Renken at the top of the list for the current test.
 
-1. Sign in as a Renken staffer (`renken@smartify.co.za`) and **Start Shift** so `IncomingSosScreen` is unlocked.
-2. With the incident reset to `open` (no `assigned_paramedic_user_id`, no `assigned_provider_id`), `INC-2026-001070` will appear in **Incoming SOS** sorted by severity.
-3. Tap **Accept & Roll**, choose a destination Johannesburg hospital in `ParamedicAcceptDialog`, and confirm:
-   - Incident moves to **Active Mission** for the Renken paramedic.
-   - Patient screen shows the single prominent **Incident # INC-2026-001070** badge and the Renken vehicle on the map.
-   - Hospital inbound listener toasts the chosen destination.
+**B. RPC — auto-list nearby providers whenever offers are empty**
+
+Update `public.holarchelp_get_incident_offers(_incident_id)` so that when the per-incident offers query returns zero rows AND the incident is still `open` AND the caller is the incident owner (or admin), it returns a fallback set:
+
+- `SELECT id, 'ambulance', 'pending', distance_km, company_name, ownership, accepting_patients FROM holarchelp_ambulance_providers WHERE status = 'approved' AND accepting_patients = true AND latitude IS NOT NULL ORDER BY distance ASC LIMIT 12`.
+- Distance is `earth_distance(...)` against the incident's reporter location (`holarchelp_locations`) or the provider-supplied incident lat/lng if present; null if neither is available.
+
+This guarantees Renken (Sandton, approved, accepting) shows for every future SOS even if the client forgets to seed offers, and resolves the "I can't find Renken" complaint with no UI changes.
+
+`AvailableResponders.tsx` already filters by `provider_kind === 'ambulance'`, already sorts by distance, and already calls `holarchelp_patient_pick_provider` which inserts/updates the offer row on pick — so the fallback list works end-to-end without any frontend changes.
 
 ## Technical notes
 
-- File touched: `src/components/IncidentNumberBadge.tsx` (style + default label), `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` (delete duplicate badge, bump remaining one to `size="lg"`).
-- DB reset for Tests A & B is a one-shot UPDATE on `holarchelp_incidents` + delete of the `auto_assigned`/`assigned`/`accepted` rows from `holarchelp_incident_events` for that incident — no schema changes, no migration.
-- No changes to RPCs, RLS, or the dispatcher console.
+- Files touched: `src/components/IncidentNumberBadge.tsx` (visual only).
+- One migration:
+  - `INSERT … SELECT` to seed pending offers for INC-2026-001070.
+  - `CREATE OR REPLACE FUNCTION public.holarchelp_get_incident_offers` with the fallback branch (keeps existing auth checks, change-mode logic, and signature).
+- No changes to `AvailableResponders.tsx`, `HolarcHelpIncidentDetail.tsx`, RLS, grants, or any other RPC.
