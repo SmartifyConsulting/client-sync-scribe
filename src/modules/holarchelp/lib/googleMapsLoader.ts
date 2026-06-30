@@ -7,6 +7,8 @@ declare global {
   interface Window {
     google?: any;
     __lovableInitGmaps?: () => void;
+    __lovableGmapsAuthError?: string;
+    gm_authFailure?: () => void;
   }
 }
 
@@ -35,6 +37,12 @@ export function loadGoogleMaps(): Promise<typeof window.google> {
   }
 
   loaderPromise = new Promise((resolve, reject) => {
+    window.gm_authFailure = () => {
+      window.__lovableGmapsAuthError =
+        "Google Maps could not load because billing, API access, or domain restrictions are not correctly configured for this key.";
+      window.dispatchEvent(new CustomEvent("lovable:gmaps-auth-failure"));
+    };
+
     window.__lovableInitGmaps = () => {
       if (window.google?.maps?.Map) resolve(window.google);
       else reject(new Error("Google Maps loaded but maps namespace missing"));

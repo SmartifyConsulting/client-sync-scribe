@@ -142,9 +142,19 @@ export const LiveMap = ({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     let cancelled = false;
+    const onAuthFailure = () => {
+      setErr(
+        window.__lovableGmapsAuthError ??
+          "Google Maps authorization failed. Check billing, enabled APIs, and domain restrictions in Google Cloud.",
+      );
+    };
+    window.addEventListener("lovable:gmaps-auth-failure", onAuthFailure);
     loadGoogleMaps()
       .then((g) => {
         if (cancelled || !containerRef.current) return;
+        if (window.__lovableGmapsAuthError) {
+          setErr(window.__lovableGmapsAuthError);
+        }
         gmapsRef.current = g.maps;
         PillCtorRef.current = createPillOverlay(g.maps);
         const first = points.find(
@@ -168,6 +178,7 @@ export const LiveMap = ({
 
     return () => {
       cancelled = true;
+      window.removeEventListener("lovable:gmaps-auth-failure", onAuthFailure);
       if (tweenRafRef.current) cancelAnimationFrame(tweenRafRef.current);
       staticMarkersRef.current.forEach((m) => m.setMap(null));
       pillOverlaysRef.current.forEach((m) => m.setMap(null));
@@ -317,6 +328,8 @@ export const LiveMap = ({
             <p className="mt-1 text-[11px] text-muted-foreground">
               {err.toLowerCase().includes("referer") || err.toLowerCase().includes("not allowed")
                 ? "This domain is not on the Google Maps key's HTTP referrer allowlist. Add the domain in Google Cloud."
+                : err.toLowerCase().includes("billing")
+                  ? "Google Maps billing is not enabled for this API key's Google Cloud project. Enable billing, then reload this SOS screen."
                 : err.toLowerCase().includes("key")
                   ? "The Google Maps key is missing or not configured for this app."
                   : err}
