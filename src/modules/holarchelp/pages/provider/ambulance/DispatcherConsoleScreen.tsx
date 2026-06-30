@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Radio, Siren, Truck, MapPin, Clock, Users, Navigation as NavIcon, Hospital, ChevronRight } from "lucide-react";
+import { Loader2, Radio, Siren, Truck, MapPin, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
 import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
 import { toastError } from "@/lib/userMessage";
-import { MissionStatusStepper } from "../../../components/MissionStatusStepper";
-import { EtaCountdown } from "../../../components/EtaCountdown";
+
 
 type Incident = {
   id: string;
