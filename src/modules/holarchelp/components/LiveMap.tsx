@@ -148,7 +148,21 @@ export const LiveMap = ({
           "Google Maps authorization failed. Check billing, enabled APIs, and domain restrictions in Google Cloud.",
       );
     };
+    const onWindowError = (event: ErrorEvent) => {
+      const message = String(event.message ?? "");
+      if (!message.toLowerCase().includes("google maps javascript api error")) return;
+      if (message.includes("BillingNotEnabledMapError")) {
+        setErr("BillingNotEnabledMapError");
+        return;
+      }
+      if (message.includes("RefererNotAllowedMapError")) {
+        setErr("RefererNotAllowedMapError");
+        return;
+      }
+      setErr(message);
+    };
     window.addEventListener("lovable:gmaps-auth-failure", onAuthFailure);
+    window.addEventListener("error", onWindowError);
     loadGoogleMaps()
       .then((g) => {
         if (cancelled || !containerRef.current) return;
@@ -179,6 +193,7 @@ export const LiveMap = ({
     return () => {
       cancelled = true;
       window.removeEventListener("lovable:gmaps-auth-failure", onAuthFailure);
+      window.removeEventListener("error", onWindowError);
       if (tweenRafRef.current) cancelAnimationFrame(tweenRafRef.current);
       staticMarkersRef.current.forEach((m) => m.setMap(null));
       pillOverlaysRef.current.forEach((m) => m.setMap(null));
