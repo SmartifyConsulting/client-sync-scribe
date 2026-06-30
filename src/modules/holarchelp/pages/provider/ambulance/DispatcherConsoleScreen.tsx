@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Radio, Siren, Truck, MapPin, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
+import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
 
 type Incident = {
   id: string;
