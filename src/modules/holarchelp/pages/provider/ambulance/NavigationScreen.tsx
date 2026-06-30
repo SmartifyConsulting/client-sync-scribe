@@ -120,23 +120,56 @@ export default function NavigationScreen() {
         </div>
 
         <aside className="space-y-3">
-          <div className="rounded-2xl border bg-card p-3">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t("navigationScreen.actionPanel")}</p>
-            <div className="mt-2 grid grid-cols-2 gap-1.5">
-              {STEPS.map((s) => (
-                <Button
-                  key={s.v}
-                  size="sm"
-                  variant={incident.status === s.v ? "default" : "outline"}
-                  className="h-11 text-xs font-bold"
-                  onClick={() => setStatus(s.v)}
-                  disabled={!isAssigned}
-                >
-                  {t(s.labelKey)}
-                </Button>
-              ))}
+          <MissionStatusStepper
+            currentStatus={incident.status}
+            treatedOnScene={incident.status === "treated_on_scene"}
+          />
+
+          {/* Course-deviation banner — set by the auto-advance trigger */}
+          {incident.status === "en_route_to_hospital" && incident.route_deviation_at && (
+            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-800">
+              <p className="flex items-center gap-1.5 font-bold">
+                <AlertTriangle className="h-3.5 w-3.5" /> Off planned route to hospital
+              </p>
+              <p className="mt-0.5">The vehicle is moving away from the selected destination hospital. Verify the route or reassign.</p>
             </div>
-          </div>
+          )}
+
+          {/* Treated on scene — cancel transport (only meaningful at scene / with patient) */}
+          {isAssigned && ["arrived","patient_collected","en_route_to_hospital"].includes(incident.status) && (
+            <Button
+              variant="outline"
+              className="h-11 w-full border-amber-500/50 text-amber-700 hover:bg-amber-500/10 text-xs font-bold"
+              onClick={async () => {
+                if (!confirm("Mark this patient as treated on scene and cancel transport?")) return;
+                const { error } = await supabase.rpc("holarchelp_cancel_transport" as any, {
+                  _incident_id: activeId, _reason: "Patient treated at the scene; transport not required",
+                });
+                if (error) return toastError(error, "We couldn't cancel transport. Please try again.");
+                toast.success("Marked as treated on scene");
+                navigate("/provider/ambulance");
+              }}
+            >
+              <HeartHandshake className="mr-1.5 h-4 w-4" /> Treated on scene — cancel transport
+            </Button>
+          )}
+
+          {/* Post-hospital dispatcher choice (only after the vehicle is unloaded at hospital) */}
+          {isAssigned && incident.status === "at_hospital" && (
+            <div className="rounded-2xl border bg-card p-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">After handover</p>
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                <Button size="sm" variant="outline" className="h-10 text-xs font-bold"
+                  onClick={() => setStatus("completed")}>
+                  <Home className="mr-1 h-3.5 w-3.5" /> Return to base
+                </Button>
+                <Button size="sm" className="h-10 text-xs font-bold"
+                  onClick={async () => { await setStatus("completed"); navigate("/provider/ambulance/dashboard"); }}>
+                  <ListChecks className="mr-1 h-3.5 w-3.5" /> Next incident
+                </Button>
+              </div>
+            </div>
+          )}
 
           <HospitalPicker
             incidentId={activeId}
