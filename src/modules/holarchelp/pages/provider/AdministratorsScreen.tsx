@@ -460,7 +460,15 @@ export default function AdministratorsScreen() {
           </div>
         </TabsContent>
 
-        <TabsContent value="hospital-network" className="space-y-3">
+        <TabsContent value="fleet" className="space-y-3">
+          <FleetOperationsScreen />
+        </TabsContent>
+
+        <TabsContent value="crew" className="space-y-3">
+          <CrewAssignmentsTab providerId={providerId} />
+        </TabsContent>
+
+        <TabsContent value="hospitals" className="space-y-3">
           <HospitalNetworkScreen />
         </TabsContent>
       </Tabs>
