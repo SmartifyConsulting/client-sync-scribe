@@ -15,7 +15,9 @@ type Offer = {
   ownership: string | null;
 };
 
-const AUTO_ASSIGN_MS = 30 * 1000;
+// TESTING: selection timer disabled — patient has unlimited time to choose an ER Provider.
+const DISABLE_SELECTION_TIMER = true;
+const AUTO_ASSIGN_MS = DISABLE_SELECTION_TIMER ? Number.MAX_SAFE_INTEGER : 30 * 1000;
 const EXTEND_STEP_MS = 30 * 1000;
 const EXTEND_MAX_MS = 60 * 1000; // up to two extensions
 
