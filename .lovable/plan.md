@@ -1,48 +1,16 @@
-## Goal
+## Dispatch Dashboard layout fix
 
-Reorganize the Dispatch Dashboard so the Dispatcher Console drives everything, add an Active Missions frame inside it, and retire the "Active Mission" sidebar entry.
+Match the attached screenshot exactly and drop the "Rolling" metric (it duplicates Available Vehicles).
 
-## Changes
+### Order on `EmergencyDashboardScreen.tsx` (top → bottom)
+1. **Incoming SOS** banner + stat strip + queue
+   - Stat strip becomes 2 columns: **Incoming** · **Critical** (remove **Rolling**)
+2. **Dispatcher Console** (Open SOS / Available Vehicles / Selected Incident)
+3. **Active Missions** grid (drill-down cards)
 
-### 1. `EmergencyDashboardScreen.tsx` — reorder
-New top-to-bottom order:
-1. Header
-2. **Dispatcher Console** (with new Active Missions frame inside — see #2)
-3. **Incoming SOS** cards
-4. **Stats strip** (Incoming · Critical · Rolling)
-5. **Rolling shifts** accordion (unchanged)
+### Copy changes
+- Dashboard subtitle: "Dispatcher console, live SOS queue and dispatch actions — all on one screen." (remove "rolling shifts")
 
-(Currently: stats → console → incoming → rolling. The request is for Incoming SOS to sit above the stats infographic strip, with the console on top.)
-
-### 2. `DispatcherConsoleScreen.tsx` — add Active Missions frame
-Add a new section above the existing 3-column grid (Open SOS / Available vehicles / Selected incident):
-
-- Title: "Active Missions · N"
-- Loads incidents where `assigned_provider_id = providerId` and `status IN ('assigned','en_route','arrived','patient_collected','en_route_to_hospital','at_hospital')`.
-- Realtime-subscribed (same channel pattern as `loadAll`).
-- Each row is a compact card with:
-  - `IncidentNumberBadge` (incident #)
-  - Inline mini `MissionStatusStepper` (read-only, current step highlighted)
-  - Destination hospital name (joined from `holarchelp_hospitals` via `destination_hospital_id`)
-  - ETA via `EtaCountdown` (uses `eta_minutes` + `last_eta_update`)
-  - Vehicle code (from active shift) as small meta
-- Whole card is a link to `/provider/ambulance/navigation/:id` — drill-down opens full Active Mission console.
-- Empty state: "No active missions."
-
-Layout: full-width frame above the existing grid, cards stacked (1 col on mobile, 2 cols on lg).
-
-### 3. `MissionStatusStepper.tsx` — compact variant
-Add an optional `compact` prop that renders a single-row horizontal mini-stepper (dots + current label only) for use in the Active Missions list rows. Existing usage in `NavigationScreen` keeps the full stepper.
-
-### 4. Sidebar — remove "Active Mission"
-`src/components/layout/ProviderSidebar.tsx`: remove the `nav.navigation` ("Active Mission") item for the ambulance role. Drill-down from the Active Missions row inside Dispatcher Console replaces it.
-
-Keep the `/provider/ambulance/navigation/:id` route intact (it's where the drill-down lands).
-
-## Files touched
-- `src/modules/holarchelp/pages/provider/ambulance/EmergencyDashboardScreen.tsx`
-- `src/modules/holarchelp/pages/provider/ambulance/DispatcherConsoleScreen.tsx`
-- `src/modules/holarchelp/components/MissionStatusStepper.tsx`
-- `src/components/layout/ProviderSidebar.tsx`
-
-No DB or RLS changes.
+### Code touch points
+- `src/modules/holarchelp/pages/provider/ambulance/EmergencyDashboardScreen.tsx` — reorder sections, change stats grid from `lg:grid-cols-3` to `lg:grid-cols-2`, remove the Rolling card and its data source, update subtitle string.
+- No DB / hook changes. Active Missions block already lives inside `DispatcherConsoleScreen` — leave it where it is so it renders directly under the console as shown.
