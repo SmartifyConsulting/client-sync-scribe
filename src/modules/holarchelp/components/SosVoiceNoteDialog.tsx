@@ -36,7 +36,7 @@ const blobToBase64 = (blob: Blob) =>
     reader.readAsDataURL(blob);
   });
 
-export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
+export function SosVoiceNoteDialog({ open, incidentId, onClose, preStarted }: Props) {
   const { t } = useTranslation();
   const [phase, setPhase] = useState<"recording" | "uploading">("recording");
   const [seconds, setSeconds] = useState(0);
