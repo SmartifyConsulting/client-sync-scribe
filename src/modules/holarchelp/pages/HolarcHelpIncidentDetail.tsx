@@ -372,7 +372,7 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      {responder && incident.assigned_provider_id && autoAssigned && autoAssignedAt && (
+      {isLive && responder && incident.assigned_provider_id && autoAssigned && autoAssignedAt && (
         <AvailableResponders
           incidentId={id!}
           createdAt={incident.created_at}
