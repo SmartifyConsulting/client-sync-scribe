@@ -81,7 +81,7 @@ export default function RealTimeMonitoringScreen() {
     const load = async () => {
       const { data } = await supabase
         .from("holarchelp_provider_locations" as any)
-        .select("id, latitude, longitude, vehicle_code")
+        .select("id, latitude, longitude")
         .eq("provider_id", providerId);
       const list = ((data as any[]) ?? [])
         .filter((r) => r.latitude != null && r.longitude != null)
@@ -89,7 +89,7 @@ export default function RealTimeMonitoringScreen() {
           id: String(r.id),
           lat: Number(r.latitude),
           lng: Number(r.longitude),
-          label: r.vehicle_code ?? "Vehicle",
+          label: "Vehicle",
         }));
       setMarkers(list);
     };
