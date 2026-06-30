@@ -11,10 +11,18 @@ const SILENCE_MS = 9000; // +5s before auto-stop on silence
 const MIN_RECORD_MS = 2000;
 const SILENCE_RMS = 0.015; // amplitude threshold
 
+export type PreStartedRecording = {
+  stream: MediaStream;
+  recorder: MediaRecorder;
+  chunks: Blob[];
+  startedAt: number;
+};
+
 interface Props {
   open: boolean;
   incidentId: string | null;
   onClose: () => void;
+  preStarted?: PreStartedRecording | null;
 }
 
 const blobToBase64 = (blob: Blob) =>
