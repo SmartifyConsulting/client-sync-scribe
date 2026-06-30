@@ -149,9 +149,12 @@ export default function HolarcHelpIncidentDetail() {
     return () => clearInterval(t);
   }, [incident?.created_at]);
   const showNoResponders = isUnassignedOpen && pendingOffers === 0 && elapsed > 90;
-  const autoChangeSecondsLeft = autoAssignedAt
-    ? Math.max(0, Math.floor((new Date(autoAssignedAt).getTime() + 30000 - clock) / 1000))
+  // Treat any recent assignment (auto OR manual) as a change window
+  const assignmentAnchorAt = autoAssignedAt ?? incident?.accepted_at ?? incident?.assigned_at ?? null;
+  const autoChangeSecondsLeft = assignmentAnchorAt
+    ? Math.max(0, Math.floor((new Date(assignmentAnchorAt).getTime() + 30000 - clock) / 1000))
     : 0;
+
 
   const callEmergency = () => { window.location.href = "tel:10177"; };
   const goHome = () => navigate("/patient/holarchelp");
