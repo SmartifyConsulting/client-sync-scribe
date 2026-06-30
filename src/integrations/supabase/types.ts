@@ -5756,6 +5756,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       holarchelp_accept_incident: {
         Args: { _incident_id: string; _provider_id: string }
         Returns: Json
@@ -5782,6 +5786,10 @@ export type Database = {
       }
       holarchelp_auto_assign_incident: {
         Args: { _incident_id: string }
+        Returns: Json
+      }
+      holarchelp_cancel_transport: {
+        Args: { _incident_id: string; _reason?: string }
         Returns: Json
       }
       holarchelp_crew_acknowledge: {
