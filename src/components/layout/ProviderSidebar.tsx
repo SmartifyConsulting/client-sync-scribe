@@ -93,7 +93,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
           </NavLink>
         )}
 
-        <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-0.5 overflow-y-auto font-size-preserve">
           {nav.map((item) => {
             const isActive = item.end
               ? location.pathname === item.to
