@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Siren, AlertTriangle, Clock, Truck, Users, Radio } from "lucide-react";
+import { Siren, AlertTriangle, Clock, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useParamedicShift } from "../../../hooks/useParamedicShift";
@@ -16,16 +13,6 @@ type Row = {
   id: string; status: string; severity: string | null;
   conscious: boolean | null; breathing: boolean | null;
   created_at: string; notes?: string | null; incident_type?: string | null;
-};
-
-type RollingShift = {
-  id: string;
-  user_id: string;
-  ambulance_id: string;
-  status: string;
-  started_at: string;
-  ambulances?: { vehicle_code: string; registration_number: string | null } | null;
-  profiles?: { full_name: string | null } | null;
 };
 
 const sevBig = (s: string | null) =>
@@ -47,7 +34,6 @@ export default function EmergencyDashboardScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [startOpen, setStartOpen] = useState(false);
-  const [rollingShifts, setRollingShifts] = useState<RollingShift[]>([]);
 
   // Live SOS queue
   useEffect(() => {
@@ -67,46 +53,12 @@ export default function EmergencyDashboardScreen() {
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  // Rolling shifts for this provider
-  useEffect(() => {
-    if (!providerId) return;
-    const load = async () => {
-      const { data: shifts } = await supabase.from("paramedic_shifts" as any)
-        .select("id, user_id, ambulance_id, status, started_at")
-        .eq("provider_id", providerId)
-        .is("ended_at", null)
-        .order("started_at", { ascending: false });
-      const list = ((shifts as any) ?? []) as RollingShift[];
-      if (list.length) {
-        const vehIds = list.map((s) => s.ambulance_id);
-        const userIds = list.map((s) => s.user_id);
-        const [{ data: vehs }, { data: profs }] = await Promise.all([
-          supabase.from("ambulances" as any).select("id, vehicle_code, registration_number").in("id", vehIds),
-          supabase.from("profiles").select("id, full_name").in("id", userIds),
-        ]);
-        const vm = new Map((vehs as any[] ?? []).map((v) => [v.id, v]));
-        const pm = new Map((profs as any[] ?? []).map((p) => [p.id, p]));
-        list.forEach((s) => {
-          s.ambulances = vm.get(s.ambulance_id) ?? null;
-          s.profiles = pm.get(s.user_id) ?? null;
-        });
-      }
-      setRollingShifts(list);
-    };
-    load();
-    const ch = supabase.channel(`dash-shifts-${providerId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "paramedic_shifts", filter: `provider_id=eq.${providerId}` }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [providerId]);
-
   const isOffShift = !shift;
   const isBusy = shift?.status === "busy";
 
   const stats = {
     incoming: rows.length,
     critical: rows.filter((r) => r.severity === "critical").length,
-    rolling: rollingShifts.length,
   };
 
   return (
@@ -120,23 +72,20 @@ export default function EmergencyDashboardScreen() {
           {t("nav.emergencyDashboard", "Dispatch Dashboard")}
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          Dispatcher console, live SOS queue, rolling shifts and dispatch actions — all on one screen.
+          Dispatcher console, live SOS queue and dispatch actions — all on one screen.
         </p>
       </header>
 
-      {/* DISPATCHER CONSOLE — top of dashboard, includes Active Missions */}
-      <section className="rounded-2xl border-2 border-primary/30 bg-card/40 p-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2">
-          <Radio className="h-4 w-4 text-primary" /> Dispatcher Console
-        </h2>
-        <DispatcherConsoleScreen />
-      </section>
-
-      {/* INCOMING SOS — above stats */}
+      {/* INCOMING SOS — banner + stats + queue */}
       <section className="space-y-2">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Siren className="h-4 w-4 text-sos" /> Incoming SOS
         </h2>
+
+        <div className="grid grid-cols-2 gap-2">
+          <StatCard label="Incoming" value={stats.incoming} tone={stats.incoming ? "destructive" : "muted"} />
+          <StatCard label="Critical" value={stats.critical} tone={stats.critical ? "destructive" : "muted"} />
+        </div>
 
         {isOffShift && (
           <div className="rounded-2xl border border-warning/40 bg-warning/10 p-3 text-xs">
@@ -192,53 +141,13 @@ export default function EmergencyDashboardScreen() {
         )}
       </section>
 
-      {/* Stats strip — moved below Incoming SOS */}
-      <div className="grid grid-cols-3 gap-2">
-        <StatCard label="Incoming" value={stats.incoming} tone={stats.incoming ? "destructive" : "muted"} />
-        <StatCard label="Critical" value={stats.critical} tone={stats.critical ? "destructive" : "muted"} />
-        <StatCard label="Rolling" value={stats.rolling} tone="success" />
-      </div>
-
-
-      {/* ROLLING SHIFTS — collapsed by default, teal-bordered accordion */}
-      <Accordion type="single" collapsible className="space-y-2">
-        <AccordionItem value="rolling" className="rounded-xl border-2 border-primary/40 bg-background overflow-hidden">
-          <AccordionTrigger className="px-3 py-2 text-sm hover:no-underline">
-            <div className="flex flex-1 items-center justify-between pr-2">
-              <span className="font-semibold flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" /> Rolling shifts
-              </span>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold tabular-nums">
-                {rollingShifts.length}
-              </span>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="px-3 pb-3">
-            {rollingShifts.length === 0 ? (
-              <p className="text-xs italic text-muted-foreground py-2">No vehicles on shift right now.</p>
-            ) : (
-              <div className="space-y-1.5">
-                {rollingShifts.map((s) => (
-                  <div key={s.id} className="rounded-lg border bg-card p-2 flex items-center gap-2 text-xs">
-                    <Truck className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <span className="font-semibold">
-                      {s.ambulances?.vehicle_code ?? "—"}
-                      {s.ambulances?.registration_number ? <span className="text-muted-foreground"> · {s.ambulances.registration_number}</span> : null}
-                    </span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="truncate">{s.profiles?.full_name ?? s.user_id.slice(0, 8)}</span>
-                    <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
-                      s.status === "busy" ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"
-                    }`}>
-                      {s.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      {/* DISPATCHER CONSOLE + ACTIVE MISSIONS */}
+      <section className="rounded-2xl border-2 border-primary/30 bg-card/40 p-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2">
+          <Radio className="h-4 w-4 text-primary" /> Dispatcher Console
+        </h2>
+        <DispatcherConsoleScreen />
+      </section>
 
       <ParamedicAcceptDialog
         incidentId={pickFor}
