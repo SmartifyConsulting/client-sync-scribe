@@ -120,7 +120,17 @@ export function AvailableResponders({
     );
   }
 
-  if (!offers.length) return null;
+  if (!offers.length) {
+    if (isChangeMode) {
+      return (
+        <div className="mb-3 rounded-2xl border-2 border-amber-500/70 bg-amber-50/70 p-3 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-100">
+          <p className="font-bold uppercase tracking-wider">Change ER Provider — {fmt(remainingSec)} left</p>
+          <p className="mt-1">No other ER Providers are in range right now. Your current responder will continue.</p>
+        </div>
+      );
+    }
+    return null;
+  }
 
   // Pin the current provider to the top in change mode
   const sorted = isChangeMode
