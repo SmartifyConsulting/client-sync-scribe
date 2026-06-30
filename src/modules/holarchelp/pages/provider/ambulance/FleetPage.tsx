@@ -6,6 +6,7 @@ import { AmbulanceFormDialog, type AmbulanceRow } from "../../../components/Ambu
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2, Ambulance, Loader2, Wrench } from "lucide-react";
 import {
+import { toastError } from "@/lib/userMessage";
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -150,7 +151,7 @@ export default function FleetPage() {
       setConfirmDelete(null); return;
     }
     const { error } = await supabase.from("ambulances" as any).delete().eq("id", confirmDelete.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toastError(error, "We couldn't complete that. Please try again."); return; }
     toast.success(t("fleet.removed"));
     setConfirmDelete(null);
     load();

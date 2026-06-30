@@ -10,6 +10,7 @@ import { TriageControls } from "../../components/TriageControls";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 const ADMISSION_STEPS = [
   { v: "incoming", labelKey: "admissionStatus.incoming" },
@@ -63,7 +64,7 @@ export default function HospitalIncidentConsole() {
     if (next === "escalated") patch.escalated_at = new Date().toISOString();
     if (next === "in_triage" && !incident?.triage_assigned_at) patch.triage_assigned_at = new Date().toISOString();
     const { error } = await supabase.from("holarchelp_incidents" as any).update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: id, event_type: `admission_${next}`, payload: {},
     } as any);

@@ -10,6 +10,7 @@ import { AddressAutocomplete } from "@/features/patients/components/AddressAutoc
 import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 export default function ProviderProfile() {
   const { t } = useTranslation();
@@ -80,7 +81,7 @@ export default function ProviderProfile() {
           fleet_size: Number(row.fleet_size) || 1, at_capacity: !!row.at_capacity,
         };
     const { error } = await supabase.from(table as any).update(patch as any).eq("id", providerId);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success(t("providerProfile.saved"));
   };
 

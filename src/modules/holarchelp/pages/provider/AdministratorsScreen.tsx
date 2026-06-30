@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+import { toastError } from "@/lib/userMessage";
   Accordion,
   AccordionContent,
   AccordionItem,
@@ -247,7 +248,7 @@ export default function AdministratorsScreen() {
     if (!confirm(t("userAdmin.removeConfirm"))) return;
     const { error } = await supabase.from(table as any).delete().eq("id", row.id);
     if (error) {
-      toast.error(error.message);
+      toastError(error, "We couldn't complete that. Please try again.");
       return;
     }
     toast.success(t("userAdmin.memberRemoved"));

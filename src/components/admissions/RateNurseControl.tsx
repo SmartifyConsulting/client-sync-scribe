@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { toastError } from "@/lib/userMessage";
 
 interface Props {
   admissionId: string;
@@ -58,7 +59,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
       );
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toastError(error, "We couldn't complete that. Please try again.");
       return;
     }
     setRating(value);

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ChevronRight, Siren, Activity, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 type Row = {
   id: string; status: string; severity: string | null;

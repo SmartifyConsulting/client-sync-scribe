@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Radio, Siren, Truck, MapPin, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
 import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
+import { toastError } from "@/lib/userMessage";
 
 type Incident = {
   id: string;
@@ -93,7 +94,7 @@ export default function DispatcherConsoleScreen() {
     const { error } = await supabase.rpc("holarchelp_set_dispatcher_on_duty" as any, {
       _provider_id: providerId, _on: next,
     });
-    if (error) toast.error(error.message);
+    if (error) toastError(error, "We couldn't complete that. Please try again.");
     else { setOnDuty(next); toast.success(next ? "You are on duty as Dispatcher" : "Dispatcher off duty"); }
     setTogglingDuty(false);
   };
@@ -104,7 +105,7 @@ export default function DispatcherConsoleScreen() {
     const { error } = await supabase.rpc("holarchelp_dispatcher_assign" as any, {
       _incident_id: selectedIncidentId, _shift_id: shiftId,
     });
-    if (error) toast.error(error.message);
+    if (error) toastError(error, "We couldn't complete that. Please try again.");
     else { toast.success("Vehicle assigned. Crew has been notified."); setSelectedIncidentId(null); loadAll(); }
     setAssigning(false);
   };

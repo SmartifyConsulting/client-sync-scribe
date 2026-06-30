@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 const PRIORITIES = [
   { v: "esi-1", label: "ESI 1 — Resuscitation" },
@@ -36,7 +37,7 @@ export function TriageControls({
       triage_assigned_at: new Date().toISOString(),
     } as any).eq("id", incidentId);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: incidentId, event_type: "triage_assigned",
       payload: { priority, bay, nurse },

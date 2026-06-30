@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { buildSosMessage, waLink } from "../lib/whatsapp";
 import { getPublicTrackUrl } from "../lib/public-track-url";
 import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
+import { toastError } from "@/lib/userMessage";
 
 type Loc = { latitude: number; longitude: number; recorded_at: string };
 
@@ -214,7 +215,7 @@ export default function HolarcHelpIncidentDetail() {
         notes: closureNote.trim(),
       } as any).eq("id", id);
     setClosing(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Incident closed");
     navigate("/patient/holarchelp");
   };

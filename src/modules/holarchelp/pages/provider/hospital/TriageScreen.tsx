@@ -5,6 +5,7 @@ import { useProviderAccess } from "../../../components/ProviderGate";
 import { toast } from "sonner";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -56,7 +57,7 @@ export default function TriageScreen() {
     if (next === "admitted") patch.admitted_at = new Date().toISOString();
     if (next === "in_triage") patch.triage_assigned_at = new Date().toISOString();
     const { error } = await supabase.from("holarchelp_incidents" as any).update(patch).eq("id", r.id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: r.id, event_type: `admission_${next}`, payload: {},
     } as any);

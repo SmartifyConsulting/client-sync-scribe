@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, Plus, X, Hospital } from "lucide-react";
 import { toast } from "sonner";
+import { toastError } from "@/lib/userMessage";
 
 type HospitalRow = { id: string; name: string; city: string | null; status: string };
 type Affiliation = {
@@ -59,7 +60,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
       role: roleInput || null,
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success(`Added ${h.name}`);
     setSearch(""); setResults([]); load();
   }
@@ -88,7 +89,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
       role: roleInput || null,
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Hospital submitted to admin for activation");
     setSearch(""); setResults([]); load();
   }

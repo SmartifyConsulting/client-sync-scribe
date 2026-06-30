@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
+import { toastError } from "@/lib/userMessage";
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
@@ -38,7 +39,7 @@ export function AccountabilityPanel() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase.rpc("holarchelp_provider_accountability" as any);
-    if (error) toast.error(error.message);
+    if (error) toastError(error, "We couldn't complete that. Please try again.");
     setRows((data as any) ?? []);
     setLoading(false);
   };
@@ -48,12 +49,12 @@ export function AccountabilityPanel() {
   const lower = async (table: string, id: string, current: number) => {
     const next = Math.max(0, (current ?? 0) - 10);
     const { error } = await supabase.from(table as any).update({ dispatch_priority: next } as any).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Priority lowered"); load();
   };
   const suspend = async (table: string, id: string) => {
     const { error } = await supabase.from(table as any).update({ status: "suspended" } as any).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Provider suspended"); load();
   };
 

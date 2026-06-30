@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Siren, Navigation as NavIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 type Inc = any;
 
@@ -73,7 +74,7 @@ export default function NavigationScreen() {
     const { error } = await supabase.rpc("holarchelp_set_incident_status" as any, {
       _incident_id: activeId, _status: status, _payload: {},
     });
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success(t("navigationScreen.status", { status: status.replace(/_/g," ") }));
     if (status === "completed") navigate("/provider/ambulance");
   };

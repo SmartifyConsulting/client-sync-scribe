@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { ImportNursesDialog } from "./ImportNursesDialog";
 import { Plus, UserPlus, Gift, Star } from "lucide-react";
 import { toast } from "sonner";
+import { toastError } from "@/lib/userMessage";
 
 type Nurse = {
   id: string;
@@ -142,7 +143,7 @@ function AddNurseDialog({ hospitalId, onAdded }: { hospitalId: string; onAdded: 
     });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toastError(error, "We couldn't complete that. Please try again.");
       return;
     }
     toast.success("Nurse added");
