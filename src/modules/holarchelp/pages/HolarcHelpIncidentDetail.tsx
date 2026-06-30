@@ -166,9 +166,11 @@ export default function HolarcHelpIncidentDetail() {
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
-  // Fresh-trigger flow: voice note → severity picker, plus 10s cancel window
-  const [voiceNoteOpen, setVoiceNoteOpen] = useState(isFresh);
-  const [severityOpen, setSeverityOpen] = useState(false);
+  // Fresh-trigger flow: severity picker → background-record voice note (no clipped opening words)
+  const [severityOpen, setSeverityOpen] = useState(isFresh);
+  const [voiceNoteOpen, setVoiceNoteOpen] = useState(false);
+  const [preStarted, setPreStarted] = useState<PreStartedRecording | null>(null);
+  const preStartedRef = useRef<PreStartedRecording | null>(null);
   const [cancelSecondsLeft, setCancelSecondsLeft] = useState(isFresh ? 10 : 0);
 
   useEffect(() => {
@@ -178,15 +180,44 @@ export default function HolarcHelpIncidentDetail() {
     return () => clearTimeout(t);
   }, [isFresh, cancelSecondsLeft]);
 
+  const startBackgroundRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.start();
+      const pre: PreStartedRecording = { stream, recorder, chunks, startedAt: Date.now() };
+      preStartedRef.current = pre;
+      setPreStarted(pre);
+    } catch (err) {
+      // Mic denied or unavailable — dialog will fall back to its own prompt
+      preStartedRef.current = null;
+      setPreStarted(null);
+    }
+  };
+
   const finishSeverity = async (severity: SeverityResult | null) => {
     setSeverityOpen(false);
-    if (!id || !severity) return;
-    await supabase.from("holarchelp_incidents" as any).update({
-      severity: severity.severity,
-      conscious: severity.conscious,
-      breathing: severity.breathing,
-    } as any).eq("id", id);
+    if (id && severity) {
+      await supabase.from("holarchelp_incidents" as any).update({
+        severity: severity.severity,
+        conscious: severity.conscious,
+        breathing: severity.breathing,
+      } as any).eq("id", id);
+    }
+    if (isFresh) setVoiceNoteOpen(true);
   };
+
+  // Kick off mic capture the moment a severity is tapped (user gesture satisfies autoplay policy)
+  const handleSeveritySubmit = (severity: SeverityResult) => {
+    void startBackgroundRecording();
+    void finishSeverity(severity);
+  };
+  const handleSeveritySkip = () => {
+    void finishSeverity(null);
+  };
+
 
   const cancelAlert = async () => {
     if (!id) return;
