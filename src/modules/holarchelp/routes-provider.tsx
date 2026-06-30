@@ -17,7 +17,7 @@ import AdministratorsScreen from "./pages/provider/AdministratorsScreen";
 
 import AmbulanceOpsLayout from "./pages/provider/ambulance/AmbulanceOpsLayout";
 import NavigationScreen from "./pages/provider/ambulance/NavigationScreen";
-import TeamStatusScreen from "./pages/provider/ambulance/TeamStatusScreen";
+// TeamStatusScreen retired — redirects to Admin → Crew
 import AmbulanceIncidentConsole from "./pages/provider/AmbulanceIncidentConsole";
 
 // Vehicle Abuse Prevention screens (detail drilldown views)
