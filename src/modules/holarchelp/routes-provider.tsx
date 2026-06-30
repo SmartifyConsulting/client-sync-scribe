@@ -41,7 +41,7 @@ import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitor
 import BillingDashboardScreen from "./pages/provider/BillingDashboardScreen";
 import ExecutiveDashboardScreen from "./pages/provider/ExecutiveDashboardScreen";
 import AlertsCentreScreen from "./pages/provider/AlertsCentreScreen";
-import DispatcherConsoleScreen from "./pages/provider/ambulance/DispatcherConsoleScreen";
+// DispatcherConsoleScreen merged into EmergencyDashboardScreen
 // IncomingSosScreen retired — merged into EmergencyDashboardScreen
 
 // Incident & Dispatch Management screens
