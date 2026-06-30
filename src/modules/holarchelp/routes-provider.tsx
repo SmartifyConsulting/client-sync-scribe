@@ -117,18 +117,17 @@ export default function ProviderRoutes() {
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
 
-        {/* Incoming SOS (crew self-accept queue) */}
-        <Route path="incoming" element={<IncomingSosScreen />} />
+        {/* Incoming SOS merged into Emergency Dashboard */}
+        <Route path="incoming" element={<Navigate to="/provider/ambulance" replace />} />
 
         {/* Dispatcher Console (desk: assigns vehicle to incident) */}
         <Route path="dispatch" element={<DispatcherConsoleScreen />} />
 
         {/* Hospital Network now lives inside Admin */}
-        <Route path="hospital-network" element={<Navigate to="/provider/ambulance/admins?tab=hospital-network" replace />} />
+        <Route path="hospital-network" element={<Navigate to="/provider/ambulance/admins?tab=hospitals" replace />} />
 
-        {/* Team & Drivers */}
-        <Route path="team" element={<TeamStatusScreen />} />
-        {/* /drivers route removed — managed in /admins (User Admin) */}
+        {/* Shift Teams removed — roster lives in Admin → Crew */}
+        <Route path="team" element={<Navigate to="/provider/ambulance/admins?tab=crew" replace />} />
 
         {/* Consolidated Fleet Operations (Vehicles + Availability + Maintenance + Utilisation) */}
         <Route path="fleet-operations" element={<FleetOperationsScreen />} />
