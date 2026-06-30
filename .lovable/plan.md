@@ -1,31 +1,48 @@
-## Emergency Responder Portal — Consolidation & Fleet Admin Upgrades
+## Goal
 
-### 1. Dispatch Dashboard (merge Dispatcher Console + Emergency Dashboard)
-- Rename "Emergency Dashboard" → **Dispatch Dashboard** across sidebar, routes, page header, and all 25 locale files.
-- Fold the Dispatcher Console panels (incoming SOS queue, accept/assign vehicle, ETA chips) into the top of `EmergencyDashboardScreen.tsx`.
-- Remove the standalone `DispatcherConsoleScreen` route and sidebar item (redirect old path).
-- Keep the shifts accordion (collapsed by default) below the SOS queue.
+Reorganize the Dispatch Dashboard so the Dispatcher Console drives everything, add an Active Missions frame inside it, and retire the "Active Mission" sidebar entry.
 
-### 2. Fleet Live — fleet-wide map
-- In `RealTimeMonitoringScreen.tsx` add a Google Map at the top showing every active vehicle as a live marker (subscribed to `holarchelp_provider_locations`).
-- Clicking a marker (or a vehicle row) drills into the existing individual tracking view.
+## Changes
 
-### 3. Telematics — merge Safety into Tracking
-- Move harsh-event / abuse data from the Safety tab into the Tracking tab as a collapsible "Safety events" section.
-- Remove the Safety tab.
+### 1. `EmergencyDashboardScreen.tsx` — reorder
+New top-to-bottom order:
+1. Header
+2. **Dispatcher Console** (with new Active Missions frame inside — see #2)
+3. **Incoming SOS** cards
+4. **Stats strip** (Incoming · Critical · Rolling)
+5. **Rolling shifts** accordion (unchanged)
 
-### 4. Admin tab order & Fleet Admin upgrades
-- Reorder Admin sub-tabs to: **Users → Fleet Admin → Crew → Hospitals** → swap to **Users → Crew → Fleet Admin → Hospitals** per request (Crew before Fleet Admin).
-- In **Fleet Admin**, each vehicle card gets an inline "Assigned Crew" section:
-  - List current crew with role chips and a remove (×) button.
-  - "Add crew member" combobox listing eligible `holarchelp_ambulance_members` not yet on the vehicle; writes to `ambulance_crew_assignments`.
-- **Compact vehicle frames**: tighten padding (`p-3`), single-row meta line (reg • type • status), collapse secondary details into an accordion body.
-- Wire **View Profile** → opens a read-only vehicle detail drawer (specs, current crew, recent trips, recent incidents).
-- Wire **Edit** → opens the existing vehicle edit dialog prefilled with current values; saves via update RPC and invalidates the fleet query.
+(Currently: stats → console → incoming → rolling. The request is for Incoming SOS to sit above the stats infographic strip, with the console on top.)
 
-### 5. Demo seed data
-- Seed Renken Ambulance Service with: 4 active incidents at different lifecycle stages (dispatched, en_route, at_scene, en_route_to_hospital), 3 vehicles with crew assignments, recent telematics pings, and 2 sample safety events.
+### 2. `DispatcherConsoleScreen.tsx` — add Active Missions frame
+Add a new section above the existing 3-column grid (Open SOS / Available vehicles / Selected incident):
 
-### Technical notes
-- New/changed files: `EmergencyDashboardScreen.tsx`, `RealTimeMonitoringScreen.tsx` (+ `FleetLiveMap.tsx`), `TelematicsScreen.tsx`, `AdministratorsScreen.tsx` (tab order + Fleet Admin crew UI), `VehicleCard.tsx` (compact), `VehicleProfileDrawer.tsx` (new), `VehicleEditDialog.tsx` (wire up), `ProviderSidebar.tsx` (remove items, rename), locale files, plus a migration for crew-assignment RPCs and demo seed.
-- Realtime: ensure `holarchelp_provider_locations` and `holarchelp_incidents` are in the realtime publication (already done previously).
+- Title: "Active Missions · N"
+- Loads incidents where `assigned_provider_id = providerId` and `status IN ('assigned','en_route','arrived','patient_collected','en_route_to_hospital','at_hospital')`.
+- Realtime-subscribed (same channel pattern as `loadAll`).
+- Each row is a compact card with:
+  - `IncidentNumberBadge` (incident #)
+  - Inline mini `MissionStatusStepper` (read-only, current step highlighted)
+  - Destination hospital name (joined from `holarchelp_hospitals` via `destination_hospital_id`)
+  - ETA via `EtaCountdown` (uses `eta_minutes` + `last_eta_update`)
+  - Vehicle code (from active shift) as small meta
+- Whole card is a link to `/provider/ambulance/navigation/:id` — drill-down opens full Active Mission console.
+- Empty state: "No active missions."
+
+Layout: full-width frame above the existing grid, cards stacked (1 col on mobile, 2 cols on lg).
+
+### 3. `MissionStatusStepper.tsx` — compact variant
+Add an optional `compact` prop that renders a single-row horizontal mini-stepper (dots + current label only) for use in the Active Missions list rows. Existing usage in `NavigationScreen` keeps the full stepper.
+
+### 4. Sidebar — remove "Active Mission"
+`src/components/layout/ProviderSidebar.tsx`: remove the `nav.navigation` ("Active Mission") item for the ambulance role. Drill-down from the Active Missions row inside Dispatcher Console replaces it.
+
+Keep the `/provider/ambulance/navigation/:id` route intact (it's where the drill-down lands).
+
+## Files touched
+- `src/modules/holarchelp/pages/provider/ambulance/EmergencyDashboardScreen.tsx`
+- `src/modules/holarchelp/pages/provider/ambulance/DispatcherConsoleScreen.tsx`
+- `src/modules/holarchelp/components/MissionStatusStepper.tsx`
+- `src/components/layout/ProviderSidebar.tsx`
+
+No DB or RLS changes.

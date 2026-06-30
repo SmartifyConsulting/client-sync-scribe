@@ -23,14 +23,23 @@ const ORDER: Record<string, number> = {
 export function MissionStatusStepper({
   currentStatus,
   treatedOnScene = false,
+  compact = false,
 }: {
   currentStatus?: string | null;
   treatedOnScene?: boolean;
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const idx = ORDER[currentStatus ?? ""] ?? -1;
 
   if (treatedOnScene) {
+    if (compact) {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+          <Check className="h-3 w-3" /> Treated on scene
+        </span>
+      );
+    }
     return (
       <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-3">
         <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Mission status</p>
@@ -43,6 +52,38 @@ export function MissionStatusStepper({
       </div>
     );
   }
+
+  if (compact) {
+    return (
+      <div className="flex items-center gap-1">
+        {STEPS.map((s, i) => {
+          const done = i < idx;
+          const active = i === idx;
+          return (
+            <div key={s.v} className="flex items-center gap-1">
+              <span
+                className={cn(
+                  "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[8px] font-bold",
+                  done && "border-primary bg-primary text-primary-foreground",
+                  active && "border-primary bg-primary/15 text-primary ring-2 ring-primary/30",
+                  !done && !active && "border-muted-foreground/30 bg-card text-muted-foreground"
+                )}
+              >
+                {done ? <Check className="h-2.5 w-2.5" /> : i + 1}
+              </span>
+              {i < STEPS.length - 1 && (
+                <span className={cn("h-0.5 w-3 rounded", i < idx ? "bg-primary" : "bg-muted-foreground/20")} />
+              )}
+            </div>
+          );
+        })}
+        <span className="ml-1 text-[10px] font-bold text-primary truncate">
+          {idx >= 0 && idx < STEPS.length ? t(STEPS[idx].labelKey, STEPS[idx].fallback) : (currentStatus ?? "")}
+        </span>
+      </div>
+    );
+  }
+
 
   return (
     <div className="rounded-2xl border bg-card p-3">

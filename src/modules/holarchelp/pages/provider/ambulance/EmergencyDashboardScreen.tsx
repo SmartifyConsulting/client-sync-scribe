@@ -124,14 +124,7 @@ export default function EmergencyDashboardScreen() {
         </p>
       </header>
 
-      {/* Stats strip */}
-      <div className="grid grid-cols-3 gap-2">
-        <StatCard label="Incoming" value={stats.incoming} tone={stats.incoming ? "destructive" : "muted"} />
-        <StatCard label="Critical" value={stats.critical} tone={stats.critical ? "destructive" : "muted"} />
-        <StatCard label="Rolling" value={stats.rolling} tone="success" />
-      </div>
-
-      {/* DISPATCHER CONSOLE — merged from former Dispatcher Console screen */}
+      {/* DISPATCHER CONSOLE — top of dashboard, includes Active Missions */}
       <section className="rounded-2xl border-2 border-primary/30 bg-card/40 p-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2">
           <Radio className="h-4 w-4 text-primary" /> Dispatcher Console
@@ -139,7 +132,7 @@ export default function EmergencyDashboardScreen() {
         <DispatcherConsoleScreen />
       </section>
 
-      {/* INCOMING SOS — merged from former Incoming SOS screen */}
+      {/* INCOMING SOS — above stats */}
       <section className="space-y-2">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Siren className="h-4 w-4 text-sos" /> Incoming SOS
@@ -198,6 +191,14 @@ export default function EmergencyDashboardScreen() {
           </div>
         )}
       </section>
+
+      {/* Stats strip — moved below Incoming SOS */}
+      <div className="grid grid-cols-3 gap-2">
+        <StatCard label="Incoming" value={stats.incoming} tone={stats.incoming ? "destructive" : "muted"} />
+        <StatCard label="Critical" value={stats.critical} tone={stats.critical ? "destructive" : "muted"} />
+        <StatCard label="Rolling" value={stats.rolling} tone="success" />
+      </div>
+
 
       {/* ROLLING SHIFTS — collapsed by default, teal-bordered accordion */}
       <Accordion type="single" collapsible className="space-y-2">

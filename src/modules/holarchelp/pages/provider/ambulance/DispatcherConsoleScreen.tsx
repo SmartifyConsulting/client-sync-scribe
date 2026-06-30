@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Radio, Siren, Truck, MapPin, Clock, Users } from "lucide-react";
+import { Loader2, Radio, Siren, Truck, MapPin, Clock, Users, Navigation as NavIcon, Hospital, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
 import { toastError } from "@/lib/userMessage";
+import { MissionStatusStepper } from "../../../components/MissionStatusStepper";
+import { EtaCountdown } from "../../../components/EtaCountdown";
 
 type Incident = {
   id: string;
@@ -30,6 +33,20 @@ type Shift = {
   lead_name?: string | null;
 };
 
+type ActiveMission = {
+  id: string;
+  incident_number?: string | null;
+  status: string;
+  severity: string | null;
+  destination_hospital_id?: string | null;
+  destination_hospital_name?: string | null;
+  eta_minutes?: number | null;
+  last_eta_update?: string | null;
+  vehicle_code?: string | null;
+};
+
+const ACTIVE_STATUSES = ["assigned", "en_route", "arrived", "patient_collected", "en_route_to_hospital", "at_hospital"];
+
 const sevOrder: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
 
 const ago = (iso: string) => {
@@ -48,6 +65,44 @@ export default function DispatcherConsoleScreen() {
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeMissions, setActiveMissions] = useState<ActiveMission[]>([]);
+
+  const loadActiveMissions = async () => {
+    if (!providerId) return;
+    const { data: incs } = await supabase.from("holarchelp_incidents" as any)
+      .select("id, incident_number, status, severity, destination_hospital_id, eta_minutes, last_eta_update, assigned_paramedic_user_id")
+      .eq("assigned_provider_id", providerId)
+      .in("status", ACTIVE_STATUSES)
+      .order("accepted_at", { ascending: false });
+    const list = ((incs as any[]) ?? []);
+    if (!list.length) { setActiveMissions([]); return; }
+
+    const hospIds = Array.from(new Set(list.map((r) => r.destination_hospital_id).filter(Boolean)));
+    const paraIds = Array.from(new Set(list.map((r) => r.assigned_paramedic_user_id).filter(Boolean)));
+    const [{ data: hosps }, { data: shf }] = await Promise.all([
+      hospIds.length
+        ? supabase.from("holarchelp_hospitals" as any).select("id, name").in("id", hospIds)
+        : Promise.resolve({ data: [] as any[] }),
+      paraIds.length
+        ? supabase.from("paramedic_shifts" as any)
+            .select("user_id, ambulances(vehicle_code)")
+            .eq("provider_id", providerId).is("ended_at", null).in("user_id", paraIds)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const hm = new Map((hosps as any[] ?? []).map((h) => [h.id, h.name]));
+    const sm = new Map((shf as any[] ?? []).map((s) => [s.user_id, s.ambulances?.vehicle_code]));
+    setActiveMissions(list.map((r) => ({
+      id: r.id,
+      incident_number: r.incident_number,
+      status: r.status,
+      severity: r.severity,
+      destination_hospital_id: r.destination_hospital_id,
+      destination_hospital_name: hm.get(r.destination_hospital_id) ?? null,
+      eta_minutes: r.eta_minutes,
+      last_eta_update: r.last_eta_update,
+      vehicle_code: sm.get(r.assigned_paramedic_user_id) ?? null,
+    })));
+  };
 
   const loadAll = async () => {
     if (!providerId) return;
@@ -74,6 +129,7 @@ export default function DispatcherConsoleScreen() {
       })),
     );
     setLoading(false);
+    loadActiveMissions();
   };
 
   useEffect(() => {
@@ -134,6 +190,53 @@ export default function DispatcherConsoleScreen() {
           <Switch checked={onDuty} disabled={togglingDuty} onCheckedChange={toggleDuty} />
         </div>
       </header>
+
+      {/* ACTIVE MISSIONS — drill down into full Active Mission console */}
+      <section className="rounded-2xl border-2 border-primary/40 bg-card p-3">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <NavIcon className="h-3.5 w-3.5 text-primary" /> Active Missions · {activeMissions.length}
+          </h2>
+          <span className="text-[10px] text-muted-foreground">Tap a mission to open the full console</span>
+        </div>
+        {activeMissions.length === 0 ? (
+          <p className="py-4 text-center text-xs text-muted-foreground italic">No active missions right now.</p>
+        ) : (
+          <div className="grid gap-2 lg:grid-cols-2">
+            {activeMissions.map((m) => (
+              <Link
+                key={m.id}
+                to={`/provider/ambulance/navigation/${m.id}`}
+                className="group rounded-xl border bg-background p-2.5 hover:border-primary hover:bg-primary/5 transition"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <IncidentNumberBadge number={m.incident_number ?? `INC-${m.id.slice(0, 8)}`} size="sm" showCopy={false} label="Mission" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                </div>
+                <div className="mt-2 overflow-x-auto">
+                  <MissionStatusStepper currentStatus={m.status} compact />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1 min-w-0">
+                    <Hospital className="h-3 w-3 text-primary shrink-0" />
+                    <span className="truncate">{m.destination_hospital_name ?? "No hospital selected"}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3 text-primary" />
+                    ETA <EtaCountdown etaMinutes={m.eta_minutes ?? null} lastUpdate={m.last_eta_update ?? null} />
+                  </span>
+                  {m.vehicle_code && (
+                    <span className="flex items-center gap-1">
+                      <Truck className="h-3 w-3 text-primary" />
+                      {m.vehicle_code}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
 
       <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.1fr]">
         {/* Incidents */}
