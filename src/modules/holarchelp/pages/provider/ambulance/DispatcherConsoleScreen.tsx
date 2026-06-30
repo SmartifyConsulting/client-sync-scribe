@@ -65,6 +65,44 @@ export default function DispatcherConsoleScreen() {
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeMissions, setActiveMissions] = useState<ActiveMission[]>([]);
+
+  const loadActiveMissions = async () => {
+    if (!providerId) return;
+    const { data: incs } = await supabase.from("holarchelp_incidents" as any)
+      .select("id, incident_number, status, severity, destination_hospital_id, eta_minutes, last_eta_update, assigned_paramedic_user_id")
+      .eq("assigned_provider_id", providerId)
+      .in("status", ACTIVE_STATUSES)
+      .order("accepted_at", { ascending: false });
+    const list = ((incs as any[]) ?? []);
+    if (!list.length) { setActiveMissions([]); return; }
+
+    const hospIds = Array.from(new Set(list.map((r) => r.destination_hospital_id).filter(Boolean)));
+    const paraIds = Array.from(new Set(list.map((r) => r.assigned_paramedic_user_id).filter(Boolean)));
+    const [{ data: hosps }, { data: shf }] = await Promise.all([
+      hospIds.length
+        ? supabase.from("holarchelp_hospitals" as any).select("id, name").in("id", hospIds)
+        : Promise.resolve({ data: [] as any[] }),
+      paraIds.length
+        ? supabase.from("paramedic_shifts" as any)
+            .select("user_id, ambulances(vehicle_code)")
+            .eq("provider_id", providerId).is("ended_at", null).in("user_id", paraIds)
+        : Promise.resolve({ data: [] as any[] }),
+    ]);
+    const hm = new Map((hosps as any[] ?? []).map((h) => [h.id, h.name]));
+    const sm = new Map((shf as any[] ?? []).map((s) => [s.user_id, s.ambulances?.vehicle_code]));
+    setActiveMissions(list.map((r) => ({
+      id: r.id,
+      incident_number: r.incident_number,
+      status: r.status,
+      severity: r.severity,
+      destination_hospital_id: r.destination_hospital_id,
+      destination_hospital_name: hm.get(r.destination_hospital_id) ?? null,
+      eta_minutes: r.eta_minutes,
+      last_eta_update: r.last_eta_update,
+      vehicle_code: sm.get(r.assigned_paramedic_user_id) ?? null,
+    })));
+  };
 
   const loadAll = async () => {
     if (!providerId) return;
