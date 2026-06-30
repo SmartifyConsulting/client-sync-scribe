@@ -61,6 +61,29 @@ export default function NavigationScreen() {
     return () => navigator.geolocation.clearWatch(id);
   }, []);
 
+  // Course-deviation: poll latest incident_events for a route_deviation in the last 60s
+  const [deviationActive, setDeviationActive] = useState(false);
+  useEffect(() => {
+    if (!activeId || incident?.status !== "en_route_to_hospital") { setDeviationActive(false); return; }
+    let cancelled = false;
+    const check = async () => {
+      const { data } = await supabase
+        .from("holarchelp_incident_events" as any)
+        .select("created_at")
+        .eq("incident_id", activeId)
+        .eq("event_type", "route_deviation")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelled) return;
+      const t = (data as any)?.created_at ? new Date((data as any).created_at).getTime() : 0;
+      setDeviationActive(t > 0 && Date.now() - t < 60_000);
+    };
+    check();
+    const id = window.setInterval(check, 10_000);
+    return () => { cancelled = true; window.clearInterval(id); };
+  }, [activeId, incident?.status]);
+
   const setStatus = async (status: string) => {
     if (!activeId) return;
     const { error } = await supabase.rpc("holarchelp_set_incident_status" as any, {
