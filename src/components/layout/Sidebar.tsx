@@ -127,7 +127,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-0.5 overflow-y-auto font-size-preserve">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
