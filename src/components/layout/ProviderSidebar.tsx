@@ -52,13 +52,12 @@ const hospitalNav: NavItem[] = [
 ];
 
 const ambulanceNav: NavItem[] = [
-  // EMERGENCY RESPONSE TIER (Incoming SOS now lives inside the dashboard)
+  // EMERGENCY RESPONSE TIER (Dispatcher Console now merged into Dispatch Dashboard)
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
-  { icon: Zap, labelKey: "nav.dispatcherConsole", to: "/provider/ambulance/dispatch" },
   { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
   // MONITORING (Fleet Live)
   { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
-  // ADMIN — Users, Fleet Admin, Crew, Hospitals
+  // ADMIN — Users, Crew, Fleet Admin, Hospitals
   { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
 ];
 

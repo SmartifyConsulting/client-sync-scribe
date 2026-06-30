@@ -369,8 +369,8 @@ export default function AdministratorsScreen() {
       >
         <TabsList className="grid w-full grid-cols-4 h-9">
           <TabsTrigger value="users" className="text-xs">Users</TabsTrigger>
-          <TabsTrigger value="fleet" className="text-xs">Fleet Admin</TabsTrigger>
           <TabsTrigger value="crew" className="text-xs">Crew</TabsTrigger>
+          <TabsTrigger value="fleet" className="text-xs">Fleet Admin</TabsTrigger>
           <TabsTrigger value="hospitals" className="text-xs">Hospitals</TabsTrigger>
         </TabsList>
 

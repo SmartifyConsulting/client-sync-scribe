@@ -41,7 +41,7 @@ import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitor
 import BillingDashboardScreen from "./pages/provider/BillingDashboardScreen";
 import ExecutiveDashboardScreen from "./pages/provider/ExecutiveDashboardScreen";
 import AlertsCentreScreen from "./pages/provider/AlertsCentreScreen";
-import DispatcherConsoleScreen from "./pages/provider/ambulance/DispatcherConsoleScreen";
+// DispatcherConsoleScreen merged into EmergencyDashboardScreen
 // IncomingSosScreen retired — merged into EmergencyDashboardScreen
 
 // Incident & Dispatch Management screens
@@ -120,8 +120,8 @@ export default function ProviderRoutes() {
         {/* Incoming SOS merged into Emergency Dashboard */}
         <Route path="incoming" element={<Navigate to="/provider/ambulance" replace />} />
 
-        {/* Dispatcher Console (desk: assigns vehicle to incident) */}
-        <Route path="dispatch" element={<DispatcherConsoleScreen />} />
+        {/* Dispatcher Console merged into Dispatch Dashboard */}
+        <Route path="dispatch" element={<Navigate to="/provider/ambulance" replace />} />
 
         {/* Hospital Network now lives inside Admin */}
         <Route path="hospital-network" element={<Navigate to="/provider/ambulance/admins?tab=hospitals" replace />} />
