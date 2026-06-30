@@ -406,14 +406,15 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      {isLive && responder && incident.assigned_provider_id && autoAssigned && autoAssignedAt && (
+      {isLive && responder && incident.assigned_provider_id && assignmentAnchorAt && autoChangeSecondsLeft > 0 && (
         <AvailableResponders
           incidentId={id!}
           createdAt={incident.created_at}
           assignedProviderId={incident.assigned_provider_id}
-          autoAssignedAt={autoAssignedAt}
+          autoAssignedAt={assignmentAnchorAt}
         />
       )}
+
 
       <SosLiveMap incidentId={id!} mode="patient" height={320} />
 
