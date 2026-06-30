@@ -8,6 +8,8 @@ import { useParamedicShift } from "../../../hooks/useParamedicShift";
 import { ParamedicAcceptDialog } from "../../../components/ParamedicAcceptDialog";
 import { StartShiftDialog } from "../../../components/StartShiftDialog";
 import DispatcherConsoleScreen from "./DispatcherConsoleScreen";
+import ActiveMissionsPanel from "./ActiveMissionsPanel";
+
 
 type Row = {
   id: string; status: string; severity: string | null;
