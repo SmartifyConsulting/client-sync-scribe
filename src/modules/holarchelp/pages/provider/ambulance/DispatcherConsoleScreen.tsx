@@ -151,7 +151,7 @@ export default function DispatcherConsoleScreen() {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs font-bold">#{(i.incident_number ?? i.id.slice(0, 8))}</span>
+                    <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
                     <span className={`text-[10px] font-bold uppercase ${
                       i.severity === "critical" ? "text-destructive" : i.severity === "high" ? "text-warning" : "text-muted-foreground"
                     }`}>
