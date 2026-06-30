@@ -9,20 +9,12 @@ import { EtaCountdown } from "../../../components/EtaCountdown";
 import { AmbulanceSimulator } from "../../../components/AmbulanceSimulator";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Siren, Navigation as NavIcon } from "lucide-react";
+import { Siren, Navigation as NavIcon, AlertTriangle, Home, ListChecks, HeartHandshake } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toastError } from "@/lib/userMessage";
+import { MissionStatusStepper } from "../../../components/MissionStatusStepper";
 
 type Inc = any;
-
-const STEPS = [
-  { v: "en_route", labelKey: "navigationScreen.enRoute" },
-  { v: "arrived", labelKey: "navigationScreen.arrived" },
-  { v: "patient_collected", labelKey: "navigationScreen.patientLoaded" },
-  { v: "en_route_to_hospital", labelKey: "navigationScreen.toHospital" },
-  { v: "at_hospital", labelKey: "navigationScreen.arrivedAtHospital" },
-  { v: "completed", labelKey: "navigationScreen.resolveIncident" },
-];
 
 export default function NavigationScreen() {
   const { t } = useTranslation();
