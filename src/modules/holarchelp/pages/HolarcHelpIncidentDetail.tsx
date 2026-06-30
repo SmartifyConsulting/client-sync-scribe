@@ -20,6 +20,8 @@ import { useLocationTracking } from "../hooks/useLocationTracking";
 import { useAuth } from "@/hooks/useAuth";
 import { buildSosMessage, waLink } from "../lib/whatsapp";
 import { getPublicTrackUrl } from "../lib/public-track-url";
+import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
+import { toastError } from "@/lib/userMessage";
 
 type Loc = { latitude: number; longitude: number; recorded_at: string };
 
@@ -213,7 +215,7 @@ export default function HolarcHelpIncidentDetail() {
         notes: closureNote.trim(),
       } as any).eq("id", id);
     setClosing(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Incident closed");
     navigate("/patient/holarchelp");
   };
@@ -281,9 +283,7 @@ export default function HolarcHelpIncidentDetail() {
             <ArrowLeft className="h-4 w-4" /> SOS Home
           </Button>
           {incident.incident_number && (
-            <span className="rounded-full border bg-card px-2 py-1 font-mono text-[11px] font-bold text-primary">
-              {incident.incident_number}
-            </span>
+            <IncidentNumberBadge number={incident.incident_number} size="md" />
           )}
           <div className="flex-1" />
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
@@ -299,7 +299,9 @@ export default function HolarcHelpIncidentDetail() {
         <div>
           <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
           {incident.incident_number && (
-            <p className="mt-0.5 font-mono text-xs font-bold text-primary">Incident {incident.incident_number}</p>
+            <div className="mt-1">
+              <IncidentNumberBadge number={incident.incident_number} size="lg" label="Reference #" />
+            </div>
           )}
         </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>

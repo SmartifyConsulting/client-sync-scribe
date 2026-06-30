@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { BedDouble, Activity } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 export default function ErCapacityScreen() {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export default function ErCapacityScreen() {
     setSaving(true);
     const { error } = await supabase.from("holarchelp_hospitals" as any).update(p).eq("id", providerId);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     setH((prev: any) => ({ ...(prev ?? {}), ...p }));
     toast.success(t("common.capacityUpdated"));
   };

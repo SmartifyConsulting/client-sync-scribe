@@ -11,6 +11,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Trash2, UserPlus, ChevronLeft, ChevronDown, Pencil, Check, X, Info } from "lucide-react";
 import { toast } from "sonner";
+import { toastError } from "@/lib/userMessage";
 
 type Severity = "low" | "medium" | "high" | "critical";
 type Source = "manual" | "personal_info_seed";
@@ -97,7 +98,7 @@ export default function HolarcHelpContacts() {
       notify_min_severity: parsed.data.notify_min_severity,
       source: "manual",
     } as any);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     setForm({ name: "", phone: "", email: "", relationship: "", notify_min_severity: "low" });
     setAddOpen(false);
     toast.success("Contact added");
@@ -109,7 +110,7 @@ export default function HolarcHelpContacts() {
       .from("holarchelp_emergency_contacts" as any)
       .update({ notify_min_severity: sev } as any)
       .eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, notify_min_severity: sev } : c)));
   };
 
@@ -135,7 +136,7 @@ export default function HolarcHelpContacts() {
     };
     if (!patch.name) return toast.error("Name is required");
     const { error } = await supabase.from("holarchelp_emergency_contacts" as any).update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } as Contact : c)));
     cancelEdit();
   };

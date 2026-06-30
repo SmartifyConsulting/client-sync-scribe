@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Radio, Siren, Truck, MapPin, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
+import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
+import { toastError } from "@/lib/userMessage";
 
 type Incident = {
   id: string;
@@ -92,7 +94,7 @@ export default function DispatcherConsoleScreen() {
     const { error } = await supabase.rpc("holarchelp_set_dispatcher_on_duty" as any, {
       _provider_id: providerId, _on: next,
     });
-    if (error) toast.error(error.message);
+    if (error) toastError(error, "We couldn't complete that. Please try again.");
     else { setOnDuty(next); toast.success(next ? "You are on duty as Dispatcher" : "Dispatcher off duty"); }
     setTogglingDuty(false);
   };
@@ -103,7 +105,7 @@ export default function DispatcherConsoleScreen() {
     const { error } = await supabase.rpc("holarchelp_dispatcher_assign" as any, {
       _incident_id: selectedIncidentId, _shift_id: shiftId,
     });
-    if (error) toast.error(error.message);
+    if (error) toastError(error, "We couldn't complete that. Please try again.");
     else { toast.success("Vehicle assigned. Crew has been notified."); setSelectedIncidentId(null); loadAll(); }
     setAssigning(false);
   };
@@ -150,7 +152,7 @@ export default function DispatcherConsoleScreen() {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs font-bold">#{(i.incident_number ?? i.id.slice(0, 8))}</span>
+                    <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
                     <span className={`text-[10px] font-bold uppercase ${
                       i.severity === "critical" ? "text-destructive" : i.severity === "high" ? "text-warning" : "text-muted-foreground"
                     }`}>
@@ -218,7 +220,7 @@ export default function DispatcherConsoleScreen() {
             <p className="mt-6 text-center text-xs text-muted-foreground">Pick an SOS on the left, then tap "Assign" on an available vehicle.</p>
           ) : (
             <div className="mt-2 space-y-2">
-              <p className="font-mono text-sm font-bold">#{selected.incident_number ?? selected.id.slice(0, 8)}</p>
+              <IncidentNumberBadge number={selected.incident_number ?? `INC-${selected.id.slice(0, 8)}`} size="md" label="Reference #" />
               <p className="text-sm">{selected.incident_type ?? "Emergency"} · <span className="uppercase font-bold">{selected.severity}</span></p>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" /> Triggered {ago(selected.created_at)} ago

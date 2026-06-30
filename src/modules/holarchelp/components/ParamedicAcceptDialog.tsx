@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useParamedicShift } from "../hooks/useParamedicShift";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 interface Props {
   incidentId: string | null;

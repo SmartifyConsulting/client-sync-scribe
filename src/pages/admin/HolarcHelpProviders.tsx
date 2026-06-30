@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
+import { toastError } from "@/lib/userMessage";
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
@@ -158,18 +159,18 @@ export default function HolarcHelpProviders() {
     const patch: any = { status: active ? "approved" : "suspended" };
     if (active) patch.approved_at = new Date().toISOString();
     const { error } = await supabase.from(tableFor(kind) as any).update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success(active ? "Activated" : "Deactivated"); load();
   };
   const setTier = async (kind: Kind, id: string, tier: string) => {
     const { error } = await supabase.from(tableFor(kind) as any).update({ tier } as any).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Tier updated"); load();
   };
   const removeRow = async () => {
     if (!confirmDelete) return;
     const { error } = await supabase.from(tableFor(confirmDelete.kind) as any).delete().eq("id", confirmDelete.id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Deleted"); setConfirmDelete(null); load();
   };
 
