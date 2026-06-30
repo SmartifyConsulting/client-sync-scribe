@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { SosVoiceNoteDialog } from "../components/SosVoiceNoteDialog";
+import { SosVoiceNoteDialog, type PreStartedRecording } from "../components/SosVoiceNoteDialog";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
 import { supabase } from "@/integrations/supabase/client";
 import { SosLiveMap } from "../components/SosLiveMap";
