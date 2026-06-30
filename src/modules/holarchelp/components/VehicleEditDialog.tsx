@@ -48,9 +48,6 @@ export function VehicleEditDialog({
       const { error } = await supabase.from("ambulances" as any).update({
         vehicle_code: form.vehicle_code,
         registration_number: form.registration_number || null,
-        make: form.make || null,
-        model: form.model || null,
-        type: form.type || null,
         status: form.status || null,
       }).eq("id", form.id);
       if (error) throw error;
