@@ -37,6 +37,8 @@ import {
 import { Trash2, UserPlus, Loader2, ShieldCheck, Edit2, Search, Phone, Mail, Copy } from "lucide-react";
 import { toast } from "sonner";
 import HospitalNetworkScreen from "./ambulance/HospitalNetworkScreen";
+import FleetOperationsScreen from "./ambulance/FleetOperationsScreen";
+import CrewAssignmentsTab from "./CrewAssignmentsTab";
 
 interface MemberRow {
   id: string;
