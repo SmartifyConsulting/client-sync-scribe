@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Siren, AlertTriangle, Clock, Truck, Users } from "lucide-react";
+import { Siren, AlertTriangle, Clock, Truck, Users, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useParamedicShift } from "../../../hooks/useParamedicShift";
 import { ParamedicAcceptDialog } from "../../../components/ParamedicAcceptDialog";
 import { StartShiftDialog } from "../../../components/StartShiftDialog";
+import DispatcherConsoleScreen from "./DispatcherConsoleScreen";
 
 type Row = {
   id: string; status: string; severity: string | null;
