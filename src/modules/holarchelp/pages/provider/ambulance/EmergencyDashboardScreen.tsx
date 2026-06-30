@@ -117,10 +117,10 @@ export default function EmergencyDashboardScreen() {
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <Siren className="h-5 w-5 text-primary" />
-          Emergency Operations
+          {t("nav.emergencyDashboard", "Dispatch Dashboard")}
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          Live SOS queue, rolling shifts and dispatch actions.
+          Dispatcher console, live SOS queue, rolling shifts and dispatch actions — all on one screen.
         </p>
       </header>
 
@@ -130,6 +130,14 @@ export default function EmergencyDashboardScreen() {
         <StatCard label="Critical" value={stats.critical} tone={stats.critical ? "destructive" : "muted"} />
         <StatCard label="Rolling" value={stats.rolling} tone="success" />
       </div>
+
+      {/* DISPATCHER CONSOLE — merged from former Dispatcher Console screen */}
+      <section className="rounded-2xl border-2 border-primary/30 bg-card/40 p-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2">
+          <Radio className="h-4 w-4 text-primary" /> Dispatcher Console
+        </h2>
+        <DispatcherConsoleScreen />
+      </section>
 
       {/* INCOMING SOS — merged from former Incoming SOS screen */}
       <section className="space-y-2">
