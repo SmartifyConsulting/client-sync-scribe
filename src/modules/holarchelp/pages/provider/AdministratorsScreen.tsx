@@ -348,14 +348,10 @@ export default function AdministratorsScreen() {
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-primary" />
-          {currentTab === "hospital-network"
-            ? t("administrators.header.hospitalNetwork")
-            : t("nav.userAdmin")}
+          Admin
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          {currentTab === "hospital-network"
-            ? t("administrators.header.hospitalDesc")
-            : t("administrators.header.userDesc")}
+          Users, fleet, crew assignments and affiliated hospitals.
         </p>
       </div>
 
@@ -371,13 +367,11 @@ export default function AdministratorsScreen() {
         onValueChange={(val) => setSearchParams({ tab: val })}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 h-9">
-          <TabsTrigger value="users" className="text-xs">
-            {t("administrators.tabs.users")}
-          </TabsTrigger>
-          <TabsTrigger value="hospital-network" className="text-xs">
-            {t("administrators.tabs.hospitals")}
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 h-9">
+          <TabsTrigger value="users" className="text-xs">Users</TabsTrigger>
+          <TabsTrigger value="fleet" className="text-xs">Fleet Admin</TabsTrigger>
+          <TabsTrigger value="crew" className="text-xs">Crew</TabsTrigger>
+          <TabsTrigger value="hospitals" className="text-xs">Hospitals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-3">
