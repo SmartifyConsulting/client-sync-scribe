@@ -59,6 +59,17 @@ export default function HolarcHelpIncidentDetail() {
         (p) => setLocations((prev) => [p.new as any, ...prev].slice(0, 200)))
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${id}` },
         (p) => setIncident((prev: any) => ({ ...(prev ?? {}), ...(p.new as any) })))
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "holarchelp_incident_events", filter: `incident_id=eq.${id}` },
+        (p) => {
+          const event = p.new as any;
+          if (event?.event_type === "auto_assigned") {
+            setAutoAssigned(true);
+            setAutoAssignedAt(event.created_at ?? new Date().toISOString());
+          }
+          if (["patient_picked", "patient_changed_provider", "reassigned"].includes(event?.event_type)) {
+            setAutoAssigned(false);
+          }
+        })
       .subscribe();
 
     const onFocus = () => refetchIncident();
