@@ -31,21 +31,8 @@ type Shift = {
   lead_name?: string | null;
 };
 
-type ActiveMission = {
-  id: string;
-  incident_number?: string | null;
-  status: string;
-  severity: string | null;
-  destination_hospital_id?: string | null;
-  destination_hospital_name?: string | null;
-  eta_minutes?: number | null;
-  last_eta_update?: string | null;
-  vehicle_code?: string | null;
-};
-
-const ACTIVE_STATUSES = ["assigned", "en_route", "arrived", "patient_collected", "en_route_to_hospital", "at_hospital"];
-
 const sevOrder: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
+
 
 const ago = (iso: string) => {
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
