@@ -143,13 +143,17 @@ export default function EmergencyDashboardScreen() {
         )}
       </section>
 
-      {/* DISPATCHER CONSOLE + ACTIVE MISSIONS */}
+      {/* DISPATCHER CONSOLE */}
       <section className="rounded-2xl border-2 border-primary/30 bg-card/40 p-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2">
           <Radio className="h-4 w-4 text-primary" /> Dispatcher Console
         </h2>
         <DispatcherConsoleScreen />
       </section>
+
+      {/* ACTIVE MISSIONS — own red-framed panel */}
+      <ActiveMissionsPanel />
+
 
       <ParamedicAcceptDialog
         incidentId={pickFor}
