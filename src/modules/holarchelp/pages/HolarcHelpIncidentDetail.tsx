@@ -298,7 +298,9 @@ export default function HolarcHelpIncidentDetail() {
         <div>
           <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
           {incident.incident_number && (
-            <p className="mt-0.5 font-mono text-xs font-bold text-primary">Incident {incident.incident_number}</p>
+            <div className="mt-1">
+              <IncidentNumberBadge number={incident.incident_number} size="lg" label="Reference #" />
+            </div>
           )}
         </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
