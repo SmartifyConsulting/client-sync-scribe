@@ -1,50 +1,95 @@
-## Goals
+# Admin restructure, Fleet Admin, Crew assignments, multi-ambulance Start shift & nav cleanup
 
-1. Start the voice-note recording the moment the patient picks a severity, so no opening words are lost.
-2. Default the "Unconscious" count to 0 on the severity picker.
-3. Make the ER Provider list reliably visible so the patient can change provider within the allowed window.
+## Why
+Today the **Start shift** dialog assumes one paramedic + one ambulance. You want a real ER provider flow: many ambulances roll out at once, each with its own crew. Crew lives nowhere obvious, the fleet has no single owner screen, affiliated hospitals are scattered, and the ambulance nav has redundant screens that force dispatchers to toggle between related views. This plan consolidates everything.
 
-## Changes
+## Rename & restructure: User Admin → Admin
+`User Admin` is renamed to **Admin** in the sidebar and page header. It becomes one screen with four sub-tabs (teal Tabs style used elsewhere):
 
-### 1. Reorder fresh-trigger flow (`src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx`)
+```text
+Admin
+ ├─ Users          (existing administrators/users list)
+ ├─ Fleet Admin    (NEW — vehicles)
+ ├─ Crew           (NEW — people, with vehicle assignments)
+ └─ Hospitals      (NEW — affiliated hospitals linked to this provider)
+```
 
-- On a fresh incident, open `SeverityPicker` first (not `SosVoiceNoteDialog`).
-- When the patient taps a severity (Life-threatening / Urgent / …), immediately:
-  - Persist the severity + headcounts (existing `finishSeverity` logic).
-  - Kick off `navigator.mediaDevices.getUserMedia({ audio: true })` and start a `MediaRecorder` in the background.
-  - Then open `SosVoiceNoteDialog`, handing it the already-running `MediaRecorder` + the audio chunks accumulated since severity click.
-- "Skip" on the severity picker keeps the current behaviour (no recording).
+### Users tab
+- Existing administrators list. Phone + email columns already added.
 
-### 2. `SosVoiceNoteDialog` accepts a pre-started recorder
+### Fleet Admin tab
+- Lists every vehicle in `ambulances` for the provider: code, registration, type, status (Available / On shift / Out of service), default base, "Assigned crew (n)".
+- Actions: **Add vehicle**, Edit, Set status, Decommission.
+- Row click opens a side panel with crew currently assigned to that vehicle (read-only mirror of the Crew tab).
+- Replaces the standalone Fleet Operations vehicle CRUD inside the Ambulance portal (live ops view stays).
 
-- Add optional props `existingRecorder?: MediaRecorder` and `existingChunks?: Blob[]`.
-- When provided, the dialog does not call `getUserMedia` again; it attaches its `ondataavailable`/`onstop` handlers to the in-flight recorder and uses the buffered chunks so the first words are preserved.
-- Stop/cancel still works the same way.
+### Crew tab
+- Lists every `holarchelp_ambulance_members` row for the provider: name, email, phone, role (Paramedic / EMT / Driver / Lead), status, **Assigned vehicle(s)**.
+- Each row has a multi-select **Assign to vehicle(s)** dropdown — writes to a new `ambulance_crew_assignments` table (many-to-many: crew member ↔ ambulance, with `is_default_lead`).
+- Actions: **Invite crew member**, Edit, Deactivate.
+- Single answer to "where do I list crew members".
 
-### 3. SeverityPicker default (`src/modules/holarchelp/components/SeverityPicker.tsx`)
+### Hospitals tab
+- Lists hospitals this provider is affiliated to / administers (`ambulance_hospital_affiliations` joined to `holarchelp_hospitals`): name, address, affiliation type (Primary destination / Backup / Administered), status, contact.
+- Actions: **Add affiliation** (search existing hospital and link), Edit affiliation type, Remove.
+- Drives downstream behaviour: only affiliated + currently-accepting hospitals appear in the destination picker on paramedic accept.
 
-- Change `useState(1)` for `unconscious` to `useState(0)`.
-- Leave People = 1 and Breathing = 1.
-- The "skip triage" path already sends `unconsciousCount: 0`; no change needed there.
+## Nav cleanup (ambulance portal)
 
-### 4. Restore ER Provider selector visibility (`HolarcHelpIncidentDetail.tsx` + `AvailableResponders.tsx`)
+Remove redundant items now that the data lives in better homes:
 
-Today the change-provider list only renders when `autoAssigned === true`. If the patient picked manually, or `autoAssigned` is unset because the `auto_assigned` event hasn't landed yet, the switcher disappears even though the 30-second window is still open.
+```text
+BEFORE                        AFTER
+─────────────────────────     ─────────────────────────
+Emergency Dashboard            Emergency Dashboard  (← Incoming SOS merged in)
+Incoming SOS         ✖ remove
+Active Mission                 Active Mission
+Fleet Live                     Fleet Live
+Dispatcher Console             Dispatcher Console
+Shift Teams          ✖ remove
+Telematics                     Telematics
+Admin                          Admin
+```
 
-- Compute `assignedSecondsLeft` from `incident.accepted_at ?? incident.assigned_at ?? autoAssignedAt`.
-- Render `<AvailableResponders … />` whenever `isLive && incident.assigned_provider_id && assignedSecondsLeft > 0`, regardless of `autoAssigned`.
-- Pass `autoAssignedAt = autoAssignedAt ?? incident.accepted_at ?? incident.assigned_at` so the countdown inside the component is correct in both auto and manual cases.
-- Inside `AvailableResponders`, also relax `isChangeMode` to `!!assignedProviderId && !!autoAssignedAt` (already true), but add a defensive fallback: if `offers` is empty in change mode, render an "ER Provider locked in / no other providers in range" line instead of returning `null`, so the section never silently disappears.
-- Above the list, add a clear heading "Change ER Provider ({remaining}s)" with the +30 s extend button already present, so the option is unmistakable.
+### Emergency Dashboard + Incoming SOS merged
+- The **Incoming SOS** list (open offers/pending incidents queue) becomes the top section of the Emergency Dashboard, above existing KPI cards and Active Mission summary.
+- One screen, one source of truth for "what's happening right now": live SOS queue → accept/dispatch inline → KPI strip → currently-rolling shifts.
+- Standalone `IncomingSosScreen` route + sidebar entry deleted; any deep links redirect to `/provider/ambulance/dashboard`.
+
+### Shift Teams removed
+- Redundant once Crew + Fleet Admin own the roster and the Emergency Dashboard shows rolling shifts.
+- `TeamStatusScreen` route + sidebar entry deleted. The "currently on shift" view becomes a compact accordion on the Emergency Dashboard so dispatchers still see who's out without an extra click.
+
+## Start shift — multi-ambulance, pre-filled crew
+Rebuild `StartShiftDialog.tsx`:
+
+```text
+Start shift
+─────────────────────────────────────────────
+Select ambulances going on shift now
+[x] RA-01 · CA 123 GP
+      Lead:  [ Sipho M (default) ▼ ]
+      Crew:  [x] Thandi K (Driver)
+             [x] Jacob P (EMT)
+[x] RA-02 · CA 456 GP
+      Lead:  [ Select paramedic ▼ ]
+      Crew:  [ ] ...
+[ ] RA-03 · CA 789 GP
+─────────────────────────────────────────────
+                              [Cancel] [Start 2 shifts]
+```
+
+- Only `available` vehicles with no open shift are listed.
+- Ticking a vehicle auto-fills Lead + Crew from `ambulance_crew_assignments`; user can override.
+- A crew member ticked on another vehicle is greyed out with "already on RA-01" — no double-booking.
+- Submit calls new RPC `holarchelp_start_shifts_bulk(_payload jsonb)` — one transaction, one `paramedic_shifts` row per ambulance plus matching `paramedic_shift_partners` rows; all-or-nothing.
+- Toast: "Started 2 shifts · 5 crew members on duty".
 
 ## Technical notes
-
-- Recording auto-start needs a user gesture; the severity button tap satisfies browser autoplay/mic policies.
-- Buffer chunks in a `useRef<Blob[]>` between severity tap and dialog mount so nothing is lost in the React render gap.
-- If `getUserMedia` is rejected, fall back to the current "tap to record" UI in `SosVoiceNoteDialog` and toast a friendly message via `toastError`.
-- No DB schema changes. No new RPCs. Only frontend.
-
-## Out of scope
-
-- Changing the auto-assign timer length or the severity wording.
-- Server-side changes to `holarchelp_get_incident_offers` (already returns nearest providers as fallback).
+- New table `public.ambulance_crew_assignments(ambulance_id, member_id, is_default_lead, created_at)`, unique `(ambulance_id, member_id)`, RLS scoped to provider admins; GRANT `authenticated` + `service_role`.
+- New RPC `holarchelp_start_shifts_bulk(_payload jsonb)` (`security definer`): validates provider ownership, vehicle availability, no open shift for each lead, bulk inserts shifts + partners.
+- `AdministratorsScreen.tsx` renamed to **Admin**, wrapped in shadcn `Tabs` (Users | Fleet Admin | Crew | Hospitals). Sidebar label + i18n keys updated.
+- Hospitals tab reuses `ambulance_hospital_affiliations`; no new table.
+- `StartShiftDialog.tsx` rewritten around `selections: { ambulance_id, lead_user_id, partner_user_ids[] }[]` with assignment defaults.
+- `EmergencyDashboardScreen.tsx` gains an "Incoming SOS" section at the top and a "Rolling shifts" accordion at the bottom. `IncomingSosScreen` and `TeamStatusScreen` routes deleted; sidebar (`AmbulanceOpsLayout`) trimmed.
+- No changes to incident acceptance, billing, or pricing logic.

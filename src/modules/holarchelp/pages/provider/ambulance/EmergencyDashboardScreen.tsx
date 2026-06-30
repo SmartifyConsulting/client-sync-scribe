@@ -1,198 +1,253 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Siren,
-  MapPin,
-  Clock,
-  Building2,
-  Phone,
-  Navigation as NavIcon,
-  FileText,
-  AlertTriangle,
-} from "lucide-react";
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Siren, AlertTriangle, Clock, Truck, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useProviderAccess } from "../../../components/ProviderGate";
+import { useParamedicShift } from "../../../hooks/useParamedicShift";
+import { ParamedicAcceptDialog } from "../../../components/ParamedicAcceptDialog";
+import { StartShiftDialog } from "../../../components/StartShiftDialog";
 
-interface Incident {
+type Row = {
+  id: string; status: string; severity: string | null;
+  conscious: boolean | null; breathing: boolean | null;
+  created_at: string; notes?: string | null; incident_type?: string | null;
+};
+
+type RollingShift = {
   id: string;
-  code: string;
-  type: "self-created" | "from-hospital";
-  severity: "critical" | "high" | "medium" | "low";
-  status: "new" | "active" | "completed";
-  title: string;
-  location: string;
-  time: string;
-  hospital?: string;
-}
-
-const MOCK_INCIDENTS: Incident[] = [
-  { id: "1", code: "INC-2024-100", type: "self-created", severity: "critical", status: "active", title: "Cardiac Emergency", location: "Main Street Downtown", time: "14:32" },
-  { id: "2", code: "INC-2024-050", type: "from-hospital", severity: "high", status: "new", title: "Trauma / Accident", location: "Downtown Medical Center", time: "14:25", hospital: "Central Hospital" },
-  { id: "3", code: "INC-2024-049", type: "from-hospital", severity: "medium", status: "active", title: "Medical Emergency", location: "North Business District", time: "14:18", hospital: "North General Hospital" },
-  { id: "4", code: "INC-2024-048", type: "self-created", severity: "high", status: "completed", title: "Respiratory Distress", location: "City Medical Centre", time: "13:45" },
-];
-
-const SEVERITY_STRIPE: Record<Incident["severity"], string> = {
-  critical: "bg-destructive",
-  high: "bg-warning",
-  medium: "bg-warning/70",
-  low: "bg-primary",
+  user_id: string;
+  ambulance_id: string;
+  status: string;
+  started_at: string;
+  ambulances?: { vehicle_code: string; registration_number: string | null } | null;
+  profiles?: { full_name: string | null } | null;
 };
 
-const SEVERITY_BADGE: Record<Incident["severity"], string> = {
-  critical: "bg-destructive/10 text-destructive border-destructive/30",
-  high: "bg-warning/10 text-warning border-warning/30",
-  medium: "bg-warning/10 text-warning border-warning/30",
-  low: "bg-primary/10 text-primary border-primary/30",
-};
+const sevBig = (s: string | null) =>
+  s === "critical" ? "border-destructive/60 bg-destructive/10"
+  : s === "high" ? "border-warning/60 bg-warning/10"
+  : "border-warning/40 bg-warning/5";
 
-const STATUS_PILL: Record<Incident["status"], string> = {
-  new: "bg-destructive/10 text-destructive",
-  active: "bg-success/10 text-success",
-  completed: "bg-muted text-muted-foreground",
+const ago = (iso: string) => {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  return `${Math.floor(s / 3600)}h`;
 };
 
 export default function EmergencyDashboardScreen() {
-  const [filter, setFilter] = useState<Incident["status"]>("new");
-  const filtered = MOCK_INCIDENTS.filter((i) => i.status === filter);
+  const { t } = useTranslation();
+  const { providerId } = useProviderAccess();
+  const { shift } = useParamedicShift();
+  const [rows, setRows] = useState<Row[]>([]);
+  const [pickFor, setPickFor] = useState<string | null>(null);
+  const [startOpen, setStartOpen] = useState(false);
+  const [rollingShifts, setRollingShifts] = useState<RollingShift[]>([]);
+
+  // Live SOS queue
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from("holarchelp_incidents" as any)
+        .select("id,status,severity,conscious,breathing,created_at,notes,incident_type")
+        .is("assigned_paramedic_user_id", null)
+        .in("status", ["open", "reopened"])
+        .order("created_at", { ascending: true }).limit(40);
+      const order: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
+      setRows((((data as any) ?? []) as Row[]).sort((a, b) => (order[a.severity ?? ""] ?? 9) - (order[b.severity ?? ""] ?? 9)));
+    };
+    load();
+    const ch = supabase.channel("dash-incoming")
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
+
+  // Rolling shifts for this provider
+  useEffect(() => {
+    if (!providerId) return;
+    const load = async () => {
+      const { data: shifts } = await supabase.from("paramedic_shifts" as any)
+        .select("id, user_id, ambulance_id, status, started_at")
+        .eq("provider_id", providerId)
+        .is("ended_at", null)
+        .order("started_at", { ascending: false });
+      const list = ((shifts as any) ?? []) as RollingShift[];
+      if (list.length) {
+        const vehIds = list.map((s) => s.ambulance_id);
+        const userIds = list.map((s) => s.user_id);
+        const [{ data: vehs }, { data: profs }] = await Promise.all([
+          supabase.from("ambulances" as any).select("id, vehicle_code, registration_number").in("id", vehIds),
+          supabase.from("profiles").select("id, full_name").in("id", userIds),
+        ]);
+        const vm = new Map((vehs as any[] ?? []).map((v) => [v.id, v]));
+        const pm = new Map((profs as any[] ?? []).map((p) => [p.id, p]));
+        list.forEach((s) => {
+          s.ambulances = vm.get(s.ambulance_id) ?? null;
+          s.profiles = pm.get(s.user_id) ?? null;
+        });
+      }
+      setRollingShifts(list);
+    };
+    load();
+    const ch = supabase.channel(`dash-shifts-${providerId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "paramedic_shifts", filter: `provider_id=eq.${providerId}` }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [providerId]);
+
+  const isOffShift = !shift;
+  const isBusy = shift?.status === "busy";
 
   const stats = {
-    new: MOCK_INCIDENTS.filter((i) => i.status === "new").length,
-    active: MOCK_INCIDENTS.filter((i) => i.status === "active").length,
-    critical: MOCK_INCIDENTS.filter((i) => i.severity === "critical").length,
+    incoming: rows.length,
+    critical: rows.filter((r) => r.severity === "critical").length,
+    rolling: rollingShifts.length,
   };
 
   return (
-    <div className="space-y-3">
-      {/* Header — matches Doctor/Patient profile style */}
+    <div className="space-y-4">
       <header>
         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Emergency Response Dispatch
+          {t("provider.emergencyResponseDispatch") || "Emergency Response Dispatch"}
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <Siren className="h-5 w-5 text-primary" />
           Emergency Operations
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          Live incident queue, severity and dispatch actions.
+          Live SOS queue, rolling shifts and dispatch actions.
         </p>
       </header>
 
-      {/* Single compact stats row */}
+      {/* Stats strip */}
       <div className="grid grid-cols-3 gap-2">
-        <StatCard label="New" value={stats.new} tone="destructive" />
-        <StatCard label="Active" value={stats.active} tone="success" />
-        <StatCard label="Critical" value={stats.critical} tone="warning" />
+        <StatCard label="Incoming" value={stats.incoming} tone={stats.incoming ? "destructive" : "muted"} />
+        <StatCard label="Critical" value={stats.critical} tone={stats.critical ? "destructive" : "muted"} />
+        <StatCard label="Rolling" value={stats.rolling} tone="success" />
       </div>
 
-      {/* Standard teal tabs */}
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as Incident["status"])} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-9">
-          <TabsTrigger value="new" className="text-xs">New ({stats.new})</TabsTrigger>
-          <TabsTrigger value="active" className="text-xs">Active ({stats.active})</TabsTrigger>
-          <TabsTrigger value="completed" className="text-xs">
-            Completed ({MOCK_INCIDENTS.filter((i) => i.status === "completed").length})
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* INCOMING SOS — merged from former Incoming SOS screen */}
+      <section className="space-y-2">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <Siren className="h-4 w-4 text-sos" /> Incoming SOS
+        </h2>
 
-      {/* Incident cards */}
-      {filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed bg-card p-8 text-center">
-          <AlertTriangle className="mx-auto h-6 w-6 text-muted-foreground" />
-          <p className="mt-2 text-xs text-muted-foreground">No {filter} incidents.</p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {filtered.map((incident) => (
-            <article
-              key={incident.id}
-              className="relative rounded-xl border border-border bg-card overflow-hidden"
-            >
-              <span className={`absolute left-0 top-0 h-full w-1 ${SEVERITY_STRIPE[incident.severity]}`} aria-hidden />
-              <div className="pl-3 p-2.5 space-y-2">
+        {isOffShift && (
+          <div className="rounded-2xl border border-warning/40 bg-warning/10 p-3 text-xs">
+            <p className="font-bold text-warning">You are off shift.</p>
+            <p className="mt-1 text-muted-foreground">Start a shift to accept incidents.</p>
+            <Button size="sm" className="mt-2 h-7 text-xs" onClick={() => setStartOpen(true)}>
+              Start shift
+            </Button>
+          </div>
+        )}
+
+        {!isOffShift && isBusy && (
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-xs">
+            <p className="font-bold text-destructive">You have an active incident.</p>
+            <p className="mt-1 text-muted-foreground">Finish it before accepting another.</p>
+          </div>
+        )}
+
+        {!isOffShift && !isBusy && !rows.length && (
+          <div className="rounded-2xl border border-dashed p-8 text-center text-xs text-muted-foreground">
+            <Siren className="mx-auto mb-2 h-5 w-5 opacity-50" />
+            No incoming SOS right now.
+          </div>
+        )}
+
+        {!isOffShift && !isBusy && rows.length > 0 && (
+          <div className="grid gap-2 lg:grid-cols-2">
+            {rows.map((r) => (
+              <div key={r.id} className={`rounded-2xl border-2 p-3 ${sevBig(r.severity)}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-mono text-xs font-bold text-foreground">{incident.code}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border ${SEVERITY_BADGE[incident.severity]}`}>
-                        {incident.severity}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold text-foreground mt-0.5 truncate">
-                      {incident.title}
+                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sos">
+                      <Siren className="h-3 w-3" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? "Emergency"}
+                    </p>
+                    <p className="mt-1 text-base font-extrabold">#{r.id.slice(0, 8)}</p>
+                    <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Clock className="h-3 w-3" /> {ago(r.created_at)} ago
                     </p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap ${STATUS_PILL[incident.status]}`}>
-                    {incident.status}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1 min-w-0">
-                    <MapPin className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{incident.location}</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {incident.time}
-                  </span>
-                  {incident.hospital && (
-                    <span className="inline-flex items-center gap-1 min-w-0">
-                      <Building2 className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{incident.hospital}</span>
+                  {(r.conscious === false || r.breathing === false) && (
+                    <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
+                      <AlertTriangle className="mr-1 inline h-3 w-3" /> Life threat
                     </span>
                   )}
                 </div>
-
-                <div className="flex gap-1.5 pt-1">
-                  {incident.status === "new" && (
-                    <>
-                      <Button size="sm" className="h-7 text-xs flex-1">
-                        <Phone className="mr-1 h-3 w-3" /> Accept &amp; Roll
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-7 text-xs text-destructive hover:text-destructive">
-                        Decline
-                      </Button>
-                    </>
-                  )}
-                  {incident.status === "active" && (
-                    <>
-                      <Button size="sm" variant="outline" className="h-7 text-xs flex-1">
-                        <NavIcon className="mr-1 h-3 w-3" /> Track
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-7 text-xs flex-1">
-                        Update Status
-                      </Button>
-                    </>
-                  )}
-                  {incident.status === "completed" && (
-                    <Button size="sm" variant="outline" className="h-7 text-xs w-full">
-                      <FileText className="mr-1 h-3 w-3" /> View Report
-                    </Button>
-                  )}
-                </div>
+                {r.notes && <p className="mt-2 rounded-lg border bg-background/60 p-2 text-[11px] italic text-muted-foreground line-clamp-2">"{r.notes}"</p>}
+                <Button size="sm" className="mt-2 h-9 w-full font-bold" onClick={() => setPickFor(r.id)}>
+                  Accept &amp; Roll
+                </Button>
               </div>
-            </article>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ROLLING SHIFTS — collapsed by default, teal-bordered accordion */}
+      <Accordion type="single" collapsible className="space-y-2">
+        <AccordionItem value="rolling" className="rounded-xl border-2 border-primary/40 bg-background overflow-hidden">
+          <AccordionTrigger className="px-3 py-2 text-sm hover:no-underline">
+            <div className="flex flex-1 items-center justify-between pr-2">
+              <span className="font-semibold flex items-center gap-2">
+                <Users className="h-4 w-4 text-primary" /> Rolling shifts
+              </span>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold tabular-nums">
+                {rollingShifts.length}
+              </span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="px-3 pb-3">
+            {rollingShifts.length === 0 ? (
+              <p className="text-xs italic text-muted-foreground py-2">No vehicles on shift right now.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {rollingShifts.map((s) => (
+                  <div key={s.id} className="rounded-lg border bg-card p-2 flex items-center gap-2 text-xs">
+                    <Truck className="h-3.5 w-3.5 text-primary shrink-0" />
+                    <span className="font-semibold">
+                      {s.ambulances?.vehicle_code ?? "—"}
+                      {s.ambulances?.registration_number ? <span className="text-muted-foreground"> · {s.ambulances.registration_number}</span> : null}
+                    </span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="truncate">{s.profiles?.full_name ?? s.user_id.slice(0, 8)}</span>
+                    <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                      s.status === "busy" ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"
+                    }`}>
+                      {s.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <ParamedicAcceptDialog
+        incidentId={pickFor}
+        open={!!pickFor}
+        onOpenChange={(v) => { if (!v) setPickFor(null); }}
+        onNeedShift={() => setStartOpen(true)}
+      />
+      <StartShiftDialog providerId={providerId} open={startOpen} onOpenChange={setStartOpen} />
     </div>
   );
 }
 
 function StatCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number;
-  tone: "destructive" | "success" | "warning";
-}) {
+  label, value, tone,
+}: { label: string; value: number; tone: "destructive" | "success" | "muted" }) {
   const toneClass =
     tone === "destructive" ? "text-destructive"
     : tone === "success" ? "text-success"
-    : "text-warning";
+    : "text-muted-foreground";
   return (
     <div className="rounded-xl border border-border bg-card px-3 py-2">
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
