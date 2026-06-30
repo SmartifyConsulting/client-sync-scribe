@@ -289,12 +289,14 @@ export default function HolarcHelpIncidentDetail() {
 
   return (
     <div className="mx-auto max-w-md pb-6">
+      <SeverityPicker open={severityOpen} onSubmit={handleSeveritySubmit} onSkip={handleSeveritySkip} />
       <SosVoiceNoteDialog
         open={voiceNoteOpen}
         incidentId={id ?? null}
-        onClose={() => { setVoiceNoteOpen(false); setSeverityOpen(true); }}
+        preStarted={preStarted}
+        onClose={() => { setVoiceNoteOpen(false); setPreStarted(null); preStartedRef.current = null; }}
       />
-      <SeverityPicker open={severityOpen} onSubmit={finishSeverity} onSkip={() => finishSeverity(null)} />
+
 
       {isFresh && cancelSecondsLeft > 0 && isLive && (
         <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 text-amber-900 dark:bg-amber-950/20 dark:text-amber-100">
