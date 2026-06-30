@@ -142,9 +142,40 @@ export const LiveMap = ({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     let cancelled = false;
+    const onAuthFailure = () => {
+      setErr(
+        window.__lovableGmapsAuthError ??
+          "Google Maps authorization failed. Check billing, enabled APIs, and domain restrictions in Google Cloud.",
+      );
+    };
+    const onWindowError = (event: ErrorEvent) => {
+      const message = String(event.message ?? "");
+      if (!message.toLowerCase().includes("google maps javascript api error")) return;
+      if (message.includes("BillingNotEnabledMapError")) {
+        setErr("BillingNotEnabledMapError");
+        return;
+      }
+      if (message.includes("RefererNotAllowedMapError")) {
+        setErr("RefererNotAllowedMapError");
+        return;
+      }
+      setErr(message);
+    };
+    window.addEventListener("lovable:gmaps-auth-failure", onAuthFailure);
+    window.addEventListener("error", onWindowError);
+    const observer = new MutationObserver(() => {
+      const text = containerRef.current?.innerText ?? "";
+      if (text.includes("This page can't load Google Maps correctly")) {
+        setErr("BillingNotEnabledMapError");
+      }
+    });
+    observer.observe(containerRef.current, { childList: true, subtree: true });
     loadGoogleMaps()
       .then((g) => {
         if (cancelled || !containerRef.current) return;
+        if (window.__lovableGmapsAuthError) {
+          setErr(window.__lovableGmapsAuthError);
+        }
         gmapsRef.current = g.maps;
         PillCtorRef.current = createPillOverlay(g.maps);
         const first = points.find(
@@ -168,6 +199,9 @@ export const LiveMap = ({
 
     return () => {
       cancelled = true;
+      window.removeEventListener("lovable:gmaps-auth-failure", onAuthFailure);
+      window.removeEventListener("error", onWindowError);
+      observer.disconnect();
       if (tweenRafRef.current) cancelAnimationFrame(tweenRafRef.current);
       staticMarkersRef.current.forEach((m) => m.setMap(null));
       pillOverlaysRef.current.forEach((m) => m.setMap(null));
@@ -311,12 +345,14 @@ export const LiveMap = ({
         className="overflow-hidden rounded-2xl border z-0"
       />
       {err && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/85 px-4 text-center">
+        <div className="absolute inset-0 z-[2147483647] flex items-center justify-center bg-background/90 px-4 text-center">
           <div className="max-w-sm rounded-xl border border-destructive/40 bg-card p-3 shadow-lg">
             <p className="text-xs font-semibold text-destructive">Google Maps could not load</p>
             <p className="mt-1 text-[11px] text-muted-foreground">
               {err.toLowerCase().includes("referer") || err.toLowerCase().includes("not allowed")
                 ? "This domain is not on the Google Maps key's HTTP referrer allowlist. Add the domain in Google Cloud."
+                : err.toLowerCase().includes("billing")
+                  ? "Google Maps billing is not enabled for this API key's Google Cloud project. Enable billing, then reload this SOS screen."
                 : err.toLowerCase().includes("key")
                   ? "The Google Maps key is missing or not configured for this app."
                   : err}

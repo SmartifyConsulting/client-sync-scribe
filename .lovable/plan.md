@@ -1,86 +1,44 @@
-# ER Provider Portal — Workflow Rework
+## Plan
 
-Goal: make the Ambulance portal match how EMS actually works and remove confusing UI. No new help page — the screens themselves must read intuitively.
+1. **Fix the Google Maps error message on SOS maps**
+   - Add a clearer in-app overlay for `BillingNotEnabledMapError`, explaining that Google Cloud billing must be enabled on the Maps project.
+   - Keep the map area usable-looking instead of relying only on Google’s default “This page can’t load Google Maps correctly” popup.
+   - Also note in-app if the issue is a domain/referrer restriction or missing key.
 
-## How it will work (target workflow)
+2. **Show the incident number on the patient SOS screen**
+   - Display the human-readable incident number, e.g. `INC-2026-000123`, near the “Active emergency” heading and in the sticky top bar.
+   - Add it to the patient incident history cards so the same number can be matched with the ER Provider / Dispatcher screens.
 
-```
-Provider (company)
- └── Many Vehicles on shift simultaneously
-       └── Each Vehicle has a Crew (1 lead + optional partners) for that shift
-             └── A Vehicle is assigned to ONE active Incident at a time
-```
+3. **Keep the ER provider list visible during the first 30 seconds**
+   - When the SOS is first created, show available ER providers with distance and a countdown.
+   - If the system auto-assigns the closest provider after 30 seconds, keep the list visible briefly as a “Change ER Provider” selector when still inside the 30-second decision window.
 
-Roles inside an ER Provider:
-- **Dispatcher** (desk): sees all incoming SOS, picks vehicle, assigns crew.
-- **Crew** (in the ambulance): clocks onto a vehicle, acknowledges assignments, drives the mission.
-- **ER_Admin**: manages fleet, members, hospitals.
+4. **Allow changing from auto-assigned to selected ER Provider within 30 seconds**
+   - Add a backend RPC such as `holarchelp_patient_change_provider` that only allows the patient who owns the incident to change provider if:
+     - the incident is still live,
+     - the incident was auto-assigned,
+     - less than 30 seconds have passed from the incident creation / auto-assignment window,
+     - the new provider is a valid pending ER provider offer.
+   - Record the change in `holarchelp_incident_events` as `patient_changed_provider` / `reassigned` so the ER workflow timeline shows it.
+   - Supersede the old provider offer and mark the newly selected provider as picked.
 
-Dispatch rule (hybrid):
-- If a Dispatcher is on duty → SOS goes to Dispatcher console; crew gets "Acknowledge / Rolling".
-- If no Dispatcher is on duty → crew can self-accept from Incoming SOS (today's behavior).
+5. **Make the patient SOS workflow easier to follow**
+   - In the responder card, show:
+     - incident number,
+     - current assigned ER Provider,
+     - whether it was auto-assigned,
+     - remaining seconds to change provider when available.
+   - After the 30-second window closes, replace the selector with a locked state explaining that the responder is now fixed unless ER dispatch reassigns it.
 
-## Changes
+## Technical details
 
-### 1. Data model (small additions)
-- `vehicle_shifts` (new): one row per vehicle currently on shift. Columns: `provider_id`, `vehicle_id`, `lead_user_id`, `status` (available/busy/off), `current_incident_id`, `started_at`, `ended_at`.
-- `vehicle_shift_crew` (new): `vehicle_shift_id`, `user_id`, `role` (lead/partner).
-- Keep `paramedic_shifts` for back-compat; new code reads/writes `vehicle_shifts`. Migrate the "1 crew = 1 vehicle" rows on the fly.
-- Add `dispatcher_on_duty` boolean on `holarchelp_ambulance_providers` (toggled by Dispatcher clocking in).
-
-### 2. Stats strip (`AmbulanceOpsLayout.tsx`)
-Reordered, deduped:
-```
-[ Start Shift / End Shift ]  [ ●ON SHIFT · busy/available ]  [ Active Mission #INC-… ]   …  [online]
-```
-- "Start Shift" action chip is first when off-shift.
-- On/Off status chip second.
-- Active Mission chip only renders when there IS one (no "Standing by" filler).
-- **Remove Open SOS chip** (already on dashboard).
-
-### 3. Start Shift dialog
-Now asks: **Vehicle** + **Crew partners (optional, multi-select from provider members)**. Lead = current user. Creates a `vehicle_shifts` row + crew rows.
-
-### 4. Incoming SOS screen (crew view)
-- If `dispatcher_on_duty` = true → banner "Dispatcher is assigning units" and the Accept button is replaced by **Acknowledge** which only appears once Dispatcher assigns this vehicle.
-- If `dispatcher_on_duty` = false → today's self-accept flow stays (renamed button to **Accept & Roll**).
-- Remove the word "Dispatch" from this screen.
-
-### 5. New Dispatcher Console (`/provider/ambulance/dispatch`)
-Sidebar item visible to users with role `dispatcher` or `er_admin`. Three columns:
-- Open SOS queue (sev-sorted)
-- Available vehicles (live, with crew names + GPS)
-- Selected incident detail → **Assign Vehicle** button opens picker, sets incident.assigned_provider/vehicle/lead, sets vehicle status busy, notifies crew.
-
-Toggle at top: **"I am on duty as Dispatcher"** → flips `dispatcher_on_duty`.
-
-### 6. Active Mission / Navigation
-No structural change — already vehicle-centric. Just shows assigned vehicle + crew names on the side panel.
-
-### 7. Fleet Live
-Group markers by vehicle; show crew names on hover. No change to map tech.
-
-## Why each of your points is addressed
-
-| Your concern | Fix |
-|---|---|
-| Can a shift have many vehicles? | Yes — shifts are now per-vehicle, provider has many concurrent `vehicle_shifts`. |
-| OFF SHIFT shows before ON SHIFT | Action chip (Start Shift) moves to position 1; status chip becomes secondary. |
-| Open SOS duplicated | Removed from strip; lives on dashboard only. |
-| What does Accept/Dispatch do? | Two clearly separated flows: Dispatcher **Assigns**, Crew **Acknowledges** (or **Accepts & Rolls** when no dispatcher). Word "Dispatch" only appears in the Dispatcher console. |
-| Shouldn't the dispatcher pick the vehicle? | New Dispatcher Console does exactly that. |
-
-## Out of scope
-- Multi-vehicle convoy on one incident (still 1 vehicle ↔ 1 incident).
-- Shift scheduling/rosters in advance (clock-in only, like today).
-- In-app help page (per your direction — UI must be self-explanatory).
-
-## Files touched
-- DB: new migration for `vehicle_shifts`, `vehicle_shift_crew`, `dispatcher_on_duty` column, RPCs `start_vehicle_shift`, `end_vehicle_shift`, `dispatcher_assign_vehicle`, `crew_acknowledge`.
-- `src/modules/holarchelp/pages/provider/ambulance/AmbulanceOpsLayout.tsx` — strip reorder, remove Open SOS chip, hide Active Mission when none.
-- `src/modules/holarchelp/components/StartShiftDialog.tsx` — vehicle + crew picker.
-- `src/modules/holarchelp/hooks/useParamedicShift.ts` → rename/extend to `useVehicleShift.ts`.
-- `src/modules/holarchelp/pages/provider/ambulance/IncomingSosScreen.tsx` — hybrid Accept/Acknowledge, remove "Dispatch" wording.
-- New `src/modules/holarchelp/pages/provider/ambulance/DispatchConsoleScreen.tsx` + route + sidebar entry (role-gated).
-- `FleetLiveScreen.tsx` — show crew names per vehicle.
-- i18n keys for new labels across all 25 locales.
+- Frontend files to update:
+  - `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx`
+  - `src/modules/holarchelp/pages/HolarcHelpIncidents.tsx`
+  - `src/modules/holarchelp/components/AvailableResponders.tsx`
+  - `src/modules/holarchelp/components/LiveMap.tsx`
+- Backend changes:
+  - Add a migration for the new patient-change-provider RPC.
+  - Reuse existing `holarchelp_incident_offers`, `holarchelp_incident_events`, and `holarchelp_incidents.assigned_provider_id` workflow.
+- Google Maps note:
+  - The screenshot error is specifically `BillingNotEnabledMapError`, so the real fix outside code is to ensure billing is enabled in the Google Cloud project that owns the Maps API key. The code can explain this clearly, but billing must be enabled in Google Cloud for the map to render normally.

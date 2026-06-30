@@ -35,6 +35,7 @@ export default function HolarcHelpIncidentDetail() {
   const [profileName, setProfileName] = useState("Your contact");
   const [responder, setResponder] = useState<{ name: string; kind: "ambulance" | "hospital"; latitude: number | null; longitude: number | null } | null>(null);
   const [autoAssigned, setAutoAssigned] = useState(false);
+  const [autoAssignedAt, setAutoAssignedAt] = useState<string | null>(null);
   const [pendingOffers, setPendingOffers] = useState<number>(0);
 
   useEffect(() => {
@@ -58,6 +59,17 @@ export default function HolarcHelpIncidentDetail() {
         (p) => setLocations((prev) => [p.new as any, ...prev].slice(0, 200)))
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_incidents", filter: `id=eq.${id}` },
         (p) => setIncident((prev: any) => ({ ...(prev ?? {}), ...(p.new as any) })))
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "holarchelp_incident_events", filter: `incident_id=eq.${id}` },
+        (p) => {
+          const event = p.new as any;
+          if (event?.event_type === "auto_assigned") {
+            setAutoAssigned(true);
+            setAutoAssignedAt(event.created_at ?? new Date().toISOString());
+          }
+          if (["patient_picked", "patient_changed_provider", "reassigned"].includes(event?.event_type)) {
+            setAutoAssigned(false);
+          }
+        })
       .subscribe();
 
     const onFocus = () => refetchIncident();
@@ -72,16 +84,16 @@ export default function HolarcHelpIncidentDetail() {
 
   // Fetch responder name (ambulance OR hospital) when assigned, plus detect auto-assignment
   useEffect(() => {
-    if (!incident?.assigned_provider_id || !id) { setResponder(null); setAutoAssigned(false); return; }
+    if (!incident?.assigned_provider_id || !id) { setResponder(null); setAutoAssigned(false); setAutoAssignedAt(null); return; }
     const pid = incident.assigned_provider_id;
     (async () => {
       const [{ data: amb }, { data: hosp }, { data: ev }] = await Promise.all([
         supabase.from("holarchelp_ambulance_providers_public" as any).select("company_name, latitude, longitude").eq("id", pid).maybeSingle(),
         supabase.from("holarchelp_hospitals_public" as any).select("name, latitude, longitude").eq("id", pid).maybeSingle(),
         supabase.from("holarchelp_incident_events" as any)
-          .select("event_type").eq("incident_id", id)
-          .in("event_type", ["auto_assigned", "patient_picked", "accepted"])
-          .order("created_at", { ascending: false }).limit(1).maybeSingle(),
+          .select("event_type, created_at").eq("incident_id", id)
+          .in("event_type", ["auto_assigned", "patient_picked", "accepted", "reassigned", "patient_changed_provider"])
+          .order("created_at", { ascending: false }).limit(8),
       ]);
       if ((amb as any)?.company_name) {
         const a: any = amb;
@@ -90,7 +102,9 @@ export default function HolarcHelpIncidentDetail() {
         const h: any = hosp;
         setResponder({ name: h.name, kind: "hospital", latitude: h.latitude ?? null, longitude: h.longitude ?? null });
       } else setResponder(null);
-      setAutoAssigned((ev as any)?.event_type === "auto_assigned");
+      const events = ((ev as any[]) ?? []);
+      setAutoAssigned(events[0]?.event_type === "auto_assigned");
+      setAutoAssignedAt(events.find((e) => e.event_type === "auto_assigned")?.created_at ?? null);
     })();
   }, [incident?.assigned_provider_id, id]);
 
@@ -120,14 +134,22 @@ export default function HolarcHelpIncidentDetail() {
 
   // Elapsed seconds since incident created (for "no responders yet" fallback after 90 s)
   const [elapsed, setElapsed] = useState(0);
+  const [clock, setClock] = useState(Date.now());
   useEffect(() => {
     if (!incident?.created_at) return;
-    const update = () => setElapsed(Math.floor((Date.now() - new Date(incident.created_at).getTime()) / 1000));
+    const update = () => {
+      const now = Date.now();
+      setClock(now);
+      setElapsed(Math.floor((now - new Date(incident.created_at).getTime()) / 1000));
+    };
     update();
-    const t = setInterval(update, 5000);
+    const t = setInterval(update, 1000);
     return () => clearInterval(t);
   }, [incident?.created_at]);
   const showNoResponders = isUnassignedOpen && pendingOffers === 0 && elapsed > 90;
+  const autoChangeSecondsLeft = autoAssignedAt
+    ? Math.max(0, Math.floor((new Date(autoAssignedAt).getTime() + 30000 - clock) / 1000))
+    : 0;
 
   const callEmergency = () => { window.location.href = "tel:10177"; };
   const goHome = () => navigate("/patient/holarchelp");
@@ -258,6 +280,11 @@ export default function HolarcHelpIncidentDetail() {
           <Button size="sm" variant="ghost" className="shrink-0 gap-1" onClick={goHome}>
             <ArrowLeft className="h-4 w-4" /> SOS Home
           </Button>
+          {incident.incident_number && (
+            <span className="rounded-full border bg-card px-2 py-1 font-mono text-[11px] font-bold text-primary">
+              {incident.incident_number}
+            </span>
+          )}
           <div className="flex-1" />
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
             <Share2 className="h-4 w-4" />
@@ -268,8 +295,13 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       </div>
 
-      <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
+          {incident.incident_number && (
+            <p className="mt-0.5 font-mono text-xs font-bold text-primary">Incident {incident.incident_number}</p>
+          )}
+        </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
           {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
         </span>
@@ -310,6 +342,11 @@ export default function HolarcHelpIncidentDetail() {
             {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
           </p>
           <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
+          {incident.incident_number && (
+            <p className="mt-1 font-mono text-[11px] font-bold text-emerald-900/80 dark:text-emerald-200/80">
+              Incident {incident.incident_number}
+            </p>
+          )}
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">
             {responder.kind === "ambulance" && incident.eta_minutes != null && (
               <span>ETA: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} /></span>
@@ -323,6 +360,9 @@ export default function HolarcHelpIncidentDetail() {
             {incident.accepted_at && (
               <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}
+            {autoAssigned && autoAssignedAt && autoChangeSecondsLeft > 0 && (
+              <span className="text-xs font-semibold">Change ER Provider: {autoChangeSecondsLeft}s left</span>
+            )}
           </div>
           {distanceKm != null && incident.provider_latitude == null && (
             <p className="mt-1 text-[11px] text-emerald-800/70 dark:text-emerald-200/60">
@@ -330,6 +370,15 @@ export default function HolarcHelpIncidentDetail() {
             </p>
           )}
         </div>
+      )}
+
+      {isLive && responder && incident.assigned_provider_id && autoAssigned && autoAssignedAt && (
+        <AvailableResponders
+          incidentId={id!}
+          createdAt={incident.created_at}
+          assignedProviderId={incident.assigned_provider_id}
+          autoAssignedAt={autoAssignedAt}
+        />
       )}
 
       <SosLiveMap incidentId={id!} mode="patient" height={320} />

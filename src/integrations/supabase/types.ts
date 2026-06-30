@@ -5815,6 +5815,10 @@ export type Database = {
             }
             Returns: Json
           }
+      holarchelp_patient_change_provider: {
+        Args: { _incident_id: string; _provider_id: string }
+        Returns: Json
+      }
       holarchelp_patient_pick_provider: {
         Args: { _incident_id: string; _kind: string; _provider_id: string }
         Returns: Json
