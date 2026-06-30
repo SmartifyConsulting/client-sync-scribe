@@ -52,9 +52,8 @@ const hospitalNav: NavItem[] = [
 ];
 
 const ambulanceNav: NavItem[] = [
-  // EMERGENCY RESPONSE TIER (Dispatcher Console now merged into Dispatch Dashboard)
+  // Active missions are now drill-downs from the Dispatcher Console inside Dispatch Dashboard.
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
-  { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
   // MONITORING (Fleet Live)
   { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
   // ADMIN — Users, Crew, Fleet Admin, Hospitals
