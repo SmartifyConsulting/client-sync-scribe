@@ -1,64 +1,43 @@
-## 1. Fix SQL error on "Change ER Provider"
+## 1. Make the Incident Number visible exactly once (and bolder)
 
-`public.holarchelp_patient_change_provider` (added in `20260630170238_...sql`) sets `updated_at = now()` on `holarchelp_incidents`, but that table has no `updated_at` column — hence the raw error in the screenshot.
+Currently `HolarcHelpIncidentDetail.tsx` renders `<IncidentNumberBadge>` twice — once inside the sticky quick-action bar (line 286) and again under the page heading (lines 301–305). That's the duplication you're seeing.
 
-- New migration: `CREATE OR REPLACE FUNCTION public.holarchelp_patient_change_provider(...)` identical to current, with the `updated_at = now()` line removed.
+Changes:
 
-## 2. Default headcounts to 1 (`SeverityPicker.tsx`)
+- **Remove** the second badge under the H1 (lines 301–305).
+- Keep a **single** badge inside the sticky bar so it stays visible as you scroll.
+- Reformat `src/components/IncidentNumberBadge.tsx` to be more prominent:
+  - Bump the visual size: `md` → `text-base px-3 py-1.5`, `lg` → `text-lg px-3.5 py-2`.
+  - Stronger frame: `border-2 border-primary bg-primary/10 text-primary shadow-sm`.
+  - Render the number in `font-mono font-extrabold tracking-[0.18em] tabular-nums`.
+  - Label changes from "Ref" to **"Incident #"** (single label), still copyable.
+- Use `size="lg"` in the sticky bar so the single badge reads clearly.
+- Same single-badge treatment is already used on the ER/Hospital screens via the shared component — they automatically inherit the new look.
 
-- Initial state: `people = 1`, `breathing = 1`, `unconscious = 1` (still clamped to people).
+## 2. Test A — Patient picks Renken for INC-2026-001070
 
-## 3. "Extend time" for auto-assign countdown (`AvailableResponders.tsx`)
+`INC-2026-001070` is currently `status = assigned` to **Ferndale Emergency Response** (auto-assigned), and the 90-second patient change window is long past, so the "Change ER Provider" UI is hidden on the patient detail page.
 
-- Add `extensionSec` state (default 0). The countdown deadline becomes `base + extensionSec * 1000`.
-- Show a "＋30s more time" button next to the countdown while `remainingSec > 0` and `extensionSec < 60` (cap two extensions = +60s total).
-- Works in both initial-pick mode and change-mode (after auto-assign).
+To run the test cleanly without code changes, the plan is to reset the incident server-side so the patient can pick Renken from scratch:
 
-## 4. Make "Change ER Provider" clearer & more prominent (`AvailableResponders.tsx`)
+1. Reopen the incident: set `status = 'open'`, clear `assigned_provider_id`, `assigned_paramedic_user_id`, `accepted_at`, and the auto-assign event flags.
+2. Reload `/patient/holarchelp/incident/e8add7b5-…` as Sharon (the patient on the incident).
+3. The `AvailableResponders` panel will reappear with the list of providers — pick **Renken Ambulance Service** (Cresta).
+4. Confirm the badge reads **Incident # INC-2026-001070** once, the assigned provider becomes Renken, and a Renken shift sees the assignment under **Active Mission**.
 
-When `isChangeMode` is true and the change window is still open:
+## 3. Test B — Renken self-accepts from the Incoming SOS feed
 
-- Wrap the panel in a prominent amber/primary banner:
-  - Title: "An ER provider was auto-assigned — you have 30s to change"
-  - Sub: "Tap any provider below to switch, or do nothing to keep <Current>."
-- Pin the currently assigned provider to the top with a "Current" pill and disabled "Keep" state; other providers get a primary "Switch" button.
-- Once `remainingSec <= 0` in change mode: replace the entire panel with the existing compact "ER Provider locked" note — no list, removing the confusion.
+For this run we need the same incident sitting unassigned in Renken's queue:
 
-## 5. Make the Incident Number highly visible
+1. Sign in as a Renken staffer (`renken@smartify.co.za`) and **Start Shift** so `IncomingSosScreen` is unlocked.
+2. With the incident reset to `open` (no `assigned_paramedic_user_id`, no `assigned_provider_id`), `INC-2026-001070` will appear in **Incoming SOS** sorted by severity.
+3. Tap **Accept & Roll**, choose a destination Johannesburg hospital in `ParamedicAcceptDialog`, and confirm:
+   - Incident moves to **Active Mission** for the Renken paramedic.
+   - Patient screen shows the single prominent **Incident # INC-2026-001070** badge and the Renken vehicle on the map.
+   - Hospital inbound listener toasts the chosen destination.
 
-`incident_number` (e.g. `INC-2026-000123`) is the workflow handle used across patient ↔ ER ↔ hospital screens, so it must read like a tracking number, not a footnote.
+## Technical notes
 
-- **Patient `HolarcHelpIncidentDetail.tsx`**: promote the incident number to a sticky pill at the top of the sticky bar — large mono font, copy-to-clipboard icon, with the label "Reference #" in front of it. Use the same styling on the live SOS map header card.
-- **Patient `HolarcHelpIncidents.tsx` history list**: show the number on the first row of each card (currently buried).
-- **ER provider screens** (`EmergencyDashboardScreen`, `DispatcherConsoleScreen`, `IncomingSosScreen`, `AmbulanceIncidentConsole`, `ActiveDispatchScreen`) and **Hospital** (`HospitalIncidentConsole`, `IncidentTimelineScreen`): render via a new shared `<IncidentNumberBadge number={...} />` component (mono font, primary border, optional copy button) so the reference looks identical everywhere.
-- Tracking page (`PublicTrack.tsx`) and notifications: include the incident number in the title and any toast strings.
-
-## 6. App-wide user-friendly message audit
-
-Today many user-visible strings are raw exceptions (e.g. `column "updated_at" of relation "holarchelp_incidents" does not exist`) thrown straight into `toast.error(error.message)`. We'll do one sweep to make every user message friendly, branded, and translation-ready.
-
-### Approach
-
-1. **Audit pass**: ripgrep the app for the noisy patterns and produce a checklist:
-   - `toast.error(error.message)` / `toast(error.message)`
-   - `alert(`, `window.alert(`, `confirm(`
-   - `throw new Error("...")` shown to users
-   - Untranslated literal strings in dialogs, empty states, error boundaries
-   - Edge function responses surfaced verbatim
-2. **Shared error mapper** (`src/lib/userMessage.ts`):
-   - `friendlyMessage(error, fallback)` — strips Postgres/Supabase noise (`PGRST…`, `duplicate key…`, `permission denied`, `JWT expired`, network/`Failed to fetch`), maps known codes to plain-language sentences, and returns the fallback otherwise.
-   - `toastError(error, fallback)` wrapper around `sonner` that calls `friendlyMessage` and logs the raw error to the console for devs.
-3. **Refactor call sites**: replace every `toast.error(error.message)` with `toastError(error, "We couldn't save your changes. Please try again.")` (fallback tuned to the action). High-traffic surfaces first:
-   - SOS / HolarcHelp (incidents, change provider, cancellations)
-   - Doctor: sessions, prescriptions, documents, invoices, appointments
-   - Patient: rewards, uploads, profile sharing, NOK
-   - Provider portals: shift start/end, dispatch, accept/decline
-   - Auth: sign-in/up, password reset, MFA
-4. **Translation**: every new fallback string lives under `messages.*` keys in `src/i18n/uiTranslations.ts` (English first, fall back to English for other locales until a follow-up sweep).
-5. **Empty states & loading**: replace generic "No data" with action-oriented copy ("No SOS incidents yet — tap the red SOS button if you need help.").
-6. **Error boundary**: ensure `ErrorBoundary` shows a branded "Something went wrong. We've logged the issue." card with a Retry button, not a stack trace.
-
-### Out of scope for this round
-
-- Full translation of new strings into all 25 locales (English + fallback this pass; locale sweep next).
-- Deep rewording of long-form legal/marketing copy.
+- File touched: `src/components/IncidentNumberBadge.tsx` (style + default label), `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx` (delete duplicate badge, bump remaining one to `size="lg"`).
+- DB reset for Tests A & B is a one-shot UPDATE on `holarchelp_incidents` + delete of the `auto_assigned`/`assigned`/`accepted` rows from `holarchelp_incident_events` for that incident — no schema changes, no migration.
+- No changes to RPCs, RLS, or the dispatcher console.

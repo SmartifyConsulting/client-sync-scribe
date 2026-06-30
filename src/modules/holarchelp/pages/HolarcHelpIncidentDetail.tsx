@@ -283,7 +283,7 @@ export default function HolarcHelpIncidentDetail() {
             <ArrowLeft className="h-4 w-4" /> SOS Home
           </Button>
           {incident.incident_number && (
-            <IncidentNumberBadge number={incident.incident_number} size="md" />
+            <IncidentNumberBadge number={incident.incident_number} size="lg" />
           )}
           <div className="flex-1" />
           <Button size="icon" variant="outline" className="h-9 w-9 rounded-full" onClick={shareLink} aria-label="Share tracking link" title="Share">
@@ -298,11 +298,6 @@ export default function HolarcHelpIncidentDetail() {
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
-          {incident.incident_number && (
-            <div className="mt-1">
-              <IncidentNumberBadge number={incident.incident_number} size="lg" label="Reference #" />
-            </div>
-          )}
         </div>
         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
           {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}

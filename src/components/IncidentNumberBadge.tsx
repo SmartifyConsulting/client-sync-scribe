@@ -19,17 +19,17 @@ export function IncidentNumberBadge({
   className,
   size = "md",
   showCopy = true,
-  label = "Ref",
+  label = "Incident #",
 }: Props) {
   const [copied, setCopied] = useState(false);
   if (!number) return null;
 
   const sizeCls =
     size === "lg"
-      ? "text-base px-3 py-1.5"
+      ? "text-lg px-3.5 py-2"
       : size === "sm"
-      ? "text-[11px] px-2 py-0.5"
-      : "text-sm px-2.5 py-1";
+      ? "text-xs px-2 py-1"
+      : "text-base px-3 py-1.5";
 
   const onCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,22 +43,22 @@ export function IncidentNumberBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border-2 border-primary/40 bg-primary/5 font-mono font-semibold tracking-wider text-primary",
+        "inline-flex items-center gap-2 rounded-full border-2 border-primary bg-primary/10 text-primary shadow-sm",
         sizeCls,
         className,
       )}
     >
-      <Hash className="h-3.5 w-3.5 opacity-70" aria-hidden />
-      <span className="opacity-70">{label}</span>
-      <span className="tabular-nums">{number}</span>
+      <Hash className="h-4 w-4 opacity-80" aria-hidden />
+      <span className="text-[0.75em] font-semibold uppercase tracking-wider opacity-80">{label}</span>
+      <span className="font-mono font-extrabold tracking-[0.18em] tabular-nums">{number}</span>
       {showCopy && (
         <button
           type="button"
           onClick={onCopy}
-          className="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded hover:bg-primary/10 transition"
-          aria-label="Copy reference number"
+          className="ml-0.5 inline-flex h-6 w-6 items-center justify-center rounded hover:bg-primary/20 transition"
+          aria-label="Copy incident number"
         >
-          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </button>
       )}
     </span>
