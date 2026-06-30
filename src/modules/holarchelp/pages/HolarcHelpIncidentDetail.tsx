@@ -360,7 +360,7 @@ export default function HolarcHelpIncidentDetail() {
             {incident.accepted_at && (
               <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}
-            {autoAssignedAt && autoChangeSecondsLeft > 0 && (
+            {autoAssigned && autoAssignedAt && autoChangeSecondsLeft > 0 && (
               <span className="text-xs font-semibold">Change ER Provider: {autoChangeSecondsLeft}s left</span>
             )}
           </div>
@@ -372,7 +372,7 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      {responder && incident.assigned_provider_id && autoAssignedAt && (
+      {responder && incident.assigned_provider_id && autoAssigned && autoAssignedAt && (
         <AvailableResponders
           incidentId={id!}
           createdAt={incident.created_at}

@@ -337,7 +337,7 @@ export const LiveMap = ({
         className="overflow-hidden rounded-2xl border z-0"
       />
       {err && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/85 px-4 text-center">
+        <div className="absolute inset-0 z-[10000] flex items-center justify-center bg-background/90 px-4 text-center">
           <div className="max-w-sm rounded-xl border border-destructive/40 bg-card p-3 shadow-lg">
             <p className="text-xs font-semibold text-destructive">Google Maps could not load</p>
             <p className="mt-1 text-[11px] text-muted-foreground">
