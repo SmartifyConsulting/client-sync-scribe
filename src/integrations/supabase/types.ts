@@ -418,6 +418,45 @@ export type Database = {
           },
         ]
       }
+      ambulance_crew_assignments: {
+        Row: {
+          ambulance_id: string
+          created_at: string
+          id: string
+          is_default_lead: boolean
+          member_id: string
+        }
+        Insert: {
+          ambulance_id: string
+          created_at?: string
+          id?: string
+          is_default_lead?: boolean
+          member_id: string
+        }
+        Update: {
+          ambulance_id?: string
+          created_at?: string
+          id?: string
+          is_default_lead?: boolean
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulance_crew_assignments_ambulance_id_fkey"
+            columns: ["ambulance_id"]
+            isOneToOne: false
+            referencedRelation: "ambulances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambulance_crew_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ambulance_fleet: {
         Row: {
           count: number
@@ -5637,6 +5676,10 @@ export type Database = {
       }
     }
     Functions: {
+      _is_amb_provider_admin_for_vehicle: {
+        Args: { _ambulance_id: string }
+        Returns: boolean
+      }
       approve_blood_donation: { Args: { _donation_id: string }; Returns: Json }
       award_doctor_checkin: {
         Args: { _note?: string; _patient_user_id: string }
@@ -5859,6 +5902,7 @@ export type Database = {
         Returns: Json
       }
       holarchelp_start_shift: { Args: { _ambulance_id: string }; Returns: Json }
+      holarchelp_start_shifts_bulk: { Args: { _payload: Json }; Returns: Json }
       holarchelp_update_provider_location: {
         Args: { _incident_id: string; _lat: number; _lng: number }
         Returns: undefined
