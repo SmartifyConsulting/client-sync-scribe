@@ -120,8 +120,8 @@ export default function ProviderRoutes() {
         {/* Incoming SOS merged into Emergency Dashboard */}
         <Route path="incoming" element={<Navigate to="/provider/ambulance" replace />} />
 
-        {/* Dispatcher Console (desk: assigns vehicle to incident) */}
-        <Route path="dispatch" element={<DispatcherConsoleScreen />} />
+        {/* Dispatcher Console merged into Dispatch Dashboard */}
+        <Route path="dispatch" element={<Navigate to="/provider/ambulance" replace />} />
 
         {/* Hospital Network now lives inside Admin */}
         <Route path="hospital-network" element={<Navigate to="/provider/ambulance/admins?tab=hospitals" replace />} />
