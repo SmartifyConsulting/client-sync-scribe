@@ -15,7 +15,9 @@ type Offer = {
   ownership: string | null;
 };
 
-const AUTO_ASSIGN_MS = 30 * 1000;
+// TESTING: selection timer disabled — patient has unlimited time to choose an ER Provider.
+const DISABLE_SELECTION_TIMER = true;
+const AUTO_ASSIGN_MS = DISABLE_SELECTION_TIMER ? Number.MAX_SAFE_INTEGER : 30 * 1000;
 const EXTEND_STEP_MS = 30 * 1000;
 const EXTEND_MAX_MS = 60 * 1000; // up to two extensions
 
@@ -80,6 +82,7 @@ export function AvailableResponders({
   const canExtend = remainingSec > 0 && extensionMs < EXTEND_MAX_MS;
 
   useEffect(() => {
+    if (DISABLE_SELECTION_TIMER) return;
     if (isChangeMode || remainingSec > 0) return;
     if (!offers.length) return;
     supabase.rpc("holarchelp_auto_assign_incident" as any, { _incident_id: incidentId }).then(() => {}, () => {});
