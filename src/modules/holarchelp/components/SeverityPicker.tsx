@@ -32,8 +32,8 @@ export const SeverityPicker = ({
   const [step, setStep] = useState<1 | 2>(1);
   const [severity, setSeverity] = useState<Severity>("high");
   const [people, setPeople] = useState(1);
-  const [breathing, setBreathing] = useState(0);
-  const [unconscious, setUnconscious] = useState(0);
+  const [breathing, setBreathing] = useState(1);
+  const [unconscious, setUnconscious] = useState(1);
 
   const setPeopleClamped = (n: number) => {
     const next = Math.max(1, n);
