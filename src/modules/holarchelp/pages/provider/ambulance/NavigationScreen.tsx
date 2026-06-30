@@ -125,8 +125,8 @@ export default function NavigationScreen() {
             treatedOnScene={incident.status === "treated_on_scene"}
           />
 
-          {/* Course-deviation banner — set by the auto-advance trigger */}
-          {incident.status === "en_route_to_hospital" && incident.route_deviation_at && (
+          {/* Course-deviation banner — set by the auto-advance trigger via incident_events */}
+          {deviationActive && (
             <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-800">
               <p className="flex items-center gap-1.5 font-bold">
                 <AlertTriangle className="h-3.5 w-3.5" /> Off planned route to hospital
