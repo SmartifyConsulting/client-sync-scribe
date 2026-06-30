@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
 
 export default function HolarcHelpIncidents() {
   const { user } = useAuth();
