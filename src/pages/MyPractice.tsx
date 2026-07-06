@@ -34,7 +34,6 @@ import {
 } from "lucide-react";
 
 import ReferralDoctors from "@/pages/ReferralDoctors";
-import Documents from "@/pages/Documents";
 import DoctorRewards from "@/pages/doctor/DoctorRewards";
 
 import Patients from "@/pages/Patients";
