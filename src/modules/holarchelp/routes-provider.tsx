@@ -74,10 +74,10 @@ export default function ProviderRoutes() {
       <Route path="er/*" element={<Navigate to="/provider/ambulance" replace />} />
       <Route path="hospital" element={<ProviderShell><HospitalOpsLayout /></ProviderShell>}>
         <Route index element={<EmergencyHubScreen />} />
-        <Route path="incoming" element={<Navigate to="/provider/hospital?tab=incoming" replace />} />
-        <Route path="triage" element={<Navigate to="/provider/hospital?tab=triage" replace />} />
+        <Route path="incoming" element={<Navigate to="/provider/hospital" replace />} />
+        <Route path="triage" element={<Navigate to="/provider/hospital" replace />} />
         <Route path="admissions" element={<AdmissionsScreen />} />
-        <Route path="capacity" element={<Navigate to="/provider/hospital?tab=capacity" replace />} />
+        <Route path="capacity" element={<Navigate to="/provider/hospital" replace />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
         <Route path="providers" element={<ProvidersScreen />} />
         <Route path="doctors" element={<Navigate to="/provider/hospital/providers?tab=doctors" replace />} />
@@ -87,12 +87,25 @@ export default function ProviderRoutes() {
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
 
-        {/* Dispatch Management Routes */}
-        <Route path="dispatch" element={<MultiIncidentBoardScreen />} />
-        <Route path="dispatch-queue" element={<DispatchQueueScreen />} />
-        <Route path="dispatch-board" element={<MultiIncidentBoardScreen />} />
+        {/* Dispatch Dashboard (unified) — reuses ER Provider's EmergencyDashboardScreen */}
+        <Route path="dispatch" element={<EmergencyDashboardScreen />} />
+        <Route path="dispatch-queue" element={<Navigate to="/provider/hospital/dispatch" replace />} />
+        <Route path="dispatch-board" element={<Navigate to="/provider/hospital/dispatch" replace />} />
         <Route path="dispatch-reassign/:incidentId" element={<DispatchReassignmentScreen />} />
         <Route path="manual-override" element={<ManualOverrideScreen />} />
+
+        {/* Fleet Live (unified) — reuses ER Provider components */}
+        <Route path="monitoring" element={<RealTimeMonitoringScreen />} />
+        <Route path="fleet" element={<FleetOperationsScreen />} />
+        <Route path="fleet/vehicle/:id" element={<VehicleProfileScreen />} />
+        <Route path="navigation" element={<NavigationScreen />} />
+        <Route path="navigation/:id" element={<NavigationScreen />} />
+        <Route path="abuse" element={<VehicleAbuseScreen />} />
+        <Route path="abuse/geofence" element={<GeofenceScreen />} />
+        <Route path="abuse/routes" element={<RouteDeviationScreen />} />
+        <Route path="abuse/hours" element={<AfterHoursScreen />} />
+        <Route path="abuse/trips" element={<UnlinkedTripsScreen />} />
+
 
         {/* Incident Creation Workflow */}
         <Route path="incident/create" element={<CreateIncidentScreen />} />

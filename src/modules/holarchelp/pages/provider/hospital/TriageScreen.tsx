@@ -66,10 +66,7 @@ export default function TriageScreen() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
-        <h1 className="text-2xl font-extrabold">{t("triageBoard.title")}</h1>
-      </header>
+      <h2 className="text-2xl font-extrabold">{t("triageBoard.title")}</h2>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
         {COLUMNS.map((col) => {

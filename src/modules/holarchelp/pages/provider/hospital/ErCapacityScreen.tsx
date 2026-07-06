@@ -37,10 +37,7 @@ export default function ErCapacityScreen() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
-        <h1 className="text-2xl font-extrabold">{t("capacity.title")}</h1>
-      </header>
+      <h2 className="text-2xl font-extrabold">{t("capacity.title")}</h2>
 
       <div className="grid gap-3 md:grid-cols-3">
         <Tile icon={Activity} label={t("capacity.status")}>

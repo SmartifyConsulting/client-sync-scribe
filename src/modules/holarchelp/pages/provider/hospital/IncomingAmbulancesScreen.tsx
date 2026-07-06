@@ -58,10 +58,7 @@ export default function IncomingAmbulancesScreen() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hospital Emergency Operations</p>
-        <h1 className="text-2xl font-extrabold">Incoming ER Providers</h1>
-      </header>
+      <h2 className="text-2xl font-extrabold">Incoming ER Providers</h2>
 
       {!rows.length && (
         <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
