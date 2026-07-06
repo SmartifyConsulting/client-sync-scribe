@@ -213,12 +213,10 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose, preStarted }: Pr
             console.error("Transcription attempt failed", err);
           }
         }
-        // Only persist a transcript when one actually came back — never fabricate placeholder text.
-        if (transcript) {
-          await supabase.from("holarchelp_incidents" as any).update({
-            voice_note_transcript: transcript,
-          } as any).eq("id", incidentId);
-        }
+        // Replace the "Transcribing…" placeholder with the real transcript, or clear it on failure.
+        await supabase.from("holarchelp_incidents" as any).update({
+          voice_note_transcript: transcript || null,
+        } as any).eq("id", incidentId);
         // Log voice-note event for the timeline
         try {
           await supabase.from("holarchelp_incident_events" as any).insert({
