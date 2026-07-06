@@ -63,6 +63,7 @@
     "providers": "Providers",
     "incidentTimeline": "Incident Timeline",
     "emergencyQueue": "Emergency Queue",
+    "emergency": "Emergency",
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
