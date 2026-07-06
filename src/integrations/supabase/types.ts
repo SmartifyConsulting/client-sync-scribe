@@ -5958,6 +5958,10 @@ export type Database = {
         Args: { _action: string; _token: string }
         Returns: Json
       }
+      provider_has_offer_on_incident: {
+        Args: { _incident_id: string; _user_id: string }
+        Returns: boolean
+      }
       search_doctor_profiles: {
         Args: { _language?: string; _name?: string; _specialty?: string }
         Returns: {
