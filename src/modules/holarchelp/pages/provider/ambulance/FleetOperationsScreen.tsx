@@ -163,10 +163,8 @@ export default function FleetOperationsScreen() {
       ) : (
         <Accordion type="multiple" className="space-y-2">
           {filtered.map((v) => {
-            const mock = MOCK_DETAILS[v.vehicle_code];
             const crew = crewForVehicle(v.id);
             const assignedIds = new Set(crew.map((c) => c.member!.id));
-            const eligible = crewMembers.filter((m) => !assignedIds.has(m.id));
 
             return (
               <AccordionItem
