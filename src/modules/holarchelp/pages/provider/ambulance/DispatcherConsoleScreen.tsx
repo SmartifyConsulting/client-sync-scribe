@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
 import { toastError } from "@/lib/userMessage";
 
-
 type Incident = {
   id: string;
   incident_number?: string | null;
@@ -21,18 +20,16 @@ type Incident = {
   longitude?: number | null;
 };
 
-type Shift = {
+type Vehicle = {
   id: string;
-  user_id: string;
-  ambulance_id: string;
-  status: string;
-  vehicle_code?: string | null;
-  registration_number?: string | null;
+  vehicle_code: string;
+  registration_number: string | null;
+  status: string | null;
   lead_name?: string | null;
+  shift_id?: string | null;
 };
 
 const sevOrder: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
-
 
 const ago = (iso: string) => {
   const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -46,46 +43,72 @@ export default function DispatcherConsoleScreen() {
   const [onDuty, setOnDuty] = useState(false);
   const [togglingDuty, setTogglingDuty] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState(false);
+  const [dragIncidentId, setDragIncidentId] = useState<string | null>(null);
+  const [dragOverVehicleId, setDragOverVehicleId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
-
 
   const loadAll = async () => {
     if (!providerId) return;
-    const [{ data: prov }, { data: incs }, { data: shf }] = await Promise.all([
+    const [{ data: prov }, { data: offers }, { data: vehs }, { data: shifts }] = await Promise.all([
       supabase.from("holarchelp_ambulance_providers" as any).select("dispatcher_on_duty").eq("id", providerId).maybeSingle(),
-      supabase.from("holarchelp_incidents" as any)
-        .select("*").is("assigned_paramedic_user_id", null).in("status", ["open", "reopened"])
-        .order("created_at", { ascending: true }).limit(50),
-      supabase.from("paramedic_shifts" as any)
-        .select("id, user_id, ambulance_id, status, ambulances(vehicle_code, registration_number), profiles:user_id(full_name)")
-        .eq("provider_id", providerId).is("ended_at", null),
+      supabase
+        .from("holarchelp_incident_offers" as any)
+        .select("incident_id, holarchelp_incidents!inner(id, incident_number, severity, status, created_at, notes, incident_type, latitude, longitude)")
+        .eq("provider_id", providerId)
+        .eq("response", "pending"),
+      supabase
+        .from("ambulances" as any)
+        .select("id, vehicle_code, registration_number, status")
+        .eq("provider_id", providerId)
+        .neq("status", "out_of_service")
+        .order("vehicle_code"),
+      supabase
+        .from("paramedic_shifts" as any)
+        .select("id, ambulance_id, user_id, status, profiles:user_id(full_name)")
+        .eq("provider_id", providerId)
+        .is("ended_at", null),
     ]);
+
     setOnDuty(!!(prov as any)?.dispatcher_on_duty);
-    setIncidents((((incs as any) ?? []) as Incident[]).sort((a, b) => (sevOrder[a.severity ?? ""] ?? 9) - (sevOrder[b.severity ?? ""] ?? 9)));
-    setShifts(
-      (((shf as any) ?? []) as any[]).map((r) => ({
-        id: r.id,
-        user_id: r.user_id,
-        ambulance_id: r.ambulance_id,
-        status: r.status,
-        vehicle_code: r.ambulances?.vehicle_code,
-        registration_number: r.ambulances?.registration_number,
-        lead_name: r.profiles?.full_name,
-      })),
+
+    const incs = ((offers as any[]) ?? [])
+      .map((o) => o.holarchelp_incidents)
+      .filter((i: any) => i && ["open", "reopened"].includes(i.status)) as Incident[];
+    // dedupe
+    const seen = new Set<string>();
+    const uniq = incs.filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
+    setIncidents(uniq.sort((a, b) => (sevOrder[a.severity ?? ""] ?? 9) - (sevOrder[b.severity ?? ""] ?? 9)));
+
+    const shiftMap = new Map<string, any>();
+    ((shifts as any[]) ?? []).forEach((s) => {
+      if (s.ambulance_id) shiftMap.set(s.ambulance_id, s);
+    });
+    setVehicles(
+      (((vehs as any[]) ?? []) as any[]).map((v) => {
+        const s = shiftMap.get(v.id);
+        return {
+          id: v.id,
+          vehicle_code: v.vehicle_code,
+          registration_number: v.registration_number,
+          status: v.status,
+          lead_name: s?.profiles?.full_name ?? null,
+          shift_id: s?.id ?? null,
+        };
+      }),
     );
     setLoading(false);
   };
-
 
   useEffect(() => {
     loadAll();
     if (!providerId) return;
     const ch = supabase.channel(`dispatch-${providerId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents" }, loadAll)
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incident_offers" }, loadAll)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ambulances", filter: `provider_id=eq.${providerId}` }, loadAll)
       .on("postgres_changes", { event: "*", schema: "public", table: "paramedic_shifts", filter: `provider_id=eq.${providerId}` }, loadAll)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_ambulance_providers", filter: `id=eq.${providerId}` }, loadAll)
       .subscribe();
@@ -104,20 +127,23 @@ export default function DispatcherConsoleScreen() {
     setTogglingDuty(false);
   };
 
-  const assign = async (shiftId: string) => {
-    if (!selectedIncidentId) return;
+  const assignVehicle = async (incidentId: string, ambulanceId: string) => {
     setAssigning(true);
-    const { error } = await supabase.rpc("holarchelp_dispatcher_assign" as any, {
-      _incident_id: selectedIncidentId, _shift_id: shiftId,
+    const { error } = await supabase.rpc("holarchelp_dispatcher_assign_vehicle" as any, {
+      _incident_id: incidentId, _ambulance_id: ambulanceId,
     });
-    if (error) toastError(error, "We couldn't complete that. Please try again.");
-    else { toast.success("Vehicle assigned. Crew has been notified."); setSelectedIncidentId(null); loadAll(); }
+    if (error) toastError(error, "We couldn't dispatch that vehicle.");
+    else {
+      toast.success("Vehicle dispatched. Crew paged.");
+      setSelectedIncidentId((cur) => (cur === incidentId ? null : cur));
+      loadAll();
+    }
     setAssigning(false);
   };
 
   const selected = incidents.find((i) => i.id === selectedIncidentId) ?? null;
-  const available = shifts.filter((s) => s.status === "available");
-  const busy = shifts.filter((s) => s.status === "busy");
+  const available = vehicles.filter((v) => (v.status ?? "available").toLowerCase() === "available");
+  const busy = vehicles.filter((v) => (v.status ?? "").toLowerCase() === "assigned");
 
   if (loading) return <div className="flex items-center justify-center py-10"><Loader2 className="h-5 w-5 animate-spin" /></div>;
 
@@ -130,7 +156,7 @@ export default function DispatcherConsoleScreen() {
             <Radio className="h-5 w-5 text-primary" /> Dispatcher Console
           </h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Pick an incident, pick a vehicle, assign. Crew gets paged and the SOS becomes their active mission.
+            Drag an SOS onto an available vehicle to dispatch — or select an incident and tap Assign.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-xl border bg-card px-3 py-2">
@@ -140,23 +166,28 @@ export default function DispatcherConsoleScreen() {
         </div>
       </header>
 
-
-
       <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.1fr]">
         {/* Incidents */}
         <section className="rounded-xl border bg-card p-2">
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">Open SOS · {incidents.length}</h2>
           {incidents.length === 0 ? (
-            <p className="px-2 py-6 text-center text-xs text-muted-foreground">Queue is clear.</p>
+            <p className="px-2 py-6 text-center text-xs text-muted-foreground">No SOS offered to your fleet.</p>
           ) : (
             <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
               {incidents.map((i) => (
                 <button
                   key={i.id}
+                  draggable
+                  onDragStart={(e) => {
+                    setDragIncidentId(i.id);
+                    e.dataTransfer.setData("text/plain", i.id);
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragEnd={() => { setDragIncidentId(null); setDragOverVehicleId(null); }}
                   onClick={() => setSelectedIncidentId(i.id)}
-                  className={`w-full text-left rounded-lg border p-2 transition ${
+                  className={`w-full text-left rounded-lg border p-2 transition cursor-grab active:cursor-grabbing ${
                     selectedIncidentId === i.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"
-                  }`}
+                  } ${dragIncidentId === i.id ? "opacity-60" : ""}`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
@@ -178,41 +209,69 @@ export default function DispatcherConsoleScreen() {
 
         {/* Available vehicles */}
         <section className="rounded-xl border bg-card p-2">
-          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">Available vehicles · {available.length}</h2>
+          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">
+            Available vehicles · {available.length}
+          </h2>
           {available.length === 0 ? (
-            <p className="px-2 py-6 text-center text-xs text-muted-foreground">No vehicles on shift available.</p>
+            <p className="px-2 py-6 text-center text-xs text-muted-foreground">No vehicles available in your fleet.</p>
           ) : (
             <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
-              {available.map((s) => (
-                <div key={s.id} className="rounded-lg border p-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold flex items-center gap-1">
-                      <Truck className="h-3.5 w-3.5 text-primary" />
-                      {s.vehicle_code ?? "Vehicle"}
-                    </span>
-                    <span className="text-[10px] uppercase font-bold text-success">Available</span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Lead: {s.lead_name ?? s.user_id.slice(0, 8)}</p>
-                  {s.registration_number && <p className="text-[10px] text-muted-foreground">{s.registration_number}</p>}
-                  <Button
-                    size="sm"
-                    className="mt-2 w-full h-8 text-xs"
-                    disabled={!selectedIncidentId || assigning}
-                    onClick={() => assign(s.id)}
+              {available.map((v) => {
+                const isOver = dragOverVehicleId === v.id;
+                return (
+                  <div
+                    key={v.id}
+                    onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; setDragOverVehicleId(v.id); }}
+                    onDragLeave={() => setDragOverVehicleId((id) => (id === v.id ? null : id))}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const incId = e.dataTransfer.getData("text/plain") || dragIncidentId;
+                      setDragOverVehicleId(null);
+                      setDragIncidentId(null);
+                      if (incId) assignVehicle(incId, v.id);
+                    }}
+                    className={`rounded-lg border p-2 transition ${
+                      isOver ? "border-primary border-dashed bg-primary/10 ring-2 ring-primary/40" : ""
+                    }`}
                   >
-                    Assign to selected SOS
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold flex items-center gap-1">
+                        <Truck className="h-3.5 w-3.5 text-primary" />
+                        {v.vehicle_code}
+                      </span>
+                      <span className="text-[10px] uppercase font-bold text-success">Available</span>
+                    </div>
+                    {v.registration_number && <p className="text-[10px] text-muted-foreground mt-0.5">{v.registration_number}</p>}
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Lead: {v.lead_name ?? <span className="italic">no shift open</span>}
+                    </p>
+                    {isOver ? (
+                      <p className="mt-2 text-center text-[11px] font-bold uppercase tracking-wider text-primary">
+                        Drop to dispatch
+                      </p>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="mt-2 w-full h-8 text-xs"
+                        disabled={!selectedIncidentId || assigning}
+                        onClick={() => selectedIncidentId && assignVehicle(selectedIncidentId, v.id)}
+                      >
+                        Assign to selected SOS
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
           {busy.length > 0 && (
             <>
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1 mt-2">On a call · {busy.length}</h2>
               <div className="space-y-1 opacity-60">
-                {busy.map((s) => (
-                  <div key={s.id} className="rounded-lg border px-2 py-1.5 text-[11px]">
-                    <span className="font-bold">{s.vehicle_code}</span> · {s.lead_name ?? s.user_id.slice(0, 8)}
+                {busy.map((v) => (
+                  <div key={v.id} className="rounded-lg border px-2 py-1.5 text-[11px]">
+                    <span className="font-bold">{v.vehicle_code}</span>
+                    {v.lead_name ? <> · {v.lead_name}</> : null}
                   </div>
                 ))}
               </div>
@@ -224,7 +283,7 @@ export default function DispatcherConsoleScreen() {
         <section className="rounded-xl border bg-card p-3">
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Selected incident</h2>
           {!selected ? (
-            <p className="mt-6 text-center text-xs text-muted-foreground">Pick an SOS on the left, then tap "Assign" on an available vehicle.</p>
+            <p className="mt-6 text-center text-xs text-muted-foreground">Pick an SOS on the left, then drag it onto a vehicle or tap Assign.</p>
           ) : (
             <div className="mt-2 space-y-2">
               <IncidentNumberBadge number={selected.incident_number ?? `INC-${selected.id.slice(0, 8)}`} size="md" label="Reference #" />
@@ -241,7 +300,7 @@ export default function DispatcherConsoleScreen() {
                 <p className="rounded-lg border bg-muted/30 p-2 text-xs italic">"{selected.notes}"</p>
               )}
               <p className="text-[11px] text-muted-foreground pt-2 border-t">
-                Tap "Assign" on an available vehicle to dispatch.
+                Drag this card onto a vehicle, or tap "Assign to selected SOS".
               </p>
             </div>
           )}
