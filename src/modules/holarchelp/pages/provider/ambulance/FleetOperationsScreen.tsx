@@ -255,23 +255,8 @@ export default function FleetOperationsScreen() {
                     )}
                   </div>
 
-                  {/* Quick stats */}
-                  {mock && (
-                    <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
-                      <div className="rounded-lg border bg-background px-2 py-1.5">
-                        <p className="text-[10px] text-muted-foreground uppercase">Trips/mo</p>
-                        <p className="font-semibold tabular-nums">{mock.trips}</p>
-                      </div>
-                      <div className="rounded-lg border bg-background px-2 py-1.5">
-                        <p className="text-[10px] text-muted-foreground uppercase">Utilization</p>
-                        <p className="font-semibold tabular-nums">{mock.utilization}%</p>
-                      </div>
-                      <div className="rounded-lg border bg-background px-2 py-1.5">
-                        <p className="text-[10px] text-muted-foreground uppercase">Mileage</p>
-                        <p className="font-semibold tabular-nums">{(mock.mileage / 1000).toFixed(1)}k km</p>
-                      </div>
-                    </div>
-                  )}
+
+
 
                   {/* Actions */}
                   <div className="flex gap-2 mt-3">
