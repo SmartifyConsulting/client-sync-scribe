@@ -40,13 +40,8 @@ interface NavItem {
 }
 
 const hospitalNav: NavItem[] = [
-  { icon: Siren, labelKey: "nav.emergencyQueue", to: "/provider/hospital", end: true, danger: true },
-  { icon: Ambulance, labelKey: "nav.incomingEr", to: "/provider/hospital/incoming" },
-  { icon: Stethoscope, labelKey: "nav.triage", to: "/provider/hospital/triage" },
+  { icon: Siren, labelKey: "nav.emergency", to: "/provider/hospital", end: true, danger: true },
   { icon: ClipboardList, labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
-  { icon: BedDouble, labelKey: "nav.erCapacity", to: "/provider/hospital/capacity" },
-  { icon: Users, labelKey: "nav.providers", to: "/provider/hospital/providers" },
-  { icon: Activity, labelKey: "nav.incidentTimeline", to: "/provider/hospital/timeline" },
   { icon: Zap, labelKey: "nav.dispatchManagement", to: "/provider/hospital/dispatch" },
   { icon: UserCheck, labelKey: "nav.admin", to: "/provider/hospital/admins" },
 ];

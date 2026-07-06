@@ -51,6 +51,7 @@ export default function EmergencyDashboardScreen() {
     load();
     const ch = supabase.channel("dash-incoming")
       .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incident_offers" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);

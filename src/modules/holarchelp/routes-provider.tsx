@@ -5,11 +5,8 @@ import ProviderRedirect from "./pages/provider/ProviderRedirect";
 import ProviderProfile from "./pages/provider/ProviderProfile";
 
 import HospitalOpsLayout from "./pages/provider/hospital/HospitalOpsLayout";
-import HospitalOpsDashboard from "./pages/provider/hospital/HospitalOpsDashboard";
-import IncomingAmbulancesScreen from "./pages/provider/hospital/IncomingAmbulancesScreen";
-import TriageScreen from "./pages/provider/hospital/TriageScreen";
+import EmergencyHubScreen from "./pages/provider/hospital/EmergencyHubScreen";
 import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
-import ErCapacityScreen from "./pages/provider/hospital/ErCapacityScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
 import ProvidersScreen from "./pages/provider/hospital/ProvidersScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
@@ -76,11 +73,11 @@ export default function ProviderRoutes() {
       <Route path="er" element={<Navigate to="/provider/ambulance" replace />} />
       <Route path="er/*" element={<Navigate to="/provider/ambulance" replace />} />
       <Route path="hospital" element={<ProviderShell><HospitalOpsLayout /></ProviderShell>}>
-        <Route index element={<HospitalOpsDashboard />} />
-        <Route path="incoming" element={<IncomingAmbulancesScreen />} />
-        <Route path="triage" element={<TriageScreen />} />
+        <Route index element={<EmergencyHubScreen />} />
+        <Route path="incoming" element={<Navigate to="/provider/hospital?tab=incoming" replace />} />
+        <Route path="triage" element={<Navigate to="/provider/hospital?tab=triage" replace />} />
         <Route path="admissions" element={<AdmissionsScreen />} />
-        <Route path="capacity" element={<ErCapacityScreen />} />
+        <Route path="capacity" element={<Navigate to="/provider/hospital?tab=capacity" replace />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
         <Route path="providers" element={<ProvidersScreen />} />
         <Route path="doctors" element={<Navigate to="/provider/hospital/providers?tab=doctors" replace />} />
