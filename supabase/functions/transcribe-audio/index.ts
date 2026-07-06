@@ -121,7 +121,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    const { audio, audioUrl, patientName, doctorName, language } = await req.json();
+    const { audio, audioUrl, patientName, doctorName, language, singleSpeaker } = await req.json();
     
     if (!audio && !audioUrl) {
       console.error('No audio data or URL provided');
