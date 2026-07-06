@@ -5804,6 +5804,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      holarchelp_dispatcher_assign_vehicle: {
+        Args: { _ambulance_id: string; _incident_id: string }
+        Returns: Json
+      }
       holarchelp_eligible_paramedics: {
         Args: { _provider_ids: string[] }
         Returns: {

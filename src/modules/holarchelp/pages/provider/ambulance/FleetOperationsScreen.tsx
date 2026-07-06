@@ -40,14 +40,6 @@ type DbAssignment = {
   is_default_lead: boolean;
 };
 
-// Mock display details merged in for vehicles that exist in DB by code,
-// so the look-and-feel stays consistent with the demo profile screens.
-const MOCK_DETAILS: Record<string, { make: string; mileage: number; utilization: number; trips: number }> = {
-  "AMB-001": { make: "Mercedes-Benz Sprinter", mileage: 45230, utilization: 78, trips: 312 },
-  "AMB-002": { make: "Mercedes-Benz Sprinter", mileage: 52150, utilization: 91, trips: 289 },
-  "AMB-003": { make: "Volkswagen Transporter", mileage: 38900, utilization: 64, trips: 245 },
-};
-
 const CREW_ROLES = new Set(["paramedic", "emt", "driver", "nurse", "supervisor"]);
 
 export default function FleetOperationsScreen() {
@@ -171,10 +163,8 @@ export default function FleetOperationsScreen() {
       ) : (
         <Accordion type="multiple" className="space-y-2">
           {filtered.map((v) => {
-            const mock = MOCK_DETAILS[v.vehicle_code];
             const crew = crewForVehicle(v.id);
             const assignedIds = new Set(crew.map((c) => c.member!.id));
-            const eligible = crewMembers.filter((m) => !assignedIds.has(m.id));
 
             return (
               <AccordionItem
@@ -189,10 +179,8 @@ export default function FleetOperationsScreen() {
                         {v.vehicle_code}
                         {v.registration_number ? <span className="text-muted-foreground font-normal"> · {v.registration_number}</span> : null}
                       </p>
-                      <p className="text-[11px] text-muted-foreground truncate">
-                        {mock?.make ?? "Ambulance"}
-                        {mock ? ` · ${mock.mileage.toLocaleString()} km · ${mock.utilization}% util` : ""}
-                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate">Ambulance</p>
+
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">
@@ -267,23 +255,8 @@ export default function FleetOperationsScreen() {
                     )}
                   </div>
 
-                  {/* Quick stats */}
-                  {mock && (
-                    <div className="grid grid-cols-3 gap-2 mt-2 text-xs">
-                      <div className="rounded-lg border bg-background px-2 py-1.5">
-                        <p className="text-[10px] text-muted-foreground uppercase">Trips/mo</p>
-                        <p className="font-semibold tabular-nums">{mock.trips}</p>
-                      </div>
-                      <div className="rounded-lg border bg-background px-2 py-1.5">
-                        <p className="text-[10px] text-muted-foreground uppercase">Utilization</p>
-                        <p className="font-semibold tabular-nums">{mock.utilization}%</p>
-                      </div>
-                      <div className="rounded-lg border bg-background px-2 py-1.5">
-                        <p className="text-[10px] text-muted-foreground uppercase">Mileage</p>
-                        <p className="font-semibold tabular-nums">{(mock.mileage / 1000).toFixed(1)}k km</p>
-                      </div>
-                    </div>
-                  )}
+
+
 
                   {/* Actions */}
                   <div className="flex gap-2 mt-3">
