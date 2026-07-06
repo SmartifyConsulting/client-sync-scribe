@@ -179,10 +179,8 @@ export default function FleetOperationsScreen() {
                         {v.vehicle_code}
                         {v.registration_number ? <span className="text-muted-foreground font-normal"> · {v.registration_number}</span> : null}
                       </p>
-                      <p className="text-[11px] text-muted-foreground truncate">
-                        {mock?.make ?? "Ambulance"}
-                        {mock ? ` · ${mock.mileage.toLocaleString()} km · ${mock.utilization}% util` : ""}
-                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate">Ambulance</p>
+
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">
