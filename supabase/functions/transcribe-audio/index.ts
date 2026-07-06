@@ -218,8 +218,12 @@ serve(async (req) => {
     console.log('Raw transcription successful');
     
     const rawText = result.text || '';
-    
-    const formattedText = await formatWithSpeakerLabels(rawText, patient, doctor);
+
+    // Single-speaker clips (e.g. patient SOS voice notes) skip the AI speaker-labeling round-trip
+    // so responders see the transcript ~2–4s sooner and never get mis-labeled as "Responder".
+    const formattedText = singleSpeaker
+      ? (rawText ? `${patient}: ${rawText}` : '')
+      : await formatWithSpeakerLabels(rawText, patient, doctor);
 
     return new Response(
       JSON.stringify({ text: formattedText, raw: rawText }),
