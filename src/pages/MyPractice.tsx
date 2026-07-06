@@ -1178,6 +1178,12 @@ export default function MyPractice() {
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
+            value="templates"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+          >
+            {t("documents.tabTemplates")}
+          </TabsTrigger>
+          <TabsTrigger
             value="referrals"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
