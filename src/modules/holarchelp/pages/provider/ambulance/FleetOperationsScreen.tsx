@@ -40,14 +40,6 @@ type DbAssignment = {
   is_default_lead: boolean;
 };
 
-// Mock display details merged in for vehicles that exist in DB by code,
-// so the look-and-feel stays consistent with the demo profile screens.
-const MOCK_DETAILS: Record<string, { make: string; mileage: number; utilization: number; trips: number }> = {
-  "AMB-001": { make: "Mercedes-Benz Sprinter", mileage: 45230, utilization: 78, trips: 312 },
-  "AMB-002": { make: "Mercedes-Benz Sprinter", mileage: 52150, utilization: 91, trips: 289 },
-  "AMB-003": { make: "Volkswagen Transporter", mileage: 38900, utilization: 64, trips: 245 },
-};
-
 const CREW_ROLES = new Set(["paramedic", "emt", "driver", "nurse", "supervisor"]);
 
 export default function FleetOperationsScreen() {
