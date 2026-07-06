@@ -1,123 +1,119 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle2, Clock, Zap } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, Loader2, Truck } from "lucide-react";
+import { useProviderAccess } from "../../../components/ProviderGate";
 
-interface AvailabilitySlot {
-  vehicleCode: string;
-  type: string;
-  availableFrom: string;
-  duration: number;
-  reason: string;
-  status: "available" | "soon";
-}
-
-const MOCK_AVAILABILITY: AvailabilitySlot[] = [
-  {
-    vehicleCode: "AMB-001",
-    type: "Type-A",
-    availableFrom: "2026-06-27 16:00",
-    duration: 240,
-    reason: "Crew shift change",
-    status: "available",
-  },
-  {
-    vehicleCode: "AMB-002",
-    type: "Type-A",
-    availableFrom: "2026-06-27 20:00",
-    duration: 480,
-    reason: "Scheduled maintenance",
-    status: "soon",
-  },
-  {
-    vehicleCode: "AMB-003",
-    type: "Type-B",
-    availableFrom: "2026-06-28 08:00",
-    duration: 1440,
-    reason: "Service completion",
-    status: "soon",
-  },
-];
+type Vehicle = {
+  id: string;
+  vehicle_code: string;
+  registration_number: string | null;
+  status: string | null;
+};
 
 export default function VehicleAvailabilityScreen() {
-  const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
+  const { providerId } = useProviderAccess();
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const load = async () => {
+    if (!providerId) return;
+    const { data } = await supabase
+      .from("ambulances" as any)
+      .select("id, vehicle_code, registration_number, status")
+      .eq("provider_id", providerId)
+      .order("vehicle_code");
+    setVehicles(((data as any[]) ?? []) as Vehicle[]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    if (!providerId) return;
+    const ch = supabase
+      .channel(`veh-avail-${providerId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ambulances", filter: `provider_id=eq.${providerId}` }, load)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [providerId]);
+
+  const availableNow = vehicles.filter((v) => (v.status ?? "").toLowerCase() === "available").length;
+  const onCall = vehicles.filter((v) => (v.status ?? "").toLowerCase() === "assigned").length;
+  const outOfService = vehicles.filter((v) => (v.status ?? "").toLowerCase() === "out_of_service").length;
+
+  const statusChip = (status: string | null) => {
+    const s = (status ?? "").toLowerCase();
+    if (s === "available") return { label: "Available Now", cls: "bg-success/10 text-success" };
+    if (s === "assigned") return { label: "On a call", cls: "bg-warning/10 text-warning" };
+    if (s === "out_of_service") return { label: "Out of service", cls: "bg-destructive/10 text-destructive" };
+    return { label: status ?? "Unknown", cls: "bg-muted text-muted-foreground" };
+  };
 
   return (
     <div className="space-y-6">
       <header>
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Availability</h1>
-        <p className="text-sm text-muted-foreground mt-2">View upcoming availability and schedule assignments</p>
+        <p className="text-sm text-muted-foreground mt-2">Live status of every vehicle in your fleet.</p>
       </header>
 
-      {/* Availability Timeline */}
-      <div className="space-y-3">
-        {MOCK_AVAILABILITY.map((slot) => (
-          <div
-            key={slot.vehicleCode}
-            onClick={() => setSelectedVehicle(slot.vehicleCode)}
-            className={`rounded-xl border p-4 cursor-pointer transition-all ${
-              selectedVehicle === slot.vehicleCode ? "border-primary bg-primary/5" : "border-border"
-            }`}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h3 className="font-bold text-lg">{slot.vehicleCode}</h3>
-                <p className="text-xs text-muted-foreground">{slot.type} Ambulance</p>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  slot.status === "available"
-                    ? "bg-success/10 text-success"
-                    : "bg-warning/10 text-warning"
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading vehicles…
+        </div>
+      ) : vehicles.length === 0 ? (
+        <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+          <Truck className="mx-auto mb-2 h-6 w-6 opacity-50" />
+          No vehicles in your fleet yet.
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {vehicles.map((v) => {
+            const chip = statusChip(v.status);
+            const active = selected === v.id;
+            return (
+              <div
+                key={v.id}
+                onClick={() => setSelected(v.id)}
+                className={`rounded-xl border p-4 cursor-pointer transition-all ${
+                  active ? "border-primary bg-primary/5" : "border-border"
                 }`}
               >
-                {slot.status === "available" ? "Available Now" : "Available Soon"}
-              </span>
-            </div>
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-bold text-lg">{v.vehicle_code}</h3>
+                    <p className="text-xs text-muted-foreground">{v.registration_number ?? "No registration"}</p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${chip.cls}`}>{chip.label}</span>
+                </div>
+                {active && (
+                  <div className="mt-3 pt-3 border-t space-y-2">
+                    <Button className="w-full" disabled>Managed from Dispatcher Console</Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">Available From</p>
-                <p className="font-semibold text-sm mt-1">{slot.availableFrom}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Duration</p>
-                <p className="font-semibold text-sm mt-1">{slot.duration} minutes</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Reason</p>
-                <p className="font-semibold text-sm mt-1">{slot.reason}</p>
-              </div>
-            </div>
-
-            {selectedVehicle === slot.vehicleCode && (
-              <div className="mt-4 pt-4 border-t space-y-2">
-                <Button className="w-full">Assign This Vehicle</Button>
-                <Button variant="outline" className="w-full">
-                  View Details
-                </Button>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <CheckCircle2 className="h-6 w-6 text-success mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">Available Now</p>
-          <p className="text-2xl font-bold mt-1">3</p>
+          <p className="text-2xl font-bold mt-1">{availableNow}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <Clock className="h-6 w-6 text-warning mx-auto mb-2" />
-          <p className="text-xs text-muted-foreground">Available Soon</p>
-          <p className="text-2xl font-bold mt-1">2</p>
+          <p className="text-xs text-muted-foreground">On a call</p>
+          <p className="text-2xl font-bold mt-1">{onCall}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-          <p className="text-xs text-muted-foreground">In Service</p>
-          <p className="text-2xl font-bold mt-1">7</p>
+          <p className="text-xs text-muted-foreground">Out of service</p>
+          <p className="text-2xl font-bold mt-1">{outOfService}</p>
         </div>
       </div>
     </div>
