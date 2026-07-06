@@ -2260,6 +2260,11 @@ export default function MyPractice() {
           </Accordion>
         </TabsContent>
 
+        {/* === TEMPLATES TAB === */}
+        <TabsContent value="templates" className="mt-4">
+          <Documents hideHeader />
+        </TabsContent>
+
         {/* === REFERRALS TAB === */}
         <TabsContent value="referrals" className="mt-4 space-y-4">
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
