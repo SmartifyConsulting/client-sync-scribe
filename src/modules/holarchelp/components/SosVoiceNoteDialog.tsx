@@ -184,9 +184,10 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose, preStarted }: Pr
         .upload(path, blob, { contentType: "audio/webm", upsert: false });
       if (upErr) throw upErr;
 
-      // Save audio path immediately so responders see it
+      // Save audio path + a "Transcribing…" placeholder immediately so responders see activity
       await supabase.from("holarchelp_incidents" as any).update({
         voice_note_audio_url: path,
+        voice_note_transcript: "Transcribing…",
       } as any).eq("id", incidentId);
 
       toast.success(t("sosVoice.shared"));
@@ -202,7 +203,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose, preStarted }: Pr
           if (d) await new Promise((r) => setTimeout(r, d));
           try {
             const { data: trData, error: trErr } = await supabase.functions.invoke("transcribe-audio", {
-              body: { audio: base64, patientName: "Patient", doctorName: "Responder" },
+              body: { audio: base64, patientName: "Patient", doctorName: "Patient", singleSpeaker: true },
             });
             if (!trErr && (trData as any)?.text) {
               transcript = String((trData as any).text);
