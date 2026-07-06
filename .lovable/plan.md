@@ -1,70 +1,63 @@
-## Problem
+## Two workstreams
 
-Two symptoms, one root cause:
+### A. Renken data + Sharon SOS visibility (unchanged)
 
-1. **"infinite recursion detected in policy for relation holarchelp_incidents"** — the SELECT policy `Provider staff read offered incidents` on `holarchelp_incidents` sub-queries `holarchelp_incident_offers`, and the SELECT policy `Patient views own incident offers` on `holarchelp_incident_offers` sub-queries `holarchelp_incidents`. Each side triggers RLS evaluation on the other → infinite recursion.
+1. **Seed AMB-001, AMB-002, AMB-003** into `public.ambulances` under Renken (`provider_id = 121ae795-b2b1-4693-93bf-a2ba1dfdaeae`) so they show up in Fleet Admin, Vehicle Availability, and the Dispatcher's Available Vehicles list.
 
-2. **Header shows "ACTIVE MISSION #55055050" but "Active Missions" panel is empty** — the Active Missions panel fetches from `holarchelp_incidents` filtered by `assigned_provider_id = <renken>`. There is no dedicated SELECT policy for the assigned provider's staff; today they only see the row through the offers-based policy, which is currently throwing the recursion error. So the panel query silently returns no rows while the header chip (cached from an earlier stat) still shows the incident.
+   | vehicle_code | status         | notes       |
+   | ------------ | -------------- | ----------- |
+   | AMB-001      | available      | Main Street |
+   | AMB-002      | assigned       | Highway 101 |
+   | AMB-003      | out_of_service | Workshop    |
 
-## Fix
+2. **Sharon's SOS (INC-2026-001078)** — RLS recursion fix from the previous turn already allows Renken staff to read this open incident (verified `provider_has_offer_on_incident` returns true for Renken). Add a second realtime listener in `EmergencyDashboardScreen.tsx` on `holarchelp_incident_offers` so a new offer to Renken re-fires `load()` immediately instead of waiting for a page refresh.
 
-### 1. Break the recursion with a SECURITY DEFINER wrapper
+### B. Hospital portal nav consolidation
 
-Add a helper that reads the offers table with definer privileges (bypassing RLS on that table):
+Merge the four duplicated hospital screens into **one** unified "ER Command" screen, and prune two nav entries. Nothing is deleted from the codebase surface — all fields, buttons, and sub-widgets are preserved, just moved into tabs.
 
-```sql
-CREATE OR REPLACE FUNCTION public.provider_has_offer_on_incident(
-  _incident_id uuid, _user_id uuid
-)
-RETURNS boolean
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.holarchelp_incident_offers o
-    WHERE o.incident_id = _incident_id
-      AND (
-        public.is_ambulance_staff(o.provider_id, _user_id)
-        OR public.is_hospital_staff(o.provider_id, _user_id)
-      )
-  );
-$$;
+#### New nav (hospital portal)
+
+```text
+Emergency (was 4 items) — /provider/hospital
+Admissions             — /provider/hospital/admissions
+Dispatch Management    — /provider/hospital/dispatch
+Admin                  — /provider/hospital/admins
 ```
 
-Recreate the incidents policy so PostgREST never crosses back into `holarchelp_incident_offers` RLS:
+Removed from the sidebar: **Providers**, **Incident Timeline**.
 
-```sql
-DROP POLICY "Provider staff read offered incidents" ON public.holarchelp_incidents;
+#### The unified "Emergency" screen
 
-CREATE POLICY "Provider staff read offered incidents"
-  ON public.holarchelp_incidents
-  FOR SELECT
-  USING (public.provider_has_offer_on_incident(id, auth.uid()));
-```
+Single page at `/provider/hospital` (index route) with a tab bar. Each tab renders the existing component untouched so no field is lost:
 
-### 2. Give the assigned provider direct read access
+| Tab            | Existing component            | Notes                              |
+| -------------- | ----------------------------- | ---------------------------------- |
+| Emergency Queue | `<HospitalOpsDashboard />`    | current index screen               |
+| Incoming ER    | `<IncomingAmbulancesScreen />`| current `/incoming` screen         |
+| Triage         | `<TriageScreen />`            | current `/triage` screen           |
+| ER Capacity    | `<ErCapacityScreen />`        | current `/capacity` screen         |
 
-The "Assigned provider staff can update incident" policy handles UPDATE only. Add the matching SELECT policy so assigned missions show up in the Active Missions panel even after the offer row is marked superseded/accepted:
+The active tab is stored in the URL as `?tab=queue|incoming|triage|capacity` so deep links and reloads keep the same view.
 
-```sql
-CREATE POLICY "Assigned provider staff read incident"
-  ON public.holarchelp_incidents
-  FOR SELECT
-  USING (
-    assigned_provider_id IS NOT NULL
-    AND (
-      public.is_ambulance_staff(assigned_provider_id, auth.uid())
-      OR public.is_hospital_staff(assigned_provider_id, auth.uid())
-    )
-  );
-```
+#### Route changes
 
-### 3. No client code changes needed
+- Keep the standalone routes `/provider/hospital/incoming`, `/triage`, `/capacity` as **redirects** to `/provider/hospital?tab=<key>` so any bookmark, in-app link, or notification continues to work.
+- Remove the sidebar entries for `nav.providers` and `nav.incidentTimeline` from `hospitalNav` in `src/components/layout/ProviderSidebar.tsx`.
+- Keep the underlying `ProvidersScreen` and `IncidentTimelineScreen` routes reachable by URL (they're linked from the Admin screen and incident detail pages), but drop the top-level nav pins.
 
-`ActiveMissionsPanel` / `useActiveMissions` / `useAmbulanceOpsStats` all already query on `assigned_provider_id`. Once the new SELECT policy is in place they return the assigned mission and the panel matches the header chip.
+## Files to touch
+
+- **Data insert (Renken vehicles):** `public.ambulances` via the insert tool.
+- **Emergency Dashboard realtime:** `src/modules/holarchelp/pages/provider/ambulance/EmergencyDashboardScreen.tsx` — add `holarchelp_incident_offers` listener.
+- **New unified screen:** `src/modules/holarchelp/pages/provider/hospital/EmergencyHubScreen.tsx` — tabs container that lazy-mounts the four existing components.
+- **Sidebar:** `src/components/layout/ProviderSidebar.tsx` — collapse the first four items into one "Emergency" pin, remove Providers + Incident Timeline pins.
+- **Routes:** `src/modules/holarchelp/routes-provider.tsx` — swap the index route to `EmergencyHubScreen`, convert `/incoming`, `/triage`, `/capacity` to `<Navigate>` redirects with the appropriate `?tab` param.
+- **i18n:** add `nav.emergency` label; existing four labels stay (used as tab titles) so no translation churn.
 
 ## Technical notes
 
-- Single migration; no data changes.
-- The existing `_public` views for hospitals (used elsewhere) remain the read surface for non-admin staff and are unaffected.
-- The definer function only exposes a boolean, no row data, so it does not widen the effective read surface.
-- Fixes both the console error and the empty Active Missions panel in one shot.
+- All four merged components already fetch their own data and manage their own state — mounting them inside tabs is a zero-refactor move; no props or wiring change.
+- Query-param routing avoids nested React Router boilerplate and preserves back/forward behaviour.
+- Because `ProvidersScreen` and `IncidentTimelineScreen` remain registered under their existing paths, any deep links from Admin, notifications, or incident consoles keep working — only the sidebar shortcuts go away.
+- No RLS/data migration is required for this hospital-side consolidation.
