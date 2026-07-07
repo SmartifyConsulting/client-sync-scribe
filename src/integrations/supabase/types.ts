@@ -5905,6 +5905,10 @@ export type Database = {
         Args: { _incident_id: string; _reason?: string }
         Returns: Json
       }
+      holarchelp_set_destination_hospital: {
+        Args: { _hospital_id: string; _incident_id: string }
+        Returns: Json
+      }
       holarchelp_set_dispatcher_on_duty: {
         Args: { _on: boolean; _provider_id: string }
         Returns: undefined
