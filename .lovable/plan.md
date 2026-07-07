@@ -1,44 +1,58 @@
-# Fix: Renken doesn't see the SOS in the incoming queue
+# Dispatcher Console: hospitals, assigned SOS visibility, and Renken demo data
 
-## What's happening
+Focus is `EmergencyDashboardScreen.tsx` and `DispatcherConsoleScreen.tsx`. Existing drag-and-drop from Open SOS → Available vehicles stays as-is; plan extends what's shown, adds a hospitals panel, and seeds demo rows for Renken.
 
-Shannon's SOS (INC-2026-001080) was correctly assigned to Renken:
-- `holarchelp_incidents.assigned_provider_id` = Renken
-- `holarchelp_incident_offers` row for Renken has `response = 'accepted'`
+## 1. Show assigned SOS in the Incoming and Open SOS frames
 
-But Renken's dashboard "Incoming SOS" panel (`EmergencyDashboardScreen.tsx`) filters to:
+Today both panels filter tightly:
+- **Incoming SOS** (EmergencyDashboardScreen): `status IN ('open','reopened') AND assigned_paramedic_user_id IS NULL`
+- **Open SOS** (DispatcherConsoleScreen): only offers with `response = 'pending'` AND incident `status IN ('open','reopened')`
+
+Once an incident is auto-assigned or accepted (status → `assigned`), it drops out of both. Fix:
+- Widen both loaders to also include incidents whose `assigned_provider_id = <this provider>` and status ∈ `['assigned','en_route','arrived','patient_collected','en_route_to_hospital','at_hospital']` — but only `assigned` rows are draggable.
+- Render assigned rows with a distinct chip ("ASSIGNED · needs vehicle" if no `assigned_paramedic_user_id`, else "ROLLING · <vehicle_code>") so dispatchers can tell them apart from truly incoming ones.
+- Rows already crewed become read-only (no drag).
+
+## 2. Approved destination hospitals panel
+
+Add a fourth column in `DispatcherConsoleScreen` (stacks on smaller screens):
+
+```text
+┌ Open SOS ┐ ┌ Vehicles ┐ ┌ Selected ┐ ┌ Destination Hospitals ┐
+│ INC-…080 │ │ AMB-01   │ │ INC-…080 │ │ • Netcare Milpark 4.1km│
+│ CRIT MVC │ │ AMB-02   │ │ CRIT MVC │ │ • Life Fourways   6.8km│
+└──────────┘ └──────────┘ └──────────┘ └────────────────────────┘
 ```
-status IN ('open','reopened')  AND  assigned_paramedic_user_id IS NULL
-```
 
-The demo override in `holarchelp_auto_assign_incident` flips the incident to `status = 'assigned'` and inserts an already‑accepted offer for Renken. So the incident short‑circuits past the incoming queue and only appears under **Active Missions** (which is exactly what the session shows — the "Active mission" link for `80c28537…` was rendered right after login).
+Query: `holarchelp_hospitals` where `status = 'approved'` AND `subscription_status = 'active'` AND `accepting_patients = true`. Order by distance from the selected incident's lat/lng (haversine, JS); alphabetical when nothing selected. Each row shows name, ownership badge, distance, "Set destination" button. Clicking calls new SECURITY DEFINER RPC `holarchelp_set_destination_hospital(_incident_id, _hospital_id)` that updates `holarchelp_incidents.destination_hospital_id` and inserts a `destination_selected` event; guarded to the assigned provider or its dispatcher. If a destination is already set, its row is highlighted with "Change".
 
-The user wants the incident visible in the **Incoming SOS queue** so they can demo Renken tapping Accept.
+## 3. Demo dummy SOS data for Renken
 
-## Fix (single migration)
+For demo polish, seed 3–4 realistic dummy incidents so Renken's panels never look empty:
 
-Rewrite `holarchelp_auto_assign_incident` so the Renken demo branch:
+- Insert into `holarchelp_incidents` with `user_id = null` (or a demo patient), `incident_number` = `DEMO-001…004`, varied `severity` (`critical`, `high`, `moderate`), varied `incident_type` (`MVC`, `Cardiac`, `Fall`, `Stroke`), realistic `notes`, `latitude`/`longitude` clustered ~1–8 km around Renken's HQ, `created_at` staggered (2m, 8m, 22m ago).
+- For each, insert a matching `holarchelp_incident_offers` row for Renken (`121ae795-…`) with `response = 'pending'`, `priority_boost = true`, `distance_km` from haversine.
+- Two rows stay `status = 'open'` → land in **Incoming SOS** and **Open SOS**. One row is set to `status = 'assigned'` with `assigned_provider_id = Renken` and no `assigned_paramedic_user_id` → land in Open SOS with the new "ASSIGNED · needs vehicle" chip so the dispatcher can demo dragging it onto a vehicle.
+- Also insert one `holarchelp_locations` row per incident so the map + hospital-distance ordering work.
+- Add matching `incident_number` values under a `DEMO-` prefix so we can wipe them later with a single `DELETE ... WHERE incident_number LIKE 'DEMO-%'`.
 
-1. Leaves the incident in `status = 'open'` (does NOT set `assigned_provider_id`, `assigned_at`, or flip to `assigned`).
-2. Inserts a **pending**, priority-boosted offer for Renken with `distance_km = 0`:
-   ```sql
-   INSERT INTO holarchelp_incident_offers
-     (incident_id, provider_id, provider_kind, response, priority_boost, distance_km)
-   VALUES (_incident_id, _renken_id, 'ambulance', 'pending', true, 0)
-   ON CONFLICT (incident_id, provider_id) DO UPDATE
-     SET response = 'pending', priority_boost = true, distance_km = 0, offered_at = now();
-   ```
-3. Logs an `auto_offered` (or reuse `auto_assigned`) event so the audit trail still shows the demo hook fired.
-4. Skips the old nearest‑ambulance auto‑accept path entirely for the demo (otherwise another provider might accept before Renken taps Accept and Renken would lose the incident).
+Data insert only — no schema change. Run via the insert tool right after the migration.
 
-`holarchelp_get_incident_offers` keeps the Renken‑at‑top override from the previous migration — no change needed there.
+## 4. Nothing else changes
 
-## Result
+- DnD Open SOS → Available Vehicles unchanged.
+- Realtime channels already subscribe to `holarchelp_incidents` / `_offers`; add one subscription to `holarchelp_hospitals` for live approval updates.
+- No new tables/RLS; `destination_hospital_id` already exists on `holarchelp_incidents`.
 
-- Renken signs in → **Incoming SOS** shows Shannon's incident with incident number, severity, and Accept button.
-- Renken taps Accept → normal `holarchelp_accept_incident` flow runs, incident becomes `assigned` to Renken, moves to Active Missions.
-- Patient's "Available ER providers" list still shows Renken first (unchanged).
+## Files touched
+
+- `src/modules/holarchelp/pages/provider/ambulance/EmergencyDashboardScreen.tsx` — widen Incoming loader, add assigned chip.
+- `src/modules/holarchelp/pages/provider/ambulance/DispatcherConsoleScreen.tsx` — widen Open SOS loader, add Destination Hospitals section (4-col on `xl:`, stack below).
+- One migration: `holarchelp_set_destination_hospital` RPC.
+- One data insert: 3–4 `DEMO-` incidents + offers + locations for Renken.
 
 ## Revert after demo
 
-Restore `holarchelp_auto_assign_incident` to its pre‑demo body (nearest‑ambulance auto‑accept, no Renken override) alongside restoring `holarchelp_get_incident_offers`.
+`DELETE FROM holarchelp_incident_offers WHERE incident_id IN (SELECT id FROM holarchelp_incidents WHERE incident_number LIKE 'DEMO-%');`
+`DELETE FROM holarchelp_locations WHERE incident_id IN (SELECT id FROM holarchelp_incidents WHERE incident_number LIKE 'DEMO-%');`
+`DELETE FROM holarchelp_incidents WHERE incident_number LIKE 'DEMO-%';`

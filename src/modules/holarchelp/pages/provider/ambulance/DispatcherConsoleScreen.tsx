@@ -18,6 +18,8 @@ type Incident = {
   incident_type?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  assigned_provider_id?: string | null;
+  assigned_ambulance_id?: string | null;
 };
 
 type Vehicle = {
@@ -27,6 +29,23 @@ type Vehicle = {
   status: string | null;
   lead_name?: string | null;
   shift_id?: string | null;
+};
+
+type Hospital = {
+  id: string;
+  name: string;
+  ownership: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  er_capacity_status?: string | null;
+  distance_km?: number | null;
+};
+
+const distKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
 };
 
 const sevOrder: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
@@ -43,22 +62,31 @@ export default function DispatcherConsoleScreen() {
   const [onDuty, setOnDuty] = useState(false);
   const [togglingDuty, setTogglingDuty] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidentLocs, setIncidentLocs] = useState<Record<string, { lat: number; lng: number }>>({});
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [destByIncident, setDestByIncident] = useState<Record<string, string | null>>({});
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState(false);
   const [dragIncidentId, setDragIncidentId] = useState<string | null>(null);
   const [dragOverVehicleId, setDragOverVehicleId] = useState<string | null>(null);
+  const [settingHospital, setSettingHospital] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadAll = async () => {
     if (!providerId) return;
-    const [{ data: prov }, { data: offers }, { data: vehs }, { data: shifts }] = await Promise.all([
+    const [{ data: prov }, { data: offers }, { data: assigned }, { data: vehs }, { data: shifts }, { data: hosps }] = await Promise.all([
       supabase.from("holarchelp_ambulance_providers" as any).select("dispatcher_on_duty").eq("id", providerId).maybeSingle(),
       supabase
         .from("holarchelp_incident_offers" as any)
-        .select("incident_id, holarchelp_incidents!inner(id, incident_number, severity, status, created_at, notes, incident_type, latitude, longitude)")
+        .select("incident_id, holarchelp_incidents!inner(id, incident_number, severity, status, created_at, notes, incident_type, assigned_provider_id, assigned_ambulance_id, destination_hospital_id)")
         .eq("provider_id", providerId)
         .eq("response", "pending"),
+      supabase
+        .from("holarchelp_incidents" as any)
+        .select("id, incident_number, severity, status, created_at, notes, incident_type, assigned_provider_id, assigned_ambulance_id, destination_hospital_id")
+        .eq("assigned_provider_id", providerId)
+        .in("status", ["assigned","en_route","arrived","patient_collected","en_route_to_hospital","at_hospital"]),
       supabase
         .from("ambulances" as any)
         .select("id, vehicle_code, registration_number, status")
@@ -70,17 +98,48 @@ export default function DispatcherConsoleScreen() {
         .select("id, ambulance_id, user_id, status, profiles:user_id(full_name)")
         .eq("provider_id", providerId)
         .is("ended_at", null),
+      supabase
+        .from("holarchelp_hospitals" as any)
+        .select("id, name, ownership, latitude, longitude, er_capacity_status, status, subscription_status, accepting_patients")
+        .eq("status", "approved")
+        .eq("accepting_patients", true)
+        .not("latitude", "is", null)
+        .not("longitude", "is", null),
     ]);
 
     setOnDuty(!!(prov as any)?.dispatcher_on_duty);
 
-    const incs = ((offers as any[]) ?? [])
+    const openIncs = ((offers as any[]) ?? [])
       .map((o) => o.holarchelp_incidents)
       .filter((i: any) => i && ["open", "reopened"].includes(i.status)) as Incident[];
-    // dedupe
-    const seen = new Set<string>();
-    const uniq = incs.filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
-    setIncidents(uniq.sort((a, b) => (sevOrder[a.severity ?? ""] ?? 9) - (sevOrder[b.severity ?? ""] ?? 9)));
+    const assignedIncs = (((assigned as any) ?? []) as Incident[]);
+    const merged = new Map<string, Incident>();
+    [...openIncs, ...assignedIncs].forEach((i) => merged.set(i.id, i));
+    const list = [...merged.values()].sort((a, b) => (sevOrder[a.severity ?? ""] ?? 9) - (sevOrder[b.severity ?? ""] ?? 9));
+    setIncidents(list);
+    setDestByIncident(
+      Object.fromEntries(list.map((i: any) => [i.id, i.destination_hospital_id ?? null])),
+    );
+
+    // Fetch latest location per incident (for hospital distance sort)
+    if (list.length) {
+      const { data: locs } = await supabase
+        .from("holarchelp_locations" as any)
+        .select("incident_id, latitude, longitude, recorded_at")
+        .in("incident_id", list.map((i) => i.id))
+        .order("recorded_at", { ascending: false });
+      const seen = new Set<string>();
+      const map: Record<string, { lat: number; lng: number }> = {};
+      ((locs as any[]) ?? []).forEach((l) => {
+        if (seen.has(l.incident_id)) return;
+        seen.add(l.incident_id);
+        if (l.latitude != null && l.longitude != null)
+          map[l.incident_id] = { lat: l.latitude, lng: l.longitude };
+      });
+      setIncidentLocs(map);
+    } else {
+      setIncidentLocs({});
+    }
 
     const shiftMap = new Map<string, any>();
     ((shifts as any[]) ?? []).forEach((s) => {
@@ -99,6 +158,14 @@ export default function DispatcherConsoleScreen() {
         };
       }),
     );
+
+    setHospitals(
+      (((hosps as any[]) ?? []) as Hospital[]).map((h) => ({
+        id: h.id, name: h.name, ownership: h.ownership,
+        latitude: h.latitude, longitude: h.longitude,
+        er_capacity_status: (h as any).er_capacity_status,
+      })),
+    );
     setLoading(false);
   };
 
@@ -111,10 +178,21 @@ export default function DispatcherConsoleScreen() {
       .on("postgres_changes", { event: "*", schema: "public", table: "ambulances", filter: `provider_id=eq.${providerId}` }, loadAll)
       .on("postgres_changes", { event: "*", schema: "public", table: "paramedic_shifts", filter: `provider_id=eq.${providerId}` }, loadAll)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_ambulance_providers", filter: `id=eq.${providerId}` }, loadAll)
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_hospitals" }, loadAll)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerId]);
+
+  const setDestination = async (incidentId: string, hospitalId: string) => {
+    setSettingHospital(hospitalId);
+    const { error } = await supabase.rpc("holarchelp_set_destination_hospital" as any, {
+      _incident_id: incidentId, _hospital_id: hospitalId,
+    });
+    if (error) toastError(error, "We couldn't set that destination hospital.");
+    else { toast.success("Destination hospital set."); loadAll(); }
+    setSettingHospital(null);
+  };
 
   const toggleDuty = async (next: boolean) => {
     if (!providerId) return;
@@ -166,7 +244,7 @@ export default function DispatcherConsoleScreen() {
         </div>
       </header>
 
-      <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.1fr]">
+      <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-[1fr_1fr_1.1fr_1.2fr]">
         {/* Incidents */}
         <section className="rounded-xl border bg-card p-2">
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">Open SOS · {incidents.length}</h2>
@@ -174,35 +252,50 @@ export default function DispatcherConsoleScreen() {
             <p className="px-2 py-6 text-center text-xs text-muted-foreground">No SOS offered to your fleet.</p>
           ) : (
             <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
-              {incidents.map((i) => (
-                <button
-                  key={i.id}
-                  draggable
-                  onDragStart={(e) => {
-                    setDragIncidentId(i.id);
-                    e.dataTransfer.setData("text/plain", i.id);
-                    e.dataTransfer.effectAllowed = "move";
-                  }}
-                  onDragEnd={() => { setDragIncidentId(null); setDragOverVehicleId(null); }}
-                  onClick={() => setSelectedIncidentId(i.id)}
-                  className={`w-full text-left rounded-lg border p-2 transition cursor-grab active:cursor-grabbing ${
-                    selectedIncidentId === i.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"
-                  } ${dragIncidentId === i.id ? "opacity-60" : ""}`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
-                    <span className={`text-[10px] font-bold uppercase ${
-                      i.severity === "critical" ? "text-destructive" : i.severity === "high" ? "text-warning" : "text-muted-foreground"
-                    }`}>
-                      <Siren className="inline h-3 w-3 mr-0.5" />{i.severity ?? "high"}
-                    </span>
-                  </div>
-                  <p className="text-xs mt-0.5 truncate">{i.incident_type ?? "Emergency"}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {ago(i.created_at)} ago
-                  </p>
-                </button>
-              ))}
+              {incidents.map((i) => {
+                const isMine = i.assigned_provider_id === providerId;
+                const hasVehicle = !!i.assigned_ambulance_id;
+                const draggable = !hasVehicle; // both unassigned offers and assigned-but-no-vehicle are draggable
+                return (
+                  <button
+                    key={i.id}
+                    draggable={draggable}
+                    onDragStart={(e) => {
+                      if (!draggable) return;
+                      setDragIncidentId(i.id);
+                      e.dataTransfer.setData("text/plain", i.id);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onDragEnd={() => { setDragIncidentId(null); setDragOverVehicleId(null); }}
+                    onClick={() => setSelectedIncidentId(i.id)}
+                    className={`w-full text-left rounded-lg border p-2 transition ${
+                      draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
+                    } ${selectedIncidentId === i.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"} ${
+                      dragIncidentId === i.id ? "opacity-60" : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
+                      <span className={`text-[10px] font-bold uppercase ${
+                        i.severity === "critical" ? "text-destructive" : i.severity === "high" ? "text-warning" : "text-muted-foreground"
+                      }`}>
+                        <Siren className="inline h-3 w-3 mr-0.5" />{i.severity ?? "high"}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-0.5 truncate">{i.incident_type ?? "Emergency"}</p>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {ago(i.created_at)} ago
+                      </p>
+                      {isMine && (
+                        <span className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">
+                          {hasVehicle ? "Rolling" : "Assigned · needs vehicle"}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </section>
@@ -291,9 +384,9 @@ export default function DispatcherConsoleScreen() {
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" /> Triggered {ago(selected.created_at)} ago
               </p>
-              {selected.latitude != null && (
+              {incidentLocs[selected.id] && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3 w-3" /> {selected.latitude.toFixed(4)}, {selected.longitude?.toFixed(4)}
+                  <MapPin className="h-3 w-3" /> {incidentLocs[selected.id].lat.toFixed(4)}, {incidentLocs[selected.id].lng.toFixed(4)}
                 </p>
               )}
               {selected.notes && (
@@ -302,6 +395,74 @@ export default function DispatcherConsoleScreen() {
               <p className="text-[11px] text-muted-foreground pt-2 border-t">
                 Drag this card onto a vehicle, or tap "Assign to selected SOS".
               </p>
+            </div>
+          )}
+        </section>
+
+        {/* Destination hospitals */}
+        <section className="rounded-xl border bg-card p-2">
+          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1 flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> Destination hospitals · {hospitals.length}
+          </h2>
+          {hospitals.length === 0 ? (
+            <p className="px-2 py-6 text-center text-xs text-muted-foreground">No approved hospitals available.</p>
+          ) : (
+            <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
+              {(() => {
+                const originLoc = selected ? incidentLocs[selected.id] : null;
+                const withDist = hospitals.map((h) => ({
+                  ...h,
+                  distance_km: originLoc && h.latitude != null && h.longitude != null
+                    ? distKm(originLoc, { lat: h.latitude, lng: h.longitude })
+                    : null,
+                }));
+                withDist.sort((a, b) => {
+                  if (a.distance_km != null && b.distance_km != null) return a.distance_km - b.distance_km;
+                  if (a.distance_km != null) return -1;
+                  if (b.distance_km != null) return 1;
+                  return a.name.localeCompare(b.name);
+                });
+                const currentDest = selected ? destByIncident[selected.id] : null;
+                return withDist.map((h) => {
+                  const isCurrent = currentDest === h.id;
+                  return (
+                    <div
+                      key={h.id}
+                      className={`rounded-lg border p-2 transition ${
+                        isCurrent ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">{h.name}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            <span className="uppercase">{h.ownership ?? "private"}</span>
+                            {h.distance_km != null && <> · {h.distance_km.toFixed(1)} km</>}
+                          </p>
+                        </div>
+                        {h.er_capacity_status && (
+                          <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                            h.er_capacity_status === "green" ? "bg-success/10 text-success"
+                            : h.er_capacity_status === "amber" ? "bg-warning/10 text-warning"
+                            : "bg-destructive/10 text-destructive"
+                          }`}>
+                            {h.er_capacity_status}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={isCurrent ? "outline" : "default"}
+                        className="mt-2 w-full h-7 text-[11px]"
+                        disabled={!selected || !!settingHospital || (isCurrent)}
+                        onClick={() => selected && setDestination(selected.id, h.id)}
+                      >
+                        {isCurrent ? "Current destination" : selected ? "Set destination" : "Select an SOS first"}
+                      </Button>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
         </section>
