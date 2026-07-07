@@ -124,7 +124,7 @@ export default function EmergencyDashboardScreen() {
                     <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sos">
                       <Siren className="h-3 w-3" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? "Emergency"}
                     </p>
-                    <p className="mt-1 text-base font-extrabold">#{r.id.slice(0, 8)}</p>
+                    <p className="mt-1 text-base font-extrabold">{r.incident_number ?? `INC-${r.id.slice(0, 8)}`}</p>
                     <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
                       <Clock className="h-3 w-3" /> {ago(r.created_at)} ago
                     </p>
