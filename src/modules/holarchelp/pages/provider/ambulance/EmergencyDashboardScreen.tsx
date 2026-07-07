@@ -16,6 +16,9 @@ type Row = {
   conscious: boolean | null; breathing: boolean | null;
   created_at: string; notes?: string | null; incident_type?: string | null;
   incident_number?: string | null;
+  assigned_provider_id?: string | null;
+  assigned_paramedic_user_id?: string | null;
+  assigned_ambulance_id?: string | null;
 };
 
 const sevBig = (s: string | null) =>
