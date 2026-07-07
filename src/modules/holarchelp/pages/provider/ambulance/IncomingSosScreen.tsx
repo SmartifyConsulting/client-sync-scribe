@@ -12,6 +12,7 @@ type Row = {
   id: string; status: string; severity: string | null;
   conscious: boolean | null; breathing: boolean | null;
   created_at: string; notes?: string | null; incident_type?: string | null;
+  incident_number?: string | null;
 };
 
 const sevBig = (s: string | null) =>
@@ -117,7 +118,7 @@ export default function IncomingSosScreen() {
                   <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sos">
                     <Siren className="h-3.5 w-3.5" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? t("ambulance.emergency")}
                   </p>
-                  <p className="mt-1 text-lg font-extrabold">Incident #{r.id.slice(0,8)}</p>
+                  <p className="mt-1 text-lg font-extrabold">{r.incident_number ?? `INC-${r.id.slice(0,8)}`}</p>
                   <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Clock className="h-3 w-3" /> {t("ambulance.triggered")} {ago(r.created_at)} {t("common.ago")}
                   </p>
