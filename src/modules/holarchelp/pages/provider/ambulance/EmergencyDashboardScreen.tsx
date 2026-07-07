@@ -15,6 +15,7 @@ type Row = {
   id: string; status: string; severity: string | null;
   conscious: boolean | null; breathing: boolean | null;
   created_at: string; notes?: string | null; incident_type?: string | null;
+  incident_number?: string | null;
 };
 
 const sevBig = (s: string | null) =>
