@@ -143,11 +143,18 @@ export default function EmergencyDashboardScreen() {
                       <Clock className="h-3 w-3" /> {ago(r.created_at)} ago
                     </p>
                   </div>
-                  {(r.conscious === false || r.breathing === false) && (
-                    <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
-                      <AlertTriangle className="mr-1 inline h-3 w-3" /> Life threat
-                    </span>
-                  )}
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    {r.assigned_provider_id === providerId && (
+                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
+                        {r.assigned_ambulance_id ? "Rolling" : "Assigned · needs vehicle"}
+                      </span>
+                    )}
+                    {(r.conscious === false || r.breathing === false) && (
+                      <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
+                        <AlertTriangle className="mr-1 inline h-3 w-3" /> Life threat
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {r.notes && <p className="mt-2 rounded-lg border bg-background/60 p-2 text-[11px] italic text-muted-foreground line-clamp-2">"{r.notes}"</p>}
                 <Button size="sm" className="mt-2 h-9 w-full font-bold" onClick={() => setPickFor(r.id)}>
