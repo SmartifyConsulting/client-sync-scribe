@@ -62,22 +62,31 @@ export default function DispatcherConsoleScreen() {
   const [onDuty, setOnDuty] = useState(false);
   const [togglingDuty, setTogglingDuty] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [incidentLocs, setIncidentLocs] = useState<Record<string, { lat: number; lng: number }>>({});
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [destByIncident, setDestByIncident] = useState<Record<string, string | null>>({});
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState(false);
   const [dragIncidentId, setDragIncidentId] = useState<string | null>(null);
   const [dragOverVehicleId, setDragOverVehicleId] = useState<string | null>(null);
+  const [settingHospital, setSettingHospital] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadAll = async () => {
     if (!providerId) return;
-    const [{ data: prov }, { data: offers }, { data: vehs }, { data: shifts }] = await Promise.all([
+    const [{ data: prov }, { data: offers }, { data: assigned }, { data: vehs }, { data: shifts }, { data: hosps }] = await Promise.all([
       supabase.from("holarchelp_ambulance_providers" as any).select("dispatcher_on_duty").eq("id", providerId).maybeSingle(),
       supabase
         .from("holarchelp_incident_offers" as any)
-        .select("incident_id, holarchelp_incidents!inner(id, incident_number, severity, status, created_at, notes, incident_type, latitude, longitude)")
+        .select("incident_id, holarchelp_incidents!inner(id, incident_number, severity, status, created_at, notes, incident_type, assigned_provider_id, assigned_ambulance_id, destination_hospital_id)")
         .eq("provider_id", providerId)
         .eq("response", "pending"),
+      supabase
+        .from("holarchelp_incidents" as any)
+        .select("id, incident_number, severity, status, created_at, notes, incident_type, assigned_provider_id, assigned_ambulance_id, destination_hospital_id")
+        .eq("assigned_provider_id", providerId)
+        .in("status", ["assigned","en_route","arrived","patient_collected","en_route_to_hospital","at_hospital"]),
       supabase
         .from("ambulances" as any)
         .select("id, vehicle_code, registration_number, status")
@@ -89,17 +98,48 @@ export default function DispatcherConsoleScreen() {
         .select("id, ambulance_id, user_id, status, profiles:user_id(full_name)")
         .eq("provider_id", providerId)
         .is("ended_at", null),
+      supabase
+        .from("holarchelp_hospitals" as any)
+        .select("id, name, ownership, latitude, longitude, er_capacity_status, status, subscription_status, accepting_patients")
+        .eq("status", "approved")
+        .eq("accepting_patients", true)
+        .not("latitude", "is", null)
+        .not("longitude", "is", null),
     ]);
 
     setOnDuty(!!(prov as any)?.dispatcher_on_duty);
 
-    const incs = ((offers as any[]) ?? [])
+    const openIncs = ((offers as any[]) ?? [])
       .map((o) => o.holarchelp_incidents)
       .filter((i: any) => i && ["open", "reopened"].includes(i.status)) as Incident[];
-    // dedupe
-    const seen = new Set<string>();
-    const uniq = incs.filter((i) => (seen.has(i.id) ? false : (seen.add(i.id), true)));
-    setIncidents(uniq.sort((a, b) => (sevOrder[a.severity ?? ""] ?? 9) - (sevOrder[b.severity ?? ""] ?? 9)));
+    const assignedIncs = (((assigned as any) ?? []) as Incident[]);
+    const merged = new Map<string, Incident>();
+    [...openIncs, ...assignedIncs].forEach((i) => merged.set(i.id, i));
+    const list = [...merged.values()].sort((a, b) => (sevOrder[a.severity ?? ""] ?? 9) - (sevOrder[b.severity ?? ""] ?? 9));
+    setIncidents(list);
+    setDestByIncident(
+      Object.fromEntries(list.map((i: any) => [i.id, i.destination_hospital_id ?? null])),
+    );
+
+    // Fetch latest location per incident (for hospital distance sort)
+    if (list.length) {
+      const { data: locs } = await supabase
+        .from("holarchelp_locations" as any)
+        .select("incident_id, latitude, longitude, recorded_at")
+        .in("incident_id", list.map((i) => i.id))
+        .order("recorded_at", { ascending: false });
+      const seen = new Set<string>();
+      const map: Record<string, { lat: number; lng: number }> = {};
+      ((locs as any[]) ?? []).forEach((l) => {
+        if (seen.has(l.incident_id)) return;
+        seen.add(l.incident_id);
+        if (l.latitude != null && l.longitude != null)
+          map[l.incident_id] = { lat: l.latitude, lng: l.longitude };
+      });
+      setIncidentLocs(map);
+    } else {
+      setIncidentLocs({});
+    }
 
     const shiftMap = new Map<string, any>();
     ((shifts as any[]) ?? []).forEach((s) => {
@@ -118,6 +158,14 @@ export default function DispatcherConsoleScreen() {
         };
       }),
     );
+
+    setHospitals(
+      (((hosps as any[]) ?? []) as Hospital[]).map((h) => ({
+        id: h.id, name: h.name, ownership: h.ownership,
+        latitude: h.latitude, longitude: h.longitude,
+        er_capacity_status: (h as any).er_capacity_status,
+      })),
+    );
     setLoading(false);
   };
 
@@ -130,10 +178,21 @@ export default function DispatcherConsoleScreen() {
       .on("postgres_changes", { event: "*", schema: "public", table: "ambulances", filter: `provider_id=eq.${providerId}` }, loadAll)
       .on("postgres_changes", { event: "*", schema: "public", table: "paramedic_shifts", filter: `provider_id=eq.${providerId}` }, loadAll)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "holarchelp_ambulance_providers", filter: `id=eq.${providerId}` }, loadAll)
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_hospitals" }, loadAll)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [providerId]);
+
+  const setDestination = async (incidentId: string, hospitalId: string) => {
+    setSettingHospital(hospitalId);
+    const { error } = await supabase.rpc("holarchelp_set_destination_hospital" as any, {
+      _incident_id: incidentId, _hospital_id: hospitalId,
+    });
+    if (error) toastError(error, "We couldn't set that destination hospital.");
+    else { toast.success("Destination hospital set."); loadAll(); }
+    setSettingHospital(null);
+  };
 
   const toggleDuty = async (next: boolean) => {
     if (!providerId) return;
