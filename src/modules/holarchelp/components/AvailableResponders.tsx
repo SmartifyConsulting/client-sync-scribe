@@ -131,7 +131,34 @@ export function AvailableResponders({
         </div>
       );
     }
-    return null;
+    return (
+      <div className="mb-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-wider text-primary">
+            Available ER providers (0)
+          </p>
+          <p className="flex items-center gap-1 text-xs font-mono tabular-nums text-muted-foreground">
+            <Clock className="h-3 w-3" /> Auto-assign in {fmt(remainingSec)}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-xl border border-dashed p-3 text-xs text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          <span>Searching for nearby ER Providers…</span>
+        </div>
+        {canExtend && (
+          <div className="mt-2 flex justify-end">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-[11px]"
+              onClick={() => setExtensionMs((e) => Math.min(EXTEND_MAX_MS, e + EXTEND_STEP_MS))}
+            >
+              +30s more time
+            </Button>
+          </div>
+        )}
+      </div>
+    );
   }
 
   // Pin the current provider to the top in change mode
