@@ -42,7 +42,7 @@ export default function EmergencyDashboardScreen() {
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase.from("holarchelp_incidents" as any)
-        .select("id,status,severity,conscious,breathing,created_at,notes,incident_type")
+        .select("id,status,severity,conscious,breathing,created_at,notes,incident_type,incident_number")
         .is("assigned_paramedic_user_id", null)
         .in("status", ["open", "reopened"])
         .order("created_at", { ascending: true }).limit(40);
