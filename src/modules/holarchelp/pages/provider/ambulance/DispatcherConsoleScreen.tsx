@@ -244,7 +244,7 @@ export default function DispatcherConsoleScreen() {
         </div>
       </header>
 
-      <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.1fr]">
+      <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-[1fr_1fr_1.1fr_1.2fr]">
         {/* Incidents */}
         <section className="rounded-xl border bg-card p-2">
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">Open SOS · {incidents.length}</h2>
@@ -252,35 +252,50 @@ export default function DispatcherConsoleScreen() {
             <p className="px-2 py-6 text-center text-xs text-muted-foreground">No SOS offered to your fleet.</p>
           ) : (
             <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
-              {incidents.map((i) => (
-                <button
-                  key={i.id}
-                  draggable
-                  onDragStart={(e) => {
-                    setDragIncidentId(i.id);
-                    e.dataTransfer.setData("text/plain", i.id);
-                    e.dataTransfer.effectAllowed = "move";
-                  }}
-                  onDragEnd={() => { setDragIncidentId(null); setDragOverVehicleId(null); }}
-                  onClick={() => setSelectedIncidentId(i.id)}
-                  className={`w-full text-left rounded-lg border p-2 transition cursor-grab active:cursor-grabbing ${
-                    selectedIncidentId === i.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"
-                  } ${dragIncidentId === i.id ? "opacity-60" : ""}`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
-                    <span className={`text-[10px] font-bold uppercase ${
-                      i.severity === "critical" ? "text-destructive" : i.severity === "high" ? "text-warning" : "text-muted-foreground"
-                    }`}>
-                      <Siren className="inline h-3 w-3 mr-0.5" />{i.severity ?? "high"}
-                    </span>
-                  </div>
-                  <p className="text-xs mt-0.5 truncate">{i.incident_type ?? "Emergency"}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {ago(i.created_at)} ago
-                  </p>
-                </button>
-              ))}
+              {incidents.map((i) => {
+                const isMine = i.assigned_provider_id === providerId;
+                const hasVehicle = !!i.assigned_ambulance_id;
+                const draggable = !hasVehicle; // both unassigned offers and assigned-but-no-vehicle are draggable
+                return (
+                  <button
+                    key={i.id}
+                    draggable={draggable}
+                    onDragStart={(e) => {
+                      if (!draggable) return;
+                      setDragIncidentId(i.id);
+                      e.dataTransfer.setData("text/plain", i.id);
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onDragEnd={() => { setDragIncidentId(null); setDragOverVehicleId(null); }}
+                    onClick={() => setSelectedIncidentId(i.id)}
+                    className={`w-full text-left rounded-lg border p-2 transition ${
+                      draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
+                    } ${selectedIncidentId === i.id ? "border-primary bg-primary/5" : "hover:bg-muted/50"} ${
+                      dragIncidentId === i.id ? "opacity-60" : ""
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
+                      <span className={`text-[10px] font-bold uppercase ${
+                        i.severity === "critical" ? "text-destructive" : i.severity === "high" ? "text-warning" : "text-muted-foreground"
+                      }`}>
+                        <Siren className="inline h-3 w-3 mr-0.5" />{i.severity ?? "high"}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-0.5 truncate">{i.incident_type ?? "Emergency"}</p>
+                    <div className="mt-0.5 flex items-center justify-between gap-2">
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {ago(i.created_at)} ago
+                      </p>
+                      {isMine && (
+                        <span className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">
+                          {hasVehicle ? "Rolling" : "Assigned · needs vehicle"}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </section>
@@ -369,9 +384,9 @@ export default function DispatcherConsoleScreen() {
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" /> Triggered {ago(selected.created_at)} ago
               </p>
-              {selected.latitude != null && (
+              {incidentLocs[selected.id] && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3 w-3" /> {selected.latitude.toFixed(4)}, {selected.longitude?.toFixed(4)}
+                  <MapPin className="h-3 w-3" /> {incidentLocs[selected.id].lat.toFixed(4)}, {incidentLocs[selected.id].lng.toFixed(4)}
                 </p>
               )}
               {selected.notes && (
@@ -380,6 +395,74 @@ export default function DispatcherConsoleScreen() {
               <p className="text-[11px] text-muted-foreground pt-2 border-t">
                 Drag this card onto a vehicle, or tap "Assign to selected SOS".
               </p>
+            </div>
+          )}
+        </section>
+
+        {/* Destination hospitals */}
+        <section className="rounded-xl border bg-card p-2">
+          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1 flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> Destination hospitals · {hospitals.length}
+          </h2>
+          {hospitals.length === 0 ? (
+            <p className="px-2 py-6 text-center text-xs text-muted-foreground">No approved hospitals available.</p>
+          ) : (
+            <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
+              {(() => {
+                const originLoc = selected ? incidentLocs[selected.id] : null;
+                const withDist = hospitals.map((h) => ({
+                  ...h,
+                  distance_km: originLoc && h.latitude != null && h.longitude != null
+                    ? distKm(originLoc, { lat: h.latitude, lng: h.longitude })
+                    : null,
+                }));
+                withDist.sort((a, b) => {
+                  if (a.distance_km != null && b.distance_km != null) return a.distance_km - b.distance_km;
+                  if (a.distance_km != null) return -1;
+                  if (b.distance_km != null) return 1;
+                  return a.name.localeCompare(b.name);
+                });
+                const currentDest = selected ? destByIncident[selected.id] : null;
+                return withDist.map((h) => {
+                  const isCurrent = currentDest === h.id;
+                  return (
+                    <div
+                      key={h.id}
+                      className={`rounded-lg border p-2 transition ${
+                        isCurrent ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold truncate">{h.name}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            <span className="uppercase">{h.ownership ?? "private"}</span>
+                            {h.distance_km != null && <> · {h.distance_km.toFixed(1)} km</>}
+                          </p>
+                        </div>
+                        {h.er_capacity_status && (
+                          <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                            h.er_capacity_status === "green" ? "bg-success/10 text-success"
+                            : h.er_capacity_status === "amber" ? "bg-warning/10 text-warning"
+                            : "bg-destructive/10 text-destructive"
+                          }`}>
+                            {h.er_capacity_status}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={isCurrent ? "outline" : "default"}
+                        className="mt-2 w-full h-7 text-[11px]"
+                        disabled={!selected || !!settingHospital || (isCurrent)}
+                        onClick={() => selected && setDestination(selected.id, h.id)}
+                      >
+                        {isCurrent ? "Current destination" : selected ? "Set destination" : "Select an SOS first"}
+                      </Button>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           )}
         </section>
