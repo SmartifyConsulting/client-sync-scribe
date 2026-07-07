@@ -41,16 +41,27 @@ export default function EmergencyDashboardScreen() {
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [startOpen, setStartOpen] = useState(false);
 
-  // Live SOS queue
+  // Live SOS queue — incoming (unassigned) + this provider's assigned/rolling incidents
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase.from("holarchelp_incidents" as any)
-        .select("id,status,severity,conscious,breathing,created_at,notes,incident_type,incident_number")
+      const incomingP = supabase.from("holarchelp_incidents" as any)
+        .select("id,status,severity,conscious,breathing,created_at,notes,incident_type,incident_number,assigned_provider_id,assigned_paramedic_user_id,assigned_ambulance_id")
         .is("assigned_paramedic_user_id", null)
         .in("status", ["open", "reopened"])
         .order("created_at", { ascending: true }).limit(40);
+      const minePromise = providerId
+        ? supabase.from("holarchelp_incidents" as any)
+            .select("id,status,severity,conscious,breathing,created_at,notes,incident_type,incident_number,assigned_provider_id,assigned_paramedic_user_id,assigned_ambulance_id")
+            .eq("assigned_provider_id", providerId)
+            .in("status", ["assigned","en_route","arrived","patient_collected","en_route_to_hospital","at_hospital"])
+            .order("created_at", { ascending: true }).limit(40)
+        : Promise.resolve({ data: [] as any[] });
+      const [{ data: a }, { data: b }] = await Promise.all([incomingP, minePromise]);
+      const merged = new Map<string, Row>();
+      (((a as any) ?? []) as Row[]).forEach((r) => merged.set(r.id, r));
+      (((b as any) ?? []) as Row[]).forEach((r) => merged.set(r.id, r));
       const order: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
-      setRows((((data as any) ?? []) as Row[]).sort((a, b) => (order[a.severity ?? ""] ?? 9) - (order[b.severity ?? ""] ?? 9)));
+      setRows([...merged.values()].sort((x, y) => (order[x.severity ?? ""] ?? 9) - (order[y.severity ?? ""] ?? 9)));
     };
     load();
     const ch = supabase.channel("dash-incoming")
@@ -58,7 +69,7 @@ export default function EmergencyDashboardScreen() {
       .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incident_offers" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, []);
+  }, [providerId]);
 
   const isOffShift = !shift;
   const isBusy = shift?.status === "busy";
