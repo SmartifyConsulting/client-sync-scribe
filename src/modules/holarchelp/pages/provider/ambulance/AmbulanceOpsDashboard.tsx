@@ -103,7 +103,7 @@ export default function AmbulanceOpsDashboard() {
                   </td>
                   <td className="px-3 py-2">
                     <p className="text-xs font-bold">{r.incident_type ?? t("ambulance.emergency")}</p>
-                    <p className="text-[10px] text-muted-foreground">#{r.id.slice(0,8)}</p>
+                    <p className="text-[10px] text-muted-foreground">{r.incident_number ?? `INC-${r.id.slice(0,8)}`}</p>
                   </td>
                   <td className="px-3 py-2 text-xs">
                     {r.conscious === false && <span className="text-destructive font-semibold">{t("ambulance.unconscious")} · </span>}
