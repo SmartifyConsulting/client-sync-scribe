@@ -354,7 +354,7 @@ export default function HolarcHelpIncidentDetail() {
         </div>
       )}
 
-      {incident.status === "open" && !incident.assigned_provider_id && !showNoResponders && (
+      {incident.status === "open" && !incident.assigned_provider_id && (
         <AvailableResponders incidentId={id!} createdAt={incident.created_at} />
       )}
 
