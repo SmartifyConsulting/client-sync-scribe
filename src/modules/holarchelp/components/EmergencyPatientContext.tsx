@@ -35,9 +35,21 @@ const ageFromDob = (dob?: string) => {
   return Math.floor(diff / (365.25 * 24 * 3600 * 1000));
 };
 
-const asList = (v?: string[] | string | null): string[] => {
+const asList = (v?: any): string[] => {
   if (!v) return [];
-  if (Array.isArray(v)) return v.filter(Boolean) as string[];
+  if (Array.isArray(v)) {
+    return v
+      .map((item) => {
+        if (!item) return "";
+        if (typeof item === "string") return item;
+        if (typeof item === "object") {
+          return String(item.name ?? item.condition ?? item.title ?? item.label ?? "").trim();
+        }
+        return String(item);
+      })
+      .filter(Boolean);
+  }
+  if (typeof v === "object") return asList([v]);
   return String(v).split(/[,\n;]+/).map((s) => s.trim()).filter(Boolean);
 };
 
