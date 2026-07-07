@@ -18,6 +18,8 @@ type Incident = {
   incident_type?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  assigned_provider_id?: string | null;
+  assigned_ambulance_id?: string | null;
 };
 
 type Vehicle = {
@@ -27,6 +29,23 @@ type Vehicle = {
   status: string | null;
   lead_name?: string | null;
   shift_id?: string | null;
+};
+
+type Hospital = {
+  id: string;
+  name: string;
+  ownership: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  er_capacity_status?: string | null;
+  distance_km?: number | null;
+};
+
+const distKm = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
+  const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(x));
 };
 
 const sevOrder: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
