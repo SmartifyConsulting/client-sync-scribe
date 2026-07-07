@@ -157,9 +157,15 @@ export default function EmergencyDashboardScreen() {
                   </div>
                 </div>
                 {r.notes && <p className="mt-2 rounded-lg border bg-background/60 p-2 text-[11px] italic text-muted-foreground line-clamp-2">"{r.notes}"</p>}
-                <Button size="sm" className="mt-2 h-9 w-full font-bold" onClick={() => setPickFor(r.id)}>
-                  Accept &amp; Roll
-                </Button>
+                {r.assigned_provider_id === providerId ? (
+                  <Button size="sm" variant="outline" className="mt-2 h-9 w-full font-bold" onClick={() => window.location.assign(`/provider/ambulance/incident/${r.id}`)}>
+                    Open incident
+                  </Button>
+                ) : (
+                  <Button size="sm" className="mt-2 h-9 w-full font-bold" onClick={() => setPickFor(r.id)}>
+                    Accept &amp; Roll
+                  </Button>
+                )}
               </div>
             ))}
           </div>
