@@ -1,35 +1,45 @@
-# Fix ER Provider selection UI + provider queue incident numbers
+## Fix: patient ER Provider list + countdown not showing
 
-Two small UI fixes.
+### Root cause
+The database function `holarchelp_get_incident_offers` fails with
+`invalid input syntax for type boolean: "20"` on every call.
 
-## 1. Patient screen: always show countdown + "searching" state
+Inside the function:
 
-**Problem:** `AvailableResponders` returns `null` when the offers RPC comes back empty, so the patient sees neither the list nor the auto-assign countdown. It only renders once at least one offer row exists.
+```sql
+_has_rows boolean := false;
+...
+GET DIAGNOSTICS _has_rows = ROW_COUNT;
+IF _has_rows = false AND ...
+```
 
-**Fix in `src/modules/holarchelp/components/AvailableResponders.tsx`:**
-- Remove the early `if (!offers.length) return null;` for the non-change-mode branch.
-- When `offers.length === 0` and not in change mode, still render the card with:
-  - Header: "Available ER providers (0)"
-  - The `Auto-assign in MM:SS` countdown (existing logic)
-  - The `+30s more time` extend button (existing logic)
-  - Placeholder body: `Searching for nearby ER Providers…` with a small spinner, instead of the `<ul>`
-- Keep all other logic (auto-assign RPC firing at 0, change-mode branch, current-provider pinning) untouched.
+`ROW_COUNT` is an integer (e.g. `20`). Assigning it into a `boolean`
+variable raises the error, so the RPC returns HTTP 400 and the patient's
+`AvailableResponders` component gets zero offers — no list, no countdown.
 
-Also in `src/modules/holarchelp/pages/HolarcHelpIncidentDetail.tsx`:
-- Loosen the render gate at line 357 so the "no responders yet after 90s" fallback (`showNoResponders`) no longer hides `AvailableResponders`. Change `!showNoResponders` guard to always render `AvailableResponders` while `status === "open" && !assigned_provider_id`. The countdown must remain visible even after 90 seconds elapse without offers.
+### The fix
+One database migration that redeclares the variable as an integer and
+updates the check:
 
-## 2. Ambulance incoming queue: show incident number
+```text
+_has_rows boolean := false;   →   _row_count integer := 0;
+GET DIAGNOSTICS _has_rows = ROW_COUNT;
+                              →   GET DIAGNOSTICS _row_count = ROW_COUNT;
+IF _has_rows = false AND ...  →   IF _row_count = 0 AND ...
+```
 
-**Problem:** Ambulance dashboard (`EmergencyDashboardScreen.tsx` line 126) and `IncomingSosScreen.tsx` line 120 show `#{r.id.slice(0,8)}` — a UUID slice — instead of the human-readable `incident_number` that hospitals already show.
+Everything else in the function stays the same (permissions, fallback
+query, security-definer settings).
 
-**Fix:**
-- `src/modules/holarchelp/pages/provider/ambulance/EmergencyDashboardScreen.tsx`
-  - Add `incident_number?: string | null` to `Row` type
-  - Add `incident_number` to the `.select(...)` list
-  - Render `{r.incident_number ?? \`INC-${r.id.slice(0,8)}\`}`
-- `src/modules/holarchelp/pages/provider/ambulance/IncomingSosScreen.tsx` — same three edits (add to type, select, render).
-- `src/modules/holarchelp/pages/provider/ambulance/AmbulanceOpsDashboard.tsx` line 105 — same treatment for parity.
+### Technical details
+- File: new migration under `supabase/migrations/`
+- Uses `CREATE OR REPLACE FUNCTION public.holarchelp_get_incident_offers(_incident_id uuid)` with the same signature and body, only the three lines above changed.
+- No client code changes needed — `AvailableResponders.tsx` already renders the 0-offers "Searching…" state with countdown, and the offers list once rows come back.
+- No changes to `dispatch-sos`, RLS, or any other function.
 
-Hospital `IncomingAmbulancesScreen` already shows `incident_number`, so no change there. Hospital `TriageScreen` / `AdmissionsScreen` are internal boards (not the "incoming SOS to pick up" queue) and are out of scope.
-
-No backend, RPC, or schema changes. Pure presentation.
+### Verification
+After the migration, the same RPC call in the browser will return 200
+with the list of ambulance offers (or the nearby-provider fallback for
+open incidents with none yet). The patient screen will then show:
+1. "Available ER providers (N)" with the `Auto-assign in MM:SS` countdown, and
+2. Auto-assignment firing at 0:00 via the existing `holarchelp_auto_assign_incident` RPC.
