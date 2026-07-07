@@ -13,6 +13,7 @@ type Row = {
   created_at: string; assigned_provider_id: string | null;
   eta_minutes: number | null; conscious: boolean | null; breathing: boolean | null;
   incident_type?: string | null;
+  incident_number?: string | null;
   latitude?: number | null; longitude?: number | null;
 };
 
