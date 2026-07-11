@@ -43,6 +43,7 @@ import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
+import { TodoRow } from "@/components/todos/TodoRow";
 
 interface TodoItem {
   id: string;
@@ -324,6 +325,23 @@ export default function TodoList() {
   const updatePriority = async (id: string, newPriority: "low" | "medium" | "high") => {
     try { await supabase.from('todos').update({ priority: newPriority }).eq('id', id); setTodos(todos.map((t) => t.id === id ? { ...t, priority: newPriority } : t)); }
     catch { toast({ title: "Error", variant: "destructive" }); }
+  };
+
+  const duplicateTask = async (todo: TodoItem) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data, error } = await supabase.from('todos').insert({
+        user_id: user.id,
+        title: todo.title,
+        priority: todo.priority,
+        patient_id: todo.patient_id ?? null,
+        status: 'pending',
+      }).select('*, patients(name)').single();
+      if (error) throw error;
+      setTodos([{ ...(data as any), completed: false, patient_name: (data as any).patients?.name || null, is_auto_executed: false, task_type: (data as any).task_type || 'standard' }, ...todos]);
+      toast({ title: "Task duplicated" });
+    } catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
   const handleSendDoc = async (todo: TodoItem) => {
