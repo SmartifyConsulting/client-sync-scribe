@@ -62,6 +62,20 @@ export function FollowUpAppointmentDialog({
   const [busy, setBusy] = useState<{ start: Date; end: Date }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  // Sync date/slot when dialog re-opens with new AI suggestion
+  useEffect(() => {
+    if (!open) return;
+    const d = parseIsoDateLocal(suggestedDate);
+    if (d) setDate(d);
+    if (suggestedTime && /^\d{2}:\d{2}$/.test(suggestedTime)) {
+      const [h, m] = suggestedTime.split(":").map(Number);
+      const snappedM = m < 30 ? 0 : 30;
+      const match = ALL_SLOTS.find(s => s.hour === h && s.minute === snappedM);
+      if (match) setSlot(match);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, suggestedDate, suggestedTime]);
+
   useEffect(() => {
     if (!open || !date || !doctorId) return;
     const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
