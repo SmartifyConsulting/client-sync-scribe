@@ -107,12 +107,11 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
 
   return (
     <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
-      <CollapsibleTrigger className="group flex w-full items-center justify-between p-3 data-[state=open]:border-b border-border hover:bg-muted/40 transition-colors">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-primary" />
-          <span className="text-xs font-semibold tracking-wide">Emergency Contacts</span>
-        </div>
-        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-muted/40 transition-colors px-4 py-3 group">
+        <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
+          <ShieldAlert className="h-4 w-4 text-primary" /> Emergency Contacts
+        </h3>
+        <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="p-3 space-y-3">
         <p className="text-sm text-muted-foreground">

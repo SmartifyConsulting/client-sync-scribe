@@ -38,17 +38,41 @@ export default function MyDetails() {
       setUserEmail(user.email || "");
       setUserId(user.id);
 
+      // 1) Prefer a non-archived row linked to this user
       let { data, error } = await supabase
         .from("patients")
         .select("*")
         .eq("patient_user_id", user.id)
-        .order("created_at", { ascending: false })
+        .neq("status", "archived")
+        .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (error) throw error;
 
-      // Self-heal: if no patient row exists for this user, create a minimal one
+      // 2) Fallback: find a non-archived row by email and self-heal the link
+      if (!data && user.email) {
+        const { data: byEmail } = await supabase
+          .from("patients")
+          .select("*")
+          .ilike("email", user.email)
+          .neq("status", "archived")
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (byEmail) {
+          const { data: healed } = await supabase
+            .from("patients")
+            .update({ patient_user_id: user.id })
+            .eq("id", byEmail.id)
+            .select("*")
+            .maybeSingle();
+          data = healed || byEmail;
+        }
+      }
+
+      // 3) Self-heal: if still nothing, create a minimal row
       if (!data) {
         const { data: profile } = await supabase
           .from("profiles")
