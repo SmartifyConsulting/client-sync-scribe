@@ -26,7 +26,8 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await anonClient.auth.getUser();
     if (authError || !user) throw new Error("Unauthorized");
 
-    const { text } = await req.json();
+    const body = await req.json();
+    const { text } = body;
     if (!text || typeof text !== "string" || text.trim().length === 0) {
       throw new Error("Text input is required");
     }
