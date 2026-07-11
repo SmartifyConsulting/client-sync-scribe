@@ -129,6 +129,7 @@ IMPORTANT GUIDELINES:
 - For prescriptions: extract each medication with name, dosage, frequency, duration, instructions
 - For invoices: extract service descriptions and amounts
 - For referrals: extract specialist_type, doctor_name (if mentioned), reason, urgency
+- For follow-up appointment: if the doctor and patient agree on a next-visit date OR the patient says when they want to be seen again, extract the follow-up. ALWAYS return follow_up_date as an ISO calendar date (YYYY-MM-DD). If both an explicit calendar date (e.g. "the 23rd of July") AND a relative phrase ("in two weeks") appear, PREFER THE EXPLICIT CALENDAR DATE. If only a relative phrase is given ("in two weeks", "next Tuesday"), resolve it against today's local date below. Extract follow_up_time as HH:MM (24h) if a time is stated; otherwise omit.
 - Only include a document type if it was CLEARLY discussed in the session
 - Dates should be in YYYY-MM-DD format when possible
 - Today is ${localDow ? localDow + ", " : ""}${today}${clientTimezone ? ` (${clientTimezone})` : ""}. Resolve "today", "tomorrow", weekday names (e.g. "until Monday"), and partial dates like "3 July" against this local calendar date. NEVER shift the user's spoken date by a day to convert to UTC.
