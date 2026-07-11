@@ -509,93 +509,24 @@ export default function TodoList() {
                   <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
                     <div className="divide-y divide-border">
                       {items.map((todo) => (
-                         <div key={todo.id} className={cn("flex items-start gap-3 p-3 transition-colors hover:bg-muted/30", todo.completed && "bg-muted/20", todo.is_auto_executed && "bg-success/5")}>
-                           <Checkbox checked={todo.completed} onCheckedChange={() => toggleComplete(todo.id)} className="h-4 w-4 mt-0.5" />
-                          {editingId === todo.id ? (
-                            <div className="flex-1 flex items-center gap-2">
-                              <Input value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEdit(todo.id); if (e.key === "Escape") cancelEdit(); }} className="flex-1" autoFocus />
-                              <Button size="icon" variant="ghost" onClick={() => saveEdit(todo.id)}><Save className="h-4 w-4 text-success" /></Button>
-                              <Button size="icon" variant="ghost" onClick={cancelEdit}><X className="h-4 w-4" /></Button>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                   <p className={cn("text-sm font-medium text-foreground", todo.completed && "line-through text-muted-foreground")}>
-                                     {translateTodoTitle(todo.title)}
-                                     {todo.patient_name && <span className="text-primary font-semibold"> — {todo.patient_name}</span>}
-                                   </p>
-                                   {(todo.is_auto_executed || todo.task_type === 'document_review') && (
-                                     <span className="inline-flex items-center gap-0.5">
-                                       <Badge className="bg-success/10 text-success border-success/20 text-xs px-1.5 py-0"><Zap className="h-4 w-4 mr-0.5" />AI</Badge>
-                                       {todo.document_id && <Send className="h-4 w-4 text-green-600" />}
-                                     </span>
-                                   )}
-                                </div>
-                                {/* Description */}
-                                {todo.description && (
-                                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{todo.description}</p>
-                                )}
-                                <div className="flex items-center gap-3 mt-1 flex-wrap">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <button className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80", priorityColors[todo.priority])}>
-                                        <Flag className="h-4 w-4" />{t(priorityKey[todo.priority])}
-                                      </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start">
-                                      {(["low", "medium", "high"] as const).map((p) => (
-                                        <DropdownMenuItem key={p} onClick={() => updatePriority(todo.id, p)} className={cn("gap-2", todo.priority === p && "bg-accent")}>
-                                          <Flag className={cn("h-3 w-3", p === "high" && "text-destructive", p === "medium" && "text-warning", p === "low" && "text-muted-foreground")} />{t(priorityKey[p])}
-                                        </DropdownMenuItem>
-                                      ))}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                  {/* Created date */}
-                                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Calendar className="h-4 w-4" />
-                                    {format(new Date(todo.created_at), "MMM d, h:mm a")}
-                                  </span>
-                                  {todo.due_date && (
-                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Calendar className="h-4 w-4" />{new Date(todo.due_date).toLocaleDateString()}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex gap-1 shrink-0">
-                                {/* Approve AI task */}
-                                {todo.is_auto_executed && !todo.completed && (
-                                  <Button size="sm" variant="outline" className="h-8 gap-1 text-xs border-success text-success hover:bg-success hover:text-white" onClick={() => toggleComplete(todo.id)}>
-                                    <ShieldCheck className="h-4 w-4" />Approve
-                                  </Button>
-                                )}
-                                {/* Document review actions */}
-                                {todo.document_id && (
-                                  <>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8" title={t("patients.tooltipPreview")} onClick={() => handlePreviewDoc(todo)} disabled={loadingPreview === todo.document_id}>
-                                      {loadingPreview === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4 text-primary" />}
-                                    </Button>
-                                    <Button
-                                      size="icon" variant="ghost" title={t("todo.approveSave")}
-                                      className={cn("h-8 w-8", todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
-                                      disabled={todo.completed || sendingDocId === todo.document_id}
-                                      onClick={() => handleSendDoc(todo)}
-                                    >
-                                      {sendingDocId === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                    </Button>
-                                  </>
-                                )}
-                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => startEditing(todo)}>
-                                  <Edit3 className="h-4 w-4" />
-                                </Button>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteTask(todo.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        <TodoRow
+                          key={todo.id}
+                          todo={todo as any}
+                          onToggle={toggleComplete}
+                          onStartEdit={(t) => startEditing(t as any)}
+                          onDelete={deleteTask}
+                          onDuplicate={duplicateTask}
+                          onSend={(t) => handleSendDoc(t as any)}
+                          onPreview={(t) => handlePreviewDoc(t as any)}
+                          onSetPriority={updatePriority}
+                          isEditing={editingId === todo.id}
+                          editText={editText}
+                          setEditText={setEditText}
+                          saveEdit={saveEdit}
+                          cancelEdit={cancelEdit}
+                          sending={sendingDocId === todo.document_id}
+                          previewing={loadingPreview === todo.document_id}
+                        />
                       ))}
                     </div>
                   </div>
