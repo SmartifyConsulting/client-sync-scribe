@@ -1,99 +1,46 @@
-# To-Do List Row Redesign
+## 1. Default `[DoctorSignature]` above `[DoctorName]` in all templates
 
-Restyle the task rows in **`src/pages/TodoList.tsx`** (full page) and **`src/components/dashboard/CompactTodoList.tsx`** (dashboard widget) so every task lives on one line, leads with a task-type icon, and uses compact icon-prefixed metadata chips instead of long sentences. Inspired by Microsoft To Do / ClickUp / Outlook.
+Signature substitution already works (`fillDocumentPlaceholders.ts` + `useTemplateWithHeaderFooter.ts` replace `[DoctorSignature]` with an `<img>` of `profile.signature_url`). The gap is that only the Referral Letter default template contains the placeholder. Update the seeded default templates in `src/hooks/useTemplates.ts` so every one shows the signature image immediately above the doctor's typed name:
 
-## 1. New shared helper: `src/lib/todoDisplay.ts`
+- Medical Certificate — insert `[DoctorSignature]` line above `Doctor's Name: [DoctorName]`.
+- Prescription — insert `[DoctorSignature]` above `Prescribing Doctor: [DoctorName]` (remove the "Signature: ............" line).
+- General Letterhead — insert `[DoctorSignature]` above `[DoctorName]` (remove dotted signature line).
+- Invoice — insert `[DoctorSignature]` above `[DoctorName]`.
+- Hospital Admission Form — replace the dotted "Signature: ..." line with `[DoctorSignature]` above `[DoctorName]`.
+- Referral Letter — already correct, leave as is.
 
-Single source of truth so both list surfaces render identically.
+Note on existing users: `fetchTemplates()` seeds any missing default templates but never rewrites templates a user already has. For the rollout we will also add a one-time reconcile: if a seeded default template's `content` still matches the old shipped string exactly (unchanged by the user) and lacks `[DoctorSignature]`, overwrite it with the new content. Custom edits are preserved.
 
-Exports:
-- `type TodoKind = "invoice" | "prescription" | "appointment" | "follow_up" | "recommendation" | "medical_certificate" | "referral" | "laboratory" | "email" | "phone" | "meeting" | "payment" | "claim" | "reminder" | "urgent" | "task"`
-- `getTodoDisplay(todo)` → `{ kind, icon: LucideIcon, shortLabel: string, patient?: string, date?: string, time?: string, duration?: string }`
+## 2. New Holarc Health logo
 
-Logic:
-- Detect kind by matching the stored English title (same regexes as `translateTodoTitle.ts`) plus `task_type` and `template_name` hints (e.g. `Medical Certificate`, `Referral`, `Laboratory`, `Follow-up`).
-- Shorten label: `"Review Invoice — Sharon Kennedy"` → `"Invoice"`; `"Schedule appointment with Sarah Johnson on 2026-06-08 (30 min)"` → `"Appointment"`. Use `t("todo.nouns.*")` for i18n so we keep translations working.
-- Extract `patient` from `todo.patient_name`, and if absent, from the tail of the title after `—` / `-` / `with` / `for`.
-- Extract `date`/`time`/`duration` from `todo.due_date` first, else parse from the title (`YYYY-MM-DD`, `HH:mm`, `(30 min)`). Format date as `d MMM` and time as `HH:mm` via `date-fns`.
-- Icon map (lucide-react, no emoji glyphs — keeps design-token color control):
-  `Receipt` invoice, `Pill` prescription, `CalendarDays` appointment, `Phone` follow-up, `FileText` recommendation, `Stethoscope` medical_certificate, `FlaskConical` laboratory, `ArrowUpRight` referral, `Mail` email, `Users` meeting, `CreditCard` payment, `Hospital` claim, `Bell` reminder, `AlertTriangle` urgent, `CheckSquare` fallback task.
-
-## 2. New row component: `src/components/todos/TodoRow.tsx`
-
-One flex row, `text-sm` (14px, matching Last-Session briefing text), aligned via fixed-width columns:
+Register `user-uploads://HHNewLogo.png` as a Lovable asset and point every existing `holarc-logo*.png` import at the new asset URL, without touching any width/height/positioning classes:
 
 ```
-[checkbox] [kind icon] [Short label ..............] [👤 name] [📅 4 Jun] [🕗 08:00] [⏱ 30 min]  [👁] [⋮]
+lovable-assets create --file /mnt/user-uploads/HHNewLogo.png \
+  --filename holarc-health-logo.png > src/assets/holarc-health-logo.png.asset.json
 ```
 
-Layout details:
-- Container: `flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/40 group text-sm`
-- Kind icon: `h-4 w-4 text-primary shrink-0`
-- Label: `flex-1 min-w-0 truncate font-medium` (ellipsis only when unavoidable)
-- Meta chips (only rendered when present): `inline-flex items-center gap-1 text-muted-foreground shrink-0` — `User`, `CalendarDays`, `Clock`, `Timer` icons at `h-3.5 w-3.5`
-- Actions cluster (`shrink-0`):
-  - `Eye` preview button — only when `todo.document_id`
-  - Overflow `MoreVertical` → shadcn `DropdownMenu` with: Edit, Send (only if `document_id`), Duplicate, Mark complete / Reopen, Delete (destructive). Removes today's separate Approve / Send / Edit / Delete buttons.
-- Priority: keep priority as a small colored dot on the checkbox side (`h-2 w-2 rounded-full` in low/med/high tokens) so a chip isn't needed on the row; full picker moves into the overflow menu → "Priority" submenu.
-- AI badge: replace the `AI` pill + `Sparkles` with a single `Sparkles` icon at row start when `is_auto_executed`, tooltip "AI-generated".
-- Edit mode: existing inline `Input` + save/cancel preserved.
+Replace the `import ... from "@/assets/holarc-logo*.png"` lines in:
+`src/components/layout/Sidebar.tsx`, `ProviderSidebar.tsx`, `ProviderAppLayout.tsx`, `PatientAppLayout.tsx`, `MobileHeader.tsx`, `src/components/auth/TwoFactorSetup.tsx`, `MfaEnrollScreen.tsx`, `BackupCodesScreen.tsx`, `src/pages/Landing.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `NotFound.tsx`
+— with `import holarcLogo from "@/assets/holarc-health-logo.png.asset.json"` and use `holarcLogo.url` as the `src`. All className/style attributes stay untouched, so sizing and position don't shift. Old `holarc-logo*.png` files stay on disk (untouched) so nothing else breaks.
 
-Responsive (Tailwind):
-- `< sm`: hide `User` icon (leave name text), hide duration, then hide time. Label never hides.
-- `< md`: hide duration chip only.
-- `≥ md`: show everything.
-- Implemented with `hidden sm:inline-flex` / `hidden md:inline-flex` on the chip wrappers.
+## 3. Show Dean's hospital admission on Sharon's profile
 
-Props: `{ todo, onToggle, onEdit, onDelete, onDuplicate, onSend, onPreview, onOpenPriority, isEditing, editText, setEditText, saveEdit, cancelEdit, sending, previewing }`.
+Confirmed via database: one admission exists (`Mediclinic Cape Town`, 14 Apr 2026) linked to Sharon Elise Kennedy (`patient_id = 4b1032be…`) created by Dr Dean Allie. RLS allows both Dean (as `doctor_id`) and Sharon (via `patient_user_id`) to read it.
 
-## 3. Wire into pages
+Two places need to render it:
 
-**`src/pages/TodoList.tsx`**
-- Replace the entire row `<div>` (lines ~511-598 inside the grouped-date map) with `<TodoRow …/>`.
-- Keep grouping, collapsibles, filter tabs, add-task form untouched.
-- Add `duplicateTask(todo)` handler (insert copy of `title`/`priority`/`patient_id` with `status: 'pending'`).
-- Remove now-unused per-row imports (`Flag`, priority Badge chip, `Calendar` inline formatter block). Keep priority dropdown by wiring `onOpenPriority` to existing `updatePriority`.
+a) **Doctor-side (Dean viewing Sharon)** — `PatientProfile.tsx` already renders `<AdmissionsView patientId={patient.id} …>` under the Admissions tab, and there is an older archived Sharon record (`bc6973cc…`) in the DB. If Dean lands on the archived Sharon by mistake the tab looks empty. Fix: in `usePatients`/the patient loader used by `PatientProfile`, when multiple patient rows share a `patient_user_id`, prefer the non-archived (name not ending in "(archived)") most-recently-updated row. This matches the existing project-memory duplicate-resolution pattern.
 
-**`src/components/dashboard/CompactTodoList.tsx`**
-- Replace the `filteredTodos.map` row body (lines ~424-518) with `<TodoRow compact …/>`.
-- Add a `compact` prop to `TodoRow` that:
-  - Uses `text-sm` still (design goal is bigger, not smaller) but drops `py-2` to `py-1.5`.
-  - Hides date+duration chips by default on the dashboard (compact real estate), keeps patient + time.
-- Ensure the widget's container isn't force-shrinking children (`min-w-0` on the row already handles truncation).
+b) **Patient-side (Sharon viewing her own profile)** — the patient portal has no Admissions surface today. Add a "Hospital Admissions" section to `src/pages/patient/MyDetails.tsx` (below existing clinical sections) that renders `<AdmissionsView patientId={myPatientRecord.id} canEdit={false} />`. Read-only for the patient (no add/upload buttons). This uses the same hook and RLS already permits it.
 
-## 4. i18n additions (`src/i18n/locales/en.json` + existing locales)
+## Verification
 
-Add:
-- `todo.kinds.invoice` = "Invoice"
-- `todo.kinds.prescription` = "Prescription"
-- `todo.kinds.appointment` = "Appointment"
-- `todo.kinds.followUp` = "Follow-up"
-- `todo.kinds.recommendation` = "Recommendation"
-- `todo.kinds.medicalCertificate` = "Medical certificate"
-- `todo.kinds.referral` = "Referral"
-- `todo.kinds.laboratory` = "Laboratory"
-- `todo.kinds.email` = "Email"
-- `todo.kinds.phone` = "Phone call"
-- `todo.kinds.meeting` = "Meeting"
-- `todo.kinds.payment` = "Payment"
-- `todo.kinds.claim` = "Claim"
-- `todo.kinds.reminder` = "Reminder"
-- `todo.kinds.urgent` = "Urgent"
-- `todo.kinds.task` = "Task"
-- `todo.actions.edit/send/duplicate/delete/markComplete/reopen/priority`
-
-Non-English locales get English fallback initially; translations follow the existing `translateTodoTitle` pattern.
-
-## 5. Verification
-
-- `bunx tsgo` for type check.
-- Playwright script at `/tmp/browser/todo-redesign/` logs in with injected Supabase session, navigates `/todo-list` and `/doctor-dashboard`, screenshots at 1280×1800 and at 640×1200 to confirm:
-  - Every row is single-line (`overflow: hidden` + no wrap).
-  - Font renders at 14px (`text-sm`) matching the briefing.
-  - Overflow menu opens with the five items.
-  - At 640px width the User icon and duration chip disappear as specified.
+- `bunx tsgo` after edits.
+- Playwright at 1280×1800: log in as Dean → open Sharon's profile → Admissions tab shows the Mediclinic Cape Town admission. Log in as Sharon → MyDetails shows the same admission read-only. Screenshot both.
+- Open a new Medical Certificate / Prescription / Invoice preview and confirm the signature image renders above the doctor name.
+- Visually confirm the new logo appears on Landing, Auth, Sidebar and MobileHeader at the same size/position as before.
 
 ## Out of scope
-- No changes to backend, RLS, edge functions, or `todos` schema.
-- No changes to add-task form, tabs, grouping, or AI processing.
-- Patient portal `PatientTasks.tsx` unchanged (separate reward-focused UX).
+
+No schema changes, no RLS changes, no edits to header/footer templates, no changes to `signature_url` upload flow, no changes to `AdmissionsView` layout beyond passing `canEdit={false}` on the patient side.
