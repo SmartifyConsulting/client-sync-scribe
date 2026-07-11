@@ -39,6 +39,11 @@ export function useLiveDiagnosticHint({
   const [isLoading, setIsLoading] = useState(false);
   const lastTranscriptLen = useRef(0);
   const inFlight = useRef<AbortController | null>(null);
+  const transcriptRef = useRef(transcript);
+
+  useEffect(() => {
+    transcriptRef.current = transcript;
+  }, [transcript]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -83,7 +88,6 @@ export function useLiveDiagnosticHint({
       }
     };
 
-    // Kick after a short warm-up so the first call has some transcript
     const warmup = setTimeout(tick, 8000);
     const interval = setInterval(tick, intervalMs);
     return () => {
@@ -93,12 +97,6 @@ export function useLiveDiagnosticHint({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled]);
-
-  // Keep an up-to-date ref of transcript without resetting the interval each keystroke
-  const transcriptRef = useRef(transcript);
-  useEffect(() => {
-    transcriptRef.current = transcript;
-  }, [transcript]);
 
   return { hint, isLoading };
 }
