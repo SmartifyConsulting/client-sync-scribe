@@ -59,6 +59,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
+import { useLiveDiagnosticHint } from "@/hooks/useLiveDiagnosticHint";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
