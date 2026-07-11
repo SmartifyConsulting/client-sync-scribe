@@ -456,6 +456,17 @@ export default function Sessions() {
     }
   });
 
+  // Live AI diagnostic hint while doctor is recording (before they conclude)
+  const { hint: liveHint, isLoading: liveHintLoading } = useLiveDiagnosticHint({
+    enabled: isRecording && !isPaused,
+    transcript,
+    patientAge: (currentPatient as any)?.age ?? null,
+    patientSex: (currentPatient as any)?.gender ?? null,
+    currentMedications: (currentPatient as any)?.current_medications ?? null,
+    chronicConditions: (currentPatient as any)?.chronic_conditions ?? null,
+    language: preferredLanguage,
+  });
+
   // Session timer - only counts when recording
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
