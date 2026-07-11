@@ -464,7 +464,7 @@ export default function Sessions() {
     patientSex: (currentPatient as any)?.gender ?? null,
     currentMedications: (currentPatient as any)?.current_medications ?? null,
     chronicConditions: (currentPatient as any)?.chronic_conditions ?? null,
-    language: preferredLanguage,
+    language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
 
   // Session timer - only counts when recording
