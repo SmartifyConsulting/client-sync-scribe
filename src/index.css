@@ -1,7 +1,5 @@
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
+@import "@fontsource-variable/sora";
+@import "@fontsource-variable/manrope";
 
 @tailwind base;
 @tailwind components;
@@ -83,7 +81,7 @@
     --text-tertiary: 0 0% 60%;       /* #999 */
     --text-disabled: 0 0% 80%;       /* #CCC */
 
-    --radius: 0.5rem;                /* 8px per spec */
+    --radius: 0.9rem;                /* Tag Connect base radius */
 
     /* Shadows */
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.03);
@@ -93,8 +91,9 @@
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
     --shadow-glow: 0 0 0 3px hsl(175 59% 43% / 0.1);
     --shadow-modal: 0 4px 16px rgb(0 0 0 / 0.1);
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 6px 16px rgb(0 0 0 / 0.04);
-    --shadow-card-hover: 0 2px 8px 0 rgb(0 0 0 / 0.06), 0 12px 24px rgb(0 0 0 / 0.08);
+    --shadow-card: 0 1px 2px rgb(13 13 13 / 0.05), 0 8px 24px -12px rgb(13 13 13 / 0.10);
+    --shadow-card-hover: 0 2px 4px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);
+    --shadow-elevated: 0 1px 2px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);
 
     /* Sidebar - clean white */
     --sidebar-background: 0 0% 100%;
@@ -186,8 +185,13 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "cv11", "ss01", "ss03";
     line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Sora Variable', 'Sora', system-ui, sans-serif;
+    letter-spacing: -0.02em;
   }
 
   /* Typographic hierarchy per Holarc design system */

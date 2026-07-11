@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        display: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Manrope Variable", "Manrope", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        display: ["Sora Variable", "Sora", "system-ui", "sans-serif"],
         lora: ["Lora", "serif"],
         merriweather: ["Merriweather", "serif"],
         "open-sans": ["Open Sans", "sans-serif"],
@@ -90,9 +90,9 @@ export default {
         },
       },
       borderRadius: {
-        "3xl": "1.5rem",
-        "2xl": "1rem",
-        xl: "0.875rem",
+        "3xl": "calc(var(--radius) + 12px)",
+        "2xl": "calc(var(--radius) + 8px)",
+        xl: "calc(var(--radius) + 4px)",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
