@@ -70,9 +70,11 @@ Other information / recommendations: [OtherRecommendations]
 
 ..............................................................................................................
 
-Doctor's Name: [DoctorName]
+[DoctorSignature]
 
-Doctor's Signature: ................................................ Date: [SignatureDate]`,
+[DoctorName]
+
+Date: [SignatureDate]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
@@ -167,11 +169,11 @@ Repeats: [NumberOfRepeats]
 
 Special Instructions: [SpecialInstructions]
 
+[DoctorSignature]
+
 Prescribing Doctor: [DoctorName]
 
 Registration Number: [DoctorNumber]
-
-Signature: ................................................
 
 Date: [SignatureDate]`,
     logo_url: null,
@@ -196,7 +198,7 @@ Date: [Date]
 
 [Content]
 
-Signature: ................................................
+[DoctorSignature]
 
 [DoctorName]
 
@@ -240,6 +242,8 @@ Payment Terms: Due within 30 days
 Bank Details: [BankDetails]
 
 Thank you.
+
+[DoctorSignature]
 
 [DoctorName]
 
@@ -294,8 +298,9 @@ Procedure Description: [ProcedureDescription]
 
 Patient: [PatientName]
 
-Signature: ................................................
-           [DoctorName]`,
+[DoctorSignature]
+
+[DoctorName]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
