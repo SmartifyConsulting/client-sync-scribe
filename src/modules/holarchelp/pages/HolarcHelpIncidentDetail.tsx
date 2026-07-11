@@ -372,11 +372,11 @@ export default function HolarcHelpIncidentDetail() {
         <div className="mb-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
           <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
             {responder.kind === "hospital" ? "🏥 Receiving hospital" : "🚑 Responding"}
-            {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
+            {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
           </p>
           <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
           {incident.incident_number && (
-            <p className="mt-1 font-mono text-[11px] font-bold text-emerald-900/80 dark:text-emerald-200/80">
+            <p className="mt-1 font-mono text-sm font-bold text-emerald-900/80 dark:text-emerald-200/80">
               Incident {incident.incident_number}
             </p>
           )}
@@ -399,7 +399,7 @@ export default function HolarcHelpIncidentDetail() {
 
           </div>
           {distanceKm != null && incident.provider_latitude == null && (
-            <p className="mt-1 text-[11px] text-emerald-800/70 dark:text-emerald-200/60">
+            <p className="mt-1 text-sm text-emerald-800/70 dark:text-emerald-200/60">
               Estimate based on responder's registered location. Updates live once they start moving.
             </p>
           )}
@@ -521,7 +521,7 @@ export default function HolarcHelpIncidentDetail() {
               rows={5}
               className="resize-none"
             />
-            <p className="text-[11px] text-muted-foreground">{closureNote.trim().length}/10 minimum characters</p>
+            <p className="text-sm text-muted-foreground">{closureNote.trim().length}/10 minimum characters</p>
           </div>
           <DialogFooter className="gap-2 sm:gap-2">
             <Button variant="outline" onClick={() => setCloseOpen(false)} disabled={closing}>Cancel</Button>

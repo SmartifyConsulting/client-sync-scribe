@@ -286,7 +286,7 @@ export function SettingsContent() {
                 <Settings2 className="h-4 w-4 text-primary" />
                 <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
               </div>
-              <p className="text-muted-foreground text-[12px]">Manage your application preferences and integrations</p>
+              <p className="text-muted-foreground text-sm">Manage your application preferences and integrations</p>
               {isPatientRole && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
@@ -387,7 +387,7 @@ export function SettingsContent() {
               <Bell className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
             </div>
-            <p className="text-[12px] text-muted-foreground">Configure how you receive alerts and reminders</p>
+            <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div><p className="font-medium text-foreground">Email Notifications</p><p className="text-sm text-muted-foreground">Receive email reminders for appointments</p></div>
@@ -487,7 +487,7 @@ export function SettingsContent() {
               <Shield className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Security</h2>
             </div>
-            <p className="text-[12px] text-muted-foreground">Manage your authentication and account protection</p>
+            <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
             <div className="space-y-4">
               {!MVP_MFA_DISABLED && (
                 <>

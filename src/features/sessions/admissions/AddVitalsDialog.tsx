@@ -83,15 +83,15 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, d
           <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div><Label className="text-[11px]">Heart Rate (bpm)</Label><Input value={hr} onChange={(e) => setHr(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">SpO₂ (%)</Label><Input value={spo2} onChange={(e) => setSpo2(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">BP Systolic</Label><Input value={bps} onChange={(e) => setBps(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">BP Diastolic</Label><Input value={bpd} onChange={(e) => setBpd(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">Temperature (°C)</Label><Input value={temp} onChange={(e) => setTemp(e.target.value)} type="number" step="0.1" /></div>
-          <div><Label className="text-[11px]">BMI {computedBmi && <span className="text-primary">({computedBmi})</span>}</Label><Input value={computedBmi || ""} disabled /></div>
-          <div><Label className="text-[11px]">Height (cm)</Label><Input value={height} onChange={(e) => setHeight(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">Weight (kg)</Label><Input value={weight} onChange={(e) => setWeight(e.target.value)} type="number" /></div>
-          <div className="col-span-2"><Label className="text-[11px]">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
+          <div><Label className="text-sm">Heart Rate (bpm)</Label><Input value={hr} onChange={(e) => setHr(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">SpO₂ (%)</Label><Input value={spo2} onChange={(e) => setSpo2(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">BP Systolic</Label><Input value={bps} onChange={(e) => setBps(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">BP Diastolic</Label><Input value={bpd} onChange={(e) => setBpd(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">Temperature (°C)</Label><Input value={temp} onChange={(e) => setTemp(e.target.value)} type="number" step="0.1" /></div>
+          <div><Label className="text-sm">BMI {computedBmi && <span className="text-primary">({computedBmi})</span>}</Label><Input value={computedBmi || ""} disabled /></div>
+          <div><Label className="text-sm">Height (cm)</Label><Input value={height} onChange={(e) => setHeight(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">Weight (kg)</Label><Input value={weight} onChange={(e) => setWeight(e.target.value)} type="number" /></div>
+          <div className="col-span-2"><Label className="text-sm">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>

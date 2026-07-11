@@ -82,7 +82,7 @@ export default function EmergencyDashboardScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           {t("provider.emergencyResponseDispatch") || "Emergency Response Dispatch"}
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
@@ -135,28 +135,28 @@ export default function EmergencyDashboardScreen() {
               <div key={r.id} className={`rounded-2xl border-2 p-3 ${sevBig(r.severity)}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sos">
+                    <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-sos">
                       <Siren className="h-3 w-3" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? "Emergency"}
                     </p>
                     <p className="mt-1 text-base font-extrabold">{r.incident_number ?? `INC-${r.id.slice(0, 8)}`}</p>
-                    <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" /> {ago(r.created_at)} ago
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     {r.assigned_provider_id === providerId && (
-                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
+                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-bold uppercase text-primary">
                         {r.assigned_ambulance_id ? "Rolling" : "Assigned · needs vehicle"}
                       </span>
                     )}
                     {(r.conscious === false || r.breathing === false) && (
-                      <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">
+                      <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-bold uppercase text-destructive">
                         <AlertTriangle className="mr-1 inline h-3 w-3" /> Life threat
                       </span>
                     )}
                   </div>
                 </div>
-                {r.notes && <p className="mt-2 rounded-lg border bg-background/60 p-2 text-[11px] italic text-muted-foreground line-clamp-2">"{r.notes}"</p>}
+                {r.notes && <p className="mt-2 rounded-lg border bg-background/60 p-2 text-sm italic text-muted-foreground line-clamp-2">"{r.notes}"</p>}
                 {r.assigned_provider_id === providerId ? (
                   <Button size="sm" variant="outline" className="mt-2 h-9 w-full font-bold" onClick={() => window.location.assign(`/provider/ambulance/incident/${r.id}`)}>
                     Open incident
@@ -204,7 +204,7 @@ function StatCard({
     : "text-muted-foreground";
   return (
     <div className="rounded-xl border border-border bg-card px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={`text-xl font-extrabold mt-0.5 tabular-nums ${toneClass}`}>{value}</p>
     </div>
   );

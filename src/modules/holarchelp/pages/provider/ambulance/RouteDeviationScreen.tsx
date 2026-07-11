@@ -125,7 +125,7 @@ export default function RouteDeviationScreen() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{deviation.ambulance_code}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${SEVERITY_COLORS[deviation.severity]}`}>
+                      <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase ${SEVERITY_COLORS[deviation.severity]}`}>
                         {deviation.deviation_percent}% Deviation
                       </span>
                     </div>
@@ -134,7 +134,7 @@ export default function RouteDeviationScreen() {
                       <ArrowRight className="h-3 w-3" />
                       <span>{deviation.to}</span>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 mt-2 text-[10px]">
+                    <div className="grid grid-cols-3 gap-4 mt-2 text-xs">
                       <div>
                         <p className="text-muted-foreground">Authorized</p>
                         <p className="font-semibold">{deviation.authorized_distance_km} km</p>
@@ -148,7 +148,7 @@ export default function RouteDeviationScreen() {
                         <p className="font-semibold">{deviation.deviation_km} km</p>
                       </div>
                     </div>
-                    <p className="text-[10px] mt-2 opacity-60">
+                    <p className="text-xs mt-2 opacity-60">
                       Incident #{deviation.incident_id} • {new Date(deviation.occurred_at).toLocaleString()}
                     </p>
                   </div>

@@ -150,7 +150,7 @@ export function AvailableResponders({
             <Button
               size="sm"
               variant="outline"
-              className="h-7 px-2 text-[11px]"
+              className="h-7 px-2 text-sm"
               onClick={() => setExtensionMs((e) => Math.min(EXTEND_MAX_MS, e + EXTEND_STEP_MS))}
             >
               +30s more time
@@ -185,7 +185,7 @@ export function AvailableResponders({
             <p className="text-sm font-bold text-amber-900 dark:text-amber-100">
               An ER Provider was auto-assigned — you have {fmt(remainingSec)} to switch
             </p>
-            <p className="text-[11px] text-amber-900/80 dark:text-amber-100/80">
+            <p className="text-sm text-amber-900/80 dark:text-amber-100/80">
               Tap another provider below to switch, or do nothing to keep the current one.
             </p>
           </div>
@@ -212,7 +212,7 @@ export function AvailableResponders({
           <Button
             size="sm"
             variant="outline"
-            className="h-7 px-2 text-[11px]"
+            className="h-7 px-2 text-sm"
             onClick={() => setExtensionMs((e) => Math.min(EXTEND_MAX_MS, e + EXTEND_STEP_MS))}
           >
             +30s more time
@@ -237,12 +237,12 @@ export function AvailableResponders({
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-semibold">{o.name}</p>
                   {isCurrent && isChangeMode && (
-                    <span className="rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                    <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
                       Current
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {o.ownership ? <span className="capitalize">{o.ownership}</span> : null}
                   {o.distance_km != null && <> · {Number(o.distance_km).toFixed(1)} km</>}
                 </p>

@@ -461,7 +461,7 @@ export function PillBaselineCapture({
     <div className="flex items-center gap-1.5">
       <span
         className={cn(
-          "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold",
+          "flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold",
           active
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground",
@@ -469,7 +469,7 @@ export function PillBaselineCapture({
       >
         {n}
       </span>
-      <span className={cn("text-[11px]", active ? "text-foreground font-medium" : "text-muted-foreground")}>
+      <span className={cn("text-sm", active ? "text-foreground font-medium" : "text-muted-foreground")}>
         {label}
       </span>
     </div>
@@ -551,7 +551,7 @@ export function PillBaselineCapture({
                   <RadioGroupItem id="sn-em" value="emergency" className="mt-0.5" />
                   <div className="flex-1">
                     <p className="text-xs font-medium">Emergency contact</p>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {patientContacts?.emergency_contact_name
                         ? `${patientContacts.emergency_contact_name}${patientContacts.emergency_contact_phone ? " · " + patientContacts.emergency_contact_phone : ""}`
                         : "Not set yet"}
@@ -562,7 +562,7 @@ export function PillBaselineCapture({
                   <RadioGroupItem id="sn-nok" value="nok" className="mt-0.5" />
                   <div className="flex-1">
                     <p className="text-xs font-medium">Next of kin</p>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {patientContacts?.next_of_kin_name
                         ? `${patientContacts.next_of_kin_name}${patientContacts.next_of_kin_phone ? " · " + patientContacts.next_of_kin_phone : ""}`
                         : "Not set yet"}
@@ -573,7 +573,7 @@ export function PillBaselineCapture({
                   <RadioGroupItem id="sn-none" value="none" className="mt-0.5" />
                   <div className="flex-1">
                     <p className="text-xs font-medium">No one</p>
-                    <p className="text-[11px] text-muted-foreground">Don't notify anyone if a dose is skipped.</p>
+                    <p className="text-sm text-muted-foreground">Don't notify anyone if a dose is skipped.</p>
                   </div>
                 </label>
               </RadioGroup>
@@ -587,7 +587,7 @@ export function PillBaselineCapture({
                     <button
                       type="button"
                       onClick={() => setOverrideContact(true)}
-                      className="mt-2 text-[11px] text-primary hover:underline"
+                      className="mt-2 text-sm text-primary hover:underline"
                     >
                       Use a different contact for this medication
                     </button>
@@ -710,7 +710,7 @@ export function PillBaselineCapture({
                 : "Place the tablet on your palm and turn it so any printed letters, numbers or score lines are clearly visible."}
             </div>
             {quantity > 1 && (
-              <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
+              <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-sm font-medium">
                 Show {quantity} tablets
               </div>
             )}

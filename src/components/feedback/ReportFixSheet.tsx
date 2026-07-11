@@ -115,7 +115,7 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
             <SheetTitle className="text-base flex items-center gap-2">
               <Bug className="h-4 w-4 text-primary" /> Report Fix
             </SheetTitle>
-            <Badge variant="secondary" className="text-[10px]">Beta</Badge>
+            <Badge variant="secondary" className="text-xs">Beta</Badge>
           </div>
         </SheetHeader>
 
@@ -163,7 +163,7 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground text-right">{title.length}/300</p>
+          <p className="text-xs text-muted-foreground text-right">{title.length}/300</p>
         </div>
 
         {/* Outstanding list */}
@@ -177,7 +177,7 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
               className="pl-7 h-8 text-xs"
             />
           </div>
-          <label className="flex items-center gap-1 text-[10px] text-muted-foreground whitespace-nowrap cursor-pointer">
+          <label className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap cursor-pointer">
             <input
               type="checkbox"
               checked={showClosed}
@@ -211,11 +211,11 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <Icon className="h-3.5 w-3.5 shrink-0" />
-                        <span className={cn("text-[10px] px-1.5 py-0.5 rounded", meta.chip)}>{meta.label}</span>
+                        <span className={cn("text-xs px-1.5 py-0.5 rounded", meta.chip)}>{meta.label}</span>
                       </div>
                       <p className="text-xs font-medium text-foreground break-words">{r.title}</p>
-                      {r.description && <p className="text-[11px] text-muted-foreground mt-0.5 break-words">{r.description}</p>}
-                      <p className="text-[10px] text-muted-foreground mt-1">
+                      {r.description && <p className="text-sm text-muted-foreground mt-0.5 break-words">{r.description}</p>}
+                      <p className="text-xs text-muted-foreground mt-1">
                         {r.display_name || "Anonymous"} · {formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}
                       </p>
                     </div>
@@ -225,7 +225,7 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
                           <DropdownMenuTrigger asChild>
                             <button
                               className={cn(
-                                "text-[10px] font-semibold px-2 py-1 rounded border transition-opacity hover:opacity-80",
+                                "text-xs font-semibold px-2 py-1 rounded border transition-opacity hover:opacity-80",
                                 statusMeta.className
                               )}
                             >
@@ -248,7 +248,7 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
                       ) : (
                         <span
                           className={cn(
-                            "text-[10px] font-semibold px-2 py-1 rounded border",
+                            "text-xs font-semibold px-2 py-1 rounded border",
                             statusMeta.className
                           )}
                         >

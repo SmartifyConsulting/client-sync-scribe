@@ -180,7 +180,7 @@ export default function PatientTasks() {
             <Mic className="h-6 w-6" />
           )}
         </Button>
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {isRecordingTask ? "Recording... tap to stop" : isTranscribing ? "Transcribing..." : "Tap to dictate a task"}
         </p>
         <div className="flex w-full max-w-md gap-2">
@@ -493,16 +493,16 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
             <p className={`text-sm font-medium ${isCompleted ? "line-through text-muted-foreground" : "text-foreground"}`}>{todo.title}</p>
             {todo.description && <p className="text-xs text-muted-foreground mt-0.5">{todo.description}</p>}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <Badge variant="outline" className={`text-[10px] ${priorityColors[todo.priority] || ""}`}>
+              <Badge variant="outline" className={`text-xs ${priorityColors[todo.priority] || ""}`}>
                 {todo.priority}
               </Badge>
               {todo.due_date && (
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Due {format(new Date(todo.due_date), "MMM d, yyyy")}
                 </span>
               )}
               {todo.vulas_reward > 0 && (
-                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
                   🪙 {todo.vulas_reward} Vulas
                 </Badge>
               )}

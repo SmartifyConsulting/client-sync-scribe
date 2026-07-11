@@ -151,7 +151,7 @@ export default function HolarcHelpNearby() {
       {coords && (
         <>
           <ProviderMap center={coords} providers={providers} height={320} />
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
             <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> ER</span>
           </div>
@@ -167,9 +167,9 @@ export default function HolarcHelpNearby() {
                 <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold truncate">{p.name}</p>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground capitalize">
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground capitalize">
                     <span>{p.type === "ambulance" ? "ER" : p.type}{p.subtitle && ` · ${p.subtitle}`}</span>
-                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
+                    <span className={`rounded-full px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
                       {isPublic ? 'Public' : 'Private'}
                     </span>
                   </div>
@@ -191,7 +191,7 @@ export default function HolarcHelpNearby() {
                 );
               }
               return (
-                <div className="space-y-1 pt-1 text-[11px] text-muted-foreground">
+                <div className="space-y-1 pt-1 text-sm text-muted-foreground">
                   {hospCount === 0 && <p>No approved hospitals in your area yet.</p>}
                   {ambCount === 0 && <p>No approved emergency response providers in your area yet.</p>}
                 </div>

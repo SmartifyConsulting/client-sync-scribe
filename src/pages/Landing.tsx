@@ -332,11 +332,11 @@ export default function Landing() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold text-foreground text-sm">{t("landing.features.transcribedSessions")}</p>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-medium text-destructive">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
                         <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> REC
                       </span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {t("landing.features.transcribedDescription")}
                     </p>
                     <div className="mt-3 flex items-end gap-1.5 h-10">
@@ -354,12 +354,12 @@ export default function Landing() {
                   <Video className="h-5 w-5 text-[#E01837]" />
                 </div>
                 <p className="text-sm font-semibold text-foreground">{t("landing.features.medicationAdherence")}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   {t("landing.features.medicationDescription")}
                 </p>
                 <div className="mt-3 flex items-center gap-1.5">
                   <Gift className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-[11px] font-semibold text-primary">{t("landing.features.rewardsEarned")}</span>
+                  <span className="text-sm font-semibold text-primary">{t("landing.features.rewardsEarned")}</span>
                 </div>
               </div>
 
@@ -369,7 +369,7 @@ export default function Landing() {
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <p className="text-sm font-semibold text-foreground">{t("landing.features.roundTable")}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   {t("landing.features.roundTableDescription")}
                 </p>
                 <div className="mt-3 flex -space-x-1.5">
@@ -387,7 +387,7 @@ export default function Landing() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">{t("landing.features.aiAssistant")}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {t("landing.features.aiAssistantDescription")}
                     </p>
                   </div>
@@ -402,7 +402,7 @@ export default function Landing() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-foreground text-sm">{t("landing.features.holarcHelp")}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {t("landing.features.holarcHelpDescription")}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -413,7 +413,7 @@ export default function Landing() {
                       ].map((b) => (
                         <span
                           key={b.key}
-                          className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2 py-0.5 text-[10px] text-foreground/80"
+                          className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2 py-0.5 text-xs text-foreground/80"
                         >
                           {b.label}
                         </span>

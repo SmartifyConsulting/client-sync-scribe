@@ -334,14 +334,14 @@ export default function PatientProfile() {
         <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.totalSessions")}</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.totalSessions")}</p>
               <FileText className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">{completedSessions.length}</p>
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.lastSeen")}</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.lastSeen")}</p>
               <Clock className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
@@ -354,7 +354,7 @@ export default function PatientProfile() {
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.since")}</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.since")}</p>
               <Calendar className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
@@ -364,7 +364,7 @@ export default function PatientProfile() {
           {/* Vula Rewards */}
           <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
             <div className="flex flex-col items-center sm:items-start min-w-0">
-              <p className="text-[10px] font-medium text-muted-foreground">{t("patientProfile.vulas")}</p>
+              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.vulas")}</p>
               <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
             </div>
             <img
@@ -782,8 +782,8 @@ export default function PatientProfile() {
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-7 w-7 text-muted-foreground" />
                     </div>
-                    <p className="text-[11px] text-muted-foreground">No documents yet</p>
-                    <p className="text-[11px] text-muted-foreground mt-1">Create a new document from a template</p>
+                    <p className="text-sm text-muted-foreground">No documents yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">Create a new document from a template</p>
                   </div>
                 );
               }
@@ -811,18 +811,18 @@ export default function PatientProfile() {
                         )}
                       </div>
                       <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
-                        <p className="text-[11px] font-semibold text-foreground leading-tight">{doc.name}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-sm font-semibold text-foreground leading-tight">{doc.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           {format(new Date(doc.created_at), "MMM d, yyyy")}
                         </p>
                       </div>
                       {(doc as any).is_draft && !(doc as any).email_sent_at && (
-                        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning border border-warning/30">
+                        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-sm font-medium text-warning border border-warning/30">
                           DRAFT
                         </span>
                       )}
                       {doc.template_name && (
-                        <span className="rounded-full bg-muted/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                        <span className="rounded-full bg-muted/70 px-2 py-0.5 text-sm font-medium text-muted-foreground">
                           {doc.template_name}
                         </span>
                       )}

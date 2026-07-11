@@ -62,7 +62,7 @@ export function SecurityBadges() {
                 <b.icon className="h-6 w-6 text-primary" />
               </div>
               <p className="text-sm font-semibold text-foreground">{b.title}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">{b.desc}</p>
+              <p className="text-sm text-muted-foreground mt-1">{b.desc}</p>
             </motion.div>
           ))}
         </div>

@@ -171,7 +171,7 @@ export default function LiveSOSScreen() {
             <div className="space-y-4">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className={cn("inline-block rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase", sevTone(selected.severity))}>
+                  <span className={cn("inline-block rounded-full border px-2 py-0.5 text-xs font-bold uppercase", sevTone(selected.severity))}>
                     {selected.severity ?? "—"}
                   </span>
                   <h2 className="mt-2 text-lg font-bold leading-tight">{selected.ai_emergency_summary ?? t("liveSos.sosIncident")}</h2>
@@ -190,7 +190,7 @@ export default function LiveSOSScreen() {
 
               {selected.provider_latitude != null && selected.provider_longitude != null && (
                 <div className="rounded-xl border bg-muted/40 p-3">
-                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <p className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                     <MapPin className="h-3 w-3" /> {t("liveSos.location")}
                   </p>
                   <p className="mt-1 text-xs font-mono">
@@ -245,12 +245,12 @@ function IncidentRow({
       )}
     >
       <div className="flex items-start gap-2">
-        <span className={cn("mt-0.5 inline-block rounded-full border px-1.5 py-0.5 text-[10px] font-bold uppercase", sevTone(i.severity))}>
+        <span className={cn("mt-0.5 inline-block rounded-full border px-1.5 py-0.5 text-xs font-bold uppercase", sevTone(i.severity))}>
           {i.severity ?? "—"}
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">{i.ai_emergency_summary ?? t("liveSos.sosIncident")}</p>
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
             <span>{ago(i.created_at)}</span>
             <span>·</span>
             <span className="capitalize">{i.status.replace(/_/g, " ")}</span>
@@ -275,7 +275,7 @@ function IncidentRow({
 
 const Stat = ({ label, value, bad, icon: Icon }: { label: string; value: string; bad?: boolean; icon?: any }) => (
   <div className={cn("rounded-lg border p-2", bad && "border-destructive/40 bg-destructive/5")}>
-    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className={cn("flex items-center gap-1 text-sm font-bold", bad && "text-destructive")}>
       {Icon && <Icon className="h-3.5 w-3.5" />}
       {value}
@@ -296,7 +296,7 @@ const EmptyRow = ({ children }: { children: React.ReactNode }) => (
 
 const KPI = ({ icon: Icon, label, value, tone }: any) => (
   <div className="rounded-xl border bg-card px-3 py-1.5">
-    <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+    <div className="flex items-center gap-1 text-xs uppercase text-muted-foreground">
       <Icon className={cn("h-3 w-3", tone)} />
       {label}
     </div>

@@ -289,9 +289,9 @@ export function StartShiftDialog({
                                   />
                                   <span className="truncate">
                                     {labelFor(m)}
-                                    <span className="ml-1 text-[10px] uppercase text-muted-foreground">· {m.role}</span>
+                                    <span className="ml-1 text-xs uppercase text-muted-foreground">· {m.role}</span>
                                     {disabled && (
-                                      <span className="ml-1 text-[10px] text-muted-foreground italic">
+                                      <span className="ml-1 text-xs text-muted-foreground italic">
                                         (already on {onOther})
                                       </span>
                                     )}
@@ -300,7 +300,7 @@ export function StartShiftDialog({
                               );
                             })}
                           {crewPool.filter((m) => m.user_id !== sel.lead_user_id).length === 0 && (
-                            <p className="text-[11px] italic text-muted-foreground px-1 py-1">No other crew members.</p>
+                            <p className="text-sm italic text-muted-foreground px-1 py-1">No other crew members.</p>
                           )}
                         </div>
                       </div>

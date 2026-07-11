@@ -159,7 +159,7 @@ export default function TeamStatusScreen() {
                       </p>
                     </div>
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                      className={`px-2 py-0.5 rounded text-xs font-semibold uppercase ${
                         isOnDuty
                           ? "bg-success/10 text-success"
                           : "bg-muted text-muted-foreground"

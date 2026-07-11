@@ -83,19 +83,19 @@ export default function IncomingAmbulancesScreen() {
                       </Badge>
                     )}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">{r.incident_number ?? `Incident ${r.id.slice(0,8)}`} · {r.status.replace(/_/g," ")}</p>
+                  <p className="text-sm text-muted-foreground">{r.incident_number ?? `Incident ${r.id.slice(0,8)}`} · {r.status.replace(/_/g," ")}</p>
                 </div>
                 <div className="text-right">
                   {r.eta_minutes != null
                     ? <><p className="text-xl font-extrabold tabular-nums"><EtaCountdown etaMinutes={r.eta_minutes} lastUpdate={r.last_eta_update} /></p>
-                        <p className="text-[10px] uppercase text-muted-foreground">ETA</p></>
-                    : <p className="text-[10px] uppercase text-muted-foreground">No ETA</p>}
+                        <p className="text-xs uppercase text-muted-foreground">ETA</p></>
+                    : <p className="text-xs uppercase text-muted-foreground">No ETA</p>}
                 </div>
               </div>
               <SosLiveMap incidentId={r.id} mode="hospital" height={200} />
               {r.pre_arrival_notes && (
                 <div className="border-t bg-warning/10 px-3 py-2 text-xs dark:bg-warning/10">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-warning">Pre-arrival notes</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-warning">Pre-arrival notes</p>
                   <p className="mt-0.5 line-clamp-3">{r.pre_arrival_notes}</p>
                 </div>
               )}

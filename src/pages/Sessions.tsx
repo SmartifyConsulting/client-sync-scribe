@@ -59,6 +59,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
+import { useLiveDiagnosticHint } from "@/hooks/useLiveDiagnosticHint";
 import { AudioWaveform } from "@/components/sessions/AudioWaveform";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatients } from "@/hooks/usePatients";
@@ -159,6 +160,7 @@ export default function Sessions() {
   const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
+  const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
   const doctorIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -348,6 +350,9 @@ export default function Sessions() {
         setActionPoints(result.action_points || []);
         
         const docs = (result as any)._extractedDocuments;
+        if (docs?.follow_up_appointment?.follow_up_date) {
+          setExtractedFollowUp(docs.follow_up_appointment);
+        }
         if (docs?.medical_certificate) {
           setExtractedMedCert(docs.medical_certificate);
           setShowMedCertReview(true);
@@ -449,6 +454,17 @@ export default function Sessions() {
       // Store audio URL locally - will be included when session is created on completion
       savedAudioUrlRef.current = audioStorageUrl;
     }
+  });
+
+  // Live AI diagnostic hint while doctor is recording (before they conclude)
+  const { hint: liveHint, isLoading: liveHintLoading } = useLiveDiagnosticHint({
+    enabled: isRecording && !isPaused,
+    transcript,
+    patientAge: (currentPatient as any)?.age ?? null,
+    patientSex: (currentPatient as any)?.gender ?? null,
+    currentMedications: (currentPatient as any)?.current_medications ?? null,
+    chronicConditions: (currentPatient as any)?.chronic_conditions ?? null,
+    language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
 
   // Session timer - only counts when recording
@@ -660,6 +676,8 @@ export default function Sessions() {
           patientId={currentPatient.id}
           patientUserId={(currentPatient as any).patient_user_id || null}
           patientName={currentPatient.name}
+          suggestedDate={extractedFollowUp?.follow_up_date}
+          suggestedTime={extractedFollowUp?.follow_up_time}
           onDone={handleFollowUpDone}
         />
       )}
@@ -719,7 +737,7 @@ export default function Sessions() {
 
       <div>
         <h1 className="text-2xl font-bold text-foreground">{t("sessions.sessionMode")}</h1>
-        <p className="mt-1 text-muted-foreground text-[12px]">
+        <p className="mt-1 text-muted-foreground text-sm">
           Record, transcribe, and generate AI summaries for patient sessions
         </p>
       </div>
@@ -943,7 +961,7 @@ export default function Sessions() {
                     ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
                     : "Tap to record"}
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
+              <p className="text-xs text-muted-foreground/70 text-center mt-1">
                 💡 Say "End Session" to automatically stop recording
               </p>
               
@@ -954,6 +972,32 @@ export default function Sessions() {
                 </div>
               )}
             </div>
+
+            {/* Live AI diagnostic hint - only while recording */}
+            {isRecording && (liveHint || liveHintLoading) && (
+              <div className="border-t bg-primary/5 p-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    <p className="text-sm font-semibold text-primary">Live AI hint</p>
+                  </div>
+                  {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+                </div>
+                {liveHint?.suggestion && (
+                  <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
+                )}
+                {liveHint?.differentials && liveHint.differentials.length > 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Consider:</span> {liveHint.differentials.join(" · ")}
+                  </p>
+                )}
+                {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
+                  <p className="mt-1 text-xs text-destructive">
+                    <span className="font-medium">Rule out:</span> {liveHint.red_flags.join(" · ")}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Live Transcript Preview - Collapsible */}
             {(transcript || isTranscribing) && (

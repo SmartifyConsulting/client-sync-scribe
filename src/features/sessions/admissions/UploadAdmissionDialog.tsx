@@ -145,7 +145,7 @@ export function UploadAdmissionDialog({ open, onOpenChange, patientId }: Props) 
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label className="text-[11px]">Hospital</Label>
+            <Label className="text-sm">Hospital</Label>
             <Input
               value={hospital}
               onChange={(e) => setHospital(e.target.value)}
@@ -154,16 +154,16 @@ export function UploadAdmissionDialog({ open, onOpenChange, patientId }: Props) 
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[11px]">Admission Date</Label>
+              <Label className="text-sm">Admission Date</Label>
               <Input type="date" value={admissionDate} onChange={(e) => setAdmissionDate(e.target.value)} />
             </div>
             <div>
-              <Label className="text-[11px]">Discharge Date</Label>
+              <Label className="text-sm">Discharge Date</Label>
               <Input type="date" value={dischargeDate} onChange={(e) => setDischargeDate(e.target.value)} />
             </div>
           </div>
           <div>
-            <Label className="text-[11px]">Diagnosis</Label>
+            <Label className="text-sm">Diagnosis</Label>
             <Textarea
               value={diagnosis}
               onChange={(e) => setDiagnosis(e.target.value)}
@@ -172,7 +172,7 @@ export function UploadAdmissionDialog({ open, onOpenChange, patientId }: Props) 
             />
           </div>
           <div>
-            <Label className="text-[11px]">Procedure / Notes</Label>
+            <Label className="text-sm">Procedure / Notes</Label>
             <Textarea
               value={procedure}
               onChange={(e) => setProcedure(e.target.value)}
@@ -181,14 +181,14 @@ export function UploadAdmissionDialog({ open, onOpenChange, patientId }: Props) 
             />
           </div>
           <div>
-            <Label className="text-[11px]">Attachment (PDF or image)</Label>
+            <Label className="text-sm">Attachment (PDF or image)</Label>
             <Input
               type="file"
               accept="application/pdf,image/*"
               onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
             />
             {file && (
-              <p className="text-[10px] text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {file.name} ({(file.size / 1024).toFixed(0)} KB)
               </p>
             )}

@@ -105,7 +105,7 @@ export function PatientSelfAdmissionsSection({ patientId, userId }: { patientId:
                 </p>
                 {a.diagnosis && <p className="text-xs mt-1">{a.diagnosis}</p>}
               </div>
-              <Badge variant="outline" className="text-[10px]">{a.source ?? "doctor"}</Badge>
+              <Badge variant="outline" className="text-xs">{a.source ?? "doctor"}</Badge>
             </div>
           </div>
         ))}
@@ -116,21 +116,21 @@ export function PatientSelfAdmissionsSection({ patientId, userId }: { patientId:
           <DialogHeader><DialogTitle>Log a hospital admission</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label className="text-[11px]">Hospital</Label>
+              <Label className="text-sm">Hospital</Label>
               <Input value={hospital} onChange={(e) => setHospital(e.target.value)} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-[11px]">Admission date</Label>
+                <Label className="text-sm">Admission date</Label>
                 <Input type="date" value={admDate} onChange={(e) => setAdmDate(e.target.value)} />
               </div>
               <div>
-                <Label className="text-[11px]">Discharge date</Label>
+                <Label className="text-sm">Discharge date</Label>
                 <Input type="date" value={discDate} onChange={(e) => setDiscDate(e.target.value)} />
               </div>
             </div>
             <div>
-              <Label className="text-[11px]">Reason / diagnosis</Label>
+              <Label className="text-sm">Reason / diagnosis</Label>
               <Textarea rows={2} value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} />
             </div>
           </div>

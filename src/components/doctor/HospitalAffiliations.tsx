@@ -156,7 +156,7 @@ export default function HospitalAffiliations() {
               <span>{h.name}</span>
               {h.city && <span className="text-xs text-muted-foreground">· {h.city}</span>}
             </span>
-            <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-[10px]">{h.status}</Badge>
+            <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-xs">{h.status}</Badge>
           </button>
         ))}
         {search.trim() && !hasExactMatch && (
@@ -184,7 +184,7 @@ export default function HospitalAffiliations() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {a.role_at_hospital && <span>{a.role_at_hospital}</span>}
                   {a.hospital?.status && a.hospital.status !== "approved" && (
-                    <Badge variant="secondary" className="text-[10px]">pending admin review</Badge>
+                    <Badge variant="secondary" className="text-xs">pending admin review</Badge>
                   )}
                 </div>
               </div>

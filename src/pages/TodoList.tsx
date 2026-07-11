@@ -410,7 +410,7 @@ export default function TodoList() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
-        <p className="mt-1 text-muted-foreground text-[12px]">Manage your tasks with voice or text input — AI can auto-execute actions</p>
+        <p className="mt-1 text-muted-foreground text-sm">Manage your tasks with voice or text input — AI can auto-execute actions</p>
       </div>
 
       {/* Add New Task — reduced by 60% */}
@@ -443,7 +443,7 @@ export default function TodoList() {
               <span className="text-xs text-muted-foreground">{t("todo.priority")}</span>
               <div className="flex gap-1">
                 {(["low", "medium", "high"] as const).map((p) => (
-                  <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
+                  <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-xs font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
                     {t(priorityKey[p])}
                   </button>
                 ))}
@@ -503,7 +503,7 @@ export default function TodoList() {
                 <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors">
                   {isCollapsed ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                   <span className="text-sm font-semibold text-foreground">{label}</span>
-                  <Badge variant="outline" className="ml-auto text-[10px]">{items.length}</Badge>
+                  <Badge variant="outline" className="ml-auto text-xs">{items.length}</Badge>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
@@ -527,7 +527,7 @@ export default function TodoList() {
                                    </p>
                                    {(todo.is_auto_executed || todo.task_type === 'document_review') && (
                                      <span className="inline-flex items-center gap-0.5">
-                                       <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0"><Zap className="h-4 w-4 mr-0.5" />AI</Badge>
+                                       <Badge className="bg-success/10 text-success border-success/20 text-xs px-1.5 py-0"><Zap className="h-4 w-4 mr-0.5" />AI</Badge>
                                        {todo.document_id && <Send className="h-4 w-4 text-green-600" />}
                                      </span>
                                    )}

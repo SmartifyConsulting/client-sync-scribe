@@ -144,7 +144,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
             <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
               <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
             </div>
-            <p className="text-[11px] uppercase tracking-wider text-primary font-semibold mb-1">
+            <p className="text-sm uppercase tracking-wider text-primary font-semibold mb-1">
               Account security · One-time setup
             </p>
             <h1 className="text-lg sm:text-xl font-semibold text-foreground">Set up Two-Factor Authentication</h1>
@@ -369,7 +369,7 @@ function AuthenticatorDownload() {
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
       <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
-      <p className="text-[11px] text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         {verb} below to install one of these authenticator apps, then come back here to scan the code.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

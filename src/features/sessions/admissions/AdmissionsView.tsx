@@ -54,12 +54,12 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
             <h3 className="font-semibold text-sm truncate">
               {(admission as any).title || admission.diagnosis || admission.hospital || "Admission"}
             </h3>
-            <p className="text-[11px] text-muted-foreground truncate">
+            <p className="text-sm text-muted-foreground truncate">
               {admission.hospital ? `${admission.hospital} · ` : ""}
               Admitted {format(new Date(admission.admission_date), "dd MMM yyyy")}
               {admission.discharge_date && ` · Discharged ${format(new Date(admission.discharge_date), "dd MMM yyyy")}`}
             </p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               Logged {format(new Date((admission as any).created_at || admission.admission_date), "dd MMM yyyy HH:mm")}
             </p>
           </div>
@@ -83,7 +83,7 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
             <div className="space-y-2">
               {vitals.map((v: any) => (
                 <div key={v.id} className="text-xs p-2 rounded bg-muted/40">
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {format(new Date(v.recorded_at), "dd MMM yyyy HH:mm")}
                     {v.nurse_name_snapshot && <span> · Nurse: {v.nurse_name_snapshot}</span>}
                   </p>
@@ -111,7 +111,7 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 <div key={m.id} className="text-xs p-2 rounded bg-muted/40">
                   <p className="font-medium">{m.name}</p>
                   <p className="text-muted-foreground">{m.dosage} · {m.frequency}</p>
-                  {m.nurse_name_snapshot && <p className="text-[10px] text-muted-foreground">Nurse: {m.nurse_name_snapshot}</p>}
+                  {m.nurse_name_snapshot && <p className="text-xs text-muted-foreground">Nurse: {m.nurse_name_snapshot}</p>}
                   <RateNurseControl admissionId={admission.id} recordTable="admission_medications" recordId={m.id} nurseId={m.nurse_id ?? null} nurseName={m.nurse_name_snapshot} />
                 </div>
               ))}
@@ -128,11 +128,11 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 <div key={l.id} className="text-xs p-2 rounded bg-muted/40">
                   <p className="font-medium">{l.test_name}</p>
                   <p>{l.result_value} {l.units} {l.reference_range && <span className="text-muted-foreground">(ref: {l.reference_range})</span>}</p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {format(new Date(l.result_date), "dd MMM yyyy")}
                     {l.nurse_name_snapshot && <span> · Nurse: {l.nurse_name_snapshot}</span>}
                   </p>
-                  {l.attachment_url && <a href={l.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-[10px] inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> View attachment</a>}
+                  {l.attachment_url && <a href={l.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-xs inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> View attachment</a>}
                   <RateNurseControl admissionId={admission.id} recordTable="admission_lab_results" recordId={l.id} nurseId={l.nurse_id ?? null} nurseName={l.nurse_name_snapshot} />
                 </div>
               ))}
@@ -148,13 +148,13 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
               {imaging.map((i: any) => (
                 <div key={i.id} className="text-xs p-2 rounded bg-muted/40">
                   <p className="font-medium">{i.modality} · {i.body_region}</p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {format(new Date(i.performed_at), "dd MMM yyyy")}
                     {i.nurse_name_snapshot && <span> · Nurse: {i.nurse_name_snapshot}</span>}
                   </p>
                   {i.summary && <p className="mt-1">{i.summary}</p>}
-                  {i.pacs_link && <a href={i.pacs_link} target="_blank" rel="noreferrer" className="text-primary text-[10px] inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> PACS</a>}
-                  {i.attachment_url && <a href={i.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-[10px] inline-flex items-center gap-1 ml-2"><ExternalLink className="h-2 w-2" /> PDF</a>}
+                  {i.pacs_link && <a href={i.pacs_link} target="_blank" rel="noreferrer" className="text-primary text-xs inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> PACS</a>}
+                  {i.attachment_url && <a href={i.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-xs inline-flex items-center gap-1 ml-2"><ExternalLink className="h-2 w-2" /> PDF</a>}
                   <RateNurseControl admissionId={admission.id} recordTable="admission_imaging" recordId={i.id} nurseId={i.nurse_id ?? null} nurseName={i.nurse_name_snapshot} />
                 </div>
               ))}

@@ -79,7 +79,7 @@ export function BottomNav() {
                 >
                   <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 </div>
-                <span className={cn("text-[10px] font-medium text-center leading-tight", isActive && "text-primary")}>
+                <span className={cn("text-xs font-medium text-center leading-tight", isActive && "text-primary")}>
                   {t(item.labelKey)}
                 </span>
               </button>
@@ -132,7 +132,7 @@ export function BottomNav() {
                 >
                   <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 </div>
-                <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{t(item.labelKey)}</span>
+                <span className={cn("text-xs font-medium", isActive && "text-primary")}>{t(item.labelKey)}</span>
               </button>
             );
           })}
@@ -190,7 +190,7 @@ export function BottomNav() {
               >
                 <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
               </div>
-              <span className={cn("text-[10px] font-medium", isActive && "text-primary")}>{t(item.labelKey)}</span>
+              <span className={cn("text-xs font-medium", isActive && "text-primary")}>{t(item.labelKey)}</span>
             </button>
           );
         })}

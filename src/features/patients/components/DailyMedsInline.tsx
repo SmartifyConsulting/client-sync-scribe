@@ -138,7 +138,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
         {!showCustom ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div className="md:col-span-2">
-              <Label className="text-[10px]">Pick item</Label>
+              <Label className="text-xs">Pick item</Label>
               <Select value={pickedId} onValueChange={(v) => {
                 setPickedId(v);
                 const med = approved.find((a) => a.id === v);
@@ -148,25 +148,25 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
                 <SelectContent>
                   {approved.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
-                      {a.name} <span className="text-[10px] text-muted-foreground ml-1">({a.category})</span>
+                      {a.name} <span className="text-xs text-muted-foreground ml-1">({a.category})</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label className="text-[10px]">Reminder time</Label>
+              <Label className="text-xs">Reminder time</Label>
               <Input className="h-9" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div>
-              <Label className="text-[10px]">Item name</Label>
+              <Label className="text-xs">Item name</Label>
               <Input className="h-9" value={customName} onChange={(e) => setCustomName(e.target.value)} placeholder="e.g. Magnesium 400mg" />
             </div>
             <div>
-              <Label className="text-[10px]">Category</Label>
+              <Label className="text-xs">Category</Label>
               <Select value={customCategory} onValueChange={(v) => setCustomCategory(v as any)}>
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -177,7 +177,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
               </Select>
             </div>
             <div>
-              <Label className="text-[10px]">Reminder time</Label>
+              <Label className="text-xs">Reminder time</Label>
               <Input className="h-9" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
             </div>
           </div>
@@ -185,7 +185,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1">
-            <Label className="text-[10px]">Frequency</Label>
+            <Label className="text-xs">Frequency</Label>
             <Select value={frequency} onValueChange={setFrequency}>
               <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -194,7 +194,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
             </Select>
           </div>
           <div className="flex items-center gap-1">
-            <Label className="text-[10px]">Food</Label>
+            <Label className="text-xs">Food</Label>
             <Select value={withFood} onValueChange={(v) => setWithFood(v as any)}>
               <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -204,16 +204,16 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
               </SelectContent>
             </Select>
           </div>
-          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <label className="flex items-center gap-1 text-sm text-muted-foreground">
             <Switch checked={remindMe} onCheckedChange={setRemindMe} className="scale-75" />
             Remind me
           </label>
-          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <label className="flex items-center gap-1 text-sm text-muted-foreground">
             <Switch checked={isChronic} onCheckedChange={setIsChronic} className="scale-75" />
             Chronic
           </label>
           <div className="flex items-center gap-1">
-            <Label className="text-[10px]">Alert if missed after</Label>
+            <Label className="text-xs">Alert if missed after</Label>
             <Input
               type="number"
               min={5}
@@ -223,13 +223,13 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
               onChange={(e) => setMissedAfter(Math.max(5, parseInt(e.target.value || "30", 10)))}
               className="h-8 w-20 text-xs"
             />
-            <span className="text-[10px] text-muted-foreground">min</span>
+            <span className="text-xs text-muted-foreground">min</span>
           </div>
-          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <label className="flex items-center gap-1 text-sm text-muted-foreground">
             <Switch checked={alertContactsTaken} onCheckedChange={setAlertContactsTaken} className="scale-75" />
             Alert contacts when taken
           </label>
-          <Button variant="ghost" size="sm" className="h-7 text-[11px]" onClick={() => setShowCustom((s) => !s)}>
+          <Button variant="ghost" size="sm" className="h-7 text-sm" onClick={() => setShowCustom((s) => !s)}>
             {showCustom ? "Pick from list" : "+ Add custom"}
           </Button>
           <Button size="sm" onClick={add} disabled={(!showCustom && !pickedId) || (showCustom && !customName.trim())} className="ml-auto h-7">
@@ -238,9 +238,9 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
         </div>
       </div>
 
-      {loading && <p className="text-[11px] text-muted-foreground">Loading…</p>}
+      {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
       {!loading && meds.length === 0 && (
-        <p className="text-[11px] text-muted-foreground">No daily vitamins or supplements added yet.</p>
+        <p className="text-sm text-muted-foreground">No daily vitamins or supplements added yet.</p>
       )}
       {meds.map((m) => (
         <div key={m.id} className="flex items-center justify-between rounded-md border border-border p-2 bg-muted/30">
@@ -248,13 +248,13 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
             <p className="text-xs font-medium truncate flex items-center gap-1.5">
               <Pill className="h-4 w-4 text-primary" /> {m.medication}
             </p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {m.frequency || "daily"} · {m.reminder_times?.join(", ") || "no time"} · {m.with_food === "with_food" ? "with food" : m.with_food === "without_food" ? "empty" : "either"}
             </p>
             <Badge variant="outline" className="mt-0.5 text-[9px] px-1 py-0">Self-added</Badge>
           </div>
           <div className="flex items-center gap-1">
-            <label className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <label className="flex items-center gap-1 text-xs text-muted-foreground">
               {(m.reminders_enabled ?? true) ? <Bell className="h-4 w-4 text-primary" /> : <BellOff className="h-4 w-4" />}
               <Switch checked={m.reminders_enabled ?? true} onCheckedChange={(v) => toggleReminder(m.id, v)} />
             </label>

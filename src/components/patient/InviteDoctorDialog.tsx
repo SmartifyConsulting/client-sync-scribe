@@ -207,9 +207,9 @@ export function InviteDoctorDialog({
               <div>
                 <p className="text-sm font-semibold text-foreground">{prefillDoctorName}</p>
                 {prefillSpecialty && (
-                  <Badge variant="secondary" className="text-[10px] mt-0.5">{prefillSpecialty}</Badge>
+                  <Badge variant="secondary" className="text-xs mt-0.5">{prefillSpecialty}</Badge>
                 )}
-                {!prefillSpecialty && <p className="text-[10px] text-muted-foreground">Selected healthcare provider</p>}
+                {!prefillSpecialty && <p className="text-xs text-muted-foreground">Selected healthcare provider</p>}
               </div>
             </div>
           )}
@@ -217,7 +217,7 @@ export function InviteDoctorDialog({
           {/* Permission Transparency */}
           <div className="space-y-2">
             <Label>Data Sharing Transparency</Label>
-            <p className="text-[10px] text-muted-foreground">What your doctor will and won't be able to see:</p>
+            <p className="text-xs text-muted-foreground">What your doctor will and won't be able to see:</p>
             <PermissionTransparencyModal inline isPatientFacing />
           </div>
         </div>

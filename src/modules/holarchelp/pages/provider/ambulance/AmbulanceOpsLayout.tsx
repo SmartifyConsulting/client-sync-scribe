@@ -85,12 +85,12 @@ function AmbulanceStatsStrip() {
           className="inline-flex items-center gap-2 rounded-xl border border-sos/40 bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
         >
           <Siren className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
+          <span className="text-xs font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
           <span className="text-xs font-bold">#{stats.currentIncidentId.slice(0, 8)}</span>
         </Link>
       )}
 
-      <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <span className="ml-auto inline-flex items-center gap-1.5 text-sm text-muted-foreground">
         <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
         {online ? t("provider.online") : t("provider.offline")}
       </span>

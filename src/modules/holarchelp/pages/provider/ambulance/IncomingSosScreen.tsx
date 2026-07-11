@@ -115,16 +115,16 @@ export default function IncomingSosScreen() {
             <div key={r.id} className={`rounded-2xl border-2 p-4 shadow-sm ${sevBig(r.severity)}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-sos">
+                  <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-sos">
                     <Siren className="h-3.5 w-3.5" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? t("ambulance.emergency")}
                   </p>
                   <p className="mt-1 text-lg font-extrabold">{r.incident_number ?? `INC-${r.id.slice(0,8)}`}</p>
-                  <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <Clock className="h-3 w-3" /> {t("ambulance.triggered")} {ago(r.created_at)} {t("common.ago")}
                   </p>
                 </div>
                 {(r.conscious === false || r.breathing === false) && (
-                  <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-1 text-[10px] font-bold uppercase text-destructive">
+                  <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-bold uppercase text-destructive">
                     <AlertTriangle className="mr-1 inline h-3 w-3" /> {t("incomingSos.lifeThreat")}
                   </span>
                 )}
@@ -158,7 +158,7 @@ export default function IncomingSosScreen() {
 
 const Stat = ({ label, value, tone }: { label: string; value: string; tone?: "destructive" }) => (
   <div className={`rounded-xl border bg-background/60 px-2 py-1 ${tone === "destructive" ? "border-destructive/40 text-destructive" : ""}`}>
-    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className="text-sm font-bold">{value}</p>
   </div>
 );

@@ -297,16 +297,16 @@ export function ActiveMissionGoogleMap({ incidentId, height = 520 }: Props) {
             <span className="absolute inset-0 animate-ping rounded-full bg-white/70" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
           </span>
-          <span className="text-[10px] font-bold uppercase tracking-wider opacity-90">
+          <span className="text-xs font-bold uppercase tracking-wider opacity-90">
             {phase === "transport" ? "Transport" : "Pickup"}
           </span>
           <span className="text-sm font-extrabold tabular-nums leading-none">
             {eta.minutes} min
           </span>
-          <span className="text-[11px] font-semibold opacity-90">· {eta.km.toFixed(1)} km</span>
+          <span className="text-sm font-semibold opacity-90">· {eta.km.toFixed(1)} km</span>
         </div>
       )}
-      <div className="absolute right-2 top-2 z-10 rounded-full bg-background/95 px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground shadow-md">
+      <div className="absolute right-2 top-2 z-10 rounded-full bg-background/95 px-2 py-1 text-xs font-semibold uppercase text-muted-foreground shadow-md">
         Live · Google Maps
       </div>
     </div>

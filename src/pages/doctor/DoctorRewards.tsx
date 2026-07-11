@@ -140,14 +140,14 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
               <h1 className="text-2xl font-bold text-foreground">{t("doctorRewards.title")}</h1>
               <button
                 onClick={() => setShowVulaExplainer(true)}
-                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 title="Learn about Vulas"
               >
                 <Info className="h-3.5 w-3.5" />
                 What are Vulas?
               </button>
             </div>
-            <p className="text-muted-foreground text-[12px]">Manage your Vulas balance, milestones, and streaks</p>
+            <p className="text-muted-foreground text-sm">Manage your Vulas balance, milestones, and streaks</p>
           </div>
           {partnerApps.length > 0 && (
             <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Vulas</Button>
@@ -215,11 +215,11 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
       {/* Tabs — same as patient view */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-primary flex w-full flex-nowrap overflow-x-auto justify-start">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabOverview")}</TabsTrigger>
-          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabMilestones")}</TabsTrigger>
-          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabStreaks")}</TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabHistory")}</TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabRedeem")}</TabsTrigger>
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabOverview")}</TabsTrigger>
+          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabMilestones")}</TabsTrigger>
+          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabStreaks")}</TabsTrigger>
+          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabHistory")}</TabsTrigger>
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabRedeem")}</TabsTrigger>
          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">

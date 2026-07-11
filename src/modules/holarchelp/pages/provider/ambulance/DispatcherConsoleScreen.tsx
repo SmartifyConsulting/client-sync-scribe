@@ -229,7 +229,7 @@ export default function DispatcherConsoleScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
           <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
             <Radio className="h-5 w-5 text-primary" /> Dispatcher Console
           </h1>
@@ -247,7 +247,7 @@ export default function DispatcherConsoleScreen() {
       <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-[1fr_1fr_1.1fr_1.2fr]">
         {/* Incidents */}
         <section className="rounded-xl border bg-card p-2">
-          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">Open SOS · {incidents.length}</h2>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">Open SOS · {incidents.length}</h2>
           {incidents.length === 0 ? (
             <p className="px-2 py-6 text-center text-xs text-muted-foreground">No SOS offered to your fleet.</p>
           ) : (
@@ -276,7 +276,7 @@ export default function DispatcherConsoleScreen() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <IncidentNumberBadge number={i.incident_number ?? `INC-${i.id.slice(0, 8)}`} size="sm" showCopy={false} label="Ref" />
-                      <span className={`text-[10px] font-bold uppercase ${
+                      <span className={`text-xs font-bold uppercase ${
                         i.severity === "critical" ? "text-destructive" : i.severity === "high" ? "text-warning" : "text-muted-foreground"
                       }`}>
                         <Siren className="inline h-3 w-3 mr-0.5" />{i.severity ?? "high"}
@@ -284,7 +284,7 @@ export default function DispatcherConsoleScreen() {
                     </div>
                     <p className="text-xs mt-0.5 truncate">{i.incident_type ?? "Emergency"}</p>
                     <div className="mt-0.5 flex items-center justify-between gap-2">
-                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3 w-3" /> {ago(i.created_at)} ago
                       </p>
                       {isMine && (
@@ -302,7 +302,7 @@ export default function DispatcherConsoleScreen() {
 
         {/* Available vehicles */}
         <section className="rounded-xl border bg-card p-2">
-          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1 py-1">
             Available vehicles · {available.length}
           </h2>
           {available.length === 0 ? (
@@ -332,14 +332,14 @@ export default function DispatcherConsoleScreen() {
                         <Truck className="h-3.5 w-3.5 text-primary" />
                         {v.vehicle_code}
                       </span>
-                      <span className="text-[10px] uppercase font-bold text-success">Available</span>
+                      <span className="text-xs uppercase font-bold text-success">Available</span>
                     </div>
-                    {v.registration_number && <p className="text-[10px] text-muted-foreground mt-0.5">{v.registration_number}</p>}
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {v.registration_number && <p className="text-xs text-muted-foreground mt-0.5">{v.registration_number}</p>}
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       Lead: {v.lead_name ?? <span className="italic">no shift open</span>}
                     </p>
                     {isOver ? (
-                      <p className="mt-2 text-center text-[11px] font-bold uppercase tracking-wider text-primary">
+                      <p className="mt-2 text-center text-sm font-bold uppercase tracking-wider text-primary">
                         Drop to dispatch
                       </p>
                     ) : (
@@ -359,10 +359,10 @@ export default function DispatcherConsoleScreen() {
           )}
           {busy.length > 0 && (
             <>
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1 mt-2">On a call · {busy.length}</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1 py-1 mt-2">On a call · {busy.length}</h2>
               <div className="space-y-1 opacity-60">
                 {busy.map((v) => (
-                  <div key={v.id} className="rounded-lg border px-2 py-1.5 text-[11px]">
+                  <div key={v.id} className="rounded-lg border px-2 py-1.5 text-sm">
                     <span className="font-bold">{v.vehicle_code}</span>
                     {v.lead_name ? <> · {v.lead_name}</> : null}
                   </div>
@@ -374,7 +374,7 @@ export default function DispatcherConsoleScreen() {
 
         {/* Details */}
         <section className="rounded-xl border bg-card p-3">
-          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Selected incident</h2>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Selected incident</h2>
           {!selected ? (
             <p className="mt-6 text-center text-xs text-muted-foreground">Pick an SOS on the left, then drag it onto a vehicle or tap Assign.</p>
           ) : (
@@ -392,7 +392,7 @@ export default function DispatcherConsoleScreen() {
               {selected.notes && (
                 <p className="rounded-lg border bg-muted/30 p-2 text-xs italic">"{selected.notes}"</p>
               )}
-              <p className="text-[11px] text-muted-foreground pt-2 border-t">
+              <p className="text-sm text-muted-foreground pt-2 border-t">
                 Drag this card onto a vehicle, or tap "Assign to selected SOS".
               </p>
             </div>
@@ -401,7 +401,7 @@ export default function DispatcherConsoleScreen() {
 
         {/* Destination hospitals */}
         <section className="rounded-xl border bg-card p-2">
-          <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1 py-1 flex items-center gap-1">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-1 py-1 flex items-center gap-1">
             <MapPin className="h-3 w-3" /> Destination hospitals · {hospitals.length}
           </h2>
           {hospitals.length === 0 ? (
@@ -435,7 +435,7 @@ export default function DispatcherConsoleScreen() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-xs font-bold truncate">{h.name}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             <span className="uppercase">{h.ownership ?? "private"}</span>
                             {h.distance_km != null && <> · {h.distance_km.toFixed(1)} km</>}
                           </p>
@@ -453,7 +453,7 @@ export default function DispatcherConsoleScreen() {
                       <Button
                         size="sm"
                         variant={isCurrent ? "outline" : "default"}
-                        className="mt-2 w-full h-7 text-[11px]"
+                        className="mt-2 w-full h-7 text-sm"
                         disabled={!selected || !!settingHospital || (isCurrent)}
                         onClick={() => selected && setDestination(selected.id, h.id)}
                       >

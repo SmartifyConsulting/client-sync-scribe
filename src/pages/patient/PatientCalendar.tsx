@@ -167,10 +167,10 @@ export default function PatientCalendar() {
         </div>
         <div className="mt-1 flex flex-wrap gap-1">
           {apt.service_name && (
-            <Badge variant="secondary" className="text-[10px]">{apt.service_name}</Badge>
+            <Badge variant="secondary" className="text-xs">{apt.service_name}</Badge>
           )}
           {apt.service_price != null && apt.service_price > 0 && (
-            <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
+            <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
               <DollarSign className="h-4 w-4 mr-0.5" />
               {formatCurrency(apt.service_price)}
             </Badge>
@@ -239,7 +239,7 @@ export default function PatientCalendar() {
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
-                <span className="text-[10px] md:text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
+                <span className="text-xs md:text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
                 <span className="text-base md:text-lg font-semibold">{format(day, "d")}</span>
                 {dayAppointments.length > 0 && (
                   <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
@@ -360,7 +360,7 @@ export default function PatientCalendar() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h1 className="text-lg md:text-2xl font-bold text-foreground">My Calendar</h1>
-          <p className="text-muted-foreground text-[11px] md:text-[12px]">View and manage your appointments</p>
+          <p className="text-muted-foreground text-sm md:text-sm">View and manage your appointments</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <ViewToggle />
@@ -383,7 +383,7 @@ export default function PatientCalendar() {
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {upcomingAppointments.slice(0, 5).map((apt) => (
                 <div key={apt.id} className="p-2 rounded-lg bg-card border border-border/50 min-w-[140px] shrink-0 space-y-0.5">
-                  <p className="font-medium text-[10px] truncate">{apt.title}</p>
+                  <p className="font-medium text-xs truncate">{apt.title}</p>
                   {apt.doctor_name && (
                     <p className="text-[9px] text-primary font-medium flex items-center gap-0.5">
                       <User className="h-2 w-2" /> Dr. {apt.doctor_name}

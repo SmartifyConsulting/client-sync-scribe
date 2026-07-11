@@ -153,7 +153,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
             <Users className="h-4 w-4 text-primary" />
             <h3 className="text-sm font-semibold">Round Table — {patientName}</h3>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Circle className="h-2 w-2 fill-emerald-500 text-emerald-500" />
             {onlineCount} online
           </div>
@@ -191,7 +191,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
               >
                 <div className="flex flex-col items-start text-left">
                   <span className="text-sm font-semibold">{t.subject}</span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {t.doctor_name} • {format(new Date(t.created_at), "MMM d, yyyy 'at' h:mm a")}
                   </span>
                 </div>
@@ -199,16 +199,16 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
               <AccordionContent className="space-y-3">
                 <p className="whitespace-pre-wrap text-xs text-foreground">{t.body}</p>
                 <div className="border-t pt-3 space-y-2">
-                  <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                  <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                     <MessageCircle className="h-4 w-4" /> Live discussion
                   </div>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {(messagesByTopic[t.id] || []).map((m) => (
                       <div key={m.id} className={`rounded-md p-2 text-xs ${m.doctor_id === currentUserId ? 'bg-primary/10 ml-6' : 'bg-muted mr-6'}`}>
                         <div className="flex items-center gap-1 mb-0.5">
-                          <span className="font-semibold text-[11px]">{m.doctor_name}</span>
+                          <span className="font-semibold text-sm">{m.doctor_name}</span>
                           {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
-                          <span className="text-[10px] text-muted-foreground ml-auto">
+                          <span className="text-xs text-muted-foreground ml-auto">
                             {format(new Date(m.created_at), "MMM d, h:mm a")}
                           </span>
                         </div>

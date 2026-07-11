@@ -163,7 +163,7 @@ export default function MySessions() {
                                   </div>
                                 </div>
                                 <span
-                                  className={`text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                                  className={`text-xs uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 ${
                                     s.status === "completed"
                                       ? "bg-success/10 text-success"
                                       : s.status === "in_progress"

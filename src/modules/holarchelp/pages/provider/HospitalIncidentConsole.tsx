@@ -106,7 +106,7 @@ export default function HospitalIncidentConsole() {
 
       {incident.pre_arrival_notes && (
         <div className="rounded-2xl border-2 border-warning/30 bg-warning/10 p-3 dark:bg-warning/10">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-warning dark:text-warning">{t("hospitalConsole.preArrivalFromCrew")}</p>
+          <p className="text-sm font-bold uppercase tracking-wider text-warning dark:text-warning">{t("hospitalConsole.preArrivalFromCrew")}</p>
           <p className="mt-1 whitespace-pre-wrap text-sm">{incident.pre_arrival_notes}</p>
         </div>
       )}
@@ -144,7 +144,7 @@ export default function HospitalIncidentConsole() {
 
 const Stat = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="rounded-2xl border bg-card p-2.5">
-    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className="mt-0.5 text-base font-extrabold">{value}</p>
   </div>
 );

@@ -39,7 +39,7 @@ export function PasswordStrength({ password, className, breached }: Props) {
 
   return (
     <div className={cn("space-y-2", className)}>
-      <div className="flex items-center justify-between text-[11px]">
+      <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">Password strength</span>
         <span className="font-medium text-foreground">{breached ? "Unsafe (breached)" : label}</span>
       </div>
@@ -50,7 +50,7 @@ export function PasswordStrength({ password, className, breached }: Props) {
         {RULES.map((r) => {
           const ok = r.test(password);
           return (
-            <li key={r.label} className="flex items-center gap-1.5 text-[11px]">
+            <li key={r.label} className="flex items-center gap-1.5 text-sm">
               {ok ? (
                 <Check className="h-3 w-3 text-primary flex-shrink-0" />
               ) : (
@@ -60,7 +60,7 @@ export function PasswordStrength({ password, className, breached }: Props) {
             </li>
           );
         })}
-        <li className="col-span-2 flex items-center gap-1.5 text-[11px]">
+        <li className="col-span-2 flex items-center gap-1.5 text-sm">
           {breached ? (
             <>
               <X className="h-3 w-3 text-destructive flex-shrink-0" />
@@ -74,7 +74,7 @@ export function PasswordStrength({ password, className, breached }: Props) {
           )}
         </li>
       </ul>
-      <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground pt-1">
+      <p className="flex items-start gap-1.5 text-sm text-muted-foreground pt-1">
         <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
         <span>Tip: avoid names, dictionary words, and passwords you've used on other sites — even with numbers/symbols added.</span>
       </p>

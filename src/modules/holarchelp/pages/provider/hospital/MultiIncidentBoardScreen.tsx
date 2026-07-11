@@ -86,7 +86,7 @@ export default function MultiIncidentBoardScreen() {
       <div className="space-y-6">
         <header className="flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Dispatch Management
             </p>
             <h1 className="text-3xl font-extrabold">Multi-Incident Board</h1>
@@ -183,7 +183,7 @@ export default function MultiIncidentBoardScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             Dispatch Management
           </p>
           <h1 className="text-3xl font-extrabold">Multi-Incident Board</h1>

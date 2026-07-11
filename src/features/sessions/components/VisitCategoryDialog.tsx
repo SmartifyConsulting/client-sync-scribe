@@ -208,7 +208,7 @@ export function VisitCategoryDialog({
               onChange={(e) => setCustomCategory(e.target.value)}
               className="mt-1"
             />
-            <p className="text-[10px] text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Suggestions are sent to an admin for review — no Vula is awarded for "Other".
             </p>
           </div>

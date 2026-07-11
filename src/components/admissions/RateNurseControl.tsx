@@ -68,7 +68,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
 
   return (
     <div className="flex items-center gap-1 mt-1">
-      <span className="text-[10px] text-muted-foreground mr-1">Rate {nurseName || "nurse"}:</span>
+      <span className="text-xs text-muted-foreground mr-1">Rate {nurseName || "nurse"}:</span>
       {[1, 2, 3, 4, 5].map((v) => {
         const filled = (hover ?? rating ?? 0) >= v;
         return (

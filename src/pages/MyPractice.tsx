@@ -276,7 +276,7 @@ function MailboxSection({ userId }: { userId?: string }) {
           <p className="text-xs text-muted-foreground mt-0.5">External parties can email documents to this address.</p>
           <div className="mt-2 flex items-start gap-1.5 rounded-md border border-primary/30 bg-primary/5 p-2">
             <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-            <p className="text-[11px] leading-snug text-foreground/80">
+            <p className="text-sm leading-snug text-foreground/80">
               This address is solely for emailing files (scans, referrals, lab results) directly to your <strong>My Documents</strong> tab — it is not for standard messaging and you will not receive replies in your normal inbox. Share it with anyone sending you medical records so they are routed straight to your Holarc Health profile.
             </p>
           </div>
@@ -364,7 +364,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
             placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
           />
           <div className="flex items-center justify-between">
-            <span className={cn("text-[11px]", overLimit ? "text-destructive" : "text-muted-foreground")}>
+            <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
               {t("myPractice.wordCount", { count: wordCount })}
             </span>
             <Button
@@ -1093,7 +1093,7 @@ export default function MyPractice() {
       <div className="space-y-4 animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Round Tables</h1>
-          <p className="text-muted-foreground text-[12px]">View round table discussions you've contributed to</p>
+          <p className="text-muted-foreground text-sm">View round table discussions you've contributed to</p>
         </div>
         <DoctorRoundTables />
       </div>
@@ -1107,7 +1107,7 @@ export default function MyPractice() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Holarprac</h1>
-          <p className="text-muted-foreground text-[12px]">Manage your personal and practice information</p>
+          <p className="text-muted-foreground text-sm">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === "saving" && (
@@ -1173,31 +1173,31 @@ export default function MyPractice() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
             value="referrals"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabRewards")}
           </TabsTrigger>
@@ -1361,7 +1361,7 @@ export default function MyPractice() {
                 <Input
                   value={practiceColor}
                   onChange={(e) => handlePracticeColorChange(e.target.value)}
-                  className="max-w-[140px] font-mono text-[12px]"
+                  className="max-w-[140px] font-mono text-sm"
                   placeholder="#0EA5E9"
                 />
                 <input
@@ -1372,7 +1372,7 @@ export default function MyPractice() {
                   aria-label="Pick color"
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Used on the shared Practice Calendar so colleagues can see whose appointment a slot belongs to.
               </p>
             </div>
@@ -1592,7 +1592,7 @@ export default function MyPractice() {
                           >
                             <div className="min-w-0">
                               <p className="text-sm font-medium truncate">{r.full_name || "Unnamed"}</p>
-                              <p className="text-[11px] text-muted-foreground truncate">
+                              <p className="text-sm text-muted-foreground truncate">
                                 {r.doctor_number ? `Reg: ${r.doctor_number}` : "No registration #"}
                               </p>
                             </div>
@@ -1723,7 +1723,7 @@ export default function MyPractice() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
-                <p className="text-[12px] text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Share a single calendar across multiple doctors. Each doctor's appointments show in their assigned color.
                   Google Calendar sync stays personal — only your own appointments mirror.
                 </p>
@@ -1733,14 +1733,14 @@ export default function MyPractice() {
                     {pendingInvites.map((inv) => (
                       <div key={inv.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
                         <div className="min-w-0 flex-1">
-                          <p className="text-[12px] font-medium text-foreground truncate">
+                          <p className="text-sm font-medium text-foreground truncate">
                             Invitation to join <strong>{inv.practice_name || "a practice"}</strong>
                           </p>
-                          <p className="text-[11px] text-muted-foreground truncate">From {inv.inviter_name || inv.invited_by}</p>
+                          <p className="text-sm text-muted-foreground truncate">From {inv.inviter_name || inv.invited_by}</p>
                         </div>
                         <div className="flex gap-1.5 shrink-0">
-                          <Button size="sm" onClick={() => acceptInvitation(inv)} className="h-7 text-[11px]">Accept</Button>
-                          <Button size="sm" variant="outline" onClick={() => declineInvitation(inv)} className="h-7 text-[11px]">Decline</Button>
+                          <Button size="sm" onClick={() => acceptInvitation(inv)} className="h-7 text-sm">Accept</Button>
+                          <Button size="sm" variant="outline" onClick={() => declineInvitation(inv)} className="h-7 text-sm">Decline</Button>
                         </div>
                       </div>
                     ))}
@@ -1749,7 +1749,7 @@ export default function MyPractice() {
 
                 {!practice ? (
                   <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                    <Label className="text-[11px]">Create a Practice Calendar</Label>
+                    <Label className="text-sm">Create a Practice Calendar</Label>
                     <div className="flex gap-2">
                       <Input value={newPracticeName} onChange={(e) => setNewPracticeName(e.target.value)} placeholder="e.g., Cape Town Medical Centre" className="flex-1" />
                       <Button size="sm" onClick={async () => {
@@ -1763,8 +1763,8 @@ export default function MyPractice() {
                   <>
                     <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
                       <div className="min-w-0">
-                        <p className="text-[12px] font-medium text-foreground truncate">{practice.name}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-sm font-medium text-foreground truncate">{practice.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           {isPracticeOwner ? "You are the owner" : "You are a member"} · {members.length} member{members.length === 1 ? "" : "s"}
                         </p>
                       </div>
@@ -1773,12 +1773,12 @@ export default function MyPractice() {
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="sm" onClick={async () => { if (confirm("Leave this practice?")) await leavePractice(); }} className="h-7 text-[11px] text-destructive">Leave</Button>
+                        <Button variant="ghost" size="sm" onClick={async () => { if (confirm("Leave this practice?")) await leavePractice(); }} className="h-7 text-sm text-destructive">Leave</Button>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-[11px]">Members</Label>
+                      <Label className="text-sm">Members</Label>
                       {members.map((m) => {
                         const initials = (m.full_name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                         return (
@@ -1786,12 +1786,12 @@ export default function MyPractice() {
                             <div className="flex items-center gap-2.5 min-w-0">
                               <Avatar className="h-7 w-7">
                                 {m.avatar_url ? <AvatarImage src={m.avatar_url} /> : null}
-                                <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
+                                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                               </Avatar>
                               <span className="inline-block h-3 w-3 rounded-full border border-border shrink-0" style={{ backgroundColor: m.practice_color || "#0EA5E9" }} />
                               <div className="min-w-0">
-                                <p className="text-[12px] font-medium text-foreground truncate">{m.full_name || "Unnamed"}</p>
-                                <p className="text-[10px] text-muted-foreground capitalize">{m.role}</p>
+                                <p className="text-sm font-medium text-foreground truncate">{m.full_name || "Unnamed"}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{m.role}</p>
                               </div>
                             </div>
                             {isPracticeOwner && m.role !== "owner" && (
@@ -1806,7 +1806,7 @@ export default function MyPractice() {
 
                     {isPracticeOwner && (
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Invite a doctor by email</Label>
+                        <Label className="text-sm">Invite a doctor by email</Label>
                         <div className="flex gap-2">
                           <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@example.com" className="flex-1" />
                           <Button size="sm" onClick={async () => {
@@ -1820,12 +1820,12 @@ export default function MyPractice() {
 
                     {isPracticeOwner && invitations.filter((i) => i.status === "pending").length > 0 && (
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Pending invitations</Label>
+                        <Label className="text-sm">Pending invitations</Label>
                         {invitations.filter((i) => i.status === "pending").map((inv) => (
                           <div key={inv.id} className="flex items-center justify-between p-2 bg-muted/20 rounded-lg border border-border">
                             <div className="min-w-0">
-                              <p className="text-[12px] truncate">{inv.invited_email}</p>
-                              <p className="text-[10px] text-muted-foreground">Sent {format(new Date(inv.created_at), "MMM d")}</p>
+                              <p className="text-sm truncate">{inv.invited_email}</p>
+                              <p className="text-xs text-muted-foreground">Sent {format(new Date(inv.created_at), "MMM d")}</p>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => revokeInvitation(inv.id)} className="h-7 w-7 text-destructive" title="Revoke">
                               <X className="h-3.5 w-3.5" />
@@ -2089,7 +2089,7 @@ export default function MyPractice() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-1.5 min-w-[80px] flex-1">
-                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {sigFormData.signature_font_size}px
                 </span>
                 <Slider
@@ -2285,7 +2285,7 @@ export default function MyPractice() {
               <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-muted-foreground text-[12px]">
+              <p className="text-muted-foreground text-sm">
                 Track your professional credentials and CPD points.
               </p>
               <Button

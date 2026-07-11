@@ -325,7 +325,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">{t("nav.myDocuments", "Documents")}</h1>
-            <p className="mt-1 text-muted-foreground text-[12px]">Manage header/footer layouts and content templates separately</p>
+            <p className="mt-1 text-muted-foreground text-sm">Manage header/footer layouts and content templates separately</p>
           </div>
         </div>
       )}
@@ -352,7 +352,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         {/* Header/Footer Templates Tab */}
         <TabsContent value="header-footer" className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[12px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Create reusable header and footer layouts that apply to all your documents
             </p>
             <Dialog open={isNewHFTemplateOpen} onOpenChange={setIsNewHFTemplateOpen}>
@@ -434,11 +434,11 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                  <h3 className="text-[12px] font-semibold text-foreground mb-1">{template.name}</h3>
-                  <p className="text-[11px] text-muted-foreground mb-3 line-clamp-2">
+                  <h3 className="text-sm font-semibold text-foreground mb-1">{template.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                     {template.description || "No description"}
                   </p>
-                  <span className="text-[11px] text-muted-foreground">{formatDate(template.updated_at)}</span>
+                  <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
                 </div>
               ))}
 
@@ -450,7 +450,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
                   <Plus className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-[12px] font-medium text-muted-foreground">Create Header/Footer</p>
+                <p className="text-sm font-medium text-muted-foreground">Create Header/Footer</p>
               </div>
             </div>
           )}
@@ -459,7 +459,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         {/* Content Templates Tab */}
         <TabsContent value="content" className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[12px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {t("documents.contentHelper")}
             </p>
             <Dialog open={isNewTemplateOpen} onOpenChange={setIsNewTemplateOpen}>
@@ -550,14 +550,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                     </DropdownMenu>
                   </div>
                   <div onClick={() => handleSelectTemplate(template)}>
-                    <h3 className="text-[12px] font-semibold text-foreground mb-1">{template.name}</h3>
-                    <p className="text-[11px] text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
+                    <h3 className="text-sm font-semibold text-foreground mb-1">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
                     {(() => {
                       const linkedHf = headerFooterTemplates.find(
                         (hf) => hf.id === template.header_footer_template_id,
                       );
                       return (
-                        <p className="text-[11px] text-muted-foreground mb-2">
+                        <p className="text-sm text-muted-foreground mb-2">
                           {t("documents.letterhead")}{" "}
                           <span className="font-medium text-foreground">
                             {linkedHf?.name ?? t("documents.letterheadDefault")}
@@ -565,7 +565,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                         </p>
                       );
                     })()}
-                    <span className="text-[11px] text-muted-foreground">{template.lastModified}</span>
+                    <span className="text-sm text-muted-foreground">{template.lastModified}</span>
                   </div>
                 </div>
               ))}
@@ -578,7 +578,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
                   <Plus className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-[12px] font-medium text-muted-foreground">{t("documents.createTemplate")}</p>
+                <p className="text-sm font-medium text-muted-foreground">{t("documents.createTemplate")}</p>
               </div>
             </div>
           )}
@@ -613,8 +613,8 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                       <FileText className="h-5 w-5 text-accent-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold text-foreground truncate">{doc.name}</p>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
                         <span className="text-primary/70">{doc.template_name || "Custom"}</span>
                       </p>
@@ -680,7 +680,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-[11px] text-muted-foreground">
+                <div className="p-8 text-center text-sm text-muted-foreground">
                   {documents.length === 0
                     ? "No documents yet. Create your first document using a template above."
                     : "No documents found matching your search."}
@@ -696,7 +696,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             </Button>
           </div>
         )}
-        <p className="text-[11px] text-muted-foreground mt-2">
+        <p className="text-sm text-muted-foreground mt-2">
           Showing {Math.min(visibleDocCount, filteredDocuments.length)} of {filteredDocuments.length} documents
         </p>
       </div>

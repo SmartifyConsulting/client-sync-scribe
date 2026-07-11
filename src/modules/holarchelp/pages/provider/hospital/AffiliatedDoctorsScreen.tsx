@@ -107,11 +107,11 @@ export default function AffiliatedDoctorsScreen() {
                   </div>
                   <div className="text-xs text-muted-foreground truncate">{specialty}</div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    {r.role_at_hospital && <Badge variant="secondary" className="text-[10px]">{r.role_at_hospital}</Badge>}
-                    {practiceNo && <Badge variant="outline" className="text-[10px]">MP {practiceNo}</Badge>}
+                    {r.role_at_hospital && <Badge variant="secondary" className="text-xs">{r.role_at_hospital}</Badge>}
+                    {practiceNo && <Badge variant="outline" className="text-xs">MP {practiceNo}</Badge>}
                   </div>
                   {mobile && (
-                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                       <Phone className="h-3 w-3" /> {mobile}
                     </div>
                   )}

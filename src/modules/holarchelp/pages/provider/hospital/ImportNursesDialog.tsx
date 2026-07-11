@@ -110,7 +110,7 @@ export function ImportNursesDialog({ hospitalId, onImported }: { hospitalId: str
                className="inline-flex items-center gap-1 mt-2 text-primary hover:underline">
               <Download className="h-3 w-3" /> Download CSV template
             </a>
-            <p className="text-[11px] text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               Nurses without an existing app account are added as <strong>inactive</strong>.
               They can still be selected on admission records; their Vulas accrue and become claimable once they sign up.
             </p>
@@ -139,7 +139,7 @@ export function ImportNursesDialog({ hospitalId, onImported }: { hospitalId: str
                         r.status === "matched" ? "default"
                         : r.status === "pending" ? "secondary"
                         : r.status === "error" ? "destructive" : "outline"
-                      } className="text-[10px]">{r.status}</Badge>
+                      } className="text-xs">{r.status}</Badge>
                       {r.reason && <span className="text-muted-foreground">{r.reason}</span>}
                     </span>
                   </div>

@@ -42,7 +42,7 @@ export default function IncidentTimelineScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
         <h1 className="text-2xl font-extrabold">{t("nav.incidentTimeline")}</h1>
       </header>
 
@@ -53,14 +53,14 @@ export default function IncidentTimelineScreen() {
               <Activity className="h-4 w-4 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-1.5">
-                  <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-bold uppercase ${tone(e.event_type)}`}>
+                  <span className={`rounded-full border px-1.5 py-0.5 text-xs font-bold uppercase ${tone(e.event_type)}`}>
                     {t(`eventType.${e.event_type}`, { defaultValue: e.event_type.replace(/_/g," ") })}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">{t("ambulance.incident")} #{e.incident_id.slice(0,8)}</span>
                 </p>
               </div>
-              <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{fmt(e.created_at)}</span>
-              <Link to={`/provider/hospital/incident/${e.incident_id}`} className="rounded-lg border bg-background px-2 py-1 text-[10px] font-semibold hover:bg-muted">
+              <span className="shrink-0 text-sm tabular-nums text-muted-foreground">{fmt(e.created_at)}</span>
+              <Link to={`/provider/hospital/incident/${e.incident_id}`} className="rounded-lg border bg-background px-2 py-1 text-xs font-semibold hover:bg-muted">
                 <ChevronRight className="h-3 w-3" />
               </Link>
             </li>

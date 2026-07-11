@@ -84,7 +84,7 @@ export function AddImagingDialog({ open, onOpenChange, admissionId, hospitalId }
         <div className="space-y-3">
           <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
           <div>
-            <Label className="text-[11px]">Modality</Label>
+            <Label className="text-sm">Modality</Label>
             <Select value={modality} onValueChange={setModality}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -97,15 +97,15 @@ export function AddImagingDialog({ open, onOpenChange, admissionId, hospitalId }
               </SelectContent>
             </Select>
           </div>
-          <div><Label className="text-[11px]">Body Region</Label><Input value={bodyRegion} onChange={(e) => setBodyRegion(e.target.value)} placeholder="e.g. Chest, Lumbar spine" /></div>
-          <div><Label className="text-[11px]">Performed Date</Label><Input type="date" value={performedAt} onChange={(e) => setPerformedAt(e.target.value)} /></div>
-          <div><Label className="text-[11px]">PACS Link</Label><Input value={pacsLink} onChange={(e) => setPacsLink(e.target.value)} placeholder="https://..." /></div>
+          <div><Label className="text-sm">Body Region</Label><Input value={bodyRegion} onChange={(e) => setBodyRegion(e.target.value)} placeholder="e.g. Chest, Lumbar spine" /></div>
+          <div><Label className="text-sm">Performed Date</Label><Input type="date" value={performedAt} onChange={(e) => setPerformedAt(e.target.value)} /></div>
+          <div><Label className="text-sm">PACS Link</Label><Input value={pacsLink} onChange={(e) => setPacsLink(e.target.value)} placeholder="https://..." /></div>
           <div>
-            <Label className="text-[11px]">Attach PDF Summary</Label>
+            <Label className="text-sm">Attach PDF Summary</Label>
             <Input type="file" accept="application/pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} disabled={uploading} />
-            {attachmentUrl && <p className="text-[10px] text-muted-foreground mt-1">Attached ✓</p>}
+            {attachmentUrl && <p className="text-xs text-muted-foreground mt-1">Attached ✓</p>}
           </div>
-          <div><Label className="text-[11px]">Summary</Label><Textarea value={summary} onChange={(e) => setSummary(e.target.value)} rows={2} /></div>
+          <div><Label className="text-sm">Summary</Label><Textarea value={summary} onChange={(e) => setSummary(e.target.value)} rows={2} /></div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>

@@ -132,15 +132,15 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
         <div className="rounded-lg border border-dashed border-border p-3 space-y-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
-              <Label className="text-[11px]">First name</Label>
+              <Label className="text-sm">First name</Label>
               <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="Jane" />
             </div>
             <div>
-              <Label className="text-[11px]">Last name</Label>
+              <Label className="text-sm">Last name</Label>
               <Input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
             </div>
             <div>
-              <Label className="text-[11px]">Username or email</Label>
+              <Label className="text-sm">Username or email</Label>
               <Input
                 value={usernameOrEmail}
                 onChange={(e) => setUsernameOrEmail(e.target.value)}
@@ -148,7 +148,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
               />
             </div>
             <div>
-              <Label className="text-[11px]">Relationship</Label>
+              <Label className="text-sm">Relationship</Label>
               <Input
                 value={relationship}
                 onChange={(e) => setRelationship(e.target.value)}
@@ -182,10 +182,10 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
                   )}
                 </p>
                 {(s.shared_with_first_name || s.shared_with_last_name) && (s.shared_with_username || s.shared_with_email) && (
-                  <p className="text-[10px] text-muted-foreground">{s.shared_with_username ?? s.shared_with_email}</p>
+                  <p className="text-xs text-muted-foreground">{s.shared_with_username ?? s.shared_with_email}</p>
                 )}
                 {!s.shared_with_user_id && (
-                  <p className="text-[11px] text-amber-600">Pending — they'll get access once they sign up.</p>
+                  <p className="text-sm text-amber-600">Pending — they'll get access once they sign up.</p>
                 )}
               </div>
               <Button

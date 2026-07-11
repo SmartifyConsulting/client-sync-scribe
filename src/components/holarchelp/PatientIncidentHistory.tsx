@@ -136,15 +136,15 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
                       <Badge className={`border-0 capitalize ${SEVERITY_CHIP[i.severity] ?? "bg-muted text-foreground"}`}>{i.severity}</Badge>
                     )}
                     <Badge variant="outline" className="capitalize">{i.status}</Badge>
-                    {i.manually_logged && <Badge variant="outline" className="text-[10px]">Manual</Badge>}
+                    {i.manually_logged && <Badge variant="outline" className="text-xs">Manual</Badge>}
                   </div>
                 </div>
                 <div className="text-muted-foreground">
                   Provider: <span className="text-foreground font-medium">{i.provider_name}</span>
                   {i.auto_assigned && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">AUTO</span>}
                 </div>
-                {i.notes && <div className="text-[11px]">{i.notes}</div>}
-                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                {i.notes && <div className="text-sm">{i.notes}</div>}
+                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
                   {i.accepted_at && <span>Accepted {format(parseISO(i.accepted_at), "HH:mm")}</span>}
                   {i.arrived_at && <span>Arrived {format(parseISO(i.arrived_at), "HH:mm")}</span>}
                   {i.resolved_at && <span>Resolved {format(parseISO(i.resolved_at), "HH:mm")}</span>}
@@ -161,11 +161,11 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
           <DialogHeader><DialogTitle>Log an emergency incident</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label className="text-[11px]">When did it happen?</Label>
+              <Label className="text-sm">When did it happen?</Label>
               <Input type="datetime-local" value={whenDate} onChange={(e) => setWhenDate(e.target.value)} />
             </div>
             <div>
-              <Label className="text-[11px]">Severity</Label>
+              <Label className="text-sm">Severity</Label>
               <Select value={severity} onValueChange={(v) => setSeverity(v as any)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -177,7 +177,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
               </Select>
             </div>
             <div>
-              <Label className="text-[11px]">What happened?</Label>
+              <Label className="text-sm">What happened?</Label>
               <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Brief description, location, outcome..." />
             </div>
           </div>

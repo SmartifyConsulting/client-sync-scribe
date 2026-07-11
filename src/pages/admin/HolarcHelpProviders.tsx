@@ -208,7 +208,7 @@ export default function HolarcHelpProviders() {
         <TableCell>
           <div className="flex items-center gap-2">
             <Switch checked={active} onCheckedChange={(v) => setActiveFlag(kind, r.id, v)} />
-            <span className={`text-[11px] font-semibold ${active ? "text-emerald-700" : "text-muted-foreground"}`}>
+            <span className={`text-sm font-semibold ${active ? "text-emerald-700" : "text-muted-foreground"}`}>
               {active ? "Active" : "Inactive"}
             </span>
           </div>
@@ -259,7 +259,7 @@ export default function HolarcHelpProviders() {
                     <AccordionItem key={t} value={t} className="border rounded-xl overflow-hidden">
                       <AccordionTrigger className="px-3 hover:no-underline">
                         <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${TIER_CHIP[t]}`}>
+                          <span className={`px-2 py-0.5 rounded-full text-sm font-semibold border ${TIER_CHIP[t]}`}>
                             {t.replace("_", " ").replace("tier", "Tier")}
                           </span>
                           <span className="text-xs text-muted-foreground">{tiers[t].length} {noun}</span>
@@ -292,7 +292,7 @@ export default function HolarcHelpProviders() {
 
   // Premium underline tab styling shared across this page
   const topTrigger =
-    "relative h-9 rounded-none border-0 bg-transparent px-3 text-[13px] font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary";
+    "relative h-9 rounded-none border-0 bg-transparent px-3 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary";
   const subTrigger = topTrigger;
   const flatTabsList = "h-auto w-full justify-start rounded-none border-b border-border bg-transparent p-0 gap-1";
 
@@ -327,7 +327,7 @@ export default function HolarcHelpProviders() {
                 value={providerSearch[k]}
                 onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
                 placeholder={`Search ${noun}…`}
-                className="h-8 w-48 pl-7 text-[12px]"
+                className="h-8 w-48 pl-7 text-sm"
               />
             </div>
             <div className="inline-flex rounded-md border border-[hsl(var(--admin-border-strong))] bg-[hsl(var(--admin-surface))] p-0.5">
@@ -335,7 +335,7 @@ export default function HolarcHelpProviders() {
                 <button
                   key={s}
                   onClick={() => setStatus(s)}
-                  className={`px-2.5 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
+                  className={`px-2.5 py-1 text-sm font-medium capitalize rounded-sm transition-colors ${
                     status === s
                       ? "bg-[hsl(var(--admin-accent))] text-white"
                       : "text-[hsl(var(--admin-text-secondary))] hover:text-[hsl(var(--admin-text-primary))]"
@@ -346,7 +346,7 @@ export default function HolarcHelpProviders() {
               ))}
             </div>
             {providerKindNeedsAdd(k) && (
-              <Button size="sm" className="h-8 px-3 text-[12px]" onClick={() => { setTab(k); setChooserOpen(true); }}>
+              <Button size="sm" className="h-8 px-3 text-sm" onClick={() => { setTab(k); setChooserOpen(true); }}>
                 <Plus className="mr-1 h-3.5 w-3.5" />Add
               </Button>
             )}
@@ -587,7 +587,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
             }))}
           />
           {form.latitude != null && form.longitude != null && (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Pinned at {Number(form.latitude).toFixed(4)}, {Number(form.longitude).toFixed(4)}
             </p>
           )}
@@ -621,7 +621,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
               </SelectContent>
             </Select>
           </div>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Note: providers control their own "accepting patients" status from their provider view.
           </p>
         </div>
@@ -749,7 +749,7 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
           </div>
         )}
       </div>
-      <p className="text-[11px] text-muted-foreground">Selecting a result auto-fills city, country, phone, and pins the location on the map.</p>
+      <p className="text-sm text-muted-foreground">Selecting a result auto-fills city, country, phone, and pins the location on the map.</p>
     </div>
   );
 }

@@ -223,6 +223,7 @@ const completeSession = async (
         invoice: summaryData?.invoice || null,
         referral: summaryData?.referral || null,
         hospital_admission: summaryData?.hospital_admission || null,
+        follow_up_appointment: summaryData?.follow_up_appointment || null,
       };
 
       let sessionId = id;

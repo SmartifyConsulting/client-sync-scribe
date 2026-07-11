@@ -41,7 +41,7 @@ export function NursePicker({ hospitalId, value, onChange, required, label = "Nu
 
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px]">
+      <Label className="text-sm">
         {label}
         {required && " *"}
       </Label>

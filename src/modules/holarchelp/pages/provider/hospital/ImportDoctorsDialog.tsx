@@ -137,7 +137,7 @@ export function ImportDoctorsDialog({ hospitalId, onImported }: { hospitalId: st
                         r.status === "matched" ? "default"
                         : r.status === "pending" ? "secondary"
                         : r.status === "error" ? "destructive" : "outline"
-                      } className="text-[10px]">{r.status}</Badge>
+                      } className="text-xs">{r.status}</Badge>
                       {r.reason && <span className="text-muted-foreground">{r.reason}</span>}
                     </span>
                   </div>

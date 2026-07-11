@@ -129,6 +129,7 @@ IMPORTANT GUIDELINES:
 - For prescriptions: extract each medication with name, dosage, frequency, duration, instructions
 - For invoices: extract service descriptions and amounts
 - For referrals: extract specialist_type, doctor_name (if mentioned), reason, urgency
+- For follow-up appointment: if the doctor and patient agree on a next-visit date OR the patient says when they want to be seen again, extract the follow-up. ALWAYS return follow_up_date as an ISO calendar date (YYYY-MM-DD). If both an explicit calendar date (e.g. "the 23rd of July") AND a relative phrase ("in two weeks") appear, PREFER THE EXPLICIT CALENDAR DATE. If only a relative phrase is given ("in two weeks", "next Tuesday"), resolve it against today's local date below. Extract follow_up_time as HH:MM (24h) if a time is stated; otherwise omit.
 - Only include a document type if it was CLEARLY discussed in the session
 - Dates should be in YYYY-MM-DD format when possible
 - Today is ${localDow ? localDow + ", " : ""}${today}${clientTimezone ? ` (${clientTimezone})` : ""}. Resolve "today", "tomorrow", weekday names (e.g. "until Monday"), and partial dates like "3 July" against this local calendar date. NEVER shift the user's spoken date by a day to convert to UTC.
@@ -255,6 +256,16 @@ Respond using the provided tool/function schema.`,
                     },
                     required: ["tasks"],
                   },
+                  follow_up_appointment: {
+                    type: "object",
+                    description: "Follow-up appointment details if a next visit was agreed. Null/omit if not discussed.",
+                    properties: {
+                      follow_up_date: { type: "string", description: "ISO calendar date YYYY-MM-DD for the follow-up. Prefer explicit date mentioned in transcript over relative phrases." },
+                      follow_up_time: { type: "string", description: "24-hour time HH:MM if a time was stated. Omit otherwise." },
+                      notes: { type: "string", description: "Any context: reason for follow-up, patient's stated preference, etc." },
+                    },
+                    required: ["follow_up_date"],
+                  },
                 },
                 required: ["summary", "action_points"],
                 additionalProperties: false,
@@ -290,6 +301,15 @@ Respond using the provided tool/function schema.`,
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       const result = JSON.parse(toolCall.function.arguments);
+      // Sanitize follow-up date: must be ISO YYYY-MM-DD and >= today
+      if (result?.follow_up_appointment) {
+        const fu = result.follow_up_appointment;
+        const iso = typeof fu.follow_up_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fu.follow_up_date) ? fu.follow_up_date : null;
+        if (!iso || iso < today) {
+          console.warn("Dropping invalid/past follow_up_date:", fu.follow_up_date);
+          delete result.follow_up_appointment;
+        }
+      }
       console.log("Summary generated:", result.summary?.substring(0, 100) + "...");
       console.log("Action points:", result.action_points?.length);
       console.log("Medical certificate detected:", !!result.medical_certificate);
@@ -298,6 +318,7 @@ Respond using the provided tool/function schema.`,
       console.log("Referral detected:", !!result.referral);
       console.log("Hospital admission detected:", !!result.hospital_admission);
       console.log("Patient tasks detected:", !!result.patient_tasks);
+      console.log("Follow-up detected:", !!result.follow_up_appointment, result.follow_up_appointment?.follow_up_date);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

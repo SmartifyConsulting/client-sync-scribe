@@ -230,7 +230,7 @@ export default function TelematicsScreen() {
             <Radar className="h-5 w-5 text-primary" /> {t("telematics.title")}
           </h1>
         </div>
-        <span className="text-[11px] text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           {loading
             ? t("common.loading")
             : `${pings.length.toLocaleString()} ${t("telematics.pings")} · ${byDriver.size} ${t("telematics.drivers")}`}
@@ -256,13 +256,13 @@ export default function TelematicsScreen() {
                     <div>
                       <p className="font-semibold">{d.name}</p>
                       {d.vehicle && (
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           {t("telematics.vehicle")}: {d.vehicle}
                         </p>
                       )}
                     </div>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${
                         d.moving
                           ? "bg-emerald-500/15 text-emerald-700"
                           : "bg-warning/15 text-warning"
@@ -271,7 +271,7 @@ export default function TelematicsScreen() {
                       {d.moving ? t("telematics.moving") : t("telematics.stopped")}
                     </span>
                   </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" /> {d.last.lat.toFixed(4)}, {d.last.lng.toFixed(4)}
                     </span>
@@ -305,12 +305,12 @@ export default function TelematicsScreen() {
                     <span className="font-semibold">
                       {tr.name}
                       {tr.vehicle && (
-                        <span className="ml-2 text-[11px] font-normal text-muted-foreground">
+                        <span className="ml-2 text-sm font-normal text-muted-foreground">
                           · {tr.vehicle}
                         </span>
                       )}
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-sm text-muted-foreground">
                       {(tr.distanceM / 1000).toFixed(1)} km · max {Math.round(tr.maxSpeed)} km/h ·{" "}
                       {tr.stops.length} {tr.stops.length === 1 ? t("telematics.stop") : t("telematics.stops")} ·{" "}
                       {tr.pingsCount} {t("telematics.pings")}
@@ -326,7 +326,7 @@ export default function TelematicsScreen() {
                       </p>
                     ) : (
                       <table className="w-full text-left">
-                        <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        <thead className="text-xs uppercase tracking-wider text-muted-foreground">
                           <tr>
                             <th className="py-1">{t("telematics.arrived")}</th>
                             <th>{t("telematics.departed")}</th>
