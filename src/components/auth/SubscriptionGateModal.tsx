@@ -43,7 +43,7 @@ export function SubscriptionGateModal() {
           Subscribe Now
         </Button>
 
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           You can manage your subscription anytime from Settings.
         </p>
       </div>

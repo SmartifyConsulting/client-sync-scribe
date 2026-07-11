@@ -101,12 +101,12 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
         <DialogHeader><DialogTitle>Log a hospital admission</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label className="text-[11px]">Admission title (e.g. "Knee surgery", "Pneumonia")</Label>
+            <Label className="text-sm">Admission title (e.g. "Knee surgery", "Pneumonia")</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Short label for this admission" />
           </div>
 
           <div>
-            <Label className="text-[11px]">Hospital</Label>
+            <Label className="text-sm">Hospital</Label>
             {!useFreeText ? (
               <Select
                 value={hospitalId}
@@ -142,24 +142,24 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[11px]">Admission date</Label>
+              <Label className="text-sm">Admission date</Label>
               <Input type="date" value={admDate} onChange={(e) => setAdmDate(e.target.value)} />
             </div>
             <div>
-              <Label className="text-[11px]">Discharge date</Label>
+              <Label className="text-sm">Discharge date</Label>
               <Input type="date" value={discDate} onChange={(e) => setDiscDate(e.target.value)} />
             </div>
           </div>
 
           <div>
-            <Label className="text-[11px]">Reason / diagnosis</Label>
+            <Label className="text-sm">Reason / diagnosis</Label>
             <Textarea rows={2} value={diagnosis} onChange={(e) => setDiagnosis(e.target.value)} />
           </div>
 
           {/* Codes section */}
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-            <Label className="text-[11px] font-semibold">Diagnosis / procedure codes (ICD-10, CPT, etc.)</Label>
-            <p className="text-[10px] text-muted-foreground mb-2">Add a code and a matching description.</p>
+            <Label className="text-sm font-semibold">Diagnosis / procedure codes (ICD-10, CPT, etc.)</Label>
+            <p className="text-xs text-muted-foreground mb-2">Add a code and a matching description.</p>
             {codes.length > 0 && (
               <ul className="space-y-1.5 mb-2">
                 {codes.map((c, i) => (

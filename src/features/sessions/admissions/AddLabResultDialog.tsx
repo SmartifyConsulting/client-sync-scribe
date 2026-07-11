@@ -88,19 +88,19 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId, hospitalId
         <DialogHeader><DialogTitle>Add Lab Result</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
-          <div><Label className="text-[11px]">Test Name *</Label><Input value={testName} onChange={(e) => setTestName(e.target.value)} /></div>
+          <div><Label className="text-sm">Test Name *</Label><Input value={testName} onChange={(e) => setTestName(e.target.value)} /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-[11px]">Result</Label><Input value={resultValue} onChange={(e) => setResultValue(e.target.value)} /></div>
-            <div><Label className="text-[11px]">Units</Label><Input value={units} onChange={(e) => setUnits(e.target.value)} /></div>
+            <div><Label className="text-sm">Result</Label><Input value={resultValue} onChange={(e) => setResultValue(e.target.value)} /></div>
+            <div><Label className="text-sm">Units</Label><Input value={units} onChange={(e) => setUnits(e.target.value)} /></div>
           </div>
-          <div><Label className="text-[11px]">Reference Range</Label><Input value={refRange} onChange={(e) => setRefRange(e.target.value)} /></div>
-          <div><Label className="text-[11px]">Result Date</Label><Input type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)} /></div>
+          <div><Label className="text-sm">Reference Range</Label><Input value={refRange} onChange={(e) => setRefRange(e.target.value)} /></div>
+          <div><Label className="text-sm">Result Date</Label><Input type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)} /></div>
           <div>
-            <Label className="text-[11px]">Attach PDF</Label>
+            <Label className="text-sm">Attach PDF</Label>
             <Input type="file" accept="application/pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} disabled={uploading} />
-            {attachmentUrl && <p className="text-[10px] text-muted-foreground mt-1 truncate">Attached ✓</p>}
+            {attachmentUrl && <p className="text-xs text-muted-foreground mt-1 truncate">Attached ✓</p>}
           </div>
-          <div><Label className="text-[11px]">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
+          <div><Label className="text-sm">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>

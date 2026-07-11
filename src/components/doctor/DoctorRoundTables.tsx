@@ -118,7 +118,7 @@ export function DoctorRoundTables() {
             <div className="flex items-center gap-2">
               <p className="font-medium text-sm text-foreground truncate">{entry.patientName}</p>
               {entry.unreadCount > 0 && (
-                <Badge variant="destructive" className="text-[10px] h-5 px-1.5">
+                <Badge variant="destructive" className="text-xs h-5 px-1.5">
                   {entry.unreadCount} new
                 </Badge>
               )}

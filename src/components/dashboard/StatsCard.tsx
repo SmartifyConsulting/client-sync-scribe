@@ -35,12 +35,12 @@ export function StatsCard({
     >
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <p className="text-[10px] md:text-xs font-medium text-muted-foreground truncate">{title}</p>
+          <p className="text-xs md:text-xs font-medium text-muted-foreground truncate">{title}</p>
           <p className="text-base md:text-xl font-bold text-foreground tracking-tight truncate">{value}</p>
           {change && (
             <p
               className={cn(
-                "text-[8px] md:text-[10px] font-medium",
+                "text-[8px] md:text-xs font-medium",
                 trend === "up" && "text-success",
                 trend === "down" && "text-destructive",
                 trend === "neutral" && "text-muted-foreground"

@@ -153,7 +153,7 @@ export function RecentActivity() {
                       </p>
                     )}
                   </div>
-                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {relativeTimeLabel(activity.timeIso)}
                   </span>
                 </div>

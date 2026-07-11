@@ -104,7 +104,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
             <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
               <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
             </div>
-            <p className="text-[11px] uppercase tracking-wider text-primary font-semibold mb-1">
+            <p className="text-sm uppercase tracking-wider text-primary font-semibold mb-1">
               Last step · Save these codes
             </p>
             <h1 className="text-lg sm:text-xl font-semibold text-foreground">

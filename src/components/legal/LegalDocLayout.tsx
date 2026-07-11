@@ -120,7 +120,7 @@ export function LegalDocLayout({
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-wider text-muted-foreground leading-none">Legal Document</p>
+              <p className="text-sm uppercase tracking-wider text-muted-foreground leading-none">Legal Document</p>
               <h1 className="text-sm md:text-base font-semibold text-foreground truncate">{title}</h1>
             </div>
           </div>
@@ -177,7 +177,7 @@ export function LegalDocLayout({
             {/* TOC */}
             {toc.length > 1 && (
               <nav className="no-print mb-8 rounded-md border border-border bg-muted/30 p-4">
-                <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground mb-2">
+                <p className="text-sm uppercase tracking-wider font-semibold text-muted-foreground mb-2">
                   Contents
                 </p>
                 <ul className="list-none space-y-1 text-sm">

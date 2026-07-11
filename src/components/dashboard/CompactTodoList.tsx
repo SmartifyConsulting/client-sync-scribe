@@ -401,10 +401,10 @@ export function CompactTodoList() {
         {/* Tabs */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
           <TabsList className="h-7 w-full bg-primary p-0.5">
-            <TabsTrigger value="active" className="text-[11px] h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger value="active" className="text-sm h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               {t("doctorDashboard.active")} ({activeCount})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="text-[11px] h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger value="completed" className="text-sm h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               {t("doctorDashboard.done")} ({completedCount})
             </TabsTrigger>
           </TabsList>
@@ -417,7 +417,7 @@ export function CompactTodoList() {
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
             </div>
           ) : filteredTodos.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground text-center py-3">
+            <p className="text-sm text-muted-foreground text-center py-3">
               {filter === "active" ? t("doctorDashboard.noActiveTasks") : t("doctorDashboard.noCompletedTasks")}
             </p>
           ) : (
@@ -437,7 +437,7 @@ export function CompactTodoList() {
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && saveEdit(todo.id)}
-                      className="h-6 text-[11px] border-border px-1.5"
+                      className="h-6 text-sm border-border px-1.5"
                       autoFocus
                     />
                     <button onClick={() => saveEdit(todo.id)} className="text-success hover:text-success/80">
@@ -463,7 +463,7 @@ export function CompactTodoList() {
                     {todo.is_auto_executed && !todo.completed && (
                       <button
                         onClick={() => toggleComplete(todo.id)}
-                        className="flex items-center gap-0.5 text-[10px] font-medium text-success hover:text-success/80 shrink-0 border border-success/30 rounded px-1 py-0.5"
+                        className="flex items-center gap-0.5 text-xs font-medium text-success hover:text-success/80 shrink-0 border border-success/30 rounded px-1 py-0.5"
                       >
                         <ShieldCheck className="h-4 w-4" />
                       </button>
