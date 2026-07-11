@@ -1,103 +1,99 @@
-# Typography Consistency Pass + Session AI Fixes
+# To-Do List Row Redesign
 
-## Part A — Typography Normalization
+Restyle the task rows in **`src/pages/TodoList.tsx`** (full page) and **`src/components/dashboard/CompactTodoList.tsx`** (dashboard widget) so every task lives on one line, leads with a task-type icon, and uses compact icon-prefixed metadata chips instead of long sentences. Inspired by Microsoft To Do / ClickUp / Outlook.
 
-### Goal
-Every screen, tab, Quick Action editor, modal/dialog, and button should match the font scale used in the **Patient Overview tab** (Tailwind `text-sm` = 14px body, `text-base` = 16px card titles, `text-xs` reserved for true meta/eyebrow labels). Eliminate the pervasive `text-[10px] / text-[11px] / text-[12px]` scaling and the shrunken Session Detail / Delete button styling.
+## 1. New shared helper: `src/lib/todoDisplay.ts`
 
-### 1. MobileHeader — Holarc logo alignment
-`src/components/layout/MobileHeader.tsx`
-- Vertically center-align the logo with the header row (bump padding to `py-4`, add `self-center mt-0.5` on `<img>`) so the logo sits on the visual midline of adjacent screen headings.
+Single source of truth so both list surfaces render identically.
 
-### 2. SessionDetail page (attached screenshot)
-`src/pages/SessionDetail.tsx`
-- Back link `text-[11px]` → `text-sm`
-- Subtitle row `text-[11px]` → `text-sm`; status pill `text-[10px]` → `text-xs`
-- **Delete Session button**: drop `text-[11px]`, use default Button `size="sm"` typography so it matches other primary/destructive buttons in the app
-- Quick Actions title `text-[12px]` → `text-base`; Quick Action buttons `text-[11px] h-9` → `text-sm h-10`
-- **AI Summary card** body `text-[12px]` → `text-sm leading-relaxed` (fixes tiny post-transcription summary); title → `text-base`; subtitle → `text-sm`
-- Session Notes / Private Notes / Session Documents / Action Points cards: titles → `text-base`, subtitles → `text-sm`, body/transcript lines `text-[12px]` → `text-sm`
-- Section eyebrows (`AUDIO / TRANSCRIPT / NOTES`) stay uppercase but move to `text-xs`
-- Selects/inline buttons: `text-[11px] h-8` → `text-sm h-9`
+Exports:
+- `type TodoKind = "invoice" | "prescription" | "appointment" | "follow_up" | "recommendation" | "medical_certificate" | "referral" | "laboratory" | "email" | "phone" | "meeting" | "payment" | "claim" | "reminder" | "urgent" | "task"`
+- `getTodoDisplay(todo)` → `{ kind, icon: LucideIcon, shortLabel: string, patient?: string, date?: string, time?: string, duration?: string }`
 
-### 3. Quick Action editors
-`src/features/sessions/components/` — `PrescriptionEditor`, `InvoiceEditor`, `MedicalCertificateEditor`, `ReferralLetterEditor`, `GeneralLetterEditor`, `HospitalAdmissionEditor`, `SessionNotepad`, `FollowUpAppointmentDialog`, `StarRatingDialog`, `VisitCategoryDialog`, `TranscriptionReviewDialogs`
-- Replace every `text-[10px]/[11px]/[12px]` on labels, inputs, helper text with `text-sm` (or `text-xs` for true meta captions only).
+Logic:
+- Detect kind by matching the stored English title (same regexes as `translateTodoTitle.ts`) plus `task_type` and `template_name` hints (e.g. `Medical Certificate`, `Referral`, `Laboratory`, `Follow-up`).
+- Shorten label: `"Review Invoice — Sharon Kennedy"` → `"Invoice"`; `"Schedule appointment with Sarah Johnson on 2026-06-08 (30 min)"` → `"Appointment"`. Use `t("todo.nouns.*")` for i18n so we keep translations working.
+- Extract `patient` from `todo.patient_name`, and if absent, from the tail of the title after `—` / `-` / `with` / `for`.
+- Extract `date`/`time`/`duration` from `todo.due_date` first, else parse from the title (`YYYY-MM-DD`, `HH:mm`, `(30 min)`). Format date as `d MMM` and time as `HH:mm` via `date-fns`.
+- Icon map (lucide-react, no emoji glyphs — keeps design-token color control):
+  `Receipt` invoice, `Pill` prescription, `CalendarDays` appointment, `Phone` follow-up, `FileText` recommendation, `Stethoscope` medical_certificate, `FlaskConical` laboratory, `ArrowUpRight` referral, `Mail` email, `Users` meeting, `CreditCard` payment, `Hospital` claim, `Bell` reminder, `AlertTriangle` urgent, `CheckSquare` fallback task.
 
-### 4. Admissions dialogs
-`src/features/sessions/admissions/*` (AddVitals, AddMedication, AddLabResult, AddImaging, ManualLogAdmission, UploadAdmission, AdmissionsView)
-- All `<Label className="text-[11px]">` → `text-sm`; `text-[10px]` helper lines → `text-xs`.
+## 2. New row component: `src/components/todos/TodoRow.tsx`
 
-### 5. Global modal/dialog sweep
-Normalize `text-[10-12]px` across:
-- `src/components/admissions/**`, `src/components/doctor/**`, `src/components/auth/**`
-- `src/components/dashboard/**`, `src/components/feedback/ReportFixSheet.tsx`
-- `src/components/legal/LegalDocLayout.tsx`, `src/components/holarchelp/PatientIncidentHistory.tsx`
-- Patient header stat pills in `src/pages/PatientProfile.tsx` (`text-[10px]` → `text-xs`)
+One flex row, `text-sm` (14px, matching Last-Session briefing text), aligned via fixed-width columns:
 
-**Do NOT touch** `src/components/ui/*` shadcn primitives — those are baseline library sizes.
+```
+[checkbox] [kind icon] [Short label ..............] [👤 name] [📅 4 Jun] [🕗 08:00] [⏱ 30 min]  [👁] [⋮]
+```
 
-### 6. Verification
-- `rg -n "text-\[1[0-2]px\]" src/pages src/features src/components/{admissions,dashboard,doctor,auth,feedback,holarchelp,legal}` → near-zero hits.
-- Playwright screenshots at 1280×1800 for: Session Detail, Overview tab, Documents tab, each Quick Action modal, AddVitals dialog. Confirm body copy matches Overview and Delete Session matches other buttons.
+Layout details:
+- Container: `flex items-center gap-3 py-2 px-2 rounded-md hover:bg-muted/40 group text-sm`
+- Kind icon: `h-4 w-4 text-primary shrink-0`
+- Label: `flex-1 min-w-0 truncate font-medium` (ellipsis only when unavoidable)
+- Meta chips (only rendered when present): `inline-flex items-center gap-1 text-muted-foreground shrink-0` — `User`, `CalendarDays`, `Clock`, `Timer` icons at `h-3.5 w-3.5`
+- Actions cluster (`shrink-0`):
+  - `Eye` preview button — only when `todo.document_id`
+  - Overflow `MoreVertical` → shadcn `DropdownMenu` with: Edit, Send (only if `document_id`), Duplicate, Mark complete / Reopen, Delete (destructive). Removes today's separate Approve / Send / Edit / Delete buttons.
+- Priority: keep priority as a small colored dot on the checkbox side (`h-2 w-2 rounded-full` in low/med/high tokens) so a chip isn't needed on the row; full picker moves into the overflow menu → "Priority" submenu.
+- AI badge: replace the `AI` pill + `Sparkles` with a single `Sparkles` icon at row start when `is_auto_executed`, tooltip "AI-generated".
+- Edit mode: existing inline `Input` + save/cancel preserved.
 
-### Mapping rule
-| Old | New |
-|---|---|
-| `text-[10px]` | `text-xs` (eyebrow/badge only) |
-| `text-[11px]` | `text-sm` (body/labels), `text-xs` (meta) |
-| `text-[12px]` | `text-sm` |
-| Section titles `text-[12px] font-semibold` | `text-base font-semibold` |
-| Inputs/selects `h-8` paired with tiny text | `h-9` |
+Responsive (Tailwind):
+- `< sm`: hide `User` icon (leave name text), hide duration, then hide time. Label never hides.
+- `< md`: hide duration chip only.
+- `≥ md`: show everything.
+- Implemented with `hidden sm:inline-flex` / `hidden md:inline-flex` on the chip wrappers.
 
----
+Props: `{ todo, onToggle, onEdit, onDelete, onDuplicate, onSend, onPreview, onOpenPriority, isEditing, editText, setEditText, saveEdit, cancelEdit, sending, previewing }`.
 
-## Part B — Session AI Fixes
+## 3. Wire into pages
 
-### B1. Follow-up appointment date extraction bug
-**Symptom:** Transcript clearly says "in two weeks' time, let's say around the 23rd of July" but the AI does not schedule the appointment on that correct date.
+**`src/pages/TodoList.tsx`**
+- Replace the entire row `<div>` (lines ~511-598 inside the grouped-date map) with `<TodoRow …/>`.
+- Keep grouping, collapsibles, filter tabs, add-task form untouched.
+- Add `duplicateTask(todo)` handler (insert copy of `title`/`priority`/`patient_id` with `status: 'pending'`).
+- Remove now-unused per-row imports (`Flag`, priority Badge chip, `Calendar` inline formatter block). Keep priority dropdown by wiring `onOpenPriority` to existing `updatePriority`.
 
-**Where to fix:** `supabase/functions/summarize-session/index.ts` (and any downstream `extract-followup` / appointment-creation edge function or client code that parses the follow-up).
+**`src/components/dashboard/CompactTodoList.tsx`**
+- Replace the `filteredTodos.map` row body (lines ~424-518) with `<TodoRow compact …/>`.
+- Add a `compact` prop to `TodoRow` that:
+  - Uses `text-sm` still (design goal is bigger, not smaller) but drops `py-2` to `py-1.5`.
+  - Hides date+duration chips by default on the dashboard (compact real estate), keeps patient + time.
+- Ensure the widget's container isn't force-shrinking children (`min-w-0` on the row already handles truncation).
 
-**Changes:**
-1. Update the extraction prompt to:
-   - Return an ISO date (`YYYY-MM-DD`) for `follow_up_date`, not a relative phrase.
-   - Prefer an explicit calendar date mentioned in the transcript (e.g. "the 23rd of July") over relative phrases ("in two weeks") when both are present. If only a relative phrase exists, resolve it against `sessionDateISO` passed in from the client.
-   - Include the current session date + timezone in the prompt context so relative dates resolve deterministically.
-2. Pass `clientDate` + `clientTimezone` from `useSessions.ts` into the summarize-session invocation payload (mirror the pattern already used in `process-todo-actions`).
-3. Add a Zod/JSON-schema validator that rejects non-ISO date output and re-prompts once.
-4. On the client, when creating the follow-up appointment, use the ISO date directly instead of re-parsing the phrase.
-5. Add a targeted unit-style test transcript with the exact "23rd of July" phrasing via `supabase--curl_edge_functions` and confirm the returned `follow_up_date` = the correct ISO date.
+## 4. i18n additions (`src/i18n/locales/en.json` + existing locales)
 
-### B2. AI diagnostic suggestion during recording (not after)
-**Current behaviour:** Diagnostic suggestion is generated only after `summarize-session` runs on stop, so the doctor sees it after they have already dictated prescription and diagnosis — too late to be useful.
+Add:
+- `todo.kinds.invoice` = "Invoice"
+- `todo.kinds.prescription` = "Prescription"
+- `todo.kinds.appointment` = "Appointment"
+- `todo.kinds.followUp` = "Follow-up"
+- `todo.kinds.recommendation` = "Recommendation"
+- `todo.kinds.medicalCertificate` = "Medical certificate"
+- `todo.kinds.referral` = "Referral"
+- `todo.kinds.laboratory` = "Laboratory"
+- `todo.kinds.email` = "Email"
+- `todo.kinds.phone` = "Phone call"
+- `todo.kinds.meeting` = "Meeting"
+- `todo.kinds.payment` = "Payment"
+- `todo.kinds.claim` = "Claim"
+- `todo.kinds.reminder` = "Reminder"
+- `todo.kinds.urgent` = "Urgent"
+- `todo.kinds.task` = "Task"
+- `todo.actions.edit/send/duplicate/delete/markComplete/reopen/priority`
 
-**Target behaviour:** Stream an evolving diagnostic suggestion while the recording is in progress, updating every ~20 seconds of new transcript.
+Non-English locales get English fallback initially; translations follow the existing `translateTodoTitle` pattern.
 
-**Changes:**
-1. New edge function `supabase/functions/live-diagnostic-hint/index.ts`:
-   - Input: rolling transcript chunk + patient context (age, sex, active meds, chronic conditions).
-   - Model: `google/gemini-3-flash-preview` via Lovable AI Gateway.
-   - Output: short structured JSON `{ suggestion, differentials[], red_flags[] }`.
-   - Cheap/fast: single prompt, no tools, ~200 token cap.
-2. Client hook change in `src/hooks/useAudioRecording.ts` (or a new `useLiveDiagnosticHint.ts`):
-   - Every ~20s during recording, if partial transcript grew by ≥ N characters, debounce-invoke `live-diagnostic-hint` with the accumulated transcript so far.
-   - Cancel in-flight request when a newer one is queued.
-   - Stop polling once `stopRecording()` fires (final summary takes over).
-3. UI surface on `src/pages/Sessions.tsx` recording panel:
-   - Add a subtle "AI hint" card (collapsed by default) that live-updates with the latest suggestion + differentials, styled with the same Overview font scale (`text-sm` body, `text-base` title).
-   - Show a small "updating…" pulse while a request is in flight.
-4. Guardrail: only fire if visit category is set and patient consent to AI processing is present (same gate the summarizer already uses).
-5. Persist the last live hint into the session record so the completed session still shows what was suggested during the visit.
-6. Cost note: acceptable because each call is small and infrequent (~3–6 calls per typical 5-min session).
+## 5. Verification
 
-### B3. Verification for Part B
-- `supabase--curl_edge_functions` against `summarize-session` with a canned transcript containing "in two weeks' time, let's say around the 23rd of July" and session date 2026-07-11 → assert `follow_up_date` = `2026-07-23`.
-- Manually start a recording in the preview, speak a symptom, wait 25s → confirm the live diagnostic hint card appears and updates.
-- Stop the recording → confirm the auto-document sequence still runs and Vula awarding is last (regression check on the earlier fix).
+- `bunx tsgo` for type check.
+- Playwright script at `/tmp/browser/todo-redesign/` logs in with injected Supabase session, navigates `/todo-list` and `/doctor-dashboard`, screenshots at 1280×1800 and at 640×1200 to confirm:
+  - Every row is single-line (`overflow: hidden` + no wrap).
+  - Font renders at 14px (`text-sm`) matching the briefing.
+  - Overflow menu opens with the five items.
+  - At 640px width the User icon and duration chip disappear as specified.
 
 ## Out of scope
-- No color/spacing/layout changes.
-- No changes to shadcn UI primitives.
-- No copy changes beyond the AI prompt updates required for B1.
-- No changes to Vula reward rules or document templates.
+- No changes to backend, RLS, edge functions, or `todos` schema.
+- No changes to add-task form, tabs, grouping, or AI processing.
+- Patient portal `PatientTasks.tsx` unchanged (separate reward-focused UX).
