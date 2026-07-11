@@ -319,7 +319,7 @@ export default function SessionDetail() {
         <div className="flex items-center gap-2">
           <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="gap-2 text-sm">
+            <Button variant="destructive" size="sm" className="gap-2">
               <Trash2 className="h-4 w-4" />
               Delete Session
             </Button>
@@ -344,7 +344,7 @@ export default function SessionDetail() {
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-primary bg-card p-6">
-          <h2 className="text-sm font-semibold text-foreground mb-4">Quick Actions</h2>
+          <h2 className="text-base font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
               className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
@@ -408,7 +408,7 @@ export default function SessionDetail() {
                 <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-foreground">AI Summary</h2>
+                <h2 className="text-base font-semibold text-foreground">AI Summary</h2>
                 <p className="text-sm text-muted-foreground">Generated from session content</p>
               </div>
             </div>
@@ -447,7 +447,7 @@ export default function SessionDetail() {
                 <Volume2 className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-foreground">Session Notes</h2>
+                <h2 className="text-base font-semibold text-foreground">Session Notes</h2>
                 <p className="text-sm text-muted-foreground">Audio, transcript, and manual notes from the consultation</p>
               </div>
             </div>
@@ -549,7 +549,7 @@ export default function SessionDetail() {
               <Lock className="h-4 w-4 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">Private Notes</h2>
+              <h2 className="text-base font-semibold text-foreground">Private Notes</h2>
               <p className="text-sm text-muted-foreground">Only visible to you. Not shared with the patient or other doctors.</p>
             </div>
           </div>
@@ -612,7 +612,7 @@ export default function SessionDetail() {
               <FileText className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">Session Documents</h2>
+              <h2 className="text-base font-semibold text-foreground">Session Documents</h2>
               <p className="text-sm text-muted-foreground">Auto-generated documents from this session</p>
             </div>
           </div>
@@ -661,7 +661,7 @@ export default function SessionDetail() {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">Action Points / TO-DO</h2>
+              <h2 className="text-base font-semibold text-foreground">Action Points / TO-DO</h2>
               <p className="text-sm text-muted-foreground">Tasks extracted from this session</p>
             </div>
           </div>
