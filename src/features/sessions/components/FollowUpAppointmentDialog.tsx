@@ -17,6 +17,8 @@ interface FollowUpAppointmentDialogProps {
   patientId: string;
   patientUserId?: string | null;
   patientName?: string;
+  suggestedDate?: string; // ISO YYYY-MM-DD from AI extraction
+  suggestedTime?: string; // HH:MM 24h from AI extraction
   onDone: () => void;
 }
 
@@ -37,12 +39,26 @@ function generateTimeSlots() {
 }
 const ALL_SLOTS = generateTimeSlots();
 
+function parseIsoDateLocal(iso?: string): Date | undefined {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return undefined;
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export function FollowUpAppointmentDialog({
-  open, onOpenChange, doctorId, doctorName, patientId, patientUserId, patientName, onDone,
+  open, onOpenChange, doctorId, doctorName, patientId, patientUserId, patientName, suggestedDate, suggestedTime, onDone,
 }: FollowUpAppointmentDialogProps) {
   const { toast } = useToast();
-  const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 7));
-  const [slot, setSlot] = useState<{ hour: number; minute: number; label: string } | null>(null);
+  const initialDate = parseIsoDateLocal(suggestedDate) || addDays(new Date(), 7);
+  const initialSlot = (() => {
+    if (!suggestedTime || !/^\d{2}:\d{2}$/.test(suggestedTime)) return null;
+    const [h, m] = suggestedTime.split(":").map(Number);
+    const snappedM = m < 30 ? 0 : 30;
+    const match = ALL_SLOTS.find(s => s.hour === h && s.minute === snappedM);
+    return match || null;
+  })();
+  const [date, setDate] = useState<Date | undefined>(initialDate);
+  const [slot, setSlot] = useState<{ hour: number; minute: number; label: string } | null>(initialSlot);
   const [busy, setBusy] = useState<{ start: Date; end: Date }[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
