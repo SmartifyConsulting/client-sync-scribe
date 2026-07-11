@@ -7,7 +7,8 @@ import { TopBarIcons } from "./TopBarIcons";
 import { Footer } from "./Footer";
 import { PageTransition } from "./PageTransition";
 import { EarlyReleaseNotice } from "@/components/EarlyReleaseNotice";
-import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 import holarcHelpLogo from "@/assets/holarc-help-logo.png";
 import { useTranslation } from "react-i18next";
 

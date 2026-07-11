@@ -2,7 +2,8 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, LifeBuoy } from "lucide-react";
-import holarcLogo from "@/assets/holarc-logo-clear.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 
 const NotFound = () => {
   const location = useLocation();

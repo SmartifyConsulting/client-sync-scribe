@@ -1,4 +1,5 @@
-import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 import { TopBarIcons } from "./TopBarIcons";
 import { InstallAppButton } from "@/components/InstallAppButton";
 
