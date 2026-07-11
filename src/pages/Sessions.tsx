@@ -349,6 +349,9 @@ export default function Sessions() {
         setActionPoints(result.action_points || []);
         
         const docs = (result as any)._extractedDocuments;
+        if (docs?.follow_up_appointment?.follow_up_date) {
+          setExtractedFollowUp(docs.follow_up_appointment);
+        }
         if (docs?.medical_certificate) {
           setExtractedMedCert(docs.medical_certificate);
           setShowMedCertReview(true);
