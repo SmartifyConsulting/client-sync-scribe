@@ -373,6 +373,37 @@ export function useTemplates() {
         }
       }
 
+      // One-time reconcile: refresh untouched default templates that lack the
+      // new [DoctorSignature] placeholder so the signature renders above the
+      // doctor name on rollout.
+      const stale = parsedTemplates.filter(
+        (t) =>
+          t.is_default &&
+          !(t.content || "").includes("[DoctorSignature]") &&
+          t.updated_at === t.created_at,
+      );
+      if (stale.length > 0) {
+        const updated = await Promise.all(
+          stale.map(async (t) => {
+            const fresh = defaultTemplates.find((dt) => dt.name === t.name);
+            if (!fresh) return t;
+            const { data: upd } = await supabase
+              .from("templates")
+              .update({ content: fresh.content, updated_at: new Date().toISOString() })
+              .eq("id", t.id)
+              .eq("user_id", user.id)
+              .select()
+              .single();
+            return upd
+              ? { ...upd, logo_position: upd.logo_position as { x: number; y: number } | null }
+              : t;
+          }),
+        );
+        const byId = new Map(updated.map((u) => [u.id, u]));
+        setTemplates(parsedTemplates.map((t) => byId.get(t.id) || t));
+        return;
+      }
+
       setTemplates(parsedTemplates);
     } else {
       // No templates yet, seed with defaults
