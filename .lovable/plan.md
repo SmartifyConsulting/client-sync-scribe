@@ -1,58 +1,53 @@
-# Dispatcher Console: hospitals, assigned SOS visibility, and Renken demo data
+## Goal
+Apply Tag Connect's typography and CSS styling (fonts, heading treatment, radius scale, shadow depth) to the entire Holarc app. Do NOT change any colors — every existing color token in light and dark mode stays exactly as it is.
 
-Focus is `EmergencyDashboardScreen.tsx` and `DispatcherConsoleScreen.tsx`. Existing drag-and-drop from Open SOS → Available vehicles stays as-is; plan extends what's shown, adds a hospitals panel, and seeds demo rows for Renken.
+## What Tag Connect contributes
+- Display font: **Sora Variable** (headings)
+- Body/sans font: **Manrope Variable**
+- Headings: `letter-spacing: -0.02em`, display family
+- Body font-feature-settings: `"cv11", "ss01", "ss03"` + antialiased
+- Base radius `--radius: 0.9rem` with sm/md/lg/xl/2xl/3xl derived from it
+- Shadow tokens `--shadow-card` and `--shadow-elevated` (soft, ink-tinted)
 
-## 1. Show assigned SOS in the Incoming and Open SOS frames
+## Files changed
 
-Today both panels filter tightly:
-- **Incoming SOS** (EmergencyDashboardScreen): `status IN ('open','reopened') AND assigned_paramedic_user_id IS NULL`
-- **Open SOS** (DispatcherConsoleScreen): only offers with `response = 'pending'` AND incident `status IN ('open','reopened')`
+### 1. `package.json`
+Add dependencies:
+- `@fontsource-variable/sora`
+- `@fontsource-variable/manrope`
 
-Once an incident is auto-assigned or accepted (status → `assigned`), it drops out of both. Fix:
-- Widen both loaders to also include incidents whose `assigned_provider_id = <this provider>` and status ∈ `['assigned','en_route','arrived','patient_collected','en_route_to_hospital','at_hospital']` — but only `assigned` rows are draggable.
-- Render assigned rows with a distinct chip ("ASSIGNED · needs vehicle" if no `assigned_paramedic_user_id`, else "ROLLING · <vehicle_code>") so dispatchers can tell them apart from truly incoming ones.
-- Rows already crewed become read-only (no drag).
+(Existing `@fontsource/inter/*` packages stay installed but are no longer imported.)
 
-## 2. Approved destination hospitals panel
+### 2. `src/index.css`
+- Replace the four `@fontsource/inter/*` imports at top with:
+  - `@import "@fontsource-variable/sora";`
+  - `@import "@fontsource-variable/manrope";`
+- Leave all self-hosted signature `@font-face` blocks unchanged.
+- In `:root`: change `--radius: 0.5rem` → `--radius: 0.9rem`.
+- In `:root`: override the shadow values for card depth:
+  - `--shadow-card: 0 1px 2px rgb(13 13 13 / 0.05), 0 8px 24px -12px rgb(13 13 13 / 0.10);`
+  - `--shadow-card-hover: 0 2px 4px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);`
+  - Add new `--shadow-elevated: 0 1px 2px rgb(13 13 13 / 0.06), 0 16px 40px -16px rgb(13 13 13 / 0.18);`
+- In `@layer base body`: change `font-feature-settings` from the current Inter set to `"cv11", "ss01", "ss03"`. Keep `@apply bg-background text-foreground font-sans` and line-height.
+- Update `h1,h2,h3,h4,h5,h6` rules to apply `font-family: 'Sora Variable', system-ui, sans-serif;` and `letter-spacing: -0.02em;` — preserve current responsive sizes, weight, and `text-foreground`.
+- Keep everything else intact: mobile input sizing, `.font-size-preserve`, `.admin-tab-scope`, `.admin-shell`, keyframes, utilities, sidebar tokens.
+- Do NOT touch any color variable in `:root` or `.dark` — teal, terracotta, SOS red, admin palette, sidebar all stay.
 
-Add a fourth column in `DispatcherConsoleScreen` (stacks on smaller screens):
+### 3. `tailwind.config.ts`
+- `fontFamily.sans`: `["Manrope Variable", "Manrope", "system-ui", "-apple-system", "sans-serif"]`
+- `fontFamily.display`: `["Sora Variable", "Sora", "system-ui", "sans-serif"]`
+- Leave lora, merriweather, open-sans, playfair, roboto, source-serif, rockwell untouched.
+- Update `borderRadius` so `xl`, `2xl`, `3xl` derive from `--radius`:
+  - `"xl": "calc(var(--radius) + 4px)"`
+  - `"2xl": "calc(var(--radius) + 8px)"`
+  - `"3xl": "calc(var(--radius) + 12px)"`
+- Leave every `colors.*` entry, `boxShadow`, keyframes, animations, spacing scale unchanged.
 
-```text
-┌ Open SOS ┐ ┌ Vehicles ┐ ┌ Selected ┐ ┌ Destination Hospitals ┐
-│ INC-…080 │ │ AMB-01   │ │ INC-…080 │ │ • Netcare Milpark 4.1km│
-│ CRIT MVC │ │ AMB-02   │ │ CRIT MVC │ │ • Life Fourways   6.8km│
-└──────────┘ └──────────┘ └──────────┘ └────────────────────────┘
-```
+## Explicitly out of scope
+- No color changes in light or dark mode.
+- No component/JSX edits — the typography change flows through Tailwind's `font-sans` default and the base `h1..h6` rule.
+- No changes to signature fonts, admin-scope typography, mobile input sizing, or `.font-size-preserve` nav rules.
+- No changes to gradients, status colors, borders, or brand accents.
 
-Query: `holarchelp_hospitals` where `status = 'approved'` AND `subscription_status = 'active'` AND `accepting_patients = true`. Order by distance from the selected incident's lat/lng (haversine, JS); alphabetical when nothing selected. Each row shows name, ownership badge, distance, "Set destination" button. Clicking calls new SECURITY DEFINER RPC `holarchelp_set_destination_hospital(_incident_id, _hospital_id)` that updates `holarchelp_incidents.destination_hospital_id` and inserts a `destination_selected` event; guarded to the assigned provider or its dispatcher. If a destination is already set, its row is highlighted with "Change".
-
-## 3. Demo dummy SOS data for Renken
-
-For demo polish, seed 3–4 realistic dummy incidents so Renken's panels never look empty:
-
-- Insert into `holarchelp_incidents` with `user_id = null` (or a demo patient), `incident_number` = `DEMO-001…004`, varied `severity` (`critical`, `high`, `moderate`), varied `incident_type` (`MVC`, `Cardiac`, `Fall`, `Stroke`), realistic `notes`, `latitude`/`longitude` clustered ~1–8 km around Renken's HQ, `created_at` staggered (2m, 8m, 22m ago).
-- For each, insert a matching `holarchelp_incident_offers` row for Renken (`121ae795-…`) with `response = 'pending'`, `priority_boost = true`, `distance_km` from haversine.
-- Two rows stay `status = 'open'` → land in **Incoming SOS** and **Open SOS**. One row is set to `status = 'assigned'` with `assigned_provider_id = Renken` and no `assigned_paramedic_user_id` → land in Open SOS with the new "ASSIGNED · needs vehicle" chip so the dispatcher can demo dragging it onto a vehicle.
-- Also insert one `holarchelp_locations` row per incident so the map + hospital-distance ordering work.
-- Add matching `incident_number` values under a `DEMO-` prefix so we can wipe them later with a single `DELETE ... WHERE incident_number LIKE 'DEMO-%'`.
-
-Data insert only — no schema change. Run via the insert tool right after the migration.
-
-## 4. Nothing else changes
-
-- DnD Open SOS → Available Vehicles unchanged.
-- Realtime channels already subscribe to `holarchelp_incidents` / `_offers`; add one subscription to `holarchelp_hospitals` for live approval updates.
-- No new tables/RLS; `destination_hospital_id` already exists on `holarchelp_incidents`.
-
-## Files touched
-
-- `src/modules/holarchelp/pages/provider/ambulance/EmergencyDashboardScreen.tsx` — widen Incoming loader, add assigned chip.
-- `src/modules/holarchelp/pages/provider/ambulance/DispatcherConsoleScreen.tsx` — widen Open SOS loader, add Destination Hospitals section (4-col on `xl:`, stack below).
-- One migration: `holarchelp_set_destination_hospital` RPC.
-- One data insert: 3–4 `DEMO-` incidents + offers + locations for Renken.
-
-## Revert after demo
-
-`DELETE FROM holarchelp_incident_offers WHERE incident_id IN (SELECT id FROM holarchelp_incidents WHERE incident_number LIKE 'DEMO-%');`
-`DELETE FROM holarchelp_locations WHERE incident_id IN (SELECT id FROM holarchelp_incidents WHERE incident_number LIKE 'DEMO-%');`
-`DELETE FROM holarchelp_incidents WHERE incident_number LIKE 'DEMO-%';`
+## Result
+Every heading renders in Sora with tight tracking. Every body/UI surface renders in Manrope with Tag's stylistic-set features. Cards and shells pick up the softer 0.9rem radius and Tag's ink-tinted shadow depth. All Holarc colors (teal primary, terracotta, SOS red, admin palette, sidebar theming, dark mode) remain identical.
