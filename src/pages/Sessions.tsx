@@ -664,6 +664,8 @@ export default function Sessions() {
           patientId={currentPatient.id}
           patientUserId={(currentPatient as any).patient_user_id || null}
           patientName={currentPatient.name}
+          suggestedDate={extractedFollowUp?.follow_up_date}
+          suggestedTime={extractedFollowUp?.follow_up_time}
           onDone={handleFollowUpDone}
         />
       )}
