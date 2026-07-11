@@ -301,6 +301,15 @@ Respond using the provided tool/function schema.`,
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
       const result = JSON.parse(toolCall.function.arguments);
+      // Sanitize follow-up date: must be ISO YYYY-MM-DD and >= today
+      if (result?.follow_up_appointment) {
+        const fu = result.follow_up_appointment;
+        const iso = typeof fu.follow_up_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fu.follow_up_date) ? fu.follow_up_date : null;
+        if (!iso || iso < today) {
+          console.warn("Dropping invalid/past follow_up_date:", fu.follow_up_date);
+          delete result.follow_up_appointment;
+        }
+      }
       console.log("Summary generated:", result.summary?.substring(0, 100) + "...");
       console.log("Action points:", result.action_points?.length);
       console.log("Medical certificate detected:", !!result.medical_certificate);
@@ -309,6 +318,7 @@ Respond using the provided tool/function schema.`,
       console.log("Referral detected:", !!result.referral);
       console.log("Hospital admission detected:", !!result.hospital_admission);
       console.log("Patient tasks detected:", !!result.patient_tasks);
+      console.log("Follow-up detected:", !!result.follow_up_appointment, result.follow_up_appointment?.follow_up_date);
       return new Response(JSON.stringify(result), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
