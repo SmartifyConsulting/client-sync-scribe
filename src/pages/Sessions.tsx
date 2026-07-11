@@ -973,6 +973,32 @@ export default function Sessions() {
               )}
             </div>
 
+            {/* Live AI diagnostic hint - only while recording */}
+            {isRecording && (liveHint || liveHintLoading) && (
+              <div className="border-t bg-primary/5 p-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    <p className="text-sm font-semibold text-primary">Live AI hint</p>
+                  </div>
+                  {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+                </div>
+                {liveHint?.suggestion && (
+                  <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
+                )}
+                {liveHint?.differentials && liveHint.differentials.length > 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Consider:</span> {liveHint.differentials.join(" · ")}
+                  </p>
+                )}
+                {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
+                  <p className="mt-1 text-xs text-destructive">
+                    <span className="font-medium">Rule out:</span> {liveHint.red_flags.join(" · ")}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Live Transcript Preview - Collapsible */}
             {(transcript || isTranscribing) && (
               <div className="border-t p-3">
