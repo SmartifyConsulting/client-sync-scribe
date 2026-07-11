@@ -1,54 +1,51 @@
-## 1. Sharon can't see the hospital admission
+## Diagnosis
 
-Root cause (verified in DB):
-- Sharon's real auth account is `sharon.kennedy@testmail.com` (id `cf9b1db5…`). Her only patient row `bc6973cc…` is archived and has no admissions.
-- The active clinical row `Sharon Elise Kennedy` (id `4b1032be…`) — the one Dean added the admission to — is linked to a different auth user (`projectmanager@smartify.co.za`, id `96740682…`), so when the real Sharon logs in, `MyDetails.fetchPatientRecord()` (matching by `patient_user_id = auth.uid()`) lands on the empty archived row.
+**1. Why Dr Gianna sees no hospitals**
 
-Fix:
+`HospitalAffiliations.tsx` reads from the view `public.holarchelp_hospitals_public`, and `HospitalsDirectoryScreen.tsx` reads from `public.holarchelp_hospitals` directly.
 
-**a) Data reconciliation (insert/update tool)**
-- Re-parent the active clinical row: `UPDATE patients SET patient_user_id = 'cf9b1db5…' WHERE id = '4b1032be…'`.
-- Null the `patient_user_id` on the empty archived duplicate `bc6973cc…` so it can't shadow the real one.
+- The **view has no `GRANT SELECT`** to `authenticated` or `anon` — only `sandbox_exec`. PostgREST therefore returns 0 rows to every logged-in doctor. This is the primary cause. All 100 approved hospitals exist in the table but are unreachable from the client.
+- The **base table's RLS** only allows the hospital owner, hospital admins, and platform admins to `SELECT`. So the directory screen also returns 0 to any non-owner doctor.
 
-**b) Defensive fetch in `src/pages/patient/MyDetails.tsx`**
-- Prefer `patient_user_id = user.id AND status <> 'archived'` ordered by newest `updated_at`.
-- Fallback: match by `lower(email) = lower(user.email)` on a non-archived row; if found, patch that row's `patient_user_id` to the current user so future logins self-heal.
-- Keep the "create minimal row" branch only when both lookups fail.
+**2. Why patients can't find Dr Gianna**
 
-Sharon then sees the admission in both `?section=health` (existing `<AdmissionsView>` block) and `?section=care` → Admissions tab (already wired to `patient.id`).
+Her `profiles` row (`132ab89a-…`) is a real doctor (`role='doctor'`, `user_roles.role='doctor'`), but `profiles.specialty` is `NULL`. Her about_me says "Physiotherapist…" but that field isn't indexed by search.
 
-## 2. Emergency Contacts accordion label
+- The `search_providers` RPC finds her by **name** (confirmed via a simulated authenticated call — she returns).
+- She is **excluded any time a patient filters by specialty**, because the RPC does `p.specialty ILIKE '%…%'` and hers is null. Most patients discover doctors by specialty, not by exact name.
+- Separately, `ReferralDoctors.tsx` searches `profiles` directly, and `profiles` RLS only lets patients see doctors they're already **connected to** — so she never appears there for a new patient. This is a pre-existing limitation of that screen (not Gianna-specific), worth noting but not part of this fix.
 
-In `src/features/patients/components/EmergencyContactsInline.tsx` the trigger uses ad-hoc markup (`p-3`, `<span>`, no shared icon slot) so it renders slightly differently from every other Personal Information accordion which uses the shared `SectionHeader`.
+## Fix
 
-Rewrite the `CollapsibleTrigger` to mirror `SectionHeader`:
-- `flex w-full items-center justify-between px-4 py-3 group …`
-- `<h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left"><ShieldAlert className="h-4 w-4 text-primary" /> Emergency Contacts</h3>`
-- Same chevron treatment.
+### 1. Migration — expose approved hospitals to authenticated users
 
-## 3. Where Sharon rates a nurse (with new 4-hour + comment rule)
+```sql
+GRANT SELECT ON public.holarchelp_hospitals_public TO authenticated, anon;
 
-**Current state:** `RateNurseControl` (used inside `AdmissionsView` on each vitals/medication/lab/imaging row) already lets the patient submit a 1–5 star rating per record. The `nurse_record_ratings` table has a `comment` column but the UI never surfaces it, and there is no rate-limit — patients can rate any number of records instantly.
+-- Also allow any authenticated user to read approved hospitals from the base
+-- table so the ambulance/ER directory screen works. Sensitive owner-only
+-- columns are already excluded from the _public view; the base-table policy
+-- below only exposes approved rows.
+CREATE POLICY "Authenticated users can view approved hospitals"
+  ON public.holarchelp_hospitals
+  FOR SELECT
+  TO authenticated
+  USING (status = 'approved');
+```
 
-**Changes:**
+### 2. Data fix — set Gianna's specialty
 
-a) UX — `src/components/admissions/RateNurseControl.tsx`
-   - After stars, show an inline "Add a note" trigger that expands a small `<Textarea>` + Submit. Rating without a comment still allowed; comment without a rating is not.
-   - On submit, upsert `{ rating, comment }` into `nurse_record_ratings` (existing column).
-   - Show the last-submitted rating + comment inline in a muted read-only pill once saved.
-   - Disable the control (stars + textarea) with a helper "You can rate a nurse again in Xh Ym" whenever the most recent rating by this patient for this `nurse_id` is under 4 hours old. Countdown recomputed on mount.
+Update her profile so specialty-filtered searches surface her (derived from her own about_me):
 
-b) Enforcement — new migration on `nurse_record_ratings`
-   - Add a `BEFORE INSERT OR UPDATE` trigger `enforce_nurse_rating_cooldown()` (SECURITY DEFINER, `search_path=public`) that raises if another row exists with the same `patient_user_id` + `nurse_id` and `created_at > now() - interval '4 hours'` (ignoring the row being updated).
-   - Trigger enforces the rule regardless of client, so bypassing the UI still fails.
+```sql
+UPDATE public.profiles
+SET specialty = 'Physiotherapist'
+WHERE id = '132ab89a-572a-4f31-ba61-27ab750cc709'
+  AND (specialty IS NULL OR specialty = '');
+```
 
-c) Discoverability — surface nurse ratings at the top of the admission
-   - In `AdmissionsView.tsx` add a small "Rate your nurses" summary above the accordions listing every nurse who touched the admission with their most recent rating chip and a jump link, so Sharon knows the feature exists without expanding each accordion.
+No code changes required — `search_providers` already returns her by name today, and once `specialty` is populated she'll match `Physiotherapist` filters.
 
-## Files touched
-- new migration (trigger only — no schema changes)
-- one insert/update call (row re-parenting)
-- `src/pages/patient/MyDetails.tsx`
-- `src/features/patients/components/EmergencyContactsInline.tsx`
-- `src/components/admissions/RateNurseControl.tsx`
-- `src/features/sessions/admissions/AdmissionsView.tsx`
+## Out of scope (flagged, not fixed here)
+
+`ReferralDoctors.tsx` cannot find any unconnected doctor for a patient because `profiles` RLS restricts patient reads to connected doctors only. If you want patients to discover doctors from that screen too, we'd swap that lookup to the `search_doctor_profiles` RPC in a follow-up.
