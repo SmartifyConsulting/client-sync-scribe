@@ -286,7 +286,7 @@ export default function SessionDetail() {
             <Clock className="h-5 w-5 text-accent-foreground" />
           </div>
           <div>
-            <h1 className="text-[16px] font-semibold text-foreground">
+            <h1 className="text-base font-semibold text-foreground">
               Session - {format(new Date(session.started_at), "MMMM d, yyyy")}
             </h1>
             <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
