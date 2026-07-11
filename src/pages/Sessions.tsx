@@ -159,6 +159,7 @@ export default function Sessions() {
   const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
   const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
+  const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
   const doctorIdRef = useRef<string | null>(null);
 
   useEffect(() => {
