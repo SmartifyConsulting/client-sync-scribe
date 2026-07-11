@@ -286,7 +286,7 @@ export default function ForgotPassword() {
                 <Button type="button" variant="ghost" onClick={() => setStep("identify")} className="w-full">
                   <ArrowLeft className="mr-2 h-4 w-4" /> Use a different account
                 </Button>
-                <p className="text-[11px] text-muted-foreground text-center">
+                <p className="text-sm text-muted-foreground text-center">
                   Lost both your authenticator and backup codes? Contact support to verify your
                   identity manually.
                 </p>

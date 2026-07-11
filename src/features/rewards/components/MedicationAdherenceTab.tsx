@@ -689,7 +689,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                             />
                           )}
                         </div>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           Reference: {ref.observed_description?.split(/[,.]/)[0] || "tablet"}
                           {methodLabel ? ` · ${methodLabel}` : ""}
                           {captured ? ` · captured ${captured}` : ""}
@@ -793,7 +793,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                 ? "Hold your pill close to the camera so we can confirm it matches your prescription."
                 : "Film yourself taking your medication. Max 30 seconds."}
             </p>
-            <p className="text-[11px] text-muted-foreground italic">
+            <p className="text-sm text-muted-foreground italic">
               Your video isn't saved. We only keep a short text description and a single still of the tablet.
             </p>
 

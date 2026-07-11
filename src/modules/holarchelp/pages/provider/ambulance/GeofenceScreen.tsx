@@ -170,7 +170,7 @@ export default function GeofenceScreen() {
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">Name</th>
                 <th className="px-3 py-2 text-left">Type</th>
@@ -186,7 +186,7 @@ export default function GeofenceScreen() {
                   <td className="px-3 py-2">
                     <span
                       className={cn(
-                        "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase",
+                        "rounded-full border px-2 py-0.5 text-xs font-bold uppercase",
                         GEOFENCE_TYPE_COLORS[geofence.type]
                       )}
                     >

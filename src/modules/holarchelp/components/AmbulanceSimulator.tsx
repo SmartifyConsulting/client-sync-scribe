@@ -119,7 +119,7 @@ export function AmbulanceSimulator({ incidentId }: { incidentId?: string } = {})
         <Sparkles className="h-4 w-4 text-warning" />
         <div>
           <p className="font-semibold text-foreground">Demo simulator</p>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Walks a fake ambulance every 3s. Preview + admin only. Not visible on holarchealth.com.
           </p>
         </div>

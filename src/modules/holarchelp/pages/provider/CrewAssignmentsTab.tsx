@@ -107,7 +107,7 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
           <div key={m.id} className="rounded-xl border border-border bg-card p-3 flex flex-wrap items-center gap-2">
             <div className="flex-1 min-w-[180px]">
               <p className="font-semibold text-sm">{label}</p>
-              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{m.role}</p>
+              <p className="text-sm text-muted-foreground uppercase tracking-wider">{m.role}</p>
             </div>
 
             <div className="flex flex-wrap gap-1.5">
@@ -115,7 +115,7 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
                 const v = vehicles.find((x) => x.id === a.ambulance_id);
                 if (!v) return null;
                 return (
-                  <span key={a.id} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-semibold">
+                  <span key={a.id} className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-sm font-semibold">
                     <Truck className="h-3 w-3" /> {v.vehicle_code}
                   </span>
                 );
@@ -129,7 +129,7 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2">
-                <p className="px-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="px-1 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Tick vehicles
                 </p>
                 <div className="max-h-60 overflow-y-auto space-y-0.5">

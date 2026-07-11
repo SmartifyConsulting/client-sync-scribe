@@ -16,7 +16,7 @@ export default function ActiveMissionsPanel() {
         <h2 className="text-sm font-bold uppercase tracking-wider text-destructive flex items-center gap-1.5">
           <NavIcon className="h-4 w-4 text-destructive" /> Active Missions · {missions.length}
         </h2>
-        <span className="text-[10px] text-muted-foreground">Tap a mission to open the full console</span>
+        <span className="text-xs text-muted-foreground">Tap a mission to open the full console</span>
       </div>
       {missions.length === 0 ? (
         <p className="py-6 text-center text-xs text-muted-foreground italic">No active missions right now.</p>
@@ -40,7 +40,7 @@ export default function ActiveMissionsPanel() {
               <div className="mt-2 overflow-x-auto">
                 <MissionStatusStepper currentStatus={m.status} compact />
               </div>
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1 min-w-0">
                   <Hospital className="h-3 w-3 text-primary shrink-0" />
                   <span className="truncate">{m.destination_hospital_name ?? "No hospital selected"}</span>

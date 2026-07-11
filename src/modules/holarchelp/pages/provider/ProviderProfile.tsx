@@ -133,7 +133,7 @@ export default function ProviderProfile() {
             placeholder={t("providerProfile.addressPlaceholder")}
             rows={2}
           />
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-3 w-3" />
             {hasPin
               ? <span>{t("providerProfile.savedPin")}: {Number(row.latitude).toFixed(5)}, {Number(row.longitude).toFixed(5)}</span>

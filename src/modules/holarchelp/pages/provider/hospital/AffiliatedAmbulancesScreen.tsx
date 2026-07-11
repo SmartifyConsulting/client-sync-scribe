@@ -86,14 +86,14 @@ export default function AffiliatedAmbulancesScreen() {
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm truncate">{r.ambulance?.company_name || "Unknown"}</div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {r.role && <Badge variant="secondary" className="text-[10px]">{r.role}</Badge>}
+                    {r.role && <Badge variant="secondary" className="text-xs">{r.role}</Badge>}
                     {r.ambulance?.status && r.ambulance.status !== "approved" && (
-                      <Badge variant="outline" className="text-[10px]">{r.ambulance.status}</Badge>
+                      <Badge variant="outline" className="text-xs">{r.ambulance.status}</Badge>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="mt-2 space-y-1 text-[11px] text-muted-foreground">
+              <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                 {r.ambulance?.city && (
                   <div className="flex items-center gap-1"><MapPin className="h-3 w-3" />{r.ambulance.city}</div>
                 )}

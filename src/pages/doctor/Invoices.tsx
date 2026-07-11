@@ -973,7 +973,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         {!hideHeader && (
           <div>
             <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
-            <p className="mt-1 text-muted-foreground text-[12px]">
+            <p className="mt-1 text-muted-foreground text-sm">
               Manage and track all patient invoices
             </p>
           </div>
@@ -1535,7 +1535,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 text-[11px] border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
+                            className="h-8 text-sm border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
                             onClick={() => openEditDialog(invoice)}
                             title="This invoice has no amount — click to set it"
                           >
@@ -1592,7 +1592,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                             <Button
                               size="sm"
                               variant="outline"
-                              className="gap-1.5 h-8 text-[11px]"
+                              className="gap-1.5 h-8 text-sm"
                               onClick={() => sendPaidInvoiceToMedicalAid(invoice)}
                               title="Send PAID invoice to Medical Aid claims email"
                             >

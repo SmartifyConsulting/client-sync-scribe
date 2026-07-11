@@ -5,7 +5,7 @@ export default function DoctorDocumentsPage() {
   const { t } = useTranslation();
   return (
     <div className="space-y-3">
-      <h1 className="text-[12px] font-semibold text-foreground">{t("documents.title")}</h1>
+      <h1 className="text-sm font-semibold text-foreground">{t("documents.title")}</h1>
       <DoctorDocumentsTab />
     </div>
   );

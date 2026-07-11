@@ -11,7 +11,7 @@ export function AutosaveIndicator({
   className?: string;
 }) {
   if (status === "idle") return null;
-  const base = "inline-flex items-center gap-1 text-[11px] font-medium " + className;
+  const base = "inline-flex items-center gap-1 text-sm font-medium " + className;
   if (status === "dirty")
     return <span className={`${base} text-[hsl(var(--admin-text-tertiary))]`}>Edited…</span>;
   if (status === "saving")

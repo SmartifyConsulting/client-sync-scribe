@@ -128,14 +128,14 @@ export default function AfterHoursScreen() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{event.ambulance_code}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${SEVERITY_COLORS[event.severity]}`}>
+                      <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase ${SEVERITY_COLORS[event.severity]}`}>
                         {event.event_type === "start" ? "Unauthorized Start" :
                          event.event_type === "extended_hours" ? "Extended Hours" :
                          "Unauthorized Movement"}
                       </span>
                     </div>
                     <p className="text-xs mt-1">{event.description}</p>
-                    <div className="grid grid-cols-3 gap-4 mt-2 text-[10px]">
+                    <div className="grid grid-cols-3 gap-4 mt-2 text-xs">
                       <div>
                         <p className="text-muted-foreground">Time</p>
                         <p className="font-semibold">{new Date(event.started_at).toLocaleTimeString()}</p>
@@ -149,7 +149,7 @@ export default function AfterHoursScreen() {
                         <p className="font-semibold">{event.unauthorized_minutes} min</p>
                       </div>
                     </div>
-                    <p className="text-[10px] mt-2 opacity-60">
+                    <p className="text-xs mt-2 opacity-60">
                       {new Date(event.started_at).toLocaleDateString()} • Authorized shift end: {event.authorized_shift_end}
                     </p>
                   </div>

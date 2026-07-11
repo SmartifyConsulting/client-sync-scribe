@@ -396,7 +396,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         {!hideHeader && (
           <div>
             <h1 className="text-2xl font-bold text-foreground">{t("nav.myPatients", "Patients")}</h1>
-            <p className="mt-1 text-muted-foreground text-[12px]">
+            <p className="mt-1 text-muted-foreground text-sm">
               {t("patients.subtitle")}
             </p>
           </div>
@@ -405,7 +405,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
           <PatientImportDialog 
             trigger={
-              <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
+              <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-xs md:text-xs">
                 <Upload className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 {t("patients.importPatients")}
               </Button>
@@ -414,7 +414,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           />
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-1.5 h-8 md:h-9 text-[10px] md:text-xs">
+              <Button className="gap-1.5 h-8 md:h-9 text-xs md:text-xs">
                 <Plus className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 {t("patients.addPatient")}
               </Button>
@@ -782,7 +782,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <button
             onClick={() => setSelectedLetter(null)}
             className={cn(
-              "flex-1 min-w-0 h-7 rounded-lg text-[11px] font-semibold transition-colors",
+              "flex-1 min-w-0 h-7 rounded-lg text-sm font-semibold transition-colors",
               selectedLetter === null
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-foreground hover:bg-primary/20"
@@ -801,7 +801,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   }
                 }}
                 className={cn(
-                  "flex-1 min-w-0 h-7 rounded-lg text-[11px] font-semibold transition-colors",
+                  "flex-1 min-w-0 h-7 rounded-lg text-sm font-semibold transition-colors",
                   hasPatients
                     ? selectedLetter === letter
                       ? "bg-primary text-primary-foreground"
@@ -943,7 +943,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center rounded-full bg-terracotta/10 px-1.5 py-0.5 text-[10px] font-bold text-terracotta">
+                                    <span className="inline-flex items-center rounded-full bg-terracotta/10 px-1.5 py-0.5 text-xs font-bold text-terracotta">
                                       <Pill className="h-2.5 w-2.5" />
                                     </span>
                                   </TooltipTrigger>

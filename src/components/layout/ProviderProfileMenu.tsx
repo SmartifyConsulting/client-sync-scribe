@@ -46,12 +46,12 @@ export function ProviderProfileMenu() {
       <PopoverContent align="end" className={cn("p-1.5", isAdmin ? "w-72" : "w-56")}>
         <div className="px-2 py-1.5 border-b border-border mb-1">
           <p className="text-xs font-semibold text-foreground truncate">{profile?.full_name || t("profileMenu.user")}</p>
-          <p className="text-[10px] text-muted-foreground truncate">{currentEmail}</p>
+          <p className="text-xs text-muted-foreground truncate">{currentEmail}</p>
         </div>
 
         {isAdmin && (
           <div className="pt-1">
-            <div className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               <UserCog className="h-3 w-3" /> {t("topbar.switchProfile")}
             </div>
             <div className="max-h-64 overflow-y-auto">
@@ -73,7 +73,7 @@ export function ProviderProfileMenu() {
                     {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-foreground truncate">{p.name}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{p.role} · {p.email}</p>
+                      <p className="text-xs text-muted-foreground truncate">{p.role} · {p.email}</p>
                     </div>
                   </button>
                 );
@@ -98,7 +98,7 @@ export function ProviderProfileMenu() {
             )}
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
-              <p className="text-[10px] text-muted-foreground truncate">Georgia Adams · {ADMIN_EMAIL}</p>
+              <p className="text-xs text-muted-foreground truncate">Georgia Adams · {ADMIN_EMAIL}</p>
             </div>
           </button>
         )}

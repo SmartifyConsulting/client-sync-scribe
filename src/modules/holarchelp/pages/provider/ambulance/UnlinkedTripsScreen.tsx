@@ -138,7 +138,7 @@ export default function UnlinkedTripsScreen() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{trip.ambulance_code}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${SEVERITY_COLORS[trip.severity]}`}>
+                      <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase ${SEVERITY_COLORS[trip.severity]}`}>
                         Unlinked Trip
                       </span>
                     </div>
@@ -149,7 +149,7 @@ export default function UnlinkedTripsScreen() {
                       <span>{trip.end_location}</span>
                     </div>
                     <p className="text-xs mt-2">{trip.reason}</p>
-                    <div className="grid grid-cols-4 gap-3 mt-2 text-[10px]">
+                    <div className="grid grid-cols-4 gap-3 mt-2 text-xs">
                       <div>
                         <p className="text-muted-foreground">Distance</p>
                         <p className="font-semibold">{trip.distance_km} km</p>

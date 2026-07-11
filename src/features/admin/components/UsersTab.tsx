@@ -402,9 +402,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     u.email
                   )}
                 </TableCell>
-                <TableCell className="text-[hsl(var(--admin-text-secondary))] text-[12px] tabular-nums">{u.phone || "—"}</TableCell>
+                <TableCell className="text-[hsl(var(--admin-text-secondary))] text-sm tabular-nums">{u.phone || "—"}</TableCell>
                 {showAddress && (
-                  <TableCell className="text-[hsl(var(--admin-text-secondary))] text-[12px] max-w-[260px] truncate" title={u.address || ""}>
+                  <TableCell className="text-[hsl(var(--admin-text-secondary))] text-sm max-w-[260px] truncate" title={u.address || ""}>
                     {u.address || "—"}
                   </TableCell>
                 )}
@@ -426,7 +426,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     </SelectTrigger>
                     <SelectContent>
                       {ROLE_OPTIONS.map((r) => (
-                        <SelectItem key={r.value} value={r.value} className="text-[12px]">{r.label}</SelectItem>
+                        <SelectItem key={r.value} value={r.value} className="text-sm">{r.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -443,10 +443,10 @@ export default function UsersTab({ kind }: UsersTabProps) {
                   <div className="flex items-center gap-1.5">
                     <StatusDot tone={statusToTone(u.status)} />
                     {pendingStatusMap.get(u.user_id) === "pending" && (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-400 text-amber-700 dark:text-amber-300">Pending approval</Badge>
+                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-amber-400 text-amber-700 dark:text-amber-300">Pending approval</Badge>
                     )}
                     {pendingStatusMap.get(u.user_id) === "rejected" && (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-destructive text-destructive">Rejected</Badge>
+                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-destructive text-destructive">Rejected</Badge>
                     )}
                   </div>
                 </TableCell>
@@ -530,7 +530,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
                         <span className="text-[14px] leading-none">{countryFlag(group)}</span>
                       )}
                       <span className="text-[12.5px] font-semibold text-[hsl(var(--admin-text-primary))]">{group}</span>
-                      <span className="text-[11px] text-[hsl(var(--admin-text-tertiary))]">{rows.length}</span>
+                      <span className="text-sm text-[hsl(var(--admin-text-tertiary))]">{rows.length}</span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-0 border-t border-[hsl(var(--admin-border-subtle))]">

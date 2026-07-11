@@ -1076,8 +1076,8 @@ export default function GamificationAdmin() {
                             </div>
                           ) : (
                             <div className="flex flex-col gap-1">
-                              {app.google_play_url && <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline">Play Store</a>}
-                              {app.app_store_url && <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary underline">App Store</a>}
+                              {app.google_play_url && <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">Play Store</a>}
+                              {app.app_store_url && <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">App Store</a>}
                               {!app.google_play_url && !app.app_store_url && <span className="text-sm text-muted-foreground">-</span>}
                             </div>
                           )}

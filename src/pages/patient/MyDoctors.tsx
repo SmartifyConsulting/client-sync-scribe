@@ -235,10 +235,10 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <div className="flex flex-col">
               <span className="font-medium text-foreground">{doctor.full_name || "Unknown Doctor"}</span>
               {doctor.practice_number && (
-                <span className="text-[10px] text-muted-foreground">PR#: {doctor.practice_number}</span>
+                <span className="text-xs text-muted-foreground">PR#: {doctor.practice_number}</span>
               )}
               {mode === "hidden" && (
-                <span className="text-[10px] text-muted-foreground italic">
+                <span className="text-xs text-muted-foreground italic">
                   {!access.is_active ? "Deactivated" : "Hidden"}
                 </span>
               )}
@@ -247,7 +247,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </TableCell>
         <TableCell>
           {doctor.specialty && (
-            <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+            <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
               {doctor.specialty}
             </Badge>
           )}
@@ -415,13 +415,13 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                     <div className="flex items-center gap-2">
                                       <Avatar className="h-7 w-7 shrink-0">
                                         <AvatarImage src={doctor.avatar_url || undefined} />
-                                        <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
                                           <KindIcon className="h-3.5 w-3.5" />
                                         </AvatarFallback>
                                       </Avatar>
                                       <div className="flex flex-col min-w-0">
                                         <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
-                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                        <span className="text-xs text-muted-foreground flex items-center gap-1">
                                           {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
                                             <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
                                           ))}
@@ -431,12 +431,12 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                   </TableCell>
                                   <TableCell className="p-2">
                                     {doctor.kind === 'doctor' && doctor.specialty ? (
-                                      <Badge className={`text-[10px] font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                                      <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
                                         {doctor.specialty}
                                       </Badge>
                                     ) : (
                                       <div className="flex flex-col gap-0.5">
-                                        <Badge variant="outline" className="text-[10px] capitalize">{doctor.kind}</Badge>
+                                        <Badge variant="outline" className="text-xs capitalize">{doctor.kind}</Badge>
                                         {doctor.ownership && (
                                           <Badge
                                             variant="outline"

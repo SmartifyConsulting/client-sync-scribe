@@ -614,7 +614,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         {!hideHeader ? (
           <div>
             <h1 className="text-lg md:text-2xl font-bold text-foreground">My Documents</h1>
-            <p className="text-muted-foreground text-[11px] md:text-[12px]">
+            <p className="text-muted-foreground text-sm md:text-sm">
               All your prescriptions, invoices, certificates and uploaded files.
             </p>
           </div>
@@ -857,12 +857,12 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                   <IconComponent className="h-2.5 w-2.5" />
                 </span>
                 {doc.aiAnalysis && (
-                  <Badge variant="secondary" className="text-[10px] h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
+                  <Badge variant="secondary" className="text-xs h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
                     <Sparkles className="h-2.5 w-2.5" />
                     AI
                   </Badge>
                 )}
-                <span className="hidden sm:inline text-[11px] text-muted-foreground whitespace-nowrap">
+                <span className="hidden sm:inline text-sm text-muted-foreground whitespace-nowrap">
                   {format(new Date(doc.date), "dd MMM yyyy")}
                 </span>
                 <div className="flex items-center gap-1 shrink-0">
@@ -920,7 +920,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   )}
-                  <span className="hidden md:inline text-[10px] text-muted-foreground whitespace-nowrap">
+                  <span className="hidden md:inline text-xs text-muted-foreground whitespace-nowrap">
                     {(doc.sizeBytes / 1024).toFixed(1)} KB
                   </span>
                 </div>

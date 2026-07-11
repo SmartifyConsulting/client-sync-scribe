@@ -80,7 +80,7 @@ export default function ErCapacityScreen() {
 
 const Tile = ({ icon: Icon, label, children }: any) => (
   <div className="rounded-2xl border bg-card p-3 space-y-2">
-    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+    <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground">
       <Icon className="h-3.5 w-3.5" /> {label}
     </p>
     {children}

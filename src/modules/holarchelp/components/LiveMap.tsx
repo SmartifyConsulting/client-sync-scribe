@@ -348,7 +348,7 @@ export const LiveMap = ({
         <div className="absolute inset-0 z-[2147483647] flex items-center justify-center bg-background/90 px-4 text-center">
           <div className="max-w-sm rounded-xl border border-destructive/40 bg-card p-3 shadow-lg">
             <p className="text-xs font-semibold text-destructive">Google Maps could not load</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               {err.toLowerCase().includes("referer") || err.toLowerCase().includes("not allowed")
                 ? "This domain is not on the Google Maps key's HTTP referrer allowlist. Add the domain in Google Cloud."
                 : err.toLowerCase().includes("billing")

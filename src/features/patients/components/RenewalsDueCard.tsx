@@ -24,7 +24,7 @@ export function RenewalsDueCard({ patientId, patientUserId }: Props) {
           <Pill className="h-4 w-4 text-primary" />
           Renewals due
         </CardTitle>
-        <CardDescription className="text-[11px]">
+        <CardDescription className="text-sm">
           Prescriptions reaching the end of their cycle. Tap to request a renewal — add a note if you'd like something adjusted.
         </CardDescription>
       </CardHeader>
@@ -44,13 +44,13 @@ export function RenewalsDueCard({ patientId, patientUserId }: Props) {
                     <Badge variant="outline" className="text-[9px]">No refills left</Badge>
                   )}
                 </div>
-                <p className="text-[10px] text-muted-foreground truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {[r.dosage, r.frequency].filter(Boolean).join(" • ")}
                   {r.doctor_name ? ` • Dr. ${r.doctor_name}` : ""}
                 </p>
               </div>
               {requested ? (
-                <Badge variant="secondary" className="text-[10px] gap-1 shrink-0">
+                <Badge variant="secondary" className="text-xs gap-1 shrink-0">
                   <CheckCircle2 className="h-3 w-3" /> Requested
                 </Badge>
               ) : (

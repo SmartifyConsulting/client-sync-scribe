@@ -148,7 +148,7 @@ export function IncidentVoiceNoteRecorder({
             <p className="text-xs font-semibold">
               🎤 {n.actor_name ?? t("common.unknown")} {n.provider_name ? `— ${n.provider_name}` : ""}
             </p>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {new Date(n.created_at).toLocaleString()} {n.duration_seconds ? `· ${n.duration_seconds.toFixed(1)}s` : ""}
             </p>
             {n.transcript && <p className="mt-1.5 whitespace-pre-wrap text-sm">{n.transcript}</p>}

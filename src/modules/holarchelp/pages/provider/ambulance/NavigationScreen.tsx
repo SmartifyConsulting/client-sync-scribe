@@ -111,7 +111,7 @@ export default function NavigationScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {t("provider.emergencyResponseDispatch")} · {t("navigationScreen.activeMission", "Active Mission")}
           </p>
           <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
@@ -123,11 +123,11 @@ export default function NavigationScreen() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full border border-sos/40 bg-sos/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-sos">
+          <span className="rounded-full border border-sos/40 bg-sos/10 px-2 py-1 text-xs font-bold uppercase tracking-wider text-sos">
             <Siren className="mr-1 inline h-3 w-3" /> {(incident.status ?? "").replace(/_/g," ")}
           </span>
           {incident.eta_minutes != null && (
-            <span className="rounded-full border bg-card px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+            <span className="rounded-full border bg-card px-2 py-1 text-xs font-bold uppercase tracking-wider">
               {t("navigationScreen.eta")} <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
             </span>
           )}
@@ -180,7 +180,7 @@ export default function NavigationScreen() {
           {/* Post-hospital dispatcher choice (only after the vehicle is unloaded at hospital) */}
           {isAssigned && incident.status === "at_hospital" && (
             <div className="rounded-2xl border bg-card p-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">After handover</p>
+              <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">After handover</p>
               <div className="mt-2 grid grid-cols-2 gap-1.5">
                 <Button size="sm" variant="outline" className="h-10 text-xs font-bold"
                   onClick={() => setStatus("completed")}>

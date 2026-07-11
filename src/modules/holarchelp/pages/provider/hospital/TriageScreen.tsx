@@ -75,7 +75,7 @@ export default function TriageScreen() {
             <div key={col.key} className="flex min-h-[300px] flex-col rounded-2xl border bg-card">
               <div className="flex items-center justify-between border-b px-3 py-2">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t(col.labelKey)}</p>
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold">{items.length}</span>
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-bold">{items.length}</span>
               </div>
               <div className="flex-1 space-y-1.5 overflow-auto p-2">
                 {items.map((r) => {
@@ -86,15 +86,15 @@ export default function TriageScreen() {
                         <span className={`h-2 w-2 rounded-full ${sevDot(r.severity)}`} />
                         <p className="flex-1 truncate font-semibold">{t("ambulance.incident")} {r.id.slice(0,8)}</p>
                       </div>
-                      <p className="mt-0.5 text-[10px] text-muted-foreground">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {r.triage_priority ? `${t("admissions.priority")} ${r.triage_priority}` : t("triageBoard.noTriage")}
                       </p>
                       <div className="mt-1.5 flex items-center gap-1">
-                        <Link to={`/provider/hospital/incident/${r.id}`} className="flex-1 truncate rounded-md border bg-card px-1.5 py-1 text-center text-[10px] font-semibold hover:bg-muted">
+                        <Link to={`/provider/hospital/incident/${r.id}`} className="flex-1 truncate rounded-md border bg-card px-1.5 py-1 text-center text-xs font-semibold hover:bg-muted">
                           {t("common.open")}
                         </Link>
                         {nextKey && (
-                          <button onClick={() => advance(r, nextKey)} className="inline-flex items-center gap-0.5 rounded-md bg-primary px-1.5 py-1 text-[10px] font-bold text-primary-foreground">
+                          <button onClick={() => advance(r, nextKey)} className="inline-flex items-center gap-0.5 rounded-md bg-primary px-1.5 py-1 text-xs font-bold text-primary-foreground">
                             {t("triageBoard.advance")} <ChevronRight className="h-3 w-3" />
                           </button>
                         )}
@@ -102,7 +102,7 @@ export default function TriageScreen() {
                     </div>
                   );
                 })}
-                {!items.length && <p className="py-6 text-center text-[11px] text-muted-foreground">—</p>}
+                {!items.length && <p className="py-6 text-center text-sm text-muted-foreground">—</p>}
               </div>
             </div>
           );

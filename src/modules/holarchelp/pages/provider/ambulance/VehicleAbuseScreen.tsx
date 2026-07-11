@@ -141,7 +141,7 @@ export default function VehicleAbuseScreen() {
       harsh_driving: "Harsh Driving",
       route_deviation: "Route Deviation",
     };
-    return <span className="text-[10px] font-bold uppercase">{labels[type] || type}</span>;
+    return <span className="text-xs font-bold uppercase">{labels[type] || type}</span>;
   };
 
   return (
@@ -245,9 +245,9 @@ export default function VehicleAbuseScreen() {
                         </div>
                         <p className="text-xs mt-1">{event.description}</p>
                         {event.location && (
-                          <p className="text-[10px] mt-1 opacity-75">📍 {event.location}</p>
+                          <p className="text-xs mt-1 opacity-75">📍 {event.location}</p>
                         )}
-                        <p className="text-[10px] mt-1 opacity-60">
+                        <p className="text-xs mt-1 opacity-60">
                           {new Date(event.occurred_at).toLocaleString()}
                         </p>
                       </div>
@@ -267,7 +267,7 @@ export default function VehicleAbuseScreen() {
             <div className="p-8 text-center text-xs text-muted-foreground">
               <MapPin className="mx-auto mb-2 h-5 w-5 opacity-50" />
               <p>Geofence Management & Breach Alerts coming soon.</p>
-              <p className="mt-2 text-[11px]">Create geographic boundaries and get alerted when vehicles breach them.</p>
+              <p className="mt-2 text-sm">Create geographic boundaries and get alerted when vehicles breach them.</p>
             </div>
           </div>
         </TabsContent>
@@ -277,7 +277,7 @@ export default function VehicleAbuseScreen() {
             <div className="p-8 text-center text-xs text-muted-foreground">
               <Clock className="mx-auto mb-2 h-5 w-5 opacity-50" />
               <p>After-Hours Detection coming soon.</p>
-              <p className="mt-2 text-[11px]">Track vehicles that are used outside scheduled operating hours.</p>
+              <p className="mt-2 text-sm">Track vehicles that are used outside scheduled operating hours.</p>
             </div>
           </div>
         </TabsContent>
@@ -287,7 +287,7 @@ export default function VehicleAbuseScreen() {
             <div className="p-8 text-center text-xs text-muted-foreground">
               <MapPin className="mx-auto mb-2 h-5 w-5 opacity-50" />
               <p>Route Deviation & Tracking coming soon.</p>
-              <p className="mt-2 text-[11px]">Monitor if ambulances follow dispatch routes or deviate.</p>
+              <p className="mt-2 text-sm">Monitor if ambulances follow dispatch routes or deviate.</p>
             </div>
           </div>
         </TabsContent>

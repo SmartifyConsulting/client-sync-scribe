@@ -108,7 +108,7 @@ export default function DispatchQueueScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Dispatch Management
         </p>
         <h1 className="text-3xl font-extrabold">Dispatch Queue</h1>
@@ -120,25 +120,25 @@ export default function DispatchQueueScreen() {
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Waiting
           </p>
           <p className="text-3xl font-bold text-yellow-600 mt-1">{stats.waiting}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Active
           </p>
           <p className="text-3xl font-bold text-blue-600 mt-1">{stats.active}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Delayed
           </p>
           <p className="text-3xl font-bold text-red-600 mt-1">{stats.delayed}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-[10px] font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Completed
           </p>
           <p className="text-3xl font-bold text-green-600 mt-1">{stats.completed}</p>

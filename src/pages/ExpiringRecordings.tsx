@@ -104,7 +104,7 @@ export default function ExpiringRecordings() {
     <div className="space-y-6 animate-fade-in max-w-3xl">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Expiring Recordings</h1>
-        <p className="text-muted-foreground text-[12px]">
+        <p className="text-muted-foreground text-sm">
           Session recordings are automatically deleted after 7 days. Download any you want to keep.
         </p>
       </div>

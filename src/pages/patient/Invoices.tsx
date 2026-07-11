@@ -236,7 +236,7 @@ export default function Invoices() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
-        <p className="text-muted-foreground text-[12px]">View and manage your medical invoices</p>
+        <p className="text-muted-foreground text-sm">View and manage your medical invoices</p>
       </div>
 
       {/* Summary Cards */}

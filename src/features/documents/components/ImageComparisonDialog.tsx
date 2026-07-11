@@ -225,7 +225,7 @@ export function ImageComparisonDialog({
                     ) : (
                       <div className="text-center text-muted-foreground">
                         <Plus className="h-6 w-6 mx-auto mb-1" />
-                        <span className="text-[10px]">Add Image</span>
+                        <span className="text-xs">Add Image</span>
                       </div>
                     )}
                   </div>
@@ -233,7 +233,7 @@ export function ImageComparisonDialog({
                     placeholder={`Label (e.g., Day 1, Before)`}
                     value={img.label}
                     onChange={(e) => updateLabel(i, e.target.value)}
-                    className="h-7 text-[11px]"
+                    className="h-7 text-sm"
                   />
                 </div>
               ))}

@@ -279,7 +279,7 @@ export default function AdministratorsScreen() {
       >
         <div className="flex-1 min-w-[180px]">
           <p className="font-semibold text-foreground">{name}</p>
-          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-[11px]">
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-sm">
             {phone ? (
               <span className="inline-flex items-center gap-1 text-muted-foreground">
                 <Phone className="h-3 w-3" />
@@ -313,7 +313,7 @@ export default function AdministratorsScreen() {
           </div>
         </div>
         <span
-          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+          className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
             isPending
               ? "bg-warning/10 text-warning"
               : "bg-success/10 text-success"
@@ -343,7 +343,7 @@ export default function AdministratorsScreen() {
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           {t("administrators.header.label")}
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
@@ -433,7 +433,7 @@ export default function AdministratorsScreen() {
                             <span className="font-semibold">
                               {ROLE_LABELS[role] ?? role.charAt(0).toUpperCase() + role.slice(1)}
                             </span>
-                            <span className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                            <span className="flex items-center gap-2 text-sm text-muted-foreground">
                               <span className="rounded-full bg-muted px-2 py-0.5 font-semibold tabular-nums">
                                 {rows.length}
                               </span>

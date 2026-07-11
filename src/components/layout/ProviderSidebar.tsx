@@ -83,7 +83,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
           <NavLink
             to="/admin/users"
             onClick={onNavigate}
-            className="mx-4 mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+            className="mx-4 mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           >
             <ArrowLeft className="h-3 w-3" /> {t("nav.backToAdmin")}
           </NavLink>
@@ -128,7 +128,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-primary truncate">{profile?.full_name || t("common.provider")}</p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground truncate">
                 {portal === "hospital" ? t("provider.hospitalOps") : t("provider.erProvider")}
               </p>
             </div>

@@ -189,19 +189,19 @@ export default function HolarcHelpContacts() {
                   {isEditing ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <div>
-                        <Label className="text-[11px]">Name</Label>
+                        <Label className="text-sm">Name</Label>
                         <Input value={(editDraft.name ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))} />
                       </div>
                       <div>
-                        <Label className="text-[11px]">Relationship</Label>
+                        <Label className="text-sm">Relationship</Label>
                         <Input value={(editDraft.relationship ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, relationship: e.target.value }))} />
                       </div>
                       <div>
-                        <Label className="text-[11px]">Phone</Label>
+                        <Label className="text-sm">Phone</Label>
                         <Input value={(editDraft.phone ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, phone: e.target.value }))} />
                       </div>
                       <div>
-                        <Label className="text-[11px]">Email</Label>
+                        <Label className="text-sm">Email</Label>
                         <Input type="email" value={(editDraft.email ?? "") as string} onChange={(e) => setEditDraft((d) => ({ ...d, email: e.target.value }))} />
                       </div>
                     </div>
@@ -210,10 +210,10 @@ export default function HolarcHelpContacts() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold truncate">{c.name}</p>
                         {c.relationship && (
-                          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">· {c.relationship}</span>
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground">· {c.relationship}</span>
                         )}
                         {c.source === "personal_info_seed" && (
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                             From Personal Information
                           </span>
                         )}

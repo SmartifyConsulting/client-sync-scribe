@@ -1289,7 +1289,7 @@ export function PatientDetailsEditor({
                 )}
               </div>
             </div>
-            <span className="text-[10px] font-medium text-primary mt-0.5">
+            <span className="text-xs font-medium text-primary mt-0.5">
               {avatarUrl ? "Change photo" : "Add photo"}
             </span>
 
@@ -1303,7 +1303,7 @@ export function PatientDetailsEditor({
                 return `${greeting}, ${patient.name.split(" ")[0]}`;
               })()}
             </h3>
-            <p className="text-muted-foreground text-[12px]">
+            <p className="text-muted-foreground text-sm">
               Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
           </div>
@@ -1438,7 +1438,7 @@ export function PatientDetailsEditor({
     const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
     const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
     const triggerClass =
-      "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5";
+      "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5";
 
     // Self-service (mobile + tablet + web): tabs filtered by current section
     if (isSelfService && section) {
@@ -1498,13 +1498,13 @@ export function PatientDetailsEditor({
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
         <TabsTrigger
           value="personal"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
           {t("patientProfile.togglePersonal")}
         </TabsTrigger>
         <TabsTrigger
           value="medical"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
         >
           {t("patientProfile.toggleMedical")}
         </TabsTrigger>
@@ -1649,8 +1649,8 @@ export function PatientDetailsEditor({
                               {nok.name}{" "}
                               {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
                             </p>
-                            {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
-                            {nok.email && <p className="text-[10px] text-muted-foreground">{nok.email}</p>}
+                            {nok.phone && <p className="text-xs text-muted-foreground">{nok.phone}</p>}
+                            {nok.email && <p className="text-xs text-muted-foreground">{nok.email}</p>}
                           </div>
                           <div className="flex gap-1">
                             <Button
@@ -1783,7 +1783,7 @@ export function PatientDetailsEditor({
                                     {m.dosage ? ` — ${m.dosage}` : ""}
                                   </p>
                                   {(m.start_date || m.end_date) && (
-                                    <p className="text-[10px] text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground">
                                       {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} —{" "}
                                       {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
                                     </p>
@@ -1805,7 +1805,7 @@ export function PatientDetailsEditor({
                         )}
                         {isChronic && (
                           <div className="mt-2">
-                            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
                               <Pill className="h-2.5 w-2.5" />
                               Chronic Patient
                             </span>
@@ -1828,7 +1828,7 @@ export function PatientDetailsEditor({
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
                                     <p className="text-xs font-medium text-foreground">{c.name}</p>
-                                    <p className="text-[10px] text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground">
                                       {c.diagnosed_date
                                         ? format(new Date(c.diagnosed_date), "MMM d, yyyy")
                                         : "Date unknown"}
@@ -1870,11 +1870,11 @@ export function PatientDetailsEditor({
                           {surgeries.map((surgery) => (
                             <div key={surgery.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                               <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                              <p className="text-[10px] text-muted-foreground">
+                              <p className="text-xs text-muted-foreground">
                                 {formatSurgeryDate(surgery.date, surgery.date_precision)}
                               </p>
                               {surgery.notes && (
-                                <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>
                               )}
                             </div>
                           ))}
@@ -1894,7 +1894,7 @@ export function PatientDetailsEditor({
                           {familyHistory.map((entry) => (
                             <div key={entry.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                               <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                              <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
+                              <p className="text-xs text-muted-foreground">{entry.condition}</p>
                             </div>
                           ))}
                         </div>
@@ -1911,7 +1911,7 @@ export function PatientDetailsEditor({
                       <div className="flex items-center gap-2">
                         <span
                           className={cn(
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
                             patient.organ_donor
                               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                               : "bg-muted text-muted-foreground",
@@ -1983,13 +1983,13 @@ export function PatientDetailsEditor({
                                     <span className="text-muted-foreground">({pharmacy.branch})</span>
                                   )}
                                   {pharmacy.is_primary && (
-                                    <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                                    <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
                                       Primary
                                     </span>
                                   )}
                                 </p>
                                 {pharmacy.email && (
-                                  <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>
+                                  <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
                                 )}
                               </div>
                             </div>
@@ -2439,7 +2439,7 @@ export function PatientDetailsEditor({
                               {nok.name}{" "}
                               {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
                             </p>
-                            {nok.phone && <p className="text-[10px] text-muted-foreground">{nok.phone}</p>}
+                            {nok.phone && <p className="text-xs text-muted-foreground">{nok.phone}</p>}
                           </div>
                           <div className="flex gap-1">
                             <Button
@@ -2470,7 +2470,7 @@ export function PatientDetailsEditor({
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 border-t border-border/40">
-                          <label className="flex items-center gap-2 text-[11px]">
+                          <label className="flex items-center gap-2 text-sm">
                             <Switch
                               checked={!!nok.can_view_profile}
                               onCheckedChange={(v) => {
@@ -2482,7 +2482,7 @@ export function PatientDetailsEditor({
                             />
                             Can view profile
                           </label>
-                          <label className="flex items-center gap-2 text-[11px]">
+                          <label className="flex items-center gap-2 text-sm">
                             <Switch
                               checked={!!nok.can_view_live_tracking}
                               onCheckedChange={(v) => {
@@ -2552,7 +2552,7 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
                       placeholder="manager@company.com"
                     />
-                    <p className="text-[10px] text-muted-foreground">Used for e-mailing of Medical Certificates</p>
+                    <p className="text-xs text-muted-foreground">Used for e-mailing of Medical Certificates</p>
                   </div>
                 </div>
               </CollapsibleContent>
@@ -2812,7 +2812,7 @@ export function PatientDetailsEditor({
                                     {m.dosage ? ` — ${m.dosage}` : ""}
                                   </p>
                                   {(m.start_date || m.end_date) && (
-                                    <p className="text-[10px] text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground">
                                       {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} —{" "}
                                       {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
                                     </p>
@@ -2867,7 +2867,7 @@ export function PatientDetailsEditor({
                       )}
                       {isChronic && (
                         <div className="mt-2">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
                             <Pill className="h-2.5 w-2.5" />
                             Chronic Patient
                           </span>
@@ -2971,7 +2971,7 @@ export function PatientDetailsEditor({
                             >
                               <div>
                                 <p className="text-xs font-medium text-foreground">{c.name}</p>
-                                <p className="text-[10px] text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                   {c.diagnosed_date
                                     ? format(new Date(c.diagnosed_date), "MMM d, yyyy")
                                     : "Date unknown"}
@@ -3139,11 +3139,11 @@ export function PatientDetailsEditor({
                           >
                             <div>
                               <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                              <p className="text-[10px] text-muted-foreground">
+                              <p className="text-xs text-muted-foreground">
                                 {formatSurgeryDate(surgery.date, surgery.date_precision)}
                               </p>
                               {surgery.notes && (
-                                <p className="text-[10px] text-muted-foreground mt-0.5">{surgery.notes}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>
                               )}
                             </div>
                             <div className="flex gap-1 shrink-0">
@@ -3240,7 +3240,7 @@ export function PatientDetailsEditor({
                           >
                             <div>
                               <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                              <p className="text-[10px] text-muted-foreground">{entry.condition}</p>
+                              <p className="text-xs text-muted-foreground">{entry.condition}</p>
                             </div>
                             <div className="flex gap-1 shrink-0">
                               <Button
@@ -3276,7 +3276,7 @@ export function PatientDetailsEditor({
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
                           formData.organ_donor
                             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                             : "bg-muted text-muted-foreground",
@@ -3370,7 +3370,7 @@ export function PatientDetailsEditor({
                           onChange={(e) => updateFormData({ claims_email: e.target.value })}
                           placeholder="claims@insurance.com"
                         />
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           When invoices are marked paid, the PAID invoice is auto-submitted here (if enabled in patient settings).
                         </p>
                       </div>
@@ -3399,7 +3399,7 @@ export function PatientDetailsEditor({
                             >
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground truncate">{doc.full_name}</p>
-                                <p className="text-[10px] text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                   {doc.specialty || "General"} {doc.practice_number ? `• ${doc.practice_number}` : ""}
                                 </p>
                               </div>
@@ -3433,12 +3433,12 @@ export function PatientDetailsEditor({
                             </div>
                           ))}
                           <div className="px-3 py-2 border-t border-border">
-                            <p className="text-[10px] text-muted-foreground mb-1">Doctor not on the app?</p>
+                            <p className="text-xs text-muted-foreground mb-1">Doctor not on the app?</p>
                             <div className="flex gap-1">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1 text-[10px] h-6"
+                                className="gap-1 text-xs h-6"
                                 onClick={() => {
                                   toast({ title: "Invitation sent", description: "An invitation email will be sent" });
                                   setGpSearchOpen(false);
@@ -3450,7 +3450,7 @@ export function PatientDetailsEditor({
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1 text-[10px] h-6"
+                                className="gap-1 text-xs h-6"
                                 onClick={() => {
                                   toast({
                                     title: "Invite & Connect",
@@ -3567,7 +3567,7 @@ export function PatientDetailsEditor({
                                   )}
                                 </p>
                                 {pharmacy.email && (
-                                  <p className="text-[10px] text-muted-foreground">{pharmacy.email}</p>
+                                  <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
                                 )}
                               </div>
                             </div>

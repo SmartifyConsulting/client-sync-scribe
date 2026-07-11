@@ -725,7 +725,7 @@ export default function Auth() {
                   <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
                     {avatarPreview ? "Change photo" : "Upload photo"}
                   </Button>
-                  <p className="text-[10px] text-muted-foreground">Shown on your profile and to patients.</p>
+                  <p className="text-xs text-muted-foreground">Shown on your profile and to patients.</p>
                 </div>
               </div>
             </div>
@@ -781,7 +781,7 @@ export default function Auth() {
                   <CountrySelector />
                   <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" required disabled={accountCreated} />
                 </div>
-                {mobileNumber && <p className="text-[10px] text-muted-foreground">Account ID: {normalizePhone(mobileNumber)}</p>}
+                {mobileNumber && <p className="text-xs text-muted-foreground">Account ID: {normalizePhone(mobileNumber)}</p>}
               </div>
             )}
             <div className="space-y-2">
@@ -887,7 +887,7 @@ export default function Auth() {
                   <CountrySelector />
                   <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" required disabled={accountCreated} />
                 </div>
-                {phone && <p className="text-[10px] text-muted-foreground">Account ID: {normalizePhone(phone)}</p>}
+                {phone && <p className="text-xs text-muted-foreground">Account ID: {normalizePhone(phone)}</p>}
               </div>
             )}
             <div className="space-y-2">
@@ -1024,7 +1024,7 @@ export default function Auth() {
                         </div>
                       </div>
                       {loginPhone.trim() && (
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           You'll sign in as {normalizePhone(`${countryCode}${loginPhone}`)}
                         </p>
                       )}
@@ -1126,13 +1126,13 @@ export default function Auth() {
             </div>
             {/* Trust band — moved to bottom of sign-in box */}
             <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
               </span>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
               </span>
             </div>
@@ -1179,7 +1179,7 @@ export default function Auth() {
           </div>
           <div className="text-center mb-3">
             <div className="mt-1"><Progress value={progress} className="h-1.5" /></div>
-            <p className="text-[10px] text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
+            <p className="text-xs text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
@@ -1204,13 +1204,13 @@ export default function Auth() {
           </div>
           {/* Trust band — bottom of signup box */}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
               <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
               <KeyRound className="h-3.5 w-3.5 text-primary" /> 2FA required
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" /> HIPAA-aligned
             </span>
           </div>

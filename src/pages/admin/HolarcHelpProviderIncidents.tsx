@@ -79,10 +79,10 @@ export default function HolarcHelpProviderIncidents() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">Total</p><p className="text-xl font-bold">{totals.count}</p></CardContent></Card>
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">Accepted</p><p className="text-xl font-bold">{totals.accepts}</p></CardContent></Card>
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">Arrived</p><p className="text-xl font-bold">{totals.arrived}</p></CardContent></Card>
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">Avg rating</p><p className="text-xl font-bold">{totals.avgRating}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Total</p><p className="text-xl font-bold">{totals.count}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Accepted</p><p className="text-xl font-bold">{totals.accepts}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Arrived</p><p className="text-xl font-bold">{totals.arrived}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Avg rating</p><p className="text-xl font-bold">{totals.avgRating}</p></CardContent></Card>
       </div>
 
       <div className="rounded-2xl border bg-card overflow-x-auto">
@@ -106,8 +106,8 @@ export default function HolarcHelpProviderIncidents() {
               <TableRow key={r.id}>
                 <TableCell className="text-xs">{format(parseISO(r.created_at), "MMM d, HH:mm")}</TableCell>
                 <TableCell className="text-xs">{r.patient_name}</TableCell>
-                <TableCell><Badge variant="outline" className="capitalize text-[10px]">{r.severity ?? "—"}</Badge></TableCell>
-                <TableCell><Badge variant="outline" className="capitalize text-[10px]">{r.status}</Badge></TableCell>
+                <TableCell><Badge variant="outline" className="capitalize text-xs">{r.severity ?? "—"}</Badge></TableCell>
+                <TableCell><Badge variant="outline" className="capitalize text-xs">{r.status}</Badge></TableCell>
                 <TableCell className="text-xs">{r.accepted_at ? format(parseISO(r.accepted_at), "HH:mm") : "—"}</TableCell>
                 <TableCell className="text-xs">{r.arrived_at ? format(parseISO(r.arrived_at), "HH:mm") : "—"}</TableCell>
                 <TableCell className="text-xs">{r.resolved_at ? format(parseISO(r.resolved_at), "HH:mm") : "—"}</TableCell>

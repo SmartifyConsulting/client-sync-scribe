@@ -45,7 +45,7 @@ export default function DispatchAssignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Emergency Dispatch
         </p>
         <h1 className="text-3xl font-extrabold">Confirm Dispatch Assignment</h1>

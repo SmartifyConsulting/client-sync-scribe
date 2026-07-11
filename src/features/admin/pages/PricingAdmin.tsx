@@ -57,7 +57,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
             <Input
               value={monthly.name}
               onChange={(e) => onChange(monthly.id, "name", e.target.value)}
-              className="text-[13px] font-semibold border-0 border-b border-[hsl(var(--admin-border-strong))] rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto py-1 mb-4 bg-transparent"
+              className="text-sm font-semibold border-0 border-b border-[hsl(var(--admin-border-strong))] rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto py-1 mb-4 bg-transparent"
             />
             <div className="flex items-baseline gap-1 mb-3">
               <span className="text-[18px] text-[hsl(var(--admin-text-tertiary))]">$</span>
@@ -68,9 +68,9 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
                 onChange={(e) => onChange(monthly.id, "price", e.target.value)}
                 className="w-full text-[28px] font-semibold tabular-nums border-0 border-b border-transparent rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto bg-transparent"
               />
-              <span className="text-[12px] text-[hsl(var(--admin-text-tertiary))]">/mo</span>
+              <span className="text-sm text-[hsl(var(--admin-text-tertiary))]">/mo</span>
             </div>
-            <div className="flex justify-between border-t border-[hsl(var(--admin-border-subtle))] pt-2 text-[12px]">
+            <div className="flex justify-between border-t border-[hsl(var(--admin-border-subtle))] pt-2 text-sm">
               <span className="text-[hsl(var(--admin-text-tertiary))]">Annual liability</span>
               <span className="tabular-nums text-[hsl(var(--admin-text-secondary))]">${formatCurrency(annualLiability)}</span>
             </div>
@@ -84,14 +84,14 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
               <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-accent))]">
                 Annual plan
               </p>
-              <span className="text-[10px] font-semibold text-[hsl(var(--admin-accent))] uppercase tracking-wider">
+              <span className="text-xs font-semibold text-[hsl(var(--admin-accent))] uppercase tracking-wider">
                 Best value
               </span>
             </div>
             <Input
               value={annual.name}
               onChange={(e) => onChange(annual.id, "name", e.target.value)}
-              className="text-[13px] font-semibold border-0 border-b border-[hsl(var(--admin-border-strong))] rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto py-1 mb-4 bg-transparent"
+              className="text-sm font-semibold border-0 border-b border-[hsl(var(--admin-border-strong))] rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto py-1 mb-4 bg-transparent"
             />
             <div className="flex items-baseline gap-1 mb-3">
               <span className="text-[18px] text-[hsl(var(--admin-accent))]">$</span>
@@ -102,9 +102,9 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
                 onChange={(e) => onChange(annual.id, "price", e.target.value)}
                 className="w-full text-[28px] font-semibold tabular-nums text-[hsl(var(--admin-accent))] border-0 border-b border-transparent rounded-none focus-visible:ring-0 focus-visible:border-[hsl(var(--admin-accent))] px-0 h-auto bg-transparent"
               />
-              <span className="text-[12px] text-[hsl(var(--admin-text-tertiary))]">/yr</span>
+              <span className="text-sm text-[hsl(var(--admin-text-tertiary))]">/yr</span>
             </div>
-            <div className="space-y-1.5 border-t border-[hsl(var(--admin-border-subtle))] pt-2 text-[12px]">
+            <div className="space-y-1.5 border-t border-[hsl(var(--admin-border-subtle))] pt-2 text-sm">
               <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Monthly × 12</span><span className="tabular-nums">${formatCurrency(annualLiability)}</span></div>
               <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Annual price</span><span className="tabular-nums">−${formatCurrency(annual.price)}</span></div>
               <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Discount</span><span className="font-semibold text-[hsl(var(--admin-accent))] tabular-nums">{discountPct}%</span></div>

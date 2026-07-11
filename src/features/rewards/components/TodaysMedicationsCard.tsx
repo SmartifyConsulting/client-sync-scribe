@@ -115,8 +115,8 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
                       </p>
                     ) : (
                       <div className="flex gap-1.5 mt-1">
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Active</Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">Chronic</Badge>
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0">Active</Badge>
+                        <Badge variant="outline" className="text-xs px-1.5 py-0">Chronic</Badge>
                       </div>
                     )}
                   </div>

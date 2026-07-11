@@ -132,7 +132,7 @@ export default function FleetOperationsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
           <h2 className="text-xl font-extrabold mt-0.5 flex items-center gap-2">
             <Truck className="h-5 w-5 text-primary" /> Fleet Admin
           </h2>
@@ -179,14 +179,14 @@ export default function FleetOperationsScreen() {
                         {v.vehicle_code}
                         {v.registration_number ? <span className="text-muted-foreground font-normal"> · {v.registration_number}</span> : null}
                       </p>
-                      <p className="text-[11px] text-muted-foreground truncate">Ambulance</p>
+                      <p className="text-sm text-muted-foreground truncate">Ambulance</p>
 
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-semibold">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">
                         <Users className="h-3 w-3" /> {crew.length}
                       </span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${statusBadge(v.status)}`}>
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${statusBadge(v.status)}`}>
                         {v.status ?? "—"}
                       </span>
                     </div>
@@ -196,17 +196,17 @@ export default function FleetOperationsScreen() {
                   {/* Assigned crew */}
                   <div className="rounded-lg bg-muted/40 p-2.5 space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
                         Assigned crew
                       </p>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button size="sm" variant="outline" className="h-6 text-[11px] px-2">
+                          <Button size="sm" variant="outline" className="h-6 text-sm px-2">
                             <Plus className="h-3 w-3 mr-1" /> Add crew
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-64 p-2">
-                          <p className="px-1 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          <p className="px-1 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Tick members to assign
                           </p>
                           <div className="max-h-60 overflow-y-auto space-y-0.5">
@@ -221,7 +221,7 @@ export default function FleetOperationsScreen() {
                                   <Checkbox checked={on} onCheckedChange={() => toggleAssign(v.id, m.id, on)} />
                                   <span className="truncate flex-1">
                                     {memberLabel(m)}
-                                    <span className="text-muted-foreground text-[10px] ml-1 uppercase">· {m.role}</span>
+                                    <span className="text-muted-foreground text-xs ml-1 uppercase">· {m.role}</span>
                                   </span>
                                 </label>
                               );
@@ -232,16 +232,16 @@ export default function FleetOperationsScreen() {
                     </div>
 
                     {crew.length === 0 ? (
-                      <p className="text-[11px] italic text-muted-foreground">
+                      <p className="text-sm italic text-muted-foreground">
                         No crew assigned. Use Add crew above to assign paramedics, EMTs, drivers or nurses.
                       </p>
                     ) : (
                       <div className="flex flex-wrap gap-1.5">
                         {crew.map(({ assignment, member }) => (
-                          <span key={assignment.id} className="inline-flex items-center gap-1 rounded-full bg-background border px-2 py-0.5 text-[11px]">
+                          <span key={assignment.id} className="inline-flex items-center gap-1 rounded-full bg-background border px-2 py-0.5 text-sm">
                             <Users className="h-3 w-3 text-primary" />
                             <span className="font-semibold">{memberLabel(member!)}</span>
-                            <span className="text-muted-foreground text-[10px] uppercase">· {member!.role}</span>
+                            <span className="text-muted-foreground text-xs uppercase">· {member!.role}</span>
                             <button
                               onClick={(e) => { e.stopPropagation(); toggleAssign(v.id, member!.id, true); }}
                               className="ml-0.5 opacity-60 hover:opacity-100"

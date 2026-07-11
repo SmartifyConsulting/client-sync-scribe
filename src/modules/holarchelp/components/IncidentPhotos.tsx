@@ -223,7 +223,7 @@ export function IncidentPhotos({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">
+                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                   {t("common.loading")}
                 </div>
               )}

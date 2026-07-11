@@ -120,7 +120,7 @@ export default function RealTimeMonitoringScreen() {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           {t("realTimeMonitoring.eyebrow", "Operations")}
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
@@ -160,7 +160,7 @@ export default function RealTimeMonitoringScreen() {
                 </p>
               </div>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
+                className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${
                   item.status === "moving" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                 }`}
               >
@@ -169,11 +169,11 @@ export default function RealTimeMonitoringScreen() {
             </div>
             <div className="grid grid-cols-3 gap-3 text-xs items-center">
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Speed</p>
+                <p className="text-xs text-muted-foreground uppercase">Speed</p>
                 <p className="font-semibold">{item.speed}</p>
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground uppercase">Fuel</p>
+                <p className="text-xs text-muted-foreground uppercase">Fuel</p>
                 <p className="font-semibold">{item.fuel}</p>
               </div>
               <div className="text-right">
@@ -192,7 +192,7 @@ export default function RealTimeMonitoringScreen() {
               <span className="font-semibold flex items-center gap-2">
                 <Shield className="h-4 w-4 text-primary" /> Safety events
               </span>
-              <span className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span className="text-destructive">● 2 high</span>
                 <span className="text-warning">● 1 medium</span>
               </span>
@@ -220,7 +220,7 @@ export default function RealTimeMonitoringScreen() {
                       <p className="text-xs mt-0.5">{item.event}</p>
                     </div>
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider ${
+                      className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${
                         item.severity === "HIGH"
                           ? "bg-destructive/10 text-destructive"
                           : "bg-warning/10 text-warning"
@@ -230,7 +230,7 @@ export default function RealTimeMonitoringScreen() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] text-muted-foreground">{item.time}</p>
+                    <p className="text-sm text-muted-foreground">{item.time}</p>
                     <Button variant="outline" size="sm" className="h-7 text-xs">{item.action}</Button>
                   </div>
                 </div>
@@ -283,9 +283,9 @@ function StatCard({
           : "text-foreground";
   return (
     <div className="rounded-2xl border border-border bg-card p-3">
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={`text-xl font-extrabold mt-1 ${toneClass}`}>{value}</p>
-      <p className="text-[11px] text-muted-foreground">{hint}</p>
+      <p className="text-sm text-muted-foreground">{hint}</p>
     </div>
   );
 }

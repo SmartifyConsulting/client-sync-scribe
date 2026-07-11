@@ -35,14 +35,14 @@ export function MissionStatusStepper({
   if (treatedOnScene) {
     if (compact) {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 text-xs font-bold text-emerald-700">
           <Check className="h-3 w-3" /> Treated on scene
         </span>
       );
     }
     return (
       <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-3">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Mission status</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Mission status</p>
         <div className="mt-1.5 flex items-center gap-2">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white">
             <Check className="h-3.5 w-3.5" />
@@ -77,7 +77,7 @@ export function MissionStatusStepper({
             </div>
           );
         })}
-        <span className="ml-1 text-[10px] font-bold text-primary truncate">
+        <span className="ml-1 text-xs font-bold text-primary truncate">
           {idx >= 0 && idx < STEPS.length ? t(STEPS[idx].labelKey, STEPS[idx].fallback) : (currentStatus ?? "")}
         </span>
       </div>
@@ -88,8 +88,8 @@ export function MissionStatusStepper({
   return (
     <div className="rounded-2xl border bg-card p-3">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mission status</p>
-        <p className="text-[10px] text-muted-foreground">Auto-updates from vehicle GPS</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Mission status</p>
+        <p className="text-xs text-muted-foreground">Auto-updates from vehicle GPS</p>
       </div>
       <ol className="mt-2 grid grid-cols-4 gap-1">
         {STEPS.map((s, i) => {
@@ -100,7 +100,7 @@ export function MissionStatusStepper({
               <div className="flex w-full items-center">
                 <span
                   className={cn(
-                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-[10px] font-bold",
+                    "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold",
                     done && "border-primary bg-primary text-primary-foreground",
                     active && "border-primary bg-primary/15 text-primary ring-2 ring-primary/30",
                     !done && !active && "border-muted-foreground/30 bg-card text-muted-foreground"
@@ -119,7 +119,7 @@ export function MissionStatusStepper({
               </div>
               <span
                 className={cn(
-                  "text-center text-[10px] leading-tight",
+                  "text-center text-xs leading-tight",
                   active ? "font-bold text-primary" : "text-muted-foreground"
                 )}
               >

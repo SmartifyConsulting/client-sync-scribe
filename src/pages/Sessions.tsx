@@ -737,7 +737,7 @@ export default function Sessions() {
 
       <div>
         <h1 className="text-2xl font-bold text-foreground">{t("sessions.sessionMode")}</h1>
-        <p className="mt-1 text-muted-foreground text-[12px]">
+        <p className="mt-1 text-muted-foreground text-sm">
           Record, transcribe, and generate AI summaries for patient sessions
         </p>
       </div>
@@ -961,7 +961,7 @@ export default function Sessions() {
                     ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
                     : "Tap to record"}
               </p>
-              <p className="text-[10px] text-muted-foreground/70 text-center mt-1">
+              <p className="text-xs text-muted-foreground/70 text-center mt-1">
                 💡 Say "End Session" to automatically stop recording
               </p>
               

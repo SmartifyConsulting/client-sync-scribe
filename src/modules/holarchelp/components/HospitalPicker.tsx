@@ -82,7 +82,7 @@ export function HospitalPicker({
                   <p className="truncate text-sm font-semibold">{h.name}</p>
                   {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[10px]">
+                <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs">
                   <span className={`rounded-full border px-1.5 py-0.5 font-semibold ${capColor(h.er_capacity_status)}`}>
                     {(h.er_capacity_status ?? "green").toUpperCase()}
                   </span>

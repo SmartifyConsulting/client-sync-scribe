@@ -81,7 +81,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
     <div className="space-y-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold uppercase tracking-wider text-primary">{t("emergencyContext.title")}</p>
-        <span className="text-[10px] uppercase text-muted-foreground">{t("emergencyContext.permission")}</span>
+        <span className="text-xs uppercase text-muted-foreground">{t("emergencyContext.permission")}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
@@ -99,7 +99,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
       {ctx.ai_summary && (
         <div className="rounded-xl border bg-muted/40 p-2.5">
-          <p className="mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="mb-1 flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground">
             <Stethoscope className="h-3.5 w-3.5" /> {t("emergencyContext.aiSummary")}
           </p>
           <p className="text-xs leading-snug">{ctx.ai_summary}</p>
@@ -108,7 +108,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
       {(ctx.voice_note_url || ctx.voice_note_transcript) && (
         <div className="rounded-xl border bg-muted/40 p-2.5">
-          <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{t("emergencyContext.voiceClip")}</p>
+          <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("emergencyContext.voiceClip")}</p>
           {ctx.voice_note_url && <VoiceNoteAudio path={ctx.voice_note_url} />}
           {ctx.voice_note_transcript && <p className="mt-1 text-xs italic text-muted-foreground">"{ctx.voice_note_transcript}"</p>}
         </div>
@@ -163,7 +163,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
 const Field = ({ icon: Icon, label, value }: any) => (
   <div>
-    <p className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+    <p className="flex items-center gap-1 text-xs uppercase tracking-wider text-muted-foreground">
       {Icon && <Icon className="h-3 w-3" />}{label}
     </p>
     <p className="truncate text-sm font-semibold">{value}</p>
@@ -176,7 +176,7 @@ const Pill2 = ({ ok, label }: { ok: boolean; label: string }) => (
 
 const Section = ({ icon: Icon, label, tone, children }: any) => (
   <div>
-    <p className={`mb-1 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${tone ?? "text-muted-foreground"}`}>
+    <p className={`mb-1 flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider ${tone ?? "text-muted-foreground"}`}>
       <Icon className="h-3.5 w-3.5" /> {label}
     </p>
     {children}
@@ -186,7 +186,7 @@ const Section = ({ icon: Icon, label, tone, children }: any) => (
 const Chips = ({ items, tone }: { items: string[]; tone?: "destructive" }) => (
   <div className="flex flex-wrap gap-1">
     {items.map((it, i) => (
-      <span key={i} className={`rounded-full border px-2 py-0.5 text-[11px] ${tone === "destructive" ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-border bg-muted text-foreground"}`}>{it}</span>
+      <span key={i} className={`rounded-full border px-2 py-0.5 text-sm ${tone === "destructive" ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-border bg-muted text-foreground"}`}>{it}</span>
     ))}
   </div>
 );

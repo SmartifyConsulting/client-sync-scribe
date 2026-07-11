@@ -202,7 +202,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           <div className="flex items-center justify-between px-3 py-2 border-b border-border">
             <p className="text-xs font-semibold">{t("topbar.notifications")}</p>
             {recentNotifications.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-[10px] h-6 text-destructive hover:text-destructive" onClick={clearAllNotifications}>
+              <Button variant="ghost" size="sm" className="text-xs h-6 text-destructive hover:text-destructive" onClick={clearAllNotifications}>
                 {t("topbar.clearAll")}
               </Button>
             )}
@@ -215,7 +215,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                 <div key={n.id} className="px-3 py-2 border-b border-border/50 text-xs bg-primary/5 flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground">{n.title}</p>
-                    {n.description && <p className="text-[10px] text-muted-foreground mt-0.5">{n.description}</p>}
+                    {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
                   </div>
                   <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px] text-muted-foreground hover:text-destructive shrink-0" onClick={() => clearNotification(n.id)}>
                     {t("common.close")}
@@ -259,7 +259,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                 <Stethoscope className="h-3.5 w-3.5 text-primary" />
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                  <p className="text-[10px] text-muted-foreground">{t("topbar.doctor")}</p>
+                  <p className="text-xs text-muted-foreground">{t("topbar.doctor")}</p>
                 </div>
               </button>
               <button
@@ -272,7 +272,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                 <HeartPulse className="h-3.5 w-3.5 text-primary" />
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                  <p className="text-[10px] text-muted-foreground">{t("topbar.patient")}</p>
+                  <p className="text-xs text-muted-foreground">{t("topbar.patient")}</p>
                 </div>
               </button>
             </div>
@@ -289,7 +289,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
             return (
               <div className="px-2 py-1.5 border-b border-border mb-1">
                 <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-[10px] text-muted-foreground">{roleLabel}</p>
+                <p className="text-xs text-muted-foreground">{roleLabel}</p>
               </div>
             );
           })()}
@@ -300,7 +300,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           )}
           {isAdmin && (
             <div className="border-t border-border mt-1 pt-1">
-              <div className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <UserCog className="h-3 w-3" /> {t("topbar.switchProfile")}
               </div>
               <div className="max-h-64 overflow-y-auto">
@@ -322,7 +322,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                       {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-foreground truncate">{p.name}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{p.role} · {p.email}</p>
+                        <p className="text-xs text-muted-foreground truncate">{p.role} · {p.email}</p>
                       </div>
                     </button>
                   );
@@ -348,7 +348,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">Georgia Adams · info@georgiaadams.co.za</p>
+                  <p className="text-xs text-muted-foreground truncate">Georgia Adams · info@georgiaadams.co.za</p>
                 </div>
               </button>
             </div>
