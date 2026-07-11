@@ -1,46 +1,54 @@
-## 1. Default `[DoctorSignature]` above `[DoctorName]` in all templates
+## 1. Sharon can't see the hospital admission
 
-Signature substitution already works (`fillDocumentPlaceholders.ts` + `useTemplateWithHeaderFooter.ts` replace `[DoctorSignature]` with an `<img>` of `profile.signature_url`). The gap is that only the Referral Letter default template contains the placeholder. Update the seeded default templates in `src/hooks/useTemplates.ts` so every one shows the signature image immediately above the doctor's typed name:
+Root cause (verified in DB):
+- Sharon's real auth account is `sharon.kennedy@testmail.com` (id `cf9b1db5…`). Her only patient row `bc6973cc…` is archived and has no admissions.
+- The active clinical row `Sharon Elise Kennedy` (id `4b1032be…`) — the one Dean added the admission to — is linked to a different auth user (`projectmanager@smartify.co.za`, id `96740682…`), so when the real Sharon logs in, `MyDetails.fetchPatientRecord()` (matching by `patient_user_id = auth.uid()`) lands on the empty archived row.
 
-- Medical Certificate — insert `[DoctorSignature]` line above `Doctor's Name: [DoctorName]`.
-- Prescription — insert `[DoctorSignature]` above `Prescribing Doctor: [DoctorName]` (remove the "Signature: ............" line).
-- General Letterhead — insert `[DoctorSignature]` above `[DoctorName]` (remove dotted signature line).
-- Invoice — insert `[DoctorSignature]` above `[DoctorName]`.
-- Hospital Admission Form — replace the dotted "Signature: ..." line with `[DoctorSignature]` above `[DoctorName]`.
-- Referral Letter — already correct, leave as is.
+Fix:
 
-Note on existing users: `fetchTemplates()` seeds any missing default templates but never rewrites templates a user already has. For the rollout we will also add a one-time reconcile: if a seeded default template's `content` still matches the old shipped string exactly (unchanged by the user) and lacks `[DoctorSignature]`, overwrite it with the new content. Custom edits are preserved.
+**a) Data reconciliation (insert/update tool)**
+- Re-parent the active clinical row: `UPDATE patients SET patient_user_id = 'cf9b1db5…' WHERE id = '4b1032be…'`.
+- Null the `patient_user_id` on the empty archived duplicate `bc6973cc…` so it can't shadow the real one.
 
-## 2. New Holarc Health logo
+**b) Defensive fetch in `src/pages/patient/MyDetails.tsx`**
+- Prefer `patient_user_id = user.id AND status <> 'archived'` ordered by newest `updated_at`.
+- Fallback: match by `lower(email) = lower(user.email)` on a non-archived row; if found, patch that row's `patient_user_id` to the current user so future logins self-heal.
+- Keep the "create minimal row" branch only when both lookups fail.
 
-Register `user-uploads://HHNewLogo.png` as a Lovable asset and point every existing `holarc-logo*.png` import at the new asset URL, without touching any width/height/positioning classes:
+Sharon then sees the admission in both `?section=health` (existing `<AdmissionsView>` block) and `?section=care` → Admissions tab (already wired to `patient.id`).
 
-```
-lovable-assets create --file /mnt/user-uploads/HHNewLogo.png \
-  --filename holarc-health-logo.png > src/assets/holarc-health-logo.png.asset.json
-```
+## 2. Emergency Contacts accordion label
 
-Replace the `import ... from "@/assets/holarc-logo*.png"` lines in:
-`src/components/layout/Sidebar.tsx`, `ProviderSidebar.tsx`, `ProviderAppLayout.tsx`, `PatientAppLayout.tsx`, `MobileHeader.tsx`, `src/components/auth/TwoFactorSetup.tsx`, `MfaEnrollScreen.tsx`, `BackupCodesScreen.tsx`, `src/pages/Landing.tsx`, `Auth.tsx`, `ForgotPassword.tsx`, `ResetPassword.tsx`, `NotFound.tsx`
-— with `import holarcLogo from "@/assets/holarc-health-logo.png.asset.json"` and use `holarcLogo.url` as the `src`. All className/style attributes stay untouched, so sizing and position don't shift. Old `holarc-logo*.png` files stay on disk (untouched) so nothing else breaks.
+In `src/features/patients/components/EmergencyContactsInline.tsx` the trigger uses ad-hoc markup (`p-3`, `<span>`, no shared icon slot) so it renders slightly differently from every other Personal Information accordion which uses the shared `SectionHeader`.
 
-## 3. Show Dean's hospital admission on Sharon's profile
+Rewrite the `CollapsibleTrigger` to mirror `SectionHeader`:
+- `flex w-full items-center justify-between px-4 py-3 group …`
+- `<h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left"><ShieldAlert className="h-4 w-4 text-primary" /> Emergency Contacts</h3>`
+- Same chevron treatment.
 
-Confirmed via database: one admission exists (`Mediclinic Cape Town`, 14 Apr 2026) linked to Sharon Elise Kennedy (`patient_id = 4b1032be…`) created by Dr Dean Allie. RLS allows both Dean (as `doctor_id`) and Sharon (via `patient_user_id`) to read it.
+## 3. Where Sharon rates a nurse (with new 4-hour + comment rule)
 
-Two places need to render it:
+**Current state:** `RateNurseControl` (used inside `AdmissionsView` on each vitals/medication/lab/imaging row) already lets the patient submit a 1–5 star rating per record. The `nurse_record_ratings` table has a `comment` column but the UI never surfaces it, and there is no rate-limit — patients can rate any number of records instantly.
 
-a) **Doctor-side (Dean viewing Sharon)** — `PatientProfile.tsx` already renders `<AdmissionsView patientId={patient.id} …>` under the Admissions tab, and there is an older archived Sharon record (`bc6973cc…`) in the DB. If Dean lands on the archived Sharon by mistake the tab looks empty. Fix: in `usePatients`/the patient loader used by `PatientProfile`, when multiple patient rows share a `patient_user_id`, prefer the non-archived (name not ending in "(archived)") most-recently-updated row. This matches the existing project-memory duplicate-resolution pattern.
+**Changes:**
 
-b) **Patient-side (Sharon viewing her own profile)** — the patient portal has no Admissions surface today. Add a "Hospital Admissions" section to `src/pages/patient/MyDetails.tsx` (below existing clinical sections) that renders `<AdmissionsView patientId={myPatientRecord.id} canEdit={false} />`. Read-only for the patient (no add/upload buttons). This uses the same hook and RLS already permits it.
+a) UX — `src/components/admissions/RateNurseControl.tsx`
+   - After stars, show an inline "Add a note" trigger that expands a small `<Textarea>` + Submit. Rating without a comment still allowed; comment without a rating is not.
+   - On submit, upsert `{ rating, comment }` into `nurse_record_ratings` (existing column).
+   - Show the last-submitted rating + comment inline in a muted read-only pill once saved.
+   - Disable the control (stars + textarea) with a helper "You can rate a nurse again in Xh Ym" whenever the most recent rating by this patient for this `nurse_id` is under 4 hours old. Countdown recomputed on mount.
 
-## Verification
+b) Enforcement — new migration on `nurse_record_ratings`
+   - Add a `BEFORE INSERT OR UPDATE` trigger `enforce_nurse_rating_cooldown()` (SECURITY DEFINER, `search_path=public`) that raises if another row exists with the same `patient_user_id` + `nurse_id` and `created_at > now() - interval '4 hours'` (ignoring the row being updated).
+   - Trigger enforces the rule regardless of client, so bypassing the UI still fails.
 
-- `bunx tsgo` after edits.
-- Playwright at 1280×1800: log in as Dean → open Sharon's profile → Admissions tab shows the Mediclinic Cape Town admission. Log in as Sharon → MyDetails shows the same admission read-only. Screenshot both.
-- Open a new Medical Certificate / Prescription / Invoice preview and confirm the signature image renders above the doctor name.
-- Visually confirm the new logo appears on Landing, Auth, Sidebar and MobileHeader at the same size/position as before.
+c) Discoverability — surface nurse ratings at the top of the admission
+   - In `AdmissionsView.tsx` add a small "Rate your nurses" summary above the accordions listing every nurse who touched the admission with their most recent rating chip and a jump link, so Sharon knows the feature exists without expanding each accordion.
 
-## Out of scope
-
-No schema changes, no RLS changes, no edits to header/footer templates, no changes to `signature_url` upload flow, no changes to `AdmissionsView` layout beyond passing `canEdit={false}` on the patient side.
+## Files touched
+- new migration (trigger only — no schema changes)
+- one insert/update call (row re-parenting)
+- `src/pages/patient/MyDetails.tsx`
+- `src/features/patients/components/EmergencyContactsInline.tsx`
+- `src/components/admissions/RateNurseControl.tsx`
+- `src/features/sessions/admissions/AdmissionsView.tsx`
