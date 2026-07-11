@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 import {
   Mail, Lock, Loader2, User, Building2, MapPin, Plus, Trash2, Phone,
   Stethoscope, PenTool, UserCircle, Camera, ChevronLeft, ChevronRight, Globe,

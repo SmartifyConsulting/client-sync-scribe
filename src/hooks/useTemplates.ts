@@ -70,9 +70,11 @@ Other information / recommendations: [OtherRecommendations]
 
 ..............................................................................................................
 
-Doctor's Name: [DoctorName]
+[DoctorSignature]
 
-Doctor's Signature: ................................................ Date: [SignatureDate]`,
+[DoctorName]
+
+Date: [SignatureDate]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
@@ -167,11 +169,11 @@ Repeats: [NumberOfRepeats]
 
 Special Instructions: [SpecialInstructions]
 
+[DoctorSignature]
+
 Prescribing Doctor: [DoctorName]
 
 Registration Number: [DoctorNumber]
-
-Signature: ................................................
 
 Date: [SignatureDate]`,
     logo_url: null,
@@ -196,7 +198,7 @@ Date: [Date]
 
 [Content]
 
-Signature: ................................................
+[DoctorSignature]
 
 [DoctorName]
 
@@ -240,6 +242,8 @@ Payment Terms: Due within 30 days
 Bank Details: [BankDetails]
 
 Thank you.
+
+[DoctorSignature]
 
 [DoctorName]
 
@@ -294,8 +298,9 @@ Procedure Description: [ProcedureDescription]
 
 Patient: [PatientName]
 
-Signature: ................................................
-           [DoctorName]`,
+[DoctorSignature]
+
+[DoctorName]`,
     logo_url: null,
     logo_position: null,
     font_family: "sans",
@@ -366,6 +371,37 @@ export function useTemplates() {
           setTemplates([...parsedTemplates, ...newParsed]);
           return;
         }
+      }
+
+      // One-time reconcile: refresh untouched default templates that lack the
+      // new [DoctorSignature] placeholder so the signature renders above the
+      // doctor name on rollout.
+      const stale = parsedTemplates.filter(
+        (t) =>
+          t.is_default &&
+          !(t.content || "").includes("[DoctorSignature]") &&
+          t.updated_at === t.created_at,
+      );
+      if (stale.length > 0) {
+        const updated = await Promise.all(
+          stale.map(async (t) => {
+            const fresh = defaultTemplates.find((dt) => dt.name === t.name);
+            if (!fresh) return t;
+            const { data: upd } = await supabase
+              .from("templates")
+              .update({ content: fresh.content, updated_at: new Date().toISOString() })
+              .eq("id", t.id)
+              .eq("user_id", user.id)
+              .select()
+              .single();
+            return upd
+              ? { ...upd, logo_position: upd.logo_position as { x: number; y: number } | null }
+              : t;
+          }),
+        );
+        const byId = new Map(updated.map((u) => [u.id, u]));
+        setTemplates(parsedTemplates.map((t) => byId.get(t.id) || t));
+        return;
       }
 
       setTemplates(parsedTemplates);

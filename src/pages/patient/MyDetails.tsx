@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
+import { AdmissionsView } from "@/features/sessions/admissions/AdmissionsView";
+import { Hospital } from "lucide-react";
 
 
 
@@ -173,6 +175,16 @@ export default function MyDetails() {
       ) : (
         <div className="p-6 text-center text-muted-foreground border border-dashed border-border rounded-lg">
           <p>Your medical record is being set up. Please refresh in a moment.</p>
+        </div>
+      )}
+
+      {patient && section === "health" && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Hospital className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Hospital Admissions</h2>
+          </div>
+          <AdmissionsView patientId={patient.id} canEdit={false} />
         </div>
       )}
 
