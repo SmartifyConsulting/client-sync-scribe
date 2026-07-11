@@ -1022,6 +1022,8 @@ ${tasksHtml}`;
         }
       }
 
+      // Vula awarding MUST be sequenced last — after every auto-created document above has settled.
+      logger.debug('All auto-documents processed; proceeding to Vula awarding step.');
       if (visitCategory && patientId) {
         const { data: configData } = await supabase
           .from('gamification_config')
