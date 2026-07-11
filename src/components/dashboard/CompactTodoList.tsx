@@ -28,6 +28,7 @@ import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
+import { TodoRow } from "@/components/todos/TodoRow";
 import { useTranslation } from "react-i18next";
 
 interface TodoItem {
@@ -422,100 +423,37 @@ export function CompactTodoList() {
             </p>
           ) : (
             filteredTodos.map((todo) => (
-              <div
+              <TodoRow
                 key={todo.id}
-                className="flex items-center gap-1.5 py-1.5 px-1 rounded-md hover:bg-muted/50 group"
-              >
-                <Checkbox
-                  checked={todo.completed}
-                  onCheckedChange={() => toggleComplete(todo.id)}
-                  className="h-3.5 w-3.5"
-                />
-                {editingId === todo.id ? (
-                  <div className="flex-1 flex gap-1">
-                    <Input
-                      value={editText}
-                      onChange={(e) => setEditText(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && saveEdit(todo.id)}
-                      className="h-6 text-sm border-border px-1.5"
-                      autoFocus
-                    />
-                    <button onClick={() => saveEdit(todo.id)} className="text-success hover:text-success/80">
-                      <Check className="h-4 w-4" />
-                    </button>
-                    <button onClick={() => { setEditingId(null); setEditText(""); }} className="text-muted-foreground hover:text-foreground">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    {todo.is_auto_executed && (
-                      <Sparkles className="h-4 w-4 text-primary shrink-0" />
-                    )}
-                    <span
-                      className={cn(
-                        "flex-1 text-xs",
-                        todo.completed && "line-through text-muted-foreground"
-                      )}
-                    >
-                      {translateTodoTitle(todo.title)}
-                    </span>
-                    {todo.is_auto_executed && !todo.completed && (
-                      <button
-                        onClick={() => toggleComplete(todo.id)}
-                        className="flex items-center gap-0.5 text-xs font-medium text-success hover:text-success/80 shrink-0 border border-success/30 rounded px-1 py-0.5"
-                      >
-                        <ShieldCheck className="h-4 w-4" />
-                      </button>
-                    )}
-                    <div className="flex gap-0.5">
-                      {todo.document_id && (
-                        <>
-                          <button
-                            onClick={() => handlePreviewDoc(todo)}
-                            disabled={loadingPreview === todo.document_id}
-                            className="text-muted-foreground hover:text-foreground"
-                            title="Preview"
-                          >
-                            {loadingPreview === todo.document_id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (!todo.document_id) return;
-                              setSendingDocId(todo.document_id);
-                              try {
-                                const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', todo.document_id).maybeSingle();
-                                if (!doc) return;
-                                const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
-                                const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
-                                if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: todo.document_id, recipientEmail: email } });
-                                await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', todo.document_id);
-                                await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', todo.id);
-                                setTodos(prev => prev.map(t => t.id === todo.id ? { ...t, completed: true } : t));
-                                toast({ title: "Document sent" });
-                              } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
-                            }}
-                            disabled={todo.completed || sendingDocId === todo.document_id}
-                            className={cn(todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
-                          >
-                            {sendingDocId === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                          </button>
-                        </>
-                      )}
-                      <button onClick={() => { setEditingId(todo.id); setEditText(todo.title); }} className="text-muted-foreground hover:text-foreground">
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-                      <button onClick={() => deleteTask(todo.id)} className="text-muted-foreground hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+                compact
+                todo={todo as any}
+                onToggle={toggleComplete}
+                onStartEdit={(t) => { setEditingId(t.id); setEditText(t.title); }}
+                onDelete={deleteTask}
+                onPreview={(t) => handlePreviewDoc(t as any)}
+                onSend={async (t) => {
+                  if (!t.document_id) return;
+                  setSendingDocId(t.document_id);
+                  try {
+                    const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', t.document_id).maybeSingle();
+                    if (!doc) return;
+                    const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
+                    const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
+                    if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: t.document_id, recipientEmail: email } });
+                    await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', t.document_id);
+                    await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', t.id);
+                    setTodos(prev => prev.map(x => x.id === t.id ? { ...x, completed: true } : x));
+                    toast({ title: "Document sent" });
+                  } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
+                }}
+                isEditing={editingId === todo.id}
+                editText={editText}
+                setEditText={setEditText}
+                saveEdit={saveEdit}
+                cancelEdit={() => { setEditingId(null); setEditText(""); }}
+                sending={sendingDocId === todo.document_id}
+                previewing={loadingPreview === todo.document_id}
+              />
             ))
           )}
         </div>

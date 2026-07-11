@@ -618,6 +618,33 @@
       "admission": "Hospital admission",
       "report": "Report",
       "result": "Result"
+    },
+    "kinds": {
+      "invoice": "Invoice",
+      "prescription": "Prescription",
+      "appointment": "Appointment",
+      "followUp": "Follow-up",
+      "recommendation": "Recommendation",
+      "medicalCertificate": "Medical certificate",
+      "referral": "Referral",
+      "laboratory": "Laboratory",
+      "email": "Email",
+      "phone": "Phone call",
+      "meeting": "Meeting",
+      "payment": "Payment",
+      "claim": "Claim",
+      "reminder": "Reminder",
+      "urgent": "Urgent",
+      "task": "Task"
+    },
+    "actions": {
+      "edit": "Edit",
+      "send": "Send",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "markComplete": "Mark complete",
+      "reopen": "Reopen",
+      "priority": "Priority"
     }
   },
   "documents": {
