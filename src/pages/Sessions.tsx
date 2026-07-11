@@ -616,6 +616,11 @@ export default function Sessions() {
     console.log("=== toggleRecording called ===");
     console.log("isRecording:", isRecording);
     if (isRecording) {
+      // Manual Stop must trigger the full completion pipeline:
+      // transcription → summarize-session → auto-create documents → (Vula awarded last).
+      // Flag pending completion BEFORE stopping so onTranscriptionComplete runs handleSessionComplete.
+      pendingCompletionRef.current = true;
+      setPendingTranscript(latestTranscriptRef.current || transcript || "");
       stopRecording();
     } else {
       startRecording();
