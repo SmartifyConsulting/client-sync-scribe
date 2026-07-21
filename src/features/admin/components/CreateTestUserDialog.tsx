@@ -151,16 +151,12 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
       const newUserId: string | undefined = data?.user_id;
       if (!newUserId) throw new Error("User created but ID missing");
 
-      // 2. Upload license
+      // 2. Prepare license path and insert the pending provider record FIRST
+      // (storage RLS verifies the upload path is referenced by a provider row owned by this user).
       const file = vetting.license_file;
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `pending/${newUserId}/${Date.now()}-${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("provider-licenses")
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (upErr) throw new Error(`License upload failed: ${upErr.message}`);
 
-      // 3. Insert provider record (pending)
       const directors = vetting.directors
         .filter((d) => d.full_name.trim())
         .map((d) => ({ full_name: d.full_name.trim(), role: d.role?.trim() || null }));
@@ -195,6 +191,13 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
         } as any);
         if (insErr) throw new Error(`Provider insert failed: ${insErr.message}`);
       }
+
+      // 3. Upload license
+      const { error: upErr } = await supabase.storage
+        .from("provider-licenses")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw new Error(`License upload failed: ${upErr.message}`);
+
 
       // 4. Assign role
       if (data?.action === "created") {

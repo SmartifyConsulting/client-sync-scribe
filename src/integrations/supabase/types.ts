@@ -6006,6 +6006,10 @@ export type Database = {
         Args: { _patient_id: string }
         Returns: boolean
       }
+      user_owns_provider_license_path: {
+        Args: { _path: string }
+        Returns: boolean
+      }
     }
     Enums: {
       access_permission:

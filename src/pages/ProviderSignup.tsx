@@ -124,16 +124,12 @@ export default function ProviderSignup() {
       const newUserId = authData?.user?.id;
       if (!newUserId) throw new Error("Sign-up succeeded but no user id was returned");
 
-      // 3. Upload license (authenticated by the fresh session)
+      // 3. Prepare license path and insert the pending provider row FIRST
+      // (so storage RLS can verify the upload path belongs to a provider row owned by this user).
       const file = vetting.license_file;
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `pending/${newUserId}/${Date.now()}-${safeName}`;
-      const { error: upErr } = await supabase.storage
-        .from("provider-licenses")
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (upErr) throw new Error(`License upload failed: ${upErr.message}`);
 
-      // 4. Insert the pending provider row with owner_id = administrator
       const directors = vetting.directors
         .filter((d) => d.full_name.trim())
         .map((d) => ({ full_name: d.full_name.trim(), role: d.role?.trim() || null }));
@@ -188,6 +184,13 @@ export default function ProviderSignup() {
         if (insErr) throw new Error(`Provider insert failed: ${insErr.message}`);
         newProviderId = (ins as any)?.id ?? null;
       }
+
+      // 4. Upload license (RLS now verifies a provider row owned by this user references this path)
+      const { error: upErr } = await supabase.storage
+        .from("provider-licenses")
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw new Error(`License upload failed: ${upErr.message}`);
+
 
       // 4b. Notify admin (best-effort, fire-and-forget before sign-out)
       if (newProviderId) {
