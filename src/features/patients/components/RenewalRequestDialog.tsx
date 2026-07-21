@@ -157,7 +157,7 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
               {candidate.is_expired && <span className="ml-2 text-destructive font-medium">(expired)</span>}
             </div>
           )}
-          <div className="text-[10px] italic text-muted-foreground pt-1">
+          <div className="text-xs italic text-muted-foreground pt-1">
             Read-only — use the comment box below to request changes.
           </div>
         </div>
@@ -184,7 +184,7 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
               ))}
             </SelectContent>
           </Select>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Defaults to the original prescriber. Switch to another of your doctors if you'd prefer.
           </p>
         </div>
@@ -201,7 +201,7 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
             onChange={(e) => setComment(e.target.value.slice(0, COMMENT_MAX))}
             className="min-h-[90px] text-xs"
           />
-          <p className="text-[10px] text-muted-foreground text-right">
+          <p className="text-xs text-muted-foreground text-right">
             {comment.length}/{COMMENT_MAX}
           </p>
         </div>

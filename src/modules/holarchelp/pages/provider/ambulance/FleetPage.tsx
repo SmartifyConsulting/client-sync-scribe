@@ -1,3 +1,4 @@
+import { toastError } from "@/lib/userMessage";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -150,7 +151,7 @@ export default function FleetPage() {
       setConfirmDelete(null); return;
     }
     const { error } = await supabase.from("ambulances" as any).delete().eq("id", confirmDelete.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toastError(error, "We couldn't complete that. Please try again."); return; }
     toast.success(t("fleet.removed"));
     setConfirmDelete(null);
     load();

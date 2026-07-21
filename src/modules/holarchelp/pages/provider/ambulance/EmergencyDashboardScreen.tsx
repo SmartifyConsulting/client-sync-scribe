@@ -1,215 +1,211 @@
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle2, Clock, MapPin } from "lucide-react";
+import { Siren, AlertTriangle, Clock, Radio } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useProviderAccess } from "../../../components/ProviderGate";
+import { useParamedicShift } from "../../../hooks/useParamedicShift";
+import { ParamedicAcceptDialog } from "../../../components/ParamedicAcceptDialog";
+import { StartShiftDialog } from "../../../components/StartShiftDialog";
+import DispatcherConsoleScreen from "./DispatcherConsoleScreen";
+import ActiveMissionsPanel from "./ActiveMissionsPanel";
 
-interface Incident {
-  id: string;
-  code: string;
-  type: "self-created" | "from-hospital";
-  severity: "critical" | "high" | "medium" | "low";
-  status: "new" | "active" | "completed";
-  title: string;
-  location: string;
-  time: string;
-  hospital?: string;
-}
 
-const MOCK_INCIDENTS: Incident[] = [
-  {
-    id: "1",
-    code: "INC-2024-100",
-    type: "self-created",
-    severity: "critical",
-    status: "active",
-    title: "Cardiac Emergency",
-    location: "Main Street Downtown",
-    time: "14:32",
-  },
-  {
-    id: "2",
-    code: "INC-2024-050",
-    type: "from-hospital",
-    severity: "high",
-    status: "new",
-    title: "Trauma/Accident",
-    location: "Downtown Medical Center",
-    time: "14:25",
-    hospital: "Central Hospital",
-  },
-  {
-    id: "3",
-    code: "INC-2024-049",
-    type: "from-hospital",
-    severity: "medium",
-    status: "active",
-    title: "Medical Emergency",
-    location: "North Business District",
-    time: "14:18",
-    hospital: "North General Hospital",
-  },
-  {
-    id: "4",
-    code: "INC-2024-048",
-    type: "self-created",
-    severity: "high",
-    status: "completed",
-    title: "Respiratory Distress",
-    location: "City Medical Centre",
-    time: "13:45",
-  },
-];
-
-const SEVERITY_COLORS = {
-  critical: "bg-destructive text-destructive-foreground",
-  high: "bg-warning text-warning-foreground",
-  medium: "bg-warning text-warning-foreground",
-  low: "bg-primary text-primary-foreground",
+type Row = {
+  id: string; status: string; severity: string | null;
+  conscious: boolean | null; breathing: boolean | null;
+  created_at: string; notes?: string | null; incident_type?: string | null;
+  incident_number?: string | null;
+  assigned_provider_id?: string | null;
+  assigned_paramedic_user_id?: string | null;
+  assigned_ambulance_id?: string | null;
 };
 
-const STATUS_CONFIG = {
-  new: { icon: "🔔", label: "NEW", color: "text-destructive", bg: "bg-destructive/10" },
-  active: { icon: "🚑", label: "ACTIVE", color: "text-success", bg: "bg-success/10" },
-  completed: { icon: "✓", label: "COMPLETED", color: "text-muted-foreground", bg: "bg-muted" },
+const sevBig = (s: string | null) =>
+  s === "critical" ? "border-destructive/60 bg-destructive/10"
+  : s === "high" ? "border-warning/60 bg-warning/10"
+  : "border-warning/40 bg-warning/5";
+
+const ago = (iso: string) => {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  return `${Math.floor(s / 3600)}h`;
 };
 
 export default function EmergencyDashboardScreen() {
   const { t } = useTranslation();
-  const [filter, setFilter] = useState<"new" | "active" | "completed">("new");
-  const filteredIncidents = MOCK_INCIDENTS.filter((i) => i.status === filter);
+  const { providerId } = useProviderAccess();
+  const { shift } = useParamedicShift();
+  const [rows, setRows] = useState<Row[]>([]);
+  const [pickFor, setPickFor] = useState<string | null>(null);
+  const [startOpen, setStartOpen] = useState(false);
+
+  // Live SOS queue — incoming (unassigned) + this provider's assigned/rolling incidents
+  useEffect(() => {
+    const load = async () => {
+      const incomingP = supabase.from("holarchelp_incidents" as any)
+        .select("id,status,severity,conscious,breathing,created_at,notes,incident_type,incident_number,assigned_provider_id,assigned_paramedic_user_id,assigned_ambulance_id")
+        .is("assigned_paramedic_user_id", null)
+        .in("status", ["open", "reopened"])
+        .order("created_at", { ascending: true }).limit(40);
+      const minePromise = providerId
+        ? supabase.from("holarchelp_incidents" as any)
+            .select("id,status,severity,conscious,breathing,created_at,notes,incident_type,incident_number,assigned_provider_id,assigned_paramedic_user_id,assigned_ambulance_id")
+            .eq("assigned_provider_id", providerId)
+            .in("status", ["assigned","en_route","arrived","patient_collected","en_route_to_hospital","at_hospital"])
+            .order("created_at", { ascending: true }).limit(40)
+        : Promise.resolve({ data: [] as any[] });
+      const [{ data: a }, { data: b }] = await Promise.all([incomingP, minePromise]);
+      const merged = new Map<string, Row>();
+      (((a as any) ?? []) as Row[]).forEach((r) => merged.set(r.id, r));
+      (((b as any) ?? []) as Row[]).forEach((r) => merged.set(r.id, r));
+      const order: Record<string, number> = { critical: 0, high: 1, moderate: 2 };
+      setRows([...merged.values()].sort((x, y) => (order[x.severity ?? ""] ?? 9) - (order[y.severity ?? ""] ?? 9)));
+    };
+    load();
+    const ch = supabase.channel("dash-incoming")
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incident_offers" }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [providerId]);
+
+  const isOffShift = !shift;
+  const isBusy = shift?.status === "busy";
 
   const stats = {
-    new: MOCK_INCIDENTS.filter((i) => i.status === "new").length,
-    active: MOCK_INCIDENTS.filter((i) => i.status === "active").length,
-    critical: MOCK_INCIDENTS.filter((i) => i.severity === "critical").length,
+    incoming: rows.length,
+    critical: rows.filter((r) => r.severity === "critical").length,
   };
 
   return (
-    <div className="space-y-6">
-      {/* Status Bar */}
-      <div className="flex gap-3">
-        <div className="rounded-lg bg-destructive/10 text-destructive px-4 py-2 text-sm font-semibold">
-          🚨 ACTIVE MISSION #5505050
-        </div>
-        <div className="rounded-lg bg-primary/10 text-primary px-4 py-2 text-sm font-semibold">
-          ✓ ON SHIFT (08:00 - 20:00)
-        </div>
-      </div>
-
-      {/* Header */}
+    <div className="space-y-4">
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Emergency Response</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Emergency Operations</h1>
-        <p className="text-sm text-muted-foreground mt-2">
-          {stats.new} new • {stats.active} active • {stats.critical} critical
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {t("provider.emergencyResponseDispatch") || "Emergency Response Dispatch"}
+        </p>
+        <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
+          <Siren className="h-5 w-5 text-primary" />
+          {t("nav.emergencyDashboard", "Dispatch Dashboard")}
+        </h1>
+        <p className="text-xs text-muted-foreground mt-1">
+          Dispatcher console, live SOS queue and dispatch actions — all on one screen.
         </p>
       </header>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">New Requests</p>
-          <p className="text-2xl font-bold mt-2 text-destructive">{stats.new}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Active Operations</p>
-          <p className="text-2xl font-bold mt-2 text-success">{stats.active}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Critical Incidents</p>
-          <p className="text-2xl font-bold mt-2 text-warning">{stats.critical}</p>
-        </div>
-      </div>
+      {/* INCOMING SOS — banner + stats + queue */}
+      <section className="space-y-2">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+          <Siren className="h-4 w-4 text-sos" /> Incoming SOS
+        </h2>
 
-      {/* Tabs */}
-      <div className="flex gap-2">
-        {(["new", "active", "completed"] as const).map((f) => (
-          <Button
-            key={f}
-            variant={filter === f ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(f)}
-            className="capitalize"
-          >
-            {f === "new" ? "🔔 New Requests" : f === "active" ? "🚑 Active" : "✓ Completed"}
-          </Button>
-        ))}
-      </div>
+        <div className="grid grid-cols-2 gap-2">
+          <StatCard label="Incoming" value={stats.incoming} tone={stats.incoming ? "destructive" : "muted"} />
+          <StatCard label="Critical" value={stats.critical} tone={stats.critical ? "destructive" : "muted"} />
+        </div>
 
-      {/* Incident List */}
-      <div className="space-y-3">
-        {filteredIncidents.map((incident) => {
-          const config = STATUS_CONFIG[incident.status];
-          return (
-            <div key={incident.id} className={`rounded-xl border border-border p-4 ${config.bg}`}>
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-3 py-1 rounded text-sm font-bold text-white ${SEVERITY_COLORS[incident.severity]}`}>
-                      {incident.severity.toUpperCase()}
-                    </span>
-                    <h3 className="font-bold text-lg">{incident.code}</h3>
+        {isOffShift && (
+          <div className="rounded-2xl border border-warning/40 bg-warning/10 p-3 text-xs">
+            <p className="font-bold text-warning">You are off shift.</p>
+            <p className="mt-1 text-muted-foreground">Start a shift to accept incidents.</p>
+            <Button size="sm" className="mt-2 h-7 text-xs" onClick={() => setStartOpen(true)}>
+              Start shift
+            </Button>
+          </div>
+        )}
+
+        {!isOffShift && isBusy && (
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-xs">
+            <p className="font-bold text-destructive">You have an active incident.</p>
+            <p className="mt-1 text-muted-foreground">Finish it before accepting another.</p>
+          </div>
+        )}
+
+        {!isOffShift && !isBusy && !rows.length && (
+          <div className="rounded-2xl border border-dashed p-8 text-center text-xs text-muted-foreground">
+            <Siren className="mx-auto mb-2 h-5 w-5 opacity-50" />
+            No incoming SOS right now.
+          </div>
+        )}
+
+        {!isOffShift && !isBusy && rows.length > 0 && (
+          <div className="grid gap-2 lg:grid-cols-2">
+            {rows.map((r) => (
+              <div key={r.id} className={`rounded-2xl border-2 p-3 ${sevBig(r.severity)}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-sos">
+                      <Siren className="h-3 w-3" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? "Emergency"}
+                    </p>
+                    <p className="mt-1 text-base font-extrabold">{r.incident_number ?? `INC-${r.id.slice(0, 8)}`}</p>
+                    <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                      <Clock className="h-3 w-3" /> {ago(r.created_at)} ago
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">{incident.title}</p>
-                </div>
-                <span className={`px-3 py-1 rounded text-xs font-semibold font-bold ${config.color}`}>
-                  {config.icon} {config.label}
-                </span>
-              </div>
-
-              {/* Details Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t">
-                <div>
-                  <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="font-semibold text-sm mt-1 flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    {incident.location}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Received</p>
-                  <p className="font-semibold text-sm mt-1">{incident.time}</p>
-                </div>
-                {incident.hospital && (
-                  <div>
-                    <p className="text-xs text-muted-foreground">From Hospital</p>
-                    <p className="font-semibold text-sm mt-1">🏥 {incident.hospital}</p>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    {r.assigned_provider_id === providerId && (
+                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-bold uppercase text-primary">
+                        {r.assigned_ambulance_id ? "Rolling" : "Assigned · needs vehicle"}
+                      </span>
+                    )}
+                    {(r.conscious === false || r.breathing === false) && (
+                      <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-bold uppercase text-destructive">
+                        <AlertTriangle className="mr-1 inline h-3 w-3" /> Life threat
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 mt-4 pt-3 border-t">
-                {incident.status === "new" && (
-                  <>
-                    <Button className="flex-1 bg-success hover:bg-success" size="sm">
-                      Accept & Dispatch
-                    </Button>
-                    <Button variant="outline" className="flex-1 text-destructive" size="sm">
-                      Decline
-                    </Button>
-                  </>
-                )}
-                {incident.status === "active" && (
-                  <>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Track Live
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Update Status
-                    </Button>
-                  </>
-                )}
-                {incident.status === "completed" && (
-                  <Button variant="outline" size="sm" className="w-full">
-                    View Report
+                </div>
+                {r.notes && <p className="mt-2 rounded-lg border bg-background/60 p-2 text-sm italic text-muted-foreground line-clamp-2">"{r.notes}"</p>}
+                {r.assigned_provider_id === providerId ? (
+                  <Button size="sm" variant="outline" className="mt-2 h-9 w-full font-bold" onClick={() => window.location.assign(`/provider/ambulance/incident/${r.id}`)}>
+                    Open incident
+                  </Button>
+                ) : (
+                  <Button size="sm" className="mt-2 h-9 w-full font-bold" onClick={() => setPickFor(r.id)}>
+                    Accept &amp; Roll
                   </Button>
                 )}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* DISPATCHER CONSOLE */}
+      <section className="rounded-2xl border-2 border-primary/30 bg-card/40 p-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2">
+          <Radio className="h-4 w-4 text-primary" /> Dispatcher Console
+        </h2>
+        <DispatcherConsoleScreen />
+      </section>
+
+      {/* ACTIVE MISSIONS — own red-framed panel */}
+      <ActiveMissionsPanel />
+
+
+      <ParamedicAcceptDialog
+        incidentId={pickFor}
+        open={!!pickFor}
+        onOpenChange={(v) => { if (!v) setPickFor(null); }}
+        onNeedShift={() => setStartOpen(true)}
+      />
+      <StartShiftDialog providerId={providerId} open={startOpen} onOpenChange={setStartOpen} />
+    </div>
+  );
+}
+
+function StatCard({
+  label, value, tone,
+}: { label: string; value: number; tone: "destructive" | "success" | "muted" }) {
+  const toneClass =
+    tone === "destructive" ? "text-destructive"
+    : tone === "success" ? "text-success"
+    : "text-muted-foreground";
+  return (
+    <div className="rounded-xl border border-border bg-card px-3 py-2">
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className={`text-xl font-extrabold mt-0.5 tabular-nums ${toneClass}`}>{value}</p>
     </div>
   );
 }

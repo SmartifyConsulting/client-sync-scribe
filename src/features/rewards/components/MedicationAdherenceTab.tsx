@@ -228,43 +228,10 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
     createTodayRecords();
   }, [prescriptions.length, today]);
 
-  // Check missed doses and notify doctor
-  useEffect(() => {
-    if (prescriptions.length === 0) return;
-    const checkMissed = async () => {
-      const yesterday = format(subDays(new Date(), 1), "yyyy-MM-dd");
-      for (const rx of prescriptions) {
-        const yesterdayRecord = adherenceRecords.find(
-          (r) => r.prescription_id === rx.id && r.scheduled_date === yesterday
-        );
-        if (!yesterdayRecord || yesterdayRecord.status === "pending") {
-          // Mark as missed
-          if (yesterdayRecord) {
-            await supabase
-              .from("medication_adherence")
-              .update({ status: "missed" })
-              .eq("id", yesterdayRecord.id);
-          }
-          // Notify doctor
-          const { data: patient } = await supabase
-            .from("patients")
-            .select("user_id, name")
-            .eq("id", patientId)
-            .maybeSingle();
-          if (patient) {
-            await supabase.from("notifications").insert({
-              user_id: patient.user_id,
-              title: "Missed Medication Dose",
-              description: `${patient.name} missed their dose of ${rx.medication} yesterday.`,
-              type: "medication_missed",
-              reference_id: patientId,
-            });
-          }
-        }
-      }
-    };
-    checkMissed();
-  }, [prescriptions.length, adherenceRecords.length]);
+  // Skipped/missed doses no longer notify doctors — only the patient and their
+  // emergency contacts / next of kin are notified (see check-missed-medications
+  // edge function), based on the patient's own preference.
+
 
   // Honour ?focus={rxId} from the Overview "Take Medication" button:
   // scroll the matching card into view and auto-open the recorder/baseline.
@@ -722,7 +689,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                             />
                           )}
                         </div>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           Reference: {ref.observed_description?.split(/[,.]/)[0] || "tablet"}
                           {methodLabel ? ` · ${methodLabel}` : ""}
                           {captured ? ` · captured ${captured}` : ""}
@@ -826,7 +793,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                 ? "Hold your pill close to the camera so we can confirm it matches your prescription."
                 : "Film yourself taking your medication. Max 30 seconds."}
             </p>
-            <p className="text-[11px] text-muted-foreground italic">
+            <p className="text-sm text-muted-foreground italic">
               Your video isn't saved. We only keep a short text description and a single still of the tablet.
             </p>
 

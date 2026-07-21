@@ -418,6 +418,45 @@ export type Database = {
           },
         ]
       }
+      ambulance_crew_assignments: {
+        Row: {
+          ambulance_id: string
+          created_at: string
+          id: string
+          is_default_lead: boolean
+          member_id: string
+        }
+        Insert: {
+          ambulance_id: string
+          created_at?: string
+          id?: string
+          is_default_lead?: boolean
+          member_id: string
+        }
+        Update: {
+          ambulance_id?: string
+          created_at?: string
+          id?: string
+          is_default_lead?: boolean
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ambulance_crew_assignments_ambulance_id_fkey"
+            columns: ["ambulance_id"]
+            isOneToOne: false
+            referencedRelation: "ambulances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ambulance_crew_assignments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_ambulance_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ambulance_fleet: {
         Row: {
           count: number
@@ -1595,6 +1634,9 @@ export type Database = {
           credential_score_updated_at: string | null
           directors: Json
           dispatch_priority: number
+          dispatcher_on_duty: boolean
+          dispatcher_on_duty_since: string | null
+          dispatcher_on_duty_user_id: string | null
           emergency_phone: string | null
           fleet_size: number | null
           id: string
@@ -1632,6 +1674,9 @@ export type Database = {
           credential_score_updated_at?: string | null
           directors?: Json
           dispatch_priority?: number
+          dispatcher_on_duty?: boolean
+          dispatcher_on_duty_since?: string | null
+          dispatcher_on_duty_user_id?: string | null
           emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
@@ -1669,6 +1714,9 @@ export type Database = {
           credential_score_updated_at?: string | null
           directors?: Json
           dispatch_priority?: number
+          dispatcher_on_duty?: boolean
+          dispatcher_on_duty_since?: string | null
+          dispatcher_on_duty_user_id?: string | null
           emergency_phone?: string | null
           fleet_size?: number | null
           id?: string
@@ -2145,6 +2193,7 @@ export type Database = {
           eta_minutes: number | null
           hospital_admission_status: string | null
           id: string
+          incident_number: string
           last_eta_update: string | null
           manually_logged: boolean
           notes: string | null
@@ -2189,6 +2238,7 @@ export type Database = {
           eta_minutes?: number | null
           hospital_admission_status?: string | null
           id?: string
+          incident_number: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
@@ -2233,6 +2283,7 @@ export type Database = {
           eta_minutes?: number | null
           hospital_admission_status?: string | null
           id?: string
+          incident_number?: string
           last_eta_update?: string | null
           manually_logged?: boolean
           notes?: string | null
@@ -2546,6 +2597,7 @@ export type Database = {
           provider_id: string
           provider_kind: string
           recorded_at: string
+          simulated: boolean
           speed: number | null
           updated_at: string
           user_id: string
@@ -2561,6 +2613,7 @@ export type Database = {
           provider_id: string
           provider_kind: string
           recorded_at?: string
+          simulated?: boolean
           speed?: number | null
           updated_at?: string
           user_id: string
@@ -2576,6 +2629,7 @@ export type Database = {
           provider_id?: string
           provider_kind?: string
           recorded_at?: string
+          simulated?: boolean
           speed?: number | null
           updated_at?: string
           user_id?: string
@@ -2845,6 +2899,7 @@ export type Database = {
       hospital_admissions: {
         Row: {
           admission_date: string
+          codes: Json
           created_at: string
           created_by: string | null
           diagnosis: string | null
@@ -2863,6 +2918,7 @@ export type Database = {
         }
         Insert: {
           admission_date?: string
+          codes?: Json
           created_at?: string
           created_by?: string | null
           diagnosis?: string | null
@@ -2881,6 +2937,7 @@ export type Database = {
         }
         Update: {
           admission_date?: string
+          codes?: Json
           created_at?: string
           created_by?: string | null
           diagnosis?: string | null
@@ -3424,6 +3481,38 @@ export type Database = {
             columns: ["nurse_id"]
             isOneToOne: false
             referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paramedic_shift_partners: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          shift_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          shift_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          shift_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paramedic_shift_partners_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "paramedic_shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -4201,6 +4290,8 @@ export type Database = {
           reminder_times: string[] | null
           reminders_enabled: boolean
           session_id: string | null
+          skip_notify_contact: Json | null
+          skip_notify_target: string | null
           source: string
           start_date: string
           status: string
@@ -4227,6 +4318,8 @@ export type Database = {
           reminder_times?: string[] | null
           reminders_enabled?: boolean
           session_id?: string | null
+          skip_notify_contact?: Json | null
+          skip_notify_target?: string | null
           source?: string
           start_date?: string
           status?: string
@@ -4253,6 +4346,8 @@ export type Database = {
           reminder_times?: string[] | null
           reminders_enabled?: boolean
           session_id?: string | null
+          skip_notify_contact?: Json | null
+          skip_notify_target?: string | null
           source?: string
           start_date?: string
           status?: string
@@ -5581,6 +5676,10 @@ export type Database = {
       }
     }
     Functions: {
+      _is_amb_provider_admin_for_vehicle: {
+        Args: { _ambulance_id: string }
+        Returns: boolean
+      }
       approve_blood_donation: { Args: { _donation_id: string }; Returns: Json }
       award_doctor_checkin: {
         Args: { _note?: string; _patient_user_id: string }
@@ -5657,6 +5756,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       holarchelp_accept_incident: {
         Args: { _incident_id: string; _provider_id: string }
         Returns: Json
@@ -5685,6 +5788,26 @@ export type Database = {
         Args: { _incident_id: string }
         Returns: Json
       }
+      holarchelp_cancel_transport: {
+        Args: { _incident_id: string; _reason?: string }
+        Returns: Json
+      }
+      holarchelp_crew_acknowledge: {
+        Args: { _incident_id: string }
+        Returns: undefined
+      }
+      holarchelp_dispatcher_assign: {
+        Args: {
+          _destination_hospital_id?: string
+          _incident_id: string
+          _shift_id: string
+        }
+        Returns: undefined
+      }
+      holarchelp_dispatcher_assign_vehicle: {
+        Args: { _ambulance_id: string; _incident_id: string }
+        Returns: Json
+      }
       holarchelp_eligible_paramedics: {
         Args: { _provider_ids: string[] }
         Returns: {
@@ -5694,6 +5817,7 @@ export type Database = {
         }[]
       }
       holarchelp_end_shift: { Args: never; Returns: Json }
+      holarchelp_generate_incident_number: { Args: never; Returns: string }
       holarchelp_get_incident_offers: {
         Args: { _incident_id: string }
         Returns: {
@@ -5733,8 +5857,21 @@ export type Database = {
           recorded_at: string
         }[]
       }
-      holarchelp_paramedic_accept: {
-        Args: { _ambulance_id: string; _incident_id: string }
+      holarchelp_paramedic_accept:
+        | {
+            Args: { _ambulance_id: string; _incident_id: string }
+            Returns: Json
+          }
+        | {
+            Args: {
+              _ambulance_id: string
+              _destination_hospital_id?: string
+              _incident_id: string
+            }
+            Returns: Json
+          }
+      holarchelp_patient_change_provider: {
+        Args: { _incident_id: string; _provider_id: string }
         Returns: Json
       }
       holarchelp_patient_pick_provider: {
@@ -5768,11 +5905,20 @@ export type Database = {
         Args: { _incident_id: string; _reason?: string }
         Returns: Json
       }
+      holarchelp_set_destination_hospital: {
+        Args: { _hospital_id: string; _incident_id: string }
+        Returns: Json
+      }
+      holarchelp_set_dispatcher_on_duty: {
+        Args: { _on: boolean; _provider_id: string }
+        Returns: undefined
+      }
       holarchelp_set_incident_status: {
         Args: { _incident_id: string; _payload?: Json; _status: string }
         Returns: Json
       }
       holarchelp_start_shift: { Args: { _ambulance_id: string }; Returns: Json }
+      holarchelp_start_shifts_bulk: { Args: { _payload: Json }; Returns: Json }
       holarchelp_update_provider_location: {
         Args: { _incident_id: string; _lat: number; _lng: number }
         Returns: undefined
@@ -5815,6 +5961,10 @@ export type Database = {
       process_provider_approval: {
         Args: { _action: string; _token: string }
         Returns: Json
+      }
+      provider_has_offer_on_incident: {
+        Args: { _incident_id: string; _user_id: string }
+        Returns: boolean
       }
       search_doctor_profiles: {
         Args: { _language?: string; _name?: string; _specialty?: string }

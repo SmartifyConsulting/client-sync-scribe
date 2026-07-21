@@ -52,7 +52,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
             </p>
           </div>
         </div>
-        <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        <ExternalLink className="h-4 w-4 text-muted-foreground transition-opacity" />
       </div>
       
       {/* AI Summary */}

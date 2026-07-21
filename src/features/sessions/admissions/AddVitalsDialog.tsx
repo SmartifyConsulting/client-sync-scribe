@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,6 @@ interface Props {
 }
 
 export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, defaultHeight, defaultWeight }: Props) {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
@@ -66,12 +64,12 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, d
         notes: notes || null,
       } as any);
       if (error) throw error;
-      toast({ title: t("dialogs.success") });
+      toast({ title: "Vitals saved" });
       qc.invalidateQueries({ queryKey: ["admission-vitals", admissionId] });
       reset();
       onOpenChange(false);
     } catch (e: any) {
-      toast({ title: t("dialogs.error"), description: e.message, variant: "destructive" });
+      toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -80,24 +78,24 @@ export function AddVitalsDialog({ open, onOpenChange, admissionId, hospitalId, d
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
-        <DialogHeader><DialogTitle>{t("admissions.vitals.title")}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Add Vitals</DialogTitle></DialogHeader>
         <div className="mb-2">
           <NursePicker hospitalId={hospitalId} value={nurse?.id ?? null} onChange={setNurse} />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div><Label className="text-[11px]">{t("admissions.vitals.heartRate")}</Label><Input value={hr} onChange={(e) => setHr(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">{t("admissions.vitals.spo2")}</Label><Input value={spo2} onChange={(e) => setSpo2(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">{t("admissions.vitals.bpSystolic")}</Label><Input value={bps} onChange={(e) => setBps(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">{t("admissions.vitals.bpDiastolic")}</Label><Input value={bpd} onChange={(e) => setBpd(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">{t("admissions.vitals.temperature")}</Label><Input value={temp} onChange={(e) => setTemp(e.target.value)} type="number" step="0.1" /></div>
-          <div><Label className="text-[11px]">{t("admissions.vitals.bmi")} {computedBmi && <span className="text-primary">({computedBmi})</span>}</Label><Input value={computedBmi || ""} disabled /></div>
-          <div><Label className="text-[11px]">{t("admissions.vitals.height")}</Label><Input value={height} onChange={(e) => setHeight(e.target.value)} type="number" /></div>
-          <div><Label className="text-[11px]">{t("admissions.vitals.weight")}</Label><Input value={weight} onChange={(e) => setWeight(e.target.value)} type="number" /></div>
-          <div className="col-span-2"><Label className="text-[11px]">{t("forms.labels.name")}</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
+          <div><Label className="text-sm">Heart Rate (bpm)</Label><Input value={hr} onChange={(e) => setHr(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">SpO₂ (%)</Label><Input value={spo2} onChange={(e) => setSpo2(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">BP Systolic</Label><Input value={bps} onChange={(e) => setBps(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">BP Diastolic</Label><Input value={bpd} onChange={(e) => setBpd(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">Temperature (°C)</Label><Input value={temp} onChange={(e) => setTemp(e.target.value)} type="number" step="0.1" /></div>
+          <div><Label className="text-sm">BMI {computedBmi && <span className="text-primary">({computedBmi})</span>}</Label><Input value={computedBmi || ""} disabled /></div>
+          <div><Label className="text-sm">Height (cm)</Label><Input value={height} onChange={(e) => setHeight(e.target.value)} type="number" /></div>
+          <div><Label className="text-sm">Weight (kg)</Label><Input value={weight} onChange={(e) => setWeight(e.target.value)} type="number" /></div>
+          <div className="col-span-2"><Label className="text-sm">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("dialogs.cancel")}</Button>
-          <Button onClick={handleSave} disabled={saving}>{saving ? t("common.loading") : t("common.save")}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

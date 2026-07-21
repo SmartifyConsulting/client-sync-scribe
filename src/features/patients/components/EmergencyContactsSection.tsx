@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { isValidOptionalEmail } from "@/lib/validation";
+
 
 export interface EmergencyContact {
   id: string;
@@ -88,7 +90,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
           <div key={c.id} className="rounded-lg border border-border p-3 space-y-2 bg-muted/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div>
-                <Label className="text-[11px]">Name</Label>
+                <Label className="text-sm">Name</Label>
                 <Input
                   value={c.name}
                   onChange={(e) => updateContact(c.id, { name: e.target.value })}
@@ -96,7 +98,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
                 />
               </div>
               <div>
-                <Label className="text-[11px]">Relationship</Label>
+                <Label className="text-sm">Relationship</Label>
                 <Input
                   value={c.relationship ?? ""}
                   onChange={(e) => updateContact(c.id, { relationship: e.target.value })}
@@ -104,7 +106,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
                 />
               </div>
               <div>
-                <Label className="text-[11px]">Phone</Label>
+                <Label className="text-sm">Phone</Label>
                 <Input
                   value={c.phone}
                   onChange={(e) => updateContact(c.id, { phone: e.target.value })}
@@ -112,13 +114,19 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
                 />
               </div>
               <div>
-                <Label className="text-[11px]">Email</Label>
+                <Label className="text-sm">Email</Label>
                 <Input
                   type="email"
                   value={c.email ?? ""}
                   onChange={(e) => updateContact(c.id, { email: e.target.value })}
+                  aria-invalid={!isValidOptionalEmail(c.email)}
+                  className={!isValidOptionalEmail(c.email) ? "border-destructive focus-visible:ring-destructive" : undefined}
                 />
+                {!isValidOptionalEmail(c.email) && (
+                  <p className="text-xs text-destructive mt-0.5">Enter a valid email address.</p>
+                )}
               </div>
+
             </div>
             <div className="flex flex-wrap gap-4 pt-1">
               <label className="flex items-center gap-2 text-xs">

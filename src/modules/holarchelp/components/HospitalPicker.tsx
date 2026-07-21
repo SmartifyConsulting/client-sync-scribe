@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Hospital, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 type H = {
   id: string;
@@ -54,7 +55,7 @@ export function HospitalPicker({
     setPicking(h.id);
     const { error } = await supabase.from("holarchelp_incidents" as any)
       .update({ destination_hospital_id: h.id } as any).eq("id", incidentId);
-    if (error) { setPicking(null); return toast.error(error.message); }
+    if (error) { setPicking(null); return toastError(error, "We couldn't complete that. Please try again."); }
     // Verify the write actually persisted (RLS can silently no-op).
     const { data: check } = await supabase.from("holarchelp_incidents" as any)
       .select("destination_hospital_id").eq("id", incidentId).maybeSingle();
@@ -81,7 +82,7 @@ export function HospitalPicker({
                   <p className="truncate text-sm font-semibold">{h.name}</p>
                   {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[10px]">
+                <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs">
                   <span className={`rounded-full border px-1.5 py-0.5 font-semibold ${capColor(h.er_capacity_status)}`}>
                     {(h.er_capacity_status ?? "green").toUpperCase()}
                   </span>

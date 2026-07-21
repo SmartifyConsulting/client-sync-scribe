@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets } from "lucide-react";
+import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,10 +24,16 @@ interface PatientOverviewProps {
     allergies?: string | null;
     is_chronic?: boolean | null;
     blood_type?: string | null;
+    emergency_contact_name?: string | null;
+    emergency_contact_phone?: string | null;
+    emergency_contact_email?: string | null;
+    emergency_contact_relationship?: string | null;
+    emergency_contacts?: Array<{ name?: string; phone?: string; email?: string; relationship?: string }> | null;
   };
   sessions: Session[];
   isSelfService?: boolean;
 }
+
 
 interface StatusItem {
   name: string;
@@ -520,6 +526,59 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
         </div>
       )}
 
+      {/* Emergency Contact (visible to doctors and patient) */}
+      {(() => {
+        const primary = patient.emergency_contact_name
+          ? {
+              name: patient.emergency_contact_name,
+              phone: patient.emergency_contact_phone,
+              email: patient.emergency_contact_email,
+              relationship: patient.emergency_contact_relationship,
+            }
+          : Array.isArray(patient.emergency_contacts) && patient.emergency_contacts.length > 0
+            ? patient.emergency_contacts[0]
+            : null;
+        if (!primary?.name) return null;
+        return (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldAlert className="h-4 w-4 text-red-600" />
+              <h4 className="font-semibold text-sm text-foreground">Emergency Contact</h4>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2 text-sm">
+              <div>
+                <p className="text-sm uppercase tracking-wide text-muted-foreground">Name</p>
+                <p className="font-medium text-foreground">
+                  {primary.name}
+                  {primary.relationship && (
+                    <span className="text-muted-foreground font-normal"> ({primary.relationship})</span>
+                  )}
+                </p>
+              </div>
+              {primary.phone && (
+                <div>
+                  <p className="text-sm uppercase tracking-wide text-muted-foreground">Phone</p>
+                  <a href={`tel:${primary.phone}`} className="flex items-center gap-1.5 font-medium text-primary hover:underline">
+                    <Phone className="h-3.5 w-3.5" />
+                    {primary.phone}
+                  </a>
+                </div>
+              )}
+              {primary.email && (
+                <div className="sm:col-span-2">
+                  <p className="text-sm uppercase tracking-wide text-muted-foreground">Email</p>
+                  <a href={`mailto:${primary.email}`} className="flex items-center gap-1.5 font-medium text-primary hover:underline break-all">
+                    <Mail className="h-3.5 w-3.5 shrink-0" />
+                    {primary.email}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+
       {/* AI Summary Card - Timeline */}
       <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
@@ -707,7 +766,8 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-6 px-2 transition-opacity"
+
                       onClick={() => toggleStatus("conditions", i)}
                     >
                       {cond.status === "active" ? (
@@ -754,7 +814,8 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-6 px-2 transition-opacity"
+
                       onClick={() => toggleStatus("medications", i)}
                     >
                       {med.status === "active" ? (
@@ -793,7 +854,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-6 px-2 transition-opacity"
                       onClick={() => toggleStatus("symptoms", i)}
                     >
                       {symptom.status === "active" ? (

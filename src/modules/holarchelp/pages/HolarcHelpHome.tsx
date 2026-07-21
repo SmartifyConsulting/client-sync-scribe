@@ -146,7 +146,7 @@ export default function HolarcHelpHome() {
       {/* SOS acknowledgements */}
       {!activeIncidentId && (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4 space-y-3">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
             {t("sos.ackHeading")}
           </p>
           {[
@@ -216,7 +216,7 @@ export default function HolarcHelpHome() {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600" />
               </span>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-red-700">Active SOS in progress</p>
+                <p className="text-sm font-bold uppercase tracking-wider text-red-700">Active SOS in progress</p>
                 <p className="text-sm font-semibold text-red-900">Tap to resume live tracking</p>
               </div>
             </div>

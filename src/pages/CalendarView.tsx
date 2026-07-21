@@ -562,7 +562,7 @@ export default function CalendarView() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("nav.myCalendar", "Calendar")}</h1>
-          <p className="text-muted-foreground text-[12px]">
+          <p className="text-muted-foreground text-sm">
             {t("calendar.subtitle")}
           </p>
         </div>
@@ -574,7 +574,7 @@ export default function CalendarView() {
                   key={s}
                   onClick={() => setScope(s)}
                   className={cn(
-                    "px-2 py-1 text-[11px] md:px-3 md:py-1.5 md:text-sm font-medium transition-colors shrink-0",
+                    "px-2 py-1 text-sm md:px-3 md:py-1.5 md:text-sm font-medium transition-colors shrink-0",
                     scope === s
                       ? "bg-primary text-primary-foreground"
                       : "hover:bg-muted text-muted-foreground"
@@ -757,7 +757,7 @@ export default function CalendarView() {
               key={view}
               onClick={() => setCalendarView(view)}
               className={cn(
-                "px-2 py-1 text-[11px] md:px-3 md:py-1.5 md:text-sm font-medium transition-colors capitalize shrink-0",
+                "px-2 py-1 text-sm md:px-3 md:py-1.5 md:text-sm font-medium transition-colors capitalize shrink-0",
                 calendarView === view
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-muted text-muted-foreground"
@@ -812,11 +812,11 @@ export default function CalendarView() {
                         {dayEvents.length > 0 && (
                           <div className="mt-2 space-y-1 w-full">
                             {dayEvents.slice(0, 2).map((event) => (
-                              <div key={event.id} className="text-[10px] truncate text-center opacity-80">
+                              <div key={event.id} className="text-xs truncate text-center opacity-80">
                                 {event.time} {(() => { const p = patients.find(pt => pt.id === event.patientId); if (!p) return ''; const parts = p.name.split(' '); return parts.map(w => w[0]).join('').toUpperCase(); })()}
                               </div>
                             ))}
-                            {dayEvents.length > 2 && <div className="text-[10px] text-center opacity-60">+{dayEvents.length - 2}</div>}
+                            {dayEvents.length > 2 && <div className="text-xs text-center opacity-60">+{dayEvents.length - 2}</div>}
                           </div>
                         )}
                       </div>
@@ -1034,7 +1034,7 @@ export default function CalendarView() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="inline-flex h-5 px-1.5 items-center justify-center rounded text-[10px] font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor }}>
+                          <span className="inline-flex h-5 px-1.5 items-center justify-center rounded text-xs font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor }}>
                             {initialsOf(event.ownerName)}
                           </span>
                         </TooltipTrigger>
@@ -1228,7 +1228,7 @@ export default function CalendarView() {
                       if (!isOwner) {
                         return (
                           <div className="pt-4">
-                            <p className="text-[11px] text-muted-foreground italic">
+                            <p className="text-sm text-muted-foreground italic">
                               Owned by {selectedEvent.ownerName ? `Dr ${selectedEvent.ownerName}` : 'another doctor'} — only they can change this.
                             </p>
                             {selectedEvent.type !== "internal" && selectedEvent.patientId && (

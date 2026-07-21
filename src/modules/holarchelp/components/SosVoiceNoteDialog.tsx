@@ -6,15 +6,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
-const MAX_SECONDS = 65; // +5s extra capture window
+const MAX_SECONDS = 70; // +10s extra capture window (longer for stressed users)
 const SILENCE_MS = 9000; // +5s before auto-stop on silence
 const MIN_RECORD_MS = 2000;
 const SILENCE_RMS = 0.015; // amplitude threshold
+
+export type PreStartedRecording = {
+  stream: MediaStream;
+  recorder: MediaRecorder;
+  chunks: Blob[];
+  startedAt: number;
+};
 
 interface Props {
   open: boolean;
   incidentId: string | null;
   onClose: () => void;
+  preStarted?: PreStartedRecording | null;
 }
 
 const blobToBase64 = (blob: Blob) =>
@@ -28,7 +36,7 @@ const blobToBase64 = (blob: Blob) =>
     reader.readAsDataURL(blob);
   });
 
-export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
+export function SosVoiceNoteDialog({ open, incidentId, onClose, preStarted }: Props) {
   const { t } = useTranslation();
   const [phase, setPhase] = useState<"recording" | "uploading">("recording");
   const [seconds, setSeconds] = useState(0);
@@ -64,7 +72,21 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let stream: MediaStream;
+      let mr: MediaRecorder;
+      let initialChunks: Blob[] = [];
+      let startedAt = Date.now();
+
+      if (preStarted) {
+        stream = preStarted.stream;
+        mr = preStarted.recorder;
+        initialChunks = preStarted.chunks;
+        startedAt = preStarted.startedAt;
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
+        mr.start();
+      }
       streamRef.current = stream;
 
       // Audio analyser for silence detection
@@ -95,16 +117,15 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
         rafRef.current = requestAnimationFrame(tick);
       };
 
-      const mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
       recorderRef.current = mr;
-      chunksRef.current = [];
+      chunksRef.current = initialChunks;
       mr.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
       mr.onstop = handleStop;
-      mr.start();
-      startedAtRef.current = Date.now();
+      startedAtRef.current = startedAt;
       lastVoiceAtRef.current = Date.now();
       setPhase("recording");
-      setSeconds(0);
+      const elapsedInit = Math.floor((Date.now() - startedAt) / 1000);
+      setSeconds(elapsedInit);
       timerRef.current = window.setInterval(() => {
         setSeconds((s) => {
           if (s + 1 >= MAX_SECONDS) {
@@ -119,6 +140,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
       onClose();
     }
   };
+
 
   useEffect(() => {
     if (open) {
@@ -162,9 +184,10 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
         .upload(path, blob, { contentType: "audio/webm", upsert: false });
       if (upErr) throw upErr;
 
-      // Save audio path immediately so responders see it
+      // Save audio path + a "Transcribing…" placeholder immediately so responders see activity
       await supabase.from("holarchelp_incidents" as any).update({
         voice_note_audio_url: path,
+        voice_note_transcript: "Transcribing…",
       } as any).eq("id", incidentId);
 
       toast.success(t("sosVoice.shared"));
@@ -180,7 +203,7 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
           if (d) await new Promise((r) => setTimeout(r, d));
           try {
             const { data: trData, error: trErr } = await supabase.functions.invoke("transcribe-audio", {
-              body: { audio: base64, patientName: "Patient", doctorName: "Responder" },
+              body: { audio: base64, patientName: "Patient", doctorName: "Patient", singleSpeaker: true },
             });
             if (!trErr && (trData as any)?.text) {
               transcript = String((trData as any).text);
@@ -190,12 +213,10 @@ export function SosVoiceNoteDialog({ open, incidentId, onClose }: Props) {
             console.error("Transcription attempt failed", err);
           }
         }
-        // Only persist a transcript when one actually came back — never fabricate placeholder text.
-        if (transcript) {
-          await supabase.from("holarchelp_incidents" as any).update({
-            voice_note_transcript: transcript,
-          } as any).eq("id", incidentId);
-        }
+        // Replace the "Transcribing…" placeholder with the real transcript, or clear it on failure.
+        await supabase.from("holarchelp_incidents" as any).update({
+          voice_note_transcript: transcript || null,
+        } as any).eq("id", incidentId);
         // Log voice-note event for the timeline
         try {
           await supabase.from("holarchelp_incident_events" as any).insert({

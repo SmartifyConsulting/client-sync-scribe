@@ -5,7 +5,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import holarcLogo from "@/assets/holarc-logo-clear.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 
 interface Props {
   /** Called when the user has saved their codes and clicked Continue. */
@@ -104,7 +105,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
             <div className="inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-primary/10 mb-3">
               <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
             </div>
-            <p className="text-[11px] uppercase tracking-wider text-primary font-semibold mb-1">
+            <p className="text-sm uppercase tracking-wider text-primary font-semibold mb-1">
               Last step · Save these codes
             </p>
             <h1 className="text-lg sm:text-xl font-semibold text-foreground">

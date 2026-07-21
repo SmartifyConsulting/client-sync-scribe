@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedAudioUrl } from "@/utils/audioUrl";
@@ -21,7 +20,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function ExpiringRecordings() {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -60,17 +58,17 @@ export default function ExpiringRecordings() {
     try {
       const url = await getSignedAudioUrl(session.audio_url);
       if (!url) throw new Error("Could not get download URL");
-
+      
       const a = document.createElement("a");
       a.href = url;
       a.download = `session-${format(parseISO(session.started_at), "yyyy-MM-dd")}.webm`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-
-      toast({ title: t("doctor.recordings.download_started"), description: t("doctor.recordings.download_description") });
+      
+      toast({ title: "Download started", description: "Your recording is being downloaded." });
     } catch (err) {
-      toast({ title: t("doctor.recordings.download_failed"), description: t("doctor.recordings.download_failed_description"), variant: "destructive" });
+      toast({ title: "Download failed", description: "Could not download the recording.", variant: "destructive" });
     } finally {
       setDownloadingId(null);
     }
@@ -86,10 +84,10 @@ export default function ExpiringRecordings() {
 
       if (error) throw error;
 
-      toast({ title: t("doctor.recordings.deleted"), description: t("doctor.recordings.deleted_description") });
+      toast({ title: "Recording deleted", description: "The audio and transcript have been removed." });
       queryClient.invalidateQueries({ queryKey: ["expiring-recordings"] });
     } catch (err) {
-      toast({ title: t("doctor.recordings.delete_failed"), description: t("doctor.recordings.delete_failed_description"), variant: "destructive" });
+      toast({ title: "Delete failed", description: "Could not delete the recording.", variant: "destructive" });
     } finally {
       setDeletingId(null);
       setConfirmDeleteId(null);
@@ -105,9 +103,9 @@ export default function ExpiringRecordings() {
   return (
     <div className="space-y-6 animate-fade-in max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("doctor.recordings.title")}</h1>
-        <p className="text-muted-foreground text-[12px]">
-          {t("doctor.recordings.subtitle")}
+        <h1 className="text-2xl font-bold text-foreground">Expiring Recordings</h1>
+        <p className="text-muted-foreground text-sm">
+          Session recordings are automatically deleted after 7 days. Download any you want to keep.
         </p>
       </div>
 
@@ -119,8 +117,8 @@ export default function ExpiringRecordings() {
         <Card>
           <CardContent className="py-12 text-center">
             <Mic className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">{t("doctor.recordings.no_expiring")}</p>
-            <p className="text-sm text-muted-foreground mt-1">{t("doctor.recordings.no_expiring_description")}</p>
+            <p className="text-muted-foreground">No recordings expiring soon.</p>
+            <p className="text-sm text-muted-foreground mt-1">Recordings older than 7 days are automatically removed.</p>
           </CardContent>
         </Card>
       ) : (
@@ -146,12 +144,12 @@ export default function ExpiringRecordings() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <Badge
+                    <Badge 
                       variant={daysLeft <= 1 ? "destructive" : "secondary"}
                       className="gap-1"
                     >
                       <AlertTriangle className="h-4 w-4" />
-                      {daysLeft === 0 ? t("doctor.recordings.expires_today") : t("doctor.recordings.days_left", { count: daysLeft })}
+                      {daysLeft === 0 ? "Expires today" : `${daysLeft} day${daysLeft !== 1 ? "s" : ""} left`}
                     </Badge>
                     <Button
                       variant="outline"
@@ -165,7 +163,7 @@ export default function ExpiringRecordings() {
                       ) : (
                         <Download className="h-4 w-4" />
                       )}
-                      {t("doctor.recordings.download")}
+                      Download
                     </Button>
                     <Button
                       variant="outline"
@@ -179,7 +177,7 @@ export default function ExpiringRecordings() {
                       ) : (
                         <Trash2 className="h-4 w-4" />
                       )}
-                      {t("doctor.recordings.delete")}
+                      Delete
                     </Button>
                   </div>
                 </CardContent>
@@ -192,18 +190,18 @@ export default function ExpiringRecordings() {
       <AlertDialog open={!!confirmDeleteId} onOpenChange={(open) => !open && setConfirmDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("doctor.recordings.delete_title")}</AlertDialogTitle>
+            <AlertDialogTitle>Delete Recording?</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("doctor.recordings.delete_description")}
+              This will permanently remove the audio recording and transcript. The AI summary and action points will be preserved. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => confirmDeleteId && handleDelete(confirmDeleteId)}
             >
-              {t("doctor.recordings.delete_button")}
+              Delete Recording
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

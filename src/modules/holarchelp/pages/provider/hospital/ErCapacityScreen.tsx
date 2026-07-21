@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { BedDouble, Activity } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 export default function ErCapacityScreen() {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export default function ErCapacityScreen() {
     setSaving(true);
     const { error } = await supabase.from("holarchelp_hospitals" as any).update(p).eq("id", providerId);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     setH((prev: any) => ({ ...(prev ?? {}), ...p }));
     toast.success(t("common.capacityUpdated"));
   };
@@ -36,10 +37,7 @@ export default function ErCapacityScreen() {
 
   return (
     <div className="space-y-4">
-      <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
-        <h1 className="text-2xl font-extrabold">{t("capacity.title")}</h1>
-      </header>
+      <h2 className="text-2xl font-extrabold">{t("capacity.title")}</h2>
 
       <div className="grid gap-3 md:grid-cols-3">
         <Tile icon={Activity} label={t("capacity.status")}>
@@ -82,7 +80,7 @@ export default function ErCapacityScreen() {
 
 const Tile = ({ icon: Icon, label, children }: any) => (
   <div className="rounded-2xl border bg-card p-3 space-y-2">
-    <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+    <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground">
       <Icon className="h-3.5 w-3.5" /> {label}
     </p>
     {children}

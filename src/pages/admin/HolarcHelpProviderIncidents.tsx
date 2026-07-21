@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import { ArrowLeft, Loader2, ShieldAlert } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 export default function HolarcHelpProviderIncidents() {
-  const { t } = useTranslation();
   const { type, id } = useParams<{ type: "hospital" | "ambulance"; id: string }>();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [rows, setRows] = useState<any[]>([]);
@@ -56,7 +54,7 @@ export default function HolarcHelpProviderIncidents() {
   if (!isAdmin) return (
     <div className="mx-auto max-w-md p-8 text-center">
       <ShieldAlert className="mx-auto h-10 w-10 text-destructive" />
-      <p className="mt-4 font-semibold">{t('admin.incidents.adminAccessRequired')}</p>
+      <p className="mt-4 font-semibold">Admin access required</p>
     </div>
   );
 
@@ -73,43 +71,43 @@ export default function HolarcHelpProviderIncidents() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
-      <Link to="/admin/users"><Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> {t('admin.incidents.backToAdmin')}</Button></Link>
+      <Link to="/admin/users"><Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Back to admin</Button></Link>
       <div>
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">{t('admin.incidents.title')}</p>
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Incident history</p>
         <h1 className="text-2xl font-extrabold">{providerName}</h1>
         <p className="text-xs text-muted-foreground">{provider?.country ?? "—"} · {provider?.tier ?? "—"} · <span className="capitalize">{provider?.status}</span></p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">{t('admin.incidents.total')}</p><p className="text-xl font-bold">{totals.count}</p></CardContent></Card>
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">{t('admin.incidents.accepted')}</p><p className="text-xl font-bold">{totals.accepts}</p></CardContent></Card>
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">{t('admin.incidents.arrived')}</p><p className="text-xl font-bold">{totals.arrived}</p></CardContent></Card>
-        <Card><CardContent className="p-3"><p className="text-[11px] text-muted-foreground">{t('admin.incidents.avgRating')}</p><p className="text-xl font-bold">{totals.avgRating}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Total</p><p className="text-xl font-bold">{totals.count}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Accepted</p><p className="text-xl font-bold">{totals.accepts}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Arrived</p><p className="text-xl font-bold">{totals.arrived}</p></CardContent></Card>
+        <Card><CardContent className="p-3"><p className="text-sm text-muted-foreground">Avg rating</p><p className="text-xl font-bold">{totals.avgRating}</p></CardContent></Card>
       </div>
 
       <div className="rounded-2xl border bg-card overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('admin.incidents.date')}</TableHead>
-              <TableHead>{t('admin.incidents.patient')}</TableHead>
-              <TableHead>{t('admin.incidents.severity')}</TableHead>
-              <TableHead>{t('common.status')}</TableHead>
-              <TableHead>{t('admin.incidents.accepted')}</TableHead>
-              <TableHead>{t('admin.incidents.arrived')}</TableHead>
-              <TableHead>{t('admin.incidents.resolved')}</TableHead>
-              <TableHead>{t('admin.incidents.rating')}</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Patient</TableHead>
+              <TableHead>Severity</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Accepted</TableHead>
+              <TableHead>Arrived</TableHead>
+              <TableHead>Resolved</TableHead>
+              <TableHead>Rating</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading && (<TableRow><TableCell colSpan={8} className="text-center py-8"><Loader2 className="inline h-4 w-4 animate-spin" /></TableCell></TableRow>)}
-            {!loading && rows.length === 0 && (<TableRow><TableCell colSpan={8} className="text-center py-8 text-sm text-muted-foreground">{t('admin.incidents.noIncidents')}</TableCell></TableRow>)}
+            {!loading && rows.length === 0 && (<TableRow><TableCell colSpan={8} className="text-center py-8 text-sm text-muted-foreground">No incidents for this provider yet.</TableCell></TableRow>)}
             {!loading && rows.map((r) => (
               <TableRow key={r.id}>
                 <TableCell className="text-xs">{format(parseISO(r.created_at), "MMM d, HH:mm")}</TableCell>
                 <TableCell className="text-xs">{r.patient_name}</TableCell>
-                <TableCell><Badge variant="outline" className="capitalize text-[10px]">{r.severity ?? "—"}</Badge></TableCell>
-                <TableCell><Badge variant="outline" className="capitalize text-[10px]">{r.status}</Badge></TableCell>
+                <TableCell><Badge variant="outline" className="capitalize text-xs">{r.severity ?? "—"}</Badge></TableCell>
+                <TableCell><Badge variant="outline" className="capitalize text-xs">{r.status}</Badge></TableCell>
                 <TableCell className="text-xs">{r.accepted_at ? format(parseISO(r.accepted_at), "HH:mm") : "—"}</TableCell>
                 <TableCell className="text-xs">{r.arrived_at ? format(parseISO(r.arrived_at), "HH:mm") : "—"}</TableCell>
                 <TableCell className="text-xs">{r.resolved_at ? format(parseISO(r.resolved_at), "HH:mm") : "—"}</TableCell>

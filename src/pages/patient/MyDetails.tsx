@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
+import { AdmissionsView } from "@/features/sessions/admissions/AdmissionsView";
+import { Hospital } from "lucide-react";
 
 
 
@@ -38,17 +40,41 @@ export default function MyDetails() {
       setUserEmail(user.email || "");
       setUserId(user.id);
 
+      // 1) Prefer a non-archived row linked to this user
       let { data, error } = await supabase
         .from("patients")
         .select("*")
         .eq("patient_user_id", user.id)
-        .order("created_at", { ascending: false })
+        .neq("status", "archived")
+        .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (error) throw error;
 
-      // Self-heal: if no patient row exists for this user, create a minimal one
+      // 2) Fallback: find a non-archived row by email and self-heal the link
+      if (!data && user.email) {
+        const { data: byEmail } = await supabase
+          .from("patients")
+          .select("*")
+          .ilike("email", user.email)
+          .neq("status", "archived")
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (byEmail) {
+          const { data: healed } = await supabase
+            .from("patients")
+            .update({ patient_user_id: user.id })
+            .eq("id", byEmail.id)
+            .select("*")
+            .maybeSingle();
+          data = healed || byEmail;
+        }
+      }
+
+      // 3) Self-heal: if still nothing, create a minimal row
       if (!data) {
         const { data: profile } = await supabase
           .from("profiles")
@@ -154,7 +180,7 @@ export default function MyDetails() {
     <div className="space-y-4 p-4 md:p-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">{heading.title}</h1>
-        <p className="text-muted-foreground text-[12px]">{heading.subtitle}</p>
+        <p className="text-muted-foreground text-sm">{heading.subtitle}</p>
       </div>
 
       {isIncomplete && section === "health" && <ProfileCompletionBanner />}
@@ -175,6 +201,16 @@ export default function MyDetails() {
       ) : (
         <div className="p-6 text-center text-muted-foreground border border-dashed border-border rounded-lg">
           <p>{t("patient.myDetails.recordSetupMessage")}</p>
+        </div>
+      )}
+
+      {patient && section === "health" && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Hospital className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Hospital Admissions</h2>
+          </div>
+          <AdmissionsView patientId={patient.id} canEdit={false} />
         </div>
       )}
 

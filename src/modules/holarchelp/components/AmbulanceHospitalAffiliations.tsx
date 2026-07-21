@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building2, Plus, X, Hospital } from "lucide-react";
 import { toast } from "sonner";
+import { toastError } from "@/lib/userMessage";
 
 type HospitalRow = { id: string; name: string; city: string | null; status: string };
 type Affiliation = {
@@ -61,7 +62,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
       role: roleInput || null,
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success(`Added ${h.name}`);
     setSearch(""); setResults([]); load();
   }
@@ -90,7 +91,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
       role: roleInput || null,
     });
     setLoading(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Hospital submitted to admin for activation");
     setSearch(""); setResults([]); load();
   }
@@ -137,7 +138,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
                 <span>{h.name}</span>
                 {h.city && <span className="text-xs text-muted-foreground">· {h.city}</span>}
               </span>
-              <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-[10px]">{h.status}</Badge>
+              <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-xs">{h.status}</Badge>
             </button>
           ))}
           {!hasExactMatch && (
@@ -166,7 +167,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {a.role && <span>{a.role}</span>}
                   {a.hospital?.status && a.hospital.status !== "approved" && (
-                    <Badge variant="secondary" className="text-[10px]">pending admin review</Badge>
+                    <Badge variant="secondary" className="text-xs">pending admin review</Badge>
                   )}
                 </div>
               </div>

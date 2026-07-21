@@ -63,7 +63,7 @@ export function Testimonials() {
               </blockquote>
               <figcaption className="mt-5 pt-4 border-t border-border">
                 <p className="text-sm font-semibold text-foreground">{q.name}</p>
-                <p className="text-[11px] text-muted-foreground">{q.role}</p>
+                <p className="text-sm text-muted-foreground">{q.role}</p>
               </figcaption>
             </motion.figure>
           ))}

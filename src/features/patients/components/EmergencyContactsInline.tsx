@@ -7,6 +7,8 @@ import { Plus, Trash2, ShieldAlert, ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { isValidOptionalEmail } from "@/lib/validation";
+
 import type { EmergencyContact } from "./EmergencyContactsSection";
 import type { NextOfKinMember } from "@/hooks/usePatients";
 
@@ -105,15 +107,14 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
 
   return (
     <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
-      <CollapsibleTrigger className="group flex w-full items-center justify-between p-3 data-[state=open]:border-b border-border hover:bg-muted/40 transition-colors">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-primary" />
-          <span className="text-xs font-semibold tracking-wide">Emergency Contacts</span>
-        </div>
-        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+      <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-muted/40 transition-colors px-4 py-3 group">
+        <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
+          <ShieldAlert className="h-4 w-4 text-primary" /> Emergency Contacts
+        </h3>
+        <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent className="p-3 space-y-3">
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Notified by default when you trigger SOS. They can be the same as your Next of Kin, or someone different entirely.
         </p>
 
@@ -125,34 +126,44 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
         {!sameAsNok && (
           <>
             {contacts.length === 0 && (
-              <p className="text-[11px] text-muted-foreground">No emergency contacts yet.</p>
+              <p className="text-sm text-muted-foreground">No emergency contacts yet.</p>
             )}
             {contacts.map((c) => (
               <div key={c.id} className="rounded-lg border border-border p-2.5 space-y-2 bg-muted/30">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
-                    <Label className="text-[11px]">Name</Label>
+                    <Label className="text-sm">Name</Label>
                     <Input value={c.name} onChange={(e) => updateContact(c.id, { name: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-[11px]">Relationship</Label>
+                    <Label className="text-sm">Relationship</Label>
                     <Input value={c.relationship ?? ""} onChange={(e) => updateContact(c.id, { relationship: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-[11px]">Phone</Label>
+                    <Label className="text-sm">Phone</Label>
                     <Input value={c.phone} onChange={(e) => updateContact(c.id, { phone: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-[11px]">Email</Label>
-                    <Input type="email" value={c.email ?? ""} onChange={(e) => updateContact(c.id, { email: e.target.value })} />
+                    <Label className="text-sm">Email</Label>
+                    <Input
+                      type="email"
+                      value={c.email ?? ""}
+                      onChange={(e) => updateContact(c.id, { email: e.target.value })}
+                      aria-invalid={!isValidOptionalEmail(c.email)}
+                      className={!isValidOptionalEmail(c.email) ? "border-destructive focus-visible:ring-destructive" : undefined}
+                    />
+                    {!isValidOptionalEmail(c.email) && (
+                      <p className="text-xs text-destructive mt-0.5">Enter a valid email address.</p>
+                    )}
                   </div>
+
                 </div>
                 <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <label className="flex items-center gap-2 text-[11px]">
+                  <label className="flex items-center gap-2 text-sm">
                     <Switch checked={!!c.can_view_profile} onCheckedChange={(v) => updateContact(c.id, { can_view_profile: v })} />
                     Can view profile
                   </label>
-                  <label className="flex items-center gap-2 text-[11px]">
+                  <label className="flex items-center gap-2 text-sm">
                     <Switch checked={c.can_view_live_tracking !== false} onCheckedChange={(v) => updateContact(c.id, { can_view_live_tracking: v })} />
                     Live tracking
                   </label>

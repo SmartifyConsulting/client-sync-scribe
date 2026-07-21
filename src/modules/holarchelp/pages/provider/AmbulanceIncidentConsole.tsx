@@ -17,6 +17,7 @@ import { useProviderAccess } from "../../components/ProviderGate";
 import { useLiveProviderLocation } from "../../hooks/useLiveProviderLocation";
 import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 type Loc = { latitude: number; longitude: number; recorded_at: string };
 
@@ -78,7 +79,7 @@ export default function AmbulanceIncidentConsole() {
     const { error } = await supabase.rpc("holarchelp_set_incident_status" as any, {
       _incident_id: id, _status: status, _payload: {},
     });
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success(`${t("common.status")}: ${statusLabel(status, t)}`);
   };
 
@@ -86,7 +87,7 @@ export default function AmbulanceIncidentConsole() {
     if (!eta || !id) return;
     const { error } = await supabase.from("holarchelp_incidents" as any)
       .update({ eta_minutes: Number(eta), last_eta_update: new Date().toISOString() } as any).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: id, provider_id: providerId, event_type: "eta_set", payload: { eta_minutes: Number(eta) },
     } as any);
@@ -98,7 +99,7 @@ export default function AmbulanceIncidentConsole() {
     const { error } = await supabase.from("holarchelp_incidents" as any)
       .update({ pre_arrival_notes: notes } as any).eq("id", id);
     setSavingNotes(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     await supabase.from("holarchelp_incident_events" as any).insert({
       incident_id: id, provider_id: providerId, event_type: "pre_arrival_notes_updated", payload: { length: notes.length },
     } as any);
@@ -109,7 +110,7 @@ export default function AmbulanceIncidentConsole() {
     if (!id) return;
     const reason = window.prompt(t("incidentConsole.unableReason")) || "unable_to_continue";
     const { error } = await supabase.rpc("holarchelp_release_incident" as any, { _incident_id: id, _reason: reason });
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
     supabase.functions.invoke("dispatch-sos", { body: { incident_id: id, exclude_provider_ids: [providerId] } });
     toast.success(t("incidentConsole.released"));
     navigate("/provider/ambulance");

@@ -148,7 +148,7 @@ export function ArrowCallout({ targetEl, title, message, stepIndex, totalSteps, 
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed mb-3">{message}</p>
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+          <span className="text-xs uppercase tracking-wide text-muted-foreground">
             Step {stepIndex + 1} of {totalSteps}
           </span>
           <div className="flex gap-2">

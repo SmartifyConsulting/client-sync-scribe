@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2, Send, MapPin, Phone } from "lucide-react";
@@ -15,7 +14,6 @@ interface DispatchData {
 }
 
 export default function DispatchAssignmentScreen() {
-  const { t } = useTranslation();
   const { providerId } = useProviderAccess();
   const [loading, setLoading] = useState(false);
   const [dispatch, setDispatch] = useState<DispatchData>({
@@ -47,30 +45,30 @@ export default function DispatchAssignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          {t("holarcHelp.emergency.dispatch.header")}
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Emergency Dispatch
         </p>
-        <h1 className="text-3xl font-extrabold">{t("holarcHelp.emergency.dispatch.title")}</h1>
+        <h1 className="text-3xl font-extrabold">Confirm Dispatch Assignment</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {t("holarcHelp.emergency.dispatch.subtitle")}
+          Finalize assignment and send dispatch to crew
         </p>
       </header>
 
       <div className="grid gap-6 max-w-2xl">
         {/* Dispatch Details */}
         <div className="rounded-2xl border bg-card p-6">
-          <h2 className="text-lg font-bold mb-4">{t("holarcHelp.emergency.dispatch.details")}</h2>
+          <h2 className="text-lg font-bold mb-4">Dispatch Details</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-semibold text-muted-foreground">
-                  {t("holarcHelp.emergency.dispatch.ambulance")}
+                  Ambulance
                 </label>
                 <p className="text-lg font-bold mt-1">{dispatch.ambulance_id}</p>
               </div>
               <div>
                 <label className="text-sm font-semibold text-muted-foreground">
-                  {t("holarcHelp.emergency.dispatch.incidentId")}
+                  Incident ID
                 </label>
                 <p className="text-lg font-bold mt-1">{dispatch.incident_id}</p>
               </div>
@@ -79,13 +77,13 @@ export default function DispatchAssignmentScreen() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-semibold text-muted-foreground">
-                  {t("holarcHelp.emergency.dispatch.crewLead")}
+                  Crew Lead
                 </label>
                 <p className="text-lg font-bold mt-1">{dispatch.crew_lead}</p>
               </div>
               <div>
                 <label className="text-sm font-semibold text-muted-foreground">
-                  {t("holarcHelp.emergency.dispatch.contact")}
+                  Contact
                 </label>
                 <p className="text-lg font-bold mt-1">{dispatch.contact_number}</p>
               </div>
@@ -97,7 +95,7 @@ export default function DispatchAssignmentScreen() {
         <div className="rounded-2xl border bg-card p-6">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
-            {t("holarcHelp.emergency.dispatch.hospitalDestination")}
+            Hospital Destination
           </h2>
           <select
             value={dispatch.hospital_destination}
@@ -110,29 +108,29 @@ export default function DispatchAssignmentScreen() {
             <option>Emergency Care Unit</option>
           </select>
           <p className="text-xs text-muted-foreground mt-2">
-            {t("holarcHelp.emergency.dispatch.crewNavigateHint")}
+            Crew will navigate to this hospital destination
           </p>
         </div>
 
         {/* Route Priority */}
         <div className="rounded-2xl border bg-card p-6">
-          <h2 className="text-lg font-bold mb-4">{t("holarcHelp.emergency.dispatch.routePriority")}</h2>
+          <h2 className="text-lg font-bold mb-4">Route Priority</h2>
           <div className="space-y-2">
             {[
               {
                 value: "fastest",
-                label: t("holarcHelp.emergency.dispatch.routes.fastest"),
-                desc: t("holarcHelp.emergency.dispatch.routes.fastestDesc"),
+                label: "Fastest Route",
+                desc: "Quickest time, may use major roads",
               },
               {
                 value: "safest",
-                label: t("holarcHelp.emergency.dispatch.routes.safest"),
-                desc: t("holarcHelp.emergency.dispatch.routes.safestDesc"),
+                label: "Safest Route",
+                desc: "Avoids dangerous areas",
               },
               {
                 value: "standard",
-                label: t("holarcHelp.emergency.dispatch.routes.standard"),
-                desc: t("holarcHelp.emergency.dispatch.routes.standardDesc"),
+                label: "Standard Route",
+                desc: "Balanced approach",
               },
             ].map((option) => (
               <label
@@ -160,11 +158,11 @@ export default function DispatchAssignmentScreen() {
 
         {/* Special Instructions */}
         <div className="rounded-2xl border bg-card p-6">
-          <h2 className="text-lg font-bold mb-4">{t("holarcHelp.emergency.dispatch.specialInstructions")}</h2>
+          <h2 className="text-lg font-bold mb-4">Special Instructions</h2>
           <textarea
             value={dispatch.special_instructions}
             onChange={(e) => handleChange("special_instructions", e.target.value)}
-            placeholder={t("holarcHelp.emergency.dispatch.specialInstructionsPlaceholder")}
+            placeholder="Any special instructions for the crew (e.g., access notes, hazards, patient information)..."
             rows={3}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
@@ -175,11 +173,11 @@ export default function DispatchAssignmentScreen() {
           <div className="flex gap-3">
             <Send className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold">{t("holarcHelp.emergency.dispatch.notificationsWillBeSentTo")}</p>
+              <p className="text-sm font-semibold">Notifications will be sent to:</p>
               <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                <li>✓ {t("holarcHelp.emergency.dispatch.crewLead")} ({dispatch.crew_lead})</li>
-                <li>✓ {t("holarcHelp.emergency.dispatch.hospitalDestination")}</li>
-                <li>✓ {t("holarcHelp.emergency.dispatch.dispatchControlCenter")}</li>
+                <li>✓ Crew Lead ({dispatch.crew_lead})</li>
+                <li>✓ Hospital Destination</li>
+                <li>✓ Dispatch Control Center</li>
               </ul>
             </div>
           </div>
@@ -192,7 +190,7 @@ export default function DispatchAssignmentScreen() {
             className="flex-1"
             onClick={() => window.history.back()}
           >
-            {t("common.back")}
+            Back
           </Button>
           <Button
             className="flex-1 bg-green-600 hover:bg-green-700"
@@ -202,12 +200,12 @@ export default function DispatchAssignmentScreen() {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t("holarcHelp.emergency.dispatch.actions.sending")}
+                Sending...
               </>
             ) : (
               <>
                 <Send className="mr-2 h-4 w-4" />
-                {t("holarcHelp.emergency.dispatch.actions.sendDispatch")}
+                Send Dispatch
               </>
             )}
           </Button>

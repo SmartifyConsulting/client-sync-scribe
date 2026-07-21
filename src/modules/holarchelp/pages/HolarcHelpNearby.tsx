@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,7 +22,6 @@ const distanceKm = (a: Coords, b: Coords) => {
 };
 
 export default function HolarcHelpNearby() {
-  const { t } = useTranslation();
   const [coords, setCoords] = useState<Coords | null>(null);
   const [permState, setPermState] = useState<PermissionState | "unknown">("unknown");
   const [loadingLoc, setLoadingLoc] = useState(false);
@@ -55,7 +53,7 @@ export default function HolarcHelpNearby() {
 
   const requestLocation = (silent = false) => {
     if (!("geolocation" in navigator)) {
-      toast.error(t("holarcHelp.nearby.gpsNotSupported"));
+      toast.error("GPS not supported on this device");
       return;
     }
     setLoadingLoc(true);
@@ -69,9 +67,9 @@ export default function HolarcHelpNearby() {
         setLoadingLoc(false);
         if (err.code === err.PERMISSION_DENIED) {
           setPermState("denied");
-          if (!silent) toast.error(t("holarcHelp.nearby.locationBlocked"));
+          if (!silent) toast.error("Location is blocked. Enable it in your browser site settings to find nearby providers.");
         } else if (!silent) {
-          toast.error(t("holarcHelp.nearby.locationError"));
+          toast.error("Couldn't get your location. Try again.");
         }
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -117,17 +115,17 @@ export default function HolarcHelpNearby() {
   return (
     <div className="mx-auto max-w-md space-y-4">
       <Link to="/patient/holarchelp">
-        <Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> {t("common.back")}</Button>
+        <Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Back</Button>
       </Link>
       <div>
-        <h1 className="text-2xl font-extrabold">{t("holarcHelp.nearby.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("holarcHelp.nearby.subtitle")}</p>
+        <h1 className="text-2xl font-extrabold">Find nearby provider</h1>
+        <p className="text-sm text-muted-foreground">Approved hospitals and emergency responders within reach.</p>
       </div>
 
       {!coords && permState !== "denied" && (
         <Button onClick={() => requestLocation()} disabled={loadingLoc} className="h-12 w-full gap-2 rounded-xl">
           {loadingLoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crosshair className="h-5 w-5" />}
-          {t("holarcHelp.nearby.findButton")}
+          Find nearby provider
         </Button>
       )}
 
@@ -135,17 +133,17 @@ export default function HolarcHelpNearby() {
         <Card className="border-amber-500/40 bg-amber-50">
           <CardContent className="p-4 space-y-2 text-sm">
             <div className="flex items-center gap-2 font-semibold text-amber-800">
-              <AlertTriangle className="h-4 w-4" /> {t("holarcHelp.nearby.blockedTitle")}
+              <AlertTriangle className="h-4 w-4" /> Location is blocked
             </div>
             <p className="text-amber-900/80 text-xs">
-              {t("holarcHelp.nearby.blockedDescription")}
+              To find nearby hospitals and emergency responders, enable location access for this site:
             </p>
             <ul className="list-disc pl-5 text-xs text-amber-900/80 space-y-0.5">
-              <li>{t("holarcHelp.nearby.step1")}</li>
-              <li>{t("holarcHelp.nearby.step2")}</li>
-              <li>{t("holarcHelp.nearby.step3")}</li>
+              <li>Tap the lock/info icon in the address bar</li>
+              <li>Find <strong>Location</strong> permission and set to <strong>Allow</strong></li>
+              <li>Reload this page and try again</li>
             </ul>
-            <Button size="sm" onClick={() => requestLocation()} className="mt-1">{t("holarcHelp.nearby.tryAgain")}</Button>
+            <Button size="sm" onClick={() => requestLocation()} className="mt-1">Try again</Button>
           </CardContent>
         </Card>
       )}
@@ -153,14 +151,14 @@ export default function HolarcHelpNearby() {
       {coords && (
         <>
           <ProviderMap center={coords} providers={providers} height={320} />
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-            <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> {t("common.hospital")}</span>
-            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> {t("common.er")}</span>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5"><img src={hospitalIcon} alt="" className="h-4 w-4" /> Hospital</span>
+            <span className="flex items-center gap-1.5"><img src={ambulanceIcon} alt="" className="h-4 w-4" /> ER</span>
           </div>
 
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {loadingProviders ? t("common.loading") : t("holarcHelp.nearby.nearestCount", { count: sorted.length })}
+              {loadingProviders ? "Loading providers…" : `${sorted.length} nearest`}
             </p>
             {sorted.map((p) => {
               const isPublic = (p.ownership ?? 'private') === 'public';
@@ -169,10 +167,10 @@ export default function HolarcHelpNearby() {
                 <img src={p.type === "hospital" ? hospitalIcon : ambulanceIcon} alt="" className="h-9 w-9 object-contain" />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold truncate">{p.name}</p>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground capitalize">
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground capitalize">
                     <span>{p.type === "ambulance" ? "ER" : p.type}{p.subtitle && ` · ${p.subtitle}`}</span>
-                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
-                      {isPublic ? t("holarcHelp.nearby.public") : t("holarcHelp.nearby.private")}
+                    <span className={`rounded-full px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
+                      {isPublic ? 'Public' : 'Private'}
                     </span>
                   </div>
                 </div>
@@ -188,14 +186,14 @@ export default function HolarcHelpNearby() {
               if (sorted.length === 0) {
                 return (
                   <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
-                    {t("holarcHelp.nearby.noProviders")}
+                    No approved providers with mapped locations yet.
                   </p>
                 );
               }
               return (
-                <div className="space-y-1 pt-1 text-[11px] text-muted-foreground">
-                  {hospCount === 0 && <p>{t("holarcHelp.nearby.noHospitals")}</p>}
-                  {ambCount === 0 && <p>{t("holarcHelp.nearby.noAmbulances")}</p>}
+                <div className="space-y-1 pt-1 text-sm text-muted-foreground">
+                  {hospCount === 0 && <p>No approved hospitals in your area yet.</p>}
+                  {ambCount === 0 && <p>No approved emergency response providers in your area yet.</p>}
                 </div>
               );
             })()}

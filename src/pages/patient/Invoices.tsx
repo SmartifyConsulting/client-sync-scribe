@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import { Receipt, Calendar, Download, CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Send, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,6 @@ const statusConfig: Record<string, { color: string; icon: typeof CheckCircle; la
 export default function Invoices() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [patientInfoMap, setPatientInfoMap] = useState<Record<string, PatientInfo>>({});
   const [loading, setLoading] = useState(true);
@@ -165,8 +163,8 @@ export default function Invoices() {
       if (error) throw error;
 
       toast({
-        title: t("patient.invoices.paymentSuccessful"),
-        description: t("patient.invoices.invoiceMarkedAsPaid"),
+        title: "Payment Successful",
+        description: "Your invoice has been marked as paid.",
       });
 
       // Refresh invoices
@@ -174,8 +172,8 @@ export default function Invoices() {
     } catch (error) {
       console.error("Error paying invoice:", error);
       toast({
-        title: t("patient.invoices.paymentFailed"),
-        description: t("patient.invoices.paymentFailedDescription"),
+        title: "Payment Failed",
+        description: "There was an error processing your payment. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -211,14 +209,14 @@ export default function Invoices() {
       if (response.error) throw response.error;
 
       toast({
-        title: t("patient.invoices.claimSubmitted"),
-        description: t("patient.invoices.claimSubmittedDescription", { invoiceNumber: invoice.invoice_number }),
+        title: "Claim Submitted",
+        description: `Invoice ${invoice.invoice_number} has been submitted to your medical insurance.`,
       });
     } catch (error) {
       console.error("Error submitting claim:", error);
       toast({
-        title: t("patient.invoices.submissionFailed"),
-        description: t("patient.invoices.submissionFailedDescription"),
+        title: "Submission Failed",
+        description: "There was an error submitting your claim. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -237,43 +235,43 @@ export default function Invoices() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("patient.invoices.title")}</h1>
-        <p className="text-muted-foreground text-[12px]">{t("patient.invoices.subtitle")}</p>
+        <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
+        <p className="text-muted-foreground text-sm">View and manage your medical invoices</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("patient.invoices.pendingPayment")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Pending Payment</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPending)}</div>
             <p className="text-xs text-muted-foreground">
-              {invoices.filter((i) => i.status === "pending").length} {t("patient.invoices.invoiceCountPlural")}
+              {invoices.filter((i) => i.status === "pending").length} invoice(s)
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("patient.invoices.overdue")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{formatCurrency(totalOverdue)}</div>
             <p className="text-xs text-muted-foreground">
-              {invoices.filter((i) => i.status === "overdue").length} {t("patient.invoices.invoiceCountPlural")}
+              {invoices.filter((i) => i.status === "overdue").length} invoice(s)
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">{t("patient.invoices.totalInvoiced")}</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Invoiced</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {formatCurrency(invoices.reduce((sum, inv) => sum + Number(inv.amount), 0))}
             </div>
-            <p className="text-xs text-muted-foreground">{invoices.length} {t("patient.invoices.invoiceCountPlural")}</p>
+            <p className="text-xs text-muted-foreground">{invoices.length} invoice(s)</p>
           </CardContent>
         </Card>
       </div>
@@ -283,8 +281,8 @@ export default function Invoices() {
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
             <div>
-              <CardTitle>{t("patient.invoices.allInvoices")}</CardTitle>
-              <CardDescription>{t("patient.invoices.completeInvoiceHistory")}</CardDescription>
+              <CardTitle>All Invoices</CardTitle>
+              <CardDescription>Your complete invoice history</CardDescription>
             </div>
           </div>
           <div className="flex gap-2 mt-4">
@@ -295,7 +293,7 @@ export default function Invoices() {
                 size="sm"
                 onClick={() => setFilter(status)}
               >
-                {status === "all" ? t("common.all") : statusConfig[status]?.label || status}
+                {status === "all" ? "All" : statusConfig[status]?.label || status}
               </Button>
             ))}
           </div>
@@ -305,8 +303,8 @@ export default function Invoices() {
             {filteredInvoices.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">
                 {invoices.length === 0
-                  ? t("patient.invoices.noInvoicesFound")
-                  : t("patient.invoices.noInvoicesMatchFilter")
+                  ? "No invoices found. Your invoices will appear here once your doctor creates them."
+                  : "No invoices match your filter criteria."
                 }
               </p>
             ) : (
@@ -343,14 +341,14 @@ export default function Invoices() {
                       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
-                          {t("patient.invoices.issued")}: {format(parseISO(invoice.created_at), "MMM d, yyyy")}
+                          Issued: {format(parseISO(invoice.created_at), "MMM d, yyyy")}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          {t("patient.invoices.due")}: {format(parseISO(invoice.due_date), "MMM d, yyyy")}
+                          Due: {format(parseISO(invoice.due_date), "MMM d, yyyy")}
                         </span>
                         {invoice.doctor_profile?.full_name && (
-                          <span>{t("patient.invoices.from")}: {invoice.doctor_profile.full_name}</span>
+                          <span>From: {invoice.doctor_profile.full_name}</span>
                         )}
                       </div>
                     </div>
@@ -374,14 +372,14 @@ export default function Invoices() {
                                 ) : (
                                   <Send className="h-4 w-4" />
                                 )}
-                                {t("patient.invoices.claim")}
+                                Claim
                               </Button>
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
                             {patientInfoMap[invoice.patient_id]?.claims_email
-                              ? t("patient.invoices.submitTo", { email: patientInfoMap[invoice.patient_id].claims_email })
-                              : t("patient.invoices.noClaimsEmailConfigured")}
+                              ? `Submit to ${patientInfoMap[invoice.patient_id].claims_email}`
+                              : "No claims email address configured"}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -397,7 +395,7 @@ export default function Invoices() {
                           ) : (
                             <CreditCard className="h-4 w-4" />
                           )}
-                          {t("patient.invoices.pay")}
+                          Pay
                         </Button>
                       )}
                     </div>
@@ -419,7 +417,7 @@ export default function Invoices() {
                   <Receipt className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">{t("patient.invoices.invoiceDetails")}</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Invoice Details</h2>
                   <p className="text-sm text-muted-foreground">{viewingInvoice.invoice_number}</p>
                 </div>
               </div>
@@ -435,23 +433,23 @@ export default function Invoices() {
             <div className="space-y-4">
               {viewingInvoice.doctor_profile?.full_name && (
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("patient.invoices.fromDoctor")}</p>
+                  <p className="text-sm text-muted-foreground">From Doctor</p>
                   <p className="font-medium">{viewingInvoice.doctor_profile.full_name}</p>
                 </div>
               )}
 
               <div>
-                <p className="text-sm text-muted-foreground">{t("patient.invoices.description")}</p>
+                <p className="text-sm text-muted-foreground">Description</p>
                 <p className="font-medium">{viewingInvoice.description}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("patient.invoices.amount")}</p>
+                  <p className="text-sm text-muted-foreground">Amount</p>
                   <p className="font-semibold text-lg">{formatCurrency(Number(viewingInvoice.amount))}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("patient.invoices.status")}</p>
+                  <p className="text-sm text-muted-foreground">Status</p>
                   <div className="mt-1">
                     <Badge className={statusConfig[viewingInvoice.status]?.color || statusConfig.pending.color}>
                       {statusConfig[viewingInvoice.status]?.label || viewingInvoice.status}
@@ -462,33 +460,33 @@ export default function Invoices() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("patient.invoices.issuedOn")}</p>
+                  <p className="text-sm text-muted-foreground">Issued On</p>
                   <p className="font-medium">{format(parseISO(viewingInvoice.created_at), 'dd MMMM yyyy')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("patient.invoices.dueDate")}</p>
+                  <p className="text-sm text-muted-foreground">Due Date</p>
                   <p className="font-medium">{format(parseISO(viewingInvoice.due_date), 'dd MMMM yyyy')}</p>
                 </div>
               </div>
 
               {viewingInvoice.paid_at && (
                 <div>
-                  <p className="text-sm text-muted-foreground">{t("patient.invoices.paidOn")}</p>
+                  <p className="text-sm text-muted-foreground">Paid On</p>
                   <p className="font-medium">{format(parseISO(viewingInvoice.paid_at), 'dd MMMM yyyy')}</p>
                 </div>
               )}
             </div>
 
             <div className="flex gap-3 pt-6 border-t border-border mt-6">
-              <Button
-                variant="outline"
-                className="flex-1"
+              <Button 
+                variant="outline" 
+                className="flex-1" 
                 onClick={() => setViewingInvoice(null)}
               >
-                {t("common.close")}
+                Close
               </Button>
               {(viewingInvoice.status === "pending" || viewingInvoice.status === "overdue") && (
-                <Button
+                <Button 
                   className="flex-1 gap-1"
                   onClick={() => {
                     handlePayInvoice(viewingInvoice.id);
@@ -496,7 +494,7 @@ export default function Invoices() {
                   }}
                 >
                   <CreditCard className="h-4 w-4" />
-                  {t("patient.invoices.markAsPaid")}
+                  Mark as Paid
                 </Button>
               )}
             </div>

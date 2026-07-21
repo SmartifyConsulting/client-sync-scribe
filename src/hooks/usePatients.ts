@@ -390,18 +390,36 @@ export function usePatient(id: string) {
         .maybeSingle();
 
       if (error) throw error;
-      
-      if (data) {
+
+      let resolved = data;
+
+      // Duplicate-record resolution: if this row is linked to an auth user,
+      // prefer the most recent non-archived sibling so clinical data (e.g.
+      // hospital admissions) attached to any of the duplicates surfaces.
+      if (resolved?.patient_user_id) {
+        const { data: siblings } = await supabase
+          .from('patients')
+          .select('*')
+          .eq('patient_user_id', resolved.patient_user_id)
+          .order('updated_at', { ascending: false });
+        if (siblings && siblings.length > 1) {
+          const preferred =
+            siblings.find((s) => !/\(archived\)/i.test(s.name || '')) || siblings[0];
+          if (preferred) resolved = preferred;
+        }
+      }
+
+      if (resolved) {
         const { data: sessionData } = await supabase
           .from('sessions')
           .select('started_at')
-          .eq('patient_id', id)
+          .eq('patient_id', resolved.id)
           .eq('status', 'completed')
           .order('started_at', { ascending: false })
           .limit(1)
           .maybeSingle();
-        
-        setPatient(toPatient(data, sessionData?.started_at || null));
+
+        setPatient(toPatient(resolved, sessionData?.started_at || null));
       } else {
         setPatient(null);
       }

@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
 import { Users, Send, Loader2, Trash2, MessageCircle, Plus, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,7 +35,6 @@ interface RoundTableProps {
 }
 
 export function RoundTable({ patientId, patientName, hideHeader = false }: RoundTableProps) {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const [topics, setTopics] = useState<RTTopic[]>([]);
   const [messagesByTopic, setMessagesByTopic] = useState<Record<string, RTMessage[]>>({});
@@ -119,10 +117,10 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
       });
       if (error) throw error;
       setSubject(""); setBody(""); setShowCompose(false);
-      toast({ title: t("roundTables.topicCreated"), description: t("roundTables.topicCreatedDescription") });
+      toast({ title: "Topic created", description: "Other doctors will be notified." });
       loadTopics();
     } catch (e: any) {
-      toast({ title: t("roundTables.error"), description: e.message, variant: "destructive" });
+      toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally { setSubmitting(false); }
   };
 
@@ -153,27 +151,27 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold">{t("roundTables.title")} — {patientName}</h3>
+            <h3 className="text-sm font-semibold">Round Table — {patientName}</h3>
           </div>
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Circle className="h-2 w-2 fill-emerald-500 text-emerald-500" />
-            {onlineCount} {t("roundTables.online")}
+            {onlineCount} online
           </div>
         </div>
       )}
 
       {!showCompose ? (
         <Button size="sm" variant="outline" onClick={() => setShowCompose(true)} className="w-full gap-2">
-          <Plus className="h-4 w-4" /> {t("roundTables.newTopic")}
+          <Plus className="h-4 w-4" /> New Topic
         </Button>
       ) : (
         <div className="space-y-2 rounded-lg border border-primary/40 bg-muted/30 p-3">
-          <Input placeholder={t("roundTables.subject")} value={subject} onChange={(e) => setSubject(e.target.value)} />
-          <Textarea placeholder={t("roundTables.describeCaseForTeam")} value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[90px]" />
+          <Input placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+          <Textarea placeholder="Describe the case for the team..." value={body} onChange={(e) => setBody(e.target.value)} className="min-h-[90px]" />
           <div className="flex justify-end gap-2">
-            <Button size="sm" variant="ghost" onClick={() => { setShowCompose(false); setSubject(""); setBody(""); }}>{t("roundTables.cancel")}</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setShowCompose(false); setSubject(""); setBody(""); }}>Cancel</Button>
             <Button size="sm" onClick={createTopic} disabled={submitting || !subject.trim() || !body.trim()}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : t("roundTables.post")}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Post"}
             </Button>
           </div>
         </div>
@@ -181,7 +179,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
 
       {topics.length === 0 ? (
         <div className="rounded-lg border border-dashed p-6 text-center text-xs text-muted-foreground">
-          {t("roundTables.noTopicsYet")}
+          No round table topics yet.
         </div>
       ) : (
         <Accordion type="multiple" className="space-y-2">
@@ -193,7 +191,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
               >
                 <div className="flex flex-col items-start text-left">
                   <span className="text-sm font-semibold">{t.subject}</span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {t.doctor_name} • {format(new Date(t.created_at), "MMM d, yyyy 'at' h:mm a")}
                   </span>
                 </div>
@@ -201,16 +199,16 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
               <AccordionContent className="space-y-3">
                 <p className="whitespace-pre-wrap text-xs text-foreground">{t.body}</p>
                 <div className="border-t pt-3 space-y-2">
-                  <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-                    <MessageCircle className="h-4 w-4" /> {t("roundTables.liveDiscussion")}
+                  <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+                    <MessageCircle className="h-4 w-4" /> Live discussion
                   </div>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {(messagesByTopic[t.id] || []).map((m) => (
                       <div key={m.id} className={`rounded-md p-2 text-xs ${m.doctor_id === currentUserId ? 'bg-primary/10 ml-6' : 'bg-muted mr-6'}`}>
                         <div className="flex items-center gap-1 mb-0.5">
-                          <span className="font-semibold text-[11px]">{m.doctor_name}</span>
+                          <span className="font-semibold text-sm">{m.doctor_name}</span>
                           {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
-                          <span className="text-[10px] text-muted-foreground ml-auto">
+                          <span className="text-xs text-muted-foreground ml-auto">
                             {format(new Date(m.created_at), "MMM d, h:mm a")}
                           </span>
                         </div>
@@ -220,7 +218,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                   </div>
                   <div className="flex gap-1">
                     <Input
-                      placeholder={t("roundTables.reply")}
+                      placeholder="Reply..."
                       value={chatInput[t.id] || ""}
                       onChange={(e) => setChatInput((c) => ({ ...c, [t.id]: e.target.value }))}
                       onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(t.id); }}
@@ -232,7 +230,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                   </div>
                   {t.doctor_id === currentUserId && (
                     <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs" onClick={() => deleteTopic(t.id)}>
-                      <Trash2 className="h-4 w-4 mr-1" /> {t("roundTables.deleteTopic")}
+                      <Trash2 className="h-4 w-4 mr-1" /> Delete topic
                     </Button>
                   )}
                 </div>

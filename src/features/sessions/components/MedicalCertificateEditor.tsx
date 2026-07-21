@@ -321,7 +321,7 @@ export function MedicalCertificateEditor({
             </div>
           </div>
           {startDate && endDate && (
-            <p className="text-[12px] text-muted-foreground">Period: {computeLeavePeriod()}</p>
+            <p className="text-sm text-muted-foreground">Period: {computeLeavePeriod()}</p>
           )}
 
           <div className="space-y-2">

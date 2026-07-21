@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 import holarcHelpLogo from "@/assets/holarc-help-logo.png";
 import { cn } from "@/lib/utils";
 import {
@@ -41,29 +42,21 @@ interface NavItem {
 
 const hospitalNav: NavItem[] = [
   { icon: Siren, labelKey: "nav.emergencyQueue", to: "/provider/hospital", end: true, danger: true },
-  { icon: Ambulance, labelKey: "nav.incomingEr", to: "/provider/hospital/incoming" },
-  { icon: Stethoscope, labelKey: "nav.triage", to: "/provider/hospital/triage" },
   { icon: ClipboardList, labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
-  { icon: BedDouble, labelKey: "nav.erCapacity", to: "/provider/hospital/capacity" },
-  { icon: Users, labelKey: "nav.providers", to: "/provider/hospital/providers" },
-  { icon: Activity, labelKey: "nav.incidentTimeline", to: "/provider/hospital/timeline" },
-  { icon: Zap, labelKey: "nav.dispatchManagement", to: "/provider/hospital/dispatch" },
+  { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/hospital/dispatch", danger: true },
+  { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/hospital/monitoring" },
   { icon: UserCheck, labelKey: "nav.admin", to: "/provider/hospital/admins" },
 ];
 
 const ambulanceNav: NavItem[] = [
-  // EMERGENCY RESPONSE TIER (Consolidated)
+  // Active missions are now drill-downs from the Dispatcher Console inside Dispatch Dashboard.
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
-  { icon: NavIcon, labelKey: "nav.navigation", to: "/provider/ambulance/navigation" },
-  // TEAM & FLEET TIER
-  { icon: Users, labelKey: "nav.shiftTeams", to: "/provider/ambulance/team" },
-  { icon: Ambulance, labelKey: "nav.fleetOperations", to: "/provider/ambulance/fleet-operations" },
-  // MONITORING & ANALYTICS TIER (Consolidated)
+  // MONITORING (Fleet Live)
   { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
-  { icon: Users, labelKey: "nav.driverManagement", to: "/provider/ambulance/drivers" },
-  // ADMIN TIER (Hospital Network lives as a tab inside Admin)
+  // ADMIN — Users, Crew, Fleet Admin, Hospitals
   { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
 ];
+
 
 interface ProviderSidebarProps {
   portal: "hospital" | "ambulance";
@@ -91,13 +84,13 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
           <NavLink
             to="/admin/users"
             onClick={onNavigate}
-            className="mx-4 mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+            className="mx-4 mb-1 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
           >
             <ArrowLeft className="h-3 w-3" /> {t("nav.backToAdmin")}
           </NavLink>
         )}
 
-        <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-0.5 overflow-y-auto font-size-preserve">
           {nav.map((item) => {
             const isActive = item.end
               ? location.pathname === item.to
@@ -136,7 +129,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-primary truncate">{profile?.full_name || t("common.provider")}</p>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground truncate">
                 {portal === "hospital" ? t("provider.hospitalOps") : t("provider.erProvider")}
               </p>
             </div>

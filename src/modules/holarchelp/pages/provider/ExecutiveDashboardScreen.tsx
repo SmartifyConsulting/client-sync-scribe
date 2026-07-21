@@ -15,7 +15,7 @@ export default function ExecutiveDashboardScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Analytics</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Analytics</p>
         <h1 className="text-3xl font-extrabold mt-2">Executive Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-2">Strategic insights and business metrics</p>
       </header>

@@ -48,7 +48,7 @@ export default function IncidentHistoryScreen() {
 
       <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-3 py-2 text-left">{t("ambulance.incident")}</th>
               <th className="px-3 py-2 text-left">{t("incidentHistory.outcome")}</th>
@@ -68,10 +68,10 @@ export default function IncidentHistoryScreen() {
                     : <span className="inline-flex items-center gap-1 text-destructive"><XCircle className="h-3.5 w-3.5" /> {t("status.cancelled")}</span>}
                 </td>
                 <td className="px-3 py-2 text-xs">{hosp[r.destination_hospital_id ?? ""] ?? "—"}</td>
-                <td className="px-3 py-2 text-[11px] text-muted-foreground">{fmt(r.created_at)}</td>
-                <td className="px-3 py-2 text-[11px] text-muted-foreground">{fmt(r.completed_at)}</td>
+                <td className="px-3 py-2 text-sm text-muted-foreground">{fmt(r.created_at)}</td>
+                <td className="px-3 py-2 text-sm text-muted-foreground">{fmt(r.completed_at)}</td>
                 <td className="px-3 py-2 text-right">
-                  <Link to={`/provider/ambulance/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted">
+                  <Link to={`/provider/ambulance/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-sm font-semibold hover:bg-muted">
                     {t("common.review")} <ChevronRight className="h-3 w-3" />
                   </Link>
                 </td>

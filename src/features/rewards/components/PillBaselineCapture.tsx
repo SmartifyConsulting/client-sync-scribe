@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Camera, Loader2, RefreshCw, Check, Video, Square, Info, Pill, Package } from "lucide-react";
+import { Camera, Loader2, RefreshCw, Check, Video, Square, Info, Pill, Package, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { mapCameraError } from "@/lib/cameraErrors";
+
+
 
 interface PillBaselineCaptureProps {
   open: boolean;
@@ -49,6 +53,32 @@ export function PillBaselineCapture({
   const [step, setStep] = useState<Step>("intro");
   const [intakeMethod, setIntakeMethod] = useState<string>("swallow");
   const [stream, setStream] = useState<MediaStream | null>(null);
+
+  // Skip-notify (who to alert if this medication is missed)
+  const [skipNotifyTarget, setSkipNotifyTarget] = useState<"emergency" | "nok" | "none">("emergency");
+  const [patientContacts, setPatientContacts] = useState<{
+    emergency_contact_name: string | null;
+    emergency_contact_phone: string | null;
+    next_of_kin_name: string | null;
+    next_of_kin_phone: string | null;
+  } | null>(null);
+  const [overrideContact, setOverrideContact] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+
+  // Load patient emergency/NOK contacts when dialog opens
+  useEffect(() => {
+    if (!open || !patientId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("patients")
+        .select("emergency_contact_name, emergency_contact_phone, next_of_kin_name, next_of_kin_phone")
+        .eq("id", patientId)
+        .maybeSingle();
+      if (data) setPatientContacts(data as any);
+    })();
+  }, [open, patientId]);
+
 
   // Stills (packaging + tablet close-up)
   const [packagingBlob, setPackagingBlob] = useState<Blob | null>(null);
@@ -96,9 +126,11 @@ export function PillBaselineCapture({
       });
       setStream(ms);
       if (videoRef.current) videoRef.current.srcObject = ms;
-    } catch {
-      toast({ title: "Camera error", description: "Could not access camera.", variant: "destructive" });
+    } catch (err) {
+      const friendly = mapCameraError(err);
+      toast({ title: friendly.title, description: friendly.description, variant: "destructive" });
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 
@@ -346,6 +378,44 @@ export function PillBaselineCapture({
         { onConflict: "prescription_id" },
       );
 
+      // Persist skip-notify choice on the prescription
+      try {
+        const contactSnap = (() => {
+          if (skipNotifyTarget === "none") return null;
+          if (overrideContact) return { name: editName.trim() || null, phone: editPhone.trim() || null };
+          if (skipNotifyTarget === "emergency") return {
+            name: patientContacts?.emergency_contact_name || null,
+            phone: patientContacts?.emergency_contact_phone || null,
+          };
+          return {
+            name: patientContacts?.next_of_kin_name || null,
+            phone: patientContacts?.next_of_kin_phone || null,
+          };
+        })();
+        await supabase.from("prescriptions").update({
+          skip_notify_target: skipNotifyTarget,
+          skip_notify_contact: contactSnap as any,
+        } as any).eq("id", prescriptionId);
+
+        // If user filled in missing patient-level contact info, write it back
+        if (overrideContact && (editName.trim() || editPhone.trim())) {
+          const patch: any = {};
+          if (skipNotifyTarget === "emergency") {
+            if (editName.trim() && !patientContacts?.emergency_contact_name) patch.emergency_contact_name = editName.trim();
+            if (editPhone.trim() && !patientContacts?.emergency_contact_phone) patch.emergency_contact_phone = editPhone.trim();
+          } else if (skipNotifyTarget === "nok") {
+            if (editName.trim() && !patientContacts?.next_of_kin_name) patch.next_of_kin_name = editName.trim();
+            if (editPhone.trim() && !patientContacts?.next_of_kin_phone) patch.next_of_kin_phone = editPhone.trim();
+          }
+          if (Object.keys(patch).length) {
+            await supabase.from("patients").update(patch).eq("id", patientId);
+          }
+        }
+      } catch (e) {
+        console.warn("skip-notify save failed", e);
+      }
+
+
       toast({
         title: "Baseline saved",
         description: "We'll use this routine to recognise your future doses.",
@@ -391,7 +461,7 @@ export function PillBaselineCapture({
     <div className="flex items-center gap-1.5">
       <span
         className={cn(
-          "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold",
+          "flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold",
           active
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground",
@@ -399,7 +469,7 @@ export function PillBaselineCapture({
       >
         {n}
       </span>
-      <span className={cn("text-[11px]", active ? "text-foreground font-medium" : "text-muted-foreground")}>
+      <span className={cn("text-sm", active ? "text-foreground font-medium" : "text-muted-foreground")}>
         {label}
       </span>
     </div>
@@ -414,12 +484,15 @@ export function PillBaselineCapture({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pill className="h-5 w-5 text-primary" />
-            Set up <strong className="ml-1">{medicationName}</strong>
+            Teach the app how you take <strong className="ml-1">{medicationName}</strong>
           </DialogTitle>
           <DialogDescription>
-            One-time baseline so we can recognise your routine.
+            A <strong>baseline</strong> is a quick one-time setup. Show us the packet, the tablet, and how you take it.
+            From then on the app recognises your routine and you only need a short daily clip to earn your Vula reward —
+            you won't have to do this setup again.
           </DialogDescription>
         </DialogHeader>
+
 
         {showStepIndicator && (
           <div className="flex items-center justify-between gap-2 px-1">
@@ -437,13 +510,19 @@ export function PillBaselineCapture({
             <div className="rounded-xl border border-teal-500/40 bg-teal-50/60 p-4 text-sm">
               <p className="flex items-center gap-2 font-semibold text-foreground mb-1.5">
                 <Info className="h-4 w-4 text-teal-600" />
-                One-time setup — you won't need to do this again
+                What is a baseline?
               </p>
-              <p className="text-muted-foreground leading-relaxed">
-                These three quick captures teach our AI what <strong className="text-foreground">your medication</strong> looks like
-                and <strong className="text-foreground">how you take it</strong>. From the next dose onwards, we'll recognise
-                your tablet and your face automatically — no more set-up, just a quick check-in.
+              <p className="text-muted-foreground leading-relaxed mb-2">
+                A baseline is a <strong className="text-foreground">one short video</strong> of you taking
+                this medication normally. The AI watches your hands, the pill and your mouth motion <em>once</em> so
+                it learns what "you taking <strong className="text-foreground">{medicationName}</strong>" looks like.
+                After that, every future dose only needs a quick check-in — no setup, no repeats.
               </p>
+              <ul className="text-muted-foreground list-disc list-inside space-y-0.5 text-xs">
+                <li><strong className="text-foreground">One-time only</strong> — you'll never be asked to repeat this for {medicationName}.</li>
+                <li>Helps the AI learn what your tablet and routine look like.</li>
+                <li>The video is used only to compare against future check-ins — not shared.</li>
+              </ul>
             </div>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
               <p className="font-medium mb-1">Three quick steps</p>
@@ -453,12 +532,93 @@ export function PillBaselineCapture({
                 <li>A short video of you <strong className="text-foreground">taking the dose</strong> ({INGEST_SECONDS}s, not stored)</li>
               </ol>
             </div>
+
+            {/* Skip-notify panel */}
+            <div className="rounded-xl border border-amber-500/40 bg-amber-50/60 p-4 text-sm">
+              <p className="flex items-center gap-2 font-semibold text-foreground mb-1.5">
+                <BellRing className="h-4 w-4 text-amber-600" />
+                If you skip this medication, who should we contact?
+              </p>
+              <p className="text-muted-foreground text-xs mb-3">
+                Pulled from your Personal Information — you can change it here too.
+              </p>
+              <RadioGroup
+                value={skipNotifyTarget}
+                onValueChange={(v) => { setSkipNotifyTarget(v as any); setOverrideContact(false); }}
+                className="gap-2"
+              >
+                <label htmlFor="sn-em" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                  <RadioGroupItem id="sn-em" value="emergency" className="mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">Emergency contact</p>
+                    <p className="text-sm text-muted-foreground">
+                      {patientContacts?.emergency_contact_name
+                        ? `${patientContacts.emergency_contact_name}${patientContacts.emergency_contact_phone ? " · " + patientContacts.emergency_contact_phone : ""}`
+                        : "Not set yet"}
+                    </p>
+                  </div>
+                </label>
+                <label htmlFor="sn-nok" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                  <RadioGroupItem id="sn-nok" value="nok" className="mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">Next of kin</p>
+                    <p className="text-sm text-muted-foreground">
+                      {patientContacts?.next_of_kin_name
+                        ? `${patientContacts.next_of_kin_name}${patientContacts.next_of_kin_phone ? " · " + patientContacts.next_of_kin_phone : ""}`
+                        : "Not set yet"}
+                    </p>
+                  </div>
+                </label>
+                <label htmlFor="sn-none" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
+                  <RadioGroupItem id="sn-none" value="none" className="mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">No one</p>
+                    <p className="text-sm text-muted-foreground">Don't notify anyone if a dose is skipped.</p>
+                  </div>
+                </label>
+              </RadioGroup>
+
+              {skipNotifyTarget !== "none" && (() => {
+                const hasCurrent = skipNotifyTarget === "emergency"
+                  ? !!(patientContacts?.emergency_contact_name || patientContacts?.emergency_contact_phone)
+                  : !!(patientContacts?.next_of_kin_name || patientContacts?.next_of_kin_phone);
+                if (hasCurrent && !overrideContact) {
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setOverrideContact(true)}
+                      className="mt-2 text-sm text-primary hover:underline"
+                    >
+                      Use a different contact for this medication
+                    </button>
+                  );
+                }
+                return (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <Input
+                      placeholder="Name"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="text-xs h-8"
+                    />
+                    <Input
+                      placeholder="Phone"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                      className="text-xs h-8"
+                    />
+                  </div>
+                );
+              })()}
+            </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={handleClose}>Cancel</Button>
               <Button onClick={() => setStep("method")}>Next</Button>
             </div>
           </div>
         )}
+
 
         {/* STEP: intake method */}
         {step === "method" && (
@@ -550,7 +710,7 @@ export function PillBaselineCapture({
                 : "Place the tablet on your palm and turn it so any printed letters, numbers or score lines are clearly visible."}
             </div>
             {quantity > 1 && (
-              <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
+              <div className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-sm font-medium">
                 Show {quantity} tablets
               </div>
             )}

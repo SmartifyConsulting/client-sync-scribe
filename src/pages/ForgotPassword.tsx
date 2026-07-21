@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 import { Loader2, ArrowLeft, Shield, Eye, EyeOff, CheckCircle, Mail, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,6 @@ const looksLikeEmail = (s: string) => /@/.test(s.trim());
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { toast } = useToast();
 
   const [step, setStep] = useState<Step>("identify");
@@ -36,7 +35,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     const id = identifier.trim();
     if (!id) {
-      toast({ title: t("auth.common.error"), description: t("auth.forgot.identifyHelper"), variant: "destructive" });
+      toast({ title: "Required", description: "Enter your phone number or email", variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -68,19 +67,19 @@ export default function ForgotPassword() {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (codeType === "totp" && code.replace(/\D/g, "").length !== 6) {
-      toast({ title: t("auth.common.error"), description: t("auth.forgot.verifyHelper"), variant: "destructive" });
+      toast({ title: "Invalid code", description: "Enter the 6-digit code from your authenticator app", variant: "destructive" });
       return;
     }
     if (codeType === "backup" && code.replace(/[^A-Za-z0-9]/g, "").length !== 8) {
-      toast({ title: t("auth.common.error"), description: t("auth.forgot.verifyHelper"), variant: "destructive" });
+      toast({ title: "Invalid backup code", description: "Backup codes are 8 characters (letters + numbers)", variant: "destructive" });
       return;
     }
     if (newPassword.length < 8 || !/[A-Za-z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      toast({ title: t("auth.common.error"), description: t("auth.reset.newPassword"), variant: "destructive" });
+      toast({ title: "Weak password", description: "At least 8 characters with a letter and a number", variant: "destructive" });
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: t("auth.common.error"), variant: "destructive" });
+      toast({ title: "Passwords don't match", variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -91,7 +90,7 @@ export default function ForgotPassword() {
       if (error) throw error;
       if (!data?.ok) throw new Error(data?.error || "Reset failed");
       setStep("done");
-      toast({ title: t("auth.reset.success"), description: t("auth.reset.success") });
+      toast({ title: "Password updated", description: "You can now sign in with your new password." });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
@@ -111,9 +110,10 @@ export default function ForgotPassword() {
             >
               <img src={holarcLogo} alt="Holarc Health" className="h-[81px] w-auto" />
             </button>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("auth.forgot.title")}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Reset Password</h1>
             <p className="text-muted-foreground mt-2 text-sm">
-              {t("auth.forgot.instructions")}
+              Email accounts get a reset link by email. Phone accounts verify with the
+              authenticator app.
             </p>
           </div>
 
@@ -121,7 +121,7 @@ export default function ForgotPassword() {
             {step === "identify" && (
               <form onSubmit={handleIdentify} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="identifier">{t("auth.forgot.email")}</Label>
+                  <Label htmlFor="identifier">Phone or Email</Label>
                   <Input
                     id="identifier"
                     type="text"
@@ -133,18 +133,18 @@ export default function ForgotPassword() {
                   />
                   <p className="text-xs text-muted-foreground">
                     {identifier.trim() === ""
-                      ? t("auth.forgot.identifyHelper")
+                      ? "Enter the phone number or email you used at sign-up."
                       : isEmail
-                      ? t("auth.forgot.email")
-                      : t("auth.forgot.identifyHelper")}
+                      ? "We'll email you a reset link."
+                      : "We'll ask for a code from your authenticator app — or a backup code if you've lost your phone."}
                   </p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {t("auth.common.continue")}
+                  Continue
                 </Button>
                 <Button type="button" variant="ghost" onClick={() => navigate("/auth")} className="w-full">
-                  <ArrowLeft className="mr-2 h-4 w-4" /> {t("auth.common.backToSignIn")}
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Back to Sign In
                 </Button>
               </form>
             )}
@@ -156,13 +156,13 @@ export default function ForgotPassword() {
                     <Mail className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h2 className="text-lg font-semibold text-foreground">{t("auth.forgot.checkEmail")}</h2>
+                <h2 className="text-lg font-semibold text-foreground">Check your inbox</h2>
                 <p className="text-sm text-muted-foreground">
                   If <strong>{identifier.trim()}</strong> matches an account, we've sent a reset
                   link. Click it within 1 hour to choose a new password.
                 </p>
                 <Button onClick={() => navigate("/auth")} className="w-full">
-                  {t("auth.common.backToSignIn")}
+                  Back to Sign In
                 </Button>
                 <button
                   type="button"
@@ -187,13 +187,13 @@ export default function ForgotPassword() {
                 </div>
                 <p className="text-sm text-muted-foreground text-center">
                   {codeType === "totp"
-                    ? t("auth.forgot.verifyHelper")
-                    : t("auth.forgot.verifyHelper")}
+                    ? "Open your authenticator app and enter the 6-digit code for Holarc Health."
+                    : "Enter one of the 8-character backup codes you saved when you set up the authenticator."}
                 </p>
 
                 <div className="space-y-2">
                   <Label htmlFor="code">
-                    {codeType === "totp" ? t("auth.forgot.verifyCode") : t("auth.forgot.verifyCode")}
+                    {codeType === "totp" ? "Verification code" : "Backup code"}
                   </Label>
                   {codeType === "totp" ? (
                     <Input
@@ -230,13 +230,13 @@ export default function ForgotPassword() {
                     className="text-xs text-primary hover:underline"
                   >
                     {codeType === "totp"
-                      ? t("auth.forgot.verifyHelper")
-                      : t("auth.forgot.verifyHelper")}
+                      ? "Lost your authenticator? Use a backup code instead."
+                      : "Have your authenticator? Use a 6-digit code instead."}
                   </button>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">{t("auth.reset.newPassword")}</Label>
+                  <Label htmlFor="newPassword">New password</Label>
                   <div className="relative">
                     <Input
                       id="newPassword"
@@ -259,7 +259,7 @@ export default function ForgotPassword() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">{t("auth.reset.confirmPassword")}</Label>
+                  <Label htmlFor="confirmPassword">Confirm new password</Label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
@@ -282,12 +282,12 @@ export default function ForgotPassword() {
 
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {t("auth.reset.reset")}
+                  Verify & Update Password
                 </Button>
                 <Button type="button" variant="ghost" onClick={() => setStep("identify")} className="w-full">
                   <ArrowLeft className="mr-2 h-4 w-4" /> Use a different account
                 </Button>
-                <p className="text-[11px] text-muted-foreground text-center">
+                <p className="text-sm text-muted-foreground text-center">
                   Lost both your authenticator and backup codes? Contact support to verify your
                   identity manually.
                 </p>
@@ -301,7 +301,7 @@ export default function ForgotPassword() {
                     <CheckCircle className="h-8 w-8 text-primary" />
                   </div>
                 </div>
-                <h2 className="text-lg font-semibold text-foreground">{t("auth.reset.success")}</h2>
+                <h2 className="text-lg font-semibold text-foreground">Password updated</h2>
                 <p className="text-sm text-muted-foreground">
                   Sign in with your new password — you'll be prompted for your authenticator code
                   one more time.

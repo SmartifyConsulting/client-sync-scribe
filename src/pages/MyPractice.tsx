@@ -30,7 +30,9 @@ import {
   Calendar as CalendarIcon,
   Palette,
   Sparkles,
+  Info,
 } from "lucide-react";
+
 import ReferralDoctors from "@/pages/ReferralDoctors";
 import DoctorRewards from "@/pages/doctor/DoctorRewards";
 
@@ -56,6 +58,8 @@ import { getSignedUrl } from "@/utils/storageUrls";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -113,7 +117,7 @@ const CURRENCIES = [
   { code: "EUR", symbol: "€", name: "Euro" },
   { code: "GBP", symbol: "£", name: "British Pound" },
   { code: "BWP", symbol: "P", name: "Botswana Pula" },
-  { code: "NAD", symbol: "N$", name: "Namibian Dollar" },
+  { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
   { code: "SZL", symbol: "E", name: "Swazi Lilangeni" },
   { code: "LSL", symbol: "M", name: "Lesotho Loti" },
 ];
@@ -193,6 +197,7 @@ function formatPhoneNumber(value: string): string {
 }
 
 function MailboxSection({ userId }: { userId?: string }) {
+  const { t } = useTranslation();
   const [mailboxId, setMailboxId] = useState<string | null>(null);
   const [mailboxAlias, setMailboxAlias] = useState<string>("");
   const [editingAlias, setEditingAlias] = useState(false);
@@ -200,6 +205,7 @@ function MailboxSection({ userId }: { userId?: string }) {
   const [isSavingAlias, setIsSavingAlias] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
 
   useEffect(() => {
     const fetchMailboxInfo = async () => {
@@ -268,7 +274,14 @@ function MailboxSection({ userId }: { userId?: string }) {
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm text-foreground">Document Mailbox</p>
           <p className="text-xs text-muted-foreground mt-0.5">External parties can email documents to this address.</p>
+          <div className="mt-2 flex items-start gap-1.5 rounded-md border border-primary/30 bg-primary/5 p-2">
+            <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+            <p className="text-sm leading-snug text-foreground/80">
+              This address is solely for emailing files (scans, referrals, lab results) directly to your <strong>My Documents</strong> tab — it is not for standard messaging and you will not receive replies in your normal inbox. Share it with anyone sending you medical records so they are routed straight to your Holarc Health profile.
+            </p>
+          </div>
           {displayEmail ? (
+
             <div className="mt-2 space-y-2">
               <div className="flex items-center gap-2">
                 <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-foreground border border-border truncate">
@@ -351,7 +364,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
             placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
           />
           <div className="flex items-center justify-between">
-            <span className={cn("text-[11px]", overLimit ? "text-destructive" : "text-muted-foreground")}>
+            <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
               {t("myPractice.wordCount", { count: wordCount })}
             </span>
             <Button
@@ -456,11 +469,73 @@ export default function MyPractice() {
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
   const [editingPartner, setEditingPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
   const [isSavingPartner, setIsSavingPartner] = useState(false);
-  const [partnerAddMode, setPartnerAddMode] = useState<"email" | "select">("email");
-  const [availableDoctors, setAvailableDoctors] = useState<any[]>([]);
-  const [selectedDoctorId, setSelectedDoctorId] = useState("");
-  const [shareLink, setShareLink] = useState("");
-  const [showShareLink, setShowShareLink] = useState(false);
+
+  // ── Existing-user partner search ──
+  const [partnerSearch, setPartnerSearch] = useState("");
+  const [partnerSearchResults, setPartnerSearchResults] = useState<
+    Array<{ id: string; full_name: string | null; doctor_number: string | null; mobile_number: string | null }>
+  >([]);
+  const [searchingPartners, setSearchingPartners] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
+
+  useEffect(() => {
+    if (!showAddPartnerForm) return;
+    const q = partnerSearch.trim();
+    if (q.length < 2) {
+      setPartnerSearchResults([]);
+      return;
+    }
+    let cancelled = false;
+    setSearchingPartners(true);
+    const handle = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, doctor_number, mobile_number")
+        .or(`full_name.ilike.%${q}%,doctor_number.ilike.%${q}%`)
+        .neq("id", user?.id || "")
+        .limit(8);
+      if (!cancelled) {
+        setPartnerSearchResults((data as any) || []);
+        setSearchingPartners(false);
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(handle); };
+  }, [partnerSearch, showAddPartnerForm, user?.id]);
+
+  const addExistingPartner = async (existing: { id: string; full_name: string | null; doctor_number: string | null; mobile_number: string | null }) => {
+    if (!user) return;
+    setIsAddingPartner(true);
+    const { data, error } = await supabase
+      .from("practice_partners")
+      .insert({
+        user_id: user.id,
+        full_name: existing.full_name || "Partner",
+        registration_number: existing.doctor_number || "—",
+        mobile_number: existing.mobile_number || null,
+      } as any)
+      .select()
+      .single();
+    setIsAddingPartner(false);
+    if (error) {
+      toast({ title: "Error", description: "Failed to add partner", variant: "destructive" });
+    } else {
+      setPartners([...partners, data]);
+      setPartnerSearch("");
+      setPartnerSearchResults([]);
+      setShowAddPartnerForm(false);
+      toast({ title: "Partner added" });
+    }
+  };
+
+
+  const partnerShareLink = `${typeof window !== "undefined" ? window.location.origin : "https://holarchealth.com"}/?invite=${user?.id || ""}`;
+  const copyShareLink = async () => {
+    await navigator.clipboard.writeText(partnerShareLink);
+    setCopiedShareLink(true);
+    toast({ title: "Link copied" });
+    setTimeout(() => setCopiedShareLink(false), 2000);
+  };
+
 
   // ── Service Prices ──
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
@@ -713,63 +788,6 @@ export default function MyPractice() {
       toast({ title: "Partner removed" });
     }
   };
-
-  const fetchAvailableDoctors = async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, email, registration_number")
-      .eq("role", "doctor")
-      .neq("id", user?.id);
-    if (data) setAvailableDoctors(data);
-  };
-
-  const addPartnerFromSelect = async () => {
-    if (!selectedDoctorId) {
-      toast({ title: "Please select a doctor", variant: "destructive" });
-      return;
-    }
-
-    const doctor = availableDoctors.find((d) => d.id === selectedDoctorId);
-    if (!doctor) return;
-
-    setIsAddingPartner(true);
-    const { data, error } = await supabase
-      .from("practice_partners")
-      .insert({
-        user_id: user?.id,
-        full_name: doctor.full_name,
-        registration_number: doctor.registration_number || "N/A",
-        mobile_number: null,
-        email: doctor.email,
-      } as any)
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: "Error", description: "Failed to add partner", variant: "destructive" });
-    } else {
-      setPartners([...partners, data]);
-      toast({ title: "Partner added", description: `${doctor.full_name} has been added` });
-      setSelectedDoctorId("");
-      setPartnerAddMode("email");
-      setShowAddPartnerForm(false);
-    }
-    setIsAddingPartner(false);
-  };
-
-  const generateShareLink = () => {
-    const baseUrl = window.location.origin;
-    const link = `${baseUrl}/signup?practice=${user?.id}&ref=practice-invite`;
-    setShareLink(link);
-    setShowShareLink(true);
-    toast({ title: "Share link generated" });
-  };
-
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(shareLink);
-    toast({ title: "Link copied to clipboard" });
-  };
-
   const startEditingPartner = (partner: Partner) => {
     setEditingPartnerId(partner.id);
     setEditingPartner({
@@ -1075,7 +1093,7 @@ export default function MyPractice() {
       <div className="space-y-4 animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Round Tables</h1>
-          <p className="text-muted-foreground text-[12px]">View round table discussions you've contributed to</p>
+          <p className="text-muted-foreground text-sm">View round table discussions you've contributed to</p>
         </div>
         <DoctorRoundTables />
       </div>
@@ -1089,7 +1107,7 @@ export default function MyPractice() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Holarprac</h1>
-          <p className="text-muted-foreground text-[12px]">Manage your personal and practice information</p>
+          <p className="text-muted-foreground text-sm">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === "saving" && (
@@ -1155,25 +1173,31 @@ export default function MyPractice() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
+            value="templates"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+          >
+            {t("documents.tabTemplates")}
+          </TabsTrigger>
+          <TabsTrigger
             value="referrals"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabRewards")}
           </TabsTrigger>
@@ -1337,7 +1361,7 @@ export default function MyPractice() {
                 <Input
                   value={practiceColor}
                   onChange={(e) => handlePracticeColorChange(e.target.value)}
-                  className="max-w-[140px] font-mono text-[12px]"
+                  className="max-w-[140px] font-mono text-sm"
                   placeholder="#0EA5E9"
                 />
                 <input
@@ -1348,7 +1372,7 @@ export default function MyPractice() {
                   aria-label="Pick color"
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Used on the shared Practice Calendar so colleagues can see whose appointment a slot belongs to.
               </p>
             </div>
@@ -1391,48 +1415,17 @@ export default function MyPractice() {
                 <p className="text-sm text-muted-foreground">
                   Add partners of the same practice. Their information will be available on documents.
                 </p>
-                {!showAddPartnerForm && (
-                  <div className="flex gap-2 shrink-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => generateShareLink()}
-                      className="gap-1.5"
-                      title="Generate a shareable link to invite partners"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Share Link
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setShowAddPartnerForm(true);
-                        fetchAvailableDoctors();
-                      }}
-                      className="gap-1.5"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      Add Partner
-                    </Button>
-                  </div>
-                )}
-              </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddPartnerForm(true)}
+                  className="gap-1.5 shrink-0"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Partner
+                </Button>
 
-              {showShareLink && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
-                  <p className="text-sm font-medium text-foreground mb-2">Share this link with new doctors:</p>
-                  <div className="flex gap-2 items-center">
-                    <Input value={shareLink} readOnly className="text-xs" />
-                    <Button size="sm" onClick={copyShareLink} className="shrink-0">
-                      <Copy className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    They can use this link to sign up and be automatically added as a partner to your practice.
-                  </p>
-                </div>
-              )}
+              </div>
               {partners.length > 0 && (
                 <div className="space-y-2">
                   {partners.map((partner) => (
@@ -1543,15 +1536,74 @@ export default function MyPractice() {
                   ))}
                 </div>
               )}
-              {showAddPartnerForm && (
-                <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                  <Tabs value={partnerAddMode} onValueChange={(v) => setPartnerAddMode(v as "email" | "select")}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="email">Add by Email</TabsTrigger>
-                      <TabsTrigger value="select">Select Existing Doctor</TabsTrigger>
+              <Dialog
+                open={showAddPartnerForm}
+                onOpenChange={(o) => {
+                  if (!o) {
+                    setShowAddPartnerForm(false);
+                    setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
+                    setPartnerSearch("");
+                    setPartnerSearchResults([]);
+                  }
+                }}
+              >
+                <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <UserPlus className="h-5 w-5 text-primary" />
+                      Add Practice Partner
+                    </DialogTitle>
+                    <DialogDescription>
+                      Search for an existing Holarc practitioner, invite a new one by email, or share your practice link.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3">
+
+                  <Tabs defaultValue="existing">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="existing">Select existing</TabsTrigger>
+                      <TabsTrigger value="invite">Invite by email</TabsTrigger>
+                      <TabsTrigger value="share">Share app link</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="email" className="space-y-3">
+                    {/* ── Existing user ── */}
+                    <TabsContent value="existing" className="space-y-2 pt-3">
+                      <Label className="text-xs">Search Holarc users by name or registration #</Label>
+                      <Input
+                        value={partnerSearch}
+                        onChange={(e) => setPartnerSearch(e.target.value)}
+                        placeholder="Start typing a name…"
+                      />
+                      <div className="max-h-56 overflow-y-auto space-y-1">
+                        {searchingPartners && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1.5 px-2 py-2">
+                            <Loader2 className="h-3 w-3 animate-spin" /> Searching…
+                          </p>
+                        )}
+                        {!searchingPartners && partnerSearch.length >= 2 && partnerSearchResults.length === 0 && (
+                          <p className="text-xs text-muted-foreground px-2 py-2">No matching users found.</p>
+                        )}
+                        {partnerSearchResults.map((r) => (
+                          <button
+                            key={r.id}
+                            onClick={() => addExistingPartner(r)}
+                            disabled={isAddingPartner}
+                            className="w-full text-left p-2 rounded-md border border-border hover:bg-accent/40 flex items-center justify-between gap-2"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">{r.full_name || "Unnamed"}</p>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {r.doctor_number ? `Reg: ${r.doctor_number}` : "No registration #"}
+                              </p>
+                            </div>
+                            <Plus className="h-4 w-4 text-primary shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    </TabsContent>
+
+                    {/* ── Invite by email ── */}
+                    <TabsContent value="invite" className="space-y-3 pt-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
                           <Label>Full Name *</Label>
@@ -1586,55 +1638,78 @@ export default function MyPractice() {
                           />
                         </div>
                       </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={addPartner} disabled={isAddingPartner} className="gap-1.5">
+                          <Save className="h-3.5 w-3.5" />
+                          {isAddingPartner ? "Saving..." : "Send Invite"}
+                        </Button>
+                      </div>
                     </TabsContent>
 
-                    <TabsContent value="select" className="space-y-3">
-                      <div className="space-y-1.5">
-                        <Label>Select a Doctor *</Label>
-                        <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose a doctor from the list" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableDoctors.map((doctor) => (
-                              <SelectItem key={doctor.id} value={doctor.id}>
-                                {doctor.full_name} ({doctor.email})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    {/* ── Share link ── */}
+                    <TabsContent value="share" className="space-y-3 pt-3">
+                      <p className="text-xs text-muted-foreground">
+                        Share this link with a colleague — they can sign up and be linked to your practice.
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Input value={partnerShareLink} readOnly className="font-mono text-xs" />
+                        <Button size="sm" variant="outline" onClick={copyShareLink} className="gap-1.5 shrink-0">
+                          {copiedShareLink ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                          {copiedShareLink ? "Copied" : "Copy"}
+                        </Button>
                       </div>
-                      {availableDoctors.length === 0 && (
-                        <p className="text-xs text-muted-foreground italic">No other doctors available in the system yet.</p>
-                      )}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          asChild
+                          className="gap-1.5"
+                        >
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(`Join me on Holarc Health: ${partnerShareLink}`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            WhatsApp
+                          </a>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          asChild
+                          className="gap-1.5"
+                        >
+                          <a
+                            href={`mailto:?subject=${encodeURIComponent("Join my practice on Holarc Health")}&body=${encodeURIComponent(`Hi,\n\nJoin me on Holarc Health: ${partnerShareLink}`)}`}
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                            Email
+                          </a>
+                        </Button>
+                      </div>
                     </TabsContent>
                   </Tabs>
 
-                  <div className="flex gap-2">
+                  <div className="flex justify-end pt-1">
                     <Button
                       size="sm"
-                      onClick={partnerAddMode === "email" ? addPartner : addPartnerFromSelect}
-                      disabled={isAddingPartner}
-                      className="gap-1.5"
-                    >
-                      <Save className="h-3.5 w-3.5" />
-                      {isAddingPartner ? "Saving..." : "Save"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => {
                         setShowAddPartnerForm(false);
                         setNewPartner({ full_name: "", registration_number: "", mobile_number: "", email: "" });
-                        setSelectedDoctorId("");
-                        setPartnerAddMode("email");
+                        setPartnerSearch("");
+                        setPartnerSearchResults([]);
                       }}
                     >
-                      Cancel
+                      Close
                     </Button>
                   </div>
-                </div>
-              )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+
             </div>
               </AccordionContent>
             </AccordionItem>
@@ -1648,7 +1723,7 @@ export default function MyPractice() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
-                <p className="text-[12px] text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Share a single calendar across multiple doctors. Each doctor's appointments show in their assigned color.
                   Google Calendar sync stays personal — only your own appointments mirror.
                 </p>
@@ -1658,14 +1733,14 @@ export default function MyPractice() {
                     {pendingInvites.map((inv) => (
                       <div key={inv.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
                         <div className="min-w-0 flex-1">
-                          <p className="text-[12px] font-medium text-foreground truncate">
+                          <p className="text-sm font-medium text-foreground truncate">
                             Invitation to join <strong>{inv.practice_name || "a practice"}</strong>
                           </p>
-                          <p className="text-[11px] text-muted-foreground truncate">From {inv.inviter_name || inv.invited_by}</p>
+                          <p className="text-sm text-muted-foreground truncate">From {inv.inviter_name || inv.invited_by}</p>
                         </div>
                         <div className="flex gap-1.5 shrink-0">
-                          <Button size="sm" onClick={() => acceptInvitation(inv)} className="h-7 text-[11px]">Accept</Button>
-                          <Button size="sm" variant="outline" onClick={() => declineInvitation(inv)} className="h-7 text-[11px]">Decline</Button>
+                          <Button size="sm" onClick={() => acceptInvitation(inv)} className="h-7 text-sm">Accept</Button>
+                          <Button size="sm" variant="outline" onClick={() => declineInvitation(inv)} className="h-7 text-sm">Decline</Button>
                         </div>
                       </div>
                     ))}
@@ -1674,7 +1749,7 @@ export default function MyPractice() {
 
                 {!practice ? (
                   <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                    <Label className="text-[11px]">Create a Practice Calendar</Label>
+                    <Label className="text-sm">Create a Practice Calendar</Label>
                     <div className="flex gap-2">
                       <Input value={newPracticeName} onChange={(e) => setNewPracticeName(e.target.value)} placeholder="e.g., Cape Town Medical Centre" className="flex-1" />
                       <Button size="sm" onClick={async () => {
@@ -1688,8 +1763,8 @@ export default function MyPractice() {
                   <>
                     <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
                       <div className="min-w-0">
-                        <p className="text-[12px] font-medium text-foreground truncate">{practice.name}</p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-sm font-medium text-foreground truncate">{practice.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           {isPracticeOwner ? "You are the owner" : "You are a member"} · {members.length} member{members.length === 1 ? "" : "s"}
                         </p>
                       </div>
@@ -1698,12 +1773,12 @@ export default function MyPractice() {
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       ) : (
-                        <Button variant="ghost" size="sm" onClick={async () => { if (confirm("Leave this practice?")) await leavePractice(); }} className="h-7 text-[11px] text-destructive">Leave</Button>
+                        <Button variant="ghost" size="sm" onClick={async () => { if (confirm("Leave this practice?")) await leavePractice(); }} className="h-7 text-sm text-destructive">Leave</Button>
                       )}
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-[11px]">Members</Label>
+                      <Label className="text-sm">Members</Label>
                       {members.map((m) => {
                         const initials = (m.full_name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                         return (
@@ -1711,12 +1786,12 @@ export default function MyPractice() {
                             <div className="flex items-center gap-2.5 min-w-0">
                               <Avatar className="h-7 w-7">
                                 {m.avatar_url ? <AvatarImage src={m.avatar_url} /> : null}
-                                <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>
+                                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
                               </Avatar>
                               <span className="inline-block h-3 w-3 rounded-full border border-border shrink-0" style={{ backgroundColor: m.practice_color || "#0EA5E9" }} />
                               <div className="min-w-0">
-                                <p className="text-[12px] font-medium text-foreground truncate">{m.full_name || "Unnamed"}</p>
-                                <p className="text-[10px] text-muted-foreground capitalize">{m.role}</p>
+                                <p className="text-sm font-medium text-foreground truncate">{m.full_name || "Unnamed"}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{m.role}</p>
                               </div>
                             </div>
                             {isPracticeOwner && m.role !== "owner" && (
@@ -1731,7 +1806,7 @@ export default function MyPractice() {
 
                     {isPracticeOwner && (
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Invite a doctor by email</Label>
+                        <Label className="text-sm">Invite a doctor by email</Label>
                         <div className="flex gap-2">
                           <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@example.com" className="flex-1" />
                           <Button size="sm" onClick={async () => {
@@ -1745,12 +1820,12 @@ export default function MyPractice() {
 
                     {isPracticeOwner && invitations.filter((i) => i.status === "pending").length > 0 && (
                       <div className="space-y-2">
-                        <Label className="text-[11px]">Pending invitations</Label>
+                        <Label className="text-sm">Pending invitations</Label>
                         {invitations.filter((i) => i.status === "pending").map((inv) => (
                           <div key={inv.id} className="flex items-center justify-between p-2 bg-muted/20 rounded-lg border border-border">
                             <div className="min-w-0">
-                              <p className="text-[12px] truncate">{inv.invited_email}</p>
-                              <p className="text-[10px] text-muted-foreground">Sent {format(new Date(inv.created_at), "MMM d")}</p>
+                              <p className="text-sm truncate">{inv.invited_email}</p>
+                              <p className="text-xs text-muted-foreground">Sent {format(new Date(inv.created_at), "MMM d")}</p>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => revokeInvitation(inv.id)} className="h-7 w-7 text-destructive" title="Revoke">
                               <X className="h-3.5 w-3.5" />
@@ -2014,7 +2089,7 @@ export default function MyPractice() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-1.5 min-w-[80px] flex-1">
-                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {sigFormData.signature_font_size}px
                 </span>
                 <Slider
@@ -2185,6 +2260,11 @@ export default function MyPractice() {
           </Accordion>
         </TabsContent>
 
+        {/* === TEMPLATES TAB === */}
+        <TabsContent value="templates" className="mt-4">
+          <Documents hideHeader />
+        </TabsContent>
+
         {/* === REFERRALS TAB === */}
         <TabsContent value="referrals" className="mt-4 space-y-4">
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
@@ -2205,7 +2285,7 @@ export default function MyPractice() {
               <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
-              <p className="text-muted-foreground text-[12px]">
+              <p className="text-muted-foreground text-sm">
                 Track your professional credentials and CPD points.
               </p>
               <Button

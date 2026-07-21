@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Camera, ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { toastError } from "@/lib/userMessage";
 
 const BUCKET = "holarchelp-incident-photos";
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -133,7 +134,7 @@ export function IncidentPhotos({
       .delete()
       .eq("id", p.id);
     if (error) {
-      toast.error(error.message);
+      toastError(error, "We couldn't complete that. Please try again.");
       return;
     }
     await supabase.storage.from(BUCKET).remove([p.storage_path]).catch(() => {});
@@ -222,7 +223,7 @@ export function IncidentPhotos({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[10px] text-muted-foreground">
+                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
                   {t("common.loading")}
                 </div>
               )}

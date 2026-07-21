@@ -619,7 +619,7 @@ export function TodaysBriefing() {
           </Button>
           <div className="text-center">
             <h3 className="text-xs md:text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
-            <p className="text-[10px] md:text-sm text-primary-foreground/80">
+            <p className="text-xs md:text-sm text-primary-foreground/80">
               <span>{formattedSelectedDate}</span>
               <span className="inline md:hidden"> • {doneCount}/{appointments.length}</span>
               <span className="hidden md:block">{t("briefing.completedOf", { done: doneCount, total: appointments.length })}</span>
@@ -639,7 +639,7 @@ export function TodaysBriefing() {
           {isPlaying ? (
             <div className="flex flex-col items-center gap-1">
               {segments.length > 1 && (
-                <span className="text-[9px] md:text-[11px] text-primary-foreground/80 whitespace-nowrap">
+                <span className="text-[9px] md:text-sm text-primary-foreground/80 whitespace-nowrap">
                   {currentSegmentIndex + 1}/{segments.length} — {segments[currentSegmentIndex]?.label}
                 </span>
               )}
@@ -648,14 +648,14 @@ export function TodaysBriefing() {
                 size="sm"
                 onClick={handleSkipBack}
                 disabled={currentSegmentIndex === 0}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 <SkipBack className="h-2.5 w-2.5 md:h-3 md:w-3" />
               </Button>
               <Button
                 size="sm"
                 onClick={handlePauseResume}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 {isPaused ? (
                   <>
@@ -673,14 +673,14 @@ export function TodaysBriefing() {
                 size="sm"
                 onClick={handleSkipForward}
                 disabled={currentSegmentIndex >= segmentAudioUrls.length - 1}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 <SkipForward className="h-2.5 w-2.5 md:h-3 md:w-3" />
               </Button>
               <Button
                 size="sm"
                 onClick={handleStop}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-[10px] md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 <VolumeX className="h-2.5 w-2.5 md:h-3 md:w-3" />
                 <span className="hidden md:inline">Stop</span>
@@ -693,7 +693,7 @@ export function TodaysBriefing() {
               size="sm"
               onClick={handleNarrate}
               disabled={isNarrating}
-              className="gap-0.5 bg-white text-primary border border-white/50 hover:bg-accent hover:text-primary text-[10px] md:text-xs h-6 px-1.5 md:h-7 md:px-2"
+              className="gap-0.5 bg-white text-primary border border-white/50 hover:bg-accent hover:text-primary text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2"
             >
               {isNarrating ? (
                  <>

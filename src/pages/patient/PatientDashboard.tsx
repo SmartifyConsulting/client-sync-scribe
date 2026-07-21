@@ -299,7 +299,7 @@ export default function PatientDashboard() {
             <h1 className="text-xl font-bold text-foreground">
               {profile?.full_name ? `${t("patientDashboard.welcomeTitle")}, ${profile.full_name.split(" ")[0]}` : t("patientDashboard.welcomeTitle")}
             </h1>
-            <p className="text-muted-foreground text-[12px]">{t("patientDashboard.welcomeSubtitle")}</p>
+            <p className="text-muted-foreground text-sm">{t("patientDashboard.welcomeSubtitle")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -334,7 +334,7 @@ export default function PatientDashboard() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium text-foreground truncate">{notif.title}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{format(parseISO(notif.created_at), "MMM d")}</p>
+                    <p className="text-xs text-muted-foreground truncate">{format(parseISO(notif.created_at), "MMM d")}</p>
                   </div>
                 </div>
               );
@@ -361,11 +361,11 @@ export default function PatientDashboard() {
                   <Skeleton className="h-4 w-4/5" />
                 </div>
               ) : aiSummary?.summary ? (
-                <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-4">
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
                   {cleanSummary(aiSummary.summary)}
                 </p>
               ) : (
-                <p className="text-[11px] text-muted-foreground italic">{t("patientDashboard.aiSummaryEmpty")}</p>
+                <p className="text-sm text-muted-foreground italic">{t("patientDashboard.aiSummaryEmpty")}</p>
               )}
             </CardContent>
           </Card>
@@ -380,14 +380,14 @@ export default function PatientDashboard() {
           </CardHeader>
           <CardContent>
             {doctors.filter(d => d.nextAppointment).length === 0 ? (
-              <p className="text-[11px] text-muted-foreground text-center py-4">{t("patientDashboard.appointmentsEmpty")}</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t("patientDashboard.appointmentsEmpty")}</p>
             ) : (
               <div className="space-y-1.5">
                 {doctors.filter(d => d.nextAppointment).map(doc => (
                   <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
                     <div>
                       <p className="text-xs font-medium text-foreground">{doc.doctor_profile?.full_name || t("patientDashboard.doctorFallback")}</p>
-                      <p className="text-[10px] text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
+                      <p className="text-xs text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
                     </div>
                     {doc.doctor_profile?.specialty && (
                       <Badge className={`text-[8px] border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
@@ -409,7 +409,7 @@ export default function PatientDashboard() {
                 <Trophy className="h-7 w-7 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{t("patientDashboard.vulaLabel")}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("patientDashboard.vulaLabel")}</p>
                 <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -425,7 +425,7 @@ export default function PatientDashboard() {
                 <Trophy className="h-4 w-4 text-primary" />
                 {t("patientDashboard.earnVulasTitle")}
               </CardTitle>
-              <CardDescription className="text-[10px]">{t("patientDashboard.earnVulasDescription")}</CardDescription>
+              <CardDescription className="text-xs">{t("patientDashboard.earnVulasDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -439,7 +439,7 @@ export default function PatientDashboard() {
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
                       <tip.icon className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <p className="text-[11px] text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
+                    <p className="text-sm text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
                     <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
                 ))}
@@ -460,23 +460,23 @@ export default function PatientDashboard() {
                   {t("patientDashboard.claimsTitle")}
                 </CardTitle>
                 <Link to="/patient/invoices">
-                  <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
+                  <Button variant="ghost" size="sm" className="text-xs h-6 text-primary gap-1">
                     {t("patientDashboard.claimsAllInvoices")} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
-              <CardDescription className="text-[10px]">{t("patientDashboard.claimsDescription")}</CardDescription>
+              <CardDescription className="text-xs">{t("patientDashboard.claimsDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentClaims.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground text-center py-4">{t("patientDashboard.claimsEmpty")}</p>
+                <p className="text-sm text-muted-foreground text-center py-4">{t("patientDashboard.claimsEmpty")}</p>
               ) : (
                 <div className="space-y-1.5">
                   {recentClaims.map((claim: any) => (
                     <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
                       <div>
                         <p className="text-xs font-medium text-foreground">#{claim.invoice_number}</p>
-                        <p className="text-[10px] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           Submitted {claim.email_sent_at ? format(parseISO(claim.email_sent_at), "MMM d, yyyy") : "—"}
                         </p>
                       </div>
@@ -500,7 +500,7 @@ export default function PatientDashboard() {
                   </div>
                   {t("patientDashboard.documentationTitle")}
                 </CardTitle>
-                <CardDescription className="text-[10px]">{t("patientDashboard.documentationDescription")}</CardDescription>
+                <CardDescription className="text-xs">{t("patientDashboard.documentationDescription")}</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -522,12 +522,12 @@ export default function PatientDashboard() {
                 {t("patientDashboard.tasksTitle")}
               </CardTitle>
               <Link to="/patient/rewards">
-                <Button variant="ghost" size="sm" className="text-[10px] h-6 text-primary gap-1">
+                <Button variant="ghost" size="sm" className="text-xs h-6 text-primary gap-1">
                   {t("patientDashboard.tasksViewAll")} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <CardDescription className="text-[10px]">{t("patientDashboard.tasksDescription")}</CardDescription>
+            <CardDescription className="text-xs">{t("patientDashboard.tasksDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-1.5">
@@ -536,7 +536,7 @@ export default function PatientDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{task.title}</p>
                     {task.due_date && (
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {t("patientDashboard.tasksDue")}: {format(parseISO(task.due_date), "MMM d, yyyy")}
                       </p>
                     )}

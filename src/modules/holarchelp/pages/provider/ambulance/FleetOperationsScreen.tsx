@@ -1,229 +1,302 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Truck, Users, Plus, X, Search, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useProviderAccess } from "../../../components/ProviderGate";
+import { toast } from "sonner";
+import { toastError } from "@/lib/userMessage";
+import { VehicleEditDialog, EditableVehicle } from "../../../components/VehicleEditDialog";
 
-interface Vehicle {
-  code: string;
-  make: string;
-  status: "available" | "in-service" | "maintenance";
-  mileage: number;
-  lastService: string;
-  nextService: string;
-  serviceType: string;
-  maintenanceStatus: "scheduled" | "in-progress" | "overdue";
-  maintenanceDate: string;
-  daysOverdue?: number;
-  trips: number;
-  utilization: number;
-  avgDistance: number;
-}
+type DbVehicle = {
+  id: string;
+  vehicle_code: string;
+  registration_number: string | null;
+  status: string | null;
+};
 
-const VEHICLES: Vehicle[] = [
-  {
-    code: "AMB-001",
-    make: "Mercedes-Benz Sprinter",
-    status: "available",
-    mileage: 45230,
-    lastService: "2026-06-25",
-    nextService: "2026-07-15",
-    serviceType: "Oil Change",
-    maintenanceStatus: "scheduled",
-    maintenanceDate: "2026-07-15",
-    trips: 312,
-    utilization: 78,
-    avgDistance: 28.5,
-  },
-  {
-    code: "AMB-002",
-    make: "Mercedes-Benz Sprinter",
-    status: "in-service",
-    mileage: 52150,
-    lastService: "2026-06-20",
-    nextService: "2026-08-10",
-    serviceType: "Filter Replacement",
-    maintenanceStatus: "overdue",
-    maintenanceDate: "2026-06-20",
-    daysOverdue: 8,
-    trips: 289,
-    utilization: 91,
-    avgDistance: 32.1,
-  },
-  {
-    code: "AMB-003",
-    make: "Volkswagen Transporter",
-    status: "maintenance",
-    mileage: 38900,
-    lastService: "2026-06-28",
-    nextService: "2026-07-30",
-    serviceType: "Brake Service",
-    maintenanceStatus: "in-progress",
-    maintenanceDate: "2026-06-30",
-    trips: 245,
-    utilization: 64,
-    avgDistance: 25.8,
-  },
-];
+type DbMember = {
+  id: string;
+  user_id: string | null;
+  invited_name: string | null;
+  invited_email: string | null;
+  role: string;
+  status: string;
+};
+
+type DbAssignment = {
+  id: string;
+  ambulance_id: string;
+  member_id: string;
+  is_default_lead: boolean;
+};
+
+const CREW_ROLES = new Set(["paramedic", "emt", "driver", "nurse", "supervisor"]);
 
 export default function FleetOperationsScreen() {
-  const [searchCode, setSearchCode] = useState("");
+  const { providerId } = useProviderAccess();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [editing, setEditing] = useState<EditableVehicle | null>(null);
 
-  const filteredVehicles = useMemo(
-    () =>
-      VEHICLES.filter((v) =>
-        searchCode ? v.code.toLowerCase().includes(searchCode.toLowerCase()) : true
-      ),
-    [searchCode]
+  const { data, isLoading } = useQuery({
+    queryKey: ["fleet-ops", providerId],
+    enabled: !!providerId,
+    queryFn: async () => {
+      const [v, m, a] = await Promise.all([
+        supabase.from("ambulances" as any)
+          .select("id, vehicle_code, registration_number, status")
+          .eq("provider_id", providerId)
+          .order("vehicle_code"),
+        supabase.from("holarchelp_ambulance_members" as any)
+          .select("id, user_id, invited_name, invited_email, role, status")
+          .eq("provider_id", providerId)
+          .eq("status", "active"),
+        supabase.from("ambulance_crew_assignments" as any)
+          .select("id, ambulance_id, member_id, is_default_lead"),
+      ]);
+      if (v.error) throw v.error;
+      if (m.error) throw m.error;
+      if (a.error) throw a.error;
+      return {
+        vehicles: (v.data as any[] as DbVehicle[]) ?? [],
+        members: (m.data as any[] as DbMember[]) ?? [],
+        assignments: (a.data as any[] as DbAssignment[]) ?? [],
+      };
+    },
+  });
+
+  const vehicles = data?.vehicles ?? [];
+  const allMembers = data?.members ?? [];
+  const crewMembers = useMemo(
+    () => allMembers.filter((m) => CREW_ROLES.has((m.role || "").toLowerCase())),
+    [allMembers],
   );
+  const assignments = data?.assignments ?? [];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "available":
-        return { badge: "bg-success/10 text-success", icon: "✓" };
-      case "in-service":
-        return { badge: "bg-warning/10 text-warning", icon: "🚑" };
-      case "maintenance":
-        return { badge: "bg-muted text-muted-foreground", icon: "⚙" };
-      default:
-        return { badge: "bg-muted text-muted-foreground", icon: "•" };
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q
+      ? vehicles.filter((v) =>
+          v.vehicle_code.toLowerCase().includes(q) ||
+          (v.registration_number || "").toLowerCase().includes(q),
+        )
+      : vehicles;
+  }, [vehicles, search]);
+
+  const crewForVehicle = (id: string) =>
+    assignments
+      .filter((a) => a.ambulance_id === id)
+      .map((a) => ({ assignment: a, member: crewMembers.find((m) => m.id === a.member_id) }))
+      .filter((x) => x.member);
+
+  const memberLabel = (m: DbMember) =>
+    m.invited_name || m.invited_email || (m.user_id ?? "").slice(0, 8) || "Crew";
+
+  const toggleAssign = async (vehicleId: string, memberId: string, on: boolean) => {
+    try {
+      if (on) {
+        const { error } = await supabase.from("ambulance_crew_assignments" as any)
+          .delete().eq("ambulance_id", vehicleId).eq("member_id", memberId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("ambulance_crew_assignments" as any)
+          .insert({ ambulance_id: vehicleId, member_id: memberId });
+        if (error) throw error;
+      }
+      qc.invalidateQueries({ queryKey: ["fleet-ops", providerId] });
+    } catch (e) {
+      toastError(e, "Could not update crew assignment");
     }
   };
 
-  const getMaintenanceStatusColor = (status: string) => {
-    switch (status) {
-      case "scheduled":
-        return "bg-warning/10 text-warning";
-      case "in-progress":
-        return "bg-primary/10 text-primary";
-      case "overdue":
-        return "bg-destructive/10 text-destructive";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getMaintenanceLabel = (status: string, date: string, daysOverdue?: number) => {
-    if (status === "scheduled") return `SCHEDULED - ${date.split("-").slice(1).join("/")}`;
-    if (status === "in-progress") return `IN PROGRESS - Est. ${date.split("-").slice(1).join("/")}`;
-    if (status === "overdue") return `OVERDUE - ${daysOverdue} DAYS`;
-    return status.toUpperCase();
+  const statusBadge = (status: string | null) => {
+    const s = (status || "").toLowerCase();
+    if (s === "available") return "bg-success/10 text-success";
+    if (s === "in-service" || s === "in_service") return "bg-warning/10 text-warning";
+    if (s === "maintenance") return "bg-muted text-muted-foreground";
+    return "bg-muted text-muted-foreground";
   };
 
   return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Operations</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Fleet Operations</h1>
-        <p className="text-sm text-muted-foreground mt-2">6 vehicles • 3 available • 2 in-service • 1 maintenance</p>
+    <div className="space-y-4">
+      <header className="flex items-end justify-between gap-2">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
+          <h2 className="text-xl font-extrabold mt-0.5 flex items-center gap-2">
+            <Truck className="h-5 w-5 text-primary" /> Fleet Admin
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Vehicles, crew assignments and quick edits.
+          </p>
+        </div>
+        <div className="relative w-48">
+          <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input
+            placeholder="Search code or reg…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8 h-8 text-xs"
+          />
+        </div>
       </header>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Total Vehicles</p>
-          <p className="text-2xl font-bold mt-2">6</p>
+      {isLoading ? (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading vehicles…
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Utilization Rate</p>
-          <p className="text-2xl font-bold mt-2">76.4%</p>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+          <Truck className="mx-auto mb-2 h-6 w-6 opacity-50" />
+          No vehicles in your fleet yet.
         </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Total Mileage</p>
-          <p className="text-2xl font-bold mt-2">13.5k km</p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Cost/Vehicle</p>
-          <p className="text-2xl font-bold mt-2">$4.2k/mo</p>
-        </div>
-      </div>
+      ) : (
+        <Accordion type="multiple" className="space-y-2">
+          {filtered.map((v) => {
+            const crew = crewForVehicle(v.id);
+            const assignedIds = new Set(crew.map((c) => c.member!.id));
 
-      {/* Vehicles Section */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">🚑 Vehicles</h2>
+            return (
+              <AccordionItem
+                key={v.id}
+                value={v.id}
+                className="rounded-xl border-2 border-primary/30 bg-card overflow-hidden"
+              >
+                <AccordionTrigger className="px-3 py-2 hover:no-underline">
+                  <div className="flex flex-1 items-center justify-between gap-2 pr-2">
+                    <div className="text-left min-w-0">
+                      <p className="font-bold text-sm truncate">
+                        {v.vehicle_code}
+                        {v.registration_number ? <span className="text-muted-foreground font-normal"> · {v.registration_number}</span> : null}
+                      </p>
+                      <p className="text-sm text-muted-foreground truncate">Ambulance</p>
 
-        {filteredVehicles.map((vehicle) => {
-          const statusColor = getStatusColor(vehicle.status);
-          const maintenanceColor = getMaintenanceStatusColor(vehicle.maintenanceStatus);
-
-          return (
-            <div key={vehicle.code} className="rounded-xl border border-border bg-card p-4 space-y-3">
-              {/* Header Row */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-bold text-lg">{vehicle.code} — {vehicle.make}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Mileage: {vehicle.mileage.toLocaleString()} km · Last Service: {vehicle.lastService}
-                  </p>
-                </div>
-                <span className={`px-3 py-1.5 rounded text-xs font-semibold ${statusColor.badge}`}>
-                  {statusColor.icon} {vehicle.status.toUpperCase().replace("-", " ")}
-                </span>
-              </div>
-
-              {/* Maintenance Status */}
-              <div>
-                <span className={`inline-block px-3 py-1.5 rounded text-xs font-semibold ${maintenanceColor}`}>
-                  {getMaintenanceLabel(vehicle.maintenanceStatus, vehicle.maintenanceDate, vehicle.daysOverdue)}
-                </span>
-              </div>
-
-              {/* Divider */}
-              <div className="border-t" />
-
-              {/* Vehicle Utilization */}
-              <div className="bg-muted rounded p-3 space-y-2">
-                <p className="text-sm font-semibold">Vehicle Utilization</p>
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Trips This Month</p>
-                    <p className="font-semibold mt-1">{vehicle.trips}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">
+                        <Users className="h-3 w-3" /> {crew.length}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${statusBadge(v.status)}`}>
+                        {v.status ?? "—"}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Utilization</p>
-                    <p className="font-semibold mt-1">{vehicle.utilization}%</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Avg Distance/Trip</p>
-                    <p className="font-semibold mt-1">{vehicle.avgDistance} km</p>
-                  </div>
-                </div>
-              </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-3 pb-3">
+                  {/* Assigned crew */}
+                  <div className="rounded-lg bg-muted/40 p-2.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                        Assigned crew
+                      </p>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button size="sm" variant="outline" className="h-6 text-sm px-2">
+                            <Plus className="h-3 w-3 mr-1" /> Add crew
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64 p-2">
+                          <p className="px-1 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            Tick members to assign
+                          </p>
+                          <div className="max-h-60 overflow-y-auto space-y-0.5">
+                            {crewMembers.length === 0 ? (
+                              <p className="text-xs text-muted-foreground italic px-1 py-1">
+                                No active crew yet. Add them under Admin → Users.
+                              </p>
+                            ) : crewMembers.map((m) => {
+                              const on = assignedIds.has(m.id);
+                              return (
+                                <label key={m.id} className="flex items-center gap-2 text-sm rounded px-1.5 py-1 hover:bg-muted/50 cursor-pointer">
+                                  <Checkbox checked={on} onCheckedChange={() => toggleAssign(v.id, m.id, on)} />
+                                  <span className="truncate flex-1">
+                                    {memberLabel(m)}
+                                    <span className="text-muted-foreground text-xs ml-1 uppercase">· {m.role}</span>
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  View Profile
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  Edit
-                </Button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                    {crew.length === 0 ? (
+                      <p className="text-sm italic text-muted-foreground">
+                        No crew assigned. Use Add crew above to assign paramedics, EMTs, drivers or nurses.
+                      </p>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {crew.map(({ assignment, member }) => (
+                          <span key={assignment.id} className="inline-flex items-center gap-1 rounded-full bg-background border px-2 py-0.5 text-sm">
+                            <Users className="h-3 w-3 text-primary" />
+                            <span className="font-semibold">{memberLabel(member!)}</span>
+                            <span className="text-muted-foreground text-xs uppercase">· {member!.role}</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); toggleAssign(v.id, member!.id, true); }}
+                              className="ml-0.5 opacity-60 hover:opacity-100"
+                              aria-label="Remove crew member"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-      {/* Fleet Efficiency Metrics */}
-      <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-        <h3 className="font-bold">Fleet Efficiency Metrics</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Fuel Consumption</span>
-            <span className="font-semibold">6.8 L/100km</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Cost per km</span>
-            <span className="font-semibold">$0.31</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Downtime (Maintenance)</span>
-            <span className="font-semibold">2.3%</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Average Trips per Month</span>
-            <span className="font-semibold">3,675</span>
-          </div>
-        </div>
-      </div>
+
+
+
+                  {/* Actions */}
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-8 text-xs"
+                      onClick={() => navigate(`/provider/ambulance/fleet/vehicle/${encodeURIComponent(v.vehicle_code)}`)}
+                    >
+                      View Profile
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-8 text-xs"
+                      onClick={() =>
+                        setEditing({
+                          id: v.id,
+                          vehicle_code: v.vehicle_code,
+                          registration_number: v.registration_number,
+                          status: v.status,
+                        })
+                      }
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
+      )}
+
+      <VehicleEditDialog
+        open={!!editing}
+        onOpenChange={(v) => { if (!v) setEditing(null); }}
+        vehicle={editing}
+        onSaved={() => qc.invalidateQueries({ queryKey: ["fleet-ops", providerId] })}
+      />
     </div>
   );
 }

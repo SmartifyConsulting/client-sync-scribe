@@ -95,10 +95,11 @@ i18n
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     interpolation: { escapeValue: false },
     detection: {
-      order: ["localStorage", "navigator"],
+      order: ["localStorage"],
       lookupLocalStorage: "app.language",
       caches: ["localStorage"],
     },
+
   });
 
 const LANG_SCALE: Record<string, number> = {

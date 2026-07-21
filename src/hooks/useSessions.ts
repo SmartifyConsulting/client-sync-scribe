@@ -223,6 +223,7 @@ const completeSession = async (
         invoice: summaryData?.invoice || null,
         referral: summaryData?.referral || null,
         hospital_admission: summaryData?.hospital_admission || null,
+        follow_up_appointment: summaryData?.follow_up_appointment || null,
       };
 
       let sessionId = id;
@@ -800,7 +801,7 @@ const completeSession = async (
           const currencySymbol = (code: string): string => {
             const map: Record<string, string> = {
               ZAR: 'R', USD: '$', EUR: '€', GBP: '£',
-              BWP: 'P', NAD: 'N$', SZL: 'E', LSL: 'M',
+              BWP: 'P', SZL: 'E', LSL: 'M',
             };
             return map[code?.toUpperCase()] || code || 'R';
           };
@@ -1022,6 +1023,8 @@ ${tasksHtml}`;
         }
       }
 
+      // Vula awarding MUST be sequenced last — after every auto-created document above has settled.
+      logger.debug('All auto-documents processed; proceeding to Vula awarding step.');
       if (visitCategory && patientId) {
         const { data: configData } = await supabase
           .from('gamification_config')

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { IncidentNumberBadge } from "@/components/IncidentNumberBadge";
 
 export default function HolarcHelpIncidents() {
   const { t } = useTranslation();
@@ -63,6 +64,11 @@ export default function HolarcHelpIncidents() {
           <li key={i.id}>
             <Link to={`/patient/holarchelp/incident/${i.id}`} className="flex items-center justify-between rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <div className="min-w-0 flex-1">
+                {i.incident_number && (
+                  <div className="mb-1">
+                    <IncidentNumberBadge number={i.incident_number} size="sm" showCopy={false} label="Ref" />
+                  </div>
+                )}
                 <p className="font-semibold">{new Date(i.created_at).toLocaleString()}</p>
                 {i.provider_name && (
                   <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 truncate">

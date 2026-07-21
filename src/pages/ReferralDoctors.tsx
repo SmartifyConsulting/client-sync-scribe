@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Pencil, Loader2, Search, Mail, Send, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,7 +76,6 @@ interface ReferralDoctorsProps {
 }
 
 export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsProps) {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -202,7 +200,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
 
   const handleSave = async () => {
     if (!user || !form.first_name.trim() || !form.last_name.trim()) {
-      toast({ title: t("doctor.referrals.required"), description: t("doctor.referrals.required_names"), variant: "destructive" });
+      toast({ title: "Required", description: "First and last name are required", variant: "destructive" });
       return;
     }
     setSaving(true);
@@ -214,12 +212,12 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     };
     if (editingId) {
       const { error } = await supabase.from("referral_doctors").update(record).eq("id", editingId);
-      if (error) toast({ title: t("common.error"), description: t("doctor.referrals.error_update"), variant: "destructive" });
-      else toast({ title: t("doctor.referrals.updated"), description: t("doctor.referrals.updated_message") });
+      if (error) toast({ title: "Error", description: "Failed to update", variant: "destructive" });
+      else toast({ title: "Updated", description: "Referral doctor updated" });
     } else {
       const { error } = await supabase.from("referral_doctors").insert({ ...record, user_id: user.id });
-      if (error) toast({ title: t("common.error"), description: t("doctor.referrals.error_add"), variant: "destructive" });
-      else toast({ title: t("doctor.referrals.added"), description: t("doctor.referrals.added_message") });
+      if (error) toast({ title: "Error", description: "Failed to add", variant: "destructive" });
+      else toast({ title: "Added", description: "Referral doctor added" });
     }
     setSaving(false);
     resetForm();
@@ -255,7 +253,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     const { error } = await supabase.from("referral_doctors").delete().eq("id", id);
     if (!error) {
       setDoctors(doctors.filter(d => d.id !== id));
-      toast({ title: t("doctor.referrals.removed"), description: t("doctor.referrals.removed_message") });
+      toast({ title: "Removed", description: "Referral doctor removed" });
     }
   };
 
@@ -270,36 +268,36 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       {!hideHeader && (
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t("doctor.referrals.title")}</h1>
-            <p className="mt-1 text-muted-foreground text-[12px]">{t("doctor.referrals.subtitle")}</p>
+            <h1 className="text-2xl font-bold text-foreground">Referrals</h1>
+            <p className="mt-1 text-muted-foreground text-sm">Manage doctors you refer patients to</p>
           </div>
           <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
-            <Plus className="h-4 w-4" /> {t("doctor.referrals.add_doctor")}
+            <Plus className="h-4 w-4" /> Add Doctor
           </Button>
         </div>
       )}
       {hideHeader && (
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-[12px]">{t("doctor.referrals.subtitle")}</p>
+          <p className="text-muted-foreground text-sm">Manage doctors you refer patients to</p>
           <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }} className="gap-1.5">
-            <Plus className="h-3.5 w-3.5" /> {t("doctor.referrals.add_doctor")}
+            <Plus className="h-3.5 w-3.5" /> Add Doctor
           </Button>
         </div>
       )}
 
       {showForm && !editingId && (
         <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
-          <h3 className="font-semibold text-foreground">{t("doctor.referrals.add_referral_title")}</h3>
+          <h3 className="font-semibold text-foreground">Add Referral Doctor</h3>
 
           {/* Search Step */}
           {addMode === "search" && (
             <div className="space-y-4">
               <div className="relative">
-                <Label>{t("doctor.referrals.search_holarc")}</Label>
+                <Label>Search for a doctor on Holarc</Label>
                 <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder={t("doctor.referrals.search_placeholder")}
+                    placeholder="Type doctor name..."
                     value={profileSearch}
                     onChange={(e) => setProfileSearch(e.target.value)}
                     onFocus={() => profileSuggestions.length > 0 && setShowProfileSuggestions(true)}
@@ -330,13 +328,13 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
               {/* Not found → invite or manual */}
               {noSearchResults && (
                 <div className="rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
-                  <p className="text-sm text-muted-foreground">{t("doctor.referrals.not_found")}</p>
+                  <p className="text-sm text-muted-foreground">Doctor not found on Holarc</p>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => setAddMode("invite")} className="gap-2">
-                      <Mail className="h-4 w-4" /> {t("doctor.referrals.send_invitation")}
+                      <Mail className="h-4 w-4" /> Send Invitation
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => setAddMode("manual")} className="gap-2">
-                      <UserPlus className="h-4 w-4" /> {t("doctor.referrals.add_manually")}
+                      <UserPlus className="h-4 w-4" /> Add Manually
                     </Button>
                   </div>
                 </div>
@@ -349,12 +347,12 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                   className="text-sm text-primary hover:underline"
                   onClick={() => setAddMode("manual")}
                 >
-                  {t("doctor.referrals.add_without_search")}
+                  Or add manually without searching
                 </button>
               )}
 
               <div className="flex gap-2">
-                <Button variant="outline" onClick={resetForm}>{t("common.cancel")}</Button>
+                <Button variant="outline" onClick={resetForm}>Cancel</Button>
               </div>
             </div>
           )}
@@ -362,12 +360,12 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
           {/* Invite Step */}
           {addMode === "invite" && (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">{t("doctor.referrals.invite_description")}</p>
+              <p className="text-sm text-muted-foreground">Send an email invitation to join Holarc Health</p>
               <div className="space-y-2">
-                <Label>{t("doctor.referrals.doctor_email")}</Label>
+                <Label>Doctor's Email</Label>
                 <Input
                   type="email"
-                  placeholder={t("doctor.referrals.email_placeholder")}
+                  placeholder="doctor@example.com"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                 />
@@ -375,10 +373,10 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
               <div className="flex gap-2">
                 <Button onClick={handleSendInvite} disabled={sendingInvite} className="gap-2">
                   {sendingInvite ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  {t("doctor.referrals.send_invitation")}
+                  Send Invitation
                 </Button>
-                <Button variant="outline" onClick={() => setAddMode("search")}>{t("common.back")}</Button>
-                <Button variant="ghost" size="sm" onClick={() => setAddMode("manual")}>{t("doctor.referrals.add_manually_instead")}</Button>
+                <Button variant="outline" onClick={() => setAddMode("search")}>Back</Button>
+                <Button variant="ghost" size="sm" onClick={() => setAddMode("manual")}>Add manually instead</Button>
               </div>
             </div>
           )}
@@ -387,29 +385,29 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
           {addMode === "manual" && (
             <>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-2"><Label>{t("doctor.referrals.first_name")}</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
-                <div className="space-y-2"><Label>{t("doctor.referrals.last_name")}</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
+                <div className="space-y-2"><Label>First Name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Last Name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
                 <div className="space-y-2">
-                  <Label>{t("doctor.referrals.specialty")}</Label>
+                  <Label>Specialty</Label>
                   <Select value={form.specialty} onValueChange={(v) => { setForm({ ...form, specialty: v }); if (v !== "__other__") setCustomSpecialty(""); }}>
-                    <SelectTrigger><SelectValue placeholder={t("doctor.referrals.select_specialty")} /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
                     <SelectContent>
                       {SPECIALTIES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      <SelectItem value="__other__">{t("doctor.referrals.other")}</SelectItem>
+                      <SelectItem value="__other__">Other...</SelectItem>
                     </SelectContent>
                   </Select>
                   {form.specialty === "__other__" && (
-                    <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder={t("doctor.referrals.enter_specialty")} className="mt-2" />
+                    <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder="Enter specialty" className="mt-2" />
                   )}
                 </div>
-                <div className="space-y-2"><Label>{t("doctor.referrals.practice_number")}</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
-                <div className="space-y-2"><Label>{t("doctor.referrals.address")}</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-                <div className="space-y-2"><Label>{t("doctor.referrals.email")}</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-                <div className="space-y-2"><Label>{t("doctor.referrals.phone")}</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Practice Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+                <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}{t("common.save")}</Button>
-                <Button variant="outline" onClick={resetForm}>{t("common.cancel")}</Button>
+                <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Save</Button>
+                <Button variant="outline" onClick={resetForm}>Cancel</Button>
               </div>
             </>
           )}
@@ -419,55 +417,55 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       {/* Edit form (always manual) */}
       {showForm && editingId && (
         <div className="rounded-xl border border-primary bg-card p-6 shadow-sm space-y-4">
-          <h3 className="font-semibold text-foreground">{t("doctor.referrals.edit_referral_title")}</h3>
+          <h3 className="font-semibold text-foreground">Edit Referral Doctor</h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="space-y-2"><Label>{t("doctor.referrals.first_name")}</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
-            <div className="space-y-2"><Label>{t("doctor.referrals.last_name")}</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
+            <div className="space-y-2"><Label>First Name *</Label><Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Last Name *</Label><Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></div>
             <div className="space-y-2">
-              <Label>{t("doctor.referrals.specialty")}</Label>
+              <Label>Specialty</Label>
               <Select value={form.specialty} onValueChange={(v) => { setForm({ ...form, specialty: v }); if (v !== "__other__") setCustomSpecialty(""); }}>
-                <SelectTrigger><SelectValue placeholder={t("doctor.referrals.select_specialty")} /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select specialty" /></SelectTrigger>
                 <SelectContent>
                   {SPECIALTIES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  <SelectItem value="__other__">{t("doctor.referrals.other")}</SelectItem>
+                  <SelectItem value="__other__">Other...</SelectItem>
                 </SelectContent>
               </Select>
               {form.specialty === "__other__" && (
-                <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder={t("doctor.referrals.enter_specialty")} className="mt-2" />
+                <Input value={customSpecialty} onChange={(e) => setCustomSpecialty(e.target.value)} placeholder="Enter specialty" className="mt-2" />
               )}
             </div>
-            <div className="space-y-2"><Label>{t("doctor.referrals.practice_number")}</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
-            <div className="space-y-2"><Label>{t("doctor.referrals.address")}</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
-            <div className="space-y-2"><Label>{t("doctor.referrals.email")}</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-            <div className="space-y-2"><Label>{t("doctor.referrals.phone")}</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Practice Number</Label><Input value={form.practice_number} onChange={(e) => setForm({ ...form, practice_number: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Address</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+            <div className="space-y-2"><Label>Phone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}{t("common.update")}</Button>
-            <Button variant="outline" onClick={resetForm}>{t("common.cancel")}</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}Update</Button>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
           </div>
         </div>
       )}
 
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("doctor.referrals.search_doctors")} className="pl-10" />
+        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-10" />
       </div>
 
       <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
         ) : filtered.length === 0 ? (
-          <div className="p-10 text-center text-muted-foreground">{t("doctor.referrals.no_doctors")}</div>
+          <div className="p-10 text-center text-muted-foreground">No referral doctors found</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("doctor.referrals.table_name")}</TableHead>
-                <TableHead>{t("doctor.referrals.specialty")}</TableHead>
-                <TableHead>{t("doctor.referrals.practice_number")}</TableHead>
-                <TableHead>{t("doctor.referrals.email")}</TableHead>
-                <TableHead>{t("doctor.referrals.phone")}</TableHead>
-                <TableHead className="text-center">{t("doctor.referrals.table_referrals")}</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Specialty</TableHead>
+                <TableHead>Practice Number</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead className="text-center">Referrals</TableHead>
                 <TableHead className="w-[100px]"></TableHead>
               </TableRow>
             </TableHeader>

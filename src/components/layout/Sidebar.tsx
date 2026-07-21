@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import holarcLogo from "@/assets/holarc-logo-clear-2.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -19,8 +20,9 @@ import {
   Siren,
   ListChecks,
   Users2,
-  Clock,
+  Mic,
 } from "lucide-react";
+
 import { useUserRole } from "@/hooks/useUserRole";
 import { useProfile } from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
@@ -37,10 +39,10 @@ interface NavItem {
 
 const doctorNavItems: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard", tour: "doctor-home" },
-  { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
-  { icon: Clock, label: "My Sessions", labelKey: "nav.mySessions", to: "/doctor/sessions" },
   { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
+  { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
+  { icon: Mic, label: "My Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/documents" },
   { icon: Users2, label: "My Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
@@ -126,7 +128,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-1 space-y-0.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-0.5 overflow-y-auto font-size-preserve">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -168,7 +170,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   <item.icon className="h-5 w-5" />
                   <span className="flex-1">{t(item.labelKey, item.label)}</span>
                   {item.label === "Notifications" && unreadCount > 0 && (
-                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold text-destructive-foreground">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}

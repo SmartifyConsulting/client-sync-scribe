@@ -297,7 +297,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
       coordinator: "Coordinator",
       doctor: "Doctor",
       nurse: "Nurse",
-      er_admin: "ER Admin",
+      er_admin: "ER_Admin",
       paramedic: "Paramedic",
     },
     inviteStaff: {
@@ -371,6 +371,12 @@ export const uiTranslations: Record<string, TranslationTree> = {
       breathingQuestion: "Are they breathing?",
       sendHelp: "Send for help",
       skipShort: "Skip",
+      peopleNeedHelp: "People needing help",
+      breathingCount: "How many are breathing?",
+      unconsciousCount: "How many are unconscious?",
+      decrease: "Decrease",
+      increase: "Increase",
+
     },
     shift: {
       startTitle: "Start shift",

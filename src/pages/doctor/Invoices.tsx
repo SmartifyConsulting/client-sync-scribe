@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { useTranslation } from 'react-i18next';
 import { format, differenceInDays, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { jsPDF } from "jspdf";
@@ -115,7 +114,7 @@ const CURRENCIES = [
   { code: "EUR", symbol: "€" },
   { code: "GBP", symbol: "£" },
   { code: "BWP", symbol: "P" },
-  { code: "NAD", symbol: "N$" },
+  { code: "NGN", symbol: "₦" },
   { code: "SZL", symbol: "E" },
   { code: "LSL", symbol: "M" },
 ];
@@ -139,41 +138,40 @@ function getInvoiceStatus(invoice: Invoice): "issued" | "paid" | "overdue" | "ar
   return "issued";
 }
 
-function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived", t: any) {
+function getStatusBadge(status: "issued" | "paid" | "overdue" | "archived") {
   switch (status) {
     case "paid":
       return (
         <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 gap-1">
           <CheckCircle className="h-4 w-4" />
-          {t('doctor.invoices.status.paid')}
+          Paid
         </Badge>
       );
     case "overdue":
       return (
         <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/20 gap-1">
           <AlertTriangle className="h-4 w-4" />
-          {t('doctor.invoices.status.overdue')}
+          Overdue
         </Badge>
       );
     case "archived":
       return (
         <Badge className="bg-muted text-muted-foreground hover:bg-muted gap-1">
           <Archive className="h-4 w-4" />
-          {t('doctor.invoices.status.archived')}
+          Archived
         </Badge>
       );
     default:
       return (
         <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 gap-1">
           <Clock className="h-4 w-4" />
-          {t('doctor.invoices.status.issued')}
+          Issued
         </Badge>
       );
   }
 }
 
 export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: boolean }) {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const { profile } = useProfile();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -267,8 +265,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     } catch (error: any) {
       console.error("Error fetching invoices:", error);
       toast({
-        title: t('doctor.invoices.errors.error'),
-        description: t('doctor.invoices.errors.failedLoadInvoices'),
+        title: "Error",
+        description: "Failed to load invoices",
         variant: "destructive",
       });
     } finally {
@@ -292,8 +290,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       if (!patientData?.claims_email) {
         if (!opts.silent) {
           toast({
-            title: t('doctor.invoices.errors.noClaimsEmail'),
-            description: t('doctor.invoices.errors.addClaimsEmail'),
+            title: "No Claims Email",
+            description: "Add a Medical Aid Claims Email on the patient profile to send claims.",
             variant: "destructive",
           });
         }
@@ -364,16 +362,16 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       if (emailErr) throw emailErr;
 
       toast({
-        title: t('doctor.invoices.messages.sentToMedicalAid'),
-        description: t('doctor.invoices.messages.paidInvoiceEmailed', { email: patientData.claims_email }),
+        title: "Sent to Medical Aid",
+        description: `Paid invoice emailed to ${patientData.claims_email}`,
       });
       return true;
     } catch (err: any) {
       console.error("Error sending paid invoice to medical aid:", err);
       if (!opts.silent) {
         toast({
-          title: t('doctor.invoices.errors.sendFailed'),
-          description: err.message || t('doctor.invoices.errors.failedSendPaid'),
+          title: "Send Failed",
+          description: err.message || "Failed to send paid invoice to medical aid",
           variant: "destructive",
         });
       }
@@ -397,15 +395,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       const updatedInvoice = invoices.find(inv => inv.id === invoiceId);
 
-      setInvoices(prev => prev.map(inv =>
-        inv.id === invoiceId
+      setInvoices(prev => prev.map(inv => 
+        inv.id === invoiceId 
           ? { ...inv, status: 'paid', paid_at: paidAtIso }
           : inv
       ));
 
       toast({
-        title: t('doctor.invoices.messages.invoiceUpdated'),
-        description: t('doctor.invoices.messages.markedPaid'),
+        title: "Invoice Updated",
+        description: "Invoice marked as paid",
       });
 
       // Auto-forward the PAID-stamped invoice to the claims email
@@ -420,8 +418,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
           if (!patientData?.claims_email) {
             toast({
-              title: t('doctor.invoices.errors.noClaimsEmail'),
-              description: t('doctor.invoices.errors.noClaimsEmailAutoSubmit'),
+              title: "No Claims Email",
+              description: "Add a Medical Aid Claims Email on the patient profile to enable auto-submit.",
             });
           } else if (patientData?.patient_user_id) {
             const { data: patientProfile } = await supabase
@@ -444,8 +442,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     } catch (error: any) {
       console.error("Error updating invoice:", error);
       toast({
-        title: t('doctor.invoices.errors.error'),
-        description: t('doctor.invoices.errors.failedUpdateInvoice'),
+        title: "Error",
+        description: "Failed to update invoice",
         variant: "destructive",
       });
     } finally {
@@ -463,21 +461,21 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       if (error) throw error;
 
-      setInvoices(prev => prev.map(inv =>
-        inv.id === invoiceId
+      setInvoices(prev => prev.map(inv => 
+        inv.id === invoiceId 
           ? { ...inv, status: 'archived' }
           : inv
       ));
 
       toast({
-        title: t('doctor.invoices.messages.invoiceArchived'),
-        description: t('doctor.invoices.messages.invoiceArchivedDesc'),
+        title: "Invoice Archived",
+        description: "Invoice has been archived",
       });
     } catch (error: any) {
       console.error("Error archiving invoice:", error);
       toast({
-        title: t('doctor.invoices.errors.error'),
-        description: t('doctor.invoices.errors.failedArchive'),
+        title: "Error",
+        description: "Failed to archive invoice",
         variant: "destructive",
       });
     } finally {
@@ -517,7 +515,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       setPreviewHtml({ html, title: `Invoice ${invoice.invoice_number}` });
     } catch (err: any) {
       console.error("Preview error:", err);
-      toast({ title: t('doctor.invoices.errors.previewFailed'), description: err.message, variant: "destructive" });
+      toast({ title: "Preview failed", description: err.message, variant: "destructive" });
     } finally {
       setLoadingPreviewId(null);
     }
@@ -537,8 +535,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
     if (!editForm.amount || parseFloat(editForm.amount) <= 0) {
       toast({
-        title: t('doctor.invoices.errors.invalidAmount'),
-        description: t('doctor.invoices.errors.enterValidAmount'),
+        title: "Invalid Amount",
+        description: "Please enter a valid amount",
         variant: "destructive",
       });
       return;
@@ -557,10 +555,10 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       if (error) throw error;
 
-      setInvoices(prev => prev.map(inv =>
-        inv.id === editingInvoice.id
-          ? {
-              ...inv,
+      setInvoices(prev => prev.map(inv => 
+        inv.id === editingInvoice.id 
+          ? { 
+              ...inv, 
               description: editForm.description,
               amount: parseFloat(editForm.amount),
               due_date: editForm.dueDate,
@@ -569,15 +567,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       ));
 
       toast({
-        title: t('doctor.invoices.messages.invoiceUpdated'),
-        description: t('doctor.invoices.messages.detailsSaved'),
+        title: "Invoice Updated",
+        description: "Invoice details have been saved",
       });
       setEditingInvoice(null);
     } catch (error: any) {
       console.error("Error updating invoice:", error);
       toast({
-        title: t('doctor.invoices.errors.error'),
-        description: t('doctor.invoices.errors.failedUpdateInvoice'),
+        title: "Error",
+        description: "Failed to update invoice",
         variant: "destructive",
       });
     } finally {
@@ -696,7 +694,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     // Header
     doc.setFontSize(20);
     doc.setFont("helvetica", "bold");
-    doc.text(t('doctor.invoices.report.title'), pageWidth / 2, yPos, { align: "center" });
+    doc.text("Invoice Report", pageWidth / 2, yPos, { align: "center" });
     yPos += 10;
 
     // Practice info
@@ -812,15 +810,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         const fileName = `Invoice_Report_${format(reportDateFrom!, "yyyy-MM-dd")}_to_${format(reportDateTo!, "yyyy-MM-dd")}.pdf`;
         doc.save(fileName);
         toast({
-          title: t('doctor.invoices.messages.pdfExported'),
-          description: t('doctor.invoices.messages.pdfExportedDesc'),
+          title: "PDF Exported",
+          description: "Invoice report has been downloaded",
         });
       }
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast({
-        title: t('doctor.invoices.errors.exportFailed'),
-        description: t('doctor.invoices.errors.failedGeneratePdf'),
+        title: "Export Failed",
+        description: "Failed to generate PDF report",
         variant: "destructive",
       });
     } finally {
@@ -831,8 +829,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   const handleEmailReport = async () => {
     if (!emailAddress || !emailAddress.includes("@")) {
       toast({
-        title: t('doctor.invoices.errors.invalidEmail'),
-        description: t('doctor.invoices.errors.enterValidEmail'),
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
         variant: "destructive",
       });
       return;
@@ -866,15 +864,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       if (error) throw error;
 
       toast({
-        title: t('doctor.invoices.messages.emailSent'),
-        description: t('doctor.invoices.messages.emailSentTo', { email: emailAddress }),
+        title: "Email Sent",
+        description: `Invoice report sent to ${emailAddress}`,
       });
       setEmailAddress("");
     } catch (error: any) {
       console.error("Error sending email:", error);
       toast({
-        title: t('doctor.invoices.errors.emailFailed'),
-        description: error.message || t('doctor.invoices.errors.failedSendEmail'),
+        title: "Email Failed",
+        description: error.message || "Failed to send invoice report email",
         variant: "destructive",
       });
     } finally {
@@ -893,8 +891,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
   const handleCreateInvoice = async () => {
     if (!selectedPatient) {
       toast({
-        title: t('doctor.invoices.errors.noPatientSelected'),
-        description: t('doctor.invoices.errors.selectPatientFirst'),
+        title: "No Patient Selected",
+        description: "Please select a patient first",
         variant: "destructive",
       });
       return;
@@ -902,8 +900,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
     if (!newInvoiceForm.amount || parseFloat(newInvoiceForm.amount) <= 0) {
       toast({
-        title: t('doctor.invoices.errors.invalidAmount'),
-        description: t('doctor.invoices.errors.enterValidAmountGtZero'),
+        title: "Invalid Amount",
+        description: "Please enter a valid amount greater than 0",
         variant: "destructive",
       });
       return;
@@ -933,10 +931,10 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       if (error) throw error;
 
       setInvoices(prev => [data, ...prev]);
-
+      
       toast({
-        title: t('doctor.invoices.messages.invoiceCreated'),
-        description: t('doctor.invoices.messages.invoiceCreatedDesc', { invoiceNumber }),
+        title: "Invoice Created",
+        description: `Invoice ${invoiceNumber} has been created successfully`,
       });
 
       // Reset form
@@ -951,8 +949,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     } catch (error: any) {
       console.error("Error creating invoice:", error);
       toast({
-        title: t('doctor.invoices.errors.error'),
-        description: error.message || t('doctor.invoices.errors.failedCreateInvoice'),
+        title: "Error",
+        description: error.message || "Failed to create invoice",
         variant: "destructive",
       });
     } finally {
@@ -974,9 +972,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{t('doctor.invoices.title')}</h1>
-            <p className="mt-1 text-muted-foreground text-[12px]">
-              {t('doctor.invoices.subtitle')}
+            <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
+            <p className="mt-1 text-muted-foreground text-sm">
+              Manage and track all patient invoices
             </p>
           </div>
         )}
@@ -986,21 +984,21 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                {t('doctor.invoices.createInvoice')}
+                Create Invoice
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>{t('doctor.invoices.createNewInvoice')}</DialogTitle>
+                <DialogTitle>Create New Invoice</DialogTitle>
                 <DialogDescription>
-                  {t('doctor.invoices.selectPatientEnterDetails')}
+                  Select a patient and enter invoice details
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4 py-4">
                 {/* Patient Selector with Search */}
                 <div className="space-y-2">
-                  <Label>{t('doctor.invoices.patient')}</Label>
+                  <Label>Patient</Label>
                   <Popover open={patientSelectorOpen} onOpenChange={setPatientSelectorOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -1015,16 +1013,16 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                             {selectedPatient.name}
                           </span>
                         ) : (
-                          <span className="text-muted-foreground">{t('doctor.invoices.selectPatient')}</span>
+                          <span className="text-muted-foreground">Select a patient...</span>
                         )}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[400px] p-0" align="start">
                       <Command>
-                        <CommandInput placeholder={t('doctor.invoices.searchPatients')} />
+                        <CommandInput placeholder="Search patients..." />
                         <CommandList>
-                          <CommandEmpty>{t('doctor.invoices.noPatientFound')}</CommandEmpty>
+                          <CommandEmpty>No patient found.</CommandEmpty>
                           <CommandGroup>
                             {patients.map((patient) => (
                               <CommandItem
@@ -1061,7 +1059,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 {/* Service Selector */}
                 {servicePrices.length > 0 && (
                   <div className="space-y-2">
-                    <Label>{t('doctor.invoices.serviceOptional')}</Label>
+                    <Label>Service (Optional)</Label>
                     <Popover open={serviceSelectorOpen} onOpenChange={setServiceSelectorOpen}>
                       <PopoverTrigger asChild>
                         <Button
@@ -1075,16 +1073,16 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                               {selectedService.service_name} - {getCurrencySymbol(selectedService.currency)} {Number(selectedService.default_price).toFixed(2)}
                             </span>
                           ) : (
-                            <span className="text-muted-foreground">{t('doctor.invoices.selectService')}</span>
+                            <span className="text-muted-foreground">Select a service...</span>
                           )}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[400px] p-0" align="start">
                         <Command>
-                          <CommandInput placeholder={t('doctor.invoices.searchServices')} />
+                          <CommandInput placeholder="Search services..." />
                           <CommandList>
-                            <CommandEmpty>{t('doctor.invoices.noServiceFound')}</CommandEmpty>
+                            <CommandEmpty>No service found.</CommandEmpty>
                             <CommandGroup>
                               {servicePrices.map((service) => (
                                 <CommandItem
@@ -1121,19 +1119,19 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                       </PopoverContent>
                     </Popover>
                     <p className="text-xs text-muted-foreground">
-                      {t('doctor.invoices.serviceHelpText')}
+                      Select a service to auto-fill description and amount. You can override the price below.
                     </p>
                   </div>
                 )}
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <Label htmlFor="new-description">{t('doctor.invoices.description')}</Label>
+                  <Label htmlFor="new-description">Description</Label>
                   <Textarea
                     id="new-description"
                     value={newInvoiceForm.description}
                     onChange={(e) => setNewInvoiceForm(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder={t('doctor.invoices.descriptionPlaceholder')}
+                    placeholder="Invoice description..."
                     className="min-h-[80px]"
                   />
                 </div>
@@ -1141,7 +1139,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 {/* Amount and Due Date */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="new-amount">{t('doctor.invoices.amount')} ({getCurrencySymbol(invoiceCurrency)})</Label>
+                    <Label htmlFor="new-amount">Amount ({getCurrencySymbol(invoiceCurrency)})</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                         {getCurrencySymbol(invoiceCurrency)}
@@ -1159,7 +1157,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-dueDate">{t('doctor.invoices.dueDate')}</Label>
+                    <Label htmlFor="new-dueDate">Due Date</Label>
                     <Input
                       id="new-dueDate"
                       type="date"
@@ -1171,10 +1169,10 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-border">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1"
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1" 
                   onClick={() => {
                     setShowCreateDialog(false);
                     setSelectedPatient(null);
@@ -1186,22 +1184,22 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                     });
                   }}
                 >
-                  {t('doctor.invoices.cancel')}
+                  Cancel
                 </Button>
-                <Button
-                  className="flex-1 gap-2"
+                <Button 
+                  className="flex-1 gap-2" 
                   onClick={handleCreateInvoice}
                   disabled={isCreatingInvoice || !selectedPatient}
                 >
                   {isCreatingInvoice ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      {t('doctor.invoices.creating')}
+                      Creating...
                     </>
                   ) : (
                     <>
                       <Send className="h-4 w-4" />
-                      {t('doctor.invoices.createInvoice')}
+                      Create Invoice
                     </>
                   )}
                 </Button>
@@ -1214,21 +1212,21 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <FileText className="h-4 w-4" />
-                {t('doctor.invoices.generateReport')}
+                Generate Report
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{t('doctor.invoices.invoiceReport')}</DialogTitle>
+              <DialogTitle>Invoice Report</DialogTitle>
               <DialogDescription>
-                {t('doctor.invoices.reportDescription')}
+                View invoice summary by date range with monthly totals
               </DialogDescription>
             </DialogHeader>
             
             {/* Date Range Selector */}
             <div className="flex flex-wrap gap-4 items-end py-4 border-b">
               <div className="space-y-2">
-                <Label>{t('doctor.invoices.fromDate')}</Label>
+                <Label>From Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -1239,7 +1237,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                       )}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
-                      {reportDateFrom ? format(reportDateFrom, "PPP") : t('doctor.invoices.selectDate')}
+                      {reportDateFrom ? format(reportDateFrom, "PPP") : "Select date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -1253,7 +1251,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 </Popover>
               </div>
               <div className="space-y-2">
-                <Label>{t('doctor.invoices.toDate')}</Label>
+                <Label>To Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -1264,7 +1262,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                       )}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
-                      {reportDateTo ? format(reportDateTo, "PPP") : t('doctor.invoices.selectDate')}
+                      {reportDateTo ? format(reportDateTo, "PPP") : "Select date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -1282,19 +1280,19 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             {/* Report Summary */}
             <div className="grid gap-4 md:grid-cols-4 py-4">
               <div className="rounded-lg border p-3">
-                <p className="text-sm text-muted-foreground">{t('doctor.invoices.totalInvoices')}</p>
+                <p className="text-sm text-muted-foreground">Total Invoices</p>
                 <p className="text-xl font-bold">{reportTotals.invoiceCount}</p>
               </div>
               <div className="rounded-lg border p-3">
-                <p className="text-sm text-muted-foreground">{t('doctor.invoices.totalAmount')}</p>
+                <p className="text-sm text-muted-foreground">Total Amount</p>
                 <p className="text-xl font-bold">{getCurrencySymbol(invoiceCurrency)} {reportTotals.total.toFixed(2)}</p>
               </div>
               <div className="rounded-lg border p-3 border-green-500/30 bg-green-500/5">
-                <p className="text-sm text-muted-foreground">{t('doctor.invoices.paid')}</p>
+                <p className="text-sm text-muted-foreground">Paid</p>
                 <p className="text-xl font-bold text-green-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</p>
               </div>
               <div className="rounded-lg border p-3 border-amber-500/30 bg-amber-500/5">
-                <p className="text-sm text-muted-foreground">{t('doctor.invoices.outstanding')}</p>
+                <p className="text-sm text-muted-foreground">Outstanding</p>
                 <p className="text-xl font-bold text-amber-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.unpaidTotal.toFixed(2)}</p>
               </div>
             </div>
@@ -1306,15 +1304,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               </div>
             ) : (
               <div className="space-y-4">
-                <h3 className="font-semibold">{t('doctor.invoices.monthlyBreakdown')}</h3>
+                <h3 className="font-semibold">Monthly Breakdown</h3>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t('doctor.invoices.month')}</TableHead>
-                      <TableHead className="text-center">{t('doctor.invoices.invoices')}</TableHead>
-                      <TableHead className="text-right">{t('doctor.invoices.total')}</TableHead>
-                      <TableHead className="text-right">{t('doctor.invoices.paid')}</TableHead>
-                      <TableHead className="text-right">{t('doctor.invoices.outstanding')}</TableHead>
+                      <TableHead>Month</TableHead>
+                      <TableHead className="text-center">Invoices</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-right">Paid</TableHead>
+                      <TableHead className="text-right">Outstanding</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1329,7 +1327,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                     ))}
                     {/* Totals Row */}
                     <TableRow className="border-t-2 font-bold bg-muted/50">
-                      <TableCell>{t('doctor.invoices.total')}</TableCell>
+                      <TableCell>Total</TableCell>
                       <TableCell className="text-center">{reportTotals.invoiceCount}</TableCell>
                       <TableCell className="text-right">{getCurrencySymbol(invoiceCurrency)} {reportTotals.total.toFixed(2)}</TableCell>
                       <TableCell className="text-right text-green-600">{getCurrencySymbol(invoiceCurrency)} {reportTotals.paidTotal.toFixed(2)}</TableCell>
@@ -1354,14 +1352,14 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   ) : (
                     <Download className="h-4 w-4" />
                   )}
-                  {t('doctor.invoices.downloadPdf')}
+                  Download PDF
                 </Button>
               </div>
               
               <div className="flex gap-2">
                 <Input
                   type="email"
-                  placeholder={t('doctor.invoices.enterEmailAddress')}
+                  placeholder="Enter email address"
                   value={emailAddress}
                   onChange={(e) => setEmailAddress(e.target.value)}
                   className="flex-1"
@@ -1376,7 +1374,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   ) : (
                     <Mail className="h-4 w-4" />
                   )}
-                  {t('doctor.invoices.emailReport')}
+                  Email Report
                 </Button>
               </div>
             </div>
@@ -1394,7 +1392,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{stats.issued}</p>
-              <p className="text-sm text-muted-foreground">{t('doctor.invoices.issued')}</p>
+              <p className="text-sm text-muted-foreground">Issued</p>
             </div>
           </div>
         </div>
@@ -1405,7 +1403,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{stats.overdue}</p>
-              <p className="text-sm text-muted-foreground">{t('doctor.invoices.status.overdue')}</p>
+              <p className="text-sm text-muted-foreground">Overdue</p>
             </div>
           </div>
         </div>
@@ -1416,7 +1414,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{stats.paid}</p>
-              <p className="text-sm text-muted-foreground">{t('doctor.invoices.paid')}</p>
+              <p className="text-sm text-muted-foreground">Paid</p>
             </div>
           </div>
         </div>
@@ -1427,7 +1425,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             </div>
             <div>
               <p className="text-2xl font-bold text-foreground">{getCurrencySymbol(invoiceCurrency)} {stats.totalOutstanding.toFixed(2)}</p>
-              <p className="text-sm text-muted-foreground">{t('doctor.invoices.outstanding')}</p>
+              <p className="text-sm text-muted-foreground">Outstanding</p>
             </div>
           </div>
         </div>
@@ -1438,7 +1436,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder={t('doctor.invoices.searchInvoices')}
+            placeholder="Search invoices..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -1448,15 +1446,15 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
           <Filter className="h-4 w-4 text-muted-foreground" />
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t('doctor.invoices.filterByStatus')} />
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="issued_overdue">{t('doctor.invoices.filters.issuedOverdue')}</SelectItem>
-              <SelectItem value="all">{t('doctor.invoices.filters.allInvoices')}</SelectItem>
-              <SelectItem value="issued">{t('doctor.invoices.filters.issuedOnly')}</SelectItem>
-              <SelectItem value="overdue">{t('doctor.invoices.filters.overdueOnly')}</SelectItem>
-              <SelectItem value="paid">{t('doctor.invoices.filters.paidOnly')}</SelectItem>
-              <SelectItem value="archived">{t('doctor.invoices.filters.archived')}</SelectItem>
+              <SelectItem value="issued_overdue">Issued & Overdue</SelectItem>
+              <SelectItem value="all">All Invoices</SelectItem>
+              <SelectItem value="issued">Issued Only</SelectItem>
+              <SelectItem value="overdue">Overdue Only</SelectItem>
+              <SelectItem value="paid">Paid Only</SelectItem>
+              <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -1467,13 +1465,13 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         <Table>
           <TableHeader>
             <TableRow className="bg-primary hover:bg-primary">
-              <TableHead className="text-primary-foreground">{t('doctor.invoices.invoiceNumber')}</TableHead>
-              <TableHead className="text-primary-foreground">{t('doctor.invoices.patient')}</TableHead>
-              <TableHead className="text-primary-foreground">{t('doctor.invoices.description')}</TableHead>
-              <TableHead className="text-primary-foreground">{t('doctor.invoices.amount')}</TableHead>
-              <TableHead className="text-primary-foreground">{t('doctor.invoices.dueDate')}</TableHead>
-              <TableHead className="text-primary-foreground">{t('doctor.invoices.status')}</TableHead>
-              <TableHead className="text-right text-primary-foreground">{t('doctor.invoices.actions')}</TableHead>
+              <TableHead className="text-primary-foreground">Invoice #</TableHead>
+              <TableHead className="text-primary-foreground">Patient</TableHead>
+              <TableHead className="text-primary-foreground">Description</TableHead>
+              <TableHead className="text-primary-foreground">Amount</TableHead>
+              <TableHead className="text-primary-foreground">Due Date</TableHead>
+              <TableHead className="text-primary-foreground">Status</TableHead>
+              <TableHead className="text-right text-primary-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -1482,7 +1480,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 <TableCell colSpan={7} className="h-24 text-center">
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
                     <Receipt className="h-8 w-8" />
-                    <p>{t('doctor.invoices.noInvoicesFound')}</p>
+                    <p>No invoices found</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -1529,7 +1527,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                         {format(new Date(invoice.due_date), 'dd MMM yyyy')}
                       </div>
                     </TableCell>
-                    <TableCell>{getStatusBadge(status, t)}</TableCell>
+                    <TableCell>{getStatusBadge(status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {/* Set Amount — pending zero-amount auto-invoices */}
@@ -1537,11 +1535,11 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-8 text-[11px] border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
+                            className="h-8 text-sm border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
                             onClick={() => openEditDialog(invoice)}
-                            title={t('doctor.invoices.setAmountTooltip')}
+                            title="This invoice has no amount — click to set it"
                           >
-                            {t('doctor.invoices.setAmount')}
+                            Set amount
                           </Button>
                         )}
 
@@ -1552,7 +1550,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           className="h-8 w-8"
                           onClick={() => previewInvoice(invoice)}
                           disabled={loadingPreviewId === invoice.id}
-                          title={t('doctor.invoices.previewInvoice')}
+                          title="Preview invoice"
                         >
                           {loadingPreviewId === invoice.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -1567,7 +1565,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           variant="ghost"
                           className="h-8 w-8"
                           onClick={() => openEditDialog(invoice)}
-                          title={t('doctor.invoices.editInvoice')}
+                          title="Edit invoice"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -1582,24 +1580,24 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                             {updatingId === invoice.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              t('doctor.invoices.markPaid')
+                              "Mark Paid"
                             )}
                           </Button>
                         )}
                         {status === "paid" && invoice.paid_at && (
                           <>
                             <span className="text-xs text-muted-foreground">
-                              {t('doctor.invoices.paidOn', { date: format(new Date(invoice.paid_at), 'dd MMM') })}
+                              Paid {format(new Date(invoice.paid_at), 'dd MMM')}
                             </span>
                             <Button
                               size="sm"
                               variant="outline"
-                              className="gap-1.5 h-8 text-[11px]"
+                              className="gap-1.5 h-8 text-sm"
                               onClick={() => sendPaidInvoiceToMedicalAid(invoice)}
-                              title={t('doctor.invoices.sendPaidInvoiceTooltip')}
+                              title="Send PAID invoice to Medical Aid claims email"
                             >
                               <Send className="h-3.5 w-3.5" />
-                              {t('doctor.invoices.sendToMedicalAid')}
+                              Send to Medical Aid
                             </Button>
                           </>
                         )}
@@ -1613,7 +1611,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => archiveInvoice(invoice.id)} className="text-muted-foreground">
                                 <Archive className="h-4 w-4 mr-2" />
-                                {t('doctor.invoices.archive')}
+                                Archive
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -1638,7 +1636,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   <Pencil className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">{t('doctor.invoices.editInvoiceTitle')}</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Edit Invoice</h2>
                   <p className="text-sm text-muted-foreground">{editingInvoice.invoice_number}</p>
                 </div>
               </div>
@@ -1649,19 +1647,19 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-description">{t('doctor.invoices.description')}</Label>
+                <Label htmlFor="edit-description">Description</Label>
                 <Textarea
                   id="edit-description"
                   value={editForm.description}
                   onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder={t('doctor.invoices.descriptionPlaceholder')}
+                  placeholder="Invoice description..."
                   className="min-h-[80px]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-amount">{t('doctor.invoices.amount')} ({getCurrencySymbol(invoiceCurrency)})</Label>
+                  <Label htmlFor="edit-amount">Amount ({getCurrencySymbol(invoiceCurrency)})</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                       {getCurrencySymbol(invoiceCurrency)}
@@ -1680,7 +1678,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-dueDate">{t('doctor.invoices.dueDate')}</Label>
+                  <Label htmlFor="edit-dueDate">Due Date</Label>
                   <Input
                     id="edit-dueDate"
                     type="date"
@@ -1691,26 +1689,26 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-border">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex-1"
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1" 
                   onClick={() => setEditingInvoice(null)}
                 >
-                  {t('doctor.invoices.cancel')}
+                  Cancel
                 </Button>
-                <Button
-                  className="flex-1 gap-2"
+                <Button 
+                  className="flex-1 gap-2" 
                   onClick={saveInvoiceEdit}
                   disabled={isSaving}
                 >
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      {t('doctor.invoices.saving')}
+                      Saving...
                     </>
                   ) : (
-                    t('doctor.invoices.saveChanges')
+                    "Save Changes"
                   )}
                 </Button>
               </div>
@@ -1748,7 +1746,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
             <div className="flex items-center justify-end gap-2 border-t border-border p-4">
               <Button variant="outline" onClick={() => setPreviewHtml(null)}>
-                {t('doctor.invoices.close')}
+                Close
               </Button>
               <Button
                 variant="outline"
@@ -1764,7 +1762,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 }}
               >
                 <Download className="h-4 w-4" />
-                {t('doctor.invoices.printSavePdf')}
+                Print / Save PDF
               </Button>
             </div>
           </div>
@@ -1779,7 +1777,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             <div className="bg-primary text-primary-foreground p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold">{t('doctor.invoices.invoiceTemplate')}</h1>
+                  <h1 className="text-2xl font-bold">INVOICE</h1>
                   <p className="text-primary-foreground/80 text-sm mt-1">{viewingInvoice.invoice_number}</p>
                 </div>
                 <Button
@@ -1797,7 +1795,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             <div className="p-6 border-b border-border">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">{t('doctor.invoices.from')}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">From</p>
                   <p className="font-semibold text-foreground">{profile?.full_name || "Doctor"}</p>
                   {profile?.practice_number && (
                     <p className="text-sm text-muted-foreground">Practice No: {profile.practice_number}</p>
@@ -1810,7 +1808,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">{t('doctor.invoices.billTo')}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Bill To</p>
                   <p className="font-semibold text-foreground">{viewingInvoice.patient?.name || "Unknown"}</p>
                 </div>
               </div>
@@ -1820,16 +1818,16 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             <div className="p-6 border-b border-border">
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground">{t('doctor.invoices.invoiceDate')}</p>
+                  <p className="text-muted-foreground">Invoice Date</p>
                   <p className="font-medium">{format(new Date(viewingInvoice.created_at), 'dd MMMM yyyy')}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">{t('doctor.invoices.dueDate')}</p>
+                  <p className="text-muted-foreground">Due Date</p>
                   <p className="font-medium">{format(new Date(viewingInvoice.due_date), 'dd MMMM yyyy')}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">{t('doctor.invoices.status')}</p>
-                  <div className="mt-1">{getStatusBadge(getInvoiceStatus(viewingInvoice), t)}</div>
+                  <p className="text-muted-foreground">Status</p>
+                  <div className="mt-1">{getStatusBadge(getInvoiceStatus(viewingInvoice))}</div>
                 </div>
               </div>
             </div>
@@ -1839,8 +1837,8 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border text-sm text-muted-foreground">
-                    <th className="text-left py-2 font-medium">{t('doctor.invoices.description')}</th>
-                    <th className="text-right py-2 font-medium">{t('doctor.invoices.amount')}</th>
+                    <th className="text-left py-2 font-medium">Description</th>
+                    <th className="text-right py-2 font-medium">Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1887,23 +1885,23 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
             {/* Actions */}
             <div className="flex gap-3 p-6">
-              <Button
-                variant="outline"
-                className="flex-1"
+              <Button 
+                variant="outline" 
+                className="flex-1" 
                 onClick={() => setViewingInvoice(null)}
               >
-                {t('doctor.invoices.close')}
+                Close
               </Button>
               {getInvoiceStatus(viewingInvoice) !== "paid" && getInvoiceStatus(viewingInvoice) !== "archived" && (
-                <Button
-                  className="flex-1"
+                <Button 
+                  className="flex-1" 
                   onClick={() => {
                     openEditDialog(viewingInvoice);
                     setViewingInvoice(null);
                   }}
                 >
                   <Pencil className="h-4 w-4 mr-2" />
-                  {t('doctor.invoices.edit')}
+                  Edit
                 </Button>
               )}
             </div>

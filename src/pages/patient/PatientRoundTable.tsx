@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from 'react-i18next';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { MessageSquare, User } from "lucide-react";
@@ -15,7 +14,6 @@ interface RoundTableNote {
 }
 
 export default function PatientRoundTable({ hideHeader = false }: { hideHeader?: boolean }) {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const [notes, setNotes] = useState<RoundTableNote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,9 +49,9 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
     <div className="space-y-6">
       {!hideHeader && (
         <div>
-          <h1 className="text-[16px] font-semibold text-foreground">{t("doctor.roundtable.title")}</h1>
-          <p className="text-muted-foreground text-[11px]">
-            {t("doctor.roundtable.subtitle")}
+          <h1 className="text-[16px] font-semibold text-foreground">Round Table</h1>
+          <p className="text-muted-foreground text-sm">
+            Notes shared by your healthcare providers about your care.
           </p>
         </div>
       )}
@@ -66,9 +64,9 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <MessageSquare className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-[13px] font-semibold text-foreground mb-1">{t("doctor.roundtable.no_notes")}</h3>
-            <p className="text-muted-foreground text-[11px]">
-              {t("doctor.roundtable.no_notes_description")}
+            <h3 className="text-sm font-semibold text-foreground mb-1">No notes yet</h3>
+            <p className="text-muted-foreground text-sm">
+              When your doctors share round table notes, they will appear here.
             </p>
           </CardContent>
         </Card>
@@ -79,7 +77,7 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
               <CardContent className="py-4">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-7 w-7 mt-0.5">
-                    <AvatarFallback className="bg-primary/10 text-primary text-[11px]">
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
                       {note.doctor_name
                         .split(" ")
                         .map((n) => n[0])
@@ -90,12 +88,12 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[12px] font-semibold text-foreground">{note.doctor_name}</span>
-                      <span className="text-[11px] text-muted-foreground">
+                      <span className="text-sm font-semibold text-foreground">{note.doctor_name}</span>
+                      <span className="text-sm text-muted-foreground">
                         {format(new Date(note.created_at), "dd MMM yyyy, HH:mm")}
                       </span>
                     </div>
-                    <p className="text-[12px] text-muted-foreground whitespace-pre-wrap">{note.content}</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{note.content}</p>
                   </div>
                 </div>
               </CardContent>

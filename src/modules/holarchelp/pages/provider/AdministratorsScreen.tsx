@@ -1,3 +1,4 @@
+import { toastError } from "@/lib/userMessage";
 import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -5,9 +6,14 @@ import { useSearchParams } from "react-router-dom";
 import { useProviderAccess } from "../../components/ProviderGate";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Dialog,
   DialogContent,
@@ -28,9 +34,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Trash2, UserPlus, Loader2, ShieldCheck, Edit2, Search } from "lucide-react";
+import { Trash2, UserPlus, Loader2, ShieldCheck, Edit2, Search, Phone, Mail, Copy } from "lucide-react";
 import { toast } from "sonner";
 import HospitalNetworkScreen from "./ambulance/HospitalNetworkScreen";
+import FleetOperationsScreen from "./ambulance/FleetOperationsScreen";
+import CrewAssignmentsTab from "./CrewAssignmentsTab";
 
 interface MemberRow {
   id: string;
@@ -44,29 +52,40 @@ interface MemberRow {
   accepted_at: string | null;
   created_at: string;
   full_name?: string | null;
+  profile_phone?: string | null;
+  profile_email?: string | null;
 }
 
-const ADMIN_ROLES = new Set(["admin", "owner", "manager"]);
-const CREW_ROLE_OPTIONS = [
-  "paramedic",
-  "emt",
-  "driver",
-  "dispatcher",
-  "nurse",
-  "supervisor",
-];
+const ADMIN_ROLES = new Set(["admin", "owner", "manager", "er_admin"]);
 
-const ROLE_COLORS: Record<string, { bg: string; text: string; badge: string }> = {
-  admin: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
-  owner: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
-  manager: { bg: "bg-red-100", text: "text-red-800", badge: "bg-red-600" },
-  paramedic: { bg: "bg-green-100", text: "text-green-800", badge: "bg-green-600" },
-  emt: { bg: "bg-blue-100", text: "text-blue-800", badge: "bg-blue-600" },
-  driver: { bg: "bg-amber-100", text: "text-amber-800", badge: "bg-amber-600" },
-  dispatcher: { bg: "bg-purple-100", text: "text-purple-800", badge: "bg-purple-600" },
-  nurse: { bg: "bg-pink-100", text: "text-pink-800", badge: "bg-pink-600" },
-  supervisor: { bg: "bg-indigo-100", text: "text-indigo-800", badge: "bg-indigo-600" },
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Administrators",
+  dispatcher: "Dispatchers",
+  driver: "Drivers",
+  emt: "EMTs",
+  er_admin: "ER_Admin",
+  manager: "Managers",
+  member: "Members",
+  nurse: "Nurses",
+  owner: "Owners",
+  paramedic: "Paramedics",
+  supervisor: "Supervisors",
 };
+
+// Alphabetically ordered crew role options for the Add member dropdown.
+const CREW_ROLE_OPTIONS = [
+  "admin",
+  "dispatcher",
+  "driver",
+  "emt",
+  "er_admin",
+  "manager",
+  "nurse",
+  "paramedic",
+  "supervisor",
+].sort((a, b) =>
+  (ROLE_LABELS[a] ?? a).localeCompare(ROLE_LABELS[b] ?? b),
+);
 
 export default function AdministratorsScreen() {
   const { providerId, providerType, userId } = useProviderAccess();
@@ -128,10 +147,15 @@ export default function AdministratorsScreen() {
           .select("id, full_name")
           .in("id", userIds);
         const map = new Map(
-          ((profiles as any[]) ?? []).map((p) => [p.id, p.full_name]),
+          ((profiles as any[]) ?? []).map((p) => [p.id, p]),
         );
         rows.forEach((r) => {
-          if (r.user_id) r.full_name = map.get(r.user_id) ?? null;
+          if (r.user_id) {
+            const p = map.get(r.user_id);
+            if (p) {
+              r.full_name = p.full_name ?? null;
+            }
+          }
         });
       }
       if (userId) {
@@ -146,17 +170,47 @@ export default function AdministratorsScreen() {
 
   const isCurrentUserAdmin = currentUserRole && ADMIN_ROLES.has(currentUserRole.toLowerCase());
 
-  const filteredMembers = useMemo(() => {
-    if (!searchQuery.trim()) return members;
-    const q = searchQuery.toLowerCase();
-    return members.filter(
-      (m) =>
-        (m.full_name || "").toLowerCase().includes(q) ||
-        (m.invited_name || "").toLowerCase().includes(q) ||
-        (m.invited_email || "").toLowerCase().includes(q) ||
-        (m.role || "").toLowerCase().includes(q)
-    );
+  // Filter then group by role
+  const groupedByRole = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = q
+      ? members.filter(
+          (m) =>
+            (m.full_name || "").toLowerCase().includes(q) ||
+            (m.invited_name || "").toLowerCase().includes(q) ||
+            (m.invited_email || "").toLowerCase().includes(q) ||
+            (m.profile_email || "").toLowerCase().includes(q) ||
+            (m.phone || "").toLowerCase().includes(q) ||
+            (m.profile_phone || "").toLowerCase().includes(q) ||
+            (m.role || "").toLowerCase().includes(q)
+        )
+      : members;
+
+    const groups = new Map<string, MemberRow[]>();
+    for (const m of filtered) {
+      const key = (m.role || "member").toLowerCase();
+      const bucket = groups.get(key) ?? [];
+      bucket.push(m);
+      groups.set(key, bucket);
+    }
+    // Alphabetical order by display label.
+    const ordered: { role: string; rows: MemberRow[] }[] = [];
+    const keys = Array.from(groups.keys()).sort((a, b) => {
+      const la = ROLE_LABELS[a] ?? a;
+      const lb = ROLE_LABELS[b] ?? b;
+      return la.localeCompare(lb);
+    });
+    for (const role of keys) {
+      ordered.push({ role, rows: groups.get(role)! });
+    }
+    return ordered;
   }, [members, searchQuery]);
+
+  // When user is searching, auto-expand matching groups; otherwise all collapsed.
+  const expandedValues = useMemo(() => {
+    if (!searchQuery.trim()) return [] as string[];
+    return groupedByRole.map((g) => g.role);
+  }, [searchQuery, groupedByRole]);
 
   const addMember = async () => {
     if (!addName.trim()) {
@@ -196,55 +250,92 @@ export default function AdministratorsScreen() {
     if (!confirm(t("userAdmin.removeConfirm"))) return;
     const { error } = await supabase.from(table as any).delete().eq("id", row.id);
     if (error) {
-      toast.error(error.message);
+      toastError(error, "We couldn't complete that. Please try again.");
       return;
     }
     toast.success(t("userAdmin.memberRemoved"));
     qc.invalidateQueries({ queryKey: ["provider-members"] });
   };
 
-  const getRoleColor = (role: string) => {
-    const roleLower = (role || "member").toLowerCase();
-    return ROLE_COLORS[roleLower] || { bg: "bg-gray-100", text: "text-gray-800", badge: "bg-gray-600" };
+  const copy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied`);
+    } catch {
+      toast.error("Copy failed");
+    }
   };
 
-  const renderMemberCard = (row: MemberRow) => {
-    const colors = getRoleColor(row.role);
+  const renderMemberRow = (row: MemberRow) => {
     const isOwner = row.user_id === ownerId;
+    const phone = row.phone || row.profile_phone || "";
+    const email = row.invited_email || row.profile_email || "";
+    const name = row.full_name || row.invited_name || email || "—";
+    const isPending = !row.user_id;
     return (
       <div
         key={row.id}
-        className={`rounded border p-2.5 flex items-center justify-between text-xs ${colors.bg} ${colors.text}`}
+        className="rounded-xl border border-border bg-card p-2.5 flex flex-wrap items-center gap-2 text-xs"
       >
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold">
-            {row.full_name || row.invited_name || row.invited_email || "—"}
-          </p>
-          <p className="text-[11px] opacity-70 mt-0.5">
-            {[row.invited_email, row.phone].filter(Boolean).join(" · ")}
-            {row.user_id ? ` · ${t("administrators.users.active")}` : ` · ${t("administrators.users.pending")}`}
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 ml-2">
-          <div className={`${colors.badge} text-white px-2 py-1 rounded font-semibold text-[10px] whitespace-nowrap`}>
-            {(row.role || "member").toUpperCase()}
+        <div className="flex-1 min-w-[180px]">
+          <p className="font-semibold text-foreground">{name}</p>
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5 text-sm">
+            {phone ? (
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                <Phone className="h-3 w-3" />
+                <a href={`tel:${phone}`} className="hover:text-primary">{phone}</a>
+                <button
+                  onClick={() => copy(phone, "Phone")}
+                  className="opacity-60 hover:opacity-100"
+                  aria-label="Copy phone"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </span>
+            ) : (
+              <span className="text-muted-foreground/60">No phone</span>
+            )}
+            {email ? (
+              <span className="inline-flex items-center gap-1 text-muted-foreground">
+                <Mail className="h-3 w-3" />
+                <a href={`mailto:${email}`} className="hover:text-primary">{email}</a>
+                <button
+                  onClick={() => copy(email, "Email")}
+                  className="opacity-60 hover:opacity-100"
+                  aria-label="Copy email"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </span>
+            ) : (
+              <span className="text-muted-foreground/60">No email</span>
+            )}
           </div>
-          {isCurrentUserAdmin && !isOwner && (
-            <div className="flex gap-1">
-              <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                <Edit2 className="h-3 w-3" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-6 w-6 p-0"
-                onClick={() => removeMember(row)}
-              >
-                <Trash2 className="h-3 w-3 text-red-600" />
-              </Button>
-            </div>
-          )}
         </div>
+        <span
+          className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
+            isPending
+              ? "bg-warning/10 text-warning"
+              : "bg-success/10 text-success"
+          }`}
+        >
+          {isPending ? t("administrators.users.pending") : t("administrators.users.active")}
+        </span>
+        {isCurrentUserAdmin && !isOwner && (
+          <div className="flex gap-1">
+            <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
+              <Edit2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-7 w-7 p-0"
+              onClick={() => removeMember(row)}
+            >
+              <Trash2 className="h-3.5 w-3.5 text-destructive" />
+            </Button>
+          </div>
+        )}
       </div>
     );
   };
@@ -252,39 +343,50 @@ export default function AdministratorsScreen() {
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("administrators.header.label")}</p>
-        <h1 className="text-2xl font-extrabold mt-1">
-          {currentTab === "hospital-network" ? t("administrators.header.hospitalNetwork") : t("administrators.header.userManagement")}
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {t("administrators.header.label")}
+        </p>
+        <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
+          <ShieldCheck className="h-5 w-5 text-primary" />
+          Admin
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
-          {currentTab === "hospital-network"
-            ? t("administrators.header.hospitalDesc")
-            : t("administrators.header.userDesc")}
+          Users, fleet, crew assignments and affiliated hospitals.
         </p>
       </div>
 
       {!isCurrentUserAdmin && currentTab === "users" && (
-        <div className="rounded border bg-amber-50 border-amber-200 text-amber-800 p-2.5 text-xs">
-          <p className="font-semibold">📖 {t("administrators.readOnly.label")}</p>
+        <div className="rounded-lg border border-warning/40 bg-warning/10 text-warning p-2.5 text-xs">
+          <p className="font-semibold">{t("administrators.readOnly.label")}</p>
           <p className="mt-0.5">{t("administrators.readOnly.description")}</p>
         </div>
       )}
 
-      <Tabs value={currentTab} onValueChange={(val) => setSearchParams({ tab: val })} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 h-8">
-          <TabsTrigger value="users" className="text-xs">{t("administrators.tabs.users")}</TabsTrigger>
-          <TabsTrigger value="hospital-network" className="text-xs">{t("administrators.tabs.hospitals")}</TabsTrigger>
+      <Tabs
+        value={currentTab}
+        onValueChange={(val) => setSearchParams({ tab: val })}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-4 h-9">
+          <TabsTrigger value="users" className="text-xs">Users</TabsTrigger>
+          <TabsTrigger value="crew" className="text-xs">Crew</TabsTrigger>
+          <TabsTrigger value="fleet" className="text-xs">Fleet Admin</TabsTrigger>
+          <TabsTrigger value="hospitals" className="text-xs">Hospitals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-3">
-          <div className="rounded-lg border bg-card overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-2.5 border-b bg-card">
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
               <h2 className="font-semibold text-sm flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 {t("administrators.users.title")} ({members.length})
               </h2>
               {isCurrentUserAdmin && (
-                <Button size="sm" onClick={() => setAddOpen(true)} className="h-7 text-xs">
+                <Button
+                  size="sm"
+                  onClick={() => setAddOpen(true)}
+                  className="h-7 text-xs"
+                >
                   <UserPlus className="mr-1 h-3 w-3" /> {t("common.add")}
                 </Button>
               )}
@@ -305,25 +407,73 @@ export default function AdministratorsScreen() {
                 <div className="flex items-center gap-2 text-muted-foreground text-xs py-4">
                   <Loader2 className="h-3 w-3 animate-spin" /> {t("common.loading")}
                 </div>
-              ) : filteredMembers.length === 0 ? (
+              ) : groupedByRole.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-6">
-                  {searchQuery ? t("administrators.users.noMatch") : t("administrators.users.noUsers")}
+                  {searchQuery
+                    ? t("administrators.users.noMatch")
+                    : t("administrators.users.noUsers")}
                 </p>
               ) : (
-                <div className="space-y-1">
-                  {filteredMembers.map(renderMemberCard)}
-                </div>
+                <Accordion
+                  type="multiple"
+                  value={expandedValues}
+                  className="space-y-2"
+                >
+                  {groupedByRole.map(({ role, rows }) => {
+                    const activeCount = rows.filter((r) => r.user_id).length;
+                    const pendingCount = rows.length - activeCount;
+                    return (
+                      <AccordionItem
+                        key={role}
+                        value={role}
+                        className="rounded-xl border-2 border-primary/40 bg-background overflow-hidden data-[state=open]:bg-primary/5"
+                      >
+                        <AccordionTrigger className="px-3 py-2 text-sm hover:no-underline">
+                          <div className="flex flex-1 items-center justify-between pr-2">
+                            <span className="font-semibold">
+                              {ROLE_LABELS[role] ?? role.charAt(0).toUpperCase() + role.slice(1)}
+                            </span>
+                            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span className="rounded-full bg-muted px-2 py-0.5 font-semibold tabular-nums">
+                                {rows.length}
+                              </span>
+                              {activeCount > 0 && (
+                                <span className="text-success">● {activeCount} active</span>
+                              )}
+                              {pendingCount > 0 && (
+                                <span className="text-warning">● {pendingCount} pending</span>
+                              )}
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-2 pb-2">
+                          <div className="space-y-1.5">
+                            {rows.map(renderMemberRow)}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
               )}
             </div>
           </div>
         </TabsContent>
 
-        <TabsContent value="hospital-network" className="space-y-3">
+        <TabsContent value="fleet" className="space-y-3">
+          <FleetOperationsScreen />
+        </TabsContent>
+
+        <TabsContent value="crew" className="space-y-3">
+          <CrewAssignmentsTab providerId={providerId} />
+        </TabsContent>
+
+        <TabsContent value="hospitals" className="space-y-3">
           <HospitalNetworkScreen />
         </TabsContent>
       </Tabs>
 
-      {/* Add/Edit Dialog */}
+      {/* Add Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -356,7 +506,7 @@ export default function AdministratorsScreen() {
                 <SelectContent>
                   {CREW_ROLE_OPTIONS.map((r) => (
                     <SelectItem key={r} value={r}>
-                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                      {ROLE_LABELS[r] ?? r.charAt(0).toUpperCase() + r.slice(1)}
                     </SelectItem>
                   ))}
                 </SelectContent>

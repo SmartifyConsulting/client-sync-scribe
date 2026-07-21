@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useTranslation } from 'react-i18next';
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -77,7 +76,6 @@ const LANGUAGES = [
 ];
 
 export default function SessionDetail() {
-  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -159,12 +157,12 @@ export default function SessionDetail() {
         .update({ status: 'completed', completed_at: new Date().toISOString() }) as any)
         .eq('document_id', doc.id);
 
-      setSessionDocs(prev => prev.map(d =>
+      setSessionDocs(prev => prev.map(d => 
         d.id === doc.id ? { ...d, email_sent_at: new Date().toISOString(), is_draft: false } : d
       ));
-      toast({ title: t('sessions.documentSent'), description: t('sessions.documentSentMessage', { name: doc.name }) });
+      toast({ title: "Document sent", description: `${doc.name} has been sent successfully.` });
     } catch (err) {
-      toast({ title: t('sessions.sendFailed'), variant: "destructive" });
+      toast({ title: "Send failed", variant: "destructive" });
     } finally {
       setSendingDocId(null);
     }
@@ -190,7 +188,7 @@ export default function SessionDetail() {
       setTranslatedSummary(data?.translatedText || data?.summary || session.summary);
     } catch (err) {
       console.error('Translation error:', err);
-      toast({ title: t('sessions.translationFailed'), description: t('sessions.translationError'), variant: "destructive" });
+      toast({ title: "Translation failed", description: "Could not translate the summary", variant: "destructive" });
     } finally {
       setIsTranslating(false);
     }
@@ -210,8 +208,8 @@ export default function SessionDetail() {
     if (!id) return;
     await deleteSession(id);
     toast({
-      title: t('sessions.sessionDeleted'),
-      description: t('sessions.sessionRemovedMessage'),
+      title: "Session deleted",
+      description: "The session has been removed.",
     });
     navigate(-1);
   };
@@ -225,11 +223,11 @@ export default function SessionDetail() {
         .update({ private_notes: privateNotesDraft } as any) as any)
         .eq('id', id);
       if (error) throw error;
-      toast({ title: t('sessions.privateNotesSaved') });
+      toast({ title: "Private notes saved" });
       setEditingPrivateNotes(false);
       refetch();
     } catch (err: any) {
-      toast({ title: t('sessions.saveNotesFailed'), description: err?.message, variant: "destructive" });
+      toast({ title: "Failed to save notes", description: err?.message, variant: "destructive" });
     } finally {
       setSavingPrivateNotes(false);
     }
@@ -251,10 +249,10 @@ export default function SessionDetail() {
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          {t('common.back')}
+          Back
         </button>
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-muted-foreground">{t('sessions.sessionNotFound')}</p>
+          <p className="text-muted-foreground">Session not found</p>
         </div>
       </div>
     );
@@ -266,18 +264,18 @@ export default function SessionDetail() {
       {session.patient ? (
         <Link
           to={`/patients/${session.patient_id}`}
-          className="inline-flex items-center gap-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          {t('sessions.backToPatient', { name: session.patient.name })}
+          Back to {session.patient.name}
         </Link>
       ) : (
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          {t('common.back')}
+          Back
         </button>
       )}
 
@@ -288,29 +286,29 @@ export default function SessionDetail() {
             <Clock className="h-5 w-5 text-accent-foreground" />
           </div>
           <div>
-            <h1 className="text-[16px] font-semibold text-foreground">
-              {t('sessions.sessionTitle')} - {format(new Date(session.started_at), "MMMM d, yyyy")}
+            <h1 className="text-base font-semibold text-foreground">
+              Session - {format(new Date(session.started_at), "MMMM d, yyyy")}
             </h1>
-            <div className="mt-1 flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
+            <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span>{format(new Date(session.started_at), "h:mm a")}</span>
               {session.duration_minutes && (
-                <span>· {t('sessions.minutesLabel', { count: session.duration_minutes })}</span>
+                <span>· {session.duration_minutes} minutes</span>
               )}
               <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                   session.status === "completed"
                     ? "bg-green-500/15 text-green-700 dark:text-green-400"
                     : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
                 }`}
               >
-                {session.status === "completed" ? t('sessions.completed') : t('sessions.inProgress')}
+                {session.status === "completed" ? "Completed" : "In Progress"}
               </span>
               <PrivacyBadge />
             </div>
             {session.patient && (
               <Link
                 to={`/patients/${session.patient_id}`}
-                className="mt-2 inline-flex items-center gap-1.5 text-[12px] text-primary hover:underline"
+                className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
               >
                 <User className="h-4 w-4" />
                 {session.patient.name}
@@ -321,21 +319,21 @@ export default function SessionDetail() {
         <div className="flex items-center gap-2">
           <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="gap-2 text-[11px]">
+            <Button variant="destructive" size="sm" className="gap-2">
               <Trash2 className="h-4 w-4" />
-              {t('sessions.deleteSession')}
+              Delete Session
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{t('sessions.deleteSession')}</AlertDialogTitle>
+              <AlertDialogTitle>Delete Session</AlertDialogTitle>
               <AlertDialogDescription>
-                {t('sessions.deleteSessionConfirm')}
+                This action cannot be undone. This will permanently delete the session record.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>{t('common.delete')}</AlertDialogAction>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -346,56 +344,56 @@ export default function SessionDetail() {
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
         <div className="rounded-xl border border-primary bg-card p-6">
-          <h2 className="text-[12px] font-semibold text-foreground mb-4">{t('sessions.quickActions')}</h2>
+          <h2 className="text-base font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
-              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowPrescriptionEditor(true)}
             >
               <Pill className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('sessions.prescription')}</span>
+              <span className="truncate">Prescription</span>
             </Button>
             <Button
-              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowInvoiceEditor(true)}
             >
               <Receipt className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('sessions.invoice')}</span>
+              <span className="truncate">Invoice</span>
             </Button>
             <Button
-              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowMedicalCertificateEditor(true)}
             >
               <FileBadge className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('sessions.medicalCertificate')}</span>
+              <span className="truncate">Medical Certificate</span>
             </Button>
             <Button
-              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowReferralLetterEditor(true)}
             >
               <FileText className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('sessions.referralLetter')}</span>
+              <span className="truncate">Referral Letter</span>
             </Button>
             <Button
-              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowGeneralLetterEditor(true)}
             >
               <FileEdit className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('sessions.generalLetter')}</span>
+              <span className="truncate">General Letter</span>
             </Button>
             <Button
-              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowDrawingPad(true)}
             >
               <PenTool className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('sessions.drawingPad')}</span>
+              <span className="truncate">Drawing Pad</span>
             </Button>
             <Button
-              className="gap-1.5 text-[11px] h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
+              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
               onClick={() => setShowHospitalAdmissionEditor(true)}
             >
               <Hospital className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('sessions.hospitalAdmission')}</span>
+              <span className="truncate">Hospital Admission</span>
             </Button>
           </div>
         </div>
@@ -410,33 +408,33 @@ export default function SessionDetail() {
                 <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.aiSummary')}</h2>
-                <p className="text-[11px] text-muted-foreground">{t('sessions.generatedFromSession')}</p>
+                <h2 className="text-base font-semibold text-foreground">AI Summary</h2>
+                <p className="text-sm text-muted-foreground">Generated from session content</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
               <Select value={selectedLanguage} onValueChange={handleTranslate}>
-                <SelectTrigger className="w-[160px] h-8 text-[11px]">
+                <SelectTrigger className="w-[160px] h-8 text-sm">
                   <Languages className="h-3.5 w-3.5 mr-1.5" />
-                  <SelectValue placeholder={t('sessions.translate')} />
+                  <SelectValue placeholder="Translate..." />
                 </SelectTrigger>
                 <SelectContent>
                   {LANGUAGES.map(lang => (
-                    <SelectItem key={lang.code} value={lang.code} className="text-[11px]">
+                    <SelectItem key={lang.code} value={lang.code} className="text-sm">
                       {lang.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {translatedSummary && (
-                <Button variant="ghost" size="sm" className="text-[11px] h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
-                  {t('sessions.original')}
+                <Button variant="ghost" size="sm" className="text-sm h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
+                  Original
                 </Button>
               )}
             </div>
           </div>
-          <p className="text-[12px] text-foreground leading-relaxed">{translatedSummary || session.summary}</p>
+          <p className="text-sm text-foreground leading-relaxed">{translatedSummary || session.summary}</p>
         </div>
       )}
 
@@ -449,8 +447,8 @@ export default function SessionDetail() {
                 <Volume2 className="h-4 w-4 text-purple-600" />
               </div>
               <div>
-                <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.sessionNotes')}</h2>
-                <p className="text-[11px] text-muted-foreground">{t('sessions.notesDescription')}</p>
+                <h2 className="text-base font-semibold text-foreground">Session Notes</h2>
+                <p className="text-sm text-muted-foreground">Audio, transcript, and manual notes from the consultation</p>
               </div>
             </div>
             {(session.audio_url || session.transcript) && (
@@ -468,16 +466,16 @@ export default function SessionDetail() {
                   }
                 }}
               >
-                <SelectTrigger className="w-[160px] h-8 text-[11px]">
+                <SelectTrigger className="w-[160px] h-8 text-sm">
                   <Download className="h-3.5 w-3.5 mr-1.5" />
-                  <SelectValue placeholder={t('sessions.download')} />
+                  <SelectValue placeholder="Download..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="audio" disabled={!session.audio_url} className="text-[11px]">
-                    {t('sessions.downloadAudio')}
+                  <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
+                    Download audio
                   </SelectItem>
-                  <SelectItem value="transcript" disabled={!session.transcript} className="text-[11px]">
-                    {t('sessions.downloadTranscript')}
+                  <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
+                    Download transcript
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -487,14 +485,15 @@ export default function SessionDetail() {
           {/* Audio subsection */}
           {session.audio_url && (
             <div className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('sessions.audio')}</p>
+              <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Audio</p>
               <audio controls className="w-full" src={signedAudioUrl || ''}>
-                {t('sessions.audioNotSupported')}
+                Your browser does not support the audio element.
               </audio>
               <Alert className="border-amber-500/30 bg-amber-500/5">
                 <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-[11px] text-amber-700">
-                  {t('sessions.recordingDeleteWarning')}
+                <AlertDescription className="text-sm text-amber-700">
+                  Voice recordings and transcriptions are automatically deleted after 7 days. Download them to keep.
+                  AI summaries remain permanently.
                 </AlertDescription>
               </Alert>
             </div>
@@ -505,7 +504,7 @@ export default function SessionDetail() {
             <>
               {session.audio_url && <hr className="my-4 border-border/60" />}
               <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('sessions.transcript')}</p>
+                <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Transcript</p>
                 <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-2">
                   {session.transcript.split('\n').map((line, index) => {
                     const colonIndex = line.indexOf(':');
@@ -515,13 +514,13 @@ export default function SessionDetail() {
                       const speakerLower = speaker.toLowerCase().trim();
                       const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                       return (
-                        <p key={index} className={`text-[12px] leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                        <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                           <span className="font-bold">{speaker}</span>:{text}
                         </p>
                       );
                     }
                     return line.trim() ? (
-                      <p key={index} className="text-[12px] text-foreground leading-relaxed">{line}</p>
+                      <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p>
                     ) : null;
                   })}
                 </div>
@@ -534,8 +533,8 @@ export default function SessionDetail() {
             <>
               {(session.audio_url || session.transcript) && <hr className="my-4 border-border/60" />}
               <div className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('sessions.notes')}</p>
-                <p className="text-[12px] text-foreground whitespace-pre-wrap">{session.notes}</p>
+                <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
+                <p className="text-sm text-foreground whitespace-pre-wrap">{session.notes}</p>
               </div>
             </>
           )}
@@ -550,8 +549,8 @@ export default function SessionDetail() {
               <Lock className="h-4 w-4 text-amber-600" />
             </div>
             <div>
-              <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.privateNotes')}</h2>
-              <p className="text-[11px] text-muted-foreground">{t('sessions.privateNotesDescription')}</p>
+              <h2 className="text-base font-semibold text-foreground">Private Notes</h2>
+              <p className="text-sm text-muted-foreground">Only visible to you. Not shared with the patient or other doctors.</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -559,33 +558,33 @@ export default function SessionDetail() {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-[11px] h-8"
+                className="text-sm h-8"
                 onClick={() => {
                   setPrivateNotesDraft((session as any).private_notes || "");
                   setEditingPrivateNotes(true);
                 }}
               >
                 <Edit3 className="h-3.5 w-3.5 mr-1.5" />
-                {t('common.edit')}
+                Edit
               </Button>
             ) : (
               <>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-[11px] h-8"
+                  className="text-sm h-8"
                   disabled={savingPrivateNotes}
                   onClick={() => { setEditingPrivateNotes(false); setPrivateNotesDraft(""); }}
                 >
-                  {t('common.cancel')}
+                  Cancel
                 </Button>
                 <Button
                   size="sm"
-                  className="text-[11px] h-8"
+                  className="text-sm h-8"
                   disabled={savingPrivateNotes}
                   onClick={handleSavePrivateNotes}
                 >
-                  {savingPrivateNotes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t('common.save')}
+                  {savingPrivateNotes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
                 </Button>
               </>
             )}
@@ -595,13 +594,13 @@ export default function SessionDetail() {
           <Textarea
             value={privateNotesDraft}
             onChange={(e) => setPrivateNotesDraft(e.target.value)}
-            placeholder={t('sessions.writePrivateNotes')}
-            className="text-[12px] min-h-[140px]"
+            placeholder="Write notes only you can see…"
+            className="text-sm min-h-[140px]"
           />
         ) : (session as any).private_notes ? (
-          <p className="text-[12px] whitespace-pre-wrap text-foreground">{(session as any).private_notes}</p>
+          <p className="text-sm whitespace-pre-wrap text-foreground">{(session as any).private_notes}</p>
         ) : (
-          <p className="text-[11px] text-muted-foreground italic">{t('sessions.noPrivateNotes')}</p>
+          <p className="text-sm text-muted-foreground italic">No private notes yet — click Edit to add notes only you can see.</p>
         )}
       </div>
 
@@ -613,18 +612,18 @@ export default function SessionDetail() {
               <FileText className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.sessionDocuments')}</h2>
-              <p className="text-[11px] text-muted-foreground">{t('sessions.documentsDescription')}</p>
+              <h2 className="text-base font-semibold text-foreground">Session Documents</h2>
+              <p className="text-sm text-muted-foreground">Auto-generated documents from this session</p>
             </div>
           </div>
           <div className="space-y-2">
             {sessionDocs.map((doc) => (
               <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                 <FileText className="h-4 w-4 text-primary shrink-0" />
-                <span className="flex-1 text-[12px] font-semibold text-foreground truncate">{doc.name}</span>
+                <span className="flex-1 text-sm font-semibold text-foreground truncate">{doc.name}</span>
                 {doc.is_draft && !doc.email_sent_at && (
-                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">
-                    {t('sessions.draft')}
+                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-xs">
+                    DRAFT
                   </Badge>
                 )}
                 <Button
@@ -662,15 +661,15 @@ export default function SessionDetail() {
               <CheckCircle className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <h2 className="text-[12px] font-semibold text-foreground">{t('sessions.actionPointsTodo')}</h2>
-              <p className="text-[11px] text-muted-foreground">{t('sessions.tasksExtracted')}</p>
+              <h2 className="text-base font-semibold text-foreground">Action Points / TO-DO</h2>
+              <p className="text-sm text-muted-foreground">Tasks extracted from this session</p>
             </div>
           </div>
           <ul className="space-y-2 ml-4">
             {session.action_points.map((point, i) => (
               <li
                 key={i}
-                className="flex items-start gap-3 text-[12px] text-foreground p-3 rounded-lg bg-muted/30"
+                className="flex items-start gap-3 text-sm text-foreground p-3 rounded-lg bg-muted/30"
               >
                 <Circle className="h-4 w-4 text-primary fill-primary shrink-0 mt-0.5" />
                 <span>{point}</span>
@@ -683,7 +682,7 @@ export default function SessionDetail() {
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
         <div className="rounded-xl border border-primary bg-card p-8 text-center">
-          <p className="text-[11px] text-muted-foreground">{t('sessions.noContent')}</p>
+          <p className="text-sm text-muted-foreground">No content recorded for this session yet.</p>
         </div>
       )}
 
@@ -695,8 +694,8 @@ export default function SessionDetail() {
           onClose={() => setShowPrescriptionEditor(false)}
           onSave={(prescription) => {
             toast({
-              title: t('sessions.prescriptionCreated'),
-              description: t('sessions.prescriptionSavedMessage'),
+              title: "Prescription created",
+              description: "The prescription has been saved successfully.",
             });
           }}
         />
@@ -711,8 +710,8 @@ export default function SessionDetail() {
           onClose={() => setShowInvoiceEditor(false)}
           onSave={(invoice) => {
             toast({
-              title: t('sessions.invoiceCreated'),
-              description: t('sessions.invoiceCreatedMessage', { number: invoice.invoice_number }),
+              title: "Invoice created",
+              description: `Invoice #${invoice.invoice_number} has been created.`,
             });
           }}
         />
@@ -727,8 +726,8 @@ export default function SessionDetail() {
           onClose={() => setShowMedicalCertificateEditor(false)}
           onSave={() => {
             toast({
-              title: t('sessions.medicalCertificateCreated'),
-              description: t('sessions.medicalCertificateSavedMessage'),
+              title: "Medical Certificate created",
+              description: "The medical certificate has been saved.",
             });
           }}
         />
@@ -743,8 +742,8 @@ export default function SessionDetail() {
           onClose={() => setShowReferralLetterEditor(false)}
           onSave={() => {
             toast({
-              title: t('sessions.referralLetterCreated'),
-              description: t('sessions.referralLetterSavedMessage'),
+              title: "Referral Letter created",
+              description: "The referral letter has been saved.",
             });
           }}
         />
@@ -759,8 +758,8 @@ export default function SessionDetail() {
           onClose={() => setShowGeneralLetterEditor(false)}
           onSave={() => {
             toast({
-              title: t('sessions.generalLetterCreated'),
-              description: t('sessions.generalLetterSavedMessage'),
+              title: "General Letter created",
+              description: "The letter has been saved.",
             });
           }}
         />
@@ -775,8 +774,8 @@ export default function SessionDetail() {
           onClose={() => setShowHospitalAdmissionEditor(false)}
           onSave={() => {
             toast({
-              title: t('sessions.hospitalAdmissionFormCreated'),
-              description: t('sessions.hospitalAdmissionFormSavedMessage'),
+              title: "Hospital Admission Form created",
+              description: "The form has been saved.",
             });
           }}
         />
@@ -788,7 +787,7 @@ export default function SessionDetail() {
           <DialogHeader className="px-4 py-3 border-b">
             <DialogTitle className="flex items-center gap-2">
               <PenTool className="h-5 w-5 text-primary" />
-              {t('sessions.drawingPadTitle', { name: session.patient?.name })}
+              Drawing Pad - {session.patient?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-hidden h-full">

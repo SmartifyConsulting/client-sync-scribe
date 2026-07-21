@@ -43,6 +43,7 @@ import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
+import { TodoRow } from "@/components/todos/TodoRow";
 
 interface TodoItem {
   id: string;
@@ -326,6 +327,23 @@ export default function TodoList() {
     catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
+  const duplicateTask = async (todo: TodoItem) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data, error } = await supabase.from('todos').insert({
+        user_id: user.id,
+        title: todo.title,
+        priority: todo.priority,
+        patient_id: todo.patient_id ?? null,
+        status: 'pending',
+      }).select('*, patients(name)').single();
+      if (error) throw error;
+      setTodos([{ ...(data as any), completed: false, patient_name: (data as any).patients?.name || null, is_auto_executed: false, task_type: (data as any).task_type || 'standard' }, ...todos]);
+      toast({ title: "Task duplicated" });
+    } catch { toast({ title: "Error", variant: "destructive" }); }
+  };
+
   const handleSendDoc = async (todo: TodoItem) => {
     if (!todo.document_id) return;
     setSendingDocId(todo.document_id);
@@ -410,7 +428,7 @@ export default function TodoList() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
-        <p className="mt-1 text-muted-foreground text-[12px]">Manage your tasks with voice or text input — AI can auto-execute actions</p>
+        <p className="mt-1 text-muted-foreground text-sm">Manage your tasks with voice or text input — AI can auto-execute actions</p>
       </div>
 
       {/* Add New Task — reduced by 60% */}
@@ -443,7 +461,7 @@ export default function TodoList() {
               <span className="text-xs text-muted-foreground">{t("todo.priority")}</span>
               <div className="flex gap-1">
                 {(["low", "medium", "high"] as const).map((p) => (
-                  <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
+                  <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-xs font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
                     {t(priorityKey[p])}
                   </button>
                 ))}
@@ -503,99 +521,30 @@ export default function TodoList() {
                 <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors">
                   {isCollapsed ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                   <span className="text-sm font-semibold text-foreground">{label}</span>
-                  <Badge variant="outline" className="ml-auto text-[10px]">{items.length}</Badge>
+                  <Badge variant="outline" className="ml-auto text-xs">{items.length}</Badge>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
                     <div className="divide-y divide-border">
                       {items.map((todo) => (
-                         <div key={todo.id} className={cn("flex items-start gap-3 p-3 transition-colors hover:bg-muted/30", todo.completed && "bg-muted/20", todo.is_auto_executed && "bg-success/5")}>
-                           <Checkbox checked={todo.completed} onCheckedChange={() => toggleComplete(todo.id)} className="h-4 w-4 mt-0.5" />
-                          {editingId === todo.id ? (
-                            <div className="flex-1 flex items-center gap-2">
-                              <Input value={editText} onChange={(e) => setEditText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEdit(todo.id); if (e.key === "Escape") cancelEdit(); }} className="flex-1" autoFocus />
-                              <Button size="icon" variant="ghost" onClick={() => saveEdit(todo.id)}><Save className="h-4 w-4 text-success" /></Button>
-                              <Button size="icon" variant="ghost" onClick={cancelEdit}><X className="h-4 w-4" /></Button>
-                            </div>
-                          ) : (
-                            <>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                   <p className={cn("text-sm font-medium text-foreground", todo.completed && "line-through text-muted-foreground")}>
-                                     {translateTodoTitle(todo.title)}
-                                     {todo.patient_name && <span className="text-primary font-semibold"> — {todo.patient_name}</span>}
-                                   </p>
-                                   {(todo.is_auto_executed || todo.task_type === 'document_review') && (
-                                     <span className="inline-flex items-center gap-0.5">
-                                       <Badge className="bg-success/10 text-success border-success/20 text-[10px] px-1.5 py-0"><Zap className="h-4 w-4 mr-0.5" />AI</Badge>
-                                       {todo.document_id && <Send className="h-4 w-4 text-green-600" />}
-                                     </span>
-                                   )}
-                                </div>
-                                {/* Description */}
-                                {todo.description && (
-                                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{todo.description}</p>
-                                )}
-                                <div className="flex items-center gap-3 mt-1 flex-wrap">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <button className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium cursor-pointer hover:opacity-80", priorityColors[todo.priority])}>
-                                        <Flag className="h-4 w-4" />{t(priorityKey[todo.priority])}
-                                      </button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start">
-                                      {(["low", "medium", "high"] as const).map((p) => (
-                                        <DropdownMenuItem key={p} onClick={() => updatePriority(todo.id, p)} className={cn("gap-2", todo.priority === p && "bg-accent")}>
-                                          <Flag className={cn("h-3 w-3", p === "high" && "text-destructive", p === "medium" && "text-warning", p === "low" && "text-muted-foreground")} />{t(priorityKey[p])}
-                                        </DropdownMenuItem>
-                                      ))}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                  {/* Created date */}
-                                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <Calendar className="h-4 w-4" />
-                                    {format(new Date(todo.created_at), "MMM d, h:mm a")}
-                                  </span>
-                                  {todo.due_date && (
-                                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Calendar className="h-4 w-4" />{new Date(todo.due_date).toLocaleDateString()}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex gap-1 shrink-0">
-                                {/* Approve AI task */}
-                                {todo.is_auto_executed && !todo.completed && (
-                                  <Button size="sm" variant="outline" className="h-8 gap-1 text-xs border-success text-success hover:bg-success hover:text-white" onClick={() => toggleComplete(todo.id)}>
-                                    <ShieldCheck className="h-4 w-4" />Approve
-                                  </Button>
-                                )}
-                                {/* Document review actions */}
-                                {todo.document_id && (
-                                  <>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8" title={t("patients.tooltipPreview")} onClick={() => handlePreviewDoc(todo)} disabled={loadingPreview === todo.document_id}>
-                                      {loadingPreview === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4 text-primary" />}
-                                    </Button>
-                                    <Button
-                                      size="icon" variant="ghost" title={t("todo.approveSave")}
-                                      className={cn("h-8 w-8", todo.completed ? "text-muted-foreground" : "text-green-600 hover:text-green-700")}
-                                      disabled={todo.completed || sendingDocId === todo.document_id}
-                                      onClick={() => handleSendDoc(todo)}
-                                    >
-                                      {sendingDocId === todo.document_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                                    </Button>
-                                  </>
-                                )}
-                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => startEditing(todo)}>
-                                  <Edit3 className="h-4 w-4" />
-                                </Button>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteTask(todo.id)}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        <TodoRow
+                          key={todo.id}
+                          todo={todo as any}
+                          onToggle={toggleComplete}
+                          onStartEdit={(t) => startEditing(t as any)}
+                          onDelete={deleteTask}
+                          onDuplicate={duplicateTask}
+                          onSend={(t) => handleSendDoc(t as any)}
+                          onPreview={(t) => handlePreviewDoc(t as any)}
+                          onSetPriority={updatePriority}
+                          isEditing={editingId === todo.id}
+                          editText={editText}
+                          setEditText={setEditText}
+                          saveEdit={saveEdit}
+                          cancelEdit={cancelEdit}
+                          sending={sendingDocId === todo.document_id}
+                          previewing={loadingPreview === todo.document_id}
+                        />
                       ))}
                     </div>
                   </div>

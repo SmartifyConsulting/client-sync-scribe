@@ -49,13 +49,13 @@ export default function AdmissionsScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
         <h1 className="text-2xl font-extrabold">{t("admissions.title")}</h1>
       </header>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-3 py-2 text-left">{t("ambulance.incident")}</th>
               <th className="px-3 py-2 text-left">{t("admissions.admission")}</th>
@@ -70,10 +70,10 @@ export default function AdmissionsScreen() {
               <tr key={r.id} className="hover:bg-muted/40">
                 <td className="px-3 py-2">
                   <p className="font-semibold">#{r.id.slice(0,8)}</p>
-                  <p className="text-[10px] text-muted-foreground">{statusLabel(r.status, t)}</p>
+                  <p className="text-xs text-muted-foreground">{statusLabel(r.status, t)}</p>
                 </td>
                 <td className="px-3 py-2 text-xs">
-                  <span className="inline-flex items-center gap-1 rounded-full border bg-background px-1.5 py-0.5 text-[10px] font-semibold">
+                  <span className="inline-flex items-center gap-1 rounded-full border bg-background px-1.5 py-0.5 text-xs font-semibold">
                     {r.hospital_admission_status === "admitted" && <CheckCircle2 className="h-3 w-3 text-success" />}
                     {statusLabel(r.hospital_admission_status, t)}
                   </span>
@@ -84,7 +84,7 @@ export default function AdmissionsScreen() {
                 </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">{ago(r.admitted_at ?? r.completed_at)} {t("common.ago")}</td>
                 <td className="px-3 py-2 text-right">
-                  <Link to={`/provider/hospital/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-[11px] font-semibold hover:bg-muted">
+                  <Link to={`/provider/hospital/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-sm font-semibold hover:bg-muted">
                     {t("common.open")} <ChevronRight className="h-3 w-3" />
                   </Link>
                 </td>

@@ -1,5 +1,5 @@
+import { toastError } from "@/lib/userMessage";
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -96,7 +96,6 @@ const nounFor = (k: Kind) =>
 type EditState = { kind: Kind; row: any | null } | null;
 
 export default function HolarcHelpProviders() {
-  const { t } = useTranslation();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [tab, setTab] = useState<Kind>("hospital");
   const [status, setStatus] = useState<Status>("all");
@@ -151,7 +150,7 @@ export default function HolarcHelpProviders() {
     return (
       <div className="mx-auto max-w-md p-8 text-center">
         <ShieldAlert className="mx-auto h-10 w-10 text-destructive" />
-        <p className="mt-4 font-semibold">{t("holarcHelp.admin.messages.adminAccessRequired")}</p>
+        <p className="mt-4 font-semibold">Admin access required</p>
       </div>
     );
   }
@@ -160,19 +159,19 @@ export default function HolarcHelpProviders() {
     const patch: any = { status: active ? "approved" : "suspended" };
     if (active) patch.approved_at = new Date().toISOString();
     const { error } = await supabase.from(tableFor(kind) as any).update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success(active ? t("holarcHelp.admin.messages.activated") : t("holarcHelp.admin.messages.deactivated")); load();
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
+    toast.success(active ? "Activated" : "Deactivated"); load();
   };
   const setTier = async (kind: Kind, id: string, tier: string) => {
     const { error } = await supabase.from(tableFor(kind) as any).update({ tier } as any).eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success(t("holarcHelp.admin.messages.tierUpdated")); load();
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
+    toast.success("Tier updated"); load();
   };
   const removeRow = async () => {
     if (!confirmDelete) return;
     const { error } = await supabase.from(tableFor(confirmDelete.kind) as any).delete().eq("id", confirmDelete.id);
-    if (error) return toast.error(error.message);
-    toast.success(t("holarcHelp.admin.messages.deleted")); setConfirmDelete(null); load();
+    if (error) return toastError(error, "We couldn't complete that. Please try again.");
+    toast.success("Deleted"); setConfirmDelete(null); load();
   };
 
 
@@ -209,8 +208,8 @@ export default function HolarcHelpProviders() {
         <TableCell>
           <div className="flex items-center gap-2">
             <Switch checked={active} onCheckedChange={(v) => setActiveFlag(kind, r.id, v)} />
-            <span className={`text-[11px] font-semibold ${active ? "text-emerald-700" : "text-muted-foreground"}`}>
-              {active ? t("holarcHelp.admin.status.active") : t("holarcHelp.admin.status.inactive")}
+            <span className={`text-sm font-semibold ${active ? "text-emerald-700" : "text-muted-foreground"}`}>
+              {active ? "Active" : "Inactive"}
             </span>
           </div>
         </TableCell>
@@ -232,7 +231,7 @@ export default function HolarcHelpProviders() {
     );
   };
 
-  const headers = [t("holarcHelp.admin.table.name"), t("holarcHelp.admin.table.contact"), t("holarcHelp.admin.table.city"), t("holarcHelp.admin.table.tier"), t("holarcHelp.admin.table.status"), t("holarcHelp.admin.table.actions")];
+  const headers = ["Name", "Contact", "City", "Tier", "Status", "Actions"];
 
   const renderGroupedTable = (rows: any[], kind: Kind) => {
     const noun = nounFor(kind);
@@ -260,8 +259,8 @@ export default function HolarcHelpProviders() {
                     <AccordionItem key={t} value={t} className="border rounded-xl overflow-hidden">
                       <AccordionTrigger className="px-3 hover:no-underline">
                         <div className="flex items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${TIER_CHIP[t]}`}>
-                            {t(`holarcHelp.admin.tier.${t}`)}
+                          <span className={`px-2 py-0.5 rounded-full text-sm font-semibold border ${TIER_CHIP[t]}`}>
+                            {t.replace("_", " ").replace("tier", "Tier")}
                           </span>
                           <span className="text-xs text-muted-foreground">{tiers[t].length} {noun}</span>
                         </div>
@@ -293,7 +292,7 @@ export default function HolarcHelpProviders() {
 
   // Premium underline tab styling shared across this page
   const topTrigger =
-    "relative h-9 rounded-none border-0 bg-transparent px-3 text-[13px] font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary";
+    "relative h-9 rounded-none border-0 bg-transparent px-3 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary";
   const subTrigger = topTrigger;
   const flatTabsList = "h-auto w-full justify-start rounded-none border-b border-border bg-transparent p-0 gap-1";
 
@@ -318,7 +317,7 @@ export default function HolarcHelpProviders() {
     return (
       <AdminPanel
         title={`${list.length} ${noun}${q ? ` matching "${providerSearch[k]}"` : ""}`}
-        description={t("holarcHelp.admin.forms.groupedBy")}
+        description="Grouped by country, then tier."
         bodyClassName="p-0"
         actions={
           <div className="flex flex-wrap items-center gap-2">
@@ -327,8 +326,8 @@ export default function HolarcHelpProviders() {
               <Input
                 value={providerSearch[k]}
                 onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
-                placeholder={t("holarcHelp.admin.actions.search", { noun })}
-                className="h-8 w-48 pl-7 text-[12px]"
+                placeholder={`Search ${noun}…`}
+                className="h-8 w-48 pl-7 text-sm"
               />
             </div>
             <div className="inline-flex rounded-md border border-[hsl(var(--admin-border-strong))] bg-[hsl(var(--admin-surface))] p-0.5">
@@ -336,19 +335,19 @@ export default function HolarcHelpProviders() {
                 <button
                   key={s}
                   onClick={() => setStatus(s)}
-                  className={`px-2.5 py-1 text-[11px] font-medium capitalize rounded-sm transition-colors ${
+                  className={`px-2.5 py-1 text-sm font-medium capitalize rounded-sm transition-colors ${
                     status === s
                       ? "bg-[hsl(var(--admin-accent))] text-white"
                       : "text-[hsl(var(--admin-text-secondary))] hover:text-[hsl(var(--admin-text-primary))]"
                   }`}
                 >
-                  {t(`holarcHelp.admin.status.${s}`)}
+                  {s}
                 </button>
               ))}
             </div>
             {providerKindNeedsAdd(k) && (
-              <Button size="sm" className="h-8 px-3 text-[12px]" onClick={() => { setTab(k); setChooserOpen(true); }}>
-                <Plus className="mr-1 h-3.5 w-3.5" />{t("holarcHelp.admin.actions.add")}
+              <Button size="sm" className="h-8 px-3 text-sm" onClick={() => { setTab(k); setChooserOpen(true); }}>
+                <Plus className="mr-1 h-3.5 w-3.5" />Add
               </Button>
             )}
           </div>
@@ -368,17 +367,17 @@ export default function HolarcHelpProviders() {
 
   return (
     <AdminPage
-      eyebrow={t("holarcHelp.admin.eyebrow")}
-      title={t("holarcHelp.admin.title")}
-      description={t("holarcHelp.admin.description")}
+      eyebrow="Admin"
+      title="User Management"
+      description="Manage users and accountability."
     >
       <Tabs defaultValue="users">
         <TabsList className={adminTabsListClass}>
           <TabsTrigger value="users" className={`${adminTabsTriggerClass} gap-1.5`}>
-            <Users className="h-3.5 w-3.5" />{t("holarcHelp.admin.tabs.users")}
+            <Users className="h-3.5 w-3.5" />Users
           </TabsTrigger>
           <TabsTrigger value="accountability" className={`${adminTabsTriggerClass} gap-1.5`}>
-            <BarChart3 className="h-3.5 w-3.5" />{t("holarcHelp.admin.tabs.accountability")}
+            <BarChart3 className="h-3.5 w-3.5" />Accountability
           </TabsTrigger>
         </TabsList>
 
@@ -445,20 +444,20 @@ export default function HolarcHelpProviders() {
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
         <DialogContent className="sm:max-w-xs">
           <DialogHeader>
-            <DialogTitle>{t("holarcHelp.admin.actions.addProvider")}</DialogTitle>
+            <DialogTitle>Add provider</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-3 gap-3 py-2">
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("hospital"); setEdit({ kind: "hospital", row: null }); }}>
               <Hospital className="h-6 w-6" />
-              <span className="text-xs font-semibold">{t("holarcHelp.admin.actions.hospital")}</span>
+              <span className="text-xs font-semibold">Hospital</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
               <Ambulance className="h-6 w-6" />
-              <span className="text-xs font-semibold">{t("holarcHelp.admin.actions.ambulance")}</span>
+              <span className="text-xs font-semibold">Emergency Response</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("pharmacy"); setEdit({ kind: "pharmacy", row: null }); }}>
               <Pill className="h-6 w-6" />
-              <span className="text-xs font-semibold">{t("holarcHelp.admin.actions.pharmacy")}</span>
+              <span className="text-xs font-semibold">Pharmacy</span>
             </Button>
           </div>
         </DialogContent>
@@ -467,15 +466,15 @@ export default function HolarcHelpProviders() {
       <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("holarcHelp.admin.messages.deleteConfirm")}</AlertDialogTitle>
+            <AlertDialogTitle>Delete provider?</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmDelete?.name} {t("holarcHelp.admin.messages.deleteMessage")}
+              {confirmDelete?.name} will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("holarcHelp.admin.actions.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={removeRow} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              {t("holarcHelp.admin.actions.delete")}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -588,7 +587,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
             }))}
           />
           {form.latitude != null && form.longitude != null && (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Pinned at {Number(form.latitude).toFixed(4)}, {Number(form.longitude).toFixed(4)}
             </p>
           )}
@@ -622,7 +621,7 @@ function ProviderDialog({ state, onClose, onSaved }: { state: EditState; onClose
               </SelectContent>
             </Select>
           </div>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Note: providers control their own "accepting patients" status from their provider view.
           </p>
         </div>
@@ -750,7 +749,7 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
           </div>
         )}
       </div>
-      <p className="text-[11px] text-muted-foreground">Selecting a result auto-fills city, country, phone, and pins the location on the map.</p>
+      <p className="text-sm text-muted-foreground">Selecting a result auto-fills city, country, phone, and pins the location on the map.</p>
     </div>
   );
 }

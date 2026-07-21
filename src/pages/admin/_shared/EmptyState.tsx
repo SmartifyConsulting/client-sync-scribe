@@ -9,8 +9,8 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
       <Icon className="h-6 w-6 text-[hsl(var(--admin-text-tertiary))]" />
-      <p className="text-[13px] font-medium text-[hsl(var(--admin-text-primary))]">{title}</p>
-      {description && <p className="text-[12px] text-[hsl(var(--admin-text-tertiary))]">{description}</p>}
+      <p className="text-sm font-medium text-[hsl(var(--admin-text-primary))]">{title}</p>
+      {description && <p className="text-sm text-[hsl(var(--admin-text-tertiary))]">{description}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

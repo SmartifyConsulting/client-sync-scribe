@@ -309,14 +309,14 @@ export default function MyRewards() {
               <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
               <button
                 onClick={() => setShowVulaExplainer(true)}
-                className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 title="Learn about Vulas"
               >
                 <Info className="h-3.5 w-3.5" />
                 What are Vulas?
               </button>
             </div>
-            <p className="mt-1 text-muted-foreground text-[12px]">
+            <p className="mt-1 text-muted-foreground text-sm">
               Track your Vulas, milestones, and health streaks
             </p>
           </div>
@@ -399,7 +399,7 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] md:text-sm font-medium text-blue-100">Vula Vouchers</p>
+                <p className="text-xs md:text-sm font-medium text-blue-100">Vula Vouchers</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
@@ -413,7 +413,7 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] md:text-sm font-medium text-blue-100">Current Level</p>
+                <p className="text-xs md:text-sm font-medium text-blue-100">Current Level</p>
                 <p className="text-sm md:text-xl font-bold text-white">
                   {currentMilestone?.label || "Beginner"}
                 </p>
@@ -427,7 +427,7 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] md:text-sm font-medium text-sky-100">Active Streaks</p>
+                <p className="text-xs md:text-sm font-medium text-sky-100">Active Streaks</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
               <Flame className="h-8 w-8 text-white/90 shrink-0" />
@@ -439,7 +439,7 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] md:text-sm font-medium text-indigo-100">Vula Vault</p>
+                <p className="text-xs md:text-sm font-medium text-indigo-100">Vula Vault</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
               <Vault className="h-8 w-8 text-white/90 shrink-0" />
@@ -447,7 +447,7 @@ export default function MyRewards() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-[10px] md:text-xs flex items-center gap-1 mt-1 md:mt-2"
+              className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs md:text-xs flex items-center gap-1 mt-1 md:mt-2"
               onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
             >
               Transfer to Vault <ArrowRightLeft className="h-4 w-4" />
@@ -458,20 +458,20 @@ export default function MyRewards() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-primary flex w-full flex-nowrap overflow-x-auto justify-start">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             Overview
           </TabsTrigger>
           {patientRecord?.is_chronic && (
-            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
               <Pill className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Chronic Meds
             </TabsTrigger>
           )}
-          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Wins and Streaks
           </TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-[10px] px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
              Redeem
            </TabsTrigger>
          </TabsList>

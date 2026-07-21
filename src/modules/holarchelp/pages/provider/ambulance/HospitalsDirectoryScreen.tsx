@@ -76,12 +76,12 @@ export default function HospitalsDirectoryScreen() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-extrabold">{h.name}</p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {h.city ?? ""}{h.ownership ? ` · ${h.ownership}` : ""}{h._d != null ? ` · ${h._d.toFixed(1)} km` : ""}
                   </p>
                 </div>
               </div>
-              <div className="mt-2 flex flex-wrap gap-1.5 text-[10px]">
+              <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
                 <span className={`rounded-full border px-1.5 py-0.5 font-bold uppercase ${capColor(h.er_capacity_status)}`}>
                   {(h.er_capacity_status ?? "green").toUpperCase()}
                 </span>
@@ -90,7 +90,7 @@ export default function HospitalsDirectoryScreen() {
                 {!h.accepting_patients && <span className="rounded-full border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-destructive">{t("hospitalsDirectory.notAccepting")}</span>}
               </div>
               {h.contact_phone && (
-                <a href={`tel:${h.contact_phone}`} className="mt-2 inline-block text-[11px] font-semibold text-primary hover:underline">
+                <a href={`tel:${h.contact_phone}`} className="mt-2 inline-block text-sm font-semibold text-primary hover:underline">
                   {h.contact_phone}
                 </a>
               )}

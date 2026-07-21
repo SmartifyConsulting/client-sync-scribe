@@ -423,7 +423,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         )}
       </div>
 
-      <div className="absolute right-2 top-2 z-[400] rounded-full bg-background/95 px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground shadow-md">
+      <div className="absolute right-2 top-2 z-[400] rounded-full bg-background/95 px-2 py-1 text-xs font-semibold uppercase text-muted-foreground shadow-md">
         {mode}
       </div>
     </div>
@@ -464,7 +464,7 @@ function CountdownBadge({
         <span className="absolute inset-0 animate-ping rounded-full bg-white/70" />
         <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
       </span>
-      <span className="text-[10px] font-bold uppercase tracking-wider opacity-90">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-wider opacity-90">{label}</span>
       <span className="text-base font-extrabold tabular-nums leading-none">{display}</span>
       <span className="text-xs font-semibold opacity-90">· {eta.km.toFixed(1)} km</span>
     </div>

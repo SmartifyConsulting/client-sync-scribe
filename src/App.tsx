@@ -16,6 +16,8 @@ import PatientProfile from "./pages/PatientProfile";
 import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
+import MySessions from "./pages/MySessions";
+
 // Documents page is now wrapped inside DoctorDocumentsPage
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
@@ -237,7 +239,9 @@ const App = () => (
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
+            <Route path="/my-sessions" element={<MySessions />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
+
             <Route path="/documents" element={<DoctorDocumentsPage />} />
             <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />

@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { useTranslation } from "react-i18next";
 import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Pill, Square, Play, Mic, MicOff, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +30,6 @@ interface PatientTodo {
 export default function PatientTasks() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation();
   const [todos, setTodos] = useState<PatientTodo[]>([]);
   const [loading, setLoading] = useState(true);
   const [patientIds, setPatientIds] = useState<string[]>([]);
@@ -94,7 +92,7 @@ export default function PatientTasks() {
           if (error) throw error;
           if (data?.text) setTaskText((prev) => (prev ? prev + " " : "") + data.text);
         } catch (err: any) {
-          toast({ title: t("patient.tasks.transcriptionFailed"), description: err.message, variant: "destructive" });
+          toast({ title: "Transcription failed", description: err.message, variant: "destructive" });
         } finally {
           setIsTranscribing(false);
         }
@@ -103,9 +101,9 @@ export default function PatientTasks() {
       taskRecorderRef.current = recorder;
       setIsRecordingTask(true);
     } catch {
-      toast({ title: t("patient.tasks.micError"), description: t("patient.tasks.micErrorDescription"), variant: "destructive" });
+      toast({ title: "Mic Error", description: "Could not access microphone.", variant: "destructive" });
     }
-  }, [toast, t]);
+  }, [toast]);
 
   const stopTaskRecording = useCallback(() => {
     taskRecorderRef.current?.stop();
@@ -138,10 +136,10 @@ export default function PatientTasks() {
       });
       if (error) throw error;
       setTaskText("");
-      toast({ title: t("patient.tasks.taskAdded") });
+      toast({ title: "Task added" });
       fetchTodos();
     } catch (err: any) {
-      toast({ title: t("patient.tasks.failedToAddTask"), description: err.message, variant: "destructive" });
+      toast({ title: "Failed to add task", description: err.message, variant: "destructive" });
     } finally {
       setAddingTask(false);
     }
@@ -160,9 +158,9 @@ export default function PatientTasks() {
       <div>
         <h1 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
-          {t("patient.tasks.title")}
+          My To-Do List
         </h1>
-        <p className="text-xs text-muted-foreground">{t("patient.tasks.subtitle")}</p>
+        <p className="text-xs text-muted-foreground">Tasks assigned to you by your healthcare providers</p>
       </div>
 
       {/* Task Input Area */}
@@ -182,12 +180,12 @@ export default function PatientTasks() {
             <Mic className="h-6 w-6" />
           )}
         </Button>
-        <p className="text-[10px] text-muted-foreground">
-          {isRecordingTask ? t("patient.tasks.recording") : isTranscribing ? t("patient.tasks.transcribing") : t("patient.tasks.tapToDictate")}
+        <p className="text-xs text-muted-foreground">
+          {isRecordingTask ? "Recording... tap to stop" : isTranscribing ? "Transcribing..." : "Tap to dictate a task"}
         </p>
         <div className="flex w-full max-w-md gap-2">
           <Input
-            placeholder={t("patient.tasks.typeTaskPlaceholder")}
+            placeholder="Type a task..."
             value={taskText}
             onChange={(e) => setTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
@@ -202,7 +200,7 @@ export default function PatientTasks() {
       {todos.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-12 text-center">
           <CheckSquare className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">{t("patient.tasks.noTasksAssigned")}</p>
+          <p className="text-sm text-muted-foreground">No tasks assigned yet</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -210,7 +208,7 @@ export default function PatientTasks() {
             <div className="space-y-3">
               <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Clock className="h-4 w-4 text-amber-500" />
-                {t("patient.tasks.pending")} ({pendingTodos.length})
+                Pending ({pendingTodos.length})
               </h2>
               {pendingTodos.map((todo) => (
                 <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
@@ -222,7 +220,7 @@ export default function PatientTasks() {
             <div className="space-y-3">
               <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
-                {t("patient.tasks.completed")} ({completedTodos.length})
+                Completed ({completedTodos.length})
               </h2>
               {completedTodos.map((todo) => (
                 <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
@@ -241,7 +239,6 @@ const FRAME_COUNT = 5;
 
 function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => void }) {
   const { toast } = useToast();
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isCompleted = todo.status === "completed";
@@ -280,9 +277,9 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
       setStream(mediaStream);
       if (liveVideoRef.current) liveVideoRef.current.srcObject = mediaStream;
     } catch {
-      toast({ title: t("patient.tasks.cameraError"), description: t("patient.tasks.cameraErrorDescription"), variant: "destructive" });
+      toast({ title: "Camera Error", description: "Could not access camera.", variant: "destructive" });
     }
-  }, [toast, t]);
+  }, [toast]);
 
   const stopCamera = useCallback(() => {
     stream?.getTracks().forEach((t) => t.stop());
@@ -346,7 +343,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
 
       video.onloadedmetadata = () => {
         const duration = video.duration;
-        if (!duration || duration < 0.5) { reject(new Error(t("patient.tasks.videoTooShort"))); return; }
+        if (!duration || duration < 0.5) { reject(new Error("Video too short")); return; }
 
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
@@ -384,7 +381,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
         seekNext();
       };
 
-      video.onerror = () => { URL.revokeObjectURL(url); reject(new Error(t("patient.tasks.failedToLoadVideo"))); };
+      video.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Failed to load video")); };
     });
   }, []);
 
@@ -397,10 +394,10 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      toast({ title: t("patient.tasks.extractingFrames"), description: t("patient.tasks.processingVideo") });
+      toast({ title: "Extracting frames…", description: "Processing your video for AI validation." });
 
       const frames = await extractFrames(recordedBlob);
-      if (frames.length < FRAME_COUNT) throw new Error(t("patient.tasks.notEnoughFrames"));
+      if (frames.length < FRAME_COUNT) throw new Error("Could not extract enough frames from video");
 
       // Upload all frames
       const filePaths: string[] = [];
@@ -450,7 +447,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           });
         }
 
-        toast({ title: t("patient.tasks.taskVerified"), description: t("patient.tasks.taskVerifiedDescription", { reward: todo.vulas_reward }) });
+        toast({ title: "✅ Task verified!", description: `AI confirmed your proof. +${todo.vulas_reward} Vulas earned!` });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();
@@ -458,20 +455,20 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
         setRecordedBlob(null);
         setRecordedUrl(null);
         startCamera();
-        const reason = validation?.description || t("patient.tasks.couldNotVerifyTask");
+        const reason = validation?.description || "Could not verify task completion.";
         const missing: string[] = [];
-        if (!validation?.person_detected) missing.push(t("patient.tasks.missingPerson"));
-        if (!validation?.medication_detected) missing.push(t("patient.tasks.missingMedication"));
-        if (!validation?.ingestion_detected) missing.push(t("patient.tasks.missingIngestion"));
+        if (!validation?.person_detected) missing.push("person visible");
+        if (!validation?.medication_detected) missing.push("medication visible");
+        if (!validation?.ingestion_detected) missing.push("taking the medication");
         toast({
-          title: t("patient.tasks.verificationFailed"),
-          description: `${reason}${missing.length > 0 ? ` ${t("patient.tasks.missing")}: ${missing.join(", ")}.` : ""} ${t("patient.tasks.tryAgain")}`,
+          title: "Verification failed",
+          description: `${reason}${missing.length > 0 ? ` Missing: ${missing.join(", ")}.` : ""} Please try again.`,
           variant: "destructive",
         });
       }
     } catch (error: any) {
       console.error(error);
-      toast({ title: t("patient.tasks.validationFailed"), description: error.message || t("patient.tasks.couldNotValidateProof"), variant: "destructive" });
+      toast({ title: "Validation failed", description: error.message || "Could not validate proof.", variant: "destructive" });
     }
     setIsUploading(false);
   };
@@ -496,17 +493,17 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
             <p className={`text-sm font-medium ${isCompleted ? "line-through text-muted-foreground" : "text-foreground"}`}>{todo.title}</p>
             {todo.description && <p className="text-xs text-muted-foreground mt-0.5">{todo.description}</p>}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <Badge variant="outline" className={`text-[10px] ${priorityColors[todo.priority] || ""}`}>
+              <Badge variant="outline" className={`text-xs ${priorityColors[todo.priority] || ""}`}>
                 {todo.priority}
               </Badge>
               {todo.due_date && (
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Due {format(new Date(todo.due_date), "MMM d, yyyy")}
                 </span>
               )}
               {todo.vulas_reward > 0 && (
-                <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                  🪙 {todo.vulas_reward} {t("common.vulas")}
+                <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                  🪙 {todo.vulas_reward} Vulas
                 </Badge>
               )}
             </div>
@@ -516,13 +513,13 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
                 {hasVulasReward && (
                   <Button size="sm" onClick={() => setShowRecordDialog(true)} className="gap-1.5 text-xs h-8">
                     <Video className="h-3.5 w-3.5" />
-                    {t("patient.tasks.recordProof")}
+                    Record Proof
                   </Button>
                 )}
                 {isMedicationType && (
                   <Button size="sm" variant="outline" onClick={() => navigate("/patient/rewards?tab=chronic-meds")} className="gap-1.5 text-xs h-8">
                     <Pill className="h-3.5 w-3.5" />
-                    {t("patient.tasks.chronicMeds")}
+                    Chronic Meds
                   </Button>
                 )}
               </div>
@@ -537,12 +534,12 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Video className="h-5 w-5 text-primary" />
-              {t("patient.tasks.recordMedicationProof")}
+              Record Medication Proof
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              {t("patient.tasks.recordInstructions")}
+              Record a short video (up to 15s) showing yourself taking the medication. Show the tablet, place it in your mouth, swallow, then show your empty mouth.
             </p>
 
             {/* Video area */}
@@ -571,22 +568,22 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
             <div className="flex gap-2 justify-center">
               {!recordedBlob && !isRecording && (
                 <Button onClick={startRecording} disabled={!stream} className="gap-2">
-                  <Video className="h-4 w-4" /> {t("patient.tasks.startRecording")}
+                  <Video className="h-4 w-4" /> Start Recording
                 </Button>
               )}
               {isRecording && (
                 <Button variant="destructive" onClick={stopRecording} className="gap-2">
-                  <Square className="h-4 w-4" /> {t("common.stop")}
+                  <Square className="h-4 w-4" /> Stop
                 </Button>
               )}
               {recordedBlob && (
                 <>
                   <Button variant="outline" onClick={() => { setRecordedBlob(null); setRecordedUrl(null); setElapsed(0); startCamera(); }}>
-                    {t("patient.tasks.retake")}
+                    Retake
                   </Button>
                   <Button onClick={handleSubmitProof} disabled={isUploading} className="gap-2">
                     {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                    {t("patient.tasks.submitProof")}
+                    Submit Proof
                   </Button>
                 </>
               )}
