@@ -44,6 +44,7 @@ import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
+import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import {
   MedCertReviewDialog,
@@ -141,6 +142,7 @@ export default function Sessions() {
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
+  const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
@@ -346,42 +348,39 @@ export default function Sessions() {
         setCurrentSessionId(result.id);
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
-        
+        setShowDiagnosticsModal(true);
+
         const docs = (result as any)._extractedDocuments;
         if (docs?.medical_certificate) {
           setExtractedMedCert(docs.medical_certificate);
-          setShowMedCertReview(true);
           hasDocs = true;
         }
         if (docs?.prescription) {
           setExtractedPrescription(docs.prescription);
-          if (!hasDocs) { setShowPrescriptionReview(true); hasDocs = true; }
+          if (!hasDocs) { hasDocs = true; }
         }
         if (docs?.invoice) {
           setExtractedInvoice(docs.invoice);
-          if (!hasDocs) { setShowInvoiceReview(true); hasDocs = true; }
+          if (!hasDocs) { hasDocs = true; }
         }
         if (docs?.referral) {
           setExtractedReferral(docs.referral);
-          if (!hasDocs) { setShowReferralReview(true); hasDocs = true; }
+          if (!hasDocs) { hasDocs = true; }
         }
       } else {
         setSummary("Session completed. No content was recorded or noted.");
         setActionPoints([]);
+        setShowDiagnosticsModal(true);
       }
     } catch (error) {
       console.error("Error in handleSessionComplete:", error);
       setSummary("Session completed. No content was recorded or noted.");
       setActionPoints([]);
+      setShowDiagnosticsModal(true);
     }
-    
+
     setSessionState("completed");
     pendingCompletionRef.current = false;
-    
-    // If no documents to review, jump straight to follow-up dialog
-    if (!hasDocs) {
-      setTimeout(() => advanceToFollowUp(), 300);
-    }
   }, [completeSession, patientId, advanceToFollowUp]);
 
   // Visit-category dialog now runs at the END of the post-session chain (Vula award)
@@ -636,6 +635,29 @@ export default function Sessions() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Session Diagnostics Modal */}
+      <SessionDiagnosticsModal
+        open={showDiagnosticsModal}
+        summary={summary}
+        actionPoints={actionPoints}
+        onClose={() => setShowDiagnosticsModal(false)}
+        onProgressComplete={() => {
+          // After progress complete, show document reviews if any exist
+          if (extractedMedCert) {
+            setShowMedCertReview(true);
+          } else if (extractedPrescription) {
+            setShowPrescriptionReview(true);
+          } else if (extractedInvoice) {
+            setShowInvoiceReview(true);
+          } else if (extractedReferral) {
+            setShowReferralReview(true);
+          } else {
+            // No documents, jump to follow-up
+            setTimeout(() => advanceToFollowUp(), 300);
+          }
+        }}
+      />
+
       {/* Visit Category Dialog */}
       <VisitCategoryDialog
         open={showVisitCategoryDialog}
