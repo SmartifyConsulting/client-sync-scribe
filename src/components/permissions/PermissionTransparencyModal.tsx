@@ -38,7 +38,7 @@ export const getSharedItems = (t: any): PermissionItem[] => [
   },
 ];
 
-const getPrivateItems = (t: any): PermissionItem[] => [
+export const getPrivateItems = (t: any): PermissionItem[] => [
   { label: t("permissions.fullTranscriptions") },
   { label: t("permissions.rawAudioRecordings") },
   { label: t("permissions.aiDiagnostics") },
