@@ -21,7 +21,7 @@ interface PermissionItem {
 }
 
 // These will be populated from i18n translations
-const getSharedItems = (t: any): PermissionItem[] => [
+export const getSharedItems = (t: any): PermissionItem[] => [
   { label: t("permissions.aiSessionSummaries") },
   { label: t("permissions.patientInformation") },
   { label: t("permissions.medicalOverview") },
