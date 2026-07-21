@@ -537,6 +537,7 @@ function NotificationList({
   onRefresh: () => void;
 }) {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [ratingNotification, setRatingNotification] = useState<Notification | null>(null);
   const [ratedDoctorName, setRatedDoctorName] = useState("");
