@@ -1,12 +1,16 @@
 import { Shield, CheckCircle, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { sharedItems, privateItems } from "./PermissionTransparencyModal";
+import { getSharedItems, getPrivateItems } from "./PermissionTransparencyModal";
 
 export function PrivacyBadge() {
+  const { t } = useTranslation();
+  const sharedItems = getSharedItems(t);
+  const privateItems = getPrivateItems(t);
   return (
     <HoverCard openDelay={200}>
       <HoverCardTrigger asChild>
