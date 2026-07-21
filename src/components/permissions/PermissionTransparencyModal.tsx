@@ -196,11 +196,3 @@ export function PermissionTransparencyModal({
   );
 }
 
-// Re-export for backward compatibility
-export function getSharedItems(t: any) {
-  return getSharedItems(t);
-}
-
-export function getPrivateItems(t: any) {
-  return getPrivateItems(t);
-}
