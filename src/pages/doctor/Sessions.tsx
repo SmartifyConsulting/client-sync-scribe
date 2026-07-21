@@ -33,7 +33,7 @@ export default function Sessions() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("sessions")
         .select(`
           id,
