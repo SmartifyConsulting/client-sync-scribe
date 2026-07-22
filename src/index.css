@@ -215,7 +215,7 @@
   .font-size-preserve {
     font-size: 15px;
   }
-  .font-size-preserve .text-sm { font-size: 12.25px; }
+  .font-size-preserve .text-sm { font-size: 14px; }
   .font-size-preserve .text-xs { font-size: 10.5px; }
   .font-size-preserve .text-base { font-size: 14px; }
 

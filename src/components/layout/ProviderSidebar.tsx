@@ -140,7 +140,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -155,7 +155,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
+                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold transition-all duration-200",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
