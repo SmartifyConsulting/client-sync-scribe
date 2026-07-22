@@ -282,7 +282,7 @@ export default function PatientAccessManagement() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Invites</h1>
+        <h1 className="text-3xl font-bold text-foreground">Invites</h1>
         <p className="text-muted-foreground text-xs">Manage your doctor invitations and preferences</p>
       </div>
 

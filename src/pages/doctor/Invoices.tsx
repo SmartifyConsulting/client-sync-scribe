@@ -972,7 +972,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!hideHeader && (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Invoices</h1>
+            <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
             <p className="mt-1 text-muted-foreground text-xs">
               Manage and track all patient invoices
             </p>

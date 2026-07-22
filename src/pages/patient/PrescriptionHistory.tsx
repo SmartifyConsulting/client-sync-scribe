@@ -117,7 +117,7 @@ export default function Documentation() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Documentation</h1>
+        <h1 className="text-3xl font-bold text-foreground">Documentation</h1>
         <p className="text-muted-foreground text-xs">View and manage your documents</p>
       </div>
 

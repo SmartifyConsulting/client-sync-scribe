@@ -184,7 +184,7 @@ export default function MyDetails() {
   return (
     <div className="space-y-4 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">{heading.title}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{heading.title}</h1>
         <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
       </div>
 

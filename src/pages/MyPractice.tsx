@@ -1103,7 +1103,7 @@ export default function MyPractice() {
     return (
       <div className="space-y-4 animate-fade-in">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Round Tables</h1>
+          <h1 className="text-3xl font-bold text-foreground">Round Tables</h1>
           <p className="text-muted-foreground text-sm">View round table discussions you've contributed to</p>
         </div>
         <DoctorRoundTables />
@@ -1117,7 +1117,7 @@ export default function MyPractice() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Holarprac</h1>
+          <h1 className="text-3xl font-bold text-foreground">My Holarprac</h1>
           <p className="text-muted-foreground text-xs">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">

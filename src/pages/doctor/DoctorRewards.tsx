@@ -137,7 +137,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-foreground">{t("doctorRewards.title")}</h1>
+              <h1 className="text-3xl font-bold text-foreground">{t("doctorRewards.title")}</h1>
               <button
                 onClick={() => setShowVulaExplainer(true)}
                 className="inline-flex items-center gap-1 text-sm text-primary hover:underline"

@@ -306,7 +306,7 @@ export default function MyRewards() {
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-foreground">My Rewards</h1>
+              <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
               <button
                 onClick={() => setShowVulaExplainer(true)}
                 className="inline-flex items-center gap-1 text-sm text-primary hover:underline"

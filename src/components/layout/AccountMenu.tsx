@@ -16,9 +16,10 @@ import { useTranslation } from "react-i18next";
 interface AccountMenuProps {
   trigger: ReactNode;
   align?: "start" | "end" | "center";
+  alignOffset?: number;
 }
 
-export function AccountMenu({ trigger, align = "end" }: AccountMenuProps) {
+export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: AccountMenuProps) {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const { isDoctor, isEmergency } = useUserRole();
@@ -40,7 +41,7 @@ export function AccountMenu({ trigger, align = "end" }: AccountMenuProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className={cn("p-1.5", isAdmin ? "w-72" : "w-48")} align={align}>
+      <PopoverContent className={cn("p-1.5", isAdmin ? "w-72" : "w-48")} align={align} alignOffset={alignOffset} sideOffset={8}>
         {/* Profile switcher */}
         {isDoctor && (
           <div className="border-b border-border mb-1">

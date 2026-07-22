@@ -359,7 +359,7 @@ export default function PatientCalendar() {
     <div className="space-y-3 md:space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Calendar</h1>
+          <h1 className="text-3xl font-bold text-foreground">My Calendar</h1>
           <p className="text-muted-foreground text-xs md:text-sm">View and manage your appointments</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">

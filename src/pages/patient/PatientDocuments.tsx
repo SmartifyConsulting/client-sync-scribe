@@ -613,7 +613,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         {!hideHeader ? (
           <div>
-            <h1 className="text-2xl font-bold text-foreground">My Documents</h1>
+            <h1 className="text-3xl font-bold text-foreground">My Documents</h1>
             <p className="text-muted-foreground text-sm md:text-sm">
               All your prescriptions, invoices, certificates and uploaded files.
             </p>

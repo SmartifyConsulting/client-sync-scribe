@@ -128,7 +128,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-0.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -155,7 +155,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   data-tour={(item as any).tour}
                   className={() =>
                     cn(
-                      "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-2 text-[13px] font-medium transition-all duration-200",
+                      "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-[13px] font-medium transition-all duration-200",
 
                       isItemActive
                         ? item.danger
@@ -181,9 +181,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </nav>
 
         {/* Bottom Section - Account */}
-        <div className="mt-auto">
+        <div className="mt-auto px-2 pb-2">
           <AccountMenu
             align="start"
+            alignOffset={8}
             trigger={
               <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-primary rounded-xl transition-colors">
                 <Avatar className="h-[52px] w-[52px] border-2 border-primary">

@@ -296,7 +296,7 @@ export default function PatientDashboard() {
             <User className="h-7 w-7 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-3xl font-bold text-foreground">
               {profile?.full_name ? `${t("patientDashboard.welcomeTitle")}, ${profile.full_name.split(" ")[0]}` : t("patientDashboard.welcomeTitle")}
             </h1>
             <p className="text-muted-foreground text-xs">{t("patientDashboard.welcomeSubtitle")}</p>

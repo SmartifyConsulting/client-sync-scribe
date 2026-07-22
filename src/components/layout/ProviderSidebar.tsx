@@ -90,7 +90,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
           </NavLink>
         )}
 
-        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-0.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
           {nav.map((item) => {
             const isActive = item.end
               ? location.pathname === item.to
@@ -102,7 +102,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                 end={item.end}
                 onClick={onNavigate}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium transition-all duration-200",
+                  "flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-[13px] font-medium transition-all duration-200",
                   isActive
                     ? item.danger
                       ? "bg-red-600 text-white shadow-sm"

@@ -93,7 +93,7 @@ export default function MySessions() {
   return (
     <div className="container mx-auto p-4 max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-3xl font-bold text-foreground">
           {t("nav.mySessions", "My Sessions")}
         </h1>
         <p className="text-xs text-muted-foreground mt-1">
