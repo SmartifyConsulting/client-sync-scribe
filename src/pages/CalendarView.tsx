@@ -902,7 +902,7 @@ export default function CalendarView() {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <span className="inline-flex h-4 px-1 items-center justify-center rounded text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor || '#0EA5E9' }}>
+                                        <span className="inline-flex h-4 px-1 items-center justify-center rounded text-xs font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor || '#0EA5E9' }}>
                                           {ownerInitials}
                                         </span>
                                       </TooltipTrigger>
@@ -914,7 +914,7 @@ export default function CalendarView() {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0" style={{ backgroundColor: tileColor || 'hsl(350, 78%, 55%)' }}>
+                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white shrink-0" style={{ backgroundColor: tileColor || 'hsl(350, 78%, 55%)' }}>
                                           {initials}
                                         </span>
                                       </TooltipTrigger>

@@ -166,7 +166,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
           <button
             type="button"
             onClick={() => setShowComment(true)}
-            className="text-[11px] text-primary hover:underline inline-flex items-center gap-0.5 ml-1"
+            className="text-xs text-primary hover:underline inline-flex items-center gap-0.5 ml-1"
           >
             <MessageSquarePlus className="h-3 w-3" />
             {savedComment ? "Edit note" : "Add a note"}
@@ -175,7 +175,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
       </div>
 
       {savedComment && !showComment && (
-        <p className="text-[11px] italic text-muted-foreground pl-1">"{savedComment}"</p>
+        <p className="text-xs italic text-muted-foreground pl-1">"{savedComment}"</p>
       )}
 
       {showComment && !cooling && (
@@ -214,7 +214,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
       )}
 
       {cooling && (
-        <p className="text-[11px] text-muted-foreground pl-1">
+        <p className="text-xs text-muted-foreground pl-1">
           You can rate {nurseName || "this nurse"} again in {remainingH > 0 ? `${remainingH}h ` : ""}
           {remainingM}m.
         </p>

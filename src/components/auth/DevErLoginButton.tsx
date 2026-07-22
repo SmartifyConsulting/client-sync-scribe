@@ -51,7 +51,7 @@ export function DevErLoginButton() {
 
   return (
     <div className="mt-4 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30 p-3">
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
         {t("components.auth.dev_login.dev_only_label")}
       </p>
       <Button
@@ -68,7 +68,7 @@ export function DevErLoginButton() {
         )}
         {t("components.auth.dev_login.button_text")}
       </Button>
-      <p className="mt-2 text-[11px] text-muted-foreground">
+      <p className="mt-2 text-xs text-muted-foreground">
         {t("components.auth.dev_login.test_description")}
       </p>
     </div>

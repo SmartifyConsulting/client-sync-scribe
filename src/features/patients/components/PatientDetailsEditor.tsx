@@ -1315,7 +1315,7 @@ export function PatientDetailsEditor({
             <div className="relative">
               <Avatar className="h-20 w-20 border-2 border-primary">
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
-                <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">{initials}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary text-xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
               {/* Always-visible camera badge so users notice the upload affordance */}
               <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md border-2 border-background">
@@ -1376,7 +1376,7 @@ export function PatientDetailsEditor({
                         {doctorProfile?.full_name || "Doctor"}
                       </span>
                       {doctorProfile?.specialty && (
-                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 shrink-0">
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 shrink-0">
                           {doctorProfile.specialty}
                         </Badge>
                       )}
@@ -1562,7 +1562,7 @@ export function PatientDetailsEditor({
           {/* Avatar */}
           <Avatar className="h-14 w-14 border-2 border-primary shrink-0">
             {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
-            <AvatarFallback className="bg-primary/10 text-primary text-base font-semibold">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-primary text-primary text-base font-semibold">{initials}</AvatarFallback>
           </Avatar>
           {/* Vula counter + logo */}
           <div className="flex-1 min-w-0 flex items-center gap-2">
@@ -1666,7 +1666,7 @@ export function PatientDetailsEditor({
                                 <span className="text-muted-foreground">({pharmacy.branch})</span>
                               )}
                               {pharmacy.is_primary && (
-                                <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                                <span className="text-xs bg-primary text-primary px-1.5 py-0.5 rounded-full font-medium">
                                   Primary
                                 </span>
                               )}
@@ -1904,12 +1904,12 @@ export function PatientDetailsEditor({
                                   )}
                                 </div>
                                 <Badge
-                                  className={`text-[8px] border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
+                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
                                 >
                                   {m.status === "past" ? "Past" : "Current"}
                                 </Badge>
                                 {m.is_chronic && (
-                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">
+                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-bold text-destructive shrink-0">
                                     Chronic
                                   </span>
                                 )}
@@ -1950,7 +1950,7 @@ export function PatientDetailsEditor({
                                     </p>
                                   </div>
                                   <Badge
-                                    className={`text-[8px] border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
+                                    className={`text-xs border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
                                   >
                                     {c.status === "resolved" ? "Resolved" : "Active"}
                                   </Badge>
@@ -3082,12 +3082,12 @@ export function PatientDetailsEditor({
                                   )}
                                 </div>
                                 <Badge
-                                  className={`text-[8px] border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
+                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
                                 >
                                   {m.status === "past" ? "Past" : "Current"}
                                 </Badge>
                                 {m.is_chronic && (
-                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-[9px] font-bold text-destructive shrink-0">
+                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-bold text-destructive shrink-0">
                                     Chronic
                                   </span>
                                 )}
@@ -3243,7 +3243,7 @@ export function PatientDetailsEditor({
                               </div>
                               <div className="flex items-center gap-1 shrink-0">
                                 <Badge
-                                  className={`text-[8px] border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
+                                  className={`text-xs border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
                                 >
                                   {c.status === "resolved" ? "Resolved" : "Active"}
                                 </Badge>

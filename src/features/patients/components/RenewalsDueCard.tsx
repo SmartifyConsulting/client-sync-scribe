@@ -37,11 +37,11 @@ export function RenewalsDueCard({ patientId, patientUserId }: Props) {
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-xs font-semibold text-foreground truncate">{r.medication}</p>
                   {r.is_expired ? (
-                    <Badge variant="destructive" className="text-[9px] gap-1"><AlertTriangle className="h-3 w-3" /> Expired</Badge>
+                    <Badge variant="destructive" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" /> Expired</Badge>
                   ) : r.days_until_expiry !== null ? (
-                    <Badge variant="outline" className="text-[9px]">Ends in {r.days_until_expiry}d</Badge>
+                    <Badge variant="outline" className="text-xs">Ends in {r.days_until_expiry}d</Badge>
                   ) : (
-                    <Badge variant="outline" className="text-[9px]">No refills left</Badge>
+                    <Badge variant="outline" className="text-xs">No refills left</Badge>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground truncate">

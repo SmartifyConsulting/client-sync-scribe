@@ -63,7 +63,7 @@ export function MissionStatusStepper({
             <div key={s.v} className="flex items-center gap-1">
               <span
                 className={cn(
-                  "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[8px] font-bold",
+                  "flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
                   done && "border-primary bg-primary text-primary-foreground",
                   active && "border-primary bg-primary/15 text-primary ring-2 ring-primary/30",
                   !done && !active && "border-muted-foreground/30 bg-card text-muted-foreground"

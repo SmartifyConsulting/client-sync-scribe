@@ -532,7 +532,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                         {doctor.ownership && (
                                           <Badge
                                             variant="outline"
-                                            className={`text-[9px] capitalize ${doctor.ownership === 'public' ? 'border-green-500 text-green-700' : 'border-blue-500 text-blue-700'}`}
+                                            className={`text-xs capitalize ${doctor.ownership === 'public' ? 'border-green-500 text-green-700' : 'border-blue-500 text-blue-700'}`}
                                           >
                                             {doctor.ownership}
                                           </Badge>

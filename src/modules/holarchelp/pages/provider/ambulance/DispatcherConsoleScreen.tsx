@@ -288,7 +288,7 @@ export default function DispatcherConsoleScreen() {
                         <Clock className="h-3 w-3" /> {ago(i.created_at)} ago
                       </p>
                       {isMine && (
-                        <span className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-primary">
+                        <span className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-xs font-bold uppercase text-primary">
                           {hasVehicle ? "Rolling" : "Assigned · needs vehicle"}
                         </span>
                       )}
@@ -441,7 +441,7 @@ export default function DispatcherConsoleScreen() {
                           </p>
                         </div>
                         {h.er_capacity_status && (
-                          <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                          <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-xs font-bold uppercase ${
                             h.er_capacity_status === "green" ? "bg-success/10 text-success"
                             : h.er_capacity_status === "amber" ? "bg-warning/10 text-warning"
                             : "bg-destructive/10 text-destructive"

@@ -39,7 +39,7 @@ interface ReportFixSheetProps {
 
 const TYPE_META: Record<ReportType, { label: string; icon: typeof Bug; border: string; chip: string; fill: string }> = {
   bug: { label: "Bug", icon: Bug, border: "border-l-destructive", chip: "bg-destructive/10 text-destructive", fill: "bg-destructive hover:bg-destructive/90" },
-  fix: { label: "Fix", icon: Wrench, border: "border-l-primary", chip: "bg-primary/10 text-primary", fill: "bg-primary hover:bg-primary/90" },
+  fix: { label: "Fix", icon: Wrench, border: "border-l-primary", chip: "bg-primary text-primary", fill: "bg-primary hover:bg-primary/90" },
   nice_to_have: { label: "Nice-to-have", icon: Sparkles, border: "border-l-amber-500", chip: "bg-amber-500/10 text-amber-700", fill: "bg-amber-500 hover:bg-amber-600" },
 };
 
@@ -255,7 +255,7 @@ export function ReportFixSheet({ open, onOpenChange }: ReportFixSheetProps) {
                           {status}
                         </span>
                       )}
-                      <span className="text-[9px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(changedAt), { addSuffix: true })}
                       </span>
                     </div>

@@ -104,12 +104,12 @@ export function BottomNav() {
                 <button
                   key={item.to}
                   onClick={() => navigate(item.to)}
-                  className="flex flex-col items-center gap-1 px-3 py-2 min-w-[64px]"
+                  className="flex flex-col items-center gap-1 px-3 py-2 min-w-[64px] hover:opacity-80 transition-opacity"
                   aria-label="SOS"
                 >
-                  <div className="flex flex-col items-center justify-center h-11 w-11 rounded-full bg-red-600 active:scale-95 transition-transform">
+                  <div className="flex flex-col items-center justify-center h-11 w-11 rounded-full bg-red-600 hover:bg-red-700 active:scale-95 transition-all duration-200">
                     <item.icon className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
-                    <span className="text-[8px] font-bold text-white leading-none mt-0.5">SOS</span>
+                    <span className="text-xs font-bold text-white leading-none mt-0.5">SOS</span>
                   </div>
                 </button>
               );

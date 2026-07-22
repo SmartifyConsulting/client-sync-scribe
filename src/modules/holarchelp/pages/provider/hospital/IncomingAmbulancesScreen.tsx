@@ -78,7 +78,7 @@ export default function IncomingAmbulancesScreen() {
                     <Ambulance className="h-4 w-4 text-destructive" />
                     {crew?.name ?? "ER Provider"}
                     {r.assigned_provider_id && partners.has(r.assigned_provider_id) && (
-                      <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-[9px]">
+                      <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-xs">
                         <Handshake className="h-2.5 w-2.5" /> Partner
                       </Badge>
                     )}

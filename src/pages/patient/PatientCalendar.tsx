@@ -385,11 +385,11 @@ export default function PatientCalendar() {
                 <div key={apt.id} className="p-2 rounded-lg bg-card border border-border/50 min-w-[140px] shrink-0 space-y-0.5">
                   <p className="font-medium text-xs truncate">{apt.title}</p>
                   {apt.doctor_name && (
-                    <p className="text-[9px] text-primary font-medium flex items-center gap-0.5">
+                    <p className="text-xs text-primary font-medium flex items-center gap-0.5">
                       <User className="h-2 w-2" /> Dr. {apt.doctor_name}
                     </p>
                   )}
-                  <div className="flex items-center gap-0.5 text-[9px] text-muted-foreground">
+                  <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                     <CalendarIcon className="h-2 w-2" />
                     {formatCalendarShortMonthDay(t, parseISO(apt.start_time))} · {format(parseISO(apt.start_time), "h:mm a")}
                   </div>

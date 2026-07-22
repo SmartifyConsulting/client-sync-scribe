@@ -639,7 +639,7 @@ export function TodaysBriefing() {
           {isPlaying ? (
             <div className="flex flex-col items-center gap-1">
               {segments.length > 1 && (
-                <span className="text-[9px] md:text-sm text-primary-foreground/80 whitespace-nowrap">
+                <span className="text-xs md:text-sm text-primary-foreground/80 whitespace-nowrap">
                   {currentSegmentIndex + 1}/{segments.length} — {segments[currentSegmentIndex]?.label}
                 </span>
               )}

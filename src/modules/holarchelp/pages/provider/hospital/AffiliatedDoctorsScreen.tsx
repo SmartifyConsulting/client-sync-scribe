@@ -103,7 +103,7 @@ export default function AffiliatedDoctorsScreen() {
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm truncate flex items-center gap-1.5">
                     {name}
-                    {pending && <Badge variant="outline" className="text-[9px]">Not yet on platform</Badge>}
+                    {pending && <Badge variant="outline" className="text-xs">Not yet on platform</Badge>}
                   </div>
                   <div className="text-xs text-muted-foreground truncate">{specialty}</div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">

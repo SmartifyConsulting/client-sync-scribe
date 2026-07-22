@@ -192,7 +192,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           <button className="relative h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
             <Bell className="h-4 w-4 text-white stroke-white fill-none" />
             {unreadNotifCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[8px] font-bold text-white">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-white">
                 {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
               </span>
             )}

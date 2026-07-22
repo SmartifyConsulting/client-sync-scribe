@@ -141,7 +141,7 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
                 </div>
                 <div className="text-muted-foreground">
                   Provider: <span className="text-foreground font-medium">{i.provider_name}</span>
-                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">AUTO</span>}
+                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">AUTO</span>}
                 </div>
                 {i.notes && <div className="text-sm">{i.notes}</div>}
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">

@@ -28,7 +28,7 @@ export function StatsCard({
   const content = (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-primary bg-card p-2 md:p-3 transition-all duration-300 shadow-card hover:shadow-card-hover min-h-[80px] md:min-h-[100px]",
+        "group relative overflow-hidden rounded-2xl border-2 border-primary bg-white p-2 md:p-3 transition-all duration-300 shadow-card hover:shadow-card-hover min-h-[80px] md:min-h-[100px]",
         href && "cursor-pointer",
         className
       )}
@@ -40,7 +40,7 @@ export function StatsCard({
           {change && (
             <p
               className={cn(
-                "text-[8px] md:text-xs font-medium",
+                "text-xs font-medium",
                 trend === "up" && "text-success",
                 trend === "down" && "text-destructive",
                 trend === "neutral" && "text-muted-foreground"
@@ -52,13 +52,13 @@ export function StatsCard({
         </div>
         <div className={cn(
           "flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden",
-          imageUrl ? "" : "bg-primary/10 group-hover:bg-primary/15 rounded-xl",
+          imageUrl ? "" : "bg-primary rounded-xl",
           iconSize === "large" ? "h-12 w-12 md:h-14 md:w-14" : "h-7 w-7 md:h-9 md:w-9"
         )}>
           {imageUrl ? (
             <img src={imageUrl} alt={title} className="h-[40px] w-auto md:h-[50px] object-contain" />
           ) : (
-            <Icon className={iconSize === "large" ? "h-5 w-5 md:h-6 md:w-6 text-primary" : "h-4 w-4 md:h-5 md:w-5 text-primary"} />
+            <Icon className={iconSize === "large" ? "h-5 w-5 md:h-6 md:w-6 text-primary-foreground" : "h-4 w-4 md:h-5 md:w-5 text-primary-foreground"} />
           )}
         </div>
       </div>

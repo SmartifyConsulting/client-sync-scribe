@@ -292,7 +292,7 @@ export default function PatientDashboard() {
       {/* Welcome Header */}
       <div className={isMobile ? "space-y-3" : "flex items-center justify-between"}>
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
             <User className="h-7 w-7 text-primary" />
           </div>
           <div>
@@ -329,7 +329,7 @@ export default function PatientDashboard() {
               const Icon = icon;
               return (
                 <div key={notif.id} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 min-w-[200px] shrink-0">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 shrink-0">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary shrink-0">
                     <Icon className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -390,7 +390,7 @@ export default function PatientDashboard() {
                       <p className="text-xs text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
                     </div>
                     {doc.doctor_profile?.specialty && (
-                      <Badge className={`text-[8px] border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
+                      <Badge className={`text-xs border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
                     )}
                   </div>
                 ))}
@@ -403,10 +403,10 @@ export default function PatientDashboard() {
       {/* Row 2: Vulas Balance */}
       <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
         <Link to="/patient/rewards">
-          <Card className="h-full border-primary/20 bg-gradient-to-br from-primary/5 via-card to-secondary/5 hover:shadow-lg transition-all cursor-pointer">
+          <Card className="h-full border-primary hover:shadow-lg transition-all cursor-pointer">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                <Trophy className="h-7 w-7 text-primary" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary shrink-0">
+                <Trophy className="h-7 w-7 text-primary-foreground" />
               </div>
               <div className="flex-1">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("patientDashboard.vulaLabel")}</p>
@@ -436,7 +436,7 @@ export default function PatientDashboard() {
                   { icon: Calendar, text: t("patientDashboard.tip4"), link: "/patient/calendar" },
                 ].map((tip, i) => (
                   <Link key={i} to={tip.link} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-primary/5 transition-colors group">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary shrink-0">
                       <tip.icon className="h-3.5 w-3.5 text-primary" />
                     </div>
                     <p className="text-sm text-foreground group-hover:text-primary transition-colors">{tip.text}</p>
@@ -482,7 +482,7 @@ export default function PatientDashboard() {
                       </div>
                       <div className="text-right">
                         <p className="text-xs font-semibold text-foreground">{formatCurrency(Number(claim.amount))}</p>
-                        <Badge variant="outline" className="text-[8px] capitalize">{claim.status}</Badge>
+                        <Badge variant="outline" className="text-xs capitalize">{claim.status}</Badge>
                       </div>
                     </div>
                   ))}
@@ -495,7 +495,7 @@ export default function PatientDashboard() {
             <Card className="cursor-pointer border-primary/10 hover:border-primary/30 hover:shadow-md transition-all h-full">
               <CardHeader className="p-4">
                 <CardTitle className="flex items-center gap-2 text-sm">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary">
                     <FileText className="h-4 w-4 text-primary" />
                   </div>
                   {t("patientDashboard.documentationTitle")}
@@ -542,7 +542,7 @@ export default function PatientDashboard() {
                     )}
                   </div>
                   {task.vulas_reward > 0 && (
-                    <Badge className="ml-2 bg-primary/10 text-primary border-0 text-[8px] font-bold">
+                    <Badge className="ml-2 bg-primary text-primary border-0 text-xs font-bold">
                       +{task.vulas_reward} Ⓜ️
                     </Badge>
                   )}

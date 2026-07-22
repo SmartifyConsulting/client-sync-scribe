@@ -73,7 +73,7 @@ export default function HolarcHelpIncidents() {
                 {i.provider_name && (
                   <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 truncate">
                     {i.provider_name}
-                    {i.auto && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">{t("holarcHelp.emergency.incidents.auto")}</span>}
+                    {i.auto && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">{t("holarcHelp.emergency.incidents.auto")}</span>}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">{i.resolved_at ? t("holarcHelp.emergency.incidents.resolved", { date: new Date(i.resolved_at).toLocaleString() }) : t("holarcHelp.emergency.incidents.inProgress")}</p>
