@@ -106,7 +106,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
   };
 
   return (
-    <Collapsible defaultOpen={false} className="rounded-xl border-2 border-primary bg-white overflow-hidden">
+    <Collapsible defaultOpen={false} className="rounded-xl border border-border bg-white overflow-hidden">
       <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-primary/5 transition-colors px-4 py-3 group">
         <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left">
           <ShieldAlert className="h-4 w-4 text-primary" /> Emergency Contacts
