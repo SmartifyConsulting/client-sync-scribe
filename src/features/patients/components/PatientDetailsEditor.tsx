@@ -189,7 +189,7 @@ const SectionHeader = ({
   onEdit?: () => void;
 }) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-muted/40 transition-colors px-4 py-3 group">
-    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-2 text-left">
+    <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left">
       <Icon className="h-4 w-4 text-primary" /> {label}
     </h3>
     <div className="flex items-center gap-2">
@@ -251,8 +251,12 @@ const PhoneInput = ({
   return (
     <div className="flex gap-1">
       <Select value={countryCode} onValueChange={(v) => handleChange(v, number)}>
-        <SelectTrigger className="w-[90px] text-xs shrink-0">
-          <SelectValue />
+        <SelectTrigger className="w-[105px] text-xs shrink-0 [&>span]:line-clamp-none">
+          <SelectValue>
+            <span className="whitespace-nowrap">
+              {COUNTRY_CODES.find((cc) => cc.code === countryCode)?.label}
+            </span>
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {COUNTRY_CODES.map((cc) => (
@@ -404,8 +408,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["personal", "medical"],
-  care: ["doctors", "sessions", "hospital_visits", "roundtable"],
+  health: ["personal", "medical", "overview", "history", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
 };
 
@@ -577,6 +580,32 @@ export function PatientDetailsEditor({
   const [gpSearchResults, setGpSearchResults] = useState<any[]>([]);
   const [gpSearchOpen, setGpSearchOpen] = useState(false);
   const [gpSearchTerm, setGpSearchTerm] = useState("");
+  const [gpAutoDetected, setGpAutoDetected] = useState<{ id: string; full_name: string } | null>(null);
+
+  // Auto-detect: if the GP field is empty, suggest a connected doctor whose
+  // specialty is "General Practitioner" (falls back to the first connected
+  // doctor) so patients don't have to search from scratch.
+  useEffect(() => {
+    if (!isSelfService || !patient.patient_user_id || formData.general_practitioner) {
+      setGpAutoDetected(null);
+      return;
+    }
+    supabase
+      .from("doctor_patient_access")
+      .select("doctor_id")
+      .eq("patient_user_id", patient.patient_user_id)
+      .then(async ({ data: access }) => {
+        const doctorIds = (access || []).map((a: any) => a.doctor_id);
+        if (doctorIds.length === 0) return;
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, specialty")
+          .in("id", doctorIds);
+        if (!profiles || profiles.length === 0) return;
+        const gp = profiles.find((p: any) => (p.specialty || "").toLowerCase().includes("general practitioner")) || profiles[0];
+        setGpAutoDetected({ id: gp.id, full_name: gp.full_name });
+      });
+  }, [isSelfService, patient.patient_user_id, formData.general_practitioner]);
 
   // Fetch avatar for self-service patients
   useEffect(() => {
@@ -1176,11 +1205,19 @@ export function PatientDetailsEditor({
       setGpSearchResults([]);
       return;
     }
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, practice_number, doctor_number, specialty")
-      .or(`full_name.ilike.%${term}%,practice_number.ilike.%${term}%,doctor_number.ilike.%${term}%`)
-      .limit(5);
+    // Doctor role can live in either `profiles.role` or the separate
+    // `user_roles` table depending on when the account was created, so
+    // check both and match on either to avoid missing real doctors.
+    const [{ data: roleRows }, { data: matchingProfiles }] = await Promise.all([
+      supabase.from("user_roles").select("user_id").eq("role", "doctor"),
+      supabase
+        .from("profiles")
+        .select("id, full_name, practice_number, doctor_number, specialty, role")
+        .or(`full_name.ilike.%${term}%,practice_number.ilike.%${term}%,doctor_number.ilike.%${term}%`)
+        .limit(20),
+    ]);
+    const doctorIds = new Set((roleRows || []).map((r: any) => r.user_id));
+    const data = (matchingProfiles || []).filter((p: any) => p.role === "doctor" || doctorIds.has(p.id)).slice(0, 5);
     setGpSearchResults(data || []);
     if ((data || []).length > 0) setGpSearchOpen(true);
   };
@@ -1415,8 +1452,8 @@ export function PatientDetailsEditor({
   };
 
   // Parent tab groups for desktop/tablet
-  const PROFILE_TABS = ["personal", "medical"];
-  const CARE_TABS = ["doctors", "sessions", "hospital_visits", "roundtable"];
+  const PROFILE_TABS = ["personal", "medical", "overview"];
+  const CARE_TABS = ["history", "roundtable"];
   const ADMIN_TABS = ["calendar", "tasks", "documents"];
 
   const handleParentTabClick = (parent: string, tabs: string[]) => {
@@ -1454,19 +1491,14 @@ export function PatientDetailsEditor({
               {t("patientProfile.toggleMedical")}
             </TabsTrigger>
           )}
-          {show("doctors") && (
-            <TabsTrigger value="doctors" className={triggerClass}>
-              {t("nav.myHolarchy")}
+          {show("overview") && (
+            <TabsTrigger value="overview" className={triggerClass}>
+              My Holarchy
             </TabsTrigger>
           )}
-          {show("sessions") && (
-            <TabsTrigger value="sessions" className={triggerClass}>
-              {t("sessions.title")}
-            </TabsTrigger>
-          )}
-          {show("hospital_visits") && (
-            <TabsTrigger value="hospital_visits" className={triggerClass}>
-              {t("patientProfile.tabAdmissions")}
+          {show("history") && (
+            <TabsTrigger value="history" className={triggerClass}>
+              My History
             </TabsTrigger>
           )}
           {show("roundtable") && (
@@ -1588,11 +1620,93 @@ export function PatientDetailsEditor({
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {renderTabsList()}
 
-            {/* === PERSONAL INFORMATION TAB === */}
-            <TabsContent value="personal" className="space-y-4 mt-4">
+            {/* === MY HOLARCHY TAB (overview) === */}
+            <TabsContent value="overview" className="space-y-4 mt-4">
+              <Tabs defaultValue="team">
+                <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5">My Holarc Team</TabsTrigger>
+                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5">Insurance</TabsTrigger>
+                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5">Pharmacies</TabsTrigger>
+                </TabsList>
+
+            {/* === INSURANCE SUB-TAB (view) === */}
+            <TabsContent value="insurance" className="mt-4">
+              <Collapsible defaultOpen className="rounded-xl border border-primary bg-card overflow-hidden">
+                <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+                <CollapsibleContent className="p-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <ViewField label="Insurance Provider" value={patient.medical_aid} />
+                    <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
+                    <ViewField label="Insurance Number" value={patient.medical_aid_number} />
+                    <ViewField label="Primary Member" value={patient.primary_member} />
+                    <ViewField label="Medical Aid Claims Email" value={patient.claims_email} />
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </TabsContent>
+
+            {/* === PHARMACIES SUB-TAB (view) === */}
+            <TabsContent value="pharmacies" className="mt-4">
+              <Collapsible defaultOpen className="rounded-xl border border-primary bg-card overflow-hidden">
+                <SectionHeader icon={Store} label="Pharmacies" />
+                <CollapsibleContent className="p-3">
+                  {pharmacies.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {pharmacies.map((pharmacy) => (
+                        <div
+                          key={pharmacy.id}
+                          className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50"
+                        >
+                          <div>
+                            <p className="text-xs font-medium text-foreground flex items-center gap-2">
+                              {pharmacy.name}
+                              {pharmacy.branch && (
+                                <span className="text-muted-foreground">({pharmacy.branch})</span>
+                              )}
+                              {pharmacy.is_primary && (
+                                <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
+                                  Primary
+                                </span>
+                              )}
+                            </p>
+                            {pharmacy.email && (
+                              <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            </TabsContent>
+
+            {/* === MY HOLARC TEAM SUB-TAB (view) === */}
+            <TabsContent value="team" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-sm font-semibold text-primary">My Holarc Team</h2>
+                <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
+              </div>
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                }
+              >
+                <MyDoctors hideHeader />
+              </Suspense>
+            </TabsContent>
+              </Tabs>
+            </TabsContent>
+
+            {/* === PERSONAL / MEDICAL (top-level tabs) === */}
+<TabsContent value="personal" className="space-y-4 mt-4">
               <div className="mb-1 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.personalHeading")}</h2>
+                  <h2 className="text-sm font-semibold text-primary">{t("patientProfile.personalHeading")}</h2>
                   <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
@@ -1728,7 +1842,7 @@ export function PatientDetailsEditor({
             <TabsContent value="medical" className="mt-4">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.medicalHeading")}</h2>
+                  <h2 className="text-sm font-semibold text-primary">{t("patientProfile.medicalHeading")}</h2>
                   <p className="text-xs text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
@@ -1905,7 +2019,7 @@ export function PatientDetailsEditor({
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
                     <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
-                      <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
+                      <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-1.5 text-left">
                         <Heart className="h-3.5 w-3.5" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
@@ -1913,7 +2027,7 @@ export function PatientDetailsEditor({
                           className={cn(
                             "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
                             patient.organ_donor
-                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                              ? "bg-primary text-primary-foreground"
                               : "bg-muted text-muted-foreground",
                           )}
                         >
@@ -1940,22 +2054,6 @@ export function PatientDetailsEditor({
                       )}
                     </CollapsibleContent>
                   </Collapsible>
-                </div>
-
-                {/* Column 2 */}
-                <div className="space-y-4">
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
-                    <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
-                    <CollapsibleContent className="p-3">
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <ViewField label="Insurance Provider" value={patient.medical_aid} />
-                        <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
-                        <ViewField label="Insurance Number" value={patient.medical_aid_number} />
-                        <ViewField label="Primary Member" value={patient.primary_member} />
-                        <ViewField label="Medical Aid Claims Email" value={patient.claims_email} />
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
 
                   <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
                     <SectionHeader icon={User} label="General Practitioner" />
@@ -1963,50 +2061,18 @@ export function PatientDetailsEditor({
                       <ViewField label="General Practitioner" value={patient.general_practitioner} />
                     </CollapsibleContent>
                   </Collapsible>
-
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
-                    <SectionHeader icon={Store} label="Pharmacies" />
-                    <CollapsibleContent className="p-3">
-                      {pharmacies.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                      ) : (
-                        <div className="space-y-2">
-                          {pharmacies.map((pharmacy) => (
-                            <div
-                              key={pharmacy.id}
-                              className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50"
-                            >
-                              <div>
-                                <p className="text-xs font-medium text-foreground flex items-center gap-2">
-                                  {pharmacy.name}
-                                  {pharmacy.branch && (
-                                    <span className="text-muted-foreground">({pharmacy.branch})</span>
-                                  )}
-                                  {pharmacy.is_primary && (
-                                    <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium">
-                                      Primary
-                                    </span>
-                                  )}
-                                </p>
-                                {pharmacy.email && (
-                                  <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CollapsibleContent>
-                  </Collapsible>
                 </div>
+
               </div>
             </TabsContent>
+
+
 
             {/* === TASKS TAB === */}
             {isSelfService && (
               <TabsContent value="tasks" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
+                  <h2 className="text-sm font-semibold text-primary">My Tasks</h2>
                   <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
                 </div>
                 <Suspense
@@ -2022,12 +2088,38 @@ export function PatientDetailsEditor({
             )}
 
             {isSelfService && (
-              <TabsContent value="sessions" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
-                  <p className="text-xs text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
-                </div>
-                <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
+              <TabsContent value="history" className="mt-4">
+                <Tabs defaultValue="sessions">
+                  <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                    <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Sessions</TabsTrigger>
+                    <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Admissions</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="sessions" className="mt-3">
+                    <div className="mb-4">
+                      <h2 className="text-sm font-semibold text-primary">My Sessions</h2>
+                      <p className="text-xs text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
+                    </div>
+                    <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
+                  </TabsContent>
+                  <TabsContent value="admissions" className="mt-3">
+                    <Tabs defaultValue="admissions_view">
+                      <TabsList className="bg-primary">
+                        <TabsTrigger value="admissions_view" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Hospital Admissions</TabsTrigger>
+                        <TabsTrigger value="incidents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Emergency Incidents</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="admissions_view" className="mt-3">
+                        <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
+                          <AdmissionsViewLazy patientId={patient.id} canEdit />
+                        </Suspense>
+                      </TabsContent>
+                      <TabsContent value="incidents" className="mt-3">
+                        <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
+                          <PatientIncidentHistoryLazy userId={patient.patient_user_id ?? null} />
+                        </Suspense>
+                      </TabsContent>
+                    </Tabs>
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
             )}
 
@@ -2060,30 +2152,9 @@ export function PatientDetailsEditor({
             )}
 
             {isSelfService && (
-              <TabsContent value="doctors" className="mt-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    {isMobile ? "My Holarchy" : "My Healthcare Providers"}
-                  </h2>
-                  <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
-                </div>
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  }
-                >
-                  <MyDoctors hideHeader />
-                </Suspense>
-              </TabsContent>
-            )}
-
-            {isSelfService && (
-              <>
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
+                  <h2 className="text-sm font-semibold text-primary">My Round Table</h2>
                   <p className="text-xs text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
@@ -2098,25 +2169,6 @@ export function PatientDetailsEditor({
                   <PatientRoundTable hideHeader />
                 </Suspense>
               </TabsContent>
-              <TabsContent value="hospital_visits" className="mt-4">
-                <Tabs defaultValue="admissions">
-                  <TabsList className="bg-primary">
-                    <TabsTrigger value="admissions" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Hospital Admissions</TabsTrigger>
-                    <TabsTrigger value="incidents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Emergency Incidents</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="admissions" className="mt-3">
-                    <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
-                      <AdmissionsViewLazy patientId={patient.id} canEdit />
-                    </Suspense>
-                  </TabsContent>
-                  <TabsContent value="incidents" className="mt-3">
-                    <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
-                      <PatientIncidentHistoryLazy userId={patient.patient_user_id ?? null} />
-                    </Suspense>
-                  </TabsContent>
-                </Tabs>
-              </TabsContent>
-              </>
             )}
           </Tabs>
         </div>
@@ -2148,11 +2200,222 @@ export function PatientDetailsEditor({
             </div>
           )}
 
-          {/* === PERSONAL TAB (EDIT) === */}
-          <TabsContent value="personal" className="space-y-4 mt-4">
+          {/* === MY HOLARCHY TAB (EDIT, overview) === */}
+          <TabsContent value="overview" className="space-y-4 mt-4">
+            <Tabs defaultValue="team">
+              <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5">My Holarc Team</TabsTrigger>
+                <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5">Insurance</TabsTrigger>
+                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5">Pharmacies</TabsTrigger>
+              </TabsList>
+
+          {/* === INSURANCE SUB-TAB (EDIT) === */}
+          <TabsContent value="insurance" className="mt-4">
+            <Collapsible defaultOpen className="rounded-xl border border-primary bg-card overflow-hidden">
+              <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
+              <CollapsibleContent className="p-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>Insurance Provider</Label>
+                    <Input
+                      className="text-sm"
+                      value={formData.medical_aid}
+                      onChange={(e) => updateFormData({ medical_aid: e.target.value })}
+                      placeholder="Insurance provider"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Insurance Product</Label>
+                    <Input
+                      className="text-sm"
+                      value={formData.medical_insurance_product}
+                      onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })}
+                      placeholder="Product name"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Insurance Number</Label>
+                    <Input
+                      className="text-sm"
+                      value={formData.medical_aid_number}
+                      onChange={(e) => updateFormData({ medical_aid_number: e.target.value })}
+                      placeholder="Member number"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Primary Member</Label>
+                    <Input
+                      className="text-sm"
+                      value={formData.primary_member}
+                      onChange={(e) => updateFormData({ primary_member: e.target.value })}
+                      placeholder="Primary member name"
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label>Medical Aid Claims Email</Label>
+                    <Input
+                      className="text-sm"
+                      type="email"
+                      value={formData.claims_email}
+                      onChange={(e) => updateFormData({ claims_email: e.target.value })}
+                      placeholder="claims@insurance.com"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      When invoices are marked paid, the PAID invoice is auto-submitted here (if enabled in patient settings).
+                    </p>
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          </TabsContent>
+
+          {/* === PHARMACIES SUB-TAB (EDIT) === */}
+          <TabsContent value="pharmacies" className="mt-4">
+            <Collapsible defaultOpen className="rounded-xl border border-primary bg-card overflow-hidden">
+              <SectionHeader icon={Store} label="Pharmacies" />
+              <CollapsibleContent className="p-3">
+                <div className="flex justify-end mb-3">
+                  {!showAddPharmacy && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 text-xs h-8 px-3"
+                      onClick={() => setShowAddPharmacy(true)}
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add
+                    </Button>
+                  )}
+                </div>
+                {showAddPharmacy && (
+                  <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label>Name *</Label>
+                        <Input
+                          className="text-sm"
+                          value={newPharmacy.name}
+                          onChange={(e) => setNewPharmacy((prev) => ({ ...prev, name: e.target.value }))}
+                          placeholder="Pharmacy name"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Branch</Label>
+                        <Input
+                          className="text-sm"
+                          value={newPharmacy.branch}
+                          onChange={(e) => setNewPharmacy((prev) => ({ ...prev, branch: e.target.value }))}
+                          placeholder="Branch name"
+                        />
+                      </div>
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label>Email</Label>
+                        <Input
+                          className="text-sm"
+                          type="email"
+                          value={newPharmacy.email}
+                          onChange={(e) => setNewPharmacy((prev) => ({ ...prev, email: e.target.value }))}
+                          placeholder="pharmacy@email.com"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7"
+                        onClick={() => {
+                          setShowAddPharmacy(false);
+                          setEditingPharmacyId(null);
+                          setNewPharmacy({ name: "", email: "", branch: "" });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>
+                        {editingPharmacyId ? "Save" : "Add"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {pharmacies.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {pharmacies.map((pharmacy) => (
+                      <div
+                        key={pharmacy.id}
+                        className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
+                      >
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleSetPrimaryPharmacy(pharmacy.id)}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            {pharmacy.is_primary ? (
+                              <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+                            ) : (
+                              <Star className="h-3.5 w-3.5 text-muted-foreground" />
+                            )}
+                          </button>
+                          <div>
+                            <p className="text-xs font-medium text-foreground">
+                              {pharmacy.name}
+                              {pharmacy.branch && (
+                                <span className="text-muted-foreground ml-1">({pharmacy.branch})</span>
+                              )}
+                            </p>
+                            {pharmacy.email && (
+                              <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => handleEditPharmacy(pharmacy)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive"
+                            onClick={() => handleRemovePharmacy(pharmacy.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CollapsibleContent>
+            </Collapsible>
+          </TabsContent>
+
+          {/* === MY HOLARC TEAM SUB-TAB (EDIT) === */}
+          <TabsContent value="team" className="mt-4">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              }
+            >
+              <MyDoctors />
+            </Suspense>
+          </TabsContent>
+              </Tabs>
+            </TabsContent>
+
+            {/* === PERSONAL / MEDICAL (top-level tabs) === */}
+<TabsContent value="personal" className="space-y-4 mt-4">
             <div className="mb-1 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.personalHeading")}</h2>
+                <h2 className="text-sm font-semibold text-primary">{t("patientProfile.personalHeading")}</h2>
                 <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
@@ -2324,7 +2587,7 @@ export function PatientDetailsEditor({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1 text-xs h-7"
+                      className="gap-1 text-xs h-8 px-3"
                       onClick={() => setShowAddNOK(true)}
                     >
                       <Plus className="h-4 w-4" />
@@ -2576,7 +2839,7 @@ export function PatientDetailsEditor({
           <TabsContent value="medical" className="mt-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-foreground">{t("patientProfile.medicalHeading")}</h2>
+                <h2 className="text-sm font-semibold text-primary">{t("patientProfile.medicalHeading")}</h2>
                 <p className="text-xs text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
@@ -2646,7 +2909,7 @@ export function PatientDetailsEditor({
                   <CollapsibleContent className="px-3 pb-3 space-y-3">
                     {/* Allergies */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-                      <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5">
+                      <Label className="text-sm font-semibold tracking-wide flex items-center gap-1.5">
                         <AlertCircle className="h-3.5 w-3.5" /> Allergies
                       </Label>
                       <Textarea
@@ -2662,14 +2925,14 @@ export function PatientDetailsEditor({
                     {/* Medication */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5">
+                        <Label className="text-sm font-semibold tracking-wide flex items-center gap-1.5">
                           <Pill className="h-3.5 w-3.5" /> Medication
                         </Label>
                         {!showAddMed && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1 text-xs h-7"
+                            className="gap-1 text-xs h-8 px-3"
                             onClick={() => setShowAddMed(true)}
                           >
                             <Plus className="h-4 w-4" />
@@ -2878,14 +3141,14 @@ export function PatientDetailsEditor({
                     {/* Conditions & Diagnoses */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
                       <div className="flex items-center justify-between mb-2">
-                        <Label className="text-xs font-semibold tracking-wide flex items-center gap-1.5">
+                        <Label className="text-sm font-semibold tracking-wide flex items-center gap-1.5">
                           <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
                         </Label>
                         {!showAddCondition && (
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1 text-xs h-7"
+                            className="gap-1 text-xs h-8 px-3"
                             onClick={() => setShowAddCondition(true)}
                           >
                             <Plus className="h-4 w-4" />
@@ -3031,7 +3294,7 @@ export function PatientDetailsEditor({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 text-xs h-7"
+                          className="gap-1 text-xs h-8 px-3"
                           onClick={() => setShowAddSurgery(true)}
                         >
                           <Plus className="h-4 w-4" />
@@ -3180,7 +3443,7 @@ export function PatientDetailsEditor({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 text-xs h-7"
+                          className="gap-1 text-xs h-8 px-3"
                           onClick={() => setShowAddFamily(true)}
                         >
                           <Plus className="h-4 w-4" />
@@ -3270,7 +3533,7 @@ export function PatientDetailsEditor({
                 {/* Organ Donor — collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
                   <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
-                    <h3 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5 text-left">
+                    <h3 className="text-xs font-semibold text-primary tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
                     </h3>
                     <div className="flex items-center gap-2">
@@ -3278,7 +3541,7 @@ export function PatientDetailsEditor({
                         className={cn(
                           "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
                           formData.organ_donor
-                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                            ? "bg-primary text-primary-foreground"
                             : "bg-muted text-muted-foreground",
                         )}
                       >
@@ -3317,66 +3580,6 @@ export function PatientDetailsEditor({
                     )}
                   </CollapsibleContent>
                 </Collapsible>
-              </div>
-
-              {/* Column 2 */}
-              <div className="space-y-4">
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
-                  <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
-                  <CollapsibleContent className="p-3">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <Label>Insurance Provider</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.medical_aid}
-                          onChange={(e) => updateFormData({ medical_aid: e.target.value })}
-                          placeholder="Insurance provider"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Insurance Product</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.medical_insurance_product}
-                          onChange={(e) => updateFormData({ medical_insurance_product: e.target.value })}
-                          placeholder="Product name"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Insurance Number</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.medical_aid_number}
-                          onChange={(e) => updateFormData({ medical_aid_number: e.target.value })}
-                          placeholder="Member number"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Primary Member</Label>
-                        <Input
-                          className="text-sm"
-                          value={formData.primary_member}
-                          onChange={(e) => updateFormData({ primary_member: e.target.value })}
-                          placeholder="Primary member name"
-                        />
-                      </div>
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <Label>Medical Aid Claims Email</Label>
-                        <Input
-                          className="text-sm"
-                          type="email"
-                          value={formData.claims_email}
-                          onChange={(e) => updateFormData({ claims_email: e.target.value })}
-                          placeholder="claims@insurance.com"
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          When invoices are marked paid, the PAID invoice is auto-submitted here (if enabled in patient settings).
-                        </p>
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
 
                 {/* GP Search */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
@@ -3390,6 +3593,24 @@ export function PatientDetailsEditor({
                         onChange={(e) => searchGP(e.target.value)}
                         placeholder="Search or type GP name"
                       />
+                      {gpAutoDetected && (
+                        <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+                          <span className="text-foreground">
+                            We noticed <span className="font-medium">{gpAutoDetected.full_name}</span> is connected to your care — use them as your GP?
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2.5 text-xs shrink-0"
+                            onClick={() => {
+                              updateFormData({ general_practitioner: gpAutoDetected.full_name });
+                              setGpAutoDetected(null);
+                            }}
+                          >
+                            Use this
+                          </Button>
+                        </div>
+                      )}
                       {gpSearchOpen && gpSearchResults.length > 0 && (
                         <div className="absolute z-10 top-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
                           {gpSearchResults.map((doc) => (
@@ -3470,140 +3691,17 @@ export function PatientDetailsEditor({
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-
-                {/* Pharmacies */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card overflow-hidden">
-                  <SectionHeader icon={Store} label="Pharmacies" />
-                  <CollapsibleContent className="p-3">
-                    <div className="flex justify-end mb-3">
-                      {!showAddPharmacy && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1 text-xs h-7"
-                          onClick={() => setShowAddPharmacy(true)}
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add
-                        </Button>
-                      )}
-                    </div>
-                    {showAddPharmacy && (
-                      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
-                          <div className="space-y-1.5">
-                            <Label>Name *</Label>
-                            <Input
-                              className="text-sm"
-                              value={newPharmacy.name}
-                              onChange={(e) => setNewPharmacy((prev) => ({ ...prev, name: e.target.value }))}
-                              placeholder="Pharmacy name"
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label>Branch</Label>
-                            <Input
-                              className="text-sm"
-                              value={newPharmacy.branch}
-                              onChange={(e) => setNewPharmacy((prev) => ({ ...prev, branch: e.target.value }))}
-                              placeholder="Branch name"
-                            />
-                          </div>
-                          <div className="space-y-1.5 sm:col-span-2">
-                            <Label>Email</Label>
-                            <Input
-                              className="text-sm"
-                              type="email"
-                              value={newPharmacy.email}
-                              onChange={(e) => setNewPharmacy((prev) => ({ ...prev, email: e.target.value }))}
-                              placeholder="pharmacy@email.com"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs h-7"
-                            onClick={() => {
-                              setShowAddPharmacy(false);
-                              setEditingPharmacyId(null);
-                              setNewPharmacy({ name: "", email: "", branch: "" });
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>
-                            {editingPharmacyId ? "Save" : "Add"}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {pharmacies.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {pharmacies.map((pharmacy) => (
-                          <div
-                            key={pharmacy.id}
-                            className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
-                          >
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleSetPrimaryPharmacy(pharmacy.id)}
-                                className="text-xs text-primary hover:underline"
-                              >
-                                {pharmacy.is_primary ? (
-                                  <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-                                ) : (
-                                  <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                                )}
-                              </button>
-                              <div>
-                                <p className="text-xs font-medium text-foreground">
-                                  {pharmacy.name}
-                                  {pharmacy.branch && (
-                                    <span className="text-muted-foreground ml-1">({pharmacy.branch})</span>
-                                  )}
-                                </p>
-                                {pharmacy.email && (
-                                  <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex gap-1 shrink-0">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleEditPharmacy(pharmacy)}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive"
-                                onClick={() => handleRemovePharmacy(pharmacy.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CollapsibleContent>
-                </Collapsible>
               </div>
             </div>
           </TabsContent>
+
+
 
           {/* === Tasks tab (edit mode) === */}
           {isSelfService && (
             <TabsContent value="tasks" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Tasks</h2>
+                <h2 className="text-sm font-semibold text-primary">My Tasks</h2>
                 <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
               </div>
               <Suspense
@@ -3619,20 +3717,33 @@ export function PatientDetailsEditor({
           )}
 
           {isSelfService && (
-            <TabsContent value="sessions" className="mt-4">
-              <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Sessions</h2>
-                <p className="text-xs text-muted-foreground">History of your consultations</p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <TabsContent value="history" className="mt-4">
+              <Tabs defaultValue="sessions">
+                <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                  <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Sessions</TabsTrigger>
+                  <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Admissions</TabsTrigger>
+                </TabsList>
+                <TabsContent value="sessions" className="mt-3">
+                  <div className="mb-4">
+                    <h2 className="text-sm font-semibold text-primary">My Sessions</h2>
+                    <p className="text-xs text-muted-foreground">History of your consultations</p>
                   </div>
-                }
-              >
-                <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
-              </Suspense>
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                      </div>
+                    }
+                  >
+                    <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+                  </Suspense>
+                </TabsContent>
+                <TabsContent value="admissions" className="mt-3">
+                  <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
+                    <AdmissionsViewLazy patientId={patient.id} canEdit />
+                  </Suspense>
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           )}
 
@@ -3653,7 +3764,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Documents</h2>
+                <h2 className="text-sm font-semibold text-primary">My Documents</h2>
                 <p className="text-xs text-muted-foreground">
                   All your prescriptions, invoices, certificates and uploaded files
                 </p>
@@ -3671,23 +3782,9 @@ export function PatientDetailsEditor({
           )}
 
           {isSelfService && (
-            <TabsContent value="doctors" className="mt-4">
-              <Suspense
-                fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                }
-              >
-                <MyDoctors />
-              </Suspense>
-            </TabsContent>
-          )}
-
-          {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground">My Round Table</h2>
+                <h2 className="text-sm font-semibold text-primary">My Round Table</h2>
                 <p className="text-xs text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>

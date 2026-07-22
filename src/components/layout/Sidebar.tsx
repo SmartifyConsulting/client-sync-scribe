@@ -28,6 +28,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AccountMenu } from "@/components/layout/AccountMenu";
 
 interface NavItem {
   icon: LucideIcon;
@@ -44,15 +45,14 @@ const doctorNavItems: (NavItem & { tour?: string })[] = [
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: Mic, label: "My Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
-  { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/documents" },
+  { icon: FolderOpen, label: "All Documents", labelKey: "nav.allDocuments", to: "/documents" },
   { icon: Users2, label: "My Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health", tour: "patient-profile" },
-  { icon: Users, label: "My Holarchy", labelKey: "nav.myHolarchy", to: "/patient/details?section=care", tour: "patient-holarchy" },
+  { icon: Users, label: "My Holarchy", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
@@ -181,58 +181,35 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </nav>
 
         {/* Bottom Section - Account */}
-        <div className="mt-auto bg-sidebar-accent/30">
-          <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-            <Avatar className="h-8 w-8 border-2 border-primary">
-              <AvatarImage
-                key={profile?.avatar_url}
-                src={profile?.avatar_url || undefined}
-                alt={profile?.full_name || "User"}
-              />
-              <AvatarFallback className="bg-primary/20 text-primary text-sm">
-                {profile?.full_name
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              {loading ? (
-                <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-              ) : (
-                <p className="text-sm font-medium text-primary truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
-              )}
-            </div>
-          </div>
-          <div className="px-3 pb-3 space-y-0.5">
-            <NavLink
-              to="/settings"
-              onClick={onNavigate}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                )
-              }
-            >
-              <Settings className="h-4 w-4" />
-              {t("common.settings", "Settings")}
-            </NavLink>
-            <button
-              onClick={async () => {
-                const { supabase } = await import("@/integrations/supabase/client");
-                await supabase.auth.signOut();
-                window.location.href = "/auth";
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
-            >
-              <LogOut className="h-4 w-4" />
-              {t("common.signOut", "Sign Out")}
-            </button>
-          </div>
+        <div className="mt-auto">
+          <AccountMenu
+            align="start"
+            trigger={
+              <button className="flex w-full items-center gap-3 px-4 py-3 hover:bg-accent hover:rounded-xl transition-colors">
+                <Avatar className="h-10 w-10 border-2 border-border">
+                  <AvatarImage
+                    key={profile?.avatar_url}
+                    src={profile?.avatar_url || undefined}
+                    alt={profile?.full_name || "User"}
+                  />
+                  <AvatarFallback className="bg-muted text-foreground text-sm">
+                    {profile?.full_name
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 text-left">
+                  {loading ? (
+                    <div className="h-3 w-20 rounded bg-muted animate-pulse" />
+                  ) : (
+                    <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
+                  )}
+                </div>
+              </button>
+            }
+          />
         </div>
       </div>
     </aside>
