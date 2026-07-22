@@ -118,11 +118,11 @@ export default function MySessions() {
               <AccordionItem
                 key={b.key}
                 value={b.key}
-                className="border border-primary/30 rounded-lg bg-card data-[state=open]:border-primary/50"
+                className="border border-primary-dark/40 rounded-lg bg-card data-[state=open]:border-primary-dark"
               >
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex items-center justify-between w-full pr-2">
-                    <span className="text-xs font-medium text-primary">{t(b.labelKey, b.fallback)}</span>
+                    <span className="text-xs font-medium text-primary-dark">{t(b.labelKey, b.fallback)}</span>
                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {rows.length}
                     </span>
