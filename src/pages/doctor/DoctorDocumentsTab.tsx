@@ -7,6 +7,7 @@ import { useDocuments } from "@/hooks/useDocuments";
 import { format } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
+import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 10;
 
@@ -70,7 +71,7 @@ export default function DoctorDocumentsTab() {
                     <FileText className="h-4 w-4 text-primary shrink-0" />
                     <span className="flex-1 truncate text-sm font-medium text-foreground">{doc.name}</span>
                     {doc.patient_name && (
-                      <span className="hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground min-w-0 truncate max-w-[180px]">
+                      <span className={cn("hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground min-w-0 truncate max-w-[180px]", isSamplePatient({ name: doc.patient_name }) && "italic")}>
                         <User className="h-3 w-3" />
                         {doc.patient_name}
                         {isSamplePatient({ name: doc.patient_name }) && <SampleBadge />}

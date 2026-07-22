@@ -1,13 +1,29 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, X, Hospital } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Building2, Plus, X, Hospital, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { toastError } from "@/lib/userMessage";
+
+const ROLE_OPTIONS = [
+  "Permanent",
+  "Part-time",
+  "Locum",
+  "Sessional",
+  "Visiting",
+  "Independent",
+  "Agency",
+  "Honorary",
+  "Volunteer",
+  "Academic",
+];
 
 type Hospital = { id: string; name: string; city: string | null; status: string };
 type Affiliation = {
@@ -22,10 +38,12 @@ type Affiliation = {
 export default function HospitalAffiliations() {
   const [affiliations, setAffiliations] = useState<Affiliation[]>([]);
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<Hospital[]>([]);
   const [roleInput, setRoleInput] = useState("Visiting");
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [hospitalsLoaded, setHospitalsLoaded] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -42,42 +60,55 @@ export default function HospitalAffiliations() {
   }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
 
-  // Preload all approved hospitals so the doctor can browse the registered list
-  // even before typing anything.
+  // Only fetch the approved hospital list once the dropdown is actually
+  // opened, rather than preloading it before the user has activated it.
   const [allHospitals, setAllHospitals] = useState<Hospital[]>([]);
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("holarchelp_hospitals_public" as any)
-        .select("id, name, city, status")
-        .order("name", { ascending: true })
-        .limit(500);
-      setAllHospitals((data as any) || []);
-    })();
-  }, []);
+  async function loadHospitalsIfNeeded() {
+    if (hospitalsLoaded) return;
+    const { data } = await supabase
+      .from("holarchelp_hospitals_public" as any)
+      .select("id, name, city, status")
+      .eq("status", "approved")
+      .order("name", { ascending: true })
+      .limit(500);
+    setAllHospitals((data as any) || []);
+    setHospitalsLoaded(true);
+  }
 
-  useEffect(() => {
+  const results = (() => {
     const q = search.trim().toLowerCase();
-    if (!q) {
-      setResults(allHospitals);
-      return;
-    }
-    setResults(allHospitals.filter((h) => h.name.toLowerCase().includes(q)).slice(0, 20));
-  }, [search, allHospitals]);
+    if (!q) return allHospitals;
+    return allHospitals.filter((h) => h.name.toLowerCase().includes(q)).slice(0, 50);
+  })();
 
-  async function addExisting(h: Hospital) {
-    if (!userId) return;
-    setLoading(true);
-    const { error } = await supabase.from("doctor_hospital_affiliations").insert({
-      doctor_id: userId,
-      hospital_id: h.id,
-      hospital_name_snapshot: h.name,
-      role_at_hospital: roleInput || null,
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
+  }
+
+  async function addSelected() {
+    if (!userId || selectedIds.size === 0) return;
+    setLoading(true);
+    const chosen = allHospitals.filter((h) => selectedIds.has(h.id));
+    const { error } = await supabase.from("doctor_hospital_affiliations").insert(
+      chosen.map((h) => ({
+        doctor_id: userId,
+        hospital_id: h.id,
+        hospital_name_snapshot: h.name,
+        role_at_hospital: roleInput || null,
+      })),
+    );
     setLoading(false);
     if (error) return toastError(error, "We couldn't complete that. Please try again.");
-    toast.success(`Added ${h.name}`);
-    setSearch(""); setResults([]); load();
+    toast.success(`Added ${chosen.length} hospital${chosen.length > 1 ? "s" : ""}`);
+    setSelectedIds(new Set());
+    setSearch("");
+    setOpen(false);
+    load();
   }
 
   async function addNewInactive() {
@@ -103,7 +134,7 @@ export default function HospitalAffiliations() {
     setLoading(false);
     if (error) return toastError(error, "We couldn't complete that. Please try again.");
     toast.success("Hospital submitted to admin for activation");
-    setSearch(""); setResults([]); load();
+    setSearch(""); setOpen(false); load();
   }
 
   async function remove(id: string) {
@@ -125,50 +156,72 @@ export default function HospitalAffiliations() {
 
       <div className="grid grid-cols-1 sm:grid-cols-[1fr,180px] gap-2">
         <div className="space-y-1.5">
-          <Label className="text-xs">Search or pick a registered hospital</Label>
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Start typing or browse the list below…"
-          />
+          <Label className="text-xs">Select hospitals</Label>
+          <Popover
+            open={open}
+            onOpenChange={(next) => {
+              setOpen(next);
+              if (next) loadHospitalsIfNeeded();
+            }}
+          >
+            <PopoverTrigger asChild>
+              <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                {selectedIds.size > 0 ? `${selectedIds.size} hospital${selectedIds.size > 1 ? "s" : ""} selected` : "Select approved hospitals…"}
+                <ChevronsUpDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <Command shouldFilter={false} className="h-auto">
+                <CommandInput
+                  placeholder="Search hospitals…"
+                  value={search}
+                  onValueChange={setSearch}
+                />
+                <CommandList className="max-h-64">
+                  <CommandEmpty>
+                    {!hospitalsLoaded ? "Loading hospitals…" : "No matching hospitals."}
+                  </CommandEmpty>
+                  <CommandGroup>
+                    {results.map((h) => (
+                      <CommandItem key={h.id} onSelect={() => toggleSelected(h.id)} className="gap-2">
+                        <Checkbox checked={selectedIds.has(h.id)} className="pointer-events-none" />
+                        <Building2 className="h-3.5 w-3.5 text-primary" />
+                        <span className="flex-1">{h.name}</span>
+                        {h.city && <span className="text-xs text-muted-foreground">{h.city}</span>}
+                      </CommandItem>
+                    ))}
+                    {search.trim() && !hasExactMatch && (
+                      <CommandItem onSelect={addNewInactive} className="gap-2 text-primary">
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Add "{search.trim()}" as new hospital (pending admin activation)</span>
+                      </CommandItem>
+                    )}
+                  </CommandGroup>
+                </CommandList>
+                {selectedIds.size > 0 && (
+                  <div className="flex justify-end p-2 border-t border-border">
+                    <Button size="sm" onClick={addSelected} disabled={loading}>
+                      Add {selectedIds.size} selected
+                    </Button>
+                  </div>
+                )}
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs">Your role</Label>
-          <Input value={roleInput} onChange={(e) => setRoleInput(e.target.value)} placeholder="Visiting" />
+          <Select value={roleInput} onValueChange={setRoleInput}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select role" />
+            </SelectTrigger>
+            <SelectContent>
+              {ROLE_OPTIONS.map((role) => (
+                <SelectItem key={role} value={role}>{role}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
-
-      <div className="rounded-md border bg-card divide-y max-h-64 overflow-auto">
-        {results.length === 0 && (
-          <div className="px-3 py-2 text-xs text-muted-foreground">
-            {allHospitals.length === 0 ? "Loading hospitals…" : "No matching hospitals."}
-          </div>
-        )}
-        {results.map((h) => (
-          <button
-            key={h.id}
-            onClick={() => addExisting(h)}
-            disabled={loading}
-            className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-accent text-sm"
-          >
-            <span className="flex items-center gap-2">
-              <Building2 className="h-3.5 w-3.5 text-primary" />
-              <span>{h.name}</span>
-              {h.city && <span className="text-xs text-muted-foreground">· {h.city}</span>}
-            </span>
-            <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-xs">{h.status}</Badge>
-          </button>
-        ))}
-        {search.trim() && !hasExactMatch && (
-          <button
-            onClick={addNewInactive}
-            disabled={loading}
-            className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Add "{search.trim()}" as new hospital (pending admin activation)</span>
-          </button>
-        )}
       </div>
 
       <div className="space-y-2">

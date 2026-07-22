@@ -67,7 +67,7 @@ export const uiTranslations: Record<string, TranslationTree> = {
       subtitle: "Manage your preferences, security, and billing",
     },
     earlyRelease: {
-      title: "Welcome to the Early Release",
+      title: "Reminder",
       description: "You are participating in an early release of Holarc Health. As we continue to expand functionality and improve the platform, some features may evolve and occasional issues may occur. Your feedback is invaluable and can be submitted through the Bug Log feature found next to the notification button.",
     },
     shareApp: {

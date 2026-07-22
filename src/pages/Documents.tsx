@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
@@ -113,6 +114,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const [activeTab, setActiveTab] = useState("content");
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
+  const [groupBy, setGroupBy] = useState<"patient" | "month" | "year" | "type">("patient");
   const DOC_PAGE_SIZE = 10;
   const [visibleDocCount, setVisibleDocCount] = useState(DOC_PAGE_SIZE);
   useEffect(() => { setVisibleDocCount(DOC_PAGE_SIZE); }, [documentSearchQuery]);
@@ -170,6 +172,31 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       (doc.patient_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase()) ||
       (doc.template_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase()),
   );
+
+  const getGroupKey = (doc: Document): string => {
+    switch (groupBy) {
+      case "patient":
+        return doc.patient_name || "No patient";
+      case "month":
+        return new Date(doc.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+      case "year":
+        return new Date(doc.created_at).getFullYear().toString();
+      case "type":
+        return doc.template_name || "Custom";
+      default:
+        return "";
+    }
+  };
+
+  const groupedDocuments = (() => {
+    const groups = new Map<string, Document[]>();
+    for (const doc of filteredDocuments) {
+      const key = getGroupKey(doc);
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(doc);
+    }
+    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  })();
 
   const handleSelectTemplate = (template: DisplayTemplate) => {
     setSelectedTemplate(template);
@@ -334,18 +361,18 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-primary">
           <TabsTrigger
-            value="header-footer"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
-          >
-            <LayoutTemplate className="h-4 w-4 mr-2" />
-            {t("documents.tabHeaderFooter")}
-          </TabsTrigger>
-          <TabsTrigger
             value="content"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
           >
             <FileText className="h-4 w-4 mr-2" />
             {t("documents.tabContent")}
+          </TabsTrigger>
+          <TabsTrigger
+            value="header-footer"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+          >
+            <LayoutTemplate className="h-4 w-4 mr-2" />
+            {t("documents.tabHeaderFooter")}
           </TabsTrigger>
         </TabsList>
 
@@ -589,14 +616,27 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">{t("documents.patientDocuments")}</h2>
-          <div className="relative max-w-xs">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t("documents.searchDocuments")}
-              value={documentSearchQuery}
-              onChange={(e) => setDocumentSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="relative max-w-xs">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder={t("documents.searchDocuments")}
+                value={documentSearchQuery}
+                onChange={(e) => setDocumentSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={groupBy} onValueChange={(v) => setGroupBy(v as typeof groupBy)}>
+              <SelectTrigger className="w-[160px] shrink-0">
+                <SelectValue placeholder="Group by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="patient">Group by Patient</SelectItem>
+                <SelectItem value="month">Group by Month</SelectItem>
+                <SelectItem value="year">Group by Year</SelectItem>
+                <SelectItem value="type">Group by Document Type</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         {documentsLoading ? (
@@ -605,77 +645,86 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           </div>
         ) : (
           <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-            <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
+            <div className="max-h-[400px] overflow-y-auto">
               {filteredDocuments.length > 0 ? (
-                filteredDocuments.slice(0, visibleDocCount).map((doc) => (
-                  <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                      <FileText className="h-5 w-5 text-accent-foreground" />
+                groupedDocuments.map(([groupName, docsInGroup]) => (
+                  <div key={groupName}>
+                    <div className="px-4 py-2 bg-muted/50 text-xs font-semibold text-primary sticky top-0">
+                      {groupName} <span className="text-muted-foreground font-normal">({docsInGroup.length})</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
-                        <span className="text-primary/70">{doc.template_name || "Custom"}</span>
-                      </p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => setPreviewDocument(doc)}
-                        title="Preview"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          setEditingDocument(doc);
-                          setEditDocName(doc.name);
-                          setEditDocContent(doc.content);
-                        }}
-                        title="Edit"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => setShareDocument(doc)}
-                        title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
-                      >
-                        {(doc as any).email_sent_at ? (
-                          <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Send className="h-4 w-4 text-green-600" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          exportToPDF({ title: doc.name, content: doc.content });
-                          toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
-                        }}
-                        title="Download PDF"
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => setDocumentToDelete(doc)}
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="divide-y divide-border">
+                      {docsInGroup.map((doc) => (
+                        <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                            <FileText className="h-5 w-5 text-accent-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
+                              <span className="text-primary/70">{doc.template_name || "Custom"}</span>
+                            </p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setPreviewDocument(doc)}
+                              title="Preview"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => {
+                                setEditingDocument(doc);
+                                setEditDocName(doc.name);
+                                setEditDocContent(doc.content);
+                              }}
+                              title="Edit"
+                            >
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setShareDocument(doc)}
+                              title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
+                            >
+                              {(doc as any).email_sent_at ? (
+                                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                              ) : (
+                                <Send className="h-4 w-4 text-green-600" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => {
+                                exportToPDF({ title: doc.name, content: doc.content });
+                                toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
+                              }}
+                              title="Download PDF"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => setDocumentToDelete(doc)}
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))

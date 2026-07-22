@@ -86,7 +86,16 @@ export default function Auth() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
+  const { user, loading: authLoading, signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
+
+  // If someone is already logged in, never show the sign-in/sign-up forms —
+  // send them straight to their dashboard so they can't accidentally create
+  // a second account. Anyone wanting a different phone/email uses Settings.
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [authLoading, user, navigate]);
   
   const modeParam = searchParams.get("mode");
   const roleParam = searchParams.get("role") as UserRole | null;
@@ -646,9 +655,9 @@ export default function Auth() {
   // Country selector component
   const CountrySelector = () => (
     <Select value={countryCode} onValueChange={setCountryCode}>
-      <SelectTrigger className="w-[80px]">
+      <SelectTrigger className="w-[110px] [&>span]:line-clamp-none">
         <SelectValue>
-          {selectedCountry.flag} {selectedCountry.code}
+          <span className="whitespace-nowrap">{selectedCountry.flag} {selectedCountry.code}</span>
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
@@ -923,6 +932,15 @@ export default function Auth() {
   };
 
   const isLastStep = currentStep === totalSteps - 1;
+
+  // Already signed in — never show sign-in/sign-up while a session exists.
+  if (authLoading || user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   // Login form
   if (isLogin) {

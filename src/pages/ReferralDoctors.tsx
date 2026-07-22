@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, Loader2, Search, Mail, Send, UserPlus } from "lucide-react";
+import { Plus, Trash2, Pencil, Loader2, Search, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -85,6 +85,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [specialtyFilter, setSpecialtyFilter] = useState("any");
   const [customSpecialty, setCustomSpecialty] = useState("");
   const [form, setForm] = useState({
     first_name: "", last_name: "", practice_number: "", address: "", email: "", phone: "", specialty: "",
@@ -113,24 +114,21 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     const timer = setTimeout(async () => {
       setSearchingProfiles(true);
       try {
-        const { data: doctorRoles } = await supabase
-          .from("user_roles")
-          .select("user_id")
-          .eq("role", "doctor");
-        const doctorIds = (doctorRoles || []).map(r => r.user_id);
-        if (doctorIds.length === 0) {
-          setProfileSuggestions([]);
-          setShowProfileSuggestions(false);
-          setSearchingProfiles(false);
-          return;
-        }
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, specialty, practice_number, mobile_number")
-          .ilike("full_name", `%${profileSearch}%`)
-          .in("id", doctorIds)
-          .limit(5);
-        setProfileSuggestions(profiles || []);
+        // Doctor role can live in either `profiles.role` or the separate
+        // `user_roles` table depending on when the account was created, so
+        // check both and match on either to avoid missing real doctors.
+        const [{ data: roleRows }, { data: matchingProfiles, error }] = await Promise.all([
+          supabase.from("user_roles").select("user_id").eq("role", "doctor"),
+          supabase
+            .from("profiles")
+            .select("id, full_name, specialty, practice_number, mobile_number, role")
+            .or(`full_name.ilike.%${profileSearch}%,practice_number.ilike.%${profileSearch}%,doctor_number.ilike.%${profileSearch}%`)
+            .limit(20),
+        ]);
+        if (error) throw error;
+        const doctorIds = new Set((roleRows || []).map((r: any) => r.user_id));
+        const doctors = (matchingProfiles || []).filter((p: any) => p.role === "doctor" || doctorIds.has(p.id)).slice(0, 5);
+        setProfileSuggestions(doctors);
         setShowProfileSuggestions(true);
       } catch (e) {
         console.error("Profile search error:", e);
@@ -258,7 +256,8 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
   };
 
   const filtered = doctors.filter(d =>
-    `${d.first_name} ${d.last_name}`.toLowerCase().includes(searchQuery.toLowerCase())
+    `${d.first_name} ${d.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (specialtyFilter === "any" || d.specialty === specialtyFilter)
   );
 
   const noSearchResults = profileSearch.length >= 3 && !searchingProfiles && profileSuggestions.length === 0;
@@ -331,10 +330,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                   <p className="text-sm text-muted-foreground">Doctor not found on Holarc</p>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => setAddMode("invite")} className="gap-2">
-                      <Mail className="h-4 w-4" /> Send Invitation
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => setAddMode("manual")} className="gap-2">
-                      <UserPlus className="h-4 w-4" /> Add Manually
+                      <Mail className="h-4 w-4" /> Invite
                     </Button>
                   </div>
                 </div>
@@ -373,7 +369,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
               <div className="flex gap-2">
                 <Button onClick={handleSendInvite} disabled={sendingInvite} className="gap-2">
                   {sendingInvite ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  Send Invitation
+                  Invite
                 </Button>
                 <Button variant="outline" onClick={() => setAddMode("search")}>Back</Button>
                 <Button variant="ghost" size="sm" onClick={() => setAddMode("manual")}>Add manually instead</Button>
@@ -446,49 +442,63 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         </div>
       )}
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-10" />
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
+        {/* Sidebar filters */}
+        <div className="rounded-xl border border-primary bg-card shadow-sm p-4 space-y-4 h-fit">
+          <h3 className="text-sm font-medium text-primary">Filters</h3>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Search</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-8 h-9 text-sm" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Specialty</Label>
+            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
+              <SelectContent className="max-h-72">
+                <SelectItem value="any">All Specialties</SelectItem>
+                {SPECIALTIES.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-      <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
-        ) : filtered.length === 0 ? (
-          <div className="p-10 text-center text-muted-foreground">No referral doctors found</div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Specialty</TableHead>
-                <TableHead>Practice Number</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead className="text-center">Referrals</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell className="font-medium">{doc.first_name} {doc.last_name}</TableCell>
-                  <TableCell>{doc.specialty || "-"}</TableCell>
-                  <TableCell>{doc.practice_number || "-"}</TableCell>
-                  <TableCell>{doc.email || "-"}</TableCell>
-                  <TableCell>{doc.phone || "-"}</TableCell>
-                  <TableCell className="text-center font-semibold">{doc.referral_count}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(doc)}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(doc.id)}><Trash2 className="h-4 w-4" /></Button>
+        {/* Referral doctor list */}
+        <div className="space-y-2">
+          {loading ? (
+            <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
+          ) : filtered.length === 0 ? (
+            <div className="p-10 text-center text-muted-foreground rounded-xl border border-primary bg-card">No referral doctors found</div>
+          ) : (
+            filtered.map((doc) => (
+              <div key={doc.id} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium">
+                    {`${doc.first_name?.[0] || ""}${doc.last_name?.[0] || ""}`.toUpperCase() || "DR"}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-medium text-foreground truncate">{doc.first_name} {doc.last_name}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
+                      {doc.specialty && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">{doc.specialty}</span>}
+                      {doc.practice_number && <span>PR#: {doc.practice_number}</span>}
+                      {doc.email && <span>· {doc.email}</span>}
+                      {doc.phone && <span>· {doc.phone}</span>}
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs text-muted-foreground">{doc.referral_count} referral{doc.referral_count === 1 ? "" : "s"}</span>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(doc)}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(doc.id)}><Trash2 className="h-4 w-4" /></Button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

@@ -350,7 +350,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
         <AccordionTrigger className="px-4 py-3 hover:no-underline">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold text-foreground">{t("myPractice.aboutMe")}</h3>
+            <h3 className="text-sm font-medium text-primary">{t("myPractice.aboutMe")}</h3>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4 space-y-2">
@@ -564,6 +564,7 @@ export default function MyPractice() {
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
   const certFileInputRef = useRef<HTMLInputElement>(null);
   const [certForm, setCertForm] = useState({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" });
+  const [certErrors, setCertErrors] = useState<Record<string, string>>({});
 
   // ── Profile data sync ──
   useEffect(() => {
@@ -964,8 +965,16 @@ export default function MyPractice() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
   const handleCertSave = async () => {
-    if (!user || !certForm.certificate_name.trim() || !certForm.date_earned) {
-      toast({ title: "Required", description: "Certificate name and date are required", variant: "destructive" });
+    if (!user) return;
+    const errors: Record<string, string> = {};
+    if (!certForm.certificate_name.trim()) errors.certificate_name = "Credential name is required";
+    if (!certForm.issuing_body.trim()) errors.issuing_body = "Issuing body is required";
+    if (!certForm.date_earned) errors.date_earned = "Date earned is required";
+    if (!certForm.cpd_points.trim()) errors.cpd_points = "CPD points is required";
+    if (!certificateFile && !editingCertId) errors.certificate_file = "Please attach a certificate";
+    setCertErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toast({ title: "Missing required fields", description: "Please fill in all required fields, marked with *", variant: "destructive" });
       return;
     }
     setCertSaving(true);
@@ -996,6 +1005,7 @@ export default function MyPractice() {
     setEditingCertId(null);
     setCertForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" });
     setCertificateFile(null);
+    setCertErrors({});
     fetchCerts();
   };
   const handleCertEdit = (cert: CPDCertificate) => {
@@ -1007,6 +1017,7 @@ export default function MyPractice() {
       cpd_points: String(cert.cpd_points),
     });
     setCertificateFile(null);
+    setCertErrors({});
     setShowCertForm(true);
   };
   const handleCertDelete = async (id: string) => {
@@ -1128,23 +1139,29 @@ export default function MyPractice() {
       {/* Profile picture card */}
       <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="relative group">
-            <Avatar className="h-16 w-16 border-2 border-primary">
-              <AvatarImage
-                key={(profile as any)?.avatar_url}
-                src={(profile as any)?.avatar_url}
-                alt={combinedFullName || t("myPractice.tabProfile")}
-              />
-              <AvatarFallback className="text-base bg-primary/10 text-primary">
-                {combinedFullName ? getInitials(combinedFullName) : "U"}
-              </AvatarFallback>
-            </Avatar>
-            <label
-              htmlFor="avatar-upload-practice"
-              className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            >
-              <Camera className="h-5 w-5 text-white" />
-            </label>
+          <label
+            htmlFor="avatar-upload-practice"
+            className="flex flex-col items-center gap-1 cursor-pointer shrink-0"
+          >
+            <div className="relative">
+              <Avatar className="h-16 w-16 border-2 border-primary">
+                <AvatarImage
+                  key={(profile as any)?.avatar_url}
+                  src={(profile as any)?.avatar_url}
+                  alt={combinedFullName || t("myPractice.tabProfile")}
+                />
+                <AvatarFallback className="text-base bg-primary/10 text-primary">
+                  {combinedFullName ? getInitials(combinedFullName) : "U"}
+                </AvatarFallback>
+              </Avatar>
+              {/* Always-visible camera badge so users notice the upload affordance */}
+              <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center border-2 border-card">
+                <Camera className="h-3 w-3 text-primary-foreground" />
+              </div>
+            </div>
+            <span className="text-xs font-medium text-primary mt-0.5 whitespace-nowrap">
+              {(profile as any)?.avatar_url ? "Change photo" : "Add photo"}
+            </span>
             <input
               type="file"
               accept="image/*"
@@ -1153,7 +1170,7 @@ export default function MyPractice() {
               id="avatar-upload-practice"
               disabled={isUploadingAvatar}
             />
-          </div>
+          </label>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-foreground truncate">{combinedFullName || "Your Name"}</p>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
@@ -1215,7 +1232,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
+                  <h3 className="text-sm font-medium text-primary">Personal Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1257,8 +1274,12 @@ export default function MyPractice() {
                 <Label>Mobile Number</Label>
                 <div className="flex gap-2">
                   <Select value={formData.country_code} onValueChange={handleCountryCodeChange}>
-                    <SelectTrigger className="w-[80px]">
-                      <SelectValue />
+                    <SelectTrigger className="w-[110px] [&>span]:line-clamp-none">
+                      <SelectValue>
+                        <span className="whitespace-nowrap flex items-center gap-1.5">
+                          {COUNTRY_CODES.find((c) => c.code === formData.country_code)?.flag} {formData.country_code}
+                        </span>
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {COUNTRY_CODES.map((c) => (
@@ -1309,7 +1330,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Practice Information</h3>
+                  <h3 className="text-sm font-medium text-primary">Practice Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1719,7 +1740,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Shared Practice Calendar</h3>
+                  <h3 className="text-sm font-medium text-primary">Shared Practice Calendar</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1844,7 +1865,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold">Service Offerings & Pricing</span>
+                  <span className="text-sm font-medium text-primary">Service Offerings & Pricing</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -2030,7 +2051,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Digital Signature</h3>
+                  <h3 className="text-sm font-medium text-primary">Digital Signature</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
@@ -2144,7 +2165,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">Voice Narration Settings</h3>
+                  <h3 className="text-sm font-medium text-primary">Voice Narration Settings</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
@@ -2270,7 +2291,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
+              <h3 className="text-sm font-medium text-primary">Referral Doctors</h3>
             </div>
             <ReferralDoctors hideHeader />
           </div>
@@ -2282,7 +2303,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
+              <h3 className="text-sm font-medium text-primary">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-sm">
@@ -2295,6 +2316,7 @@ export default function MyPractice() {
                   setEditingCertId(null);
                   setCertForm({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" });
                   setCertificateFile(null);
+                  setCertErrors({});
                 }}
                 className="gap-1.5 shrink-0"
               >
@@ -2307,41 +2329,45 @@ export default function MyPractice() {
                 <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Credential</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label>Credential Name *</Label>
+                    <Label>Credential Name <span className="text-destructive">*</span></Label>
                     <Input
                       value={certForm.certificate_name}
                       onChange={(e) => setCertForm({ ...certForm, certificate_name: e.target.value })}
                       placeholder="e.g., Advanced Cardiac Life Support"
                     />
+                    {certErrors.certificate_name && <p className="text-xs text-destructive">{certErrors.certificate_name}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Issuing Body</Label>
+                    <Label>Issuing Body <span className="text-destructive">*</span></Label>
                     <Input
                       value={certForm.issuing_body}
                       onChange={(e) => setCertForm({ ...certForm, issuing_body: e.target.value })}
                       placeholder="e.g., HPCSA"
                     />
+                    {certErrors.issuing_body && <p className="text-xs text-destructive">{certErrors.issuing_body}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Date Earned *</Label>
+                    <Label>Date Earned <span className="text-destructive">*</span></Label>
                     <Input
                       type="date"
                       value={certForm.date_earned}
                       onChange={(e) => setCertForm({ ...certForm, date_earned: e.target.value })}
                     />
+                    {certErrors.date_earned && <p className="text-xs text-destructive">{certErrors.date_earned}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label>CPD Points</Label>
+                    <Label>CPD Points <span className="text-destructive">*</span></Label>
                     <Input
                       type="number"
                       min="0"
                       value={certForm.cpd_points}
                       onChange={(e) => setCertForm({ ...certForm, cpd_points: e.target.value })}
                     />
+                    {certErrors.cpd_points && <p className="text-xs text-destructive">{certErrors.cpd_points}</p>}
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Attach Certificate</Label>
+                  <Label>Attach Certificate <span className="text-destructive">*</span></Label>
                   <div className="flex items-center gap-2">
                     <input
                       ref={certFileInputRef}
@@ -2366,6 +2392,7 @@ export default function MyPractice() {
                       </Button>
                     )}
                   </div>
+                  {certErrors.certificate_file && <p className="text-xs text-destructive">{certErrors.certificate_file}</p>}
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={handleCertSave} disabled={certSaving || certUploading}>

@@ -2124,5 +2124,20 @@
     "deleteError": "Failed to delete document",
     "invalidFileType": "Invalid file type",
     "fileTooLarge": "File is too large"
+  },
+  "rewards": {
+    "vula": {
+      "explainer": {
+        "headline": "Earn rewards in every",
+        "languages": "language you speak",
+        "tagline": "Vula Vouchers reward you for helping your community access better care.",
+        "section1Title": "Refer & Earn",
+        "section1Desc": "Invite friends and family to Holarc Health and earn vouchers when they join.",
+        "section1Tagline": "Sharing care, sharing rewards",
+        "section2Title": "Track your progress and redeem vouchers anytime",
+        "cta": "Learn more about Vula Vouchers",
+        "footerTagline": "Made with care, for our community"
+      }
+    }
   }
 }

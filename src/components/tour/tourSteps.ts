@@ -39,15 +39,10 @@ export const doctorTourSteps: TourStep[] = [
 
 export const patientTourSteps: TourStep[] = [
   {
-    target: "patient-profile",
-    title: "My Profile",
-    message:
-      "Your health information lives here — vitals, conditions, allergies and emergency contacts.",
-  },
-  {
     target: "patient-holarchy",
     title: "My Holarchy",
-    message: "Manage the doctors, family members and carers connected to your care.",
+    message:
+      "Your health information lives here — vitals, conditions, allergies, emergency contacts, your care team, insurance and pharmacies, plus your session and admission history.",
   },
   {
     target: "patient-tasks",

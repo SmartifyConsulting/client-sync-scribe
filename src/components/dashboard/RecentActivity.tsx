@@ -115,7 +115,7 @@ export function RecentActivity() {
     <Collapsible defaultOpen={true}>
       <div className="rounded-xl border border-primary bg-card shadow-sm">
         <CollapsibleTrigger className="w-full rounded-xl data-[state=open]:rounded-b-none bg-primary px-4 py-3 flex items-center justify-between transition-all">
-          <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.recentActivity")}</h3>
+          <h3 className="text-sm font-medium text-primary-foreground">{t("doctorDashboard.recentActivity")}</h3>
           <ChevronDown className="h-4 w-4 text-primary-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -142,7 +142,7 @@ export function RecentActivity() {
                     {activity.patientId && activity.patientName ? (
                       <Link
                         to={`/patients/${activity.patientId}`}
-                        className="text-xs text-primary hover:underline truncate inline-flex items-center gap-1"
+                        className={cn("text-xs text-primary hover:underline truncate inline-flex items-center gap-1", isSamplePatient({ name: activity.patientName }) && "italic")}
                       >
                         {activity.patientName}
                         {isSamplePatient({ name: activity.patientName }) && <SampleBadge />}

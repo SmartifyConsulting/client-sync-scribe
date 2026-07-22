@@ -162,7 +162,7 @@ export default function HealthAlbum() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Health Album</h1>
+          <h1 className="text-2xl font-bold text-foreground">Health Album</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Capture your healthy habits and earn rewards
           </p>

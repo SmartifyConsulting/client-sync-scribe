@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, Award, Star, MessageSquare, Search } from "lucide-react";
+import { Users, Calendar, TrendingUp, Award, MessageSquare, Search } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -286,7 +286,7 @@ export default function Dashboard() {
       {/* Header with Profile */}
       <div className="flex items-start justify-between pb-2">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight whitespace-nowrap">
+          <h1 className="text-2xl font-bold text-foreground">
             {greeting}{displayName ? `, ${displayName}` : ''}
           </h1>
           <p className="mt-2 text-muted-foreground text-sm">
@@ -328,18 +328,6 @@ export default function Dashboard() {
         />
         {isDoctor && (
           <StatsCard
-            title={t("doctorDashboard.doctorRating")}
-            value={ratingData.avg > 0 ? `${ratingData.avg.toFixed(1)} ★` : "—"}
-            change={ratingData.count > 0 
-              ? `${ratingData.communication.toFixed(1)} · ${ratingData.expertise.toFixed(1)} · ${ratingData.professionalism.toFixed(1)}`
-              : t("doctorDashboard.noRatings")}
-            trend="neutral"
-            icon={Star}
-            href="/profile"
-          />
-        )}
-        {isDoctor && (
-          <StatsCard
             title={t("doctorDashboard.vulaVouchers")}
             value={doctorVulas + patientVulas}
             change={undefined}
@@ -366,7 +354,7 @@ export default function Dashboard() {
             <div className="hidden lg:block">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
                 <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
+                  <h3 className="text-sm font-medium text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">
@@ -407,7 +395,7 @@ export default function Dashboard() {
             <div className="lg:hidden">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
                 <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
+                  <h3 className="text-sm font-medium text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">

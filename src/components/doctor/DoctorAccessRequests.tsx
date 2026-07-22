@@ -234,7 +234,9 @@ export function DoctorAccessRequests() {
   }
 
   if (!profile?.practice_number || !profile?.doctor_number) return null;
-  if (requests.length === 0) return null;
+  // Keep rendering (so the "Access granted" confirmation dialog can stay
+  // visible) even after the list empties out from accepting the last request.
+  if (requests.length === 0 && !grantedInfo) return null;
 
   const getInitials = (name: string | null) => {
     if (!name) return "?";

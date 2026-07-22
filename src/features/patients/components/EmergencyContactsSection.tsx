@@ -74,7 +74,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
   return (
     <Card className="border-2 border-primary/30">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
+        <CardTitle className="flex items-center gap-2 text-base text-primary">
           <ShieldAlert className="h-5 w-5 text-primary" />
           Emergency Contacts
         </CardTitle>

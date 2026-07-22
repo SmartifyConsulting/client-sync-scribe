@@ -138,7 +138,7 @@ export default function CPDCertificates() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Certificates</h1>
+          <h1 className="text-2xl font-bold text-foreground">Certificates</h1>
           <p className="mt-1 text-muted-foreground text-sm">Track your continuing professional development</p>
         </div>
         <div className="flex items-center gap-3">

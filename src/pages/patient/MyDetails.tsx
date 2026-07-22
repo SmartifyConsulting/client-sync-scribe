@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
@@ -9,8 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useMyRewards } from "@/hooks/usePatientRewards";
 import { EmergencyContact } from "@/features/patients/components/EmergencyContactsSection";
 import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
-import { AdmissionsView } from "@/features/sessions/admissions/AdmissionsView";
-import { Hospital } from "lucide-react";
 
 
 
@@ -27,6 +25,7 @@ export default function MyDetails() {
   const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   const { toast } = useToast();
   const { lollipopCount, loading: rewardsLoading } = useMyRewards();
+  const lastSavedToastRef = useRef<number>(0);
 
   useEffect(() => {
     fetchPatientRecord();
@@ -141,7 +140,14 @@ export default function MyDetails() {
     }
 
     setPatient((prev) => prev ? { ...prev, ...updates } : prev);
-    toast({ title: t("common.saved"), description: t("patient.myDetails.detailsUpdated") });
+
+    // Autosave fires frequently while typing — only surface a toast every
+    // 20s so it doesn't interrupt the user mid-keystroke.
+    const now = Date.now();
+    if (now - lastSavedToastRef.current > 20000) {
+      lastSavedToastRef.current = now;
+      toast({ title: t("common.saved"), description: t("patient.myDetails.detailsUpdated") });
+    }
   };
 
   const isIncomplete = useMemo(() => {
@@ -169,10 +175,9 @@ export default function MyDetails() {
 
 
   const sectionHeading: Record<string, { title: string; subtitle: string }> = {
-    health: { title: t("patient.myDetails.myHolarchive"), subtitle: t("patient.myDetails.holarchiveSubtitle") },
-    care: { title: t("patient.myDetails.myHolarchy"), subtitle: t("patient.myDetails.holarchySubtitle") },
-    admin: { title: t("patient.myDetails.myDesk"), subtitle: t("patient.myDetails.deskSubtitle") },
-    rewards: { title: t("patient.myDetails.myRewards"), subtitle: t("patient.myDetails.rewardsSubtitle") },
+    health: { title: t("patient.myDetails.myHolarchy", "My Holarchy"), subtitle: t("patient.myDetails.holarchySubtitle", "Your health information, care team and history") },
+    admin: { title: t("patient.myDetails.myDesk", "My Desk"), subtitle: t("patient.myDetails.deskSubtitle", "Calendar, tasks and documents") },
+    rewards: { title: t("patient.myDetails.myRewards", "My Rewards"), subtitle: t("patient.myDetails.rewardsSubtitle", "Track your Vula vouchers and rewards") },
   };
   const heading = sectionHeading[section] || sectionHeading.health;
 
@@ -203,17 +208,6 @@ export default function MyDetails() {
           <p>{t("patient.myDetails.recordSetupMessage")}</p>
         </div>
       )}
-
-      {patient && section === "health" && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Hospital className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold text-foreground">Hospital Admissions</h2>
-          </div>
-          <AdmissionsView patientId={patient.id} canEdit={false} />
-        </div>
-      )}
-
     </div>
   );
 }

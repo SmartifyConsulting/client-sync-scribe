@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star, EyeOff, Eye } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
 import { useToast } from "@/hooks/use-toast";
 import { LANGUAGES, COMMON_SPECIALTIES } from "@/lib/languages";
+import { cn } from "@/lib/utils";
 
 interface ProviderResult {
   id: string;
@@ -67,6 +69,44 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Sidebar filters for the connected-providers list (separate from the
+  // "find a new provider" search above).
+  const [filterSearch, setFilterSearch] = useState("");
+  const [filterSpecialty, setFilterSpecialty] = useState<string>("any");
+  const [filterLanguage, setFilterLanguage] = useState<string>("any");
+  const [filterAccessLevel, setFilterAccessLevel] = useState<string>("any");
+  const [appliedFilters, setAppliedFilters] = useState({ search: "", specialty: "any", language: "any", accessLevel: "any" });
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc">("name-asc");
+
+  const applyFilters = () => {
+    setAppliedFilters({ search: filterSearch, specialty: filterSpecialty, language: filterLanguage, accessLevel: filterAccessLevel });
+  };
+  const clearFilters = () => {
+    setFilterSearch(""); setFilterSpecialty("any"); setFilterLanguage("any"); setFilterAccessLevel("any");
+    setAppliedFilters({ search: "", specialty: "any", language: "any", accessLevel: "any" });
+  };
+
+  const getAccessLevel = (permissions?: string[]): "full" | "limited" => {
+    const filtered = (permissions || []).filter(p => p !== 'patient_info' && p !== 'patient_information');
+    return filtered.length >= 4 ? "full" : "limited";
+  };
+
+  const matchesFilters = (access: DoctorAccess) => {
+    const doctor = access.doctor;
+    if (!doctor) return false;
+    const q = appliedFilters.search.trim().toLowerCase();
+    if (q && !(doctor.full_name?.toLowerCase().includes(q) || doctor.practice_number?.toLowerCase().includes(q))) return false;
+    if (appliedFilters.specialty !== "any" && doctor.specialty !== appliedFilters.specialty) return false;
+    if (appliedFilters.language !== "any" && doctor.preferred_language !== appliedFilters.language) return false;
+    if (appliedFilters.accessLevel !== "any" && getAccessLevel(access.permissions) !== appliedFilters.accessLevel) return false;
+    return true;
+  };
+
+  const sortAccess = (list: DoctorAccess[]) => {
+    const sorted = [...list].sort((a, b) => (a.doctor?.full_name || "").localeCompare(b.doctor?.full_name || ""));
+    return sortBy === "name-desc" ? sorted.reverse() : sorted;
+  };
+
   const { data: doctorsData, isLoading } = useQuery({
     queryKey: ["patient-doctors-with-hidden"],
     queryFn: async () => {
@@ -106,6 +146,30 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       const active = enriched.filter((d) => d.is_active && !hiddenIds.has(d.doctor_id));
       const hidden = enriched.filter((d) => hiddenIds.has(d.doctor_id) || !d.is_active);
       return { active, hidden, hiddenIds };
+    },
+  });
+
+  // General Practitioner — always shown in the list (by default), flagged
+  // with whether they're a registered Holarc Health doctor or an external GP.
+  const { data: gpInfo } = useQuery({
+    queryKey: ["patient-gp-holarc-status"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data: patientRow } = await supabase
+        .from("patients")
+        .select("general_practitioner")
+        .eq("patient_user_id", user.id)
+        .maybeSingle();
+      const gpName = patientRow?.general_practitioner?.trim();
+      if (!gpName) return null;
+      const { data: match } = await supabase
+        .from("profiles")
+        .select("id, full_name, specialty, avatar_url, practice_number")
+        .eq("role", "doctor")
+        .ilike("full_name", gpName)
+        .maybeSingle();
+      return { name: gpName, onHolarc: !!match, matchedProfile: match || null };
     },
   });
 
@@ -219,106 +283,111 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     }
   };
 
-  const DoctorTableRow = ({ access, doctor, permissions, mode }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[]; mode: "active" | "hidden" }) => {
+  const DoctorRow = ({ access, doctor, permissions, mode }: { access: DoctorAccess; doctor: DoctorProfile; permissions?: string[]; mode: "active" | "hidden" }) => {
     const filteredPermissions = permissions?.filter(p => p !== 'patient_info' && p !== 'patient_information') || [];
+    const accessLevel = getAccessLevel(permissions);
 
     return (
-      <TableRow>
-        <TableCell>
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-              <AvatarImage src={doctor.avatar_url || undefined} />
-              <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium text-foreground">{doctor.full_name || "Unknown Doctor"}</span>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Avatar className="h-10 w-10 shrink-0">
+            <AvatarImage src={doctor.avatar_url || undefined} />
+            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+              {doctor.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col min-w-0">
+            <span className="font-medium text-foreground truncate">{doctor.full_name || "Unknown Doctor"}</span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {doctor.specialty && (
+                <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                  {doctor.specialty}
+                </Badge>
+              )}
               {doctor.practice_number && (
                 <span className="text-xs text-muted-foreground">PR#: {doctor.practice_number}</span>
               )}
-              {mode === "hidden" && (
-                <span className="text-xs text-muted-foreground italic">
-                  {!access.is_active ? "Deactivated" : "Hidden"}
-                </span>
+              {doctor.practice_address && (
+                <span className="text-xs text-muted-foreground">· {doctor.practice_address.split(",")[0]}</span>
               )}
             </div>
+            {mode === "hidden" && (
+              <span className="text-xs text-muted-foreground italic">
+                {!access.is_active ? "Deactivated" : "Hidden"}
+              </span>
+            )}
           </div>
-        </TableCell>
-        <TableCell>
-          {doctor.specialty && (
-            <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
-              {doctor.specialty}
-            </Badge>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {mode === "active" && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge
+                    variant={accessLevel === "full" ? "default" : "secondary"}
+                    className={`text-xs cursor-help ${accessLevel === "full" ? "bg-primary text-primary-foreground" : ""}`}
+                  >
+                    {accessLevel === "full" ? "Full access" : "Limited"}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side="left" className="max-w-[200px]">
+                  <p className="text-xs font-semibold mb-1">Access granted:</p>
+                  <ul className="text-xs space-y-0.5">
+                    {filteredPermissions.map(p => (
+                      <li key={p}>• {formatPermission(p)}</li>
+                    ))}
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2">
-            {mode === "active" && filteredPermissions.length > 0 && (
+          {mode === "active" ? (
+            <>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Lock className="h-4 w-4 text-primary cursor-help" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => handleHide(access)}
+                      aria-label="Hide doctor"
+                    >
+                      <EyeOff className="h-3.5 w-3.5" />
+                    </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="left" className="max-w-[200px]">
-                    <p className="text-xs font-semibold mb-1">Access granted:</p>
-                    <ul className="text-xs space-y-0.5">
-                      {filteredPermissions.map(p => (
-                        <li key={p}>• {formatPermission(p)}</li>
-                      ))}
-                    </ul>
-                  </TooltipContent>
+                  <TooltipContent side="left">Hide from your active list (keeps history)</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            )}
-            {mode === "active" ? (
-              <>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={() => handleHide(access)}
-                        aria-label="Hide doctor"
-                      >
-                        <EyeOff className="h-3.5 w-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">Hide from your active list (keeps history)</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => setUninviteTarget(access)}
-                        aria-label="Deactivate doctor"
-                      >
-                        <UserMinus className="h-3.5 w-3.5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">Deactivate (revoke live access, keep history)</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs gap-1"
-                onClick={() => handleRestore(access)}
-              >
-                <Eye className="h-3.5 w-3.5" /> Restore
-              </Button>
-            )}
-          </div>
-        </TableCell>
-      </TableRow>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => setUninviteTarget(access)}
+                      aria-label="Deactivate doctor"
+                    >
+                      <UserMinus className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">Deactivate (revoke live access, keep history)</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs gap-1"
+              onClick={() => handleRestore(access)}
+            >
+              <Eye className="h-3.5 w-3.5" /> Restore
+            </Button>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -327,15 +396,38 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       {!hideHeader && (
         <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">My Healthcare Providers</h3>
-            </div>
-            <p className="text-xs text-muted-foreground">
+            <h1 className="text-2xl font-bold text-foreground">My Healthcare Providers</h1>
+            <p className="text-muted-foreground text-sm">
               Healthcare providers with access to your profile
             </p>
           </div>
         </div>
+      )}
+
+      {/* General Practitioner — shown by default, flagged with Holarc status */}
+      {gpInfo && (
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarImage src={gpInfo.matchedProfile?.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                  {gpInfo.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="font-medium text-foreground truncate">{gpInfo.name}</p>
+                <p className="text-xs text-muted-foreground">General Practitioner</p>
+              </div>
+            </div>
+            <Badge
+              variant={gpInfo.onHolarc ? "default" : "secondary"}
+              className={cn("text-xs shrink-0", gpInfo.onHolarc && "bg-primary text-primary-foreground")}
+            >
+              {gpInfo.onHolarc ? "On Holarc Health" : "Not on Holarc Health"}
+            </Badge>
+          </CardContent>
+        </Card>
       )}
 
       {/* Doctor Search */}
@@ -484,7 +576,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </CardContent>
       </Card>
 
-      {/* Connected Doctors — Active / Hidden tabs */}
+      {/* Connected Doctors — Sidebar filters + Active / Hidden list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -500,64 +592,113 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </CardContent>
         </Card>
       ) : (
-        <Tabs defaultValue="active" className="w-full">
-          <TabsList>
-            <TabsTrigger value="active">Active ({doctors.length})</TabsTrigger>
-            <TabsTrigger value="hidden">Hidden ({hiddenDoctors.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="active">
-            {doctors.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
-            ) : (
-              <Card>
-                <CardContent className="p-0">
-                  <Table className="table-fixed w-full">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[45%]">Provider</TableHead>
-                        <TableHead className="w-[35%]">Specialty</TableHead>
-                        <TableHead className="w-[20%]">Access</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {doctors.map((access) =>
-                        access.doctor ? (
-                          <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="active" />
-                        ) : null
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          <TabsContent value="hidden">
-            {hiddenDoctors.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
-            ) : (
-              <Card>
-                <CardContent className="p-0">
-                  <Table className="table-fixed w-full">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[45%]">Provider</TableHead>
-                        <TableHead className="w-[35%]">Specialty</TableHead>
-                        <TableHead className="w-[20%]">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {hiddenDoctors.map((access) =>
-                        access.doctor ? (
-                          <DoctorTableRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="hidden" />
-                        ) : null
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+        <div className="grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
+          {/* Sidebar filters */}
+          <Card className="h-fit">
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-primary">Filters</h3>
+                <button type="button" className="text-xs text-muted-foreground hover:text-foreground underline" onClick={clearFilters}>
+                  Clear all
+                </button>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    className="pl-8 h-9 text-sm"
+                    placeholder="Search providers..."
+                    value={filterSearch}
+                    onChange={(e) => setFilterSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Specialty</Label>
+                <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="any">All Specialties</SelectItem>
+                    {COMMON_SPECIALTIES.map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Language</Label>
+                <Select value={filterLanguage} onValueChange={setFilterLanguage}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Languages" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="any">All Languages</SelectItem>
+                    {LANGUAGES.map((l) => (
+                      <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Access Level</Label>
+                <Select value={filterAccessLevel} onValueChange={setFilterAccessLevel}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Access Levels" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">All Access Levels</SelectItem>
+                    <SelectItem value="full">Full access</SelectItem>
+                    <SelectItem value="limited">Limited</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button className="w-full" onClick={applyFilters}>Apply Filters</Button>
+            </CardContent>
+          </Card>
+
+          {/* Provider list */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-semibold text-foreground">Healthcare Providers</h2>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as "name-asc" | "name-desc")}>
+                <SelectTrigger className="h-9 w-[160px] text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                  <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Tabs defaultValue="active" className="w-full">
+              <TabsList>
+                <TabsTrigger value="active">Active ({doctors.length})</TabsTrigger>
+                <TabsTrigger value="hidden">Hidden ({hiddenDoctors.length})</TabsTrigger>
+              </TabsList>
+              <TabsContent value="active" className="space-y-2 mt-3">
+                {doctors.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
+                ) : sortAccess(doctors).filter(matchesFilters).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
+                ) : (
+                  sortAccess(doctors).filter(matchesFilters).map((access) =>
+                    access.doctor ? (
+                      <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="active" />
+                    ) : null
+                  )
+                )}
+              </TabsContent>
+              <TabsContent value="hidden" className="space-y-2 mt-3">
+                {hiddenDoctors.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
+                ) : sortAccess(hiddenDoctors).filter(matchesFilters).length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
+                ) : (
+                  sortAccess(hiddenDoctors).filter(matchesFilters).map((access) =>
+                    access.doctor ? (
+                      <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="hidden" />
+                    ) : null
+                  )
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       )}
 
       {/* Uninvite Confirmation Dialog */}

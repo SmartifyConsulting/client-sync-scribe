@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
+import { cn } from "@/lib/utils";
 
 interface Appointment {
   id: string;
@@ -115,13 +116,13 @@ export function UpcomingAppointments() {
                 {appointment.patientId ? (
                   <Link
                     to={`/patients/${appointment.patientId}`}
-                    className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
+                    className={cn("font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1", isSamplePatient({ name: appointment.patientName }) && "italic")}
                   >
                     {appointment.patientName}
                     {isSamplePatient({ name: appointment.patientName }) && <SampleBadge />}
                   </Link>
                 ) : (
-                  <span className="font-medium text-foreground">{appointment.patientName}</span>
+                  <span className={cn("font-medium text-foreground", isSamplePatient({ name: appointment.patientName }) && "italic")}>{appointment.patientName}</span>
                 )}
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">

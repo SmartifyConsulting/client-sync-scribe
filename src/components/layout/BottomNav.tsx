@@ -26,8 +26,7 @@ const doctorNavItems = [
 ];
 
 const patientSections = [
-  { icon: User, labelKey: "nav.myProfile", section: "health", to: "/patient/details?section=health" },
-  { icon: Handshake, labelKey: "nav.myHolarchy", section: "care", to: "/patient/details?section=care" },
+  { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
   { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },

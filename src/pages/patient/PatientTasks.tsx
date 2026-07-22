@@ -156,11 +156,10 @@ export default function PatientTasks() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <div>
-        <h1 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <CheckSquare className="h-5 w-5 text-primary" />
+        <h1 className="text-2xl font-bold text-foreground">
           My To-Do List
         </h1>
-        <p className="text-xs text-muted-foreground">Tasks assigned to you by your healthcare providers</p>
+        <p className="text-muted-foreground text-sm">Tasks assigned to you by your healthcare providers</p>
       </div>
 
       {/* Task Input Area */}

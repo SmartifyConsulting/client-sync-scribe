@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Loader2, Search, Plus, MoreVertical, Trash2, Upload, Send } from "lucide-react";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient, usePatients } from "@/hooks/usePatients";
@@ -232,6 +232,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [patientRecord, setPatientRecord] = useState<Patient | null>(null);
   const [patientLoading, setPatientLoading] = useState(false);
+  const lastSavedToastRef = useRef<number>(0);
 
   const isDoctor = role === "doctor";
   const isPatient = role === "patient";
@@ -293,7 +294,14 @@ export default function Profile() {
               throw error;
             }
             setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
-            toast({ title: "Saved", description: "Your details have been updated." });
+
+            // Autosave fires frequently while typing — only surface a toast
+            // every 20s so it doesn't interrupt the user mid-keystroke.
+            const now = Date.now();
+            if (now - lastSavedToastRef.current > 20000) {
+              lastSavedToastRef.current = now;
+              toast({ title: "Saved", description: "Your details have been updated." });
+            }
           }}
           isSelfService
         />
