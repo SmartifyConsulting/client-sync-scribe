@@ -21,7 +21,7 @@ interface PermissionItem {
 }
 
 // These will be populated from i18n translations
-const getSharedItems = (t: any): PermissionItem[] => [
+export const getSharedItems = (t: any): PermissionItem[] => [
   { label: t("permissions.aiSessionSummaries") },
   { label: t("permissions.patientInformation") },
   { label: t("permissions.medicalOverview") },
@@ -38,7 +38,7 @@ const getSharedItems = (t: any): PermissionItem[] => [
   },
 ];
 
-const getPrivateItems = (t: any): PermissionItem[] => [
+export const getPrivateItems = (t: any): PermissionItem[] => [
   { label: t("permissions.fullTranscriptions") },
   { label: t("permissions.rawAudioRecordings") },
   { label: t("permissions.aiDiagnostics") },
@@ -196,5 +196,5 @@ export function PermissionTransparencyModal({
   );
 }
 
-// Export internal functions for external use
+// Backward-compatible aliases for older imports.
 export { getSharedItems as sharedItems, getPrivateItems as privateItems };
