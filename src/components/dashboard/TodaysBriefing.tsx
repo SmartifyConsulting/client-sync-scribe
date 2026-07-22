@@ -619,7 +619,7 @@ export function TodaysBriefing() {
           </Button>
           <div className="text-center">
             <h3 className="text-xs md:text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
-            <p className="text-xs md:text-sm text-primary-foreground/80">
+            <p className="text-xs md:text-sm text-white">
               <span>{formattedSelectedDate}</span>
               <span className="inline md:hidden"> • {doneCount}/{appointments.length}</span>
               <span className="hidden md:block">{t("briefing.completedOf", { done: doneCount, total: appointments.length })}</span>

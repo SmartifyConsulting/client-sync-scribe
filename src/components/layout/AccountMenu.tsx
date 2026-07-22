@@ -44,12 +44,12 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
       <PopoverContent className="p-1.5 w-[calc(var(--sidebar-width)_-_16px)]" align={align} alignOffset={alignOffset} sideOffset={8}>
         {/* Profile switcher */}
         {isDoctor && (
-          <div className="border-b border-border mb-1">
+          <div className="border-b border-border mb-1 space-y-1">
             <button
               onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
               className={cn(
                 "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
-                !isOnPatientRoute ? "bg-primary/10" : "hover:bg-accent"
+                !isOnPatientRoute ? "bg-primary/10" : "hover:bg-muted"
               )}
             >
               <Stethoscope className="h-3.5 w-3.5 text-primary" />
@@ -62,7 +62,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
               onClick={() => navigate("/patient/details")}
               className={cn(
                 "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
-                isOnPatientRoute ? "bg-primary/10" : "hover:bg-accent"
+                isOnPatientRoute ? "bg-primary/10" : "hover:bg-muted"
               )}
             >
               <HeartPulse className="h-3.5 w-3.5 text-primary" />

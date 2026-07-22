@@ -155,7 +155,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   data-tour={(item as any).tour}
                   className={() =>
                     cn(
-                      "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-[13px] font-medium transition-all duration-200",
+                      "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold transition-all duration-200",
 
                       isItemActive
                         ? item.danger
@@ -205,7 +205,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   {loading ? (
                     <div className="h-3 w-20 rounded bg-muted animate-pulse" />
                   ) : (
-                    <p className="text-sm font-medium text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
                   )}
                 </div>
               </button>
