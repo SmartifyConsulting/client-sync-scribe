@@ -184,7 +184,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         <div className="mt-auto px-2 pb-2">
           <AccountMenu
             align="start"
-            alignOffset={8}
+            alignOffset={0}
             trigger={
               <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-primary rounded-xl transition-colors">
                 <Avatar className="h-[73px] w-[73px] border-2 border-primary">
