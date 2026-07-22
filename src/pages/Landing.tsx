@@ -360,7 +360,7 @@ export default function Landing() {
                 </p>
                 <div className="mt-3 flex items-center gap-1.5">
                   <Gift className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-sm font-medium text-primary">{t("landing.features.rewardsEarned")}</span>
+                  <span className="text-xs font-medium text-primary">{t("landing.features.rewardsEarned")}</span>
                 </div>
               </div>
 

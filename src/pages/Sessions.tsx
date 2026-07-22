@@ -1001,7 +1001,7 @@ export default function Sessions() {
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-sm font-medium text-primary">Live AI hint</p>
+                    <p className="text-xs font-medium text-primary">Live AI hint</p>
                   </div>
                   {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                 </div>

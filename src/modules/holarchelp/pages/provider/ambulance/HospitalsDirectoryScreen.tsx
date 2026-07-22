@@ -90,7 +90,7 @@ export default function HospitalsDirectoryScreen() {
                 {!h.accepting_patients && <span className="rounded-full border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-destructive">{t("hospitalsDirectory.notAccepting")}</span>}
               </div>
               {h.contact_phone && (
-                <a href={`tel:${h.contact_phone}`} className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
+                <a href={`tel:${h.contact_phone}`} className="mt-2 inline-block text-xs font-medium text-primary hover:underline">
                   {h.contact_phone}
                 </a>
               )}
