@@ -121,7 +121,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   });
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
           <img src={holarcLogo} alt="Holarc Health" className="h-[82px] w-auto object-contain" />
@@ -187,7 +187,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             alignOffset={8}
             trigger={
               <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-primary rounded-xl transition-colors">
-                <Avatar className="h-[52px] w-[52px] border-2 border-primary">
+                <Avatar className="h-[73px] w-[73px] border-2 border-primary">
                   <AvatarImage
                     key={profile?.avatar_url}
                     src={profile?.avatar_url || undefined}

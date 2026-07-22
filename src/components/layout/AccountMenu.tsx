@@ -41,7 +41,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
   return (
     <Popover>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className={cn("p-1.5", isAdmin ? "w-72" : "w-48")} align={align} alignOffset={alignOffset} sideOffset={8}>
+      <PopoverContent className={cn("p-1.5", isAdmin ? "w-[403px]" : "w-[269px]")} align={align} alignOffset={alignOffset} sideOffset={8}>
         {/* Profile switcher */}
         {isDoctor && (
           <div className="border-b border-border mb-1">
