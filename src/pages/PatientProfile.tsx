@@ -255,7 +255,7 @@ export default function PatientProfile() {
               {initials}
             </div>
             <div>
-              <h1 className={cn("text-xl font-bold tracking-tight text-foreground flex items-center gap-2", isSamplePatient(patient) && "italic")}>
+              <h1 className={cn("text-3xl font-bold tracking-tight text-foreground flex items-center gap-2", isSamplePatient(patient) && "italic")}>
                 {patient.name}
                 {isSamplePatient(patient) && <SampleBadge size="md" />}
                 <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
