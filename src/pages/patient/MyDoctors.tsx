@@ -597,7 +597,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           <Card className="h-fit">
             <CardContent className="p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-medium text-primary-dark">Filters</h3>
+                <h3 className="text-xs font-medium text-primary-dark">Filters</h3>
                 <button type="button" className="text-xs text-muted-foreground hover:text-foreground underline" onClick={clearFilters}>
                   Clear all
                 </button>

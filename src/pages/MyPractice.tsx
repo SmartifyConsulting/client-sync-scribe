@@ -350,7 +350,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
         <AccordionTrigger className="px-4 py-3 hover:no-underline">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-base font-medium text-primary-dark">{t("myPractice.aboutMe")}</h3>
+            <h3 className="text-xs font-medium text-primary-dark">{t("myPractice.aboutMe")}</h3>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4 space-y-2">
@@ -1159,7 +1159,7 @@ export default function MyPractice() {
                 <Camera className="h-3 w-3 text-primary-foreground" />
               </div>
             </div>
-            <span className="text-base font-medium text-primary-dark mt-0.5 whitespace-nowrap">
+            <span className="text-xs font-medium text-primary-dark mt-0.5 whitespace-nowrap">
               {(profile as any)?.avatar_url ? "Change photo" : "Add photo"}
             </span>
             <input
@@ -1190,31 +1190,31 @@ export default function MyPractice() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base px-1.5 py-1 sm:text-base sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base px-1.5 py-1 sm:text-base sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
             value="referrals"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base px-1.5 py-1 sm:text-base sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base px-1.5 py-1 sm:text-base sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base px-1.5 py-1 sm:text-base sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabRewards")}
           </TabsTrigger>
@@ -1232,7 +1232,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-medium text-primary-dark">Personal Information</h3>
+                  <h3 className="text-xs font-medium text-primary-dark">Personal Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1330,7 +1330,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-medium text-primary-dark">Practice Information</h3>
+                  <h3 className="text-xs font-medium text-primary-dark">Practice Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1740,7 +1740,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-medium text-primary-dark">Shared Practice Calendar</h3>
+                  <h3 className="text-xs font-medium text-primary-dark">Shared Practice Calendar</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1865,7 +1865,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
-                  <span className="text-base font-medium text-primary-dark">Service Offerings & Pricing</span>
+                  <span className="text-xs font-medium text-primary-dark">Service Offerings & Pricing</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -2051,7 +2051,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-medium text-primary-dark">Digital Signature</h3>
+                  <h3 className="text-xs font-medium text-primary-dark">Digital Signature</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
@@ -2165,7 +2165,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-medium text-primary-dark">Voice Narration Settings</h3>
+                  <h3 className="text-xs font-medium text-primary-dark">Voice Narration Settings</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
@@ -2291,7 +2291,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-base font-medium text-primary-dark">Referral Doctors</h3>
+              <h3 className="text-xs font-medium text-primary-dark">Referral Doctors</h3>
             </div>
             <ReferralDoctors hideHeader />
           </div>
@@ -2303,7 +2303,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
-              <h3 className="text-base font-medium text-primary-dark">Credentials</h3>
+              <h3 className="text-xs font-medium text-primary-dark">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-sm">

@@ -102,7 +102,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                 end={item.end}
                 onClick={onNavigate}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-xl px-3 py-2 text-[16px] font-medium transition-all duration-200",
+                  "flex items-center gap-2.5 rounded-xl px-3 py-2 text-[12px] font-medium transition-all duration-200",
                   isActive
                     ? item.danger
                       ? "bg-red-600 text-white shadow-sm"

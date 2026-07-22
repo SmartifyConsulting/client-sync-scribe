@@ -115,7 +115,7 @@ export function RecentActivity() {
     <Collapsible defaultOpen={true}>
       <div className="rounded-xl border border-primary bg-card shadow-sm">
         <CollapsibleTrigger className="w-full rounded-xl data-[state=open]:rounded-b-none bg-primary px-4 py-3 flex items-center justify-between transition-all">
-          <h3 className="text-base font-medium text-primary-dark-foreground">{t("doctorDashboard.recentActivity")}</h3>
+          <h3 className="text-xs font-medium text-primary-dark-foreground">{t("doctorDashboard.recentActivity")}</h3>
           <ChevronDown className="h-4 w-4 text-primary-foreground transition-transform duration-200 [[data-state=open]>&]:rotate-180" />
         </CollapsibleTrigger>
         <CollapsibleContent>
