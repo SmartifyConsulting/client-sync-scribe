@@ -75,7 +75,7 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </Button>
       )}
 
-      <Accordion type="multiple" className="w-full">
+      <Accordion type="multiple" className="w-full" defaultValue={["vitals"]}>
         <AccordionItem value="vitals">
           <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Activity className="h-4 w-4" /> Vitals ({vitals.length})</span></AccordionTrigger>
           <AccordionContent>

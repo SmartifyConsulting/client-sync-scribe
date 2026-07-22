@@ -182,7 +182,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
           No round table topics yet.
         </div>
       ) : (
-        <Accordion type="multiple" className="space-y-2">
+        <Accordion type="multiple" className="space-y-2" defaultValue={topics.length > 0 ? [topics[0].id] : []}>
           {topics.map((t) => (
             <AccordionItem key={t.id} value={t.id} className="rounded-lg border border-primary/30 bg-card px-3">
               <AccordionTrigger
