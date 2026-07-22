@@ -121,7 +121,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   });
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar border-r border-sidebar-border">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-[210px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
           <img src={holarcLogo} alt="Holarc Health" className="h-[82px] w-auto object-contain" />
@@ -155,15 +155,15 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   data-tour={(item as any).tour}
                   className={() =>
                     cn(
-                      "flex items-center gap-2.5 rounded-xl px-3 py-2 text-base font-medium transition-all duration-200",
+                      "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-2 text-base font-medium transition-all duration-200",
 
                       isItemActive
                         ? item.danger
                           ? "bg-red-600 text-white shadow-sm"
                           : "bg-primary text-primary-foreground shadow-sm"
                         : item.danger
-                          ? "text-red-600 hover:bg-red-600/10"
-                          : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                          ? "text-red-600 hover:border-red-600"
+                          : "text-foreground hover:border-primary",
                     )
                   }
                 >
@@ -185,8 +185,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           <AccountMenu
             align="start"
             trigger={
-              <button className="flex w-full items-center gap-3 px-4 py-3 hover:bg-accent hover:rounded-xl transition-colors">
-                <Avatar className="h-10 w-10 border-2 border-border">
+              <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-primary rounded-xl transition-colors">
+                <Avatar className="h-[52px] w-[52px] border-2 border-primary">
                   <AvatarImage
                     key={profile?.avatar_url}
                     src={profile?.avatar_url || undefined}

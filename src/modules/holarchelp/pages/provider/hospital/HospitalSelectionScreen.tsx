@@ -79,7 +79,7 @@ export default function HospitalSelectionScreen() {
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="min-w-0">
-                  <h3 className="text-xs font-medium text-primary-dark truncate">
+                  <h3 className="text-base font-medium text-primary-dark truncate">
                     {hospital.name}
                   </h3>
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">

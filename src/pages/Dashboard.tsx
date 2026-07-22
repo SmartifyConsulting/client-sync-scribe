@@ -354,7 +354,7 @@ export default function Dashboard() {
             <div className="hidden lg:block">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
                 <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-xs font-medium text-primary-dark-foreground">{t("doctorDashboard.myRoundTables")}</h3>
+                  <h3 className="text-base font-medium text-primary-dark-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">
@@ -395,7 +395,7 @@ export default function Dashboard() {
             <div className="lg:hidden">
               <div className="rounded-xl border border-primary bg-card shadow-sm">
                 <div className="w-full rounded-t-xl bg-primary px-4 py-3 flex items-center justify-between">
-                  <h3 className="text-xs font-medium text-primary-dark-foreground">{t("doctorDashboard.myRoundTables")}</h3>
+                  <h3 className="text-base font-medium text-primary-dark-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">

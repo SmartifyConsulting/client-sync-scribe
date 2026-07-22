@@ -445,7 +445,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       <div className="grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
         {/* Sidebar filters */}
         <div className="rounded-xl border border-primary bg-card shadow-sm p-4 space-y-4 h-fit">
-          <h3 className="text-xs font-medium text-primary-dark">Filters</h3>
+          <h3 className="text-base font-medium text-primary-dark">Filters</h3>
           <div className="space-y-1.5">
             <Label className="text-xs">Search</Label>
             <div className="relative">

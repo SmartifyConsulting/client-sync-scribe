@@ -16,7 +16,7 @@ export function Footer() {
   const Dot = () => <span aria-hidden="true" className="opacity-50">·</span>;
 
   return (
-    <footer className="border-t border-border bg-card/50 h-[var(--footer-height)] flex items-center">
+    <footer className="bg-card/50 h-[var(--footer-height)] flex items-center">
       <div className="md:ml-[var(--sidebar-width)] w-full">
         <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <span>{t("footer.copyright", { year: currentYear })}</span>

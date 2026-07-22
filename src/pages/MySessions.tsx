@@ -122,7 +122,7 @@ export default function MySessions() {
               >
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex items-center justify-between w-full pr-2">
-                    <span className="text-xs font-medium text-primary-dark">{t(b.labelKey, b.fallback)}</span>
+                    <span className="text-base font-medium text-primary-dark">{t(b.labelKey, b.fallback)}</span>
                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {rows.length}
                     </span>
