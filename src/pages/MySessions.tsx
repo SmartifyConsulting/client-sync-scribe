@@ -96,7 +96,7 @@ export default function MySessions() {
         <h1 className="text-2xl font-bold text-foreground">
           {t("nav.mySessions", "My Sessions")}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
         </p>
       </div>

@@ -299,7 +299,7 @@ export default function PatientDashboard() {
             <h1 className="text-2xl font-bold text-foreground">
               {profile?.full_name ? `${t("patientDashboard.welcomeTitle")}, ${profile.full_name.split(" ")[0]}` : t("patientDashboard.welcomeTitle")}
             </h1>
-            <p className="text-muted-foreground text-sm">{t("patientDashboard.welcomeSubtitle")}</p>
+            <p className="text-muted-foreground text-xs">{t("patientDashboard.welcomeSubtitle")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

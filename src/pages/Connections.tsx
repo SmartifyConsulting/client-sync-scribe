@@ -344,7 +344,7 @@ export default function Connections() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Connections</h1>
-          <p className="mt-1 text-muted-foreground text-sm">
+          <p className="mt-1 text-muted-foreground text-xs">
             Manage your professional network and connections
           </p>
         </div>

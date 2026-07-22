@@ -1118,7 +1118,7 @@ export default function MyPractice() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Holarprac</h1>
-          <p className="text-muted-foreground text-sm">Manage your personal and practice information</p>
+          <p className="text-muted-foreground text-xs">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === "saving" && (
@@ -1173,7 +1173,7 @@ export default function MyPractice() {
           </label>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-foreground truncate">{combinedFullName || "Your Name"}</p>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
             {isUploadingAvatar && <p className="text-xs text-muted-foreground">Uploading...</p>}
           </div>
           {totalCpdPoints > 0 && (

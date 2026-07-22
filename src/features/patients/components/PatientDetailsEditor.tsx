@@ -1340,7 +1340,7 @@ export function PatientDetailsEditor({
                 return `${greeting}, ${patient.name.split(" ")[0]}`;
               })()}
             </h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-xs">
               Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
           </div>

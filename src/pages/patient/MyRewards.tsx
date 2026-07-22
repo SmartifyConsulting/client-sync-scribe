@@ -316,7 +316,7 @@ export default function MyRewards() {
                 What are Vulas?
               </button>
             </div>
-            <p className="mt-1 text-muted-foreground text-sm">
+            <p className="mt-1 text-muted-foreground text-xs">
               Track your Vulas, milestones, and health streaks
             </p>
           </div>

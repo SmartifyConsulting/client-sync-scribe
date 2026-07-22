@@ -147,7 +147,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                 What are Vulas?
               </button>
             </div>
-            <p className="text-muted-foreground text-sm">Manage your Vulas balance, milestones, and streaks</p>
+            <p className="text-muted-foreground text-xs">Manage your Vulas balance, milestones, and streaks</p>
           </div>
           {partnerApps.length > 0 && (
             <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Vulas</Button>

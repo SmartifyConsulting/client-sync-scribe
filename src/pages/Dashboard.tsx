@@ -289,7 +289,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-foreground">
             {greeting}{displayName ? `, ${displayName}` : ''}
           </h1>
-          <p className="mt-2 text-muted-foreground text-sm">
+          <p className="mt-2 text-muted-foreground text-xs">
             {t("doctorDashboard.subtitle")}
             <span className="block md:inline"> {formattedDate}</span>
           </p>

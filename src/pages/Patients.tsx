@@ -396,7 +396,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         {!hideHeader && (
           <div>
             <h1 className="text-2xl font-bold text-foreground">{t("nav.myPatients", "Patients")}</h1>
-            <p className="mt-1 text-muted-foreground text-sm">
+            <p className="mt-1 text-muted-foreground text-xs">
               {t("patients.subtitle")}
             </p>
           </div>

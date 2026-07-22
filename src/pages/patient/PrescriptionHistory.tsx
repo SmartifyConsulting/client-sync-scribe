@@ -118,7 +118,7 @@ export default function Documentation() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Documentation</h1>
-        <p className="text-muted-foreground text-sm">View and manage your documents</p>
+        <p className="text-muted-foreground text-xs">View and manage your documents</p>
       </div>
 
       {patientId && user?.id && (

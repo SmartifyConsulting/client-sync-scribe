@@ -155,7 +155,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   data-tour={(item as any).tour}
                   className={() =>
                     cn(
-                      "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-2 text-[12px] font-medium transition-all duration-200",
+                      "flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-2 text-[13px] font-medium transition-all duration-200",
 
                       isItemActive
                         ? item.danger
