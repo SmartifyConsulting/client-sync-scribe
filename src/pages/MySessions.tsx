@@ -93,8 +93,7 @@ export default function MySessions() {
   return (
     <div className="container mx-auto p-4 max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold flex items-center gap-2">
-          <Mic className="h-6 w-6 text-primary" />
+        <h1 className="text-2xl font-bold text-foreground">
           {t("nav.mySessions", "My Sessions")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -123,7 +122,7 @@ export default function MySessions() {
               >
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex items-center justify-between w-full pr-2">
-                    <span className="font-medium">{t(b.labelKey, b.fallback)}</span>
+                    <span className="text-sm font-semibold text-primary">{t(b.labelKey, b.fallback)}</span>
                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {rows.length}
                     </span>

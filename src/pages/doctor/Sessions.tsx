@@ -116,7 +116,7 @@ export default function Sessions() {
     <div className="flex-1 overflow-auto">
       <div className="max-w-4xl mx-auto space-y-6 p-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">My Sessions</h1>
+          <h1 className="text-2xl font-bold text-foreground">My Sessions</h1>
           <p className="text-muted-foreground mt-1">
             View your past and upcoming sessions with patients
           </p>
@@ -139,7 +139,7 @@ export default function Sessions() {
                     onClick={() => toggleGroup(groupKey)}
                   >
                     <div className="flex items-center gap-3">
-                      <h3 className="font-semibold text-foreground">
+                      <h3 className="text-sm font-semibold text-primary">
                         {groupLabels[groupKey]}
                       </h3>
                       <span className="text-sm text-muted-foreground">

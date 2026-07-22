@@ -133,7 +133,7 @@ export function AccountabilityPanel() {
               <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/40">
                 <div className="flex items-center gap-3">
                   <span className="text-base">{countryFlag(country)}</span>
-                  <span className="text-sm font-semibold">{country}</span>
+                  <span className="text-sm font-semibold text-primary">{country}</span>
                   <span className="text-sm text-muted-foreground">
                     {approved.length} approved · {unapproved.length} unapproved
                   </span>
@@ -149,7 +149,7 @@ export function AccountabilityPanel() {
                       <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-muted/30">
                         <div className="flex items-center gap-2">
                           <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
-                          <span className="text-sm font-medium">{label}</span>
+                          <span className="text-sm font-semibold text-primary">{label}</span>
                           <span className="text-sm text-muted-foreground">{items.length}</span>
                         </div>
                       </AccordionTrigger>
