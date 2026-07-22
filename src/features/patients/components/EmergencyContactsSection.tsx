@@ -84,7 +84,7 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
       </CardHeader>
       <CardContent className="space-y-3">
         {contacts.length === 0 && (
-          <p className="text-sm text-muted-foreground">No emergency contacts yet.</p>
+          <p className="text-xs text-muted-foreground">No emergency contacts yet.</p>
         )}
         {contacts.map((c) => (
           <div key={c.id} className="rounded-lg border border-border p-3 space-y-2 bg-muted/30">

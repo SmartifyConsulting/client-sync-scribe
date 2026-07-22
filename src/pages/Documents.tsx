@@ -729,7 +729,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-sm text-muted-foreground">
+                <div className="p-8 text-center text-xs text-muted-foreground">
                   {documents.length === 0
                     ? "No documents yet. Create your first document using a template above."
                     : "No documents found matching your search."}

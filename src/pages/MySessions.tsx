@@ -130,7 +130,7 @@ export default function MySessions() {
                 </AccordionTrigger>
                 <AccordionContent className="px-3 pb-3">
                   {rows.length === 0 ? (
-                    <p className="text-sm text-muted-foreground px-2 py-3">
+                    <p className="text-xs text-muted-foreground px-2 py-3">
                       {t("mySessions.empty", "No sessions in this period.")}
                     </p>
                   ) : (

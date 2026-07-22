@@ -782,8 +782,8 @@ export default function PatientProfile() {
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-7 w-7 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground">No documents yet</p>
-                    <p className="text-sm text-muted-foreground mt-1">Create a new document from a template</p>
+                    <p className="text-xs text-muted-foreground">No documents yet</p>
+                    <p className="text-xs text-muted-foreground mt-1">Create a new document from a template</p>
                   </div>
                 );
               }

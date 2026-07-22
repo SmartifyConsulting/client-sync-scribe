@@ -93,7 +93,7 @@ export function PatientSelfAdmissionsSection({ patientId, userId }: { patientId:
       <CardContent className="space-y-2">
         {loading && <p className="text-xs text-muted-foreground">Loading…</p>}
         {!loading && items.length === 0 && (
-          <p className="text-sm text-muted-foreground">No admissions logged yet.</p>
+          <p className="text-xs text-muted-foreground">No admissions logged yet.</p>
         )}
         {items.map((a) => (
           <div key={a.id} className="rounded-lg border border-border p-3 bg-muted/30">

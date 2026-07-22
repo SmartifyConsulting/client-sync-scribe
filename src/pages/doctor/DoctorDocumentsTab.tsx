@@ -52,7 +52,7 @@ export default function DoctorDocumentsTab() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">
+        <div className="rounded-lg border border-dashed p-10 text-center text-xs text-muted-foreground">
           No documents yet.
         </div>
       ) : (

@@ -96,7 +96,7 @@ export function DoctorRoundTables() {
     return (
       <div className="rounded-xl border border-dashed border-border p-12 text-center">
         <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-        <p className="text-sm text-muted-foreground">No round table contributions yet</p>
+        <p className="text-xs text-muted-foreground">No round table contributions yet</p>
       </div>
     );
   }

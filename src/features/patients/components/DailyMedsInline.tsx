@@ -240,7 +240,7 @@ export function DailyMedsInline({ patientId, patientUserId }: Props) {
 
       {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
       {!loading && meds.length === 0 && (
-        <p className="text-sm text-muted-foreground">No daily vitamins or supplements added yet.</p>
+        <p className="text-xs text-muted-foreground">No daily vitamins or supplements added yet.</p>
       )}
       {meds.map((m) => (
         <div key={m.id} className="flex items-center justify-between rounded-md border border-border p-2 bg-muted/30">

@@ -167,7 +167,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
 
         {loading && <p className="text-xs text-muted-foreground">Loading…</p>}
         {!loading && shares.length === 0 && (
-          <p className="text-sm text-muted-foreground">No one has access yet.</p>
+          <p className="text-xs text-muted-foreground">No one has access yet.</p>
         )}
         {shares.map((s) => (
           <div key={s.id} className="rounded-lg border border-border p-3 bg-muted/30">
