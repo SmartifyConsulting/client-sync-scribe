@@ -140,7 +140,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               const itemSearch = hasQuery ? item.to.split("?")[1] : "";
 
               const isItemActive = hasQuery
-                ? location.pathname === itemPath && location.search === `?${itemSearch}`
+                ? location.pathname === itemPath &&
+                  (location.search === `?${itemSearch}` ||
+                    (!location.search && itemSearch === "section=health"))
                 : location.pathname === itemPath &&
                   (!location.search ||
                     !navItems.some(
