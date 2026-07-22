@@ -162,7 +162,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                           ? "bg-red-600 text-white shadow-sm"
                           : "bg-primary text-primary-foreground shadow-sm"
                         : item.danger
-                          ? "text-red-600 hover:border-red-600"
+                          ? "text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600"
                           : "text-foreground hover:border-primary",
                     )
                   }

@@ -693,7 +693,7 @@ export function TodaysBriefing() {
               size="sm"
               onClick={handleNarrate}
               disabled={isNarrating}
-              className="gap-0.5 bg-white text-primary border border-white/50 hover:bg-accent hover:text-primary text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2"
+              className="gap-0.5 bg-white text-primary border border-white/50 hover:bg-muted hover:text-primary text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2"
             >
               {isNarrating ? (
                  <>
