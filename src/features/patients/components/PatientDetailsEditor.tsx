@@ -182,14 +182,16 @@ const SectionHeader = ({
   label,
   extra,
   onEdit,
+  titleClassName,
 }: {
   icon: any;
   label: string;
   extra?: React.ReactNode;
   onEdit?: () => void;
+  titleClassName?: string;
 }) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-primary/5 transition-colors px-4 py-3 group">
-    <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left">
+    <h3 className={cn("text-[14px] font-semibold text-primary tracking-wide flex items-center gap-2 text-left", titleClassName)}>
       <Icon className="h-4 w-4 text-primary" /> {label}
     </h3>
     <div className="flex items-center gap-2">
