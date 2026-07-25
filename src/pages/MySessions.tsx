@@ -62,7 +62,7 @@ function CountPill({ count, open }: { count: number; open?: boolean }) {
   );
 }
 
-function SessionCard({ s, t }: { s: SessionRow; t: (k: string, d?: string) => string }) {
+function SessionCard({ s, t }: { s: SessionRow; t: any }) {
   return (
     <Link to={`/sessions/${s.id}`}>
       <Card className="p-3 hover:bg-accent/40 transition-colors">
