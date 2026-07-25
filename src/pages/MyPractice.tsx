@@ -2282,12 +2282,12 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === TEMPLATES TAB === */}
-        <TabsContent value="templates" className="mt-4">
+        <TabsContent value="templates" className="mt-4 my-practice-tab-body">
           <Documents hideHeader />
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
-        <TabsContent value="referrals" className="mt-4 space-y-4">
+        <TabsContent value="referrals" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
@@ -2299,7 +2299,7 @@ export default function MyPractice() {
 
 
         {/* === CERTIFICATES TAB === */}
-        <TabsContent value="certificates" className="mt-4">
+        <TabsContent value="certificates" className="mt-4 my-practice-tab-body">
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
