@@ -1,108 +1,73 @@
+# UI polish + patient documents + medications + programs + profile switcher
 
-## 1. Sidebar bottom avatar (desktop)
+## A. Profile switcher additions
+Add **Okili** and **Dr Buttons** to `src/components/layout/testProfiles.ts` so they appear in the switcher for all seeded users.
+Also whitelist their emails in `supabase/functions/admin-impersonate/index.ts` `SEEDED_EMAILS`.
 
-`src/components/layout/Sidebar.tsx` (AccountMenu trigger):
-- Shrink avatar from `h-[73px] w-[73px]` → `h-16 w-16` (matches the My Practice profile picture).
-- Drop the framed square around the user's name — remove `border border-transparent hover:border-primary rounded-xl` on the trigger button; keep padding + a subtle `hover:bg-muted/50`.
+**Blocker — need from you:**
+- Okili: login email + role (Patient / Doctor / Hospital / ER Provider / Admin)
+- Dr Buttons: login email + role
 
-## 2. Restore avatar to the top-right
+I'll add stub entries only if you send those; otherwise the "Signed in as … can't impersonate them" error will fire.
 
-`src/components/layout/TopBarIcons.tsx`:
-- Append a right-most `<Avatar className="h-9 w-9 border-2 border-primary">` (image from `profile?.avatar_url`, fallback via existing `getInitials()`).
-- Wrap it in the shared `AccountMenu` so it opens the same popover (including the profile switcher).
-- No label, no square frame. `AppLayout` already renders `TopBarIcons` in the top-right, so no layout change needed.
+## B. Tab-view heading parity (My Practice matches Patient My Profile)
+The tab-body headings in My Practice (e.g. "Practice Details", "Referral Doctors", "Credentials") currently render at `text-xs`, while Patient My Profile tab headings render at `text-base` (`h2` semantic).
+- Update the section headings inside each `MyPractice.tsx` `TabsContent` to the same class stack used in `src/pages/patient/MyDetails.tsx` — typically `text-base font-semibold text-primary-dark` with a matching subtitle in `text-xs text-muted-foreground`.
+- Applies to every My Practice sub-tab (Practice, Templates, Referrals, Credentials, Rewards) so all tab headers look identical to the patient side.
 
-## 3. Darker accordion borders — My Holarchy and My Practice
+## C. Patient Documents — group by Type / Date, patient-authored CRUD
+- Segmented toggle `[ By Type | By Date ]`, By Date default.
+- **By Date**: accordion per `Month YYYY`, current month (`Jul 2026`) expanded, others collapsed.
+- **By Type**: accordion per document type, all collapsed by default.
+- Patient can `+ New Document`, plus Edit/Delete on rows they authored. Doctor-authored docs stay read-only.
+- Verify RLS on `public.documents` for patient self-CRUD; add missing policies via migration only if needed.
 
-- `src/features/patients/components/PatientDetailsEditor.tsx`: replace every accordion `border border-border` with `border border-neutral-400`.
-- `src/pages/MyPractice.tsx`: replace accordion `border border-primary-dark` (and any `border border-border`) with `border border-neutral-400`.
-- Outer section frames (`border border-primary`) stay unchanged — only inner accordion frames darken.
+## D. Medications & Programs (patient My Profile → Health)
+- Rename **"Today's Medications"** → **"Current Medication"**, collapsed by default.
+- Add **"Past Medication"** accordion — populated where `end_date < today` OR status discontinued/completed. Collapsed by default.
+- Add **"Assigned Programs"** accordion (diets, exercises, rehab). Collapsed by default.
+  - Check existing schema first; if no fit, migration for `patient_assigned_programs` (patient_id, assigned_by_doctor_id, title, program_type enum, description, start_date, end_date) with full GRANTs + RLS.
 
-## 4. My Practice tabs → visual parity with My Holarchy
+## E. Sub-tab styling (green bar, white text)
+- My Profile → Holarchy inner tabs and Templates sub-tabs: inner `TabsList` → `bg-primary` with triggers `text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark`.
 
-In `src/pages/MyPractice.tsx`:
-- Page H1 + subtitle: keep `text-3xl font-bold` heading and `text-xs text-muted-foreground` subtitle (matches My Holarchy).
-- Standardise every `TabsTrigger` to `text-xs px-3 py-1.5 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-black` — remove the mixed responsive `px-1.5/py-1 sm:px-3` variants so all triggers are identical.
-- Each `TabsContent` opens with a shared header block: `<h2 className="text-lg font-semibold text-foreground">…</h2>` + `<p className="text-xs text-muted-foreground">…</p>`, mirroring My Holarchy tab headings. Suppress duplicate headings inside embedded pages via the existing `hideHeader` prop pattern (already used for `Documents`/`Invoices`) and extend it to `ReferralDoctors`, `CPDCertificates`, `DoctorRewards`.
-- Sub-tab menus inside Templates/Rewards reuse the same TabsList styling.
+## F. Accordion + label consistency (My Profile)
+- Emergency Contacts wrapper → `border-neutral-400`.
+- "Organ Donor" label in Medical Information → same class stack as sibling labels.
 
-## 5. 12px body text inside My Practice tab frames
+## G. Compact, classy form typography
+Scoped to `.my-holarchy-tab-body` and `.my-practice-tab-body` in `src/index.css`:
+- Labels: `font-weight: 700; font-size: 11px;`
+- Inputs / selects / textareas / value spans: `font-size: 11px; font-weight: 600;`
+- `input, select, textarea { height: 30px; padding: 4px 8px; }`
+- Tighter rhythm within scope only.
 
-- Wrap each `TabsContent` in `<div className="my-practice-tab-body">…</div>`.
-- Add to `src/index.css`:
+## H. Calendar tweaks (Doctor calendar)
+- Weekday headers `font-bold`.
+- "Today" badge → `bg-primary text-white`.
+- Top card: replace "Upcoming Appointment with {name}" with just `{name}`.
 
-```css
-.my-practice-tab-body,
-.my-practice-tab-body p,
-.my-practice-tab-body span,
-.my-practice-tab-body label,
-.my-practice-tab-body button,
-.my-practice-tab-body input,
-.my-practice-tab-body textarea,
-.my-practice-tab-body td,
-.my-practice-tab-body th,
-.my-practice-tab-body li { font-size: 12px; line-height: 1.35; }
+## I. Live AI diagnostic hint during recording
+Diagnostic-first: verify hook/component mount while `isRecording === true`, poll fires on transcript-chunk updates, `live-session-hint` edge fn logs clean. Fix the broken link.
 
-.my-practice-tab-body h1,
-.my-practice-tab-body h2,
-.my-practice-tab-body h3 { font-size: 14px; }
-```
+## J. Toast pacing
+In `useSessions.ts` + `Sessions.tsx` finalisation, pass `{ duration: 6000, id: "<step-key>" }` so toasts persist ~6s and stack.
 
-## 6. Rename patient nav item "My Holarchy" → "My Profile"
+## K. To-Do List redesign (patient home)
+- Remove document description; row = `[icon] [patient name] [meta chip] [actions]`.
+- Legend strip at top (Document, Certificate, Appointment, Medication, Referral, Task).
+- Medical Certificate → `Award` icon; Appointment → plain `Calendar` (no `Sparkles`).
+- Patient name inline in `text-sm font-semibold`.
 
-- `src/i18n/locales/en.json`: change `nav.myHolarchy` value from `"My Holarchy"` to `"My Profile"`.
-- `src/components/layout/Sidebar.tsx` (line 55): hardcoded fallback `"My Holarchy"` → `"My Profile"`.
-- `BottomNav.tsx` reuses the same key — auto-updates.
-
-## 7. Any-to-any profile switching (drop admin-only gate)
-
-- In `src/components/layout/AccountMenu.tsx`, remove the `isAdmin` gate around the switcher list so every test account sees the full `TEST_PROFILES` list.
-- Update `supabase/functions/admin-impersonate/index.ts` so the caller allow-list is the set of `TEST_PROFILES` emails (plus admin) — production users still cannot invoke it.
-- Hide the switcher entirely for anyone whose signed-in email is not in `TEST_PROFILES`.
-
-## 8. Update the test-profiles roster
-
-`src/components/layout/testProfiles.ts`:
-- Remove: Paraskevi, Christina, Jean Prodromos.
-- Add: Okili and Dr — need their sign-in emails and roles.
-
-Question before I build step 8: what are the exact login emails and roles for "Okili" and "Dr"?
-
-## 9. Bold field labels and field text across the app
-
-Goal: every form field label and the value inside every field renders bold, everywhere.
-
-- In `src/index.css`, add global rules that target both native and Radix/shadcn primitives:
-
-```css
-label,
-[data-slot="label"],
-.form-label { font-weight: 600; }
-
-input, textarea, select,
-[data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"],
-[role="combobox"], [role="spinbutton"], [role="textbox"],
-[contenteditable="true"] { font-weight: 600; }
-
-input::placeholder,
-textarea::placeholder { font-weight: 500; }
-```
-
-- Keep the existing shadcn `Label` component API unchanged — the CSS layer above upgrades it globally so no per-component edits are needed.
-- Verify in read-only "view mode" fields (which render as disabled inputs across `PatientDetailsEditor.tsx` and `MyPractice.tsx`) that the bold weight reads correctly against the muted background; if any specific spot is too heavy, override locally with `font-normal`.
-
-## Files touched
-
-- `src/components/layout/Sidebar.tsx`
-- `src/components/layout/TopBarIcons.tsx`
-- `src/components/layout/AccountMenu.tsx`
-- `src/components/layout/testProfiles.ts`
-- `src/features/patients/components/PatientDetailsEditor.tsx`
-- `src/pages/MyPractice.tsx`
-- `src/index.css`
-- `src/i18n/locales/en.json`
-- `supabase/functions/admin-impersonate/index.ts`
+## Technical notes
+- Colours via tokens only.
+- Font/compaction rules scoped so unrelated screens are untouched.
+- Doc CRUD: RLS check first; migration only if missing.
+- Programs migration only if no existing table fits.
+- Live-hint fix is diagnostic-first.
 
 ## Out of scope
+- No palette changes, no top-level tab bar changes, no unrelated screens.
 
-No colour changes, no business-logic changes, and no changes to the underlying tab pages beyond the shared 12px scope and the `hideHeader` prop already in use.
+## Question
+Send Okili's and Dr Buttons' login emails + roles so I can wire them into the switcher and impersonation allow-list.
