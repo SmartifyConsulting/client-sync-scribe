@@ -193,8 +193,8 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+          <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button size="sm" onClick={submit} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
