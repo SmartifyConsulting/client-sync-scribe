@@ -544,7 +544,6 @@ const completeSession = async (
               .eq('user_id', user.id)
               .neq('task_type', 'document_review')
               .ilike('title', '%prescription%');
-            toast({ title: '💊 Prescription Created', description: 'Prescription was auto-generated from the session' });
           }
         } catch (rxError) {
           console.error('Error creating prescription document:', rxError);
@@ -642,7 +641,6 @@ const completeSession = async (
               status: 'pending',
             } as any);
           }
-          toast({ title: '📋 Medical Certificate Created', description: 'Medical certificate was auto-generated from the session' });
           // Remove duplicate action_point todos for medical certificates
           await supabase.from('todos')
             .delete()
@@ -745,7 +743,6 @@ const completeSession = async (
               status: 'pending',
             } as any);
           }
-          toast({ title: '📨 Referral Letter Created', description: 'Referral letter was auto-generated from the session' });
           // Remove duplicate action_point todos for referrals
           await supabase.from('todos')
             .delete()
@@ -955,7 +952,6 @@ const completeSession = async (
               status: 'pending',
             } as any);
           }
-          toast({ title: '🧾 Invoice Created', description: 'Invoice was auto-generated for review' });
           // Remove duplicate action_point todos for invoices
           await supabase.from('todos')
             .delete()
@@ -1009,7 +1005,6 @@ ${tasksHtml}`;
               status: 'pending',
             } as any);
           }
-          toast({ title: '📋 Patient Tasks Created', description: 'Patient task assignments were auto-generated for review' });
           // Remove duplicate action_point todos for exercises/tasks
           await supabase.from('todos')
             .delete()
@@ -1082,7 +1077,6 @@ ${tasksHtml}`;
           .catch((e) => logger.debug('DISC refresh skipped:', e?.message || e));
       }
 
-      toast({ title: 'Session Completed', description: 'Session saved with AI summary and action items added to to-do list' });
       return transformedData;
     } catch (error: any) {
       console.error('Error completing session:', error);
