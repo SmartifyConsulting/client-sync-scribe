@@ -1,4 +1,4 @@
-﻿import { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Upload, FileSpreadsheet, Check, AlertCircle, Loader2, X, Sparkles, FileText } from "lucide-react";
 // @ts-ignore
 import readXlsxFile from 'read-excel-file/browser';
@@ -652,18 +652,18 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
               <TableBody>
                 {parsedPatients.map((patient, index) => (
                   <TableRow key={index}>
-                    <TableCell className="text-muted-foreground text-sm px-1">{index + 1}</TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.name} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], name: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.email || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], email: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.phone || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], phone: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" type="date" value={patient.dob || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], dob: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.gender || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], gender: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.id_passport_number || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], id_passport_number: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.medical_aid || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], medical_aid: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.employer || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], employer: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.allergies || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], allergies: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.physical_address || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], physical_address: e.target.value }; setParsedPatients(updated); }} /></TableCell>
-                    <TableCell className="px-1"><Input className="h-7 text-sm px-1.5" value={patient.status || "active"} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], status: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="text-muted-foreground text-xs px-1">{index + 1}</TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.name} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], name: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.email || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], email: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.phone || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], phone: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" type="date" value={patient.dob || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], dob: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.gender || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], gender: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.id_passport_number || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], id_passport_number: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.medical_aid || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], medical_aid: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.employer || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], employer: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.allergies || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], allergies: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.physical_address || ""} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], physical_address: e.target.value }; setParsedPatients(updated); }} /></TableCell>
+                    <TableCell className="px-1"><Input className="h-7 text-xs px-1.5" value={patient.status || "active"} onChange={(e) => { const updated = [...parsedPatients]; updated[index] = { ...updated[index], status: e.target.value }; setParsedPatients(updated); }} /></TableCell>
                     <TableCell className="px-1">
                       <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setParsedPatients(parsedPatients.filter((_, i) => i !== index))}>
                         <X className="h-4 w-4" />
@@ -711,7 +711,7 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
               <p className="text-sm text-muted-foreground">
                 {importResults.success} patient{importResults.success === 1 ? "" : "s"} imported successfully
                 {importResults.failed > 0 && (
-                  <span className="text-destructive"> Â· {importResults.failed} failed</span>
+                  <span className="text-destructive"> · {importResults.failed} failed</span>
                 )}
               </p>
             </div>
@@ -727,20 +727,20 @@ export function PatientImport({ onImportComplete }: PatientImportProps) {
         <div className="p-4 rounded-lg bg-muted/30">
           <p className="text-sm font-medium text-foreground mb-2">Supported Formats</p>
           <div className="flex flex-wrap gap-2 mb-3">
-            <Badge variant="secondary" className="text-sm">.xlsx</Badge>
-            <Badge variant="secondary" className="text-sm">.xls</Badge>
-            <Badge variant="secondary" className="text-sm">.csv</Badge>
-            <Badge variant="secondary" className="text-sm">.txt</Badge>
+            <Badge variant="secondary" className="text-xs">.xlsx</Badge>
+            <Badge variant="secondary" className="text-xs">.xls</Badge>
+            <Badge variant="secondary" className="text-xs">.csv</Badge>
+            <Badge variant="secondary" className="text-xs">.txt</Badge>
           </div>
           <p className="text-sm font-medium text-foreground mb-2">Auto-detected Fields</p>
           <div className="flex flex-wrap gap-2">
             {["Name", "Email", "Phone", "DOB", "Gender", "ID/Passport", "Address", "Medical Aid", "Allergies", "Employer", "Occupation", "GP", "Next of Kin"].map((col) => (
-              <Badge key={col} variant="outline" className="text-sm">
+              <Badge key={col} variant="outline" className="text-xs">
                 {col}
               </Badge>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             <Sparkles className="h-4 w-4 inline mr-1" />
             AI automatically detects and maps fields from any format, including unstructured text notes.
           </p>
@@ -784,4 +784,3 @@ export function PatientImportDialog({ trigger, onImportComplete }: PatientImport
     </Dialog>
   );
 }
-

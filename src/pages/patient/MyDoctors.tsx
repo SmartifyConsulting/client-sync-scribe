@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -149,7 +149,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     },
   });
 
-  // General Practitioner â€” always shown in the list (by default), flagged
+  // General Practitioner — always shown in the list (by default), flagged
   // with whether they're a registered Holarc Health doctor or an external GP.
   const { data: gpInfo } = useQuery({
     queryKey: ["patient-gp-holarc-status"],
@@ -300,19 +300,19 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <span className="font-medium text-foreground truncate">{doctor.full_name || "Unknown Doctor"}</span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {doctor.specialty && (
-                <Badge className={`text-sm font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
                   {doctor.specialty}
                 </Badge>
               )}
               {doctor.practice_number && (
-                <span className="text-sm text-muted-foreground">PR#: {doctor.practice_number}</span>
+                <span className="text-xs text-muted-foreground">PR#: {doctor.practice_number}</span>
               )}
               {doctor.practice_address && (
-                <span className="text-sm text-muted-foreground">Â· {doctor.practice_address.split(",")[0]}</span>
+                <span className="text-xs text-muted-foreground">· {doctor.practice_address.split(",")[0]}</span>
               )}
             </div>
             {mode === "hidden" && (
-              <span className="text-sm text-muted-foreground italic">
+              <span className="text-xs text-muted-foreground italic">
                 {!access.is_active ? "Deactivated" : "Hidden"}
               </span>
             )}
@@ -325,16 +325,16 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 <TooltipTrigger asChild>
                   <Badge
                     variant={accessLevel === "full" ? "default" : "secondary"}
-                    className={`text-sm cursor-help ${accessLevel === "full" ? "bg-primary text-primary-foreground" : ""}`}
+                    className={`text-xs cursor-help ${accessLevel === "full" ? "bg-primary text-primary-foreground" : ""}`}
                   >
                     {accessLevel === "full" ? "Full access" : "Limited"}
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="max-w-[200px]">
-                  <p className="text-sm font-semibold mb-1">Access granted:</p>
-                  <ul className="text-sm space-y-0.5">
+                  <p className="text-xs font-semibold mb-1">Access granted:</p>
+                  <ul className="text-xs space-y-0.5">
                     {filteredPermissions.map(p => (
-                      <li key={p}>â€¢ {formatPermission(p)}</li>
+                      <li key={p}>• {formatPermission(p)}</li>
                     ))}
                   </ul>
                 </TooltipContent>
@@ -380,7 +380,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <Button
               variant="outline"
               size="sm"
-              className="h-7 text-sm gap-1"
+              className="h-7 text-xs gap-1"
               onClick={() => handleRestore(access)}
             >
               <Eye className="h-3.5 w-3.5" /> Restore
@@ -404,7 +404,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </div>
       )}
 
-      {/* General Practitioner â€” shown by default, flagged with Holarc status */}
+      {/* General Practitioner — shown by default, flagged with Holarc status */}
       {gpInfo && (
         <Card>
           <CardContent className="p-4 flex items-center justify-between gap-3">
@@ -417,12 +417,12 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               </Avatar>
               <div className="min-w-0">
                 <p className="font-medium text-foreground truncate">{gpInfo.name}</p>
-                <p className="text-sm text-muted-foreground">General Practitioner</p>
+                <p className="text-xs text-muted-foreground">General Practitioner</p>
               </div>
             </div>
             <Badge
               variant={gpInfo.onHolarc ? "default" : "secondary"}
-              className={cn("text-sm shrink-0", gpInfo.onHolarc && "bg-primary text-primary-foreground")}
+              className={cn("text-xs shrink-0", gpInfo.onHolarc && "bg-primary text-primary-foreground")}
             >
               {gpInfo.onHolarc ? "On Holarc Health" : "Not on Holarc Health"}
             </Badge>
@@ -434,7 +434,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
       <Card>
         <CardHeader className="pb-1 pt-3 px-4">
           <CardTitle className="text-sm">Find a Healthcare Provider on Holarc</CardTitle>
-          <CardDescription className="text-sm">Filter by name, specialty, language â€” or any combination</CardDescription>
+          <CardDescription className="text-xs">Filter by name, specialty, language — or any combination</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-2 md:grid-cols-3">
@@ -486,7 +486,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                     const GroupIcon = groupKind === 'hospital' ? Building2 : groupKind === 'ambulance' ? Ambulance : Stethoscope;
                     return (
                       <div key={groupKind} className="space-y-1">
-                        <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                           <GroupIcon className="h-3.5 w-3.5 text-primary" />
                           {groupLabel} <span className="text-muted-foreground font-normal">({groupRows.length})</span>
                         </div>
@@ -507,13 +507,13 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                     <div className="flex items-center gap-2">
                                       <Avatar className="h-7 w-7 shrink-0">
                                         <AvatarImage src={doctor.avatar_url || undefined} />
-                                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
                                           <KindIcon className="h-3.5 w-3.5" />
                                         </AvatarFallback>
                                       </Avatar>
                                       <div className="flex flex-col min-w-0">
-                                        <span className="font-medium text-foreground text-sm truncate">{doctor.full_name || "Unknown"}</span>
-                                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                        <span className="font-medium text-foreground text-xs truncate">{doctor.full_name || "Unknown"}</span>
+                                        <span className="text-xs text-muted-foreground flex items-center gap-1">
                                           {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(doctor.stars) || 0))) }).map((_, i) => (
                                             <Star key={i} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
                                           ))}
@@ -523,16 +523,16 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                                   </TableCell>
                                   <TableCell className="p-2">
                                     {doctor.kind === 'doctor' && doctor.specialty ? (
-                                      <Badge className={`text-sm font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
+                                      <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
                                         {doctor.specialty}
                                       </Badge>
                                     ) : (
                                       <div className="flex flex-col gap-0.5">
-                                        <Badge variant="outline" className="text-sm capitalize">{doctor.kind}</Badge>
+                                        <Badge variant="outline" className="text-xs capitalize">{doctor.kind}</Badge>
                                         {doctor.ownership && (
                                           <Badge
                                             variant="outline"
-                                            className={`text-sm capitalize ${doctor.ownership === 'public' ? 'border-green-500 text-green-700' : 'border-blue-500 text-blue-700'}`}
+                                            className={`text-xs capitalize ${doctor.ownership === 'public' ? 'border-green-500 text-green-700' : 'border-blue-500 text-blue-700'}`}
                                           >
                                             {doctor.ownership}
                                           </Badge>
@@ -576,7 +576,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         </CardContent>
       </Card>
 
-      {/* Connected Doctors â€” Sidebar filters + Active / Hidden list */}
+      {/* Connected Doctors — Sidebar filters + Active / Hidden list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -585,7 +585,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-sm font-semibold text-foreground">No healthcare providers on your profile</h3>
+            <h3 className="text-lg font-semibold text-foreground">No healthcare providers on your profile</h3>
              <p className="text-muted-foreground text-center mt-2 max-w-md">
                Search for a healthcare provider above or use the invite button to connect.
             </p>
@@ -597,13 +597,13 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           <Card className="h-fit">
             <CardContent className="p-4 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-foreground">Filters</h3>
-                <button type="button" className="text-sm text-muted-foreground hover:text-foreground underline" onClick={clearFilters}>
+                <h3 className="text-xs font-medium text-primary-dark">Filters</h3>
+                <button type="button" className="text-xs text-muted-foreground hover:text-foreground underline" onClick={clearFilters}>
                   Clear all
                 </button>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm">Search</Label>
+                <Label className="text-xs">Search</Label>
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -615,7 +615,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm">Specialty</Label>
+                <Label className="text-xs">Specialty</Label>
                 <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
                   <SelectContent className="max-h-72">
@@ -627,7 +627,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm">Language</Label>
+                <Label className="text-xs">Language</Label>
                 <Select value={filterLanguage} onValueChange={setFilterLanguage}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Languages" /></SelectTrigger>
                   <SelectContent className="max-h-72">
@@ -639,7 +639,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm">Access Level</Label>
+                <Label className="text-xs">Access Level</Label>
                 <Select value={filterAccessLevel} onValueChange={setFilterAccessLevel}>
                   <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Access Levels" /></SelectTrigger>
                   <SelectContent>
@@ -656,7 +656,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           {/* Provider list */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">Healthcare Providers</h2>
+              <h2 className="text-base font-semibold text-foreground">Healthcare Providers</h2>
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as "name-asc" | "name-desc")}>
                 <SelectTrigger className="h-9 w-[160px] text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -727,14 +727,14 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <DialogTitle className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={detailsDoctor?.avatar_url || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                <AvatarFallback className="bg-primary/10 text-primary text-xs">
                   {detailsDoctor?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "DR"}
                 </AvatarFallback>
               </Avatar>
               <span>{detailsDoctor?.full_name || "Provider"}</span>
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-xs">
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, Math.max(0, Math.round(Number(detailsDoctor?.stars) || 0))) }).map((_, i) => (
                 <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
@@ -762,4 +762,3 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     </div>
   );
 }
-

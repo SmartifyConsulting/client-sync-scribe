@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PlayCircle, StopCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +22,7 @@ import { toast } from "sonner";
 
 type LatLng = { lat: number; lng: number };
 
-// Sandton â†’ Charlotte Maxeke Academic Hospital, ~10 stops
+// Sandton → Charlotte Maxeke Academic Hospital, ~10 stops
 const DEMO_ROUTE: LatLng[] = [
   { lat: -26.1076, lng: 28.0567 }, // Sandton City
   { lat: -26.1170, lng: 28.0540 },
@@ -85,7 +85,7 @@ export function AmbulanceSimulator({ incidentId }: { incidentId?: string } = {})
         .from("holarchelp_provider_locations" as any)
         .insert(payload);
       if (error) {
-        // Most likely RLS â€” surface once then stop
+        // Most likely RLS — surface once then stop
         toast.error(`Simulator stopped: ${error.message}`);
         stop();
       }
@@ -115,7 +115,7 @@ export function AmbulanceSimulator({ incidentId }: { incidentId?: string } = {})
 
   return (
     <div className="rounded-2xl border border-dashed border-warning/60 bg-warning/5 p-2.5 flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-2 text-xs">
         <Sparkles className="h-4 w-4 text-warning" />
         <div>
           <p className="font-semibold text-foreground">Demo simulator</p>
@@ -125,15 +125,14 @@ export function AmbulanceSimulator({ incidentId }: { incidentId?: string } = {})
         </div>
       </div>
       {running ? (
-        <Button size="sm" variant="outline" onClick={stop} className="h-7 text-sm">
+        <Button size="sm" variant="outline" onClick={stop} className="h-7 text-xs">
           <StopCircle className="mr-1 h-3.5 w-3.5" /> Stop
         </Button>
       ) : (
-        <Button size="sm" onClick={start} className="h-7 text-sm">
+        <Button size="sm" onClick={start} className="h-7 text-xs">
           <PlayCircle className="mr-1 h-3.5 w-3.5" /> Simulate ambulance
         </Button>
       )}
     </div>
   );
 }
-

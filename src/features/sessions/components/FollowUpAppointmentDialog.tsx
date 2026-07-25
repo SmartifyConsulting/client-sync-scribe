@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { format, setHours, setMinutes, isBefore, parseISO, addDays } from "date-fns";
 import { CalendarIcon, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -111,7 +111,7 @@ export function FollowUpAppointmentDialog({
       const start = setMinutes(setHours(new Date(date), slot.hour), slot.minute);
       start.setSeconds(0, 0);
       const end = new Date(start.getTime() + SLOT_DURATION * 60000);
-      const title = `Follow-up â€” ${patientName || "Patient"}`;
+      const title = `Follow-up — ${patientName || "Patient"}`;
 
       const { error } = await supabase.from("appointments").insert({
         user_id: doctorId,
@@ -185,7 +185,7 @@ export function FollowUpAppointmentDialog({
                     disabled={busyNow}
                     onClick={() => setSlot(s)}
                     className={cn(
-                      "rounded-md border px-2 py-1.5 text-sm transition-colors",
+                      "rounded-md border px-2 py-1.5 text-xs transition-colors",
                       busyNow
                         ? "bg-muted text-muted-foreground cursor-not-allowed line-through"
                         : selected
@@ -215,4 +215,3 @@ export function FollowUpAppointmentDialog({
     </Dialog>
   );
 }
-

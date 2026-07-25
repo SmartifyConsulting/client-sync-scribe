@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -279,7 +279,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     }
 
     for (const rx of rxRes.data || []) {
-      const desc = `${rx.medication} â€“ ${rx.dosage} (${rx.frequency})`;
+      const desc = `${rx.medication} – ${rx.dosage} (${rx.frequency})`;
       unified.push({
         id: rx.id,
         name: rx.medication,
@@ -292,7 +292,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     }
 
     for (const inv of invRes.data || []) {
-      const desc = `${inv.invoice_number}: ${inv.description} â€“ R${inv.amount}`;
+      const desc = `${inv.invoice_number}: ${inv.description} – R${inv.amount}`;
       unified.push({
         id: inv.id,
         name: `Invoice ${inv.invoice_number}`,
@@ -823,7 +823,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <FileText className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-sm font-semibold text-foreground mb-1">
+            <h3 className="text-lg font-semibold text-foreground mb-1">
               {filter === "all" ? t("patientDocuments.noDocuments") : "No matching documents"}
             </h3>
             <p className="text-muted-foreground text-sm">
@@ -857,7 +857,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                   <IconComponent className="h-2.5 w-2.5" />
                 </span>
                 {doc.aiAnalysis && (
-                  <Badge variant="secondary" className="text-sm h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
+                  <Badge variant="secondary" className="text-xs h-4 border-0 bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400 gap-0.5 px-1">
                     <Sparkles className="h-2.5 w-2.5" />
                     AI
                   </Badge>
@@ -897,7 +897,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1.5 text-sm h-7"
+                      className="gap-1.5 text-xs h-7"
                       onClick={() => handleAIAnalysis(doc)}
                       disabled={isAnalyzing}
                     >
@@ -920,7 +920,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   )}
-                  <span className="hidden md:inline text-sm text-muted-foreground whitespace-nowrap">
+                  <span className="hidden md:inline text-xs text-muted-foreground whitespace-nowrap">
                     {(doc.sizeBytes / 1024).toFixed(1)} KB
                   </span>
                 </div>
@@ -971,7 +971,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                   </div>
 
                   {analysisDialog.aiAnalyzedAt && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Analysed on {format(new Date(analysisDialog.aiAnalyzedAt), "dd MMM yyyy 'at' HH:mm")}
                     </p>
                   )}
@@ -987,7 +987,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
               <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
                 <div className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                  <p className="text-sm text-amber-800 dark:text-amber-300">
+                  <p className="text-xs text-amber-800 dark:text-amber-300">
                     This AI analysis is for informational purposes only and does not constitute a medical diagnosis. Always consult a qualified healthcare professional for clinical interpretation and treatment decisions.
                   </p>
                 </div>
@@ -1096,7 +1096,7 @@ function renderHFCell(cell: HFCell | undefined) {
       )}
       {cell.text && (
         <div
-          className="whitespace-pre-wrap text-sm text-black"
+          className="whitespace-pre-wrap text-xs text-black"
           dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
         />
       )}
@@ -1197,4 +1197,3 @@ function DocumentPreviewDialog({
     </Dialog>
   );
 }
-

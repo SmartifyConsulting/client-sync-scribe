@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Video, X, Check, Loader2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -129,7 +129,7 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
         });
       }
 
-      toast({ title: "Proof submitted!", description: `Task completed${task?.vulas_reward ? ` â€” earned ${task.vulas_reward} Vulas!` : ""}` });
+      toast({ title: "Proof submitted!", description: `Task completed${task?.vulas_reward ? ` — earned ${task.vulas_reward} Vulas!` : ""}` });
       handleClose();
       onProofSubmitted();
     } catch (error) {
@@ -180,7 +180,7 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
               <SelectContent>
                 {pendingTasks.map((t) => (
                   <SelectItem key={t.id} value={t.id}>
-                    {t.title} {t.vulas_reward > 0 && `(+${t.vulas_reward} â“‚)`}
+                    {t.title} {t.vulas_reward > 0 && `(+${t.vulas_reward} Ⓜ)`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -203,7 +203,7 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
                 />
               )}
               {isRecording && (
-                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-sm font-bold animate-pulse">
+                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-bold animate-pulse">
                   REC {countdown}s
                 </div>
               )}
@@ -238,4 +238,3 @@ export function ActivityProofCapture({ tasks, onProofSubmitted }: ActivityProofC
     </>
   );
 }
-

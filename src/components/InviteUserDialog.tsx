@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -238,7 +238,7 @@ export function InviteUserDialog() {
                       )}
                     </div>
                     {result.role && (
-                      <span className="text-sm text-muted-foreground capitalize bg-muted px-2 py-1 rounded">
+                      <span className="text-xs text-muted-foreground capitalize bg-muted px-2 py-1 rounded">
                         {result.role}
                       </span>
                     )}
@@ -276,7 +276,7 @@ export function InviteUserDialog() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
-              <div className="relative flex justify-center text-sm uppercase">
+              <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">Or invite by email</span>
               </div>
             </div>
@@ -364,4 +364,3 @@ export function InviteUserDialog() {
     </Dialog>
   );
 }
-

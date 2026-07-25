@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -58,7 +58,7 @@ function FleetLiveMap({ markers }: { markers: FleetMarker[] }) {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-warning/40 bg-warning/5 p-4 text-sm text-warning">
+      <div className="rounded-2xl border border-warning/40 bg-warning/5 p-4 text-xs text-warning">
         Fleet map unavailable: {error}
       </div>
     );
@@ -120,15 +120,15 @@ export default function RealTimeMonitoringScreen() {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           {t("realTimeMonitoring.eyebrow", "Operations")}
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <Radar className="h-5 w-5 text-primary" />
           {t("nav.realTimeMonitoring", "Fleet Live")}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {t("realTimeMonitoring.description", "All vehicles on one map â€” live GPS, speed and safety events across the fleet.")}
+        <p className="text-xs text-muted-foreground mt-1">
+          {t("realTimeMonitoring.description", "All vehicles on one map — live GPS, speed and safety events across the fleet.")}
         </p>
       </div>
 
@@ -154,37 +154,37 @@ export default function RealTimeMonitoringScreen() {
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h3 className="font-bold text-sm">{item.vehicle}</h3>
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   {item.location}
                 </p>
               </div>
               <span
-                className={`px-2 py-0.5 rounded text-sm font-semibold uppercase tracking-wider ${
+                className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${
                   item.status === "moving" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                 }`}
               >
                 {item.status}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-3 text-sm items-center">
+            <div className="grid grid-cols-3 gap-3 text-xs items-center">
               <div>
-                <p className="text-sm text-muted-foreground uppercase">Speed</p>
+                <p className="text-xs text-muted-foreground uppercase">Speed</p>
                 <p className="font-semibold">{item.speed}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground uppercase">Fuel</p>
+                <p className="text-xs text-muted-foreground uppercase">Fuel</p>
                 <p className="font-semibold">{item.fuel}</p>
               </div>
               <div className="text-right">
-                <Button variant="outline" size="sm" className="h-7 text-sm">Track</Button>
+                <Button variant="outline" size="sm" className="h-7 text-xs">Track</Button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Safety events â€” merged in from former Safety tab */}
+      {/* Safety events — merged in from former Safety tab */}
       <Accordion type="single" collapsible defaultValue="safety" className="space-y-2">
         <AccordionItem value="safety" className="rounded-2xl border-2 border-primary/40 bg-background overflow-hidden">
           <AccordionTrigger className="px-3 py-2 text-sm hover:no-underline">
@@ -193,8 +193,8 @@ export default function RealTimeMonitoringScreen() {
                 <Shield className="h-4 w-4 text-primary" /> Safety events
               </span>
               <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="text-destructive">â— 2 high</span>
-                <span className="text-warning">â— 1 medium</span>
+                <span className="text-destructive">● 2 high</span>
+                <span className="text-warning">● 1 medium</span>
               </span>
             </div>
           </AccordionTrigger>
@@ -217,10 +217,10 @@ export default function RealTimeMonitoringScreen() {
                         />
                         {item.vehicle}
                       </h3>
-                      <p className="text-sm mt-0.5">{item.event}</p>
+                      <p className="text-xs mt-0.5">{item.event}</p>
                     </div>
                     <span
-                      className={`px-2 py-0.5 rounded text-sm font-semibold uppercase tracking-wider ${
+                      className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${
                         item.severity === "HIGH"
                           ? "bg-destructive/10 text-destructive"
                           : "bg-warning/10 text-warning"
@@ -231,15 +231,15 @@ export default function RealTimeMonitoringScreen() {
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">{item.time}</p>
-                    <Button variant="outline" size="sm" className="h-7 text-sm">{item.action}</Button>
+                    <Button variant="outline" size="sm" className="h-7 text-xs">{item.action}</Button>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="rounded-xl border border-border bg-card p-3 mt-3">
-              <h3 className="font-bold text-sm mb-2">Safety event types monitored</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+              <h3 className="font-bold text-xs mb-2">Safety event types monitored</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
                 {[
                   "Speeding events",
                   "Harsh acceleration / braking",
@@ -283,10 +283,9 @@ function StatCard({
           : "text-foreground";
   return (
     <div className="rounded-2xl border border-border bg-card p-3">
-      <p className="text-sm uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={`text-xl font-extrabold mt-1 ${toneClass}`}>{value}</p>
       <p className="text-sm text-muted-foreground">{hint}</p>
     </div>
   );
 }
-

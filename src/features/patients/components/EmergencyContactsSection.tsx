@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,13 +78,13 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
           <ShieldAlert className="h-5 w-5 text-primary" />
           Emergency Contacts
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Notified by default when you trigger an SOS. Toggle whether they can view your profile or live tracking, or get alerted on missed/taken medication.
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
         {contacts.length === 0 && (
-          <p className="text-sm text-muted-foreground">No emergency contacts yet.</p>
+          <p className="text-xs text-muted-foreground">No emergency contacts yet.</p>
         )}
         {contacts.map((c) => (
           <div key={c.id} className="rounded-lg border border-border p-3 space-y-2 bg-muted/30">
@@ -123,34 +123,34 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
                   className={!isValidOptionalEmail(c.email) ? "border-destructive focus-visible:ring-destructive" : undefined}
                 />
                 {!isValidOptionalEmail(c.email) && (
-                  <p className="text-sm text-destructive mt-0.5">Enter a valid email address.</p>
+                  <p className="text-xs text-destructive mt-0.5">Enter a valid email address.</p>
                 )}
               </div>
 
             </div>
             <div className="flex flex-wrap gap-4 pt-1">
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-xs">
                 <Switch
                   checked={!!c.can_view_profile}
                   onCheckedChange={(v) => updateContact(c.id, { can_view_profile: v })}
                 />
                 Can view my profile
               </label>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-xs">
                 <Switch
                   checked={c.can_view_live_tracking !== false}
                   onCheckedChange={(v) => updateContact(c.id, { can_view_live_tracking: v })}
                 />
                 Receive my SOS live tracking
               </label>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-xs">
                 <Switch
                   checked={!!c.notify_on_missed_medication}
                   onCheckedChange={(v) => updateContact(c.id, { notify_on_missed_medication: v })}
                 />
                 Alert when I miss medication
               </label>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-xs">
                 <Switch
                   checked={!!c.notify_on_taken_medication}
                   onCheckedChange={(v) => updateContact(c.id, { notify_on_taken_medication: v })}
@@ -176,4 +176,3 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
     </Card>
   );
 }
-

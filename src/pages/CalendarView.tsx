@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Pencil, Link, X } from "lucide-react";
@@ -587,7 +587,7 @@ export default function CalendarView() {
           )}
           {practice && scope === 'practice' && members.length > 0 && (
             <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
-              <SelectTrigger className="h-8 w-[200px] text-sm">
+              <SelectTrigger className="h-8 w-[200px] text-xs">
                 <SelectValue placeholder={t("calendar.filterDoctor")} />
               </SelectTrigger>
               <SelectContent>
@@ -704,7 +704,7 @@ export default function CalendarView() {
                         const isBlocked = conflicts.has(slot);
                         return (
                           <SelectItem key={slot} value={slot} disabled={isBlocked}>
-                            {formatTimeSlot(slot)}{isBlocked ? " â€” booked" : ""}
+                            {formatTimeSlot(slot)}{isBlocked ? " — booked" : ""}
                           </SelectItem>
                         );
                       })}
@@ -807,16 +807,16 @@ export default function CalendarView() {
                           isSameDay(day, selectedDate) ? "bg-primary text-primary-foreground" : today ? "bg-primary/10 text-primary" : "hover:bg-muted"
                         )}
                       >
-                        <span className="text-sm font-medium">{getCalendarShortWeekdayName(t, day)}</span>
+                        <span className="text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
                         <span className="text-lg font-semibold">{format(day, "d")}</span>
                         {dayEvents.length > 0 && (
                           <div className="mt-2 space-y-1 w-full">
                             {dayEvents.slice(0, 2).map((event) => (
-                              <div key={event.id} className="text-sm truncate text-center opacity-80">
+                              <div key={event.id} className="text-xs truncate text-center opacity-80">
                                 {event.time} {(() => { const p = patients.find(pt => pt.id === event.patientId); if (!p) return ''; const parts = p.name.split(' '); return parts.map(w => w[0]).join('').toUpperCase(); })()}
                               </div>
                             ))}
-                            {dayEvents.length > 2 && <div className="text-sm text-center opacity-60">+{dayEvents.length - 2}</div>}
+                            {dayEvents.length > 2 && <div className="text-xs text-center opacity-60">+{dayEvents.length - 2}</div>}
                           </div>
                         )}
                       </div>
@@ -892,7 +892,7 @@ export default function CalendarView() {
                               <div
                                 key={event.id}
                                 onClick={() => handleEventClick(event)}
-                                className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                className="flex items-center gap-1 truncate rounded px-1 py-0.5 text-xs cursor-pointer hover:opacity-80 transition-opacity"
                                 style={{
                                   backgroundColor: tileColor ? `${tileColor}22` : undefined,
                                   color: tileColor || undefined,
@@ -902,7 +902,7 @@ export default function CalendarView() {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <span className="inline-flex h-4 px-1 items-center justify-center rounded text-sm font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor || '#0EA5E9' }}>
+                                        <span className="inline-flex h-4 px-1 items-center justify-center rounded text-xs font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor || '#0EA5E9' }}>
                                           {ownerInitials}
                                         </span>
                                       </TooltipTrigger>
@@ -914,7 +914,7 @@ export default function CalendarView() {
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-sm font-bold text-white shrink-0" style={{ backgroundColor: tileColor || 'hsl(350, 78%, 55%)' }}>
+                                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white shrink-0" style={{ backgroundColor: tileColor || 'hsl(350, 78%, 55%)' }}>
                                           {initials}
                                         </span>
                                       </TooltipTrigger>
@@ -927,7 +927,7 @@ export default function CalendarView() {
                             );
                           })}
                           {dayEvents.length > 2 && (
-                            <div className="text-sm text-muted-foreground pl-1">
+                            <div className="text-xs text-muted-foreground pl-1">
                               +{dayEvents.length - 2} more
                             </div>
                           )}
@@ -979,7 +979,7 @@ export default function CalendarView() {
                         )}
                       >
                         <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{getCalendarMonthName(t, month)}</p>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           {isCurrent ? "Current month" : formatCalendarShortMonthYear(t, month)}
                         </p>
                       </button>
@@ -1034,7 +1034,7 @@ export default function CalendarView() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <span className="inline-flex h-5 px-1.5 items-center justify-center rounded text-sm font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor }}>
+                          <span className="inline-flex h-5 px-1.5 items-center justify-center rounded text-xs font-bold text-white shrink-0" style={{ backgroundColor: event.ownerColor }}>
                             {initialsOf(event.ownerName)}
                           </span>
                         </TooltipTrigger>
@@ -1047,7 +1047,7 @@ export default function CalendarView() {
                     <p className="text-sm text-muted-foreground">{event.time}</p>
                   </div>
                   <span
-                    className="rounded-full px-2 py-0.5 text-sm font-medium"
+                    className="rounded-full px-2 py-0.5 text-xs font-medium"
                     style={{
                       backgroundColor: getTypeColor(event.type) ? `${getTypeColor(event.type)}1A` : undefined,
                       color: getTypeColor(event.type) || undefined,
@@ -1104,7 +1104,7 @@ export default function CalendarView() {
                               const isBlocked = editConflicts.has(slot);
                               return (
                                 <SelectItem key={slot} value={slot} disabled={isBlocked}>
-                                  {formatTimeSlot(slot)}{isBlocked ? " â€” booked" : ""}
+                                  {formatTimeSlot(slot)}{isBlocked ? " — booked" : ""}
                                 </SelectItem>
                               );
                             })}
@@ -1198,8 +1198,8 @@ export default function CalendarView() {
                           </button>
                         ) : null;
                       })()}
-                      <span className="block text-muted-foreground text-sm">
-                        {formatCalendarMonthDayYear(t, new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedEvent.day))} Â· {selectedEvent.time}
+                      <span className="block text-muted-foreground text-xs">
+                        {formatCalendarMonthDayYear(t, new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedEvent.day))} · {selectedEvent.time}
                       </span>
                     </DialogDescription>
                   </DialogHeader>
@@ -1218,7 +1218,7 @@ export default function CalendarView() {
 
                     {selectedEvent.notes && (
                       <div className="rounded-lg bg-muted/30 p-3">
-                        <p className="text-sm font-medium text-muted-foreground uppercase mb-1">Notes</p>
+                        <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Notes</p>
                         <p className="text-sm text-foreground">{selectedEvent.notes}</p>
                       </div>
                     )}
@@ -1229,7 +1229,7 @@ export default function CalendarView() {
                         return (
                           <div className="pt-4">
                             <p className="text-sm text-muted-foreground italic">
-                              Owned by {selectedEvent.ownerName ? `Dr ${selectedEvent.ownerName}` : 'another doctor'} â€” only they can change this.
+                              Owned by {selectedEvent.ownerName ? `Dr ${selectedEvent.ownerName}` : 'another doctor'} — only they can change this.
                             </p>
                             {selectedEvent.type !== "internal" && selectedEvent.patientId && (
                               <Button className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white" onClick={handleStartSession}>

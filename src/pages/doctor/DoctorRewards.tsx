@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Send, Loader2, Trophy, Target, Flame, Gift, Star, ArrowRightLeft, Calendar as CalendarIcon, Info } from "lucide-react";
@@ -22,11 +22,11 @@ import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v2.png";
 import { cn } from "@/lib/utils";
 
 const MILESTONES = [
-  { count: 5, label: "First Steps", icon: "ðŸŒŸ", color: "text-yellow-500" },
-  { count: 10, label: "Getting Healthy", icon: "ðŸ’ª", color: "text-blue-500" },
-  { count: 25, label: "Health Champion", icon: "ðŸ†", color: "text-purple-500" },
-  { count: 50, label: "Wellness Warrior", icon: "âš”ï¸", color: "text-orange-500" },
-  { count: 100, label: "Health Legend", icon: "ðŸ‘‘", color: "text-pink-500" },
+  { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
+  { count: 10, label: "Getting Healthy", icon: "💪", color: "text-blue-500" },
+  { count: 25, label: "Health Champion", icon: "🏆", color: "text-purple-500" },
+  { count: 50, label: "Wellness Warrior", icon: "⚔️", color: "text-orange-500" },
+  { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
 ];
 
 export default function DoctorRewards({ embedded = false }: { embedded?: boolean } = {}) {
@@ -147,7 +147,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                 What are Vulas?
               </button>
             </div>
-            <p className="text-muted-foreground text-base">Manage your Vulas balance, milestones, and streaks</p>
+            <p className="text-muted-foreground text-xs">Manage your Vulas balance, milestones, and streaks</p>
           </div>
           {partnerApps.length > 0 && (
             <Button onClick={() => setShowTransferDialog(true)} className="gap-2"><Send className="h-4 w-4" /> Transfer Vulas</Button>
@@ -161,7 +161,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Doctor Vulas</p>
+                <p className="text-xs text-muted-foreground">Doctor Vulas</p>
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
@@ -174,7 +174,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Patient Vulas</p>
+                <p className="text-xs text-muted-foreground">Patient Vulas</p>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
@@ -205,21 +205,21 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
               </div>
               <ArrowRightLeft className="h-8 w-8 text-white/90 shrink-0" />
             </div>
-            <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-sm flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
+            <Button variant="ghost" size="sm" className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs flex items-center gap-1 mt-2" onClick={() => setShowTransferDialog(true)}>
               Redeem Vulas <Send className="h-3.5 w-3.5" />
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs â€” same as patient view */}
+      {/* Tabs — same as patient view */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-primary flex w-full flex-nowrap overflow-x-auto justify-start">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">{t("doctorRewards.tabOverview")}</TabsTrigger>
-          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">{t("doctorRewards.tabMilestones")}</TabsTrigger>
-          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">{t("doctorRewards.tabStreaks")}</TabsTrigger>
-          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">{t("doctorRewards.tabHistory")}</TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">{t("doctorRewards.tabRedeem")}</TabsTrigger>
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabOverview")}</TabsTrigger>
+          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabMilestones")}</TabsTrigger>
+          <TabsTrigger value="streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabStreaks")}</TabsTrigger>
+          <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabHistory")}</TabsTrigger>
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">{t("doctorRewards.tabRedeem")}</TabsTrigger>
          </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -325,14 +325,14 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                               <Flame className={`h-5 w-5 ${streak.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`} />
                               <span className="text-2xl font-bold">{streak.current_streak}</span>
                             </div>
-                            <p className="text-sm text-muted-foreground">streak</p>
+                            <p className="text-xs text-muted-foreground">streak</p>
                           </div>
                         </div>
                         <div className="mt-3 pt-3 border-t border-muted flex items-center justify-between text-sm">
                           <div><span className="text-muted-foreground">Longest: </span><span className="font-medium">{streak.longest_streak}</span></div>
                           {daysUntilDue !== null && <Badge variant={isOverdue ? "destructive" : "secondary"}>{isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : `Due in ${daysUntilDue} days`}</Badge>}
                         </div>
-                        <div className="mt-2 text-sm text-muted-foreground">Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-2.5 w-2.5 inline-block" /> per completion</div>
+                        <div className="mt-2 text-xs text-muted-foreground">Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-2.5 w-2.5 inline-block" /> per completion</div>
                       </div>
                     );
                   })}
@@ -357,7 +357,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                   <TableBody>
                     {rewards.map((reward) => (
                       <TableRow key={reward.id}>
-                        <TableCell><div>{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</div><span className="text-sm text-muted-foreground">{format(parseISO(reward.awarded_at), "h:mm a")}</span></TableCell>
+                        <TableCell><div>{format(parseISO(reward.awarded_at), "MMM d, yyyy")}</div><span className="text-xs text-muted-foreground">{format(parseISO(reward.awarded_at), "h:mm a")}</span></TableCell>
                         <TableCell><Badge variant="secondary" className="bg-primary/10 text-primary">{reward.visit_category}</Badge></TableCell>
                         <TableCell className="text-right"><span className={`font-semibold ${reward.lollipops_count < 0 ? "text-blue-600" : "text-emerald-600"}`}>{reward.lollipops_count > 0 ? "+" : ""}{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></span></TableCell>
                       </TableRow>
@@ -409,10 +409,10 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-foreground">{app.name}</p>
-                          {app.creator && <p className="text-sm text-muted-foreground">by {app.creator}</p>}
+                          {app.creator && <p className="text-xs text-muted-foreground">by {app.creator}</p>}
                         </div>
                       </div>
-                      <Button size="sm" className="w-full mt-3 gap-1 text-sm" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
+                      <Button size="sm" className="w-full mt-3 gap-1 text-xs" onClick={() => { setTransferToAppId(app.id); setShowTransferDialog(true); }}>
                         <Send className="h-4 w-4" /> Transfer Vulas
                       </Button>
                     </div>
@@ -441,7 +441,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
       {showTransferDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
          <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
-            <h3 className="text-sm font-semibold">Transfer Vulas</h3>
+            <h3 className="text-lg font-semibold">Transfer Vulas</h3>
             <p className="text-sm text-muted-foreground">Available balance: {totalVulas} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></p>
             <div className="space-y-2">
               <Label>From</Label>
@@ -479,4 +479,3 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
     </div>
   );
 }
-

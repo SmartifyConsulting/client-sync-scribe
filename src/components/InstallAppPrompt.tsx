@@ -1,4 +1,4 @@
-﻿import { Smartphone } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import { InstallAppButton } from "./InstallAppButton";
 
 function isStandalone() {
@@ -31,8 +31,8 @@ export function InstallAppPrompt({ className }: Props) {
         <p className="text-sm font-semibold text-foreground">
           Install Holarc on your phone
         </p>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Works on iPhone and Android â€” one-tap access from your home screen.
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Works on iPhone and Android — one-tap access from your home screen.
         </p>
         <div className="mt-3">
           <InstallAppButton variant="primary" className="w-full sm:w-auto" />
@@ -41,4 +41,3 @@ export function InstallAppPrompt({ className }: Props) {
     </div>
   );
 }
-

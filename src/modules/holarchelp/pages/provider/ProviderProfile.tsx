@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../components/ProviderGate";
 import { loadGoogleMaps } from "../../lib/googleMapsLoader";
@@ -94,8 +94,8 @@ export default function ProviderProfile() {
       <div>
         <h1 className="text-2xl font-extrabold">{t("providerProfile.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          {t("providerProfile.status")}: <span className="font-semibold">{row.status}</span> Â· {t("providerProfile.tier")}: <span className="font-semibold">{row.tier}</span>
-          {" Â· "}{t("providerProfile.subscription")}: <span className="font-semibold">{row.subscription_status}</span>
+          {t("providerProfile.status")}: <span className="font-semibold">{row.status}</span> · {t("providerProfile.tier")}: <span className="font-semibold">{row.tier}</span>
+          {" · "}{t("providerProfile.subscription")}: <span className="font-semibold">{row.subscription_status}</span>
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export default function ProviderProfile() {
         )}
 
         <div className="grid gap-1.5">
-          <Label className="text-sm">
+          <Label className="text-xs">
             {providerType === "hospital" ? t("providerProfile.address") : t("providerProfile.baseAddress")}
             {geocoding && <Loader2 className="inline ml-2 h-3 w-3 animate-spin text-muted-foreground" />}
           </Label>
@@ -125,7 +125,7 @@ export default function ProviderProfile() {
               handleAddressChange(v);
               // The autocomplete calls onChange both for typing and when a
               // suggestion is selected. Suggestions yield a long, complete
-              // address â€” geocode those immediately.
+              // address — geocode those immediately.
               if (v && v.length > 12 && !v.endsWith(" ")) {
                 void geocode(v);
               }
@@ -162,7 +162,7 @@ export default function ProviderProfile() {
         <div className="flex items-center justify-between rounded-xl border p-3">
           <div>
             <p className="text-sm font-semibold">{t("providerProfile.atCapacity")}</p>
-            <p className="text-sm text-muted-foreground">{t("providerProfile.pauseDispatches")}</p>
+            <p className="text-xs text-muted-foreground">{t("providerProfile.pauseDispatches")}</p>
           </div>
           <Switch checked={!!row.at_capacity} onCheckedChange={(v) => setRow({ ...row, at_capacity: v })} />
         </div>
@@ -175,7 +175,7 @@ export default function ProviderProfile() {
 
 const Field = ({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) => (
   <div className="grid gap-1.5">
-    <Label className="text-sm">{label}</Label>
+    <Label className="text-xs">{label}</Label>
     <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="rounded-xl" />
   </div>
 );
@@ -239,4 +239,3 @@ function PinMap({ latitude, longitude }: { latitude?: number | null; longitude?:
 
   return <div ref={containerRef} className="h-[220px] w-full overflow-hidden rounded-xl border" />;
 }
-

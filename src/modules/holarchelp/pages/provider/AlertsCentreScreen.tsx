@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, AlertTriangle, Info, X } from "lucide-react";
 
@@ -103,7 +103,7 @@ export default function AlertsCentreScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Notifications</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Notifications</p>
         <h1 className="text-3xl font-extrabold mt-2">Alerts Centre</h1>
         <p className="text-sm text-muted-foreground mt-2">Critical events and notifications</p>
       </header>
@@ -111,15 +111,15 @@ export default function AlertsCentreScreen() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Total Alerts</p>
+          <p className="text-xs text-muted-foreground">Total Alerts</p>
           <p className="text-2xl font-bold mt-2">{stats.total}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Unread</p>
+          <p className="text-xs text-muted-foreground">Unread</p>
           <p className="text-2xl font-bold mt-2 text-warning">{stats.unread}</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Critical</p>
+          <p className="text-xs text-muted-foreground">Critical</p>
           <p className="text-2xl font-bold mt-2 text-destructive">{stats.critical}</p>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default function AlertsCentreScreen() {
                   <div className="flex-1">
                     <h3 className="font-bold text-lg">{alert.title}</h3>
                     <p className="text-sm mt-1">{alert.message}</p>
-                    <p className="text-sm text-muted-foreground mt-2">{alert.time}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{alert.time}</p>
                   </div>
                 </div>
                 {!alert.read && (
@@ -221,4 +221,3 @@ export default function AlertsCentreScreen() {
     </div>
   );
 }
-

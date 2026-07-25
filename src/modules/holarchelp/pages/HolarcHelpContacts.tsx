@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -157,21 +157,21 @@ export default function HolarcHelpContacts() {
         Defaults from your Personal Information. Add or edit contacts here for SOS-specific severity rules.
       </p>
 
-      <div className="mt-3 flex items-start gap-2 rounded-xl border border-primary/40 bg-primary/5 p-3 text-sm text-foreground">
+      <div className="mt-3 flex items-start gap-2 rounded-xl border border-primary/40 bg-primary/5 p-3 text-xs text-foreground">
         <Info className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
         <span>
           Contacts marked as <em>from Personal Information</em> are kept in sync with My Holarchive. Add manual contacts here when the recipient should only be notified at higher severity.
         </span>
       </div>
 
-      {/* Contact list â€” scannable first */}
+      {/* Contact list — scannable first */}
       <ul className="mt-5 space-y-2">
         {loading && (
-          <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">Loadingâ€¦</li>
+          <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">Loading…</li>
         )}
         {!loading && contacts.length === 0 && (
           <li className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">
-            No contacts yet â€” add one below.
+            No contacts yet — add one below.
           </li>
         )}
         {contacts.map((c) => {
@@ -180,7 +180,7 @@ export default function HolarcHelpContacts() {
             <li key={c.id} className="rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
               <div className="flex items-start gap-3">
                 <Avatar className="h-10 w-10 border-2 border-primary shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                     {initials(c.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -210,23 +210,23 @@ export default function HolarcHelpContacts() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold truncate">{c.name}</p>
                         {c.relationship && (
-                          <span className="text-sm uppercase tracking-wide text-muted-foreground">Â· {c.relationship}</span>
+                          <span className="text-xs uppercase tracking-wide text-muted-foreground">· {c.relationship}</span>
                         )}
                         {c.source === "personal_info_seed" && (
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                             From Personal Information
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {c.email}{c.phone && ` Â· ${c.phone}`}
+                      <p className="text-xs text-muted-foreground truncate">
+                        {c.email}{c.phone && ` · ${c.phone}`}
                       </p>
                     </>
                   )}
 
                   <div className="mt-2 flex items-center gap-2 flex-wrap">
                     <Select value={c.notify_min_severity ?? "low"} onValueChange={(v) => updateSeverity(c.id, v as Severity)}>
-                      <SelectTrigger className="h-8 w-[180px] rounded-lg text-sm"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="h-8 w-[180px] rounded-lg text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {SEVERITIES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                       </SelectContent>
@@ -261,7 +261,7 @@ export default function HolarcHelpContacts() {
         })}
       </ul>
 
-      {/* Add form â€” collapsible, below the list */}
+      {/* Add form — collapsible, below the list */}
       <Collapsible open={addOpen} onOpenChange={setAddOpen} className="mt-5 rounded-2xl border-2 border-primary/30 bg-card">
         <CollapsibleTrigger className="group flex w-full items-center justify-between p-3 hover:bg-muted/40 transition-colors rounded-2xl">
           <span className="flex items-center gap-2 text-sm font-semibold">
@@ -279,7 +279,7 @@ export default function HolarcHelpContacts() {
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="crel">Relationship (optional)</Label>
-                <Input id="crel" value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })} placeholder="Spouse, parent, friendâ€¦" />
+                <Input id="crel" value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })} placeholder="Spouse, parent, friend…" />
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="cphone">Phone (with country code)</Label>
@@ -298,7 +298,7 @@ export default function HolarcHelpContacts() {
                   {SEVERITIES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">Contact will only be alerted for incidents at this severity or higher.</p>
+              <p className="text-xs text-muted-foreground">Contact will only be alerted for incidents at this severity or higher.</p>
             </div>
             <Button type="submit" className="h-11 gap-2 rounded-xl">
               <UserPlus className="h-4 w-4" /> Add contact
@@ -309,4 +309,3 @@ export default function HolarcHelpContacts() {
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -117,24 +117,24 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
 
   const androidIntro =
     androidBrowser === "inapp"
-      ? "You're viewing this inside another app. Tap the menu (â€¢â€¢â€¢) and choose \"Open in Chrome\" first, then follow the steps below."
+      ? "You're viewing this inside another app. Tap the menu (•••) and choose \"Open in Chrome\" first, then follow the steps below."
       : "Android doesn't always show a one-tap install button. Use your browser menu:";
 
   const androidSteps =
     androidBrowser === "samsung"
       ? [
-          { icon: <Menu className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>menu</strong> icon (â˜°) in Samsung Internet.</> },
-          { icon: null, text: <>Tap <strong>Add page to</strong> â†’ <strong>Home screen</strong>.</> },
+          { icon: <Menu className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>menu</strong> icon (☰) in Samsung Internet.</> },
+          { icon: null, text: <>Tap <strong>Add page to</strong> → <strong>Home screen</strong>.</> },
           { icon: null, text: <>Tap <strong>Add</strong>. The Holarc icon appears on your home screen.</> },
         ]
       : androidBrowser === "firefox"
       ? [
-          { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>â‹®</strong> menu in Firefox.</> },
+          { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>⋮</strong> menu in Firefox.</> },
           { icon: null, text: <>Tap <strong>Install</strong> (or <strong>Add to Home screen</strong>).</> },
           { icon: null, text: <>Confirm. The Holarc icon appears on your home screen.</> },
         ]
       : [
-          { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>â‹®</strong> menu in your browser (top right).</> },
+          { icon: <MoreVertical className="inline h-4 w-4 align-text-bottom" />, text: <>Tap the <strong>⋮</strong> menu in your browser (top right).</> },
           { icon: <Plus className="inline h-4 w-4 align-text-bottom" />, text: <>Tap <strong>Install app</strong> (or <strong>Add to Home screen</strong>).</> },
           { icon: null, text: <>Tap <strong>Install</strong>. The Holarc icon appears on your home screen.</> },
         ];
@@ -169,13 +169,13 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
             <DialogTitle>Install Holarc on your iPhone</DialogTitle>
             <DialogDescription>
               {inAppBrowser
-                ? "You're viewing this inside another app. Tap the menu (â€¢â€¢â€¢) and choose \"Open in Safari\" first, then follow the steps below."
+                ? "You're viewing this inside another app. Tap the menu (•••) and choose \"Open in Safari\" first, then follow the steps below."
                 : "iOS doesn't have a one-tap install button, but it takes 3 quick taps in Safari:"}
             </DialogDescription>
           </DialogHeader>
           <ol className="space-y-3 text-sm text-foreground">
             <li className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                 1
               </span>
               <span>
@@ -184,7 +184,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                 2
               </span>
               <span>
@@ -193,7 +193,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
               </span>
             </li>
             <li className="flex items-start gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                 3
               </span>
               <span>
@@ -215,7 +215,7 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
           <ol className="space-y-3 text-sm text-foreground">
             {androidSteps.map((step, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                   {i + 1}
                 </span>
                 <span>{step.text}</span>
@@ -227,4 +227,3 @@ export function InstallAppButton({ variant = "primary", className }: Props) {
     </>
   );
 }
-

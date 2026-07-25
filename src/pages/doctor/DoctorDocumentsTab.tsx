@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FileText, Loader2, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,18 +46,18 @@ export default function DoctorDocumentsTab() {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search documentsâ€¦"
+          placeholder="Search documents…"
           className="pl-8"
         />
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">
+        <div className="rounded-lg border border-dashed p-10 text-center text-xs text-muted-foreground">
           No documents yet.
         </div>
       ) : (
         <>
-          <ul className="divide-y rounded-lg border border-primary/40 bg-card">
+          <ul className="divide-y rounded-lg border bg-card">
             {filtered.slice(0, visibleCount).map((doc) => {
               const target = doc.patient_id
                 ? `/patients/${doc.patient_id}?tab=documents&doc=${doc.id}`
@@ -71,18 +71,18 @@ export default function DoctorDocumentsTab() {
                     <FileText className="h-4 w-4 text-primary shrink-0" />
                     <span className="flex-1 truncate text-sm font-medium text-foreground">{doc.name}</span>
                     {doc.patient_name && (
-                      <span className={cn("hidden sm:inline-flex items-center gap-1 text-sm text-muted-foreground min-w-0 truncate max-w-[180px]", isSamplePatient({ name: doc.patient_name }) && "italic")}>
+                      <span className={cn("hidden sm:inline-flex items-center gap-1 text-xs text-muted-foreground min-w-0 truncate max-w-[180px]", isSamplePatient({ name: doc.patient_name }) && "italic")}>
                         <User className="h-3 w-3" />
                         {doc.patient_name}
                         {isSamplePatient({ name: doc.patient_name }) && <SampleBadge />}
                       </span>
                     )}
                     {doc.template_name && (
-                      <span className="hidden md:inline text-sm text-muted-foreground truncate max-w-[160px]">
+                      <span className="hidden md:inline text-xs text-muted-foreground truncate max-w-[160px]">
                         {doc.template_name}
                       </span>
                     )}
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {format(new Date(doc.updated_at || doc.created_at), "d MMM yyyy")}
                     </span>
                   </Link>
@@ -105,4 +105,3 @@ export default function DoctorDocumentsTab() {
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -15,7 +15,7 @@ export default function ExecutiveDashboardScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Analytics</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Analytics</p>
         <h1 className="text-3xl font-extrabold mt-2">Executive Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-2">Strategic insights and business metrics</p>
       </header>
@@ -23,42 +23,42 @@ export default function ExecutiveDashboardScreen() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">YTD Incidents</p>
+          <p className="text-xs text-muted-foreground">YTD Incidents</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">868</p>
             <div className="flex items-center gap-1 text-success">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-sm font-semibold">+12%</span>
+              <span className="text-xs font-semibold">+12%</span>
             </div>
           </div>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">YTD Revenue</p>
+          <p className="text-xs text-muted-foreground">YTD Revenue</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">$128K</p>
             <div className="flex items-center gap-1 text-success">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-sm font-semibold">+18%</span>
+              <span className="text-xs font-semibold">+18%</span>
             </div>
           </div>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Fleet Efficiency</p>
+          <p className="text-xs text-muted-foreground">Fleet Efficiency</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">84%</p>
             <div className="flex items-center gap-1 text-success">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-sm font-semibold">+5%</span>
+              <span className="text-xs font-semibold">+5%</span>
             </div>
           </div>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Safety Score</p>
+          <p className="text-xs text-muted-foreground">Safety Score</p>
           <div className="flex items-end justify-between mt-2">
             <p className="text-2xl font-bold">94/100</p>
             <div className="flex items-center gap-1 text-success">
               <CheckCircle2 className="h-4 w-4" />
-              <span className="text-sm font-semibold">Excellent</span>
+              <span className="text-xs font-semibold">Excellent</span>
             </div>
           </div>
         </Card>
@@ -100,16 +100,16 @@ export default function ExecutiveDashboardScreen() {
           <h3 className="font-bold">Operational Metrics</h3>
           <div className="space-y-2">
             {[
-              { label: "Average Response Time", value: "7.2 minutes", trend: "â†“ 5%" },
-              { label: "Customer Satisfaction", value: "4.8/5.0", trend: "â†‘ 2%" },
-              { label: "Fleet Availability", value: "92%", trend: "â†‘ 3%" },
-              { label: "On-Time Delivery", value: "98%", trend: "â†’ Stable" },
+              { label: "Average Response Time", value: "7.2 minutes", trend: "↓ 5%" },
+              { label: "Customer Satisfaction", value: "4.8/5.0", trend: "↑ 2%" },
+              { label: "Fleet Availability", value: "92%", trend: "↑ 3%" },
+              { label: "On-Time Delivery", value: "98%", trend: "→ Stable" },
             ].map((metric, idx) => (
               <div key={idx} className="flex justify-between items-center text-sm p-2 rounded bg-muted/50">
                 <span className="text-muted-foreground">{metric.label}</span>
                 <div className="text-right">
                   <p className="font-semibold">{metric.value}</p>
-                  <p className="text-sm text-muted-foreground">{metric.trend}</p>
+                  <p className="text-xs text-muted-foreground">{metric.trend}</p>
                 </div>
               </div>
             ))}
@@ -138,4 +138,3 @@ export default function ExecutiveDashboardScreen() {
     </div>
   );
 }
-

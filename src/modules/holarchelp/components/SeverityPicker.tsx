@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
@@ -15,9 +15,9 @@ export type SeverityResult = {
 };
 
 const OPTIONS: { value: Severity; emoji: string; titleKey: string; subKey: string; tone: string }[] = [
-  { value: "critical", emoji: "ðŸŸ¥", titleKey: "severityPicker.lifeThreatening", subKey: "severityPicker.lifeThreateningSub", tone: "border-red-500/50 bg-red-500/10 hover:bg-red-500/15" },
-  { value: "high", emoji: "ðŸŸ§", titleKey: "severityPicker.urgent", subKey: "severityPicker.urgentSub", tone: "border-orange-500/50 bg-orange-500/10 hover:bg-orange-500/15" },
-  { value: "moderate", emoji: "ðŸŸ¨", titleKey: "severityPicker.nonUrgent", subKey: "severityPicker.nonUrgentSub", tone: "border-yellow-500/50 bg-yellow-500/10 hover:bg-yellow-500/15" },
+  { value: "critical", emoji: "🟥", titleKey: "severityPicker.lifeThreatening", subKey: "severityPicker.lifeThreateningSub", tone: "border-red-500/50 bg-red-500/10 hover:bg-red-500/15" },
+  { value: "high", emoji: "🟧", titleKey: "severityPicker.urgent", subKey: "severityPicker.urgentSub", tone: "border-orange-500/50 bg-orange-500/10 hover:bg-orange-500/15" },
+  { value: "moderate", emoji: "🟨", titleKey: "severityPicker.nonUrgent", subKey: "severityPicker.nonUrgentSub", tone: "border-yellow-500/50 bg-yellow-500/10 hover:bg-yellow-500/15" },
 ];
 
 const deriveLegacy = (people: number, breathing: number, unconscious: number) => ({
@@ -63,23 +63,23 @@ export const SeverityPicker = ({
           <>
             <DialogHeader>
               <DialogTitle>{t("severityPicker.whatHappening")}</DialogTitle>
-              <p className="text-sm text-muted-foreground">{t("severityPicker.tapOne")}</p>
+              <p className="text-xs text-muted-foreground">{t("severityPicker.tapOne")}</p>
             </DialogHeader>
             <div className="mt-2 space-y-2">
               {OPTIONS.map((o) => (
                 <button key={o.value} onClick={() => pick(o.value)} className={`w-full rounded-2xl border p-4 text-left transition ${o.tone}`}>
                   <p className="text-base font-bold">{o.emoji} {t(o.titleKey)}</p>
-                  <p className="text-sm text-muted-foreground">{t(o.subKey)}</p>
+                  <p className="text-xs text-muted-foreground">{t(o.subKey)}</p>
                 </button>
               ))}
             </div>
-            <Button variant="ghost" onClick={onSkip} className="mt-2 text-sm">{t("severityPicker.skip")}</Button>
+            <Button variant="ghost" onClick={onSkip} className="mt-2 text-xs">{t("severityPicker.skip")}</Button>
           </>
         ) : (
           <>
             <DialogHeader>
               <DialogTitle>{t("severityPicker.quickCheck")}</DialogTitle>
-              <p className="text-sm text-muted-foreground">{t("severityPicker.prepare")}</p>
+              <p className="text-xs text-muted-foreground">{t("severityPicker.prepare")}</p>
             </DialogHeader>
             <div className="mt-3 space-y-3">
               <CountStepper
@@ -144,4 +144,3 @@ const CountStepper = ({
     </div>
   );
 };
-

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, Loader2, Bell, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +96,7 @@ export function DoctorRoundTables() {
     return (
       <div className="rounded-xl border border-dashed border-border p-12 text-center">
         <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-        <p className="text-sm text-muted-foreground">No round table contributions yet</p>
+        <p className="text-xs text-muted-foreground">No round table contributions yet</p>
       </div>
     );
   }
@@ -118,13 +118,13 @@ export function DoctorRoundTables() {
             <div className="flex items-center gap-2">
               <p className="font-medium text-sm text-foreground truncate">{entry.patientName}</p>
               {entry.unreadCount > 0 && (
-                <Badge variant="destructive" className="text-sm h-5 px-1.5">
+                <Badge variant="destructive" className="text-xs h-5 px-1.5">
                   {entry.unreadCount} new
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">
-              {entry.totalNotes} note{entry.totalNotes !== 1 ? "s" : ""} Â· Last activity {format(new Date(entry.latestNoteDate), "MMM d, yyyy")}
+            <p className="text-xs text-muted-foreground">
+              {entry.totalNotes} note{entry.totalNotes !== 1 ? "s" : ""} · Last activity {format(new Date(entry.latestNoteDate), "MMM d, yyyy")}
             </p>
           </div>
           <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -133,4 +133,3 @@ export function DoctorRoundTables() {
     </div>
   );
 }
-

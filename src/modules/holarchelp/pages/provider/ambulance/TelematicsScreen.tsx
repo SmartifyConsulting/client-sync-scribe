@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
@@ -223,7 +223,7 @@ export default function TelematicsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {t("telematics.subtitle")}
           </p>
           <h1 className="flex items-center gap-2 text-xl font-extrabold">
@@ -233,7 +233,7 @@ export default function TelematicsScreen() {
         <span className="text-sm text-muted-foreground">
           {loading
             ? t("common.loading")
-            : `${pings.length.toLocaleString()} ${t("telematics.pings")} Â· ${byDriver.size} ${t("telematics.drivers")}`}
+            : `${pings.length.toLocaleString()} ${t("telematics.pings")} · ${byDriver.size} ${t("telematics.drivers")}`}
         </span>
       </header>
 
@@ -262,7 +262,7 @@ export default function TelematicsScreen() {
                       )}
                     </div>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-sm font-bold uppercase tracking-wider ${
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wider ${
                         d.moving
                           ? "bg-emerald-500/15 text-emerald-700"
                           : "bg-warning/15 text-warning"
@@ -306,27 +306,27 @@ export default function TelematicsScreen() {
                       {tr.name}
                       {tr.vehicle && (
                         <span className="ml-2 text-sm font-normal text-muted-foreground">
-                          Â· {tr.vehicle}
+                          · {tr.vehicle}
                         </span>
                       )}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                      {(tr.distanceM / 1000).toFixed(1)} km Â· max {Math.round(tr.maxSpeed)} km/h Â·{" "}
-                      {tr.stops.length} {tr.stops.length === 1 ? t("telematics.stop") : t("telematics.stops")} Â·{" "}
+                      {(tr.distanceM / 1000).toFixed(1)} km · max {Math.round(tr.maxSpeed)} km/h ·{" "}
+                      {tr.stops.length} {tr.stops.length === 1 ? t("telematics.stop") : t("telematics.stops")} ·{" "}
                       {tr.pingsCount} {t("telematics.pings")}
                     </span>
                   </summary>
-                  <div className="border-t p-3 text-sm">
+                  <div className="border-t p-3 text-xs">
                     <p className="mb-2 text-muted-foreground">
-                      {new Date(tr.first).toLocaleString()} â†’ {new Date(tr.last).toLocaleString()}
+                      {new Date(tr.first).toLocaleString()} → {new Date(tr.last).toLocaleString()}
                     </p>
                     {tr.stops.length === 0 ? (
                       <p className="text-muted-foreground">
-                        {t("telematics.noQualifyingStops")} (â‰¥{STOP_MIN_SECONDS}s).
+                        {t("telematics.noQualifyingStops")} (≥{STOP_MIN_SECONDS}s).
                       </p>
                     ) : (
                       <table className="w-full text-left">
-                        <thead className="text-sm uppercase tracking-wider text-muted-foreground">
+                        <thead className="text-xs uppercase tracking-wider text-muted-foreground">
                           <tr>
                             <th className="py-1">{t("telematics.arrived")}</th>
                             <th>{t("telematics.departed")}</th>
@@ -358,4 +358,3 @@ export default function TelematicsScreen() {
     </div>
   );
 }
-

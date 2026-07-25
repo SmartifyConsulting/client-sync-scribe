@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -188,7 +188,7 @@ export default function Sessions() {
     setSearchParams({ patient: value });
   };
 
-  // Fetch active prescriptions when patient changes â€” refreshable on med updates
+  // Fetch active prescriptions when patient changes — refreshable on med updates
   const fetchActivePrescriptions = useCallback(async () => {
     if (!patientId) return;
     const { data, error } = await supabase
@@ -314,7 +314,7 @@ export default function Sessions() {
     if (currentPatient && doctorIdRef.current) {
       setShowFollowUpDialog(true);
     } else {
-      // No patient context â€” skip directly to vula
+      // No patient context — skip directly to vula
       setShowVisitCategoryDialog(true);
     }
   }, [currentPatient]);
@@ -418,7 +418,7 @@ export default function Sessions() {
     onEndSessionDetected: () => {
       console.log("End session detected via Web Speech API");
       if (!pendingCompletionRef.current) {
-        toast({ title: "ðŸŽ¤ Session ending detected", description: "Ending session automatically from voice cue." });
+        toast({ title: "🎤 Session ending detected", description: "Ending session automatically from voice cue." });
         pendingCompletionRef.current = true;
         setPendingTranscript(latestTranscriptRef.current);
         setTimeout(() => { if (isRecording) stopRecording(); }, 100);
@@ -632,7 +632,7 @@ export default function Sessions() {
     console.log("isRecording:", isRecording);
     if (isRecording) {
       // Manual Stop must trigger the full completion pipeline:
-      // transcription â†’ summarize-session â†’ auto-create documents â†’ (Vula awarded last).
+      // transcription → summarize-session → auto-create documents → (Vula awarded last).
       // Flag pending completion BEFORE stopping so onTranscriptionComplete runs handleSessionComplete.
       pendingCompletionRef.current = true;
       setPendingTranscript(latestTranscriptRef.current || transcript || "");
@@ -648,7 +648,7 @@ export default function Sessions() {
       if (isRecording) stopRecording();
       return;
     }
-    // No recording in progress â€” go straight to documents-first flow
+    // No recording in progress — go straight to documents-first flow
     const fullContent = latestTranscriptRef.current || transcript || notes;
     setPendingTranscript(fullContent || '');
     handleSessionComplete(fullContent || '');
@@ -759,7 +759,7 @@ export default function Sessions() {
 
       <div>
         <h1 className="text-3xl font-bold text-foreground">{t("sessions.sessionMode")}</h1>
-        <p className="mt-1 text-muted-foreground text-sm">
+        <p className="mt-1 text-muted-foreground text-xs">
           Record, transcribe, and generate AI summaries for patient sessions
         </p>
       </div>
@@ -863,7 +863,7 @@ export default function Sessions() {
                   setSelectedPatientId(null);
                   setSearchParams({});
                 }}
-                className="text-sm text-muted-foreground"
+                className="text-xs text-muted-foreground"
               >
                 Change patient
               </Button>
@@ -888,11 +888,11 @@ export default function Sessions() {
            <div className="min-h-[500px] order-2 lg:order-1">
               <Tabs defaultValue="notes" className="h-full">
                 <TabsList className="mb-2">
-                  <TabsTrigger value="notes" className="gap-1.5 text-sm">
+                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
                     <FileText className="h-3.5 w-3.5" />
                     Session Notes
                   </TabsTrigger>
-                  <TabsTrigger value="drawing" className="gap-1.5 text-sm">
+                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
                     <PenTool className="h-3.5 w-3.5" />
                     Drawing Pad
                   </TabsTrigger>
@@ -917,7 +917,7 @@ export default function Sessions() {
             </div>
 
           {/* Compact Recording Panel - Sidebar */}
-          <div className="rounded-xl border border-primary/40 bg-card shadow-sm flex flex-col order-1 lg:order-2">
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:order-2">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -927,7 +927,7 @@ export default function Sessions() {
                 <p className="font-medium text-foreground truncate">
                   {currentPatient?.name || "Current Session"}
                 </p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-4 w-4" />
                   <span className="font-mono">{formatDuration(sessionDuration)}</span>
                 </div>
@@ -957,7 +957,7 @@ export default function Sessions() {
                   )}
                 </button>
 
-                {/* Pause / Resume button â€” only while recording */}
+                {/* Pause / Resume button — only while recording */}
                 {isRecording && !isTranscribing && (
                   <button
                     onClick={() => (isPaused ? resumeRecording() : pauseRecording())}
@@ -976,15 +976,15 @@ export default function Sessions() {
                 )}
               </div>
               
-              <p className="text-sm text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 {isTranscribing 
                   ? "Transcribing..." 
                   : isRecording 
-                    ? (isPaused ? "Paused â€” tap play to resume" : "Recording... Tap to stop")
+                    ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
                     : "Tap to record"}
               </p>
-              <p className="text-sm text-muted-foreground/70 text-center mt-1">
-                ðŸ’¡ Say "End Session" to automatically stop recording
+              <p className="text-xs text-muted-foreground/70 text-center mt-1">
+                💡 Say "End Session" to automatically stop recording
               </p>
               
               {/* Compact Waveform */}
@@ -1001,7 +1001,7 @@ export default function Sessions() {
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-sm font-medium text-foreground">Live AI hint</p>
+                    <p className="text-xs font-medium text-primary-dark">Live AI hint</p>
                   </div>
                   {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                 </div>
@@ -1009,13 +1009,13 @@ export default function Sessions() {
                   <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
                 )}
                 {liveHint?.differentials && liveHint.differentials.length > 0 && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    <span className="font-medium text-foreground">Consider:</span> {liveHint.differentials.join(" Â· ")}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Consider:</span> {liveHint.differentials.join(" · ")}
                   </p>
                 )}
                 {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
-                  <p className="mt-1 text-sm text-destructive">
-                    <span className="font-medium">Rule out:</span> {liveHint.red_flags.join(" Â· ")}
+                  <p className="mt-1 text-xs text-destructive">
+                    <span className="font-medium">Rule out:</span> {liveHint.red_flags.join(" · ")}
                   </p>
                 )}
               </div>
@@ -1027,10 +1027,10 @@ export default function Sessions() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
                     <FileText className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-sm font-medium text-foreground">Transcript</p>
+                    <p className="text-xs font-medium text-primary-dark">Transcript</p>
                   </div>
                   {transcript && !isTranscribing && (
-                    <span className="text-sm bg-success/15 text-success px-1.5 py-0.5 rounded">âœ“</span>
+                    <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
                   )}
                   {isTranscribing && (
                     <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -1047,16 +1047,16 @@ export default function Sessions() {
                           const speakerLower = speaker.toLowerCase().trim();
                           const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                           return (
-                            <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                               <span className="font-bold">{speaker}</span>:{text}
                             </p>
                           );
                         }
-                        return line.trim() ? <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p> : null;
+                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
                       })}
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground italic">Transcribing...</p>
+                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
                   )}
                 </div>
               </div>
@@ -1067,7 +1067,7 @@ export default function Sessions() {
               <div className="border-t p-3">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  <p className="text-sm font-medium text-foreground">Playback</p>
+                  <p className="text-xs font-medium text-foreground">Playback</p>
                 </div>
                 <audio controls className="w-full h-8" src={audioUrl}>
                   Your browser does not support audio.
@@ -1076,18 +1076,18 @@ export default function Sessions() {
             )}
 
             {/* Stop recording = ends session and triggers transcription pipeline.
-                Use the main Mic/Square button above â€” no duplicate End Session button here. */}
+                Use the main Mic/Square button above — no duplicate End Session button here. */}
           </div>
 
         </div>
       )}
 
       {sessionState === "processing" && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-primary/40 bg-card p-8 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-primary bg-card p-12 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
             <Sparkles className="h-8 w-8 text-primary animate-pulse" />
           </div>
-          <h2 className="text-sm font-semibold text-foreground mb-2">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
             Processing Session
           </h2>
           <p className="text-muted-foreground max-w-md">
@@ -1207,7 +1207,7 @@ export default function Sessions() {
               </div>
               {actionPoints.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-border">
-                  <p className="text-sm text-green-600 flex items-center gap-1">
+                  <p className="text-xs text-green-600 flex items-center gap-1">
                     <CheckCircle className="h-4 w-4" />
                     Added to To-Do List
                   </p>
@@ -1253,7 +1253,7 @@ export default function Sessions() {
             {/* Disclaimer Banner */}
             <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
               <ShieldAlert className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-              <p className="text-sm text-amber-700">
+              <p className="text-xs text-amber-700">
                 <strong>For Clinical Decision Support Only:</strong> This AI analysis is confidential and intended to assist physician judgment. 
                 It is not a diagnosis and should not be shared with patients. Always apply clinical expertise.
               </p>
@@ -1266,7 +1266,7 @@ export default function Sessions() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="gap-1 text-sm"
+                      className="gap-1 text-xs"
                       disabled={isTranslatingDiagnosis}
                       onClick={async () => {
                         if (translatedDiagnosis) {
@@ -1293,7 +1293,7 @@ export default function Sessions() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="gap-1 text-sm"
+                    className="gap-1 text-xs"
                     onClick={async () => {
                       if (isNarrating) {
                         narrationAudioRef.current?.pause();
@@ -1411,8 +1411,8 @@ export default function Sessions() {
       )}
 
       {/* All Sessions List */}
-      <div className="rounded-xl border border-primary/40 bg-card p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
+      <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">{t("sessions.allSessions")}</h2>
@@ -1453,7 +1453,7 @@ export default function Sessions() {
         </div>
 
         {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-2 mb-3">
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
@@ -1461,7 +1461,7 @@ export default function Sessions() {
               placeholder={t("sessions.searchByPatient")}
               value={sessionSearch}
               onChange={(e) => setSessionSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div className="flex gap-2">
@@ -1469,22 +1469,22 @@ export default function Sessions() {
               type="date"
               value={sessionDateFrom}
               onChange={(e) => setSessionDateFrom(e.target.value)}
-              className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background"
+              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
               placeholder="From"
             />
             <input
               type="date"
               value={sessionDateTo}
               onChange={(e) => setSessionDateTo(e.target.value)}
-              className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background"
+              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
               placeholder="To"
             />
           </div>
         </div>
 
-        <Alert className="mb-3 border-amber-500/30 bg-amber-500/5">
+        <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
           <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="text-sm text-amber-700">
+          <AlertDescription className="text-xs text-amber-700">
             Voice recordings and transcriptions are deleted after 7 days. Download them to keep. AI summaries remain permanently.
           </AlertDescription>
         </Alert>
@@ -1579,8 +1579,8 @@ export default function Sessions() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {session.patient?.name || 'Unknown Patient'} â€¢ {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
+                  <p className="text-xs text-muted-foreground">
+                    {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
               </div>
@@ -1627,12 +1627,12 @@ export default function Sessions() {
           );
 
           return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* This Week - always expanded, not collapsible */}
             {thisWeekSessions.length > 0 && (
               <div>
                 <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                  This Week <Badge variant="secondary" className="text-sm">{thisWeekSessions.length}</Badge>
+                  This Week <Badge variant="secondary" className="text-xs">{thisWeekSessions.length}</Badge>
                 </h3>
                 <div className="space-y-1.5">
                   {thisWeekSessions.map(renderSessionRow)}
@@ -1647,7 +1647,7 @@ export default function Sessions() {
                   <AccordionItem value="last-week">
                     <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
                       <span className="flex items-center gap-2">
-                        Last Week <Badge variant="secondary" className="text-sm">{lastWeekSessions.length}</Badge>
+                        Last Week <Badge variant="secondary" className="text-xs">{lastWeekSessions.length}</Badge>
                       </span>
                     </AccordionTrigger>
                     <AccordionContent>
@@ -1661,7 +1661,7 @@ export default function Sessions() {
                   <AccordionItem key={month} value={month}>
                     <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
                       <span className="flex items-center gap-2">
-                        {month} <Badge variant="secondary" className="text-sm">{sessions.length}</Badge>
+                        {month} <Badge variant="secondary" className="text-xs">{sessions.length}</Badge>
                       </span>
                     </AccordionTrigger>
                     <AccordionContent>
@@ -1751,4 +1751,3 @@ export default function Sessions() {
     </div>
   );
 }
-

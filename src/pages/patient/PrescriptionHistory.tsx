@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Calendar, User, Pill, Download, Eye, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -118,7 +118,7 @@ export default function Documentation() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Documentation</h1>
-        <p className="text-muted-foreground text-sm">View and manage your documents</p>
+        <p className="text-muted-foreground text-xs">View and manage your documents</p>
       </div>
 
       {patientId && user?.id && (
@@ -215,7 +215,7 @@ export default function Documentation() {
                     {rx.instructions && (
                       <p className="text-sm text-muted-foreground">{rx.instructions}</p>
                     )}
-                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         Started: {format(parseISO(rx.start_date), "MMM d, yyyy")}
@@ -251,4 +251,3 @@ export default function Documentation() {
     </div>
   );
 }
-

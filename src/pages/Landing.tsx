@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
@@ -48,7 +48,7 @@ const getPatientBenefits = (t: any) => [
   {
     icon: Eye,
     title: t("landing.patientBenefits.benefit1Title", "Complete Health Picture"),
-    description: t("landing.patientBenefits.benefit1Description", "See your entire medical history, prescriptions, and care team in one unified viewâ€”no more scattered records."),
+    description: t("landing.patientBenefits.benefit1Description", "See your entire medical history, prescriptions, and care team in one unified view—no more scattered records."),
   },
   {
     icon: Users,
@@ -63,7 +63,7 @@ const getPatientBenefits = (t: any) => [
   {
     icon: Calendar,
     title: t("landing.patientBenefits.benefit4Title", "Unified Appointments"),
-    description: t("landing.patientBenefits.benefit4Description", "All your healthcare appointments from every provider in one calendarâ€”never miss a follow-up."),
+    description: t("landing.patientBenefits.benefit4Description", "All your healthcare appointments from every provider in one calendar—never miss a follow-up."),
   },
 ];
 
@@ -86,7 +86,7 @@ const getProviderBenefits = (t: any) => [
   {
     icon: Heart,
     title: t("landing.providerBenefits.benefit4Title", "Better Patient Outcomes"),
-    description: t("landing.providerBenefits.benefit4Description", "Access complete patient history across all their providersâ€”make informed decisions with the full picture."),
+    description: t("landing.providerBenefits.benefit4Description", "Access complete patient history across all their providers—make informed decisions with the full picture."),
   },
   {
     icon: Ambulance,
@@ -162,7 +162,7 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero Section â€” full ecosystem showcase */}
+      {/* Hero Section — full ecosystem showcase */}
       <section className="relative pt-28 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Ambient background blobs */}
         <div className="pointer-events-none absolute inset-0 -z-10">
@@ -176,7 +176,7 @@ export default function Landing() {
         </div>
 
         <div className="max-w-7xl mx-auto space-y-10">
-          {/* TOP ROW â€” logo left, mosaic right */}
+          {/* TOP ROW — logo left, mosaic right */}
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -209,7 +209,7 @@ export default function Landing() {
                   </p>
                   <div className="mt-3 flex items-center gap-1.5">
                     <Gift className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-sm font-medium text-foreground">{t("landing.features.rewardsEarned")}</span>
+                    <span className="text-xs font-medium text-primary-dark">{t("landing.features.rewardsEarned")}</span>
                   </div>
                 </div>
 
@@ -253,7 +253,7 @@ export default function Landing() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <p className="font-semibold text-foreground text-sm">{t("landing.features.transcribedSessions")}</p>
-                        <span className="inline-flex items-center gap-1 text-sm font-medium text-destructive">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
                           <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" /> REC
                         </span>
                       </div>
@@ -272,14 +272,14 @@ export default function Landing() {
             </motion.div>
           </div>
 
-          {/* MIDDLE BAND â€” mono eyebrow + capability pills over waveform */}
+          {/* MIDDLE BAND — mono eyebrow + capability pills over waveform */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-center space-y-4"
           >
-            <p className="font-mono text-sm sm:text-sm text-muted-foreground tracking-wider">
+            <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
               {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
             </p>
             <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
@@ -320,7 +320,7 @@ export default function Landing() {
                 ].map((p) => (
                   <span
                     key={p.label}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 backdrop-blur-sm px-3 py-1.5 text-sm text-foreground/80 hover:border-primary/40 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 backdrop-blur-sm px-3 py-1.5 text-xs text-foreground/80 hover:border-primary/40 transition-colors"
                   >
                     <p.icon className="h-3.5 w-3.5 text-primary" />
                     {p.label}
@@ -330,7 +330,7 @@ export default function Landing() {
             </div>
           </motion.div>
 
-          {/* BOTTOM ROW â€” CTAs left, SOS card right */}
+          {/* BOTTOM ROW — CTAs left, SOS card right */}
           <div className="grid lg:grid-cols-12 gap-6 items-start">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -373,7 +373,7 @@ export default function Landing() {
                 {t("landing.hero.description")}
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
                   <Shield className="h-3.5 w-3.5 text-primary" /> {t("landing.trustStrip.patientAccess")}
                 </span>
@@ -410,7 +410,7 @@ export default function Landing() {
                     ].map((b) => (
                       <span
                         key={b.key}
-                        className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2 py-0.5 text-sm text-foreground/80"
+                        className="inline-flex items-center gap-1 rounded-full bg-card border border-border px-2 py-0.5 text-xs text-foreground/80"
                       >
                         {b.label}
                       </span>
@@ -434,7 +434,7 @@ export default function Landing() {
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <p className="text-base font-bold text-foreground">{t("landing.mobile.title")}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {t("landing.mobile.description")}
                 </p>
               </div>
@@ -472,7 +472,7 @@ export default function Landing() {
               {t("landing.patientBenefits.sectionBadge")}
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              {t("landing.patientBenefits.sectionTitle")} <span className="text-primary">360Â°</span> {t("landing.patientBenefits.sectionTitleHighlight")}
+              {t("landing.patientBenefits.sectionTitle")} <span className="text-primary">360°</span> {t("landing.patientBenefits.sectionTitleHighlight")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t("landing.patientBenefits.sectionDescription")}
@@ -610,4 +610,3 @@ export default function Landing() {
     </div>
   );
 }
-

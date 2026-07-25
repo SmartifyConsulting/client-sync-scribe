@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Card } from "@/components/ui/card";
@@ -66,9 +66,9 @@ export default function NursesScreen() {
     <div className="space-y-4">
       <header className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Hospital Operations</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital Operations</p>
           <h1 className="text-2xl font-extrabold">Our Nurses</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Build your nursing roster. Inactive nurses can be selected on admission records; their Vulas claim automatically when they sign up.
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function NursesScreen() {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <p className="font-semibold text-sm truncate">{n.full_name}</p>
-                <Badge variant={n.status === "active" ? "default" : "outline"} className="text-sm">
+                <Badge variant={n.status === "active" ? "default" : "outline"} className="text-xs">
                   {n.status}
                 </Badge>
                 {ratings[n.id] !== undefined && (
@@ -95,12 +95,12 @@ export default function NursesScreen() {
               </div>
               <p className="text-sm text-muted-foreground truncate">
                 {n.role_title || "Nurse"}
-                {n.email && ` Â· ${n.email}`}
-                {n.nurse_registration_number && ` Â· #${n.nurse_registration_number}`}
+                {n.email && ` · ${n.email}`}
+                {n.nurse_registration_number && ` · #${n.nurse_registration_number}`}
               </p>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-sm uppercase tracking-wider text-muted-foreground">Pending Vulas</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Pending Vulas</p>
               <p className="text-sm font-bold inline-flex items-center gap-1">
                 <Gift className="h-3.5 w-3.5 text-primary" /> {pendingTotals[n.id] ?? 0}
               </p>
@@ -178,4 +178,3 @@ function AddNurseDialog({ hospitalId, onAdded }: { hospitalId: string; onAdded: 
     </Dialog>
   );
 }
-

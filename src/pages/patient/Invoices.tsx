@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Receipt, Calendar, Download, CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Send, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -236,7 +236,7 @@ export default function Invoices() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
-        <p className="text-muted-foreground text-sm">View and manage your medical invoices</p>
+        <p className="text-muted-foreground text-xs">View and manage your medical invoices</p>
       </div>
 
       {/* Summary Cards */}
@@ -247,7 +247,7 @@ export default function Invoices() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-600">{formatCurrency(totalPending)}</div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {invoices.filter((i) => i.status === "pending").length} invoice(s)
             </p>
           </CardContent>
@@ -258,7 +258,7 @@ export default function Invoices() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{formatCurrency(totalOverdue)}</div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {invoices.filter((i) => i.status === "overdue").length} invoice(s)
             </p>
           </CardContent>
@@ -271,7 +271,7 @@ export default function Invoices() {
             <div className="text-2xl font-bold">
               {formatCurrency(invoices.reduce((sum, inv) => sum + Number(inv.amount), 0))}
             </div>
-            <p className="text-sm text-muted-foreground">{invoices.length} invoice(s)</p>
+            <p className="text-xs text-muted-foreground">{invoices.length} invoice(s)</p>
           </CardContent>
         </Card>
       </div>
@@ -338,7 +338,7 @@ export default function Invoices() {
                           </Badge>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           Issued: {format(parseISO(invoice.created_at), "MMM d, yyyy")}
@@ -417,7 +417,7 @@ export default function Invoices() {
                   <Receipt className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold text-foreground">Invoice Details</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Invoice Details</h2>
                   <p className="text-sm text-muted-foreground">{viewingInvoice.invoice_number}</p>
                 </div>
               </div>
@@ -504,4 +504,3 @@ export default function Invoices() {
     </div>
   );
 }
-

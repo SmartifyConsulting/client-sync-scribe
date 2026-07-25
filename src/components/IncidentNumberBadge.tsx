@@ -1,4 +1,4 @@
-﻿import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type Props = {
   number?: string | null;
@@ -23,7 +23,7 @@ export function IncidentNumberBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full bg-emerald-200 px-2 py-0.5 text-sm font-semibold text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100",
+        "inline-flex items-center rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100",
         className,
       )}
     >
@@ -31,4 +31,3 @@ export function IncidentNumberBadge({
     </span>
   );
 }
-

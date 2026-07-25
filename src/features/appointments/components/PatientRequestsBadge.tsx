@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { Check, X, Clock, Calendar, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -143,9 +143,9 @@ export function PatientRequestsBadge() {
           <div key={req.id} className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-medium text-sm">{req.doctor_name}</span>
-              <Badge className="bg-amber-100 text-amber-800 text-sm">New Time Proposed</Badge>
+              <Badge className="bg-amber-100 text-amber-800 text-xs">New Time Proposed</Badge>
             </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {req.proposed_start && format(parseISO(req.proposed_start), "MMM d, yyyy")}
@@ -155,7 +155,7 @@ export function PatientRequestsBadge() {
                 {req.proposed_start && format(parseISO(req.proposed_start), "h:mm a")}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground line-through">
+            <p className="text-xs text-muted-foreground line-through">
               Originally: {format(parseISO(req.requested_start), "MMM d 'at' h:mm a")}
             </p>
             <div className="flex gap-2 pt-1">
@@ -173,9 +173,9 @@ export function PatientRequestsBadge() {
           <div key={req.id} className="rounded-lg border border-border p-3 space-y-1">
             <div className="flex items-center justify-between">
               <span className="font-medium text-sm">{req.doctor_name}</span>
-              <Badge variant="outline" className="text-sm">Pending</Badge>
+              <Badge variant="outline" className="text-xs">Pending</Badge>
             </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {format(parseISO(req.requested_start), "MMM d, yyyy")}
@@ -185,11 +185,10 @@ export function PatientRequestsBadge() {
                 {format(parseISO(req.requested_start), "h:mm a")}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">Waiting for doctor's response...</p>
+            <p className="text-xs text-muted-foreground">Waiting for doctor's response...</p>
           </div>
         ))}
       </CardContent>
     </Card>
   );
 }
-

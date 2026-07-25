@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   X,
   Save,
@@ -134,7 +134,7 @@ function ProcedureSearchInput({
               }}
             >
               <span className="font-medium">{s.code}</span>
-              <span className="text-muted-foreground ml-2">â€” {s.description}</span>
+              <span className="text-muted-foreground ml-2">— {s.description}</span>
             </button>
           ))}
         </div>
@@ -206,7 +206,7 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
         .replace(/\[ProcedureDescription\]/g, procedure.description)
         .replace(/\[ProcedureCode\]/g, procedure.code)
     );
-    toast({ title: "Procedure selected", description: `${procedure.code} â€” ${procedure.description}` });
+    toast({ title: "Procedure selected", description: `${procedure.code} — ${procedure.description}` });
   };
 
   const handleSave = async () => {
@@ -270,8 +270,8 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
               </SelectContent>
             </Select>
             {selectedPatientId && selectedPatientId !== "none" && (
-              <p className="text-sm text-green-600">
-                âœ“ Patient data has been auto-filled into the document
+              <p className="text-xs text-green-600">
+                ✓ Patient data has been auto-filled into the document
               </p>
             )}
           </div>
@@ -285,7 +285,7 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
             />
           </div>
 
-          {/* Procedure Search â€” only for admission templates */}
+          {/* Procedure Search — only for admission templates */}
           {isAdmissionTemplate && (
             <ProcedureSearchInput onSelect={handleProcedureSelect} />
           )}
@@ -303,20 +303,20 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
           {/* Unfilled Placeholders */}
           {unfilledPlaceholders.length > 0 && (
             <div className="space-y-2 p-4 rounded-lg bg-muted/50 border border-border">
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Remaining Placeholders to Fill
               </p>
               <div className="flex flex-wrap gap-2">
                 {unfilledPlaceholders.map((placeholder) => (
                   <span
                     key={placeholder}
-                    className="rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2.5 py-1 text-sm font-medium"
+                    className="rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2.5 py-1 text-xs font-medium"
                   >
                     [{placeholder}]
                   </span>
                 ))}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Edit the content above to fill in these placeholders manually
               </p>
             </div>
@@ -325,14 +325,14 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
           {/* Auto-filled info */}
           {profile && (
             <div className="space-y-2 p-4 rounded-lg bg-muted/30 border border-border">
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Auto-filled from Your Profile
               </p>
-              <div className="text-sm text-muted-foreground space-y-1">
-                {profile.full_name && <p>â€¢ Doctor: {profile.full_name}</p>}
-                {profile.practice_number && <p>â€¢ Practice #: {profile.practice_number}</p>}
-                {profile.doctor_number && <p>â€¢ Registration #: {profile.doctor_number}</p>}
-                {profile.practice_address && <p>â€¢ Address: {profile.practice_address}</p>}
+              <div className="text-xs text-muted-foreground space-y-1">
+                {profile.full_name && <p>• Doctor: {profile.full_name}</p>}
+                {profile.practice_number && <p>• Practice #: {profile.practice_number}</p>}
+                {profile.doctor_number && <p>• Registration #: {profile.doctor_number}</p>}
+                {profile.practice_address && <p>• Address: {profile.practice_address}</p>}
               </div>
             </div>
           )}
@@ -352,4 +352,3 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
     </div>
   );
 }
-

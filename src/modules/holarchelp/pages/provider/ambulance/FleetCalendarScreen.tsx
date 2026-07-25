@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -58,10 +58,10 @@ const MOCK_EVENTS: CalendarEvent[] = [
 ];
 
 const EVENT_CONFIG = {
-  maintenance: { color: "bg-primary/10 text-primary", label: "Maintenance", icon: "ðŸ”§" },
-  inspection: { color: "bg-accent/40 text-accent-foreground", label: "Inspection", icon: "âœ“" },
-  insurance: { color: "bg-success/10 text-success", label: "Insurance", icon: "ðŸ“‹" },
-  mot: { color: "bg-warning/10 text-warning", label: "MOT", icon: "ðŸš—" },
+  maintenance: { color: "bg-primary/10 text-primary", label: "Maintenance", icon: "🔧" },
+  inspection: { color: "bg-accent/40 text-accent-foreground", label: "Inspection", icon: "✓" },
+  insurance: { color: "bg-success/10 text-success", label: "Insurance", icon: "📋" },
+  mot: { color: "bg-warning/10 text-warning", label: "MOT", icon: "🚗" },
 };
 
 export default function FleetCalendarScreen() {
@@ -91,7 +91,7 @@ export default function FleetCalendarScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Fleet Management</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Management</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Maintenance Calendar</h1>
         <p className="text-sm text-muted-foreground mt-2">Plan maintenance, inspections, and renewals</p>
       </header>
@@ -120,7 +120,7 @@ export default function FleetCalendarScreen() {
         {/* Day Headers */}
         <div className="grid grid-cols-7 bg-muted/50 border-b">
           {getCalendarShortWeekdayNames(t).map((day) => (
-            <div key={day} className="p-2 text-center font-semibold text-sm text-muted-foreground">
+            <div key={day} className="p-2 text-center font-semibold text-xs text-muted-foreground">
               {day}
             </div>
           ))}
@@ -149,13 +149,13 @@ export default function FleetCalendarScreen() {
                   {events.slice(0, 2).map((event, idx) => {
                     const config = EVENT_CONFIG[event.type];
                     return (
-                      <div key={idx} className={`rounded text-sm px-1 py-0.5 ${config.color}`}>
+                      <div key={idx} className={`rounded text-xs px-1 py-0.5 ${config.color}`}>
                         {config.icon} {event.vehicle}
                       </div>
                     );
                   })}
                   {events.length > 2 && (
-                    <div className="text-sm text-muted-foreground">+{events.length - 2} more</div>
+                    <div className="text-xs text-muted-foreground">+{events.length - 2} more</div>
                   )}
                 </div>
               </div>
@@ -212,4 +212,3 @@ export default function FleetCalendarScreen() {
     </div>
   );
 }
-

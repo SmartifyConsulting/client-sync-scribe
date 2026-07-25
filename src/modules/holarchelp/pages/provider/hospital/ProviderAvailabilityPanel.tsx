@@ -1,4 +1,4 @@
-﻿import { Loader2, MapPin, AlertCircle } from "lucide-react";
+import { Loader2, MapPin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ERProvider {
@@ -51,21 +51,21 @@ const MOCK_PROVIDERS: ERProvider[] = [
 
 const STATUS_CONFIG = {
   available: {
-    icon: "âœ“",
+    icon: "✓",
     color: "text-green-600",
     bgColor: "bg-green-50",
     badgeColor: "bg-green-100 text-green-800",
     label: "AVAILABLE",
   },
   limited: {
-    icon: "âš ",
+    icon: "⚠",
     color: "text-orange-600",
     bgColor: "bg-orange-50",
     badgeColor: "bg-orange-100 text-orange-800",
     label: "LIMITED CAPACITY",
   },
   unavailable: {
-    icon: "âœ—",
+    icon: "✗",
     color: "text-red-600",
     bgColor: "bg-red-50",
     badgeColor: "bg-red-100 text-red-800",
@@ -104,19 +104,19 @@ export function ProviderAvailabilityPanel({ onSelectProvider }: { onSelectProvid
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Distance</p>
+                  <p className="text-xs text-muted-foreground">Distance</p>
                   <p className="font-semibold">{provider.distance_km} km</p>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">ETA</p>
+                <p className="text-xs text-muted-foreground">ETA</p>
                 <p className="font-semibold">{provider.eta_minutes} min</p>
               </div>
             </div>
 
             {/* Capacity Bar */}
             <div className="space-y-1">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xs">
                 <span className="text-muted-foreground">Capacity</span>
                 <span className="font-semibold">
                   {provider.available_units}/{provider.total_units} units available
@@ -134,7 +134,7 @@ export function ProviderAvailabilityPanel({ onSelectProvider }: { onSelectProvid
                   style={{ width: `${provider.capacity_percent}%` }}
                 />
               </div>
-              <p className="text-sm text-muted-foreground text-right">{provider.capacity_percent}% capacity</p>
+              <p className="text-xs text-muted-foreground text-right">{provider.capacity_percent}% capacity</p>
             </div>
 
             {/* Status Badge */}
@@ -166,4 +166,3 @@ export function ProviderAvailabilityPanel({ onSelectProvider }: { onSelectProvid
     </div>
   );
 }
-

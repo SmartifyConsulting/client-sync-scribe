@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Camera, Loader2, RefreshCw, Check, Video, Square, Info, Pill, Package, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,7 +147,7 @@ export function PillBaselineCapture({
     else if (step === "tablet" && !tabletBlob) startCamera("environment");
     else if (step === "ingest" && !recordedBlob) startCamera("user");
     return () => {
-      // only stop on unmount / dialog close â€” handled in handleClose
+      // only stop on unmount / dialog close — handled in handleClose
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, step]);
@@ -343,7 +343,7 @@ export function PillBaselineCapture({
         }),
       );
 
-      // Discard the video blob client-side â€” never written to storage
+      // Discard the video blob client-side — never written to storage
       setRecordedBlob(null);
 
       const { data, error } = await supabase.functions.invoke("validate-medication-video", {
@@ -362,7 +362,7 @@ export function PillBaselineCapture({
       });
       if (error) throw error;
 
-      // Safety net â€” ensure row exists with our chosen artefacts even if function failed silently
+      // Safety net — ensure row exists with our chosen artefacts even if function failed silently
       await supabase.from("prescription_pill_references").upsert(
         {
           prescription_id: prescriptionId,
@@ -461,7 +461,7 @@ export function PillBaselineCapture({
     <div className="flex items-center gap-1.5">
       <span
         className={cn(
-          "flex h-5 w-5 items-center justify-center rounded-full text-sm font-semibold",
+          "flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold",
           active
             ? "bg-primary text-primary-foreground"
             : "bg-muted text-muted-foreground",
@@ -488,7 +488,7 @@ export function PillBaselineCapture({
           </DialogTitle>
           <DialogDescription>
             A <strong>baseline</strong> is a quick one-time setup. Show us the packet, the tablet, and how you take it.
-            From then on the app recognises your routine and you only need a short daily clip to earn your Vula reward â€”
+            From then on the app recognises your routine and you only need a short daily clip to earn your Vula reward —
             you won't have to do this setup again.
           </DialogDescription>
         </DialogHeader>
@@ -516,12 +516,12 @@ export function PillBaselineCapture({
                 A baseline is a <strong className="text-foreground">one short video</strong> of you taking
                 this medication normally. The AI watches your hands, the pill and your mouth motion <em>once</em> so
                 it learns what "you taking <strong className="text-foreground">{medicationName}</strong>" looks like.
-                After that, every future dose only needs a quick check-in â€” no setup, no repeats.
+                After that, every future dose only needs a quick check-in — no setup, no repeats.
               </p>
-              <ul className="text-muted-foreground list-disc list-inside space-y-0.5 text-sm">
-                <li><strong className="text-foreground">One-time only</strong> â€” you'll never be asked to repeat this for {medicationName}.</li>
+              <ul className="text-muted-foreground list-disc list-inside space-y-0.5 text-xs">
+                <li><strong className="text-foreground">One-time only</strong> — you'll never be asked to repeat this for {medicationName}.</li>
                 <li>Helps the AI learn what your tablet and routine look like.</li>
-                <li>The video is used only to compare against future check-ins â€” not shared.</li>
+                <li>The video is used only to compare against future check-ins — not shared.</li>
               </ul>
             </div>
             <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
@@ -539,8 +539,8 @@ export function PillBaselineCapture({
                 <BellRing className="h-4 w-4 text-amber-600" />
                 If you skip this medication, who should we contact?
               </p>
-              <p className="text-muted-foreground text-sm mb-3">
-                Pulled from your Personal Information â€” you can change it here too.
+              <p className="text-muted-foreground text-xs mb-3">
+                Pulled from your Personal Information — you can change it here too.
               </p>
               <RadioGroup
                 value={skipNotifyTarget}
@@ -550,10 +550,10 @@ export function PillBaselineCapture({
                 <label htmlFor="sn-em" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
                   <RadioGroupItem id="sn-em" value="emergency" className="mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Emergency contact</p>
+                    <p className="text-xs font-medium">Emergency contact</p>
                     <p className="text-sm text-muted-foreground">
                       {patientContacts?.emergency_contact_name
-                        ? `${patientContacts.emergency_contact_name}${patientContacts.emergency_contact_phone ? " Â· " + patientContacts.emergency_contact_phone : ""}`
+                        ? `${patientContacts.emergency_contact_name}${patientContacts.emergency_contact_phone ? " · " + patientContacts.emergency_contact_phone : ""}`
                         : "Not set yet"}
                     </p>
                   </div>
@@ -561,10 +561,10 @@ export function PillBaselineCapture({
                 <label htmlFor="sn-nok" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
                   <RadioGroupItem id="sn-nok" value="nok" className="mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">Next of kin</p>
+                    <p className="text-xs font-medium">Next of kin</p>
                     <p className="text-sm text-muted-foreground">
                       {patientContacts?.next_of_kin_name
-                        ? `${patientContacts.next_of_kin_name}${patientContacts.next_of_kin_phone ? " Â· " + patientContacts.next_of_kin_phone : ""}`
+                        ? `${patientContacts.next_of_kin_name}${patientContacts.next_of_kin_phone ? " · " + patientContacts.next_of_kin_phone : ""}`
                         : "Not set yet"}
                     </p>
                   </div>
@@ -572,7 +572,7 @@ export function PillBaselineCapture({
                 <label htmlFor="sn-none" className="flex items-start gap-2 rounded-lg border bg-background p-2 cursor-pointer">
                   <RadioGroupItem id="sn-none" value="none" className="mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">No one</p>
+                    <p className="text-xs font-medium">No one</p>
                     <p className="text-sm text-muted-foreground">Don't notify anyone if a dose is skipped.</p>
                   </div>
                 </label>
@@ -599,13 +599,13 @@ export function PillBaselineCapture({
                       placeholder="Name"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="text-sm h-8"
+                      className="text-xs h-8"
                     />
                     <Input
                       placeholder="Phone"
                       value={editPhone}
                       onChange={(e) => setEditPhone(e.target.value)}
-                      className="text-sm h-8"
+                      className="text-xs h-8"
                     />
                   </div>
                 );
@@ -640,13 +640,13 @@ export function PillBaselineCapture({
                     <RadioGroupItem id={`im-${m.value}`} value={m.value} className="mt-0.5" />
                     <div>
                       <p className="text-sm font-medium leading-tight">{m.label}</p>
-                      <p className="text-sm text-muted-foreground">{m.helper}</p>
+                      <p className="text-xs text-muted-foreground">{m.helper}</p>
                     </div>
                   </label>
                 ))}
               </RadioGroup>
             </div>
-            <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-300">
+            <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-300">
               <Info className="h-4 w-4 shrink-0 mt-0.5" />
               <p>
                 Most tablets and capsules should be swallowed whole. If you're unsure, check with
@@ -663,7 +663,7 @@ export function PillBaselineCapture({
         {/* STEP: packaging still */}
         {step === "packaging" && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Package className="h-4 w-4 text-primary" />
               Hold the box or blister so the medicine name and strength are readable.
             </div>
@@ -703,7 +703,7 @@ export function PillBaselineCapture({
         {/* STEP: tablet close-up */}
         {step === "tablet" && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Pill className="h-4 w-4 text-primary" />
               {quantity > 1
                 ? `Show all ${quantity} tablets together with any printed letters, numbers or score lines facing the camera.`
@@ -726,7 +726,7 @@ export function PillBaselineCapture({
               )}
             </div>
             {tabletBlob && tabletWarning && (
-              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-sm text-amber-800 dark:text-amber-300 flex items-start gap-2">
+              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
                 <Info className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>{tabletWarning}</p>
               </div>
@@ -756,7 +756,7 @@ export function PillBaselineCapture({
         {/* STEP: ingest video */}
         {step === "ingest" && (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Video className="h-4 w-4 text-primary" />
               Record yourself taking the dose. {INGEST_SECONDS} seconds, front camera. Video isn't saved.
             </div>
@@ -770,7 +770,7 @@ export function PillBaselineCapture({
                   onError={() =>
                     toast({
                       title: "Replay not supported on this device",
-                      description: "Don't worry â€” your baseline will still be processed.",
+                      description: "Don't worry — your baseline will still be processed.",
                     })
                   }
                 />
@@ -778,7 +778,7 @@ export function PillBaselineCapture({
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
               )}
               {isRecording && (
-                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-sm font-bold animate-pulse">
+                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-bold animate-pulse">
                   REC {countdown}s
                 </div>
               )}
@@ -829,4 +829,3 @@ export function PillBaselineCapture({
     </Dialog>
   );
 }
-

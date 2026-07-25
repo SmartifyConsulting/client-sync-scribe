@@ -1,4 +1,4 @@
-﻿import { ShareAppDialog } from "@/components/ShareAppDialog";
+import { ShareAppDialog } from "@/components/ShareAppDialog";
 import { SettingsContent } from "@/components/settings/SettingsContent";
 import { useTranslation } from "react-i18next";
 
@@ -9,7 +9,7 @@ export default function Settings() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("settingsPage.title")}</h1>
-          <p className="text-muted-foreground text-base">{t("settingsPage.subtitle")}</p>
+          <p className="text-muted-foreground text-xs">{t("settingsPage.subtitle")}</p>
         </div>
         <ShareAppDialog />
       </div>
@@ -17,4 +17,3 @@ export default function Settings() {
     </div>
   );
 }
-

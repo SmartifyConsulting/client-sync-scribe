@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -150,13 +150,13 @@ export default function HospitalAffiliations() {
         <Hospital className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">Hospital Affiliations</h3>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         Add hospitals you serve at. Listed hospitals will see you in their staff directory. Unknown hospitals are submitted to admin for activation.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-[1fr,180px] gap-2">
         <div className="space-y-1.5">
-          <Label className="text-sm">Select hospitals</Label>
+          <Label className="text-xs">Select hospitals</Label>
           <Popover
             open={open}
             onOpenChange={(next) => {
@@ -166,20 +166,20 @@ export default function HospitalAffiliations() {
           >
             <PopoverTrigger asChild>
               <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
-                {selectedIds.size > 0 ? `${selectedIds.size} hospital${selectedIds.size > 1 ? "s" : ""} selected` : "Select approved hospitalsâ€¦"}
+                {selectedIds.size > 0 ? `${selectedIds.size} hospital${selectedIds.size > 1 ? "s" : ""} selected` : "Select approved hospitals…"}
                 <ChevronsUpDown className="h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
               <Command shouldFilter={false} className="h-auto">
                 <CommandInput
-                  placeholder="Search hospitalsâ€¦"
+                  placeholder="Search hospitals…"
                   value={search}
                   onValueChange={setSearch}
                 />
                 <CommandList className="max-h-64">
                   <CommandEmpty>
-                    {!hospitalsLoaded ? "Loading hospitalsâ€¦" : "No matching hospitals."}
+                    {!hospitalsLoaded ? "Loading hospitals…" : "No matching hospitals."}
                   </CommandEmpty>
                   <CommandGroup>
                     {results.map((h) => (
@@ -187,7 +187,7 @@ export default function HospitalAffiliations() {
                         <Checkbox checked={selectedIds.has(h.id)} className="pointer-events-none" />
                         <Building2 className="h-3.5 w-3.5 text-primary" />
                         <span className="flex-1">{h.name}</span>
-                        {h.city && <span className="text-sm text-muted-foreground">{h.city}</span>}
+                        {h.city && <span className="text-xs text-muted-foreground">{h.city}</span>}
                       </CommandItem>
                     ))}
                     {search.trim() && !hasExactMatch && (
@@ -210,7 +210,7 @@ export default function HospitalAffiliations() {
           </Popover>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm">Your role</Label>
+          <Label className="text-xs">Your role</Label>
           <Select value={roleInput} onValueChange={setRoleInput}>
             <SelectTrigger>
               <SelectValue placeholder="Select role" />
@@ -226,7 +226,7 @@ export default function HospitalAffiliations() {
 
       <div className="space-y-2">
         {affiliations.length === 0 && (
-          <p className="text-sm text-muted-foreground italic">No hospital affiliations added yet.</p>
+          <p className="text-xs text-muted-foreground italic">No hospital affiliations added yet.</p>
         )}
         {affiliations.map((a) => (
           <Card key={a.id} className="p-3 flex items-center justify-between">
@@ -234,10 +234,10 @@ export default function HospitalAffiliations() {
               <Building2 className="h-4 w-4 text-primary shrink-0" />
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">{a.hospital?.name || a.hospital_name_snapshot}</div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {a.role_at_hospital && <span>{a.role_at_hospital}</span>}
                   {a.hospital?.status && a.hospital.status !== "approved" && (
-                    <Badge variant="secondary" className="text-sm">pending admin review</Badge>
+                    <Badge variant="secondary" className="text-xs">pending admin review</Badge>
                   )}
                 </div>
               </div>
@@ -251,4 +251,3 @@ export default function HospitalAffiliations() {
     </div>
   );
 }
-

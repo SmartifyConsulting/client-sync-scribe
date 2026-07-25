@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Settings, AlertCircle, CheckCircle2, Wifi, WifiOff } from "lucide-react";
 
@@ -58,7 +58,7 @@ export default function TelemetryHubScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Integration</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Integration</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Telemetry Integration Hub</h1>
           <p className="text-sm text-muted-foreground mt-2">Connect and manage telematics providers</p>
         </div>
@@ -71,19 +71,19 @@ export default function TelemetryHubScreen() {
       {/* Health Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Connected Providers</p>
+          <p className="text-xs text-muted-foreground">Connected Providers</p>
           <p className="text-2xl font-bold mt-2">2</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Total Devices</p>
+          <p className="text-xs text-muted-foreground">Total Devices</p>
           <p className="text-2xl font-bold mt-2">25</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Data Points/Hour</p>
+          <p className="text-xs text-muted-foreground">Data Points/Hour</p>
           <p className="text-2xl font-bold mt-2">1,258</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">API Health</p>
+          <p className="text-xs text-muted-foreground">API Health</p>
           <p className="text-2xl font-bold text-success mt-2">98%</p>
         </div>
       </div>
@@ -97,7 +97,7 @@ export default function TelemetryHubScreen() {
                 {getStatusIcon(provider.status)}
                 <div>
                   <h3 className="font-bold text-lg">{provider.name}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {provider.status === "connected"
                       ? `Last sync: ${provider.lastSync}`
                       : `Last sync: ${provider.lastSync} (error)`}
@@ -105,7 +105,7 @@ export default function TelemetryHubScreen() {
                 </div>
               </div>
               <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   provider.status === "connected"
                     ? "bg-success/10 text-success"
                     : provider.status === "disconnected"
@@ -123,15 +123,15 @@ export default function TelemetryHubScreen() {
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t">
               <div>
-                <p className="text-sm text-muted-foreground">Devices</p>
+                <p className="text-xs text-muted-foreground">Devices</p>
                 <p className="font-semibold text-sm mt-1">{provider.devices}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Data Points</p>
+                <p className="text-xs text-muted-foreground">Data Points</p>
                 <p className="font-semibold text-sm mt-1">{provider.dataPoints.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Status</p>
+                <p className="text-xs text-muted-foreground">Status</p>
                 <p className={`font-semibold text-sm mt-1 ${
                   provider.status === "connected" ? "text-success" : "text-destructive"
                 }`}>
@@ -172,11 +172,11 @@ export default function TelemetryHubScreen() {
             </thead>
             <tbody className="divide-y">
               {[
-                { field: "GPS Location", source: "Samsara", type: "Coordinates", status: "âœ“" },
-                { field: "Speed", source: "Samsara", type: "Number", status: "âœ“" },
-                { field: "Fuel Level", source: "Geotab", type: "Percentage", status: "âœ“" },
-                { field: "Engine Hours", source: "Geotab", type: "Number", status: "âœ“" },
-                { field: "Hard Braking", source: "Samsara", type: "Boolean", status: "âœ“" },
+                { field: "GPS Location", source: "Samsara", type: "Coordinates", status: "✓" },
+                { field: "Speed", source: "Samsara", type: "Number", status: "✓" },
+                { field: "Fuel Level", source: "Geotab", type: "Percentage", status: "✓" },
+                { field: "Engine Hours", source: "Geotab", type: "Number", status: "✓" },
+                { field: "Hard Braking", source: "Samsara", type: "Boolean", status: "✓" },
               ].map((row, idx) => (
                 <tr key={idx} className="hover:bg-muted/30">
                   <td className="p-2">{row.field}</td>
@@ -192,4 +192,3 @@ export default function TelemetryHubScreen() {
     </div>
   );
 }
-

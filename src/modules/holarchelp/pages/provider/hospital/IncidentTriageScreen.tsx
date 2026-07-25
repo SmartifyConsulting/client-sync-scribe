@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2 } from "lucide-react";
@@ -59,7 +59,7 @@ export default function IncidentTriageScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Emergency Dispatch
         </p>
         <h1 className="text-3xl font-extrabold">Incident Triage Assessment</h1>
@@ -142,7 +142,7 @@ export default function IncidentTriageScreen() {
                 />
                 <div className="ml-3 flex-1">
                   <p className="text-sm font-semibold">{option.label}</p>
-                  <p className="text-sm text-muted-foreground">{option.desc}</p>
+                  <p className="text-xs text-muted-foreground">{option.desc}</p>
                 </div>
               </label>
             ))}
@@ -231,4 +231,3 @@ export default function IncidentTriageScreen() {
     </div>
   );
 }
-

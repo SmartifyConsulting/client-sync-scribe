@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -132,28 +132,28 @@ export default function FleetOperationsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
           <h2 className="text-xl font-extrabold mt-0.5 flex items-center gap-2">
             <Truck className="h-5 w-5 text-primary" /> Fleet Admin
           </h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-xs text-muted-foreground mt-0.5">
             Vehicles, crew assignments and quick edits.
           </p>
         </div>
         <div className="relative w-48">
           <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search code or regâ€¦"
+            placeholder="Search code or reg…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-8 h-8 text-sm"
+            className="pl-8 h-8 text-xs"
           />
         </div>
       </header>
 
       {isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading vehiclesâ€¦
+        <div className="flex items-center gap-2 text-xs text-muted-foreground py-6">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading vehicles…
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -177,17 +177,17 @@ export default function FleetOperationsScreen() {
                     <div className="text-left min-w-0">
                       <p className="font-bold text-sm truncate">
                         {v.vehicle_code}
-                        {v.registration_number ? <span className="text-muted-foreground font-normal"> Â· {v.registration_number}</span> : null}
+                        {v.registration_number ? <span className="text-muted-foreground font-normal"> · {v.registration_number}</span> : null}
                       </p>
                       <p className="text-sm text-muted-foreground truncate">Ambulance</p>
 
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-sm font-semibold">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">
                         <Users className="h-3 w-3" /> {crew.length}
                       </span>
-                      <span className={`px-2 py-0.5 rounded text-sm font-semibold uppercase tracking-wider ${statusBadge(v.status)}`}>
-                        {v.status ?? "â€”"}
+                      <span className={`px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${statusBadge(v.status)}`}>
+                        {v.status ?? "—"}
                       </span>
                     </div>
                   </div>
@@ -206,13 +206,13 @@ export default function FleetOperationsScreen() {
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-64 p-2">
-                          <p className="px-1 pb-1.5 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                          <p className="px-1 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                             Tick members to assign
                           </p>
                           <div className="max-h-60 overflow-y-auto space-y-0.5">
                             {crewMembers.length === 0 ? (
-                              <p className="text-sm text-muted-foreground italic px-1 py-1">
-                                No active crew yet. Add them under Admin â†’ Users.
+                              <p className="text-xs text-muted-foreground italic px-1 py-1">
+                                No active crew yet. Add them under Admin → Users.
                               </p>
                             ) : crewMembers.map((m) => {
                               const on = assignedIds.has(m.id);
@@ -221,7 +221,7 @@ export default function FleetOperationsScreen() {
                                   <Checkbox checked={on} onCheckedChange={() => toggleAssign(v.id, m.id, on)} />
                                   <span className="truncate flex-1">
                                     {memberLabel(m)}
-                                    <span className="text-muted-foreground text-sm ml-1 uppercase">Â· {m.role}</span>
+                                    <span className="text-muted-foreground text-xs ml-1 uppercase">· {m.role}</span>
                                   </span>
                                 </label>
                               );
@@ -241,7 +241,7 @@ export default function FleetOperationsScreen() {
                           <span key={assignment.id} className="inline-flex items-center gap-1 rounded-full bg-background border px-2 py-0.5 text-sm">
                             <Users className="h-3 w-3 text-primary" />
                             <span className="font-semibold">{memberLabel(member!)}</span>
-                            <span className="text-muted-foreground text-sm uppercase">Â· {member!.role}</span>
+                            <span className="text-muted-foreground text-xs uppercase">· {member!.role}</span>
                             <button
                               onClick={(e) => { e.stopPropagation(); toggleAssign(v.id, member!.id, true); }}
                               className="ml-0.5 opacity-60 hover:opacity-100"
@@ -263,7 +263,7 @@ export default function FleetOperationsScreen() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 h-8 text-sm"
+                      className="flex-1 h-8 text-xs"
                       onClick={() => navigate(`/provider/ambulance/fleet/vehicle/${encodeURIComponent(v.vehicle_code)}`)}
                     >
                       View Profile
@@ -271,7 +271,7 @@ export default function FleetOperationsScreen() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 h-8 text-sm"
+                      className="flex-1 h-8 text-xs"
                       onClick={() =>
                         setEditing({
                           id: v.id,
@@ -300,4 +300,3 @@ export default function FleetOperationsScreen() {
     </div>
   );
 }
-

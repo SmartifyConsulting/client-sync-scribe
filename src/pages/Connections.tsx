@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -344,7 +344,7 @@ export default function Connections() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Connections</h1>
-          <p className="mt-1 text-muted-foreground text-sm">
+          <p className="mt-1 text-muted-foreground text-xs">
             Manage your professional network and connections
           </p>
         </div>
@@ -416,14 +416,14 @@ export default function Connections() {
                         </p>
                       )}
                       {connection.role && (
-                        <Badge variant="secondary" className="mt-1 text-sm capitalize">
+                        <Badge variant="secondary" className="mt-1 text-xs capitalize">
                           {connection.role}
                         </Badge>
                       )}
                     </div>
                   </div>
                   <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       Connected {format(new Date(connection.connected_at), "dd MMM yyyy")}
                     </span>
                     <Button
@@ -471,10 +471,10 @@ export default function Connections() {
                           ? invitation.sender_name || "Unknown User"
                           : invitation.recipient_email}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {invitation.direction === "received" ? "Received" : "Sent"}{" "}
                         {format(new Date(invitation.created_at), "dd MMM yyyy")}
-                        {invitation.message && ` â€¢ "${invitation.message}"`}
+                        {invitation.message && ` • "${invitation.message}"`}
                       </p>
                     </div>
                   </div>
@@ -547,4 +547,3 @@ export default function Connections() {
     </div>
   );
 }
-

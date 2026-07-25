@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,7 +98,7 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId, hospitalId
           <div>
             <Label className="text-sm">Attach PDF</Label>
             <Input type="file" accept="application/pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} disabled={uploading} />
-            {attachmentUrl && <p className="text-sm text-muted-foreground mt-1 truncate">Attached âœ“</p>}
+            {attachmentUrl && <p className="text-xs text-muted-foreground mt-1 truncate">Attached ✓</p>}
           </div>
           <div><Label className="text-sm">Notes</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} /></div>
         </div>
@@ -110,4 +110,3 @@ export function AddLabResultDialog({ open, onOpenChange, admissionId, hospitalId
     </Dialog>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -263,10 +263,10 @@ export function DoctorAccessRequests() {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground">{patientName}</p>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                     {patientName} has invited you on their panel of healthcare providers and has provided access to their health information.
                   </p>
-                  <p className="text-sm text-muted-foreground/70 mt-2">
+                  <p className="text-xs text-muted-foreground/70 mt-2">
                     {format(new Date(request.created_at), "d MMM yyyy 'at' h:mm a")}
                   </p>
                 </div>
@@ -275,7 +275,7 @@ export function DoctorAccessRequests() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 rounded-xl text-sm"
+                  className="flex-1 rounded-xl text-xs"
                   onClick={() => handleDeclineRequest(request)}
                   disabled={busy}
                 >
@@ -284,7 +284,7 @@ export function DoctorAccessRequests() {
                 </Button>
                 <Button
                   size="sm"
-                  className="flex-1 rounded-xl text-sm"
+                  className="flex-1 rounded-xl text-xs"
                   onClick={() => handleAcceptRequest(request)}
                   disabled={busy}
                 >
@@ -301,7 +301,7 @@ export function DoctorAccessRequests() {
         })}
       </div>
 
-      {/* Access-granted info modal â€” no selection, just confirmation */}
+      {/* Access-granted info modal — no selection, just confirmation */}
       <Dialog open={!!grantedInfo} onOpenChange={(open) => !open && setGrantedInfo(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -324,7 +324,7 @@ export function DoctorAccessRequests() {
                   <item.icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground">{item.label}</p>
-                    <p className="text-sm text-muted-foreground leading-snug">{item.desc}</p>
+                    <p className="text-xs text-muted-foreground leading-snug">{item.desc}</p>
                   </div>
                 </li>
               ))}
@@ -340,5 +340,4 @@ export function DoctorAccessRequests() {
     </>
   );
 }
-
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
@@ -74,27 +74,27 @@ export default function TriageScreen() {
           return (
             <div key={col.key} className="flex min-h-[300px] flex-col rounded-2xl border bg-card">
               <div className="flex items-center justify-between border-b px-3 py-2">
-                <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t(col.labelKey)}</p>
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-sm font-bold">{items.length}</span>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t(col.labelKey)}</p>
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-bold">{items.length}</span>
               </div>
               <div className="flex-1 space-y-1.5 overflow-auto p-2">
                 {items.map((r) => {
                   const nextKey = col.key === "incoming" ? null : col.key === "awaiting" ? "arrived" : col.key === "arrived" ? "in_triage" : col.key === "triage" ? "admitted" : null;
                   return (
-                    <div key={r.id} className="rounded-xl border bg-background p-2 text-sm hover:border-primary/40">
+                    <div key={r.id} className="rounded-xl border bg-background p-2 text-xs hover:border-primary/40">
                       <div className="flex items-center gap-1.5">
                         <span className={`h-2 w-2 rounded-full ${sevDot(r.severity)}`} />
                         <p className="flex-1 truncate font-semibold">{t("ambulance.incident")} {r.id.slice(0,8)}</p>
                       </div>
-                      <p className="mt-0.5 text-sm text-muted-foreground">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {r.triage_priority ? `${t("admissions.priority")} ${r.triage_priority}` : t("triageBoard.noTriage")}
                       </p>
                       <div className="mt-1.5 flex items-center gap-1">
-                        <Link to={`/provider/hospital/incident/${r.id}`} className="flex-1 truncate rounded-md border bg-card px-1.5 py-1 text-center text-sm font-semibold hover:bg-muted">
+                        <Link to={`/provider/hospital/incident/${r.id}`} className="flex-1 truncate rounded-md border bg-card px-1.5 py-1 text-center text-xs font-semibold hover:bg-muted">
                           {t("common.open")}
                         </Link>
                         {nextKey && (
-                          <button onClick={() => advance(r, nextKey)} className="inline-flex items-center gap-0.5 rounded-md bg-primary px-1.5 py-1 text-sm font-bold text-primary-foreground">
+                          <button onClick={() => advance(r, nextKey)} className="inline-flex items-center gap-0.5 rounded-md bg-primary px-1.5 py-1 text-xs font-bold text-primary-foreground">
                             {t("triageBoard.advance")} <ChevronRight className="h-3 w-3" />
                           </button>
                         )}
@@ -102,7 +102,7 @@ export default function TriageScreen() {
                     </div>
                   );
                 })}
-                {!items.length && <p className="py-6 text-center text-sm text-muted-foreground">â€”</p>}
+                {!items.length && <p className="py-6 text-center text-sm text-muted-foreground">—</p>}
               </div>
             </div>
           );
@@ -111,4 +111,3 @@ export default function TriageScreen() {
     </div>
   );
 }
-

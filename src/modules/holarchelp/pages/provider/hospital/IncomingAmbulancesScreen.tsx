@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
@@ -78,28 +78,28 @@ export default function IncomingAmbulancesScreen() {
                     <Ambulance className="h-4 w-4 text-destructive" />
                     {crew?.name ?? "ER Provider"}
                     {r.assigned_provider_id && partners.has(r.assigned_provider_id) && (
-                      <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-sm">
+                      <Badge className="ml-1 gap-1 bg-primary text-primary-foreground text-xs">
                         <Handshake className="h-2.5 w-2.5" /> Partner
                       </Badge>
                     )}
                   </p>
-                  <p className="text-sm text-muted-foreground">{r.incident_number ?? `Incident ${r.id.slice(0,8)}`} Â· {r.status.replace(/_/g," ")}</p>
+                  <p className="text-sm text-muted-foreground">{r.incident_number ?? `Incident ${r.id.slice(0,8)}`} · {r.status.replace(/_/g," ")}</p>
                 </div>
                 <div className="text-right">
                   {r.eta_minutes != null
                     ? <><p className="text-xl font-extrabold tabular-nums"><EtaCountdown etaMinutes={r.eta_minutes} lastUpdate={r.last_eta_update} /></p>
-                        <p className="text-sm uppercase text-muted-foreground">ETA</p></>
-                    : <p className="text-sm uppercase text-muted-foreground">No ETA</p>}
+                        <p className="text-xs uppercase text-muted-foreground">ETA</p></>
+                    : <p className="text-xs uppercase text-muted-foreground">No ETA</p>}
                 </div>
               </div>
               <SosLiveMap incidentId={r.id} mode="hospital" height={200} />
               {r.pre_arrival_notes && (
-                <div className="border-t bg-warning/10 px-3 py-2 text-sm dark:bg-warning/10">
-                  <p className="text-sm font-bold uppercase tracking-wider text-warning">Pre-arrival notes</p>
+                <div className="border-t bg-warning/10 px-3 py-2 text-xs dark:bg-warning/10">
+                  <p className="text-xs font-bold uppercase tracking-wider text-warning">Pre-arrival notes</p>
                   <p className="mt-0.5 line-clamp-3">{r.pre_arrival_notes}</p>
                 </div>
               )}
-              <div className="flex items-center justify-between gap-2 border-t px-3 py-2 text-sm">
+              <div className="flex items-center justify-between gap-2 border-t px-3 py-2 text-xs">
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5" /> Live tracking
                 </span>
@@ -117,4 +117,3 @@ export default function IncomingAmbulancesScreen() {
     </div>
   );
 }
-

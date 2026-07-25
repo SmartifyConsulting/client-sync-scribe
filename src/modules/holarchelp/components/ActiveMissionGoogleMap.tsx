@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { loadGoogleMaps } from "../lib/googleMapsLoader";
 
@@ -178,7 +178,7 @@ export function ActiveMissionGoogleMap({ incidentId, height = 520 }: Props) {
         });
       } else hospitalMarkerRef.current.setPosition(hospital);
     }
-    // Ambulance â€” tween between updates so it glides
+    // Ambulance — tween between updates so it glides
     if (ambulance) {
       if (!ambMarkerRef.current) {
         ambMarkerRef.current = new gmaps.Marker({
@@ -287,7 +287,7 @@ export function ActiveMissionGoogleMap({ incidentId, height = 520 }: Props) {
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/85 px-6 text-center">
           <div className="max-w-md rounded-xl border border-destructive/40 bg-card p-4 shadow-lg">
             <p className="text-sm font-semibold text-destructive">Google Maps could not load</p>
-            <p className="mt-1 text-sm text-muted-foreground">{err}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{err}</p>
           </div>
         </div>
       )}
@@ -297,17 +297,17 @@ export function ActiveMissionGoogleMap({ incidentId, height = 520 }: Props) {
             <span className="absolute inset-0 animate-ping rounded-full bg-white/70" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
           </span>
-          <span className="text-sm font-bold uppercase tracking-wider opacity-90">
+          <span className="text-xs font-bold uppercase tracking-wider opacity-90">
             {phase === "transport" ? "Transport" : "Pickup"}
           </span>
           <span className="text-sm font-extrabold tabular-nums leading-none">
             {eta.minutes} min
           </span>
-          <span className="text-sm font-semibold opacity-90">Â· {eta.km.toFixed(1)} km</span>
+          <span className="text-sm font-semibold opacity-90">· {eta.km.toFixed(1)} km</span>
         </div>
       )}
-      <div className="absolute right-2 top-2 z-10 rounded-full bg-background/95 px-2 py-1 text-sm font-semibold uppercase text-muted-foreground shadow-md">
-        Live Â· Google Maps
+      <div className="absolute right-2 top-2 z-10 rounded-full bg-background/95 px-2 py-1 text-xs font-semibold uppercase text-muted-foreground shadow-md">
+        Live · Google Maps
       </div>
     </div>
   );
@@ -391,4 +391,3 @@ function humanizeMapError(raw: string): string {
   }
   return raw;
 }
-

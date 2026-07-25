@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
@@ -110,7 +110,7 @@ export default function DispatchQueueScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Dispatch Management
         </p>
         <h1 className="text-3xl font-extrabold">Dispatch Queue</h1>
@@ -122,25 +122,25 @@ export default function DispatchQueueScreen() {
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-sm font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Waiting
           </p>
           <p className="text-3xl font-bold text-yellow-600 mt-1">{stats.waiting}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-sm font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Active
           </p>
           <p className="text-3xl font-bold text-blue-600 mt-1">{stats.active}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-sm font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Delayed
           </p>
           <p className="text-3xl font-bold text-red-600 mt-1">{stats.delayed}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-sm font-semibold uppercase text-muted-foreground">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">
             Completed
           </p>
           <p className="text-3xl font-bold text-green-600 mt-1">{stats.completed}</p>
@@ -173,14 +173,14 @@ export default function DispatchQueueScreen() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={cn(
-                    "px-2 py-1 rounded text-sm font-bold",
+                    "px-2 py-1 rounded text-xs font-bold",
                     PRIORITY_COLORS[dispatch.priority]
                   )}>
                     {dispatch.priority.toUpperCase()}
                   </span>
                   <span
                     className={cn(
-                      "px-2 py-1 rounded text-sm font-semibold flex items-center gap-1",
+                      "px-2 py-1 rounded text-xs font-semibold flex items-center gap-1",
                       STATUS_COLORS[dispatch.status]
                     )}
                   >
@@ -188,7 +188,7 @@ export default function DispatchQueueScreen() {
                     {dispatch.status.replace("_", " ").toUpperCase()}
                   </span>
                   {dispatch.ambulance && (
-                    <span className="px-2 py-1 rounded text-sm font-semibold bg-primary text-white">
+                    <span className="px-2 py-1 rounded text-xs font-semibold bg-primary text-white">
                       {dispatch.ambulance}
                     </span>
                   )}
@@ -197,7 +197,7 @@ export default function DispatchQueueScreen() {
                 <h3 className="text-base font-bold">{dispatch.incident_id}</h3>
                 <p className="text-sm text-muted-foreground mt-1">{dispatch.location}</p>
 
-                <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                   <span>Created: {dispatch.created_at}</span>
                   <span>
                     Waiting: {dispatch.wait_time_minutes}{" "}
@@ -232,4 +232,3 @@ export default function DispatchQueueScreen() {
     </div>
   );
 }
-

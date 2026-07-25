@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
   CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw, Users,
@@ -272,10 +272,10 @@ export function SettingsContent() {
     <div className="space-y-4 max-w-3xl">
       <Tabs defaultValue="preferences" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
-          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Preferences</TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Notifications</TabsTrigger>
-          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Security</TabsTrigger>
-          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Billing</TabsTrigger>
+          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
+          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
+          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
         </TabsList>
 
         {/* PREFERENCES */}
@@ -284,7 +284,7 @@ export function SettingsContent() {
             <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
               <div className="flex items-center gap-3">
                 <Settings2 className="h-4 w-4 text-primary" />
-                <h2 className="text-xl font-semibold text-foreground">Preferences</h2>
+                <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
               </div>
               <p className="text-muted-foreground text-sm">Manage your application preferences and integrations</p>
               {isPatientRole && (
@@ -385,7 +385,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <Bell className="h-4 w-4 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Notifications</h2>
+              <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
             </div>
             <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
             <div className="space-y-4">
@@ -407,7 +407,7 @@ export function SettingsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">Alert my Emergency Contacts if I miss medication</p>
-                  <p className="text-sm text-muted-foreground">Master switch â€” per-contact and per-medication opt-ins must also be on.</p>
+                  <p className="text-sm text-muted-foreground">Master switch — per-contact and per-medication opt-ins must also be on.</p>
                 </div>
                 <Switch
                   checked={(profile as any)?.notify_contacts_on_missed_meds ?? true}
@@ -485,7 +485,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <Shield className="h-4 w-4 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Security</h2>
+              <h2 className="text-sm font-semibold text-foreground">Security</h2>
             </div>
             <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
             <div className="space-y-4">
@@ -544,7 +544,7 @@ export function SettingsContent() {
                 >
                   Replay app tour
                 </Button>
-                <p className="text-sm text-muted-foreground mt-2">Re-run the first-time walkthrough on your next page load.</p>
+                <p className="text-xs text-muted-foreground mt-2">Re-run the first-time walkthrough on your next page load.</p>
               </div>
             </div>
           </div>
@@ -552,7 +552,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <Database className="h-4 w-4 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Data Management</h2>
+              <h2 className="text-sm font-semibold text-foreground">Data Management</h2>
             </div>
             <div className="space-y-4">
               <Button variant="outline">Export All Data</Button>
@@ -566,7 +566,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <CreditCard className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Subscription</h2>
+              <h2 className="text-lg font-semibold text-foreground">Subscription</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -592,7 +592,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Receipt className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Payment History</h2>
+              <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
             </div>
             {loadingPaymentHistory ? (
               <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
@@ -685,4 +685,3 @@ export function SettingsContent() {
     </div>
   );
 }
-

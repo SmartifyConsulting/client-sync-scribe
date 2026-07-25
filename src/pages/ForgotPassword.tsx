@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
@@ -131,12 +131,12 @@ export default function ForgotPassword() {
                     autoFocus
                     required
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {identifier.trim() === ""
                       ? "Enter the phone number or email you used at sign-up."
                       : isEmail
                       ? "We'll email you a reset link."
-                      : "We'll ask for a code from your authenticator app â€” or a backup code if you've lost your phone."}
+                      : "We'll ask for a code from your authenticator app — or a backup code if you've lost your phone."}
                   </p>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
@@ -167,7 +167,7 @@ export default function ForgotPassword() {
                 <button
                   type="button"
                   onClick={() => setStep("identify")}
-                  className="text-sm text-muted-foreground hover:text-foreground"
+                  className="text-xs text-muted-foreground hover:text-foreground"
                 >
                   Wrong email? Try again
                 </button>
@@ -227,7 +227,7 @@ export default function ForgotPassword() {
                       setCode("");
                       setCodeType(codeType === "totp" ? "backup" : "totp");
                     }}
-                    className="text-sm text-primary hover:underline"
+                    className="text-xs text-primary hover:underline"
                   >
                     {codeType === "totp"
                       ? "Lost your authenticator? Use a backup code instead."
@@ -303,7 +303,7 @@ export default function ForgotPassword() {
                 </div>
                 <h2 className="text-lg font-semibold text-foreground">Password updated</h2>
                 <p className="text-sm text-muted-foreground">
-                  Sign in with your new password â€” you'll be prompted for your authenticator code
+                  Sign in with your new password — you'll be prompted for your authenticator code
                   one more time.
                 </p>
                 <Button onClick={() => navigate("/auth")} className="w-full">
@@ -318,4 +318,3 @@ export default function ForgotPassword() {
     </div>
   );
 }
-

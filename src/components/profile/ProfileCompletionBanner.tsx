@@ -1,9 +1,9 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ProfileCompletionBannerProps {
-  /** Optional CTA â€” when provided, renders a "Complete my profile" button */
+  /** Optional CTA — when provided, renders a "Complete my profile" button */
   onComplete?: () => void;
   /** Override the default heading */
   title?: string;
@@ -54,7 +54,7 @@ export function ProfileCompletionBanner({
         <ShieldCheck className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{message}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">{message}</p>
           {onComplete && (
             <Button size="sm" onClick={onComplete} className="mt-1">
               Complete my profile
@@ -65,4 +65,3 @@ export function ProfileCompletionBanner({
     </div>
   );
 }
-

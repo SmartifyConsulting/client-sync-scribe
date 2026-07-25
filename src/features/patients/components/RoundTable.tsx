@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Users, Send, Loader2, Trash2, MessageCircle, Plus, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -151,7 +151,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold">Round Table â€” {patientName}</h3>
+            <h3 className="text-sm font-semibold">Round Table — {patientName}</h3>
           </div>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Circle className="h-2 w-2 fill-emerald-500 text-emerald-500" />
@@ -178,7 +178,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
       )}
 
       {topics.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+        <div className="rounded-lg border border-dashed p-6 text-center text-xs text-muted-foreground">
           No round table topics yet.
         </div>
       ) : (
@@ -191,24 +191,24 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
               >
                 <div className="flex flex-col items-start text-left">
                   <span className="text-sm font-semibold">{t.subject}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {t.doctor_name} â€¢ {format(new Date(t.created_at), "MMM d, yyyy 'at' h:mm a")}
+                  <span className="text-xs text-muted-foreground">
+                    {t.doctor_name} • {format(new Date(t.created_at), "MMM d, yyyy 'at' h:mm a")}
                   </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="space-y-3">
-                <p className="whitespace-pre-wrap text-sm text-foreground">{t.body}</p>
+                <p className="whitespace-pre-wrap text-xs text-foreground">{t.body}</p>
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                     <MessageCircle className="h-4 w-4" /> Live discussion
                   </div>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {(messagesByTopic[t.id] || []).map((m) => (
-                      <div key={m.id} className={`rounded-md p-2 text-sm ${m.doctor_id === currentUserId ? 'bg-primary/10 ml-6' : 'bg-muted mr-6'}`}>
+                      <div key={m.id} className={`rounded-md p-2 text-xs ${m.doctor_id === currentUserId ? 'bg-primary/10 ml-6' : 'bg-muted mr-6'}`}>
                         <div className="flex items-center gap-1 mb-0.5">
                           <span className="font-semibold text-sm">{m.doctor_name}</span>
                           {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
-                          <span className="text-sm text-muted-foreground ml-auto">
+                          <span className="text-xs text-muted-foreground ml-auto">
                             {format(new Date(m.created_at), "MMM d, h:mm a")}
                           </span>
                         </div>
@@ -222,14 +222,14 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                       value={chatInput[t.id] || ""}
                       onChange={(e) => setChatInput((c) => ({ ...c, [t.id]: e.target.value }))}
                       onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(t.id); }}
-                      className="text-sm h-8"
+                      className="text-xs h-8"
                     />
                     <Button size="icon" className="h-8 w-8" onClick={() => sendMessage(t.id)}>
                       <Send className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                   {t.doctor_id === currentUserId && (
-                    <Button size="sm" variant="ghost" className="text-destructive h-7 text-sm" onClick={() => deleteTopic(t.id)}>
+                    <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs" onClick={() => deleteTopic(t.id)}>
                       <Trash2 className="h-4 w-4 mr-1" /> Delete topic
                     </Button>
                   )}
@@ -242,4 +242,3 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
     </div>
   );
 }
-

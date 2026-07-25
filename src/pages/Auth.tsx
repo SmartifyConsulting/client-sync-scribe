@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
@@ -37,26 +37,26 @@ const DOCTOR_SPECIALTIES = [
 ];
 
 const COUNTRIES = [
-  { code: "+27", name: "South Africa", flag: "ðŸ‡¿ðŸ‡¦", lang: "English" },
-  { code: "+44", name: "United Kingdom", flag: "ðŸ‡¬ðŸ‡§", lang: "English" },
-  { code: "+1", name: "United States", flag: "ðŸ‡ºðŸ‡¸", lang: "English" },
-  { code: "+61", name: "Australia", flag: "ðŸ‡¦ðŸ‡º", lang: "English" },
-  { code: "+49", name: "Germany", flag: "ðŸ‡©ðŸ‡ª", lang: "German" },
-  { code: "+33", name: "France", flag: "ðŸ‡«ðŸ‡·", lang: "French" },
-  { code: "+351", name: "Portugal", flag: "ðŸ‡µðŸ‡¹", lang: "Portuguese" },
-  { code: "+34", name: "Spain", flag: "ðŸ‡ªðŸ‡¸", lang: "Spanish" },
-  { code: "+31", name: "Netherlands", flag: "ðŸ‡³ðŸ‡±", lang: "Dutch" },
-  { code: "+91", name: "India", flag: "ðŸ‡®ðŸ‡³", lang: "English" },
-  { code: "+86", name: "China", flag: "ðŸ‡¨ðŸ‡³", lang: "Chinese" },
-  { code: "+81", name: "Japan", flag: "ðŸ‡¯ðŸ‡µ", lang: "Japanese" },
-  { code: "+971", name: "UAE", flag: "ðŸ‡¦ðŸ‡ª", lang: "Arabic" },
-  { code: "+966", name: "Saudi Arabia", flag: "ðŸ‡¸ðŸ‡¦", lang: "Arabic" },
-  { code: "+254", name: "Kenya", flag: "ðŸ‡°ðŸ‡ª", lang: "English" },
-  { code: "+234", name: "Nigeria", flag: "ðŸ‡³ðŸ‡¬", lang: "English" },
-  { code: "+263", name: "Zimbabwe", flag: "ðŸ‡¿ðŸ‡¼", lang: "English" },
-  { code: "+267", name: "Botswana", flag: "ðŸ‡§ðŸ‡¼", lang: "English" },
+  { code: "+27", name: "South Africa", flag: "🇿🇦", lang: "English" },
+  { code: "+44", name: "United Kingdom", flag: "🇬🇧", lang: "English" },
+  { code: "+1", name: "United States", flag: "🇺🇸", lang: "English" },
+  { code: "+61", name: "Australia", flag: "🇦🇺", lang: "English" },
+  { code: "+49", name: "Germany", flag: "🇩🇪", lang: "German" },
+  { code: "+33", name: "France", flag: "🇫🇷", lang: "French" },
+  { code: "+351", name: "Portugal", flag: "🇵🇹", lang: "Portuguese" },
+  { code: "+34", name: "Spain", flag: "🇪🇸", lang: "Spanish" },
+  { code: "+31", name: "Netherlands", flag: "🇳🇱", lang: "Dutch" },
+  { code: "+91", name: "India", flag: "🇮🇳", lang: "English" },
+  { code: "+86", name: "China", flag: "🇨🇳", lang: "Chinese" },
+  { code: "+81", name: "Japan", flag: "🇯🇵", lang: "Japanese" },
+  { code: "+971", name: "UAE", flag: "🇦🇪", lang: "Arabic" },
+  { code: "+966", name: "Saudi Arabia", flag: "🇸🇦", lang: "Arabic" },
+  { code: "+254", name: "Kenya", flag: "🇰🇪", lang: "English" },
+  { code: "+234", name: "Nigeria", flag: "🇳🇬", lang: "English" },
+  { code: "+263", name: "Zimbabwe", flag: "🇿🇼", lang: "English" },
+  { code: "+267", name: "Botswana", flag: "🇧🇼", lang: "English" },
   
-  { code: "+258", name: "Mozambique", flag: "ðŸ‡²ðŸ‡¿", lang: "Portuguese" },
+  { code: "+258", name: "Mozambique", flag: "🇲🇿", lang: "Portuguese" },
 ];
 
 interface PartnerInput {
@@ -88,7 +88,7 @@ export default function Auth() {
   const { toast } = useToast();
   const { user, loading: authLoading, signIn, signUp, signInWithOtp, verifyOtp } = useAuth();
 
-  // If someone is already logged in, never show the sign-in/sign-up forms â€”
+  // If someone is already logged in, never show the sign-in/sign-up forms —
   // send them straight to their dashboard so they can't accidentally create
   // a second account. Anyone wanting a different phone/email uses Settings.
   useEffect(() => {
@@ -464,7 +464,7 @@ export default function Auth() {
             if (rewardData) {
               await supabase.from("notifications").insert({
                 user_id: userId,
-                title: `ðŸ­ Welcome! You earned ${signupLollipops} lollipop${signupLollipops > 1 ? "s" : ""}!`,
+                title: `🍭 Welcome! You earned ${signupLollipops} lollipop${signupLollipops > 1 ? "s" : ""}!`,
                 description: `Congratulations on signing up! You received ${signupLollipops} lollipop${signupLollipops > 1 ? "s" : ""} as a welcome bonus.`,
                 type: "reward",
                 reference_id: rewardData.id,
@@ -483,12 +483,12 @@ export default function Auth() {
         }
       }
 
-      // MVP: no trial/subscription row created at signup â€” users get full access without countdowns.
+      // MVP: no trial/subscription row created at signup — users get full access without countdowns.
 
       clearDraft();
       toast({
         title: "Account created!",
-        description: "You're all set â€” let's continue.",
+        description: "You're all set — let's continue.",
       });
       await routeAfterLogin(userId);
     } catch (error: any) {
@@ -550,7 +550,7 @@ export default function Auth() {
     return `${countryCode}${digits}`.replace(/\s+/g, "");
   };
 
-  // SMS is not used anywhere in this app â€” phone-as-identifier is mapped to
+  // SMS is not used anywhere in this app — phone-as-identifier is mapped to
   // a deterministic synthetic email so the Supabase Auth server never tries
   // to dispatch an SMS. Authenticator-app TOTP (handled by MfaGate) is the
   // single second factor for every user.
@@ -735,7 +735,7 @@ export default function Auth() {
                   <Button type="button" variant="outline" size="sm" onClick={() => avatarInputRef.current?.click()}>
                     {avatarPreview ? "Change photo" : "Upload photo"}
                   </Button>
-                  <p className="text-sm text-muted-foreground">Shown on your profile and to patients.</p>
+                  <p className="text-xs text-muted-foreground">Shown on your profile and to patients.</p>
                 </div>
               </div>
             </div>
@@ -767,11 +767,11 @@ export default function Auth() {
               <Label>Sign up with</Label>
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
-                  className={`rounded-lg border-2 p-2 text-sm font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
                   <Mail className="h-4 w-4 mx-auto mb-1" /> Email
                 </button>
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("phone")} disabled={accountCreated}
-                  className={`rounded-lg border-2 p-2 text-sm font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
                   <Phone className="h-4 w-4 mx-auto mb-1" /> Phone Number
                 </button>
               </div>
@@ -791,14 +791,14 @@ export default function Auth() {
                   <CountrySelector />
                   <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" required disabled={accountCreated} />
                 </div>
-                {mobileNumber && <p className="text-sm text-muted-foreground">Account ID: {normalizePhone(mobileNumber)}</p>}
+                {mobileNumber && <p className="text-xs text-muted-foreground">Account ID: {normalizePhone(mobileNumber)}</p>}
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -810,7 +810,7 @@ export default function Auth() {
                 <CountrySelector />
                 <Input placeholder="82 123 4567" value={mobileNumber} onChange={(e) => setMobileNumber(e.target.value)} className="flex-1" />
               </div>
-              <p className="text-sm text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
+              <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
           </div>
         );
@@ -854,7 +854,7 @@ export default function Auth() {
                   <SelectItem value="pharmacy">Pharmacy</SelectItem>
                 </SelectContent>
               </Select>
-              {inviteToken && <p className="text-sm text-muted-foreground mt-2">You're registering via a doctor's invitation</p>}
+              {inviteToken && <p className="text-xs text-muted-foreground mt-2">You're registering via a doctor's invitation</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -873,11 +873,11 @@ export default function Auth() {
               <Label>Sign up with</Label>
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("email")} disabled={accountCreated}
-                  className={`rounded-lg border-2 p-2 text-sm font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "email" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
                   <Mail className="h-4 w-4 mx-auto mb-1" /> Email
                 </button>
                 <button type="button" onClick={() => !accountCreated && setSignupMethod("phone")} disabled={accountCreated}
-                  className={`rounded-lg border-2 p-2 text-sm font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
+                  className={`rounded-lg border-2 p-2 text-xs font-medium ${signupMethod === "phone" ? "border-primary bg-primary/10" : "border-muted bg-popover hover:bg-accent"}`}>
                   <Phone className="h-4 w-4 mx-auto mb-1" /> Phone Number
                 </button>
               </div>
@@ -897,14 +897,14 @@ export default function Auth() {
                   <CountrySelector />
                   <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" required disabled={accountCreated} />
                 </div>
-                {phone && <p className="text-sm text-muted-foreground">Account ID: {normalizePhone(phone)}</p>}
+                {phone && <p className="text-xs text-muted-foreground">Account ID: {normalizePhone(phone)}</p>}
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => { setPassword(e.target.value); if (breachedPassword) setBreachedPassword(false); }} className={cn("pl-10 pr-10", breachedPassword && "border-destructive focus-visible:ring-destructive")} required minLength={6} disabled={accountCreated} aria-invalid={breachedPassword} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -917,7 +917,7 @@ export default function Auth() {
                 <CountrySelector />
                 <Input placeholder="82 123 4567" value={phone} onChange={(e) => setPhone(e.target.value)} className="flex-1" />
               </div>
-              <p className="text-sm text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
+              <p className="text-xs text-muted-foreground">Language will be set to: {selectedCountry.lang}</p>
             </div>
           </div>
         );
@@ -933,7 +933,7 @@ export default function Auth() {
 
   const isLastStep = currentStep === totalSteps - 1;
 
-  // Already signed in â€” never show sign-in/sign-up while a session exists.
+  // Already signed in — never show sign-in/sign-up while a session exists.
   if (authLoading || user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -1043,7 +1043,7 @@ export default function Auth() {
                         </div>
                       </div>
                       {loginPhone.trim() && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           You'll sign in as {normalizePhone(`${countryCode}${loginPhone}`)}
                         </p>
                       )}
@@ -1053,11 +1053,11 @@ export default function Auth() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password">Password</Label>
-                      <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-sm text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
+                      <button type="button" tabIndex={-1} onClick={() => navigate("/forgot-password")} className="text-xs text-muted-foreground hover:text-primary hover:underline">Forgot your password?</button>
                     </div>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
+                      <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={6} />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -1106,7 +1106,7 @@ export default function Auth() {
                             </InputOTPGroup>
                           </InputOTP>
                         </div>
-                        <p className="text-sm text-muted-foreground text-center">
+                        <p className="text-xs text-muted-foreground text-center">
                           Or click the magic link we emailed you.
                         </p>
                       </div>
@@ -1117,7 +1117,7 @@ export default function Auth() {
                         type="button"
                         onClick={handleSendOtp}
                         disabled={loading || otpCooldown > 0}
-                        className="block w-full text-sm text-muted-foreground hover:text-primary hover:underline disabled:opacity-50"
+                        className="block w-full text-xs text-muted-foreground hover:text-primary hover:underline disabled:opacity-50"
                       >
                         {otpCooldown > 0 ? `Resend code in ${otpCooldown}s` : "Resend code"}
                       </button>
@@ -1129,7 +1129,7 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => { setUseOtp(!useOtp); setOtpSent(false); setOtpCode(""); setPassword(""); }}
-                  className="block w-full text-center text-sm text-muted-foreground hover:text-primary hover:underline"
+                  className="block w-full text-center text-xs text-muted-foreground hover:text-primary hover:underline"
                 >
                   {useOtp ? "Sign in with password instead" : "Prefer a one-time code? Email it to me"}
                 </button>
@@ -1137,13 +1137,13 @@ export default function Auth() {
                 <button
                   type="button"
                   onClick={() => navigate("/provider-signup")}
-                  className="block w-full text-center text-sm font-medium text-primary hover:underline pt-2"
+                  className="block w-full text-center text-xs font-medium text-primary hover:underline pt-2"
                 >
-                  Registering a hospital, emergency service or insurance company? Onboard your organisation â†’
+                  Registering a hospital, emergency service or insurance company? Onboard your organisation →
                 </button>
               </div>
             </div>
-            {/* Trust band â€” moved to bottom of sign-in box */}
+            {/* Trust band — moved to bottom of sign-in box */}
             <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
               <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
@@ -1198,7 +1198,7 @@ export default function Auth() {
           </div>
           <div className="text-center mb-3">
             <div className="mt-1"><Progress value={progress} className="h-1.5" /></div>
-            <p className="text-sm text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
+            <p className="text-xs text-muted-foreground mt-1">Step {currentStep + 1} of {totalSteps}: {steps[currentStep]}</p>
           </div>
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             {userRole === "doctor" ? renderDoctorStep() : renderPatientStep()}
@@ -1221,7 +1221,7 @@ export default function Auth() {
               )}
             </div>
           </div>
-          {/* Trust band â€” bottom of signup box */}
+          {/* Trust band — bottom of signup box */}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
             <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
               <Lock className="h-3.5 w-3.5 text-primary" /> Your data is encrypted
@@ -1239,5 +1239,4 @@ export default function Auth() {
     </div>
   );
 }
-
 

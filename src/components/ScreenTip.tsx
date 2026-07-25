@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Lightbulb, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -46,9 +46,9 @@ export function ScreenTip({ title, body, onDismiss, autoDismissMs = 8000 }: Prop
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
-          <p className="text-sm text-muted-foreground mt-1 leading-snug">{body}</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-snug">{body}</p>
           <div className="mt-2 flex justify-end">
-            <Button size="sm" className="h-7 text-sm px-3" onClick={onDismiss}>
+            <Button size="sm" className="h-7 text-xs px-3" onClick={onDismiss}>
               Got it
             </Button>
           </div>
@@ -57,4 +57,3 @@ export function ScreenTip({ title, body, onDismiss, autoDismissMs = 8000 }: Prop
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Quote, Star } from "lucide-react";
 
 const QUOTES = [
@@ -6,19 +6,19 @@ const QUOTES = [
     quote:
       "The AI summaries save me at least an hour every day. I can focus on the patient instead of typing notes.",
     name: "Dr. Naledi M.",
-    role: "General Practitioner Â· Johannesburg",
+    role: "General Practitioner · Johannesburg",
   },
   {
     quote:
       "I love that I finally have one place where every doctor's notes, my prescriptions and my appointments live together.",
     name: "Thandi K.",
-    role: "Patient Â· Cape Town",
+    role: "Patient · Cape Town",
   },
   {
     quote:
       "Round Table is the first tool that actually lets me coordinate with the cardiologist and physio in real time.",
     name: "Dr. Sipho D.",
-    role: "Internal Medicine Â· Durban",
+    role: "Internal Medicine · Durban",
   },
 ];
 
@@ -43,7 +43,7 @@ export function Testimonials() {
             {[...Array(5)].map((_, i) => (
               <Star key={i} className="h-4 w-4 fill-primary text-primary" />
             ))}
-            <span className="ml-2 text-sm text-muted-foreground">4.9 average rating</span>
+            <span className="ml-2 text-xs text-muted-foreground">4.9 average rating</span>
           </div>
         </motion.div>
 
@@ -72,4 +72,3 @@ export function Testimonials() {
     </section>
   );
 }
-

@@ -5,8 +5,7 @@
       "name": "Holarc Health Dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 2084,
-      "autoPort": true
+      "port": 2084
     }
   ]
 }

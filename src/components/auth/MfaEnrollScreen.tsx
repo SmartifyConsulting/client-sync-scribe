@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Shield, Loader2, Copy, AlertTriangle, LogOut, Smartphone, Download, Apple, CheckCircle2, Check, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -120,7 +120,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
       toast({
         title: "That code didn't work",
         description:
-          "Codes refresh every 30 seconds â€” open your authenticator app and try the newest 6-digit code.",
+          "Codes refresh every 30 seconds — open your authenticator app and try the newest 6-digit code.",
         variant: "destructive",
       });
     } finally {
@@ -146,11 +146,11 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
               <Shield className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
             </div>
             <p className="text-sm uppercase tracking-wider text-primary font-semibold mb-1">
-              Account security Â· One-time setup
+              Account security · One-time setup
             </p>
             <h1 className="text-lg sm:text-xl font-semibold text-foreground">Set up Two-Factor Authentication</h1>
-            <p className="text-sm sm:text-sm text-muted-foreground mt-2">
-              This account holds sensitive health information. 2FA is required for every user â€” please enrol an
+            <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+              This account holds sensitive health information. 2FA is required for every user — please enrol an
               authenticator app to continue.
             </p>
           </div>
@@ -159,7 +159,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-10 gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Setting up 2FAâ€¦</p>
+                <p className="text-xs text-muted-foreground">Setting up 2FA…</p>
               </div>
             ) : (
               <>
@@ -176,7 +176,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                         <CheckCircle2 className="h-10 w-10 text-primary" />
                       </div>
                       <p className="text-base font-semibold text-foreground">2FA enabled</p>
-                      <p className="text-sm text-muted-foreground mt-1">Taking you inâ€¦</p>
+                      <p className="text-xs text-muted-foreground mt-1">Taking you in…</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -194,7 +194,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                             className="w-[min(80vw,280px)] h-[min(80vw,280px)] sm:w-44 sm:h-44"
                           />
                         </div>
-                        <p className="text-sm text-muted-foreground text-center">
+                        <p className="text-xs text-muted-foreground text-center">
                           Scan this with Google Authenticator, Authy, Microsoft Authenticator, or any TOTP app.
                         </p>
                       </div>
@@ -202,10 +202,10 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
 
                     {secret && (
                       <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground">Setup key (for manual entry)</Label>
+                        <Label className="text-xs text-muted-foreground">Setup key (for manual entry)</Label>
                         <div className="flex items-center gap-2">
                           <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
-                            {secretVisible ? secret : "â€¢".repeat(secret.length)}
+                            {secretVisible ? secret : "•".repeat(secret.length)}
                           </code>
                           <button
                             type="button"
@@ -235,7 +235,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                         </Button>
                         <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
                           <Smartphone className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
-                          <p className="text-sm text-foreground">
+                          <p className="text-xs text-foreground">
                             On a mobile phone? Copy this key and paste it into Google Authenticator under{" "}
                             <strong>"Enter a setup key"</strong>.
                           </p>
@@ -245,7 +245,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
 
                     <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/40 rounded-lg">
                       <AlertTriangle className="h-4 w-4 text-yellow-700 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-foreground font-medium">
+                      <p className="text-xs text-foreground font-medium">
                         Save this key somewhere safe. You'll need it if you lose access to your authenticator app.
                       </p>
                     </div>
@@ -272,7 +272,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                         {verifying ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Verifying codeâ€¦
+                            Verifying code…
                           </>
                         ) : (
                           "Verify & enable 2FA"
@@ -288,7 +288,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
               <>
                 <a
                   href="mailto:support@holarchealth.com"
-                  className="block text-center text-sm text-muted-foreground hover:text-primary py-1"
+                  className="block text-center text-xs text-muted-foreground hover:text-primary py-1"
                 >
                   Need help? Contact support
                 </a>
@@ -298,7 +298,7 @@ export function MfaEnrollScreen({ onEnrolled }: Props) {
                     await supabase.auth.signOut();
                     window.location.href = "/auth";
                   }}
-                  className="flex items-center justify-center gap-1.5 w-full text-sm text-muted-foreground hover:text-destructive py-2"
+                  className="flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground hover:text-destructive py-2"
                 >
                   <LogOut className="h-3.5 w-3.5" /> Sign out
                 </button>
@@ -325,10 +325,10 @@ function AuthenticatorDownload() {
       href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Download className="h-4 w-4 text-primary" />
-      <span>Google Authenticator â€” Android</span>
+      <span>Google Authenticator — Android</span>
     </a>
   );
   const iosBtn = (
@@ -336,10 +336,10 @@ function AuthenticatorDownload() {
       href="https://apps.apple.com/app/google-authenticator/id388497605"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Apple className="h-4 w-4 text-primary" />
-      <span>Google Authenticator â€” iPhone</span>
+      <span>Google Authenticator — iPhone</span>
     </a>
   );
   const authyBtn = (
@@ -347,7 +347,7 @@ function AuthenticatorDownload() {
       href="https://authy.com/download/"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Download className="h-4 w-4 text-primary" />
       <span>Authy</span>
@@ -358,7 +358,7 @@ function AuthenticatorDownload() {
       href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-sm font-medium text-foreground hover:bg-muted transition-colors min-h-12"
+      className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-xs font-medium text-foreground hover:bg-muted transition-colors min-h-12"
     >
       <Shield className="h-4 w-4 text-primary" />
       <span>Microsoft Authenticator</span>
@@ -369,7 +369,7 @@ function AuthenticatorDownload() {
 
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
-      <p className="text-sm font-semibold text-foreground">Don't have an authenticator app yet?</p>
+      <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
       <p className="text-sm text-muted-foreground">
         {verb} below to install one of these authenticator apps, then come back here to scan the code.
       </p>
@@ -391,4 +391,3 @@ function AuthenticatorDownload() {
     </div>
   );
 }
-

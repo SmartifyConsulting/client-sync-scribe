@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Ambulance, Loader2, AlertTriangle, Clock } from "lucide-react";
@@ -114,8 +114,8 @@ export function AvailableResponders({
   if (isChangeMode && remainingSec <= 0) {
     return (
       <div className="mb-3 rounded-2xl border bg-card p-3 shadow-[var(--shadow-card)]">
-        <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">ER Provider locked in</p>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">ER Provider locked in</p>
+        <p className="mt-1 text-xs text-muted-foreground">
           The change window has closed. ER Dispatch can still reassign your case if needed.
         </p>
       </div>
@@ -125,8 +125,8 @@ export function AvailableResponders({
   if (!offers.length) {
     if (isChangeMode) {
       return (
-        <div className="mb-3 rounded-2xl border-2 border-amber-500/70 bg-amber-50/70 p-3 text-sm text-amber-900 dark:bg-amber-500/10 dark:text-amber-100">
-          <p className="font-bold uppercase tracking-wider">Change ER Provider â€” {fmt(remainingSec)} left</p>
+        <div className="mb-3 rounded-2xl border-2 border-amber-500/70 bg-amber-50/70 p-3 text-xs text-amber-900 dark:bg-amber-500/10 dark:text-amber-100">
+          <p className="font-bold uppercase tracking-wider">Change ER Provider — {fmt(remainingSec)} left</p>
           <p className="mt-1">No other ER Providers are in range right now. Your current responder will continue.</p>
         </div>
       );
@@ -134,16 +134,16 @@ export function AvailableResponders({
     return (
       <div className="mb-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-bold uppercase tracking-wider text-primary">
+          <p className="text-xs font-bold uppercase tracking-wider text-primary">
             Available ER providers (0)
           </p>
-          <p className="flex items-center gap-1 text-sm font-mono tabular-nums text-muted-foreground">
+          <p className="flex items-center gap-1 text-xs font-mono tabular-nums text-muted-foreground">
             <Clock className="h-3 w-3" /> Auto-assign in {fmt(remainingSec)}
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-dashed p-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 rounded-xl border border-dashed p-3 text-xs text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          <span>Searching for nearby ER Providersâ€¦</span>
+          <span>Searching for nearby ER Providers…</span>
         </div>
         {canExtend && (
           <div className="mt-2 flex justify-end">
@@ -183,7 +183,7 @@ export function AvailableResponders({
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" />
           <div className="min-w-0">
             <p className="text-sm font-bold text-amber-900 dark:text-amber-100">
-              An ER Provider was auto-assigned â€” you have {fmt(remainingSec)} to switch
+              An ER Provider was auto-assigned — you have {fmt(remainingSec)} to switch
             </p>
             <p className="text-sm text-amber-900/80 dark:text-amber-100/80">
               Tap another provider below to switch, or do nothing to keep the current one.
@@ -192,10 +192,10 @@ export function AvailableResponders({
         </div>
       ) : (
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-bold uppercase tracking-wider text-primary">
+          <p className="text-xs font-bold uppercase tracking-wider text-primary">
             Available ER providers ({offers.length})
           </p>
-          <p className="flex items-center gap-1 text-sm font-mono tabular-nums text-muted-foreground">
+          <p className="flex items-center gap-1 text-xs font-mono tabular-nums text-muted-foreground">
             <Clock className="h-3 w-3" /> Auto-assign in {fmt(remainingSec)}
           </p>
         </div>
@@ -204,7 +204,7 @@ export function AvailableResponders({
       {/* Countdown + extend control */}
       <div className="mb-2 flex items-center justify-between gap-2">
         {isChangeMode ? (
-          <p className="flex items-center gap-1 text-sm font-mono tabular-nums text-amber-900 dark:text-amber-100">
+          <p className="flex items-center gap-1 text-xs font-mono tabular-nums text-amber-900 dark:text-amber-100">
             <Clock className="h-3 w-3" /> Change window {fmt(remainingSec)}
           </p>
         ) : <span />}
@@ -237,14 +237,14 @@ export function AvailableResponders({
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-semibold">{o.name}</p>
                   {isCurrent && isChangeMode && (
-                    <span className="rounded-full bg-primary px-1.5 py-0.5 text-sm font-bold uppercase tracking-wider text-primary-foreground">
+                    <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider text-primary-foreground">
                       Current
                     </span>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {o.ownership ? <span className="capitalize">{o.ownership}</span> : null}
-                  {o.distance_km != null && <> Â· {Number(o.distance_km).toFixed(1)} km</>}
+                  {o.distance_km != null && <> · {Number(o.distance_km).toFixed(1)} km</>}
                 </p>
               </div>
               <Button
@@ -269,4 +269,3 @@ export function AvailableResponders({
     </div>
   );
 }
-

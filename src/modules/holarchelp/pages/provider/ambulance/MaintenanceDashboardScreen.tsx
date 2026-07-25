@@ -1,4 +1,4 @@
-﻿import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, Clock, Wrench } from "lucide-react";
 
 interface MaintenanceItem {
@@ -69,7 +69,7 @@ export default function MaintenanceDashboardScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Fleet Care</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Care</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Maintenance Dashboard</h1>
         <p className="text-sm text-muted-foreground mt-2">Track service schedules and vehicle maintenance</p>
       </header>
@@ -77,19 +77,19 @@ export default function MaintenanceDashboardScreen() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Pending</p>
+          <p className="text-xs text-muted-foreground">Pending</p>
           <p className="text-2xl font-bold mt-2 text-warning">{stats.pending}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">In Progress</p>
+          <p className="text-xs text-muted-foreground">In Progress</p>
           <p className="text-2xl font-bold mt-2 text-primary">{stats.inProgress}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Overdue</p>
+          <p className="text-xs text-muted-foreground">Overdue</p>
           <p className="text-2xl font-bold mt-2 text-destructive">{stats.overdue}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Total Cost</p>
+          <p className="text-xs text-muted-foreground">Total Cost</p>
           <p className="text-2xl font-bold mt-2">${stats.totalCost.toLocaleString()}</p>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function MaintenanceDashboardScreen() {
                 </div>
               </div>
               <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   item.status === "pending"
                     ? "bg-warning/10 text-warning"
                     : item.status === "in-progress"
@@ -123,11 +123,11 @@ export default function MaintenanceDashboardScreen() {
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-3 border-t">
               <div>
-                <p className="text-sm text-muted-foreground">Due Date</p>
+                <p className="text-xs text-muted-foreground">Due Date</p>
                 <p className="font-semibold text-sm mt-1">{item.dueDate}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Estimated Cost</p>
+                <p className="text-xs text-muted-foreground">Estimated Cost</p>
                 <p className="font-semibold text-sm mt-1">${item.cost}</p>
               </div>
               <div className="text-right">
@@ -148,4 +148,3 @@ export default function MaintenanceDashboardScreen() {
     </div>
   );
 }
-

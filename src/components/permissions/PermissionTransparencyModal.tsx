@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   CheckCircle,
@@ -101,7 +101,7 @@ export function PermissionTransparencyModal({
   const content = (
     <div className="space-y-4">
       {isDoctorMode && (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {t("dialogs.otherDoctorsWillSee")}
         </p>
       )}
@@ -112,7 +112,7 @@ export function PermissionTransparencyModal({
             <CheckCircle className="h-4 w-4 text-green-600" />
             {sharedHeading}
           </h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-foreground">
+          <ul className="list-disc list-inside space-y-1 text-xs text-foreground">
             {sharedList.map((item) => (
               <li key={item.label}>
                 {item.label}
@@ -134,7 +134,7 @@ export function PermissionTransparencyModal({
             <XCircle className="h-4 w-4 text-destructive" />
             {privateHeading}
           </h4>
-          <ul className="list-disc list-inside space-y-1 text-sm text-foreground">
+          <ul className="list-disc list-inside space-y-1 text-xs text-foreground">
             {privateList.map((item) => (
               <li key={item.label}>{item.label}</li>
             ))}
@@ -149,7 +149,7 @@ export function PermissionTransparencyModal({
             <Heart className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-medium text-foreground">{t("dialogs.holisticHealthSharing")}</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 {t("dialogs.holisticHealthDescription")}
               </p>
             </div>
@@ -161,7 +161,7 @@ export function PermissionTransparencyModal({
       {isPatientFacing && !isDoctorMode && showHolisticWarning && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertDescription className="text-sm">
+          <AlertDescription className="text-xs">
             {t("dialogs.limitingAccessWarning")}
           </AlertDescription>
         </Alert>
@@ -198,4 +198,3 @@ export function PermissionTransparencyModal({
 
 // Backward-compatible aliases for older imports.
 export { getSharedItems as sharedItems, getPrivateItems as privateItems };
-

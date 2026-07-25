@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -337,7 +337,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         {section.imageUrl && <img src={section.imageUrl} alt="" className="max-h-10 inline-block mb-1" />}
         {section.text && (
           <div
-            className="whitespace-pre-wrap text-sm"
+            className="whitespace-pre-wrap text-xs"
             dangerouslySetInnerHTML={{ __html: renderFormattedContent(section.text) }}
           />
         )}
@@ -352,7 +352,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t("nav.myDocuments", "Documents")}</h1>
-            <p className="mt-1 text-muted-foreground text-base">Manage header/footer layouts and content templates separately</p>
+            <p className="mt-1 text-muted-foreground text-xs">Manage header/footer layouts and content templates separately</p>
           </div>
         </div>
       )}
@@ -424,7 +424,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               {filteredHFTemplates.map((template) => (
                 <div
                   key={template.id}
-                  className="group rounded-xl border border-primary/40 bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
+                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
@@ -531,7 +531,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               {filteredTemplates.map((template, index) => (
                 <div
                   key={template.id}
-                  className="group rounded-xl border border-primary/40 bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
+                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -616,15 +616,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">{t("documents.patientDocuments")}</h2>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button
-              className="gap-2 bg-primary hover:bg-primary/90"
-              onClick={() => setActiveTab("content")}
-              title="Create a new document from a template"
-            >
-              <Plus className="h-4 w-4" />
-              Create Document
-            </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative max-w-xs">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -652,12 +644,12 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="rounded-xl border border-primary/40 bg-card shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
             <div className="max-h-[400px] overflow-y-auto">
               {filteredDocuments.length > 0 ? (
                 groupedDocuments.map(([groupName, docsInGroup]) => (
                   <div key={groupName}>
-                    <div className="px-4 py-2 bg-muted/50 text-sm font-semibold text-primary sticky top-0">
+                    <div className="px-4 py-2 bg-muted/50 text-xs font-semibold text-primary sticky top-0">
                       {groupName} <span className="text-muted-foreground font-normal">({docsInGroup.length})</span>
                     </div>
                     <div className="divide-y divide-border">
@@ -737,7 +729,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-sm text-muted-foreground">
+                <div className="p-8 text-center text-xs text-muted-foreground">
                   {documents.length === 0
                     ? "No documents yet. Create your first document using a template above."
                     : "No documents found matching your search."}
@@ -927,7 +919,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
               {/* Show which header/footer is linked */}
               {previewTemplate.header_footer_template_id && (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Using header/footer:{" "}
                   <span className="font-medium">
                     {headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id)?.name ||
@@ -1277,4 +1269,3 @@ function DocumentPreviewBody({
     </>
   );
 }
-

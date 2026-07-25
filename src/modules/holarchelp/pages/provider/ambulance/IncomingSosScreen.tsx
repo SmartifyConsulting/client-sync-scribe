@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Siren, AlertTriangle, Clock, PlayCircle, Pause } from "lucide-react";
@@ -72,14 +72,14 @@ export default function IncomingSosScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("incomingSos.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("incomingSos.subtitle")}</p>
+        <p className="text-xs text-muted-foreground">{t("incomingSos.subtitle")}</p>
       </header>
 
       {dispatcherOnDuty && !isOffShift && (
-        <div className="rounded-2xl border border-primary/40 bg-primary/5 p-3 text-sm text-foreground">
-          <span className="font-bold text-primary">Dispatcher on duty.</span> A controller is assigning units â€”
+        <div className="rounded-2xl border border-primary/40 bg-primary/5 p-3 text-xs text-foreground">
+          <span className="font-bold text-primary">Dispatcher on duty.</span> A controller is assigning units —
           you will be paged on your phone when you're picked. You can still self-accept below if it's urgent.
         </div>
       )}
@@ -88,7 +88,7 @@ export default function IncomingSosScreen() {
         <div className="rounded-2xl border border-dashed border-primary/40 bg-primary/5 p-8 text-center">
           <PlayCircle className="mx-auto mb-2 h-7 w-7 text-primary" />
           <p className="text-base font-bold">{t("incomingSos.offShiftTitle")}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t("incomingSos.offShiftBody")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("incomingSos.offShiftBody")}</p>
           <Button className="mt-3" onClick={() => setStartOpen(true)}>{t("provider.startShift")}</Button>
           <StartShiftDialog providerId={providerId} open={startOpen} onOpenChange={setStartOpen} />
         </div>
@@ -98,7 +98,7 @@ export default function IncomingSosScreen() {
         <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-center">
           <Pause className="mx-auto mb-2 h-6 w-6 text-destructive" />
           <p className="text-sm font-bold">{t("incomingSos.activeIncidentTitle")}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t("incomingSos.activeIncidentBody")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("incomingSos.activeIncidentBody")}</p>
         </div>
       )}
 
@@ -115,8 +115,8 @@ export default function IncomingSosScreen() {
             <div key={r.id} className={`rounded-2xl border-2 p-4 shadow-sm ${sevBig(r.severity)}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-sos">
-                    <Siren className="h-3.5 w-3.5" /> {(r.severity ?? "high").toUpperCase()} Â· {r.incident_type ?? t("ambulance.emergency")}
+                  <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-sos">
+                    <Siren className="h-3.5 w-3.5" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? t("ambulance.emergency")}
                   </p>
                   <p className="mt-1 text-lg font-extrabold">{r.incident_number ?? `INC-${r.id.slice(0,8)}`}</p>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
@@ -124,18 +124,18 @@ export default function IncomingSosScreen() {
                   </p>
                 </div>
                 {(r.conscious === false || r.breathing === false) && (
-                  <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-1 text-sm font-bold uppercase text-destructive">
+                  <span className="shrink-0 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-bold uppercase text-destructive">
                     <AlertTriangle className="mr-1 inline h-3 w-3" /> {t("incomingSos.lifeThreat")}
                   </span>
                 )}
               </div>
 
-              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+              <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                 <Stat label={t("incomingSos.conscious")} value={r.conscious === false ? t("common.no") : t("common.yes")} tone={r.conscious === false ? "destructive" : undefined} />
                 <Stat label={t("incomingSos.breathing")} value={r.breathing === false ? t("common.no") : t("common.yes")} tone={r.breathing === false ? "destructive" : undefined} />
               </div>
 
-              {r.notes && <p className="mt-2 rounded-xl border bg-background/60 p-2 text-sm italic text-muted-foreground line-clamp-3">"{r.notes}"</p>}
+              {r.notes && <p className="mt-2 rounded-xl border bg-background/60 p-2 text-xs italic text-muted-foreground line-clamp-3">"{r.notes}"</p>}
 
               <Button size="lg" className="mt-3 h-12 w-full text-base font-extrabold" onClick={() => setPickFor(r.id)}>
                 Accept &amp; Roll
@@ -158,8 +158,7 @@ export default function IncomingSosScreen() {
 
 const Stat = ({ label, value, tone }: { label: string; value: string; tone?: "destructive" }) => (
   <div className={`rounded-xl border bg-background/60 px-2 py-1 ${tone === "destructive" ? "border-destructive/40 text-destructive" : ""}`}>
-    <p className="text-sm uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className="text-sm font-bold">{value}</p>
   </div>
 );
-

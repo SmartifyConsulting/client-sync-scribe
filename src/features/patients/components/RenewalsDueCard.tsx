@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,7 @@ export function RenewalsDueCard({ patientId, patientUserId }: Props) {
           Renewals due
         </CardTitle>
         <CardDescription className="text-sm">
-          Prescriptions reaching the end of their cycle. Tap to request a renewal â€” add a note if you'd like something adjusted.
+          Prescriptions reaching the end of their cycle. Tap to request a renewal — add a note if you'd like something adjusted.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -35,26 +35,26 @@ export function RenewalsDueCard({ patientId, patientUserId }: Props) {
             <div key={r.prescription_id} className="flex items-start justify-between gap-3 p-2.5 rounded-lg border border-border">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-foreground truncate">{r.medication}</p>
+                  <p className="text-xs font-semibold text-foreground truncate">{r.medication}</p>
                   {r.is_expired ? (
-                    <Badge variant="destructive" className="text-sm gap-1"><AlertTriangle className="h-3 w-3" /> Expired</Badge>
+                    <Badge variant="destructive" className="text-xs gap-1"><AlertTriangle className="h-3 w-3" /> Expired</Badge>
                   ) : r.days_until_expiry !== null ? (
-                    <Badge variant="outline" className="text-sm">Ends in {r.days_until_expiry}d</Badge>
+                    <Badge variant="outline" className="text-xs">Ends in {r.days_until_expiry}d</Badge>
                   ) : (
-                    <Badge variant="outline" className="text-sm">No refills left</Badge>
+                    <Badge variant="outline" className="text-xs">No refills left</Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground truncate">
-                  {[r.dosage, r.frequency].filter(Boolean).join(" â€¢ ")}
-                  {r.doctor_name ? ` â€¢ Dr. ${r.doctor_name}` : ""}
+                <p className="text-xs text-muted-foreground truncate">
+                  {[r.dosage, r.frequency].filter(Boolean).join(" • ")}
+                  {r.doctor_name ? ` • Dr. ${r.doctor_name}` : ""}
                 </p>
               </div>
               {requested ? (
-                <Badge variant="secondary" className="text-sm gap-1 shrink-0">
+                <Badge variant="secondary" className="text-xs gap-1 shrink-0">
                   <CheckCircle2 className="h-3 w-3" /> Requested
                 </Badge>
               ) : (
-                <Button size="sm" variant="outline" className="text-sm h-7 shrink-0" onClick={() => setSelected(r)}>
+                <Button size="sm" variant="outline" className="text-xs h-7 shrink-0" onClick={() => setSelected(r)}>
                   Request renewal
                 </Button>
               )}
@@ -73,4 +73,3 @@ export function RenewalsDueCard({ patientId, patientUserId }: Props) {
     </Card>
   );
 }
-

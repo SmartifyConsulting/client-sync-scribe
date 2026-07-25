@@ -1,4 +1,4 @@
-﻿import { toastError } from "@/lib/userMessage";
+import { toastError } from "@/lib/userMessage";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,9 +32,9 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 const STATUS_CONFIG = {
-  available: { icon: "âœ“", label: "AVAILABLE", color: "text-success", bg: "bg-success/10", badge: "bg-success/10 text-success" },
-  assigned: { icon: "ðŸš‘", label: "IN-SERVICE", color: "text-warning", bg: "bg-warning/10", badge: "bg-warning/10 text-warning" },
-  out_of_service: { icon: "âš™", label: "MAINTENANCE", color: "text-muted-foreground", bg: "bg-muted", badge: "bg-muted text-muted-foreground" },
+  available: { icon: "✓", label: "AVAILABLE", color: "text-success", bg: "bg-success/10", badge: "bg-success/10 text-success" },
+  assigned: { icon: "🚑", label: "IN-SERVICE", color: "text-warning", bg: "bg-warning/10", badge: "bg-warning/10 text-warning" },
+  out_of_service: { icon: "⚙", label: "MAINTENANCE", color: "text-muted-foreground", bg: "bg-muted", badge: "bg-muted text-muted-foreground" },
 };
 
 const MOCK_VEHICLE_DETAILS: Record<string, VehicleWithDetails> = {
@@ -160,10 +160,10 @@ export default function FleetPage() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Fleet Management</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          {stats.total} vehicles total â€¢ {stats.available} available â€¢ {stats.assigned} in-service â€¢ {stats.maintenance} maintenance
+          {stats.total} vehicles total • {stats.available} available • {stats.assigned} in-service • {stats.maintenance} maintenance
         </p>
       </header>
 
@@ -185,19 +185,19 @@ export default function FleetPage() {
       {/* Fleet Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Average Mileage</p>
+          <p className="text-xs text-muted-foreground">Average Mileage</p>
           <p className="text-2xl font-bold mt-1">{stats.avgMileage.toLocaleString()} km</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Fleet Age</p>
+          <p className="text-xs text-muted-foreground">Fleet Age</p>
           <p className="text-2xl font-bold mt-1">3.2 years</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Maintenance Overdue</p>
+          <p className="text-xs text-muted-foreground">Maintenance Overdue</p>
           <p className={`text-2xl font-bold mt-1 ${stats.overdue > 0 ? "text-destructive" : "text-success"}`}>{stats.overdue}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Next 30 Days</p>
+          <p className="text-xs text-muted-foreground">Next 30 Days</p>
           <p className="text-2xl font-bold mt-1">{rows.filter(r => {
             const days = calculateDaysUntilService(r.next_service_date);
             return days !== null && days > 0 && days <= 30;
@@ -245,9 +245,9 @@ export default function FleetPage() {
                       <h3 className="font-bold text-lg">{vehicle.vehicle_code}</h3>
                       <span className={`text-lg font-bold ${config.color}`}>{config.icon}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{vehicle.make_model || "â€”"}</p>
+                    <p className="text-xs text-muted-foreground">{vehicle.make_model || "—"}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${config.badge}`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.badge}`}>
                     {config.label}
                   </span>
                 </div>
@@ -255,23 +255,23 @@ export default function FleetPage() {
                 {/* Details Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
                   <div>
-                    <p className="text-sm text-muted-foreground">Location</p>
-                    <p className="font-semibold text-sm mt-1">{vehicle.location || "â€”"}</p>
+                    <p className="text-xs text-muted-foreground">Location</p>
+                    <p className="font-semibold text-sm mt-1">{vehicle.location || "—"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Mileage</p>
+                    <p className="text-xs text-muted-foreground">Mileage</p>
                     <p className="font-semibold text-sm mt-1">{vehicle.mileage_km?.toLocaleString()} km</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Last Service</p>
-                    <p className="font-semibold text-sm mt-1">{vehicle.last_service_date || "â€”"}</p>
+                    <p className="text-xs text-muted-foreground">Last Service</p>
+                    <p className="font-semibold text-sm mt-1">{vehicle.last_service_date || "—"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Next Service</p>
+                    <p className="text-xs text-muted-foreground">Next Service</p>
                     <p className={`font-semibold text-sm mt-1 ${isServiceOverdue ? "text-destructive" : isServiceSoon ? "text-warning" : ""}`}>
-                      {vehicle.next_service_date || "â€”"}
+                      {vehicle.next_service_date || "—"}
                       {daysUntilService !== null && daysUntilService !== 0 && (
-                        <span className="text-sm ml-1">
+                        <span className="text-xs ml-1">
                           ({isServiceOverdue ? "OVERDUE" : `${daysUntilService} days`})
                         </span>
                       )}
@@ -346,4 +346,3 @@ export default function FleetPage() {
     </div>
   );
 }
-

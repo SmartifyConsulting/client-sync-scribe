@@ -1,4 +1,4 @@
-﻿import { toastError } from "@/lib/userMessage";
+import { toastError } from "@/lib/userMessage";
 import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -270,12 +270,12 @@ export default function AdministratorsScreen() {
     const isOwner = row.user_id === ownerId;
     const phone = row.phone || row.profile_phone || "";
     const email = row.invited_email || row.profile_email || "";
-    const name = row.full_name || row.invited_name || email || "â€”";
+    const name = row.full_name || row.invited_name || email || "—";
     const isPending = !row.user_id;
     return (
       <div
         key={row.id}
-        className="rounded-xl border border-border bg-card p-2.5 flex flex-wrap items-center gap-2 text-sm"
+        className="rounded-xl border border-border bg-card p-2.5 flex flex-wrap items-center gap-2 text-xs"
       >
         <div className="flex-1 min-w-[180px]">
           <p className="font-semibold text-foreground">{name}</p>
@@ -313,7 +313,7 @@ export default function AdministratorsScreen() {
           </div>
         </div>
         <span
-          className={`px-2 py-0.5 rounded-full text-sm font-semibold uppercase tracking-wider ${
+          className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
             isPending
               ? "bg-warning/10 text-warning"
               : "bg-success/10 text-success"
@@ -343,20 +343,20 @@ export default function AdministratorsScreen() {
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           {t("administrators.header.label")}
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-primary" />
           Admin
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           Users, fleet, crew assignments and affiliated hospitals.
         </p>
       </div>
 
       {!isCurrentUserAdmin && currentTab === "users" && (
-        <div className="rounded-lg border border-warning/40 bg-warning/10 text-warning p-2.5 text-sm">
+        <div className="rounded-lg border border-warning/40 bg-warning/10 text-warning p-2.5 text-xs">
           <p className="font-semibold">{t("administrators.readOnly.label")}</p>
           <p className="mt-0.5">{t("administrators.readOnly.description")}</p>
         </div>
@@ -368,10 +368,10 @@ export default function AdministratorsScreen() {
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-4 h-9">
-          <TabsTrigger value="users" className="text-sm">Users</TabsTrigger>
-          <TabsTrigger value="crew" className="text-sm">Crew</TabsTrigger>
-          <TabsTrigger value="fleet" className="text-sm">Fleet Admin</TabsTrigger>
-          <TabsTrigger value="hospitals" className="text-sm">Hospitals</TabsTrigger>
+          <TabsTrigger value="users" className="text-xs">Users</TabsTrigger>
+          <TabsTrigger value="crew" className="text-xs">Crew</TabsTrigger>
+          <TabsTrigger value="fleet" className="text-xs">Fleet Admin</TabsTrigger>
+          <TabsTrigger value="hospitals" className="text-xs">Hospitals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-3">
@@ -385,7 +385,7 @@ export default function AdministratorsScreen() {
                 <Button
                   size="sm"
                   onClick={() => setAddOpen(true)}
-                  className="h-7 text-sm"
+                  className="h-7 text-xs"
                 >
                   <UserPlus className="mr-1 h-3 w-3" /> {t("common.add")}
                 </Button>
@@ -399,16 +399,16 @@ export default function AdministratorsScreen() {
                   placeholder={t("administrators.users.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 h-8 text-sm"
+                  className="pl-8 h-8 text-xs"
                 />
               </div>
 
               {isLoading ? (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm py-4">
+                <div className="flex items-center gap-2 text-muted-foreground text-xs py-4">
                   <Loader2 className="h-3 w-3 animate-spin" /> {t("common.loading")}
                 </div>
               ) : groupedByRole.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">
+                <p className="text-xs text-muted-foreground text-center py-6">
                   {searchQuery
                     ? t("administrators.users.noMatch")
                     : t("administrators.users.noUsers")}
@@ -438,10 +438,10 @@ export default function AdministratorsScreen() {
                                 {rows.length}
                               </span>
                               {activeCount > 0 && (
-                                <span className="text-success">â— {activeCount} active</span>
+                                <span className="text-success">● {activeCount} active</span>
                               )}
                               {pendingCount > 0 && (
-                                <span className="text-warning">â— {pendingCount} pending</span>
+                                <span className="text-warning">● {pendingCount} pending</span>
                               )}
                             </span>
                           </div>
@@ -543,4 +543,3 @@ export default function AdministratorsScreen() {
     </div>
   );
 }
-

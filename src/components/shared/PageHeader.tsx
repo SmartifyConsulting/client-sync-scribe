@@ -18,7 +18,7 @@ export function PageHeader({ title, subtitle, actions, className }: PageHeaderPr
     <div className={cn("flex flex-wrap items-start justify-between gap-3 pb-4", className)}>
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-        {subtitle && <p className="text-base text-muted-foreground">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

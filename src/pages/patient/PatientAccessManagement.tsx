@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -283,7 +283,7 @@ export default function PatientAccessManagement() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Invites</h1>
-        <p className="text-muted-foreground text-base">Manage your doctor invitations and preferences</p>
+        <p className="text-muted-foreground text-xs">Manage your doctor invitations and preferences</p>
       </div>
 
       {/* Round Table Access */}
@@ -350,7 +350,7 @@ export default function PatientAccessManagement() {
                           {invitation.message}
                         </p>
                       )}
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         Received {format(new Date(invitation.created_at), "MMM d, yyyy")}
                       </p>
                     </div>
@@ -377,7 +377,7 @@ export default function PatientAccessManagement() {
                             >
                               {perm.label}
                             </Label>
-                            <p className="text-sm text-muted-foreground mt-0.5">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               {perm.description}
                             </p>
                           </div>
@@ -454,7 +454,7 @@ export default function PatientAccessManagement() {
                       <p className="text-sm text-muted-foreground">
                         Registration: {invite.doctor_registration_number}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         Approved {format(new Date(invite.created_at), "MMM d, yyyy")}
                       </p>
                     </div>
@@ -465,7 +465,7 @@ export default function PatientAccessManagement() {
                   {invite.permissions && invite.permissions.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pl-14">
                       {invite.permissions.map((p) => (
-                        <Badge key={p} variant="secondary" className="text-sm">
+                        <Badge key={p} variant="secondary" className="text-xs">
                           {permissionLabel(p)}
                         </Badge>
                       ))}
@@ -480,4 +480,3 @@ export default function PatientAccessManagement() {
     </div>
   );
 }
-

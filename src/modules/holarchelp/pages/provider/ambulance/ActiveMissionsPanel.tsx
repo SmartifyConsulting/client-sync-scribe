@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Navigation as NavIcon, ChevronRight, Hospital, Clock, Truck } from "lucide-react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useActiveMissions } from "../../../hooks/useActiveMissions";
@@ -14,12 +14,12 @@ export default function ActiveMissionsPanel() {
     <section className="rounded-2xl border-2 border-destructive/60 bg-destructive/5 p-3">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-sm font-bold uppercase tracking-wider text-destructive flex items-center gap-1.5">
-          <NavIcon className="h-4 w-4 text-destructive" /> Active Missions Â· {missions.length}
+          <NavIcon className="h-4 w-4 text-destructive" /> Active Missions · {missions.length}
         </h2>
-        <span className="text-sm text-muted-foreground">Tap a mission to open the full console</span>
+        <span className="text-xs text-muted-foreground">Tap a mission to open the full console</span>
       </div>
       {missions.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground italic">No active missions right now.</p>
+        <p className="py-6 text-center text-xs text-muted-foreground italic">No active missions right now.</p>
       ) : (
         <div className="grid gap-2 lg:grid-cols-2">
           {missions.map((m) => (
@@ -63,4 +63,3 @@ export default function ActiveMissionsPanel() {
     </section>
   );
 }
-

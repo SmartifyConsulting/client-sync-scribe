@@ -1,4 +1,4 @@
-﻿import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
 import { Card } from "@/components/ui/card";
 
 const UTILISATION_DATA = [
@@ -28,7 +28,7 @@ export default function VehicleUtilisationScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Fleet Analytics</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Analytics</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Utilisation</h1>
         <p className="text-sm text-muted-foreground mt-2">Monitor fleet usage, efficiency, and costs</p>
       </header>
@@ -36,24 +36,24 @@ export default function VehicleUtilisationScreen() {
       {/* Key Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Average Utilisation</p>
+          <p className="text-xs text-muted-foreground">Average Utilisation</p>
           <p className="text-2xl font-bold mt-2">76.4%</p>
-          <p className="text-sm text-success mt-1">â†‘ 5% vs last month</p>
+          <p className="text-xs text-success mt-1">↑ 5% vs last month</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Total Trips</p>
+          <p className="text-xs text-muted-foreground">Total Trips</p>
           <p className="text-2xl font-bold mt-2">3,675</p>
-          <p className="text-sm text-success mt-1">â†‘ 12% vs last month</p>
+          <p className="text-xs text-success mt-1">↑ 12% vs last month</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Total Mileage</p>
+          <p className="text-xs text-muted-foreground">Total Mileage</p>
           <p className="text-2xl font-bold mt-2">13,520</p>
-          <p className="text-sm text-muted-foreground mt-1">km this month</p>
+          <p className="text-xs text-muted-foreground mt-1">km this month</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-muted-foreground">Operating Cost</p>
+          <p className="text-xs text-muted-foreground">Operating Cost</p>
           <p className="text-2xl font-bold mt-2">$4,250</p>
-          <p className="text-sm text-muted-foreground mt-1">per vehicle/month</p>
+          <p className="text-xs text-muted-foreground mt-1">per vehicle/month</p>
         </Card>
       </div>
 
@@ -151,4 +151,3 @@ export default function VehicleUtilisationScreen() {
     </div>
   );
 }
-

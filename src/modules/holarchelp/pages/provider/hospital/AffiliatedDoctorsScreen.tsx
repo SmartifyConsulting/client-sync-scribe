@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Card } from "@/components/ui/card";
@@ -71,7 +71,7 @@ export default function AffiliatedDoctorsScreen() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-lg font-bold flex items-center gap-2"><Stethoscope className="h-5 w-5 text-primary" /> Our Doctors</h1>
-          <p className="text-sm text-muted-foreground">Doctors who serve at this hospital. Pending rows link automatically when the doctor signs up.</p>
+          <p className="text-xs text-muted-foreground">Doctors who serve at this hospital. Pending rows link automatically when the doctor signs up.</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative w-full sm:w-64">
@@ -91,7 +91,7 @@ export default function AffiliatedDoctorsScreen() {
           {filtered.map((r) => {
             const pending = !r.doctor_id;
             const name = r.doctor?.full_name || r.pending_doctor_payload?.full_name || r.hospital_name_snapshot || "Unknown";
-            const specialty = r.doctor?.specialty || r.pending_doctor_payload?.specialty || "â€”";
+            const specialty = r.doctor?.specialty || r.pending_doctor_payload?.specialty || "—";
             const practiceNo = r.doctor?.practice_number || r.pending_doctor_payload?.practice_number;
             const mobile = r.doctor?.mobile_number || r.pending_doctor_payload?.mobile_number;
             return (
@@ -103,12 +103,12 @@ export default function AffiliatedDoctorsScreen() {
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm truncate flex items-center gap-1.5">
                     {name}
-                    {pending && <Badge variant="outline" className="text-sm">Not yet on platform</Badge>}
+                    {pending && <Badge variant="outline" className="text-xs">Not yet on platform</Badge>}
                   </div>
-                  <div className="text-sm text-muted-foreground truncate">{specialty}</div>
+                  <div className="text-xs text-muted-foreground truncate">{specialty}</div>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
-                    {r.role_at_hospital && <Badge variant="secondary" className="text-sm">{r.role_at_hospital}</Badge>}
-                    {practiceNo && <Badge variant="outline" className="text-sm">MP {practiceNo}</Badge>}
+                    {r.role_at_hospital && <Badge variant="secondary" className="text-xs">{r.role_at_hospital}</Badge>}
+                    {practiceNo && <Badge variant="outline" className="text-xs">MP {practiceNo}</Badge>}
                   </div>
                   {mobile && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
@@ -124,4 +124,3 @@ export default function AffiliatedDoctorsScreen() {
     </div>
   );
 }
-

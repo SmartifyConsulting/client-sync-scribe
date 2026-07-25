@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -84,7 +84,7 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
               <p className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-[hsl(var(--admin-accent))]">
                 Annual plan
               </p>
-              <span className="text-sm font-semibold text-[hsl(var(--admin-accent))] uppercase tracking-wider">
+              <span className="text-xs font-semibold text-[hsl(var(--admin-accent))] uppercase tracking-wider">
                 Best value
               </span>
             </div>
@@ -105,8 +105,8 @@ function RoleSection({ title, badgeLabel, monthly, annual, onChange }: RoleSecti
               <span className="text-sm text-[hsl(var(--admin-text-tertiary))]">/yr</span>
             </div>
             <div className="space-y-1.5 border-t border-[hsl(var(--admin-border-subtle))] pt-2 text-sm">
-              <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Monthly Ã— 12</span><span className="tabular-nums">${formatCurrency(annualLiability)}</span></div>
-              <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Annual price</span><span className="tabular-nums">âˆ’${formatCurrency(annual.price)}</span></div>
+              <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Monthly × 12</span><span className="tabular-nums">${formatCurrency(annualLiability)}</span></div>
+              <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Annual price</span><span className="tabular-nums">−${formatCurrency(annual.price)}</span></div>
               <div className="flex justify-between"><span className="text-[hsl(var(--admin-text-tertiary))]">Discount</span><span className="font-semibold text-[hsl(var(--admin-accent))] tabular-nums">{discountPct}%</span></div>
               <div className="flex justify-between border-t border-[hsl(var(--admin-border-subtle))] pt-1.5"><span className="font-medium">Total saved</span><span className="font-semibold tabular-nums text-[hsl(var(--admin-accent))]">${formatCurrency(savings)}</span></div>
             </div>
@@ -223,11 +223,10 @@ export default function PricingAdmin() {
       actions={<AutosaveIndicator status={autosaveStatus} error={autosaveError} />}
     >
       <div className="space-y-3">
-        <RoleSection title="Tier 01 â€” Healthcare Providers" badgeLabel="Doctor"     monthly={doctorMonthly}    annual={doctorAnnual}    onChange={handleChange} />
-        <RoleSection title="Tier 02 â€” Patient"              badgeLabel="Patient"    monthly={patientMonthly}   annual={patientAnnual}   onChange={handleChange} />
-        <RoleSection title="Tier 03 â€” Emergency Services"   badgeLabel="Emergency"  monthly={emergencyMonthly} annual={emergencyAnnual} onChange={handleChange} />
+        <RoleSection title="Tier 01 — Healthcare Providers" badgeLabel="Doctor"     monthly={doctorMonthly}    annual={doctorAnnual}    onChange={handleChange} />
+        <RoleSection title="Tier 02 — Patient"              badgeLabel="Patient"    monthly={patientMonthly}   annual={patientAnnual}   onChange={handleChange} />
+        <RoleSection title="Tier 03 — Emergency Services"   badgeLabel="Emergency"  monthly={emergencyMonthly} annual={emergencyAnnual} onChange={handleChange} />
       </div>
     </AdminPage>
   );
 }
-

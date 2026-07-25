@@ -1,5 +1,5 @@
-﻿/**
- * LoadingSpinner â€” shared loading indicator.
+/**
+ * LoadingSpinner — shared loading indicator.
  * Replaces ad-hoc <Loader2 className="animate-spin" /> blocks.
  */
 
@@ -27,8 +27,7 @@ export function LoadingSpinner({ label, showDefaultLabel, className, size = "md"
   return (
     <div className={cn("flex flex-col items-center justify-center gap-2 py-6 text-muted-foreground", className)}>
       <Loader2 className={cn("animate-spin text-primary", SIZE_MAP[size])} />
-      {displayLabel && <span className="text-sm">{displayLabel}</span>}
+      {displayLabel && <span className="text-xs">{displayLabel}</span>}
     </div>
   );
 }
-

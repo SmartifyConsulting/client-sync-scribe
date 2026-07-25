@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -88,7 +88,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, id, rows = 2
             <button
               key={s.place_id}
               type="button"
-              className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 text-foreground border-b border-border/30 last:border-0"
+              className="w-full text-left px-3 py-2 text-xs hover:bg-muted/50 text-foreground border-b border-border/30 last:border-0"
               onClick={() => selectSuggestion(s.description)}
             >
               {s.description}
@@ -99,4 +99,3 @@ export function AddressAutocomplete({ value, onChange, placeholder, id, rows = 2
     </div>
   );
 }
-

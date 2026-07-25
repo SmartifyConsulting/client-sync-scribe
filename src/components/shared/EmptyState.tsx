@@ -1,5 +1,5 @@
-﻿/**
- * EmptyState â€” shared "no data yet" block used by lists and tabs.
+/**
+ * EmptyState — shared "no data yet" block used by lists and tabs.
  * Use to replace ad-hoc <div className="text-muted-foreground"> empty
  * states scattered across the app.
  */
@@ -32,10 +32,9 @@ export function EmptyState({ icon, title, titleKey, description, descriptionKey,
       </div>
       <div className="space-y-1">
         <p className="text-sm font-medium text-foreground">{displayTitle}</p>
-        {displayDescription && <p className="text-sm text-muted-foreground max-w-sm">{displayDescription}</p>}
+        {displayDescription && <p className="text-xs text-muted-foreground max-w-sm">{displayDescription}</p>}
       </div>
       {action && <div className="pt-1">{action}</div>}
     </div>
   );
 }
-

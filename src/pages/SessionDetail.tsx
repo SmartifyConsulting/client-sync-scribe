@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -292,10 +292,10 @@ export default function SessionDetail() {
             <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span>{format(new Date(session.started_at), "h:mm a")}</span>
               {session.duration_minutes && (
-                <span>Â· {session.duration_minutes} minutes</span>
+                <span>· {session.duration_minutes} minutes</span>
               )}
               <span
-                className={`px-2 py-0.5 rounded-full text-sm font-medium ${
+                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                   session.status === "completed"
                     ? "bg-green-500/15 text-green-700 dark:text-green-400"
                     : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
@@ -343,8 +343,8 @@ export default function SessionDetail() {
 
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
-        <div className="rounded-xl border border-primary/40 bg-card p-5">
-          <h2 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h2>
+        <div className="rounded-xl border border-primary bg-card p-6">
+          <h2 className="text-base font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
               className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
@@ -401,14 +401,14 @@ export default function SessionDetail() {
 
       {/* AI Summary */}
       {session.summary && (
-        <div className="rounded-xl border border-primary/40 bg-card p-5">
-          <div className="flex items-center justify-between mb-3">
+        <div className="rounded-xl border border-primary bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
                 <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="text-sm font-semibold text-foreground">AI Summary</h2>
+                <h2 className="text-base font-semibold text-foreground">AI Summary</h2>
                 <p className="text-sm text-muted-foreground">Generated from session content</p>
               </div>
             </div>
@@ -438,10 +438,10 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Session Notes â€” combined Audio + Transcript + Notes */}
+      {/* Session Notes — combined Audio + Transcript + Notes */}
       {(session.audio_url || session.transcript || session.notes) && (
-        <div className="rounded-xl border border-primary/40 bg-card p-5">
-          <div className="flex items-center justify-between mb-3">
+        <div className="rounded-xl border border-primary bg-card p-6">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
                 <Volume2 className="h-4 w-4 text-purple-600" />
@@ -541,7 +541,7 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Private Notes â€” doctor-only */}
+      {/* Private Notes — doctor-only */}
       <div className="rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -594,13 +594,13 @@ export default function SessionDetail() {
           <Textarea
             value={privateNotesDraft}
             onChange={(e) => setPrivateNotesDraft(e.target.value)}
-            placeholder="Write notes only you can seeâ€¦"
+            placeholder="Write notes only you can see…"
             className="text-sm min-h-[140px]"
           />
         ) : (session as any).private_notes ? (
           <p className="text-sm whitespace-pre-wrap text-foreground">{(session as any).private_notes}</p>
         ) : (
-          <p className="text-sm text-muted-foreground italic">No private notes yet â€” click Edit to add notes only you can see.</p>
+          <p className="text-sm text-muted-foreground italic">No private notes yet — click Edit to add notes only you can see.</p>
         )}
       </div>
 
@@ -622,7 +622,7 @@ export default function SessionDetail() {
                 <FileText className="h-4 w-4 text-primary shrink-0" />
                 <span className="flex-1 text-sm font-semibold text-foreground truncate">{doc.name}</span>
                 {doc.is_draft && !doc.email_sent_at && (
-                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-sm">
+                  <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-xs">
                     DRAFT
                   </Badge>
                 )}
@@ -803,4 +803,3 @@ export default function SessionDetail() {
     </div>
   );
 }
-

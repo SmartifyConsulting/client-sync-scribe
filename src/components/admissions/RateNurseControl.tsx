@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, MessageSquarePlus } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ interface Props {
 const COOLDOWN_MS = 4 * 60 * 60 * 1000;
 
 /**
- * Compact 1â€“5 star rating + optional comment control for each admission record
+ * Compact 1–5 star rating + optional comment control for each admission record
  * line. Patients may submit at most one rating per nurse every 4 hours (enforced
  * by DB trigger `enforce_nurse_rating_cooldown`).
  */
@@ -137,7 +137,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
   return (
     <div className="mt-1 space-y-1">
       <div className="flex items-center gap-1 flex-wrap">
-        <span className="text-sm text-muted-foreground mr-1">
+        <span className="text-xs text-muted-foreground mr-1">
           Rate {nurseName || "nurse"}:
         </span>
         {[1, 2, 3, 4, 5].map((v) => {
@@ -166,7 +166,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
           <button
             type="button"
             onClick={() => setShowComment(true)}
-            className="text-sm text-primary hover:underline inline-flex items-center gap-0.5 ml-1"
+            className="text-xs text-primary hover:underline inline-flex items-center gap-0.5 ml-1"
           >
             <MessageSquarePlus className="h-3 w-3" />
             {savedComment ? "Edit note" : "Add a note"}
@@ -175,7 +175,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
       </div>
 
       {savedComment && !showComment && (
-        <p className="text-sm italic text-muted-foreground pl-1">"{savedComment}"</p>
+        <p className="text-xs italic text-muted-foreground pl-1">"{savedComment}"</p>
       )}
 
       {showComment && !cooling && (
@@ -184,7 +184,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Share an observation about this nurse (optional)"
-            className="min-h-[52px] text-sm"
+            className="min-h-[52px] text-xs"
             maxLength={500}
           />
           <div className="flex gap-1 justify-end">
@@ -192,7 +192,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
               type="button"
               variant="ghost"
               size="sm"
-              className="h-7 text-sm"
+              className="h-7 text-xs"
               onClick={() => {
                 setComment(savedComment);
                 setShowComment(false);
@@ -203,7 +203,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
             <Button
               type="button"
               size="sm"
-              className="h-7 text-sm"
+              className="h-7 text-xs"
               onClick={submitCommentOnly}
               disabled={busy || !rating}
             >
@@ -214,7 +214,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
       )}
 
       {cooling && (
-        <p className="text-sm text-muted-foreground pl-1">
+        <p className="text-xs text-muted-foreground pl-1">
           You can rate {nurseName || "this nurse"} again in {remainingH > 0 ? `${remainingH}h ` : ""}
           {remainingM}m.
         </p>
@@ -222,4 +222,3 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
     </div>
   );
 }
-

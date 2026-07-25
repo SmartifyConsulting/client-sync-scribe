@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Plus, Trash2, Upload, FileText, Building2, UserCog, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,11 +125,11 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
     setFileError(null);
     if (!f) { set("license_file", null); return; }
     if (!ACCEPTED_MIME.includes(f.type)) { setFileError("File must be PDF, JPG or PNG"); return; }
-    if (f.size > MAX_FILE_MB * 1024 * 1024) { setFileError(`File must be â‰¤ ${MAX_FILE_MB}MB`); return; }
+    if (f.size > MAX_FILE_MB * 1024 * 1024) { setFileError(`File must be ≤ ${MAX_FILE_MB}MB`); return; }
     set("license_file", f);
   };
 
-  // "Same as Hospital" mirroring â€” Administrator inherits from Organisation
+  // "Same as Hospital" mirroring — Administrator inherits from Organisation
   const updateOrgPhone = (v: string) => {
     onChange({
       ...values,
@@ -245,14 +245,14 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
         {/* License upload */}
         <div className="space-y-2 pt-1">
           <Label>Certified copy of license</Label>
-          <p className="text-sm text-muted-foreground">PDF, JPG or PNG â€” max {MAX_FILE_MB}MB. Required for vetting.</p>
+          <p className="text-xs text-muted-foreground">PDF, JPG or PNG — max {MAX_FILE_MB}MB. Required for vetting.</p>
           {values.license_file ? (
             <div className="flex items-center justify-between rounded-lg border p-2.5 bg-background/60">
               <div className="flex items-center gap-2 min-w-0">
                 <FileText className="h-4 w-4 shrink-0 text-primary" />
                 <div className="min-w-0">
                   <p className="text-sm truncate">{values.license_file.name}</p>
-                  <p className="text-sm text-muted-foreground">{(values.license_file.size / 1024).toFixed(0)} KB</p>
+                  <p className="text-xs text-muted-foreground">{(values.license_file.size / 1024).toFixed(0)} KB</p>
                 </div>
               </div>
               <Button type="button" variant="ghost" size="sm" onClick={() => onFile(null)} disabled={disabled}>Remove</Button>
@@ -270,7 +270,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
               />
             </label>
           )}
-          {fileError && <p className="text-sm text-destructive">{fileError}</p>}
+          {fileError && <p className="text-xs text-destructive">{fileError}</p>}
         </div>
       </section>
 
@@ -292,7 +292,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
           <Input id="admin_email" type="email" value={values.admin_email}
             disabled={disabled || values.admin_email_same_as_org}
             onChange={(e) => set("admin_email", e.target.value)} />
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <Checkbox
               checked={values.admin_email_same_as_org}
               onCheckedChange={(c) => toggleAdminEmailSame(!!c)}
@@ -310,7 +310,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
             disabled={disabled || values.admin_phone_same_as_org}
             onChange={(v) => set("admin_phone", v)}
           />
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <Checkbox
               checked={values.admin_phone_same_as_org}
               onCheckedChange={(c) => toggleAdminPhoneSame(!!c)}
@@ -328,7 +328,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>
               <p className="text-sm font-medium">Auto-generate password</p>
-              <p className="text-sm text-muted-foreground">14 chars, mixed case + digits + symbols</p>
+              <p className="text-xs text-muted-foreground">14 chars, mixed case + digits + symbols</p>
             </div>
             <Switch checked={values.auto_gen_password} onCheckedChange={(c) => set("auto_gen_password", c)} disabled={disabled} />
           </div>
@@ -343,7 +343,7 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <p className="text-sm font-medium">Email credentials to administrator</p>
-                <p className="text-sm text-muted-foreground">Send the login + password by email</p>
+                <p className="text-xs text-muted-foreground">Send the login + password by email</p>
               </div>
               <Switch checked={values.send_email} onCheckedChange={(c) => set("send_email", c)} disabled={disabled} />
             </div>
@@ -363,4 +363,3 @@ export function ProviderVettingForm({ kind, values, onChange, showAccountOptions
     </div>
   );
 }
-

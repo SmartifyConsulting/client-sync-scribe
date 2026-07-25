@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { loadGoogleMaps } from "../lib/googleMapsLoader";
 
 export type ProviderMarker = {
@@ -140,7 +140,7 @@ export function ProviderMap({ center, providers, height = 360 }: Props) {
         <div style="font-family:system-ui,sans-serif;min-width:180px;padding:2px 4px">
           <div style="font-weight:700;font-size:14px;color:#0f172a;margin-bottom:4px">${escapeHtml(p.name)}</div>
           ${dKm != null ? `<div style="font-size:12px;color:#475569"><strong>${dKm.toFixed(1)} km</strong> away</div>` : ""}
-          ${eta != null ? `<div style="font-size:12px;color:#475569">â‰ˆ ${eta} min by car</div>` : ""}
+          ${eta != null ? `<div style="font-size:12px;color:#475569">≈ ${eta} min by car</div>` : ""}
           ${dimmed ? `<div style="font-size:11px;color:#dc2626;font-weight:600;margin-top:4px">Currently full capacity</div>` : ""}
         </div>`,
       });
@@ -153,11 +153,10 @@ export function ProviderMap({ center, providers, height = 360 }: Props) {
     <div className="relative" style={{ height }}>
       <div ref={containerRef} style={{ height }} className="overflow-hidden rounded-2xl border z-0" />
       {err && (
-        <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-destructive/90 px-3 py-1 text-sm font-medium text-destructive-foreground shadow">
+        <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-destructive/90 px-3 py-1 text-xs font-medium text-destructive-foreground shadow">
           {err}
         </div>
       )}
     </div>
   );
 }
-

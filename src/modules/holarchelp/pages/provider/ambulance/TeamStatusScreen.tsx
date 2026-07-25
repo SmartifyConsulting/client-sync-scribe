@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../../components/ProviderGate";
@@ -108,12 +108,12 @@ export default function TeamStatusScreen() {
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Emergency Response
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">Shift Teams</h1>
         <p className="text-sm text-muted-foreground">
-          {members.length} crew Â· {onShift} on duty
+          {members.length} crew · {onShift} on duty
         </p>
       </div>
 
@@ -149,17 +149,17 @@ export default function TeamStatusScreen() {
                       <p className="text-sm font-semibold truncate">
                         {m.full_name}
                       </p>
-                      <p className={`text-sm ${roleClass}`}>
+                      <p className={`text-xs ${roleClass}`}>
                         {m.role
                           ? m.role.charAt(0).toUpperCase() + m.role.slice(1)
                           : "Crew Member"}
                         {shift?.vehicle_code
-                          ? ` Â· ${shift.vehicle_code}`
+                          ? ` · ${shift.vehicle_code}`
                           : ""}
                       </p>
                     </div>
                     <span
-                      className={`px-2 py-0.5 rounded text-sm font-semibold uppercase ${
+                      className={`px-2 py-0.5 rounded text-xs font-semibold uppercase ${
                         isOnDuty
                           ? "bg-success/10 text-success"
                           : "bg-muted text-muted-foreground"
@@ -186,4 +186,3 @@ export default function TeamStatusScreen() {
     </div>
   );
 }
-

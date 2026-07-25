@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { SosVoiceNoteDialog, type PreStartedRecording } from "../components/SosVoiceNoteDialog";
 import { SeverityPicker, type SeverityResult } from "../components/SeverityPicker";
@@ -163,13 +163,13 @@ export default function HolarcHelpIncidentDetail() {
       try { await navigator.share({ title: "Live emergency tracking", url: trackingUrl }); return; } catch { /* user cancelled */ }
     }
     await navigator.clipboard.writeText(trackingUrl);
-    toast.success("Tracking link copied â€” share it with your contacts");
+    toast.success("Tracking link copied — share it with your contacts");
   };
 
   const trackingUrl = incident ? getPublicTrackUrl(incident.tracking_token) : "";
   const message = buildSosMessage(profileName, trackingUrl);
 
-  // Fresh-trigger flow: severity picker â†’ background-record voice note (no clipped opening words)
+  // Fresh-trigger flow: severity picker → background-record voice note (no clipped opening words)
   const [severityOpen, setSeverityOpen] = useState(isFresh);
   const [voiceNoteOpen, setVoiceNoteOpen] = useState(false);
   const [preStarted, setPreStarted] = useState<PreStartedRecording | null>(null);
@@ -194,7 +194,7 @@ export default function HolarcHelpIncidentDetail() {
       preStartedRef.current = pre;
       setPreStarted(pre);
     } catch (err) {
-      // Mic denied or unavailable â€” dialog will fall back to its own prompt
+      // Mic denied or unavailable — dialog will fall back to its own prompt
       preStartedRef.current = null;
       setPreStarted(null);
     }
@@ -254,7 +254,7 @@ export default function HolarcHelpIncidentDetail() {
     navigate("/patient/holarchelp");
   };
 
-  if (!incident) return <div className="p-5 text-muted-foreground">Loadingâ€¦</div>;
+  if (!incident) return <div className="p-5 text-muted-foreground">Loading…</div>;
 
   const mapPoints: import("../components/LiveMap").LiveMapPoint[] = [];
   if (locations[0]) {
@@ -304,7 +304,7 @@ export default function HolarcHelpIncidentDetail() {
       {isFresh && cancelSecondsLeft > 0 && isLive && (
         <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border-2 border-amber-400 bg-amber-50 p-3 text-amber-900 dark:bg-amber-950/20 dark:text-amber-100">
           <div>
-            <p className="text-sm font-bold uppercase tracking-wider">False alarm?</p>
+            <p className="text-xs font-bold uppercase tracking-wider">False alarm?</p>
             <p className="text-sm">You can still cancel for the next {cancelSecondsLeft}s.</p>
           </div>
           <Button size="sm" variant="outline" className="shrink-0" onClick={cancelAlert}>
@@ -335,18 +335,18 @@ export default function HolarcHelpIncidentDetail() {
         <div>
           <h1 className="text-xl font-bold">{isLive ? "Active emergency" : "Incident closed"}</h1>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-sm font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
           {(incident.status ?? "").toUpperCase().replace(/_/g, " ")}
         </span>
       </div>
-      <p className="mb-3 text-sm text-muted-foreground">Started {new Date(incident.created_at).toLocaleString()}</p>
+      <p className="mb-3 text-xs text-muted-foreground">Started {new Date(incident.created_at).toLocaleString()}</p>
 
       {showNoResponders && (
         <div className="mb-3 flex items-start gap-3 rounded-2xl border-2 border-red-500/50 bg-red-50 p-3 text-sm dark:bg-red-950/20">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
           <div className="flex-1">
             <p className="font-semibold text-red-700">No emergency responder has accepted yet.</p>
-            <p className="text-sm text-red-700/80">We're still searching. Please consider calling an emergency line directly.</p>
+            <p className="text-xs text-red-700/80">We're still searching. Please consider calling an emergency line directly.</p>
             <Button size="sm" variant="destructive" className="mt-2 gap-1" onClick={callEmergency}>
               <Phone className="h-4 w-4" /> Call 10177 now
             </Button>
@@ -363,16 +363,16 @@ export default function HolarcHelpIncidentDetail() {
           <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600" />
           <div>
             <p className="font-semibold text-red-700">Your responder is unable to continue.</p>
-            <p className="text-sm text-red-700/80">Finding the next available emergency responderâ€¦</p>
+            <p className="text-xs text-red-700/80">Finding the next available emergency responder…</p>
           </div>
         </div>
       )}
 
       {responder && incident.assigned_provider_id && (
         <div className="mb-3 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
-          <p className="text-sm font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-            {responder.kind === "hospital" ? "ðŸ¥ Receiving hospital" : "ðŸš‘ Responding"}
-            {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-sm font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+            {responder.kind === "hospital" ? "🏥 Receiving hospital" : "🚑 Responding"}
+            {autoAssigned && <span className="ml-2 rounded-full bg-emerald-200 px-2 py-0.5 text-xs font-semibold text-emerald-900">AUTO-ASSIGNED</span>}
           </p>
           <p className="mt-0.5 text-base font-extrabold text-emerald-900 dark:text-emerald-100">{responder.name}</p>
           {incident.incident_number && (
@@ -387,14 +387,14 @@ export default function HolarcHelpIncidentDetail() {
             {distanceKm != null && (
               <span className="font-semibold">
                 {distanceKm.toFixed(1)} km away
-                {etaEstimateMin != null && <> Â· ~{etaEstimateMin} min by car</>}
+                {etaEstimateMin != null && <> · ~{etaEstimateMin} min by car</>}
               </span>
             )}
             {incident.accepted_at && (
-              <span className="text-sm">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+              <span className="text-xs">Accepted {new Date(incident.accepted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
             )}
             {assignmentAnchorAt && autoChangeSecondsLeft > 0 && (
-              <span className="text-sm font-semibold">Change ER Provider: {autoChangeSecondsLeft}s left</span>
+              <span className="text-xs font-semibold">Change ER Provider: {autoChangeSecondsLeft}s left</span>
             )}
 
           </div>
@@ -421,14 +421,14 @@ export default function HolarcHelpIncidentDetail() {
       {(incident.voice_note_transcript || incident.voice_note_audio_url) && (
         <div className="mt-4 rounded-2xl border-2 border-red-600/40 bg-red-50 dark:bg-red-950/20 p-4">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <p className="text-sm font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your initial voice note</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-red-700 dark:text-red-400">Your initial voice note</p>
             {incident.voice_note_audio_url && (
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-sm"
+                className="h-7 text-xs"
                 onClick={async () => {
-                  toast.message("Re-transcribingâ€¦");
+                  toast.message("Re-transcribing…");
                   try {
                     const { data: signed } = await supabase.storage.from("session-audio").createSignedUrl(incident.voice_note_audio_url, 120);
                     if (!signed?.signedUrl) throw new Error("Could not access audio");
@@ -466,7 +466,7 @@ export default function HolarcHelpIncidentDetail() {
 
       {!isLive && incident.notes && (
         <div className="mt-4 rounded-2xl border-2 border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/20">
-          <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
             <FileText className="h-3.5 w-3.5" /> Closure summary
           </p>
           <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900 dark:text-emerald-100">{incident.notes}</p>
@@ -479,11 +479,11 @@ export default function HolarcHelpIncidentDetail() {
 
       {isLive && contacts.length > 0 && (
         <div className="mt-4 rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
-          <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Notify contacts on WhatsApp</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notify contacts on WhatsApp</p>
           <ul className="mt-3 space-y-2">
             {contacts.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3 rounded-xl border p-3">
-                <div><p className="font-semibold">{c.name}</p><p className="text-sm text-muted-foreground">{c.phone ?? "No number"}</p></div>
+                <div><p className="font-semibold">{c.name}</p><p className="text-xs text-muted-foreground">{c.phone ?? "No number"}</p></div>
                 {c.phone && (
                   <Button asChild size="sm" className="gap-1.5 bg-[#25D366] text-white hover:bg-[#1ea952]">
                     <a href={waLink(c.phone, message)} target="_blank" rel="noreferrer">
@@ -535,4 +535,3 @@ export default function HolarcHelpIncidentDetail() {
     </div>
   );
 }
-

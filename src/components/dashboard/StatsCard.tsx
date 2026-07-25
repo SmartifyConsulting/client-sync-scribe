@@ -1,4 +1,4 @@
-﻿import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -35,12 +35,12 @@ export function StatsCard({
     >
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <p className="text-sm md:text-sm font-medium text-muted-foreground truncate">{title}</p>
+          <p className="text-xs md:text-xs font-medium text-muted-foreground truncate">{title}</p>
           <p className="text-base md:text-xl font-bold text-foreground tracking-tight truncate">{value}</p>
           {change && (
             <p
               className={cn(
-                "text-sm font-medium",
+                "text-xs font-medium",
                 trend === "up" && "text-success",
                 trend === "down" && "text-destructive",
                 trend === "neutral" && "text-muted-foreground"
@@ -71,4 +71,3 @@ export function StatsCard({
 
   return content;
 }
-

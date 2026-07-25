@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Loader2, Pencil, X, Shield, Trash2, Users, KeyRound, Copy, Check, FileSearch } from "lucide-react";
 import { PendingProviderReviewDialog } from "@/features/admin/components/PendingProviderReviewDialog";
 import { Badge } from "@/components/ui/badge";
@@ -306,7 +306,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      toast({ title: "Role updated", description: `${user.email} â†’ ${ROLE_LABEL[newRole]}` });
+      toast({ title: "Role updated", description: `${user.email} → ${ROLE_LABEL[newRole]}` });
       setPendingRoleChange(null);
       await fetchUsers();
     } catch (e: any) {
@@ -385,14 +385,14 @@ export default function UsersTab({ kind }: UsersTabProps) {
                   {isEditing ? (
                     <Input value={editState.first_name} onChange={(e) => setEditState((s) => ({ ...s, first_name: e.target.value }))} className="h-7 w-32 text-[12.5px]" />
                   ) : (
-                    <span className="font-medium text-[hsl(var(--admin-text-primary))]">{first || "â€”"}</span>
+                    <span className="font-medium text-[hsl(var(--admin-text-primary))]">{first || "—"}</span>
                   )}
                 </TableCell>
                 <TableCell>
                   {isEditing ? (
                     <Input value={editState.last_name} onChange={(e) => setEditState((s) => ({ ...s, last_name: e.target.value }))} className="h-7 w-32 text-[12.5px]" />
                   ) : (
-                    <span>{last || "â€”"}</span>
+                    <span>{last || "—"}</span>
                   )}
                 </TableCell>
                 <TableCell className="text-[hsl(var(--admin-text-secondary))]">
@@ -402,14 +402,14 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     u.email
                   )}
                 </TableCell>
-                <TableCell className="text-[hsl(var(--admin-text-secondary))] text-sm tabular-nums">{u.phone || "â€”"}</TableCell>
+                <TableCell className="text-[hsl(var(--admin-text-secondary))] text-sm tabular-nums">{u.phone || "—"}</TableCell>
                 {showAddress && (
                   <TableCell className="text-[hsl(var(--admin-text-secondary))] text-sm max-w-[260px] truncate" title={u.address || ""}>
-                    {u.address || "â€”"}
+                    {u.address || "—"}
                   </TableCell>
                 )}
                 {showCompany && (
-                  <TableCell>{u.company || "â€”"}</TableCell>
+                  <TableCell>{u.company || "—"}</TableCell>
                 )}
                 <TableCell>
                   <Select
@@ -443,10 +443,10 @@ export default function UsersTab({ kind }: UsersTabProps) {
                   <div className="flex items-center gap-1.5">
                     <StatusDot tone={statusToTone(u.status)} />
                     {pendingStatusMap.get(u.user_id) === "pending" && (
-                      <Badge variant="outline" className="text-sm px-1.5 py-0 border-amber-400 text-amber-700 dark:text-amber-300">Pending approval</Badge>
+                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-amber-400 text-amber-700 dark:text-amber-300">Pending approval</Badge>
                     )}
                     {pendingStatusMap.get(u.user_id) === "rejected" && (
-                      <Badge variant="outline" className="text-sm px-1.5 py-0 border-destructive text-destructive">Rejected</Badge>
+                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-destructive text-destructive">Rejected</Badge>
                     )}
                   </div>
                 </TableCell>
@@ -500,7 +500,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
             <Toolbar
               searchValue={search}
               onSearchChange={setSearch}
-              searchPlaceholder={`Search ${noun}â€¦`}
+              searchPlaceholder={`Search ${noun}…`}
             />
             <CreateTestUserDialog onCreated={fetchUsers} />
           </div>
@@ -628,9 +628,9 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     {copiedTemp ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
                   </Button>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   This password won't be shown again. Their authenticator and backup codes have
-                  been cleared â€” they'll be prompted to set up a new authenticator after they
+                  been cleared — they'll be prompted to set up a new authenticator after they
                   sign in.
                 </p>
               </div>
@@ -652,4 +652,3 @@ export default function UsersTab({ kind }: UsersTabProps) {
 
   );
 }
-

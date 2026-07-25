@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Loader2, UserPlus, Copy, Check, ArrowLeft, User, Building2, Siren, Pill, ShieldCheck } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -26,8 +26,8 @@ type UserKind = "patient" | "hospital" | "esp" | "pharmacy" | "admin";
 
 const KIND_OPTIONS: Array<{ kind: UserKind; label: string; description: string; icon: React.ComponentType<any> }> = [
   { kind: "patient", label: "Patient", description: "Standard patient account.", icon: User },
-  { kind: "hospital", label: "Hospital", description: "Hospital â€” requires vetting.", icon: Building2 },
-  { kind: "esp", label: "Emergency Service Provider", description: "ER / Ambulance â€” requires vetting.", icon: Siren },
+  { kind: "hospital", label: "Hospital", description: "Hospital — requires vetting.", icon: Building2 },
+  { kind: "esp", label: "Emergency Service Provider", description: "ER / Ambulance — requires vetting.", icon: Siren },
   { kind: "pharmacy", label: "Pharmacy", description: "Pharmacy account.", icon: Pill },
   { kind: "admin", label: "Admin", description: "Full platform admin access.", icon: ShieldCheck },
 ];
@@ -105,7 +105,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
       setResult({ email: data.email, password: data.password, emailed: !!data.emailed });
       toast({
         title: data.action === "created" ? "User created" : "Password updated",
-        description: data.emailed ? `Credentials emailed to ${data.email}` : "Password ready â€” copy it before closing.",
+        description: data.emailed ? `Credentials emailed to ${data.email}` : "Password ready — copy it before closing.",
       });
       onCreated?.();
     } catch (e: any) {
@@ -204,7 +204,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
         await supabase.from("user_roles").insert({ user_id: newUserId, role: KIND_TO_ROLE[kind] as any });
       }
 
-      // (Acknowledgement email intentionally removed â€” notify.nigeria.holarchealth.com is abandoned.)
+      // (Acknowledgement email intentionally removed — notify.nigeria.holarchealth.com is abandoned.)
 
 
       setResult({
@@ -216,7 +216,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
       });
       toast({
         title: "Submission received",
-        description: "Pending approval â€” visible in User Admin. Approval is typically completed within 6 hours.",
+        description: "Pending approval — visible in User Admin. Approval is typically completed within 6 hours.",
       });
       onCreated?.();
     } catch (e: any) {
@@ -262,14 +262,14 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
           <div className="space-y-3">
             {result.pending && (
               <div className="rounded-lg border-2 border-emerald-500/60 bg-emerald-50/60 dark:border-emerald-400/40 dark:bg-emerald-950/30 p-3 text-sm text-emerald-900 dark:text-emerald-200">
-                <p className="font-semibold">Application received â€” pending approval</p>
-                <p className="mt-1 text-sm">
+                <p className="font-semibold">Application received — pending approval</p>
+                <p className="mt-1 text-xs">
                   We aim to approve all applications within <strong>6 hours</strong>.
                   {result.adminEmail ? <> A confirmation email has been sent to <strong>{result.adminEmail}</strong>.</> : null}
                 </p>
               </div>
             )}
-            <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-sm">
+            <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
               <p className="font-bold text-amber-900 dark:text-amber-200">This password is shown only once</p>
               <p className="text-amber-900/80 dark:text-amber-200/80">
                 Copy it now if you need it. {result.emailed ? "We also emailed it to the user." : "Email was not sent."}
@@ -304,7 +304,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
                     <Icon className="h-5 w-5 mt-0.5 text-primary shrink-0" />
                     <div>
                       <p className="font-medium text-sm">{label}</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
                     </div>
                   </div>
                 </button>
@@ -349,7 +349,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <p className="text-sm font-medium">Auto-generate password</p>
-                <p className="text-sm text-muted-foreground">14 chars, mixed case + digits + symbols</p>
+                <p className="text-xs text-muted-foreground">14 chars, mixed case + digits + symbols</p>
               </div>
               <Switch checked={autoGen} onCheckedChange={setAutoGen} />
             </div>
@@ -362,7 +362,7 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
                 <p className="text-sm font-medium">Email credentials to user</p>
-                <p className="text-sm text-muted-foreground">Send the login + password by email</p>
+                <p className="text-xs text-muted-foreground">Send the login + password by email</p>
               </div>
               <Switch checked={sendEmail} onCheckedChange={setSendEmail} />
             </div>
@@ -378,4 +378,3 @@ export function CreateTestUserDialog({ onCreated }: CreateTestUserDialogProps) {
     </Dialog>
   );
 }
-

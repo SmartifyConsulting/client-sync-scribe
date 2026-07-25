@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { MapPin, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
@@ -65,11 +65,11 @@ export default function RouteDeviationScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Route Deviation</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Monitor when ambulances deviate from authorized dispatch routes.
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function RouteDeviationScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             High Deviation
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">
@@ -85,7 +85,7 @@ export default function RouteDeviationScreen() {
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Medium Deviation
           </p>
           <p className="mt-1 text-2xl font-bold text-warning">
@@ -93,7 +93,7 @@ export default function RouteDeviationScreen() {
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Total Events
           </p>
           <p className="mt-1 text-2xl font-bold">{DEVIATION_DATA.length}</p>
@@ -106,7 +106,7 @@ export default function RouteDeviationScreen() {
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : DEVIATION_DATA.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">
+          <div className="p-8 text-center text-xs text-muted-foreground">
             <MapPin className="mx-auto mb-2 h-5 w-5 opacity-50" />
             No route deviations detected.
           </div>
@@ -125,16 +125,16 @@ export default function RouteDeviationScreen() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{deviation.ambulance_code}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-sm font-bold uppercase ${SEVERITY_COLORS[deviation.severity]}`}>
+                      <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase ${SEVERITY_COLORS[deviation.severity]}`}>
                         {deviation.deviation_percent}% Deviation
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-sm mt-2">
+                    <div className="flex items-center gap-1 text-xs mt-2">
                       <span>{deviation.from}</span>
                       <ArrowRight className="h-3 w-3" />
                       <span>{deviation.to}</span>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 mt-2 text-sm">
+                    <div className="grid grid-cols-3 gap-4 mt-2 text-xs">
                       <div>
                         <p className="text-muted-foreground">Authorized</p>
                         <p className="font-semibold">{deviation.authorized_distance_km} km</p>
@@ -148,8 +148,8 @@ export default function RouteDeviationScreen() {
                         <p className="font-semibold">{deviation.deviation_km} km</p>
                       </div>
                     </div>
-                    <p className="text-sm mt-2 opacity-60">
-                      Incident #{deviation.incident_id} â€¢ {new Date(deviation.occurred_at).toLocaleString()}
+                    <p className="text-xs mt-2 opacity-60">
+                      Incident #{deviation.incident_id} • {new Date(deviation.occurred_at).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -164,4 +164,3 @@ export default function RouteDeviationScreen() {
     </div>
   );
 }
-

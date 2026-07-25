@@ -93,7 +93,7 @@ serve(async (req) => {
       .join("\n\n---\n\n");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) return json({ error: "LOVABLE_API_KEY missing — configure in Supabase secrets", hint: "Set LOVABLE_API_KEY environment variable in Supabase dashboard" }, 500);
+    if (!LOVABLE_API_KEY) return json({ error: "LOVABLE_API_KEY missing" }, 500);
 
     const systemPrompt = `You are a clinical behavioural analyst. From the patient's own words across their consultation transcripts and summaries, infer a DISC personality profile.
 
@@ -109,64 +109,49 @@ Respond ONLY with JSON matching the given schema.`;
 
     const userPrompt = `Patient: ${patient.name}\nSessions analysed: ${list.length}\n\n${sessionBlocks}`;
 
-    let aiRes;
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-      aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-pro",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-          ],
-          response_format: {
-            type: "json_schema",
-            json_schema: {
-              name: "disc_profile",
-              strict: true,
-              schema: {
-                type: "object",
-                additionalProperties: false,
-                required: [
-                  "dominance", "influence", "steadiness", "conscientiousness",
-                  "primary_trait", "secondary_trait",
-                  "dominance_rationale", "influence_rationale",
-                  "steadiness_rationale", "conscientiousness_rationale",
-                ],
-                properties: {
-                  dominance: { type: "integer", minimum: 0, maximum: 100 },
-                  influence: { type: "integer", minimum: 0, maximum: 100 },
-                  steadiness: { type: "integer", minimum: 0, maximum: 100 },
-                  conscientiousness: { type: "integer", minimum: 0, maximum: 100 },
-                  primary_trait: { type: "string", enum: ["Dominance", "Influence", "Steadiness", "Conscientiousness"] },
-                  secondary_trait: { type: "string", enum: ["Dominance", "Influence", "Steadiness", "Conscientiousness"] },
-                  dominance_rationale: { type: "string" },
-                  influence_rationale: { type: "string" },
-                  steadiness_rationale: { type: "string" },
-                  conscientiousness_rationale: { type: "string" },
-                },
+    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-pro",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "disc_profile",
+            strict: true,
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              required: [
+                "dominance", "influence", "steadiness", "conscientiousness",
+                "primary_trait", "secondary_trait",
+                "dominance_rationale", "influence_rationale",
+                "steadiness_rationale", "conscientiousness_rationale",
+              ],
+              properties: {
+                dominance: { type: "integer", minimum: 0, maximum: 100 },
+                influence: { type: "integer", minimum: 0, maximum: 100 },
+                steadiness: { type: "integer", minimum: 0, maximum: 100 },
+                conscientiousness: { type: "integer", minimum: 0, maximum: 100 },
+                primary_trait: { type: "string", enum: ["Dominance", "Influence", "Steadiness", "Conscientiousness"] },
+                secondary_trait: { type: "string", enum: ["Dominance", "Influence", "Steadiness", "Conscientiousness"] },
+                dominance_rationale: { type: "string" },
+                influence_rationale: { type: "string" },
+                steadiness_rationale: { type: "string" },
+                conscientiousness_rationale: { type: "string" },
               },
             },
           },
-        }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-    } catch (fetchErr: any) {
-      console.error("Lovable API fetch error", fetchErr.message);
-      return json({
-        error: "Failed to connect to Lovable API",
-        details: fetchErr.message,
-        hint: "Check LOVABLE_API_KEY is set and Lovable API is accessible",
-      }, 503);
-    }
+        },
+      }),
+    });
 
     if (!aiRes.ok) {
       const errBody = await aiRes.text();

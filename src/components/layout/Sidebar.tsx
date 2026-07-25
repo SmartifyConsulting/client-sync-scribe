@@ -1,4 +1,4 @@
-﻿import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
@@ -172,7 +172,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   <item.icon className="h-5 w-5" />
                   <span className="flex-1">{t(item.labelKey, item.label)}</span>
                   {item.label === "Notifications" && unreadCount > 0 && (
-                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-sm font-semibold text-destructive-foreground">
+                    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-semibold text-destructive-foreground">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
@@ -188,8 +188,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             align="start"
             alignOffset={0}
             trigger={
-              <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-green-500 rounded-xl transition-colors">
-                <Avatar className="h-11 w-11 border-2 border-green-500 shrink-0">
+              <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-primary rounded-xl transition-colors">
+                <Avatar className="h-[73px] w-[73px] border-2 border-primary">
                   <AvatarImage
                     key={profile?.avatar_url}
                     src={profile?.avatar_url || undefined}
@@ -218,4 +218,3 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     </aside>
   );
 }
-

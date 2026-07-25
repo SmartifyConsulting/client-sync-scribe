@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Card } from "@/components/ui/card";
@@ -63,7 +63,7 @@ export default function AffiliatedAmbulancesScreen() {
           <h1 className="text-lg font-bold flex items-center gap-2">
             <Ambulance className="h-5 w-5 text-primary" /> Our ER Providers
           </h1>
-          <p className="text-sm text-muted-foreground">ER providers partnered with this hospital.</p>
+          <p className="text-xs text-muted-foreground">ER providers partnered with this hospital.</p>
         </div>
         <div className="relative w-full sm:w-64">
           <Search className="h-3.5 w-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -85,10 +85,10 @@ export default function AffiliatedAmbulancesScreen() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm truncate">{r.ambulance?.company_name || "Unknown"}</div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {r.role && <Badge variant="secondary" className="text-sm">{r.role}</Badge>}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {r.role && <Badge variant="secondary" className="text-xs">{r.role}</Badge>}
                     {r.ambulance?.status && r.ambulance.status !== "approved" && (
-                      <Badge variant="outline" className="text-sm">{r.ambulance.status}</Badge>
+                      <Badge variant="outline" className="text-xs">{r.ambulance.status}</Badge>
                     )}
                   </div>
                 </div>
@@ -110,4 +110,3 @@ export default function AffiliatedAmbulancesScreen() {
     </div>
   );
 }
-

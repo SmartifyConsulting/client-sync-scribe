@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Loader2, Search, Plus, MoreVertical, Trash2, Upload, Send } from "lucide-react";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { Patient, usePatients } from "@/hooks/usePatients";
@@ -151,10 +151,10 @@ function DoctorPatientsTab() {
             <table className="w-full">
               <thead>
                 <tr className="bg-primary">
-                  <th className="px-4 py-2.5 text-left text-sm font-medium text-primary-foreground">Patient</th>
-                  <th className="px-4 py-2.5 text-left text-sm font-medium text-primary-foreground">Contact</th>
-                  <th className="px-4 py-2.5 text-left text-sm font-medium text-primary-foreground">Status</th>
-                  <th className="px-4 py-2.5 text-right text-sm font-medium text-primary-foreground">Actions</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Patient</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Contact</th>
+                  <th className="px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">Status</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -165,7 +165,7 @@ function DoctorPatientsTab() {
                       <td className="px-4 py-2.5">
                         <Link to={`/patients/${patient.id}`} className="flex items-center gap-2">
                           <div className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-full font-medium text-sm text-primary-foreground",
+                            "flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs text-primary-foreground",
                             isMe ? "bg-terracotta" : "bg-primary"
                           )}>
                             {isMe ? "ME" : patient.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
@@ -174,11 +174,11 @@ function DoctorPatientsTab() {
                         </Link>
                       </td>
                       <td className="px-4 py-2.5 text-sm text-muted-foreground">
-                        {patient.email || patient.phone || "â€”"}
+                        {patient.email || patient.phone || "—"}
                       </td>
                       <td className="px-4 py-2.5">
                         <span className={cn(
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-sm font-medium",
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
                           patient.status === "active" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                         )}>
                           {patient.status}
@@ -274,7 +274,7 @@ export default function Profile() {
     <div className="space-y-4 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">My Holarchive</h1>
-        <p className="text-muted-foreground text-base">Manage your health information</p>
+        <p className="text-muted-foreground text-xs">Manage your health information</p>
       </div>
 
       {patientLoading ? (
@@ -295,7 +295,7 @@ export default function Profile() {
             }
             setPatientRecord((prev) => prev ? { ...prev, ...updates } : prev);
 
-            // Autosave fires frequently while typing â€” only surface a toast
+            // Autosave fires frequently while typing — only surface a toast
             // every 20s so it doesn't interrupt the user mid-keystroke.
             const now = Date.now();
             if (now - lastSavedToastRef.current > 20000) {
@@ -314,4 +314,3 @@ export default function Profile() {
     </div>
   );
 }
-

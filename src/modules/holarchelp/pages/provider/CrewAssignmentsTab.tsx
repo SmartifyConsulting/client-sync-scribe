@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Truck, Users, Check } from "lucide-react";
@@ -82,7 +82,7 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
   };
 
   if (isLoading) {
-    return <div className="flex items-center gap-2 text-sm text-muted-foreground py-6"><Loader2 className="h-4 w-4 animate-spin" /> Loading crewâ€¦</div>;
+    return <div className="flex items-center gap-2 text-xs text-muted-foreground py-6"><Loader2 className="h-4 w-4 animate-spin" /> Loading crew…</div>;
   }
 
   if (!members.length) {
@@ -96,7 +96,7 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         Assign each crew member to one or more vehicles. Their tick-list pre-fills automatically when a shift starts on that ambulance.
       </p>
       {members.map((m) => {
@@ -124,17 +124,17 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 text-sm">
+                <Button variant="outline" size="sm" className="h-8 text-xs">
                   Assign vehicles
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2">
-                <p className="px-1 pb-1.5 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="px-1 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Tick vehicles
                 </p>
                 <div className="max-h-60 overflow-y-auto space-y-0.5">
                   {vehicles.length === 0 ? (
-                    <p className="text-sm text-muted-foreground italic px-1 py-1">No vehicles in fleet.</p>
+                    <p className="text-xs text-muted-foreground italic px-1 py-1">No vehicles in fleet.</p>
                   ) : vehicles.map((v) => {
                     const on = mineIds.has(v.id);
                     return (
@@ -143,7 +143,7 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
                         <Truck className="h-3.5 w-3.5 text-primary" />
                         <span className="truncate">
                           {v.vehicle_code}
-                          {v.registration_number ? <span className="text-muted-foreground"> Â· {v.registration_number}</span> : null}
+                          {v.registration_number ? <span className="text-muted-foreground"> · {v.registration_number}</span> : null}
                         </span>
                         {on && <Check className="ml-auto h-3.5 w-3.5 text-success" />}
                       </label>
@@ -158,4 +158,3 @@ export default function CrewAssignmentsTab({ providerId }: { providerId: string 
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { LifeBuoy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -13,12 +13,12 @@ export function Footer() {
     { to: "/legal", label: t("footer.legal") },
   ];
 
-  const Dot = () => <span aria-hidden="true" className="opacity-50">Â·</span>;
+  const Dot = () => <span aria-hidden="true" className="opacity-50">·</span>;
 
   return (
     <footer className="bg-card/50 h-[var(--footer-height)] flex items-center">
       <div className="md:ml-[var(--sidebar-width)] w-full">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <span>{t("footer.copyright", { year: currentYear })}</span>
           {links.map((l) => (
             <span key={l.to} className="flex items-center gap-3">
@@ -43,4 +43,3 @@ export function Footer() {
     </footer>
   );
 }
-

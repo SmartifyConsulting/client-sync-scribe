@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Brain, RefreshCw, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -103,18 +103,18 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
           ) : (
             <RefreshCw className="h-3.5 w-3.5" />
           )}
-          <span className="text-sm">{profile ? "Refresh" : "Generate"}</span>
+          <span className="text-xs">{profile ? "Refresh" : "Generate"}</span>
         </Button>
       </div>
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading profileâ€¦
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading profile…
         </div>
       ) : !profile ? (
         <p className="text-sm text-muted-foreground italic">
           {hasSessions
-            ? "No DISC profile yet â€” click Generate to build one from this patient's sessions."
+            ? "No DISC profile yet — click Generate to build one from this patient's sessions."
             : "DISC profile will generate after the patient's first completed consultation."}
         </p>
       ) : (
@@ -124,37 +124,37 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
             <span className="font-medium text-foreground">{profile.primary_trait}</span>
             {profile.secondary_trait ? (
               <>
-                {" Â· "}Secondary:{" "}
+                {" · "}Secondary:{" "}
                 <span className="font-medium text-foreground">{profile.secondary_trait}</span>
               </>
             ) : null}
           </p>
 
-          <div className="grid gap-4 grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {TILES.map((tile) => {
               const score = (profile as any)[tile.key] as number;
               const rationale = (profile as any)[`${tile.key}_rationale`] as string | null;
               return (
                 <div
                   key={tile.key}
-                  className="rounded-lg border border-border bg-background p-4"
+                  className="rounded-lg border border-border bg-background p-3"
                 >
-                  <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-sm font-semibold text-foreground">
-                      {tile.letter} â€” {tile.label}
+                      {tile.letter} — {tile.label}
                     </span>
-                    <span className="text-sm font-medium text-muted-foreground tabular-nums">
+                    <span className="text-xs font-medium text-muted-foreground tabular-nums">
                       {score}
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden mb-3">
+                  <div className="h-1 rounded-full bg-muted overflow-hidden mb-2">
                     <div
                       className={`h-full ${tile.barClass}`}
                       style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
                     />
                   </div>
                   {rationale ? (
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       {rationale}
                     </p>
                   ) : null}
@@ -163,9 +163,9 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
             })}
           </div>
 
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-3 text-xs text-muted-foreground">
             Based on {profile.sessions_analyzed} session
-            {profile.sessions_analyzed === 1 ? "" : "s"} Â· updated{" "}
+            {profile.sessions_analyzed === 1 ? "" : "s"} · updated{" "}
             {new Date(profile.generated_at).toLocaleDateString()}
           </p>
         </>
@@ -173,4 +173,3 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
     </div>
   );
 }
-

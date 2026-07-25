@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Calendar, FileText, Clock, User, Loader2, Pill, ListChecks, ArrowRight, Info, Sparkles, Building2, Receipt, Star, Camera, Trophy, Heart, Mic } from "lucide-react";
@@ -299,17 +299,17 @@ export default function PatientDashboard() {
             <h1 className="text-3xl font-bold text-foreground">
               {profile?.full_name ? `${t("patientDashboard.welcomeTitle")}, ${profile.full_name.split(" ")[0]}` : t("patientDashboard.welcomeTitle")}
             </h1>
-            <p className="text-muted-foreground text-sm">{t("patientDashboard.welcomeSubtitle")}</p>
+            <p className="text-muted-foreground text-xs">{t("patientDashboard.welcomeSubtitle")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Link to="/patient/calendar">
-            <Button variant="outline" size="sm" className="gap-1.5 text-sm">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs">
               <Calendar className="h-3.5 w-3.5" /> {t("patientDashboard.calendar")}
             </Button>
           </Link>
           <Link to="/patient/tasks?autoRecord=true">
-            <Button size="sm" className="gap-1.5 text-sm bg-primary">
+            <Button size="sm" className="gap-1.5 text-xs bg-primary">
               <Mic className="h-3.5 w-3.5" /> {t("patientDashboard.recordTask")}
             </Button>
           </Link>
@@ -321,7 +321,7 @@ export default function PatientDashboard() {
         <div className="rounded-xl border border-primary/20 bg-card shadow-sm overflow-hidden">
           <div className="px-3 py-2 bg-primary/5 border-b border-primary/10 flex items-center gap-2">
             <Clock className="h-3.5 w-3.5 text-primary" />
-            <span className="text-sm font-semibold text-foreground">{t("patientDashboard.recentActivity")}</span>
+            <span className="text-xs font-semibold text-foreground">{t("patientDashboard.recentActivity")}</span>
           </div>
           <div className="flex overflow-x-auto gap-2 p-2.5 scrollbar-hide">
             {recentNotifications.slice(0, 8).map((notif: any) => {
@@ -333,8 +333,8 @@ export default function PatientDashboard() {
                     <Icon className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground truncate">{notif.title}</p>
-                    <p className="text-sm text-muted-foreground truncate">{format(parseISO(notif.created_at), "MMM d")}</p>
+                    <p className="text-xs font-medium text-foreground truncate">{notif.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{format(parseISO(notif.created_at), "MMM d")}</p>
                   </div>
                 </div>
               );
@@ -386,11 +386,11 @@ export default function PatientDashboard() {
                 {doctors.filter(d => d.nextAppointment).map(doc => (
                   <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
                     <div>
-                      <p className="text-sm font-medium text-foreground">{doc.doctor_profile?.full_name || t("patientDashboard.doctorFallback")}</p>
-                      <p className="text-sm text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
+                      <p className="text-xs font-medium text-foreground">{doc.doctor_profile?.full_name || t("patientDashboard.doctorFallback")}</p>
+                      <p className="text-xs text-muted-foreground">{doc.nextAppointment ? format(parseISO(doc.nextAppointment), "MMM d, h:mm a") : ""}</p>
                     </div>
                     {doc.doctor_profile?.specialty && (
-                      <Badge className={`text-sm border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
+                      <Badge className={`text-xs border-0 ${getSpecialtyColor(doc.doctor_profile.specialty)}`}>{doc.doctor_profile.specialty}</Badge>
                     )}
                   </div>
                 ))}
@@ -409,7 +409,7 @@ export default function PatientDashboard() {
                 <Trophy className="h-7 w-7 text-primary-foreground" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{t("patientDashboard.vulaLabel")}</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t("patientDashboard.vulaLabel")}</p>
                 <p className="text-2xl font-bold text-foreground">{lollipopCount}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -425,7 +425,7 @@ export default function PatientDashboard() {
                 <Trophy className="h-4 w-4 text-primary" />
                 {t("patientDashboard.earnVulasTitle")}
               </CardTitle>
-              <CardDescription className="text-sm">{t("patientDashboard.earnVulasDescription")}</CardDescription>
+              <CardDescription className="text-xs">{t("patientDashboard.earnVulasDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -460,12 +460,12 @@ export default function PatientDashboard() {
                   {t("patientDashboard.claimsTitle")}
                 </CardTitle>
                 <Link to="/patient/invoices">
-                  <Button variant="ghost" size="sm" className="text-sm h-6 text-primary gap-1">
+                  <Button variant="ghost" size="sm" className="text-xs h-6 text-primary gap-1">
                     {t("patientDashboard.claimsAllInvoices")} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
-              <CardDescription className="text-sm">{t("patientDashboard.claimsDescription")}</CardDescription>
+              <CardDescription className="text-xs">{t("patientDashboard.claimsDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               {recentClaims.length === 0 ? (
@@ -475,14 +475,14 @@ export default function PatientDashboard() {
                   {recentClaims.map((claim: any) => (
                     <div key={claim.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border">
                       <div>
-                        <p className="text-sm font-medium text-foreground">#{claim.invoice_number}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Submitted {claim.email_sent_at ? format(parseISO(claim.email_sent_at), "MMM d, yyyy") : "â€”"}
+                        <p className="text-xs font-medium text-foreground">#{claim.invoice_number}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Submitted {claim.email_sent_at ? format(parseISO(claim.email_sent_at), "MMM d, yyyy") : "—"}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold text-foreground">{formatCurrency(Number(claim.amount))}</p>
-                        <Badge variant="outline" className="text-sm capitalize">{claim.status}</Badge>
+                        <p className="text-xs font-semibold text-foreground">{formatCurrency(Number(claim.amount))}</p>
+                        <Badge variant="outline" className="text-xs capitalize">{claim.status}</Badge>
                       </div>
                     </div>
                   ))}
@@ -500,7 +500,7 @@ export default function PatientDashboard() {
                   </div>
                   {t("patientDashboard.documentationTitle")}
                 </CardTitle>
-                <CardDescription className="text-sm">{t("patientDashboard.documentationDescription")}</CardDescription>
+                <CardDescription className="text-xs">{t("patientDashboard.documentationDescription")}</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -522,28 +522,28 @@ export default function PatientDashboard() {
                 {t("patientDashboard.tasksTitle")}
               </CardTitle>
               <Link to="/patient/rewards">
-                <Button variant="ghost" size="sm" className="text-sm h-6 text-primary gap-1">
+                <Button variant="ghost" size="sm" className="text-xs h-6 text-primary gap-1">
                   {t("patientDashboard.tasksViewAll")} <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
-            <CardDescription className="text-sm">{t("patientDashboard.tasksDescription")}</CardDescription>
+            <CardDescription className="text-xs">{t("patientDashboard.tasksDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-1.5">
               {assignedTasks.map((task) => (
                 <div key={task.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border hover:bg-muted/50 transition-colors">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{task.title}</p>
+                    <p className="text-xs font-medium truncate">{task.title}</p>
                     {task.due_date && (
-                      <p className="text-sm text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {t("patientDashboard.tasksDue")}: {format(parseISO(task.due_date), "MMM d, yyyy")}
                       </p>
                     )}
                   </div>
                   {task.vulas_reward > 0 && (
-                    <Badge className="ml-2 bg-primary text-primary border-0 text-sm font-bold">
-                      +{task.vulas_reward} â“‚ï¸
+                    <Badge className="ml-2 bg-primary text-primary border-0 text-xs font-bold">
+                      +{task.vulas_reward} Ⓜ️
                     </Badge>
                   )}
                 </div>
@@ -555,4 +555,3 @@ export default function PatientDashboard() {
     </div>
   );
 }
-

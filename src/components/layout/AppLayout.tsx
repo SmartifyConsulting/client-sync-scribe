@@ -1,4 +1,4 @@
-﻿import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { BottomNav } from "./BottomNav";
 import { MobileHeader } from "./MobileHeader";
 import { Sidebar } from "./Sidebar";
@@ -27,7 +27,7 @@ export function AppLayout() {
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   // Patients should be redirected to their layout, UNLESS they also hold the
-  // admin role and are visiting an admin route â€” admins use this layout.
+  // admin role and are visiting an admin route — admins use this layout.
   if (!roleLoading && isPatient && !(isAdmin && isAdminRoute)) {
     return <Navigate to="/patient/details" replace />;
   }
@@ -64,7 +64,7 @@ export function AppLayout() {
       <div className="md:hidden px-4 pb-24 -mt-4">
         <a
           href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
-          className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
+          className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
         >
           <LifeBuoy className="h-3.5 w-3.5" /> {t("common.support")}
         </a>
@@ -82,4 +82,3 @@ export function AppLayout() {
     </div>
   );
 }
-

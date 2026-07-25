@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,11 +136,16 @@ export function HeaderFooterTemplateForm({
   };
 
   const renderFormattedContent = (content: string) => {
-    let safeContent = content.replace(/\n/g, '<br/>');
-    safeContent = safeContent
-      .replace(/\{BOLD\}(.*?)\{\/BOLD\}/g, '<b>$1</b>')
-      .replace(/\{ITALIC\}(.*?)\{\/ITALIC\}/g, '<i>$1</i>')
-      .replace(/\{UNDERLINE\}(.*?)\{\/UNDERLINE\}/g, '<u>$1</u>');
+    const safeContent = content
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/&lt;b&gt;/g, '<b>')
+      .replace(/&lt;\/b&gt;/g, '</b>')
+      .replace(/&lt;i&gt;/g, '<i>')
+      .replace(/&lt;\/i&gt;/g, '</i>')
+      .replace(/&lt;u&gt;/g, '<u>')
+      .replace(/&lt;\/u&gt;/g, '</u>')
+      .replace(/\n/g, '<br/>');
     return safeContent;
   };
 
@@ -164,7 +169,7 @@ export function HeaderFooterTemplateForm({
     <div className="space-y-6">
       {/* Preview Toggle */}
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-foreground">Create Header and Footer Template</h4>
+        <h4 className="text-sm font-medium text-foreground">Header & Footer Template</h4>
         <Button
           variant="outline"
           size="sm"
@@ -243,61 +248,54 @@ export function HeaderFooterTemplateForm({
       </div>
 
       {/* Dynamic Fields Info */}
-      <div className="p-4 rounded-lg bg-blue-50/50 border border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
-        <p className="text-sm font-semibold text-foreground mb-2">Dynamic Fields for Headers & Footers</p>
-        <p className="text-sm text-muted-foreground mb-3">
-          Click to copy these placeholders. They'll be replaced with real data on all documents using this letterhead.
+      <div className="p-3 rounded-lg bg-muted/50 border border-border">
+        <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
+        <p className="text-xs text-muted-foreground mb-2">
+          Use these placeholders - they will be replaced with actual data when creating documents.
         </p>
         <div className="flex flex-wrap gap-2">
-          {[
-            "[DoctorName]", "[DoctorSignature]", "[PracticeNumber]",
-            "[DoctorNumber]", "[PracticeAddress]", "[Date]"
-          ].map(token => (
-            <code
-              key={token}
-              onClick={() => navigator.clipboard?.writeText(token)}
-              className="text-sm bg-primary/15 text-primary px-3 py-2 rounded cursor-pointer select-none hover:bg-primary/25 transition-colors border border-primary/30"
-              title="Click to copy"
-            >
-              {token}
-            </code>
-          ))}
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorName]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorSignature]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeNumber]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
+          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[Date]</code>
         </div>
       </div>
 
       {/* HEADER SECTION */}
       <div className="space-y-3">
-        <div>
-          <h4 className="text-sm font-semibold text-foreground">Header Section</h4>
-          <p className="text-sm text-muted-foreground mt-1">Appears at the top of every document (Left, Center, Right columns)</p>
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-foreground">Header</h4>
+          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
         </div>
         <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
           <div>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ Left Column</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
             <TemplateSectionEditor
               value={header.left}
               onChange={(v) => setHeader({ ...header, left: v })}
-              placeholder="Logo or practice name..."
+              placeholder="Logo, practice name..."
               rows={2}
               compact
             />
           </div>
           <div>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">â¬†ï¸ Center Column</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
             <TemplateSectionEditor
               value={header.center}
               onChange={(v) => setHeader({ ...header, center: v })}
-              placeholder="Title or tagline..."
+              placeholder="Title, heading..."
               rows={2}
               compact
             />
           </div>
           <div>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ž Right Column</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
             <TemplateSectionEditor
               value={header.right}
               onChange={(v) => setHeader({ ...header, right: v })}
-              placeholder="Contact or phone..."
+              placeholder="Date, reference..."
               rows={2}
               compact
             />
@@ -307,13 +305,13 @@ export function HeaderFooterTemplateForm({
 
       {/* FOOTER SECTION */}
       <div className="space-y-3">
-        <div>
-          <h4 className="text-sm font-semibold text-foreground">Footer Section</h4>
-          <p className="text-sm text-muted-foreground mt-1">Appears at the bottom of every document (Left, Center, Right columns)</p>
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-foreground">Footer</h4>
+          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
         </div>
         <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
           <div>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ Left Column</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
             <TemplateSectionEditor
               value={footer.left}
               onChange={(v) => setFooter({ ...footer, left: v })}
@@ -323,21 +321,21 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">â¬‡ï¸ Center Column</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
             <TemplateSectionEditor
               value={footer.center}
               onChange={(v) => setFooter({ ...footer, center: v })}
-              placeholder="Page number or date..."
+              placeholder="Page number..."
               rows={2}
               compact
             />
           </div>
           <div>
-            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ž Right Column</label>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
             <TemplateSectionEditor
               value={footer.right}
               onChange={(v) => setFooter({ ...footer, right: v })}
-              placeholder="Website or email..."
+              placeholder="Contact info..."
               rows={2}
               compact
             />

@@ -1,16 +1,8 @@
-﻿import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Upload, X, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,8 +11,6 @@ export interface SectionContent {
   text: string;
   alignment: 'left' | 'center' | 'right';
   imageUrl?: string;
-  fontSize?: number; // in pixels
-  fontFamily?: string;
 }
 
 interface TemplateSectionEditorProps {
@@ -30,27 +20,7 @@ interface TemplateSectionEditorProps {
   rows?: number;
   showImageUpload?: boolean;
   compact?: boolean;
-  label?: string;
-  showFontControls?: boolean;
 }
-
-const FONT_FAMILIES = [
-  { value: "sans", label: "DM Sans" },
-  { value: "serif", label: "Serif" },
-  { value: "mono", label: "Monospace" },
-  { value: "roboto", label: "Roboto" },
-  { value: "open-sans", label: "Open Sans" },
-];
-
-const FONT_SIZES = [
-  { value: 10, label: "10px" },
-  { value: 12, label: "12px" },
-  { value: 14, label: "14px" },
-  { value: 16, label: "16px" },
-  { value: 18, label: "18px" },
-  { value: 20, label: "20px" },
-  { value: 24, label: "24px" },
-];
 
 export function TemplateSectionEditor({
   value,
@@ -59,8 +29,6 @@ export function TemplateSectionEditor({
   rows = 3,
   showImageUpload = true,
   compact = false,
-  label,
-  showFontControls = false,
 }: TemplateSectionEditorProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -75,19 +43,19 @@ export function TemplateSectionEditor({
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = value.text.substring(start, end);
-
+    
     if (start === end) return;
 
     let wrappedText = '';
     switch (format) {
       case 'bold':
-        wrappedText = `{BOLD}${selectedText}{/BOLD}`;
+        wrappedText = `<b>${selectedText}</b>`;
         break;
       case 'italic':
-        wrappedText = `{ITALIC}${selectedText}{/ITALIC}`;
+        wrappedText = `<i>${selectedText}</i>`;
         break;
       case 'underline':
-        wrappedText = `{UNDERLINE}${selectedText}{/UNDERLINE}`;
+        wrappedText = `<u>${selectedText}</u>`;
         break;
     }
 
@@ -214,41 +182,7 @@ export function TemplateSectionEditor({
   const inputId = `section-image-${Math.random().toString(36).substr(2, 9)}`;
 
   return (
-    <div className="space-y-3">
-      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
-
-      {/* Font Controls */}
-      {showFontControls && (
-        <div className="flex items-center gap-3 p-2 border border-border rounded-md bg-muted/20">
-          <div className="flex-1">
-            <label className="text-sm font-medium text-muted-foreground block mb-1">Font Family</label>
-            <Select value={value.fontFamily || "sans"} onValueChange={(font) => onChange({ ...value, fontFamily: font })}>
-              <SelectTrigger className="h-7 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_FAMILIES.map(f => (
-                  <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-1">
-            <label className="text-sm font-medium text-muted-foreground block mb-1">Font Size</label>
-            <Select value={(value.fontSize || 14).toString()} onValueChange={(size) => onChange({ ...value, fontSize: parseInt(size) })}>
-              <SelectTrigger className="h-7 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_SIZES.map(s => (
-                  <SelectItem key={s.value} value={s.value.toString()}>{s.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      )}
-
+    <div className="space-y-2">
       {/* Toolbar */}
       <div className={`flex items-center gap-1 p-1 border border-border rounded-md bg-muted/30 ${compact ? 'flex-wrap' : ''}`}>
         <Toggle
@@ -356,7 +290,7 @@ export function TemplateSectionEditor({
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           className={`
-            border border-dashed rounded p-2 text-center transition-colors cursor-pointer text-sm
+            border border-dashed rounded p-2 text-center transition-colors cursor-pointer text-xs
             ${isDragging 
               ? 'border-primary bg-primary/5' 
               : 'border-border/50 hover:border-primary/50'
@@ -376,40 +310,32 @@ export function TemplateSectionEditor({
       )}
 
       {/* Text Area */}
-      <div className="relative">
-        <Textarea
-          ref={textareaRef}
-          value={value.text}
-          onChange={(e) => onChange({ ...value, text: e.target.value })}
-          placeholder={placeholder}
-          rows={rows}
-          className="text-sm resize-none"
-          style={{ textAlign: value.alignment, fontSize: value.fontSize ? `${value.fontSize}px` : undefined }}
-          onDragOver={(e) => {
-            if (e.dataTransfer.types.includes("text/plain")) e.preventDefault();
-          }}
-          onDrop={(e) => {
-            const token = e.dataTransfer.getData("text/plain");
-            if (!token || !token.startsWith("[") || !token.endsWith("]")) return;
-            e.preventDefault();
-            const ta = textareaRef.current;
-            const pos = ta?.selectionStart ?? value.text.length;
-            const next = value.text.slice(0, pos) + token + value.text.slice(pos);
-            onChange({ ...value, text: next });
-            setTimeout(() => {
-              ta?.focus();
-              const newPos = pos + token.length;
-              ta?.setSelectionRange(newPos, newPos);
-            }, 0);
-          }}
-        />
-        {value.text && (
-          <div className="absolute -bottom-6 right-0 text-sm text-muted-foreground">
-            Drag placeholders or paste with Ctrl+V
-          </div>
-        )}
-      </div>
+      <Textarea
+        ref={textareaRef}
+        value={value.text}
+        onChange={(e) => onChange({ ...value, text: e.target.value })}
+        placeholder={placeholder}
+        rows={rows}
+        className="text-sm resize-none"
+        style={{ textAlign: value.alignment }}
+        onDragOver={(e) => {
+          if (e.dataTransfer.types.includes("text/plain")) e.preventDefault();
+        }}
+        onDrop={(e) => {
+          const token = e.dataTransfer.getData("text/plain");
+          if (!token || !token.startsWith("[") || !token.endsWith("]")) return;
+          e.preventDefault();
+          const ta = textareaRef.current;
+          const pos = ta?.selectionStart ?? value.text.length;
+          const next = value.text.slice(0, pos) + token + value.text.slice(pos);
+          onChange({ ...value, text: next });
+          setTimeout(() => {
+            ta?.focus();
+            const newPos = pos + token.length;
+            ta?.setSelectionRange(newPos, newPos);
+          }, 0);
+        }}
+      />
     </div>
   );
 }
-

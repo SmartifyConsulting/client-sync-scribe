@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, Copy, Download, Printer, ShieldCheck, AlertTriangle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +15,7 @@ interface Props {
 
 /**
  * Shown immediately after a phone-only user finishes enrolling their authenticator.
- * Generates and displays 8 one-time backup codes â€” the only self-service way to
+ * Generates and displays 8 one-time backup codes — the only self-service way to
  * recover their account if they lose their phone (since they have no email).
  */
 export function BackupCodesScreen({ onContinue }: Props) {
@@ -60,7 +60,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
   const download = () => {
     const blob = new Blob(
       [
-        `Holarc Health â€” Backup Codes\n` +
+        `Holarc Health — Backup Codes\n` +
           `Generated: ${new Date().toLocaleString()}\n\n` +
           `Each code works once. Use one if you lose your phone.\n\n` +
           codesText +
@@ -85,7 +85,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
        .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;font-family:monospace;font-size:18px}
        .code{padding:10px;border:1px solid #ccc;border-radius:6px;text-align:center}
        p{color:#444;font-size:13px}</style></head>
-       <body><h1>Holarc Health â€” Backup Codes</h1>
+       <body><h1>Holarc Health — Backup Codes</h1>
        <p>Generated ${new Date().toLocaleString()}. Each code works once. Use one if you lose your phone.</p>
        <div class="grid">${codes.map((c) => `<div class="code">${c}</div>`).join("")}</div>
        </body></html>`
@@ -106,7 +106,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
               <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
             </div>
             <p className="text-sm uppercase tracking-wider text-primary font-semibold mb-1">
-              Last step Â· Save these codes
+              Last step · Save these codes
             </p>
             <h1 className="text-lg sm:text-xl font-semibold text-foreground">
               Save your backup codes
@@ -117,15 +117,15 @@ export function BackupCodesScreen({ onContinue }: Props) {
             <div className="space-y-3 text-sm text-foreground">
               <p>
                 Your authenticator app lives on your phone. <strong>If you lose your phone,
-                you'll be locked out</strong> â€” unless you save these backup codes now.
+                you'll be locked out</strong> — unless you save these backup codes now.
               </p>
               <p>
                 A backup code is a one-time password you type instead of the 6-digit code from
                 your app. Each code works once, then disappears. Treat them like cash: store
-                them somewhere safe â€” a note in your wallet, a printed sheet at home, or a
+                them somewhere safe — a note in your wallet, a printed sheet at home, or a
                 password manager.
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 We're showing you 8 codes. You only need them if you lose your phone.
               </p>
             </div>
@@ -133,7 +133,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-8 gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Generating your codesâ€¦</p>
+                <p className="text-xs text-muted-foreground">Generating your codes…</p>
               </div>
             ) : (
               <>
@@ -170,7 +170,7 @@ export function BackupCodesScreen({ onContinue }: Props) {
 
                 <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/40 rounded-lg">
                   <AlertTriangle className="h-4 w-4 text-yellow-700 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-foreground">
+                  <p className="text-xs text-foreground">
                     These codes won't be shown again. If you lose them, you'll have to contact
                     support to get back into your account.
                   </p>
@@ -204,4 +204,3 @@ export function BackupCodesScreen({ onContinue }: Props) {
     </div>
   );
 }
-

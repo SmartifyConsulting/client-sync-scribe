@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SosLiveMap } from "../../components/SosLiveMap";
@@ -41,7 +41,7 @@ export default function HospitalIncidentConsole() {
         if (ambId) {
           const { data: amb } = await supabase.from("holarchelp_ambulance_providers" as any)
             .select("company_name, contact_phone").eq("id", ambId).maybeSingle();
-          setCrew([(amb as any)?.company_name, (amb as any)?.contact_phone].filter(Boolean).join(" Â· "));
+          setCrew([(amb as any)?.company_name, (amb as any)?.contact_phone].filter(Boolean).join(" · "));
         }
       });
     supabase.from("holarchelp_locations" as any).select("latitude, longitude, recorded_at")
@@ -83,10 +83,10 @@ export default function HospitalIncidentConsole() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => navigate("/provider/hospital")} className="text-sm text-muted-foreground hover:text-foreground">{t("hospitalConsole.backToQueue")}</button>
+          <button onClick={() => navigate("/provider/hospital")} className="text-xs text-muted-foreground hover:text-foreground">{t("hospitalConsole.backToQueue")}</button>
           <h1 className="mt-1 text-xl font-extrabold">{t("hospitalConsole.title")}</h1>
         </div>
-        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary">
+        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
           {statusLabel(incident.status, t).toUpperCase()}
         </span>
       </div>
@@ -95,11 +95,11 @@ export default function HospitalIncidentConsole() {
         <Stat label={t("hospitalConsole.erEta")} value={<EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />} />
         <Stat label={t("hospitalConsole.transport")} value={statusLabel(incident.status, t)} />
         <Stat label={t("admissions.admission")} value={t(`admissionStatus.${incident.hospital_admission_status ?? "incoming"}`)} />
-        <Stat label={t("nav.triage")} value={incident.triage_priority ?? "â€”"} />
+        <Stat label={t("nav.triage")} value={incident.triage_priority ?? "—"} />
       </div>
 
       {crew && (
-        <div className="rounded-xl border bg-muted/30 p-2.5 text-sm">
+        <div className="rounded-xl border bg-muted/30 p-2.5 text-xs">
           <span className="font-semibold">{t("common.crew")}:</span> {crew}
         </div>
       )}
@@ -115,7 +115,7 @@ export default function HospitalIncidentConsole() {
         <div className="space-y-3">
           <SosLiveMap incidentId={id!} mode="hospital" height={320} />
           <div className="rounded-2xl border bg-card p-3 space-y-2">
-            <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("hospitalConsole.admissionStepper")}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("hospitalConsole.admissionStepper")}</p>
             <div className="flex flex-wrap gap-1.5">
               {ADMISSION_STEPS.map((s) => (
                 <Button key={s.v} size="sm"
@@ -144,8 +144,7 @@ export default function HospitalIncidentConsole() {
 
 const Stat = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="rounded-2xl border bg-card p-2.5">
-    <p className="text-sm uppercase tracking-wider text-muted-foreground">{label}</p>
+    <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
     <p className="mt-0.5 text-base font-extrabold">{value}</p>
   </div>
 );
-

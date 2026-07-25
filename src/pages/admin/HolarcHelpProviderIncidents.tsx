@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -36,7 +36,7 @@ export default function HolarcHelpProviderIncidents() {
       let names: Record<string, string> = {};
       if (userIds.length) {
         const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", userIds);
-        for (const p of (profs as any[]) ?? []) names[p.id] = p.full_name ?? "â€”";
+        for (const p of (profs as any[]) ?? []) names[p.id] = p.full_name ?? "—";
       }
       const ids = list.map((i) => i.id);
       let ratings: Record<string, number> = {};
@@ -45,7 +45,7 @@ export default function HolarcHelpProviderIncidents() {
           .select("incident_id, rating").in("incident_id", ids);
         for (const f of (fb as any[]) ?? []) ratings[f.incident_id] = f.rating;
       }
-      setRows(list.map((i) => ({ ...i, patient_name: names[i.user_id] ?? "â€”", rating: ratings[i.id] ?? null })));
+      setRows(list.map((i) => ({ ...i, patient_name: names[i.user_id] ?? "—", rating: ratings[i.id] ?? null })));
       setLoading(false);
     })();
   }, [isAdmin, id, type]);
@@ -64,7 +64,7 @@ export default function HolarcHelpProviderIncidents() {
     arrived: rows.filter((r) => r.arrived_at).length,
     avgRating: (() => {
       const r = rows.filter((x) => x.rating != null);
-      return r.length ? (r.reduce((s, x) => s + x.rating, 0) / r.length).toFixed(1) : "â€”";
+      return r.length ? (r.reduce((s, x) => s + x.rating, 0) / r.length).toFixed(1) : "—";
     })(),
   };
   const providerName = provider?.name ?? provider?.company_name ?? "Provider";
@@ -73,9 +73,9 @@ export default function HolarcHelpProviderIncidents() {
     <div className="container mx-auto p-4 sm:p-6 space-y-5">
       <Link to="/admin/users"><Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Back to admin</Button></Link>
       <div>
-        <p className="text-sm uppercase tracking-widest text-muted-foreground">Incident history</p>
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Incident history</p>
         <h1 className="text-2xl font-extrabold">{providerName}</h1>
-        <p className="text-sm text-muted-foreground">{provider?.country ?? "â€”"} Â· {provider?.tier ?? "â€”"} Â· <span className="capitalize">{provider?.status}</span></p>
+        <p className="text-xs text-muted-foreground">{provider?.country ?? "—"} · {provider?.tier ?? "—"} · <span className="capitalize">{provider?.status}</span></p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -104,14 +104,14 @@ export default function HolarcHelpProviderIncidents() {
             {!loading && rows.length === 0 && (<TableRow><TableCell colSpan={8} className="text-center py-8 text-sm text-muted-foreground">No incidents for this provider yet.</TableCell></TableRow>)}
             {!loading && rows.map((r) => (
               <TableRow key={r.id}>
-                <TableCell className="text-sm">{format(parseISO(r.created_at), "MMM d, HH:mm")}</TableCell>
-                <TableCell className="text-sm">{r.patient_name}</TableCell>
-                <TableCell><Badge variant="outline" className="capitalize text-sm">{r.severity ?? "â€”"}</Badge></TableCell>
-                <TableCell><Badge variant="outline" className="capitalize text-sm">{r.status}</Badge></TableCell>
-                <TableCell className="text-sm">{r.accepted_at ? format(parseISO(r.accepted_at), "HH:mm") : "â€”"}</TableCell>
-                <TableCell className="text-sm">{r.arrived_at ? format(parseISO(r.arrived_at), "HH:mm") : "â€”"}</TableCell>
-                <TableCell className="text-sm">{r.resolved_at ? format(parseISO(r.resolved_at), "HH:mm") : "â€”"}</TableCell>
-                <TableCell className="text-sm">{r.rating ?? "â€”"}</TableCell>
+                <TableCell className="text-xs">{format(parseISO(r.created_at), "MMM d, HH:mm")}</TableCell>
+                <TableCell className="text-xs">{r.patient_name}</TableCell>
+                <TableCell><Badge variant="outline" className="capitalize text-xs">{r.severity ?? "—"}</Badge></TableCell>
+                <TableCell><Badge variant="outline" className="capitalize text-xs">{r.status}</Badge></TableCell>
+                <TableCell className="text-xs">{r.accepted_at ? format(parseISO(r.accepted_at), "HH:mm") : "—"}</TableCell>
+                <TableCell className="text-xs">{r.arrived_at ? format(parseISO(r.arrived_at), "HH:mm") : "—"}</TableCell>
+                <TableCell className="text-xs">{r.resolved_at ? format(parseISO(r.resolved_at), "HH:mm") : "—"}</TableCell>
+                <TableCell className="text-xs">{r.rating ?? "—"}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -120,4 +120,3 @@ export default function HolarcHelpProviderIncidents() {
     </div>
   );
 }
-

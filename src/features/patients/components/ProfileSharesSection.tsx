@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,8 +124,8 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
           <Users className="h-5 w-5 text-primary" />
           Who can see my profile
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Share your profile with family â€” e.g. an elderly parent allowing a child, or a child allowing a parent.
+        <p className="text-xs text-muted-foreground">
+          Share your profile with family — e.g. an elderly parent allowing a child, or a child allowing a parent.
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -156,7 +156,7 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
               />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-sm">
+          <label className="flex items-center gap-2 text-xs">
             <Switch checked={allowTracking} onCheckedChange={setAllowTracking} />
             Also share live tracking when I trigger SOS
           </label>
@@ -165,9 +165,9 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
           </Button>
         </div>
 
-        {loading && <p className="text-sm text-muted-foreground">Loadingâ€¦</p>}
+        {loading && <p className="text-xs text-muted-foreground">Loading…</p>}
         {!loading && shares.length === 0 && (
-          <p className="text-sm text-muted-foreground">No one has access yet.</p>
+          <p className="text-xs text-muted-foreground">No one has access yet.</p>
         )}
         {shares.map((s) => (
           <div key={s.id} className="rounded-lg border border-border p-3 bg-muted/30">
@@ -178,14 +178,14 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
                     || s.shared_with_username
                     || s.shared_with_email}
                   {s.relationship && (
-                    <span className="ml-2 text-sm text-muted-foreground">({s.relationship})</span>
+                    <span className="ml-2 text-xs text-muted-foreground">({s.relationship})</span>
                   )}
                 </p>
                 {(s.shared_with_first_name || s.shared_with_last_name) && (s.shared_with_username || s.shared_with_email) && (
-                  <p className="text-sm text-muted-foreground">{s.shared_with_username ?? s.shared_with_email}</p>
+                  <p className="text-xs text-muted-foreground">{s.shared_with_username ?? s.shared_with_email}</p>
                 )}
                 {!s.shared_with_user_id && (
-                  <p className="text-sm text-amber-600">Pending â€” they'll get access once they sign up.</p>
+                  <p className="text-sm text-amber-600">Pending — they'll get access once they sign up.</p>
                 )}
               </div>
               <Button
@@ -198,14 +198,14 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
               </Button>
             </div>
             <div className="flex flex-wrap gap-4 pt-2">
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-xs">
                 <Switch
                   checked={s.can_view_profile}
                   onCheckedChange={(v) => updateShare(s.id, { can_view_profile: v })}
                 />
                 Profile
               </label>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-xs">
                 <Switch
                   checked={s.can_view_live_tracking}
                   onCheckedChange={(v) => updateShare(s.id, { can_view_live_tracking: v })}
@@ -219,4 +219,3 @@ export function ProfileSharesSection({ ownerUserId }: { ownerUserId: string }) {
     </Card>
   );
 }
-

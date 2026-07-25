@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Trash2, Pencil, Loader2, Search, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -268,7 +268,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
-            <p className="mt-1 text-muted-foreground text-sm">Manage doctors you refer patients to</p>
+            <p className="mt-1 text-muted-foreground text-xs">Manage doctors you refer patients to</p>
           </div>
           <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
             <Plus className="h-4 w-4" /> Add Doctor
@@ -277,7 +277,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       )}
       {hideHeader && (
         <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-sm">Manage doctors you refer patients to</p>
+          <p className="text-muted-foreground text-xs">Manage doctors you refer patients to</p>
           <Button size="sm" onClick={() => { resetForm(); setShowForm(true); }} className="gap-1.5">
             <Plus className="h-3.5 w-3.5" /> Add Doctor
           </Button>
@@ -314,8 +314,8 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                         onClick={() => handleSelectProfile(doc)}
                       >
                         <p className="font-medium text-foreground text-sm">{doc.full_name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {doc.specialty && `${doc.specialty} Â· `}
+                        <p className="text-xs text-muted-foreground">
+                          {doc.specialty && `${doc.specialty} · `}
                           {doc.practice_number && `PR: ${doc.practice_number}`}
                         </p>
                       </button>
@@ -324,7 +324,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                 )}
               </div>
 
-              {/* Not found â†’ invite or manual */}
+              {/* Not found → invite or manual */}
               {noSearchResults && (
                 <div className="rounded-lg border border-dashed border-border p-4 space-y-3 bg-muted/30">
                   <p className="text-sm text-muted-foreground">Doctor not found on Holarc</p>
@@ -445,16 +445,16 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       <div className="grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
         {/* Sidebar filters */}
         <div className="rounded-xl border border-primary bg-card shadow-sm p-4 space-y-4 h-fit">
-          <h3 className="text-sm font-medium text-foreground">Filters</h3>
+          <h3 className="text-xs font-medium text-primary-dark">Filters</h3>
           <div className="space-y-1.5">
-            <Label className="text-sm">Search</Label>
+            <Label className="text-xs">Search</Label>
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-8 h-9 text-sm" />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-sm">Specialty</Label>
+            <Label className="text-xs">Specialty</Label>
             <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
               <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
               <SelectContent className="max-h-72">
@@ -482,16 +482,16 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="font-medium text-foreground truncate">{doc.first_name} {doc.last_name}</span>
-                    <div className="flex items-center gap-1.5 flex-wrap text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
                       {doc.specialty && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">{doc.specialty}</span>}
                       {doc.practice_number && <span>PR#: {doc.practice_number}</span>}
-                      {doc.email && <span>Â· {doc.email}</span>}
-                      {doc.phone && <span>Â· {doc.phone}</span>}
+                      {doc.email && <span>· {doc.email}</span>}
+                      {doc.phone && <span>· {doc.phone}</span>}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-sm text-muted-foreground">{doc.referral_count} referral{doc.referral_count === 1 ? "" : "s"}</span>
+                  <span className="text-xs text-muted-foreground">{doc.referral_count} referral{doc.referral_count === 1 ? "" : "s"}</span>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(doc)}><Pencil className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(doc.id)}><Trash2 className="h-4 w-4" /></Button>
                 </div>
@@ -503,4 +503,3 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     </div>
   );
 }
-

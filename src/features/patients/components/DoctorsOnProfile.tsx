@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -218,7 +218,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Attending Doctors</h3>
+          <h3 className="text-lg font-semibold text-foreground">Attending Doctors</h3>
           <p className="text-sm text-muted-foreground">
             Doctors with access to this patient's profile
           </p>
@@ -250,7 +250,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
                     <p className="font-medium text-foreground">
                       {doctor.doctor_profile?.full_name || "Unknown Doctor"}
                       {isCurrentUser && (
-                        <span className="ml-2 text-sm text-muted-foreground">(You)</span>
+                        <span className="ml-2 text-xs text-muted-foreground">(You)</span>
                       )}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -310,7 +310,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
                   <Mail className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold text-foreground">Send Message</h2>
+                  <h2 className="text-lg font-semibold text-foreground">Send Message</h2>
                   <p className="text-sm text-muted-foreground">
                     To: {selectedDoctor.doctor_profile?.full_name}
                   </p>
@@ -376,4 +376,3 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, SmilePlus } from "lucide-react";
 
-const EMOTICONS = ["ðŸ‘", "ðŸ’ª", "â¤ï¸", "ðŸŒŸ", "ðŸ‘", "ðŸŽ‰", "ðŸ™", "ðŸ˜Š"];
+const EMOTICONS = ["👍", "💪", "❤️", "🌟", "👏", "🎉", "🙏", "😊"];
 
 interface EmoticonSenderProps {
   recipientId: string;
@@ -85,8 +85,8 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
       toast({
         title: `${emoticon} Sent!`,
         description: isAiFlagged
-          ? "Emoticon sent (no Vulas â€” view profile first or daily limit reached)"
-          : `Emoticon sent to ${recipientName} (+1 â“‚ï¸)`,
+          ? "Emoticon sent (no Vulas — view profile first or daily limit reached)"
+          : `Emoticon sent to ${recipientName} (+1 Ⓜ️)`,
       });
 
       setOpen(false);
@@ -111,7 +111,7 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3" align="end">
-        <p className="text-sm text-muted-foreground mb-2">Send a check-in emoticon</p>
+        <p className="text-xs text-muted-foreground mb-2">Send a check-in emoticon</p>
         <div className="flex gap-1.5 flex-wrap max-w-[200px]">
           {EMOTICONS.map((emoji) => (
             <button
@@ -128,4 +128,3 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
     </Popover>
   );
 }
-

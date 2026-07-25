@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Pill, Video, Camera, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,7 +96,7 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
           <div className="space-y-2">
             {prescriptions.map((rx) => {
               const baseline = hasBaseline(rx.id);
-              const dosage = rx.dosage?.trim() || "â€”";
+              const dosage = rx.dosage?.trim() || "—";
               const frequency = rx.frequency?.trim() || "once daily";
               const taken = takenToday.find((t) => t.prescription_id === rx.id && t.status !== "pending");
               return (
@@ -106,17 +106,17 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
                 >
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-foreground truncate">{rx.medication}</p>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {dosage} Â· {frequency}
+                    <p className="text-xs text-muted-foreground truncate">
+                      {dosage} · {frequency}
                     </p>
                     {taken ? (
-                      <p className="text-sm text-emerald-600 mt-1">
-                        âœ… Already taken today{taken.taken_at ? ` at ${new Date(taken.taken_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}
+                      <p className="text-xs text-emerald-600 mt-1">
+                        ✅ Already taken today{taken.taken_at ? ` at ${new Date(taken.taken_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}
                       </p>
                     ) : (
                       <div className="flex gap-1.5 mt-1">
-                        <Badge variant="secondary" className="text-sm px-1.5 py-0">Active</Badge>
-                        <Badge variant="outline" className="text-sm px-1.5 py-0">Chronic</Badge>
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0">Active</Badge>
+                        <Badge variant="outline" className="text-xs px-1.5 py-0">Chronic</Badge>
                       </div>
                     )}
                   </div>
@@ -135,4 +135,3 @@ export function TodaysMedicationsCard({ patientId, onTakeMedication }: Props) {
     </Card>
   );
 }
-

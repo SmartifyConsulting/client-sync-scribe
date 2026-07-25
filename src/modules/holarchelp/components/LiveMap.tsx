@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { loadGoogleMaps } from "../lib/googleMapsLoader";
 
 export type LiveMapPoint = {
@@ -20,7 +20,7 @@ const ROUTE_COLOR: Record<LiveMapRoute["color"], string> = {
   teal: "#0d9488",
 };
 
-// SVG marker icons (data-URI) â€” match the previous Mapbox look.
+// SVG marker icons (data-URI) — match the previous Mapbox look.
 const PATIENT_SVG =
   "data:image/svg+xml;charset=UTF-8," +
   encodeURIComponent(
@@ -347,7 +347,7 @@ export const LiveMap = ({
       {err && (
         <div className="absolute inset-0 z-[2147483647] flex items-center justify-center bg-background/90 px-4 text-center">
           <div className="max-w-sm rounded-xl border border-destructive/40 bg-card p-3 shadow-lg">
-            <p className="text-sm font-semibold text-destructive">Google Maps could not load</p>
+            <p className="text-xs font-semibold text-destructive">Google Maps could not load</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {err.toLowerCase().includes("referer") || err.toLowerCase().includes("not allowed")
                 ? "This domain is not on the Google Maps key's HTTP referrer allowlist. Add the domain in Google Cloud."
@@ -361,11 +361,10 @@ export const LiveMap = ({
         </div>
       )}
       {!err && !hasAnyPoint && (
-        <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-sm font-medium text-muted-foreground shadow">
-          Waiting for first GPS fixâ€¦
+        <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full bg-background/90 px-3 py-1 text-xs font-medium text-muted-foreground shadow">
+          Waiting for first GPS fix…
         </div>
       )}
     </div>
   );
 };
-

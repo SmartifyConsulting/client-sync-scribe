@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -60,16 +60,15 @@ export function NursePicker({ hospitalId, value, onChange, required, label = "Nu
           {nurses.map((n) => (
             <SelectItem key={n.id} value={n.id}>
               {n.full_name}
-              {n.role_title ? ` Â· ${n.role_title}` : ""}
+              {n.role_title ? ` · ${n.role_title}` : ""}
               {n.status !== "active" && " (inactive)"}
             </SelectItem>
           ))}
           {!nurses.length && (
-            <div className="px-2 py-1.5 text-sm text-muted-foreground">No nurses on roster yet.</div>
+            <div className="px-2 py-1.5 text-xs text-muted-foreground">No nurses on roster yet.</div>
           )}
         </SelectContent>
       </Select>
     </div>
   );
 }
-

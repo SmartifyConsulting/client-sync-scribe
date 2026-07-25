@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AudioWaveformProps {
@@ -119,10 +119,9 @@ export function AudioWaveform({ isRecording, className }: AudioWaveformProps) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-destructive"></span>
           </span>
-          <span className="text-sm font-medium text-destructive">REC</span>
+          <span className="text-xs font-medium text-destructive">REC</span>
         </div>
       )}
     </div>
   );
 }
-

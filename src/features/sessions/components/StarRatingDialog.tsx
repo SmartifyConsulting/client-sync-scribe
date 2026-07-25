@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +47,7 @@ function StarRow({
   const display = hoveredRating || rating;
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="text-sm font-medium text-foreground min-w-[110px]">{label}</span>
+      <span className="text-xs font-medium text-foreground min-w-[110px]">{label}</span>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
@@ -227,7 +227,7 @@ export function StarRatingDialog({
             />
             {canSubmit && (
               <p className="text-center text-sm text-muted-foreground mt-2">
-                Overall: {overallRating} â˜… â€” +{overallRating} â“‚ï¸
+                Overall: {overallRating} ★ — +{overallRating} Ⓜ️
               </p>
             )}
           </div>
@@ -261,7 +261,7 @@ export function StarRatingDialog({
                 {displayRating === 3 && "Good"}
                 {displayRating === 4 && "Very Good"}
                 {displayRating === 5 && "Excellent"}
-                {" â€” "}+{displayRating} â“‚ï¸
+                {" — "}+{displayRating} Ⓜ️
               </p>
             )}
           </>
@@ -282,4 +282,3 @@ export function StarRatingDialog({
     </Dialog>
   );
 }
-

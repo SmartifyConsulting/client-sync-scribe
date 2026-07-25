@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -72,7 +72,7 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
 
       const hasComment = trimmed.length > 0;
       const title = hasComment
-        ? `Renew prescription: ${candidate.medication}${candidate.dosage ? ` ${candidate.dosage}` : ""} â€” adjustment requested`
+        ? `Renew prescription: ${candidate.medication}${candidate.dosage ? ` ${candidate.dosage}` : ""} — adjustment requested`
         : `Renew prescription: ${candidate.medication}${candidate.dosage ? ` ${candidate.dosage}` : ""}`;
 
       const due = candidate.end_date ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -138,13 +138,13 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
             <Pill className="h-5 w-5 text-primary" />
             Request prescription renewal
           </DialogTitle>
-          <DialogDescription className="text-sm">
+          <DialogDescription className="text-xs">
             Review the prescription, choose who should handle the renewal, and add a comment if you'd like something adjusted.
           </DialogDescription>
         </DialogHeader>
 
         {/* Read-only prescription summary */}
-        <div className="rounded-lg border border-border bg-muted/40 p-3 text-sm space-y-1">
+        <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs space-y-1">
           <div className="font-semibold text-foreground">{candidate.medication}</div>
           {candidate.dosage && <div><span className="text-muted-foreground">Dosage:</span> {candidate.dosage}</div>}
           {candidate.frequency && <div><span className="text-muted-foreground">Frequency:</span> {candidate.frequency}</div>}
@@ -157,14 +157,14 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
               {candidate.is_expired && <span className="ml-2 text-destructive font-medium">(expired)</span>}
             </div>
           )}
-          <div className="text-sm italic text-muted-foreground pt-1">
-            Read-only â€” use the comment box below to request changes.
+          <div className="text-xs italic text-muted-foreground pt-1">
+            Read-only — use the comment box below to request changes.
           </div>
         </div>
 
         {/* Doctor selector */}
         <div className="space-y-1.5">
-          <Label htmlFor="renewal-doctor" className="text-sm">Assign to doctor</Label>
+          <Label htmlFor="renewal-doctor" className="text-xs">Assign to doctor</Label>
           <Select value={doctorId} onValueChange={setDoctorId}>
             <SelectTrigger id="renewal-doctor">
               <SelectValue placeholder="Choose a doctor" />
@@ -179,29 +179,29 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
                 <SelectItem key={d.doctor_id} value={d.doctor_id}>
                   {d.full_name || "Unknown doctor"}
                   {d.doctor_id === candidate.doctor_id ? " (original prescriber)" : ""}
-                  {d.specialty ? ` â€” ${d.specialty}` : ""}
+                  {d.specialty ? ` — ${d.specialty}` : ""}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Defaults to the original prescriber. Switch to another of your doctors if you'd prefer.
           </p>
         </div>
 
         {/* Patient comment */}
         <div className="space-y-1.5">
-          <Label htmlFor="renewal-comment" className="text-sm">
+          <Label htmlFor="renewal-comment" className="text-xs">
             Anything you'd like changed? (optional)
           </Label>
           <Textarea
             id="renewal-comment"
-            placeholder="e.g. Switch to a smaller dose, change frequency, side effects, alternative medicationâ€¦"
+            placeholder="e.g. Switch to a smaller dose, change frequency, side effects, alternative medication…"
             value={comment}
             onChange={(e) => setComment(e.target.value.slice(0, COMMENT_MAX))}
-            className="min-h-[90px] text-sm"
+            className="min-h-[90px] text-xs"
           />
-          <p className="text-sm text-muted-foreground text-right">
+          <p className="text-xs text-muted-foreground text-right">
             {comment.length}/{COMMENT_MAX}
           </p>
         </div>
@@ -217,4 +217,3 @@ export function RenewalRequestDialog({ open, onOpenChange, candidate, patientId,
     </Dialog>
   );
 }
-

@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -184,7 +184,7 @@ export function ImageComparisonDialog({
           <div className="space-y-4">
             {/* Comparison Type */}
             <div className="space-y-1.5">
-              <Label className="text-sm">Comparison Type</Label>
+              <Label className="text-xs">Comparison Type</Label>
               <Select value={comparisonType} onValueChange={setComparisonType}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
@@ -225,7 +225,7 @@ export function ImageComparisonDialog({
                     ) : (
                       <div className="text-center text-muted-foreground">
                         <Plus className="h-6 w-6 mx-auto mb-1" />
-                        <span className="text-sm">Add Image</span>
+                        <span className="text-xs">Add Image</span>
                       </div>
                     )}
                   </div>
@@ -272,7 +272,7 @@ export function ImageComparisonDialog({
                   <Sparkles className="h-4 w-4 text-primary" />
                   AI Comparison Analysis
                 </h4>
-                <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                <div className="text-xs text-foreground whitespace-pre-wrap leading-relaxed">
                   {analysis}
                 </div>
               </div>
@@ -283,4 +283,3 @@ export function ImageComparisonDialog({
     </Dialog>
   );
 }
-

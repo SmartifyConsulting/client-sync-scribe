@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { Check, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -74,7 +74,7 @@ export function LanguageSwitcher() {
                 key={lang.code}
                 onClick={() => pickLanguage(lang.code)}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                  "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors",
                   active ? "bg-primary/10" : "hover:bg-accent",
                 )}
               >
@@ -89,4 +89,3 @@ export function LanguageSwitcher() {
     </Popover>
   );
 }
-

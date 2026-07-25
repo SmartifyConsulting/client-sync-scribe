@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Activity, MapPin } from "lucide-react";
@@ -67,11 +67,11 @@ const PRIORITY_TEXT = {
 };
 
 const STATUS_LABELS = {
-  new: "ðŸ†• New",
-  assigned: "âœ“ Assigned",
-  en_route: "ðŸš‘ En Route",
-  on_scene: "ðŸ“ On Scene",
-  transporting: "ðŸ¥ Transporting",
+  new: "🆕 New",
+  assigned: "✓ Assigned",
+  en_route: "🚑 En Route",
+  on_scene: "📍 On Scene",
+  transporting: "🏥 Transporting",
 };
 
 export default function MultiIncidentBoardScreen() {
@@ -86,7 +86,7 @@ export default function MultiIncidentBoardScreen() {
       <div className="space-y-6">
         <header className="flex items-end justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Dispatch Management
             </p>
             <h1 className="text-3xl font-extrabold">Multi-Incident Board</h1>
@@ -106,11 +106,11 @@ export default function MultiIncidentBoardScreen() {
         {/* Alert Cards */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-xl border-l-4 border-l-red-600 bg-red-50 p-4">
-            <p className="text-sm font-semibold text-red-900">CRITICAL INCIDENTS</p>
+            <p className="text-xs font-semibold text-red-900">CRITICAL INCIDENTS</p>
             <p className="text-3xl font-bold text-red-600 mt-1">{criticalCount}</p>
           </div>
           <div className="rounded-xl border-l-4 border-l-yellow-600 bg-yellow-50 p-4">
-            <p className="text-sm font-semibold text-yellow-900">UNASSIGNED</p>
+            <p className="text-xs font-semibold text-yellow-900">UNASSIGNED</p>
             <p className="text-3xl font-bold text-yellow-600 mt-1">{unassignedCount}</p>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function MultiIncidentBoardScreen() {
                 <h3 className={`text-lg font-bold ${PRIORITY_TEXT[incident.priority]}`}>
                   {incident.id}
                 </h3>
-                <span className="text-sm font-bold px-2 py-1 bg-white rounded">
+                <span className="text-xs font-bold px-2 py-1 bg-white rounded">
                   {STATUS_LABELS[incident.status]}
                 </span>
               </div>
@@ -139,15 +139,15 @@ export default function MultiIncidentBoardScreen() {
 
                 <div className="flex items-center justify-between pt-2 border-t border-current border-opacity-20">
                   <div>
-                    <p className="text-sm opacity-70">Patients</p>
+                    <p className="text-xs opacity-70">Patients</p>
                     <p className="font-bold">{incident.patient_count}</p>
                   </div>
                   <div>
-                    <p className="text-sm opacity-70">Elapsed</p>
+                    <p className="text-xs opacity-70">Elapsed</p>
                     <p className="font-bold">{incident.time_elapsed}m</p>
                   </div>
                   <div>
-                    <p className="text-sm opacity-70">Ambulances</p>
+                    <p className="text-xs opacity-70">Ambulances</p>
                     <p className="font-bold">{incident.ambulances.length}</p>
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export default function MultiIncidentBoardScreen() {
                     {incident.ambulances.map((amb) => (
                       <span
                         key={amb}
-                        className="text-sm bg-white bg-opacity-60 px-2 py-1 rounded"
+                        className="text-xs bg-white bg-opacity-60 px-2 py-1 rounded"
                       >
                         {amb}
                       </span>
@@ -183,7 +183,7 @@ export default function MultiIncidentBoardScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             Dispatch Management
           </p>
           <h1 className="text-3xl font-extrabold">Multi-Incident Board</h1>
@@ -206,11 +206,11 @@ export default function MultiIncidentBoardScreen() {
               </div>
               <div className="flex gap-4 text-right">
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-xs text-muted-foreground">Status</p>
                   <p className="font-semibold">{STATUS_LABELS[incident.status]}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Ambulances</p>
+                  <p className="text-xs text-muted-foreground">Ambulances</p>
                   <p className="font-semibold">{incident.ambulances.length}</p>
                 </div>
                 <Button size="sm" variant="outline">
@@ -224,4 +224,3 @@ export default function MultiIncidentBoardScreen() {
     </div>
   );
 }
-

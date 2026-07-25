@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Loader2, Trophy, Target, Flame, Gift, Star, Video, Send, ArrowRightLeft, Pill, ArrowLeft, Info, History, Vault } from "lucide-react";
@@ -55,11 +55,11 @@ import vulaVaultMerchants from "@/assets/vula-vault-merchants.png";
 const VAULT_UNLOCK_THRESHOLD = 2000;
 
 const MILESTONES = [
-  { count: 5, label: "First Steps", icon: "ðŸŒŸ", color: "text-yellow-500" },
-  { count: 10, label: "Getting Healthy", icon: "ðŸ’ª", color: "text-blue-500" },
-  { count: 25, label: "Health Champion", icon: "ðŸ†", color: "text-purple-500" },
-  { count: 50, label: "Wellness Warrior", icon: "âš”ï¸", color: "text-orange-500" },
-  { count: 100, label: "Health Legend", icon: "ðŸ‘‘", color: "text-pink-500" },
+  { count: 5, label: "First Steps", icon: "🌟", color: "text-yellow-500" },
+  { count: 10, label: "Getting Healthy", icon: "💪", color: "text-blue-500" },
+  { count: 25, label: "Health Champion", icon: "🏆", color: "text-purple-500" },
+  { count: 50, label: "Wellness Warrior", icon: "⚔️", color: "text-orange-500" },
+  { count: 100, label: "Health Legend", icon: "👑", color: "text-pink-500" },
 ];
 
 
@@ -111,9 +111,9 @@ export default function MyRewards() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  // Auto-popup disabled per user request â€” explainer is available via the "What are Vulas?" button.
+  // Auto-popup disabled per user request — explainer is available via the "What are Vulas?" button.
 
-  // Get patient record (robust selector â€” prefers record with active prescriptions)
+  // Get patient record (robust selector — prefers record with active prescriptions)
   const { data: patientRecord } = useMyChronicPatientId();
 
   // Default chronic patients to the chronic-meds tab on first paint
@@ -316,7 +316,7 @@ export default function MyRewards() {
                 What are Vulas?
               </button>
             </div>
-            <p className="mt-1 text-muted-foreground text-sm">
+            <p className="mt-1 text-muted-foreground text-xs">
               Track your Vulas, milestones, and health streaks
             </p>
           </div>
@@ -377,7 +377,7 @@ export default function MyRewards() {
                 value={transferAmount}
                 onChange={(e) => setTransferAmount(e.target.value)}
               />
-              <p className="text-sm text-muted-foreground">Max: {lollipopCount} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block" /></p>
+              <p className="text-xs text-muted-foreground">Max: {lollipopCount} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block" /></p>
             </div>
           </div>
           <DialogFooter>
@@ -393,13 +393,13 @@ export default function MyRewards() {
         </DialogContent>
       </Dialog>
 
-      {/* Hero Stats â€” compact on mobile */}
+      {/* Hero Stats — compact on mobile */}
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 dark:from-blue-700/40 dark:to-cyan-700/30 border-blue-400 dark:border-blue-600/40">
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm md:text-sm font-medium text-blue-100">Vula Vouchers</p>
+                <p className="text-xs md:text-sm font-medium text-blue-100">Vula Vouchers</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
@@ -413,12 +413,12 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm md:text-sm font-medium text-blue-100">Current Level</p>
+                <p className="text-xs md:text-sm font-medium text-blue-100">Current Level</p>
                 <p className="text-sm md:text-xl font-bold text-white">
                   {currentMilestone?.label || "Beginner"}
                 </p>
               </div>
-              <span className="text-2xl md:text-4xl">{currentMilestone?.icon || "ðŸŒ±"}</span>
+              <span className="text-2xl md:text-4xl">{currentMilestone?.icon || "🌱"}</span>
             </div>
           </CardContent>
         </Card>
@@ -427,7 +427,7 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm md:text-sm font-medium text-sky-100">Active Streaks</p>
+                <p className="text-xs md:text-sm font-medium text-sky-100">Active Streaks</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{activeStreaks.length}</p>
               </div>
               <Flame className="h-8 w-8 text-white/90 shrink-0" />
@@ -439,7 +439,7 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm md:text-sm font-medium text-indigo-100">Vula Vault</p>
+                <p className="text-xs md:text-sm font-medium text-indigo-100">Vula Vault</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{totalTransferred}</p>
               </div>
               <Vault className="h-8 w-8 text-white/90 shrink-0" />
@@ -447,7 +447,7 @@ export default function MyRewards() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-sm md:text-sm flex items-center gap-1 mt-1 md:mt-2"
+              className="text-white/90 hover:text-white hover:bg-white/20 p-0 h-auto text-xs md:text-xs flex items-center gap-1 mt-1 md:mt-2"
               onClick={() => { setTransferToAppId("vault"); setShowTransferDialog(true); }}
             >
               Transfer to Vault <ArrowRightLeft className="h-4 w-4" />
@@ -458,20 +458,20 @@ export default function MyRewards() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-primary flex w-full flex-nowrap overflow-x-auto justify-start">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             Overview
           </TabsTrigger>
           {patientRecord?.is_chronic && (
-            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">
+            <TabsTrigger value="chronic-meds" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
               <Pill className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Chronic Meds
             </TabsTrigger>
           )}
-          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">
+          <TabsTrigger value="wins-streaks" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
             Wins and Streaks
           </TabsTrigger>
-          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5">
+          <TabsTrigger value="transfers" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
              Redeem
            </TabsTrigger>
          </TabsList>
@@ -529,12 +529,12 @@ export default function MyRewards() {
                         <img src={vulaVouchersLogo} alt="Vula" className="h-5 w-5 object-contain shrink-0" />
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate">{reward.visit_category}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                             {format(parseISO(reward.awarded_at), "MMM d, yyyy")}
                           </p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-sm">
+                      <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs">
                         +{reward.lollipops_count} <img src={vulaVouchersLogo} alt="Vula" className="h-3 w-auto object-contain inline-block ml-1" />
                       </Badge>
                     </div>
@@ -565,7 +565,7 @@ export default function MyRewards() {
                         <AccordionTrigger>
                           <div className="flex items-center justify-between w-full pr-2">
                             <span className="font-medium">{group.label}</span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {group.items.length} {group.items.length === 1 ? "entry" : "entries"}
                             </span>
                           </div>
@@ -585,7 +585,7 @@ export default function MyRewards() {
                                   )}
                                   <div className="min-w-0">
                                     <p className="font-medium truncate">{it.label}</p>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-xs text-muted-foreground">
                                       {format(it.date, "MMM d, yyyy")}
                                     </p>
                                   </div>
@@ -716,7 +716,7 @@ export default function MyRewards() {
                               <Flame className={`h-5 w-5 ${streak.current_streak > 0 ? "text-orange-500" : "text-muted-foreground"}`} />
                               <span className="text-2xl font-bold">{streak.current_streak}</span>
                             </div>
-                            <p className="text-sm text-muted-foreground">streak</p>
+                            <p className="text-xs text-muted-foreground">streak</p>
                           </div>
                         </div>
 
@@ -735,7 +735,7 @@ export default function MyRewards() {
                           )}
                         </div>
 
-                        <div className="mt-2 text-sm text-muted-foreground">
+                        <div className="mt-2 text-xs text-muted-foreground">
                           Earns: {streak.lollipops_awarded} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-auto object-contain inline-block" /> per completion
                         </div>
                       </div>
@@ -781,7 +781,7 @@ export default function MyRewards() {
                         size="lg"
                       >
                         <Vault className="h-4 w-4" />
-                        {isUnlocked ? "Redeem at Vula Vault" : `Locked â€” ${VAULT_UNLOCK_THRESHOLD.toLocaleString()} Vulas required`}
+                        {isUnlocked ? "Redeem at Vula Vault" : `Locked — ${VAULT_UNLOCK_THRESHOLD.toLocaleString()} Vulas required`}
                       </Button>
                     </div>
                   </CardContent>
@@ -794,5 +794,4 @@ export default function MyRewards() {
     </div>
   );
 }
-
 
