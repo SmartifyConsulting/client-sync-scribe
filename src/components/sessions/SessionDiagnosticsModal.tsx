@@ -48,8 +48,8 @@ export function SessionDiagnosticsModal({
         <div className="space-y-5 py-2">
           {summary && (
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-foreground">Session Summary</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              <h3 className="text-base font-semibold text-foreground">Session Summary</h3>
+              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {summary}
               </p>
             </div>
@@ -57,12 +57,12 @@ export function SessionDiagnosticsModal({
 
           {actionPoints.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-foreground">
+              <h3 className="text-base font-semibold text-foreground">
                 Action Points ({actionPoints.length})
               </h3>
               <ul className="space-y-1.5">
                 {actionPoints.map((point, idx) => (
-                  <li key={idx} className="flex gap-2 text-sm text-muted-foreground">
+                  <li key={idx} className="flex gap-2 text-base text-muted-foreground">
                     <span className="text-primary font-semibold">•</span>
                     <span>{point}</span>
                   </li>
@@ -73,18 +73,18 @@ export function SessionDiagnosticsModal({
 
           {/* Full AI clinical diagnosis */}
           <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">Full AI Clinical Assessment</h3>
+            <h3 className="text-base font-semibold text-foreground">Full AI Clinical Assessment</h3>
             {diagnosisLoading && !fullDiagnosis ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-base text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Completing the full assessment from the finished transcript...
               </div>
             ) : fullDiagnosis ? (
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {fullDiagnosis}
               </p>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 No full assessment available for this session.
               </p>
             )}
@@ -92,7 +92,7 @@ export function SessionDiagnosticsModal({
 
           <div className="flex gap-2 rounded-lg border border-border bg-muted/40 p-3">
             <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               This AI-generated assessment is clinical decision support only. It is
               <strong className="text-foreground"> not binding</strong>, is not a diagnosis, and
               must be validated by your own clinical judgement before acting on it.
