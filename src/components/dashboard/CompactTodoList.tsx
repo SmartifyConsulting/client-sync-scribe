@@ -29,7 +29,9 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
-import { TodoLegend } from "@/components/todos/TodoLegend";
+import { getTodoDisplay } from "@/lib/todoDisplay";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronRight, User as UserIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface TodoItem {
