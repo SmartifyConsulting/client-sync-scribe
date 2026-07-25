@@ -343,8 +343,8 @@ export default function SessionDetail() {
 
       {/* Quick Actions */}
       {session.status === "completed" && session.patient && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <h2 className="text-base font-semibold text-foreground mb-4">Quick Actions</h2>
+        <div className="rounded-xl border border-primary/40 bg-card p-5">
+          <h2 className="text-sm font-semibold text-foreground mb-3">Quick Actions</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
             <Button
               className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
@@ -401,14 +401,14 @@ export default function SessionDetail() {
 
       {/* AI Summary */}
       {session.summary && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-xl border border-primary/40 bg-card p-5">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
                 <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h2 className="text-base font-semibold text-foreground">AI Summary</h2>
+                <h2 className="text-sm font-semibold text-foreground">AI Summary</h2>
                 <p className="text-sm text-muted-foreground">Generated from session content</p>
               </div>
             </div>
@@ -440,8 +440,8 @@ export default function SessionDetail() {
 
       {/* Session Notes — combined Audio + Transcript + Notes */}
       {(session.audio_url || session.transcript || session.notes) && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="rounded-xl border border-primary/40 bg-card p-5">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
                 <Volume2 className="h-4 w-4 text-purple-600" />
