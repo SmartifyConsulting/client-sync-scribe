@@ -737,9 +737,11 @@ export default function Sessions() {
         open={showDiagnosticsModal}
         summary={summary}
         actionPoints={actionPoints}
+        fullDiagnosis={aiDiagnosis}
+        diagnosisLoading={isGeneratingDiagnosis}
         onClose={() => setShowDiagnosticsModal(false)}
         onProgressComplete={() => {
-          // After progress complete, show document reviews if any exist
+          // Only after the doctor acknowledges the full assessment do documents appear
           if (extractedMedCert) {
             setShowMedCertReview(true);
           } else if (extractedPrescription) {
@@ -754,6 +756,21 @@ export default function Sessions() {
           }
         }}
       />
+
+      {/* Per-document generate → send progress */}
+      <DocumentDeliveryProgress
+        target={delivery}
+        onSend={sendDeliveryDocument}
+        onFinish={async (sent) => {
+          const label = delivery?.label;
+          setDelivery(null);
+          if (sent && label) await completeSessionTodo(label);
+          const next = deliveryNextRef.current;
+          deliveryNextRef.current = null;
+          setTimeout(() => next?.(), 200);
+        }}
+      />
+
 
       {/* Visit Category Dialog */}
       <VisitCategoryDialog
