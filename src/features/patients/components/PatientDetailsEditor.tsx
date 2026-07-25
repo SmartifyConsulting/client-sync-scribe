@@ -1633,6 +1633,9 @@ export function PatientDetailsEditor({
 
             {/* === INSURANCE SUB-TAB (view) === */}
             <TabsContent value="insurance" className="mt-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-foreground">Insurance</h3>
+              </div>
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
                 <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
                 <CollapsibleContent className="p-3">
@@ -1649,6 +1652,9 @@ export function PatientDetailsEditor({
 
             {/* === PHARMACIES SUB-TAB (view) === */}
             <TabsContent value="pharmacies" className="mt-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-foreground">Pharmacies</h3>
+              </div>
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
                 <SectionHeader icon={Store} label="Pharmacies" />
                 <CollapsibleContent className="p-3">
@@ -1684,6 +1690,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
             </TabsContent>
+
 
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
