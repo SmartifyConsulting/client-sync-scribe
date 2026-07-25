@@ -74,6 +74,9 @@ export function useLiveDiagnosticHint({
             patientSex,
             currentMedications,
             chronicConditions,
+            allergies,
+            pastSessions: (pastSessions ?? []).slice(0, 3),
+
             language,
           },
         });
