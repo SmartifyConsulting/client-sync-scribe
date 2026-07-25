@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import holarcLogo from "@/assets/holarc-health-logo.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+const holarcLogo = holarcLogoAsset.url;
 
 const STORAGE_PREFIX = "holarc_early_release_seen_";
 
