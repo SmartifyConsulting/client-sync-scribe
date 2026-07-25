@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   Accordion,
   AccordionContent,
@@ -47,7 +48,7 @@ function getSurname(name: string) {
 }
 
 const TRIGGER_CLASS =
-  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:bg-primary data-[state=open]:hover:bg-primary/90 data-[state=open]:text-white [&>svg]:group-data-[state=open]:text-white";
+  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white [&>svg]:group-data-[state=open]:!text-white";
 
 function CountPill({ count }: { count: number }) {
   return (
@@ -55,7 +56,7 @@ function CountPill({ count }: { count: number }) {
       className={cn(
         "text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
         "bg-muted text-muted-foreground",
-        "group-data-[state=open]:bg-white group-data-[state=open]:!text-primary",
+        "group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary",
       )}
     >
       {count}
@@ -109,9 +110,11 @@ function SessionCard({ s, t }: { s: SessionRow; t: any }) {
 export default function MySessions() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { isDoctor } = useUserRole();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
-  const [groupMode, setGroupMode] = useState<"date" | "patient">("date");
+  const [groupModeState, setGroupMode] = useState<"date" | "patient">("date");
+  const groupMode = isDoctor ? groupModeState : "date";
 
   useEffect(() => {
     if (!user) return;
@@ -183,20 +186,22 @@ export default function MySessions() {
             {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
           </p>
         </div>
-        <ToggleGroup
-          type="single"
-          value={groupMode}
-          onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
-          size="sm"
-          variant="outline"
-        >
-          <ToggleGroupItem value="date" className="text-xs px-3">
-            {t("mySessions.groupByDate", "Date")}
-          </ToggleGroupItem>
-          <ToggleGroupItem value="patient" className="text-xs px-3">
-            {t("mySessions.groupByPatient", "Patient")}
-          </ToggleGroupItem>
-        </ToggleGroup>
+        {isDoctor && (
+          <ToggleGroup
+            type="single"
+            value={groupMode}
+            onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="date" className="text-xs px-3">
+              {t("mySessions.groupByDate", "Date")}
+            </ToggleGroupItem>
+            <ToggleGroupItem value="patient" className="text-xs px-3">
+              {t("mySessions.groupByPatient", "Patient")}
+            </ToggleGroupItem>
+          </ToggleGroup>
+        )}
       </div>
 
       {loading ? (
