@@ -599,13 +599,11 @@ export default function Sessions() {
           });
         }
       }
-      toast({ title: "Prescription Saved", description: `${data.medications.length} medication(s) added.` });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowPrescriptionReview(false);
-    if (extractedInvoice) setShowInvoiceReview(true);
-    else if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
+    runDelivery({ label: 'Prescription' }, nextAfterPrescription);
+
   };
 
   const handleApproveInvoice = async (data: InvoiceData) => {
