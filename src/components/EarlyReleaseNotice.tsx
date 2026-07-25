@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import betaLogoAsset from "@/assets/holarc-beta-logo.png.asset.json";
-const betaLogo = betaLogoAsset.url;
+import betaLogo from "@/assets/holarc-beta-logo.png";
 import {
   Dialog,
   DialogContent,
