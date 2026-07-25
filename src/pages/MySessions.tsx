@@ -47,7 +47,7 @@ function getSurname(name: string) {
 }
 
 const TRIGGER_CLASS =
-  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:bg-primary data-[state=open]:hover:bg-primary/90 data-[state=open]:text-white [&>svg]:group-data-[state=open]:text-white";
+  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white [&>svg]:group-data-[state=open]:!text-white";
 
 function CountPill({ count }: { count: number }) {
   return (
@@ -55,7 +55,7 @@ function CountPill({ count }: { count: number }) {
       className={cn(
         "text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
         "bg-muted text-muted-foreground",
-        "group-data-[state=open]:bg-white group-data-[state=open]:!text-primary",
+        "group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary",
       )}
     >
       {count}
