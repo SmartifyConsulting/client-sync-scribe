@@ -18,9 +18,11 @@ interface Props {
   onChange: (next: EmergencyContact[]) => void;
   nokMembers: NextOfKinMember[];
   legacyNok?: { name?: string; phone?: string; email?: string; relationship?: string };
+  flat?: boolean;
 }
 
-export function EmergencyContactsInline({ patientId, contacts, onChange, nokMembers, legacyNok }: Props) {
+export function EmergencyContactsInline({ patientId, contacts, onChange, nokMembers, legacyNok, flat }: Props) {
+
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [sameAsNok, setSameAsNok] = useState(false);
@@ -106,7 +108,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
   };
 
   return (
-    <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+    <Collapsible defaultOpen={false} className={flat ? "bg-white overflow-hidden" : "rounded-xl border border-neutral-400 bg-white overflow-hidden"}>
       <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-primary/5 transition-colors px-4 py-3 group">
         <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left">
           <ShieldAlert className="h-4 w-4 text-primary" /> Emergency Contacts

@@ -345,45 +345,44 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   const overLimit = wordCount > 600;
   const dirty = draft !== value;
   return (
-    <Accordion type="single" collapsible className="space-y-4">
-      <AccordionItem value="about-me" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
-        <AccordionTrigger className="px-4 py-3 hover:no-underline">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4 space-y-2">
-          <p className="text-xs text-muted-foreground">
-            {t("myPractice.aboutMeHelper")}
-          </p>
-          <Textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={6}
-            placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
-          />
-          <div className="flex items-center justify-between">
-            <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
-              {t("myPractice.wordCount", { count: wordCount })}
-            </span>
-            <Button
-              size="sm"
-              disabled={!dirty || overLimit || saving}
-              onClick={async () => {
-                setSaving(true);
-                try { await onSave(draft); } finally { setSaving(false); }
-              }}
-            >
-              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
-              {t("myPractice.save")}
-            </Button>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <AccordionItem value="about-me" className="border-0">
+      <AccordionTrigger className="px-4 py-3 hover:no-underline">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="px-4 pb-4 space-y-2">
+        <p className="text-xs text-muted-foreground">
+          {t("myPractice.aboutMeHelper")}
+        </p>
+        <Textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={6}
+          placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
+        />
+        <div className="flex items-center justify-between">
+          <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
+            {t("myPractice.wordCount", { count: wordCount })}
+          </span>
+          <Button
+            size="sm"
+            disabled={!dirty || overLimit || saving}
+            onClick={async () => {
+              setSaving(true);
+              try { await onSave(draft); } finally { setSaving(false); }
+            }}
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
+            {t("myPractice.save")}
+          </Button>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
+
 
 
 // ── Main Component ──────────────────────────────────────────────────
@@ -1222,13 +1221,14 @@ export default function MyPractice() {
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
-          <AboutMeAccordion
-            value={(profile as any)?.about_me || ""}
-            onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
-          />
-          {/* Personal Information Accordion */}
-          <Accordion type="multiple" className="space-y-4">
-            <AccordionItem value="personal" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
+          <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden">
+            <Accordion type="multiple" className="divide-y divide-neutral-300">
+              <AboutMeAccordion
+                value={(profile as any)?.about_me || ""}
+                onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
+              />
+              {/* Personal Information */}
+              <AccordionItem value="personal" className="border-0">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
@@ -1326,7 +1326,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Practice Details Accordion */}
-            <AccordionItem value="practice-details" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
+            <AccordionItem value="practice-details" className="border-0">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
@@ -1736,7 +1736,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Shared Practice Calendar Accordion */}
-            <AccordionItem value="shared-calendar" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
+            <AccordionItem value="shared-calendar" className="border-0">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
@@ -1861,7 +1861,7 @@ export default function MyPractice() {
             </AccordionItem>
 
            {/* Service Offerings & Pricing Accordion */}
-            <AccordionItem value="service-pricing" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
+            <AccordionItem value="service-pricing" className="border-0">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
@@ -2047,7 +2047,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Digital Signature Accordion */}
-            <AccordionItem value="signature" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
+            <AccordionItem value="signature" className="border-0">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
@@ -2161,7 +2161,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Voice Narration Settings Accordion */}
-            <AccordionItem value="voice" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
+            <AccordionItem value="voice" className="border-0">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
@@ -2278,7 +2278,8 @@ export default function MyPractice() {
             </Button>
               </AccordionContent>
             </AccordionItem>
-          </Accordion>
+            </Accordion>
+          </div>
         </TabsContent>
 
         {/* === TEMPLATES TAB === */}
