@@ -414,7 +414,6 @@ const completeSession = async (
               status: 'pending',
             } as any);
           }
-          toast({ title: '🏥 Admission Form Created', description: 'Hospital admission form was auto-generated from the session' });
         } catch (admError) {
           console.error('Error creating admission document:', admError);
         }
