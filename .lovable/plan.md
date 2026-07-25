@@ -1,55 +1,41 @@
-## Fixes: Patients toast, My Sessions, My Practice accordions
+## Scope
 
-### 1. Stop the "Patient added successfully" toast on My Patients
+Six focused UI polish items across patient profile, doctor profile, first-login modal, footer/toaster, and My Sessions.
 
-`src/pages/Patients.tsx` runs an effect that auto-creates a "ME" patient record for doctors who don't have one. This calls `createPatient` in `src/hooks/usePatients.ts`, which fires the generic success toast — so every fresh visit to My Patients pops the toast.
+## 1. Patient profile — match doctor profile formatting
 
-Fix:
-- Add an `opts?: { silent?: boolean }` argument to `createPatient` in `src/hooks/usePatients.ts` and skip the success toast when `silent` is true. Preserve the error toast.
-- In `src/pages/Patients.tsx` auto-ME effect (line 197), call `createPatient({...}, { silent: true })`. Manual "Add Patient" flow (line 334) continues to show the toast.
+In `src/features/patients/components/PatientDetailsEditor.tsx` (Personal Information and Medical Information tab views):
+- Wrap the sections in a single bordered "table" frame with `divide-y` (same container pattern as `MyPractice.tsx`).
+- Accordion bars: transparent by default with `hover:bg-muted`; when expanded (`data-[state=open]`) switch to `bg-primary text-white` with white chevron.
+- Only the top accordion in each tab remains expanded by default (already green due to open state).
+- Section headings inside use `text-base font-semibold`.
 
-### 2. My Sessions screen heading
+## 2. Sub-tab heading parity
 
-`src/pages/MySessions.tsx` currently renders the page title as `text-sm font-semibold`. Change it to match "My Holarprac" in `src/pages/MyPractice.tsx` (`text-3xl font-bold text-foreground`), with the subtitle kept as `text-muted-foreground text-xs`.
+- **Patient profile**: Sessions sub-tab heading, Insurance sub-tab heading, and Pharmacies sub-tab heading → match the Hospital **Admissions** sub-tab heading (flat row, `text-sm font-semibold`, no bordered card frame).
+- **Doctor profile**: Credentials and Referral Doctors sub-tab headings → match the **Medical Information** heading pattern (`text-base font-semibold`).
 
-### 3. My Sessions accordion — only top row green by default
+Files: `src/features/patients/components/PatientDetailsEditor.tsx`, `src/pages/MyPractice.tsx`.
+
+## 3. First-login MVP notice icon
+
+In `src/components/EarlyReleaseNotice.tsx`:
+- Replace the `Sparkles` icon with the Holarc Health logo image (`src/assets/holarc-health-logo.png`) plus a "BETA" pill next to it.
+- Keep the circular container sizing so surrounding layout is unchanged.
+
+## 4. Footer alignment + toaster position
+
+- `src/components/layout/Footer.tsx`: restore center alignment (`justify-center` instead of `justify-start`) within the max-width container.
+- Toaster: raise the sonner `<Toaster />` offset so toasts display **above** the footer (roughly `bottom: var(--footer-height) + 12px` on desktop). Update the `<Toaster />` mount (likely in `src/App.tsx` or `src/main.tsx`) with `offset` / `mobileOffset` props, and mirror for the legacy `@/components/ui/toaster` viewport if used.
+
+## 5. My Sessions — top accordion white font
 
 In `src/pages/MySessions.tsx`:
-- Keep `defaultValue={["today"]}` (or the top group for the active grouping) so the first bucket is expanded on load.
-- Default trigger state: white background, dark text, `hover:bg-muted` (light grey).
-- Expanded (`data-[state=open]`): `bg-primary` with white text/chevron/count-pill.
-- Add `pt-3` inside `AccordionContent` so the first session card has breathing room.
-- Shrink the count badge to `px-1.5 py-0 text-[10px] min-w-5`. Open state: white pill with primary text. Closed: muted pill with muted-foreground text.
+- The default-open top accordion ("Today" in date mode / first patient in patient mode) currently uses `bg-primary` on open; ensure the trigger text, count pill text, and chevron are white on that green bar (the previous change may have regressed the label to green text).
+- Verify `data-[state=open]` selectors force `text-white` on the label, count badge foreground, and chevron.
 
-### 4. Session status badge — one size smaller
+## Technical notes
 
-The status pill (Completed / In progress) currently uses `text-xs`. Drop it to `text-[10px]` while keeping `uppercase font-semibold px-2 py-0.5 rounded-full`.
-
-### 5. Grouping toggle: Date vs Patient
-
-Add a small segmented toggle above the accordion in `src/pages/MySessions.tsx` with two options: **Date** (default) and **Patient**. Use existing shadcn `ToggleGroup` (or `Tabs`) styled compactly (right-aligned next to the heading block).
-
-Behaviour:
-- **Date mode** — current buckets (Today / Last week / Last month / Older). Top bucket expanded by default.
-- **Patient mode** — group `sessions` by `patient.name`; unknown/no patient becomes a "No patient" bucket. Sort groups alphabetically by surname (reuse the `getSurname` pattern already used in `src/pages/Patients.tsx`). Within each group, list sessions newest-first. The first group (alphabetically) is expanded by default.
-- Same accordion styling rules from §3 apply in both modes. Toggle state lives in local component state (no persistence needed).
-
-### 6. My Practice — About Me green by default
-
-In `src/pages/MyPractice.tsx` `AboutMeAccordion` trigger:
-- Make the trigger `bg-primary text-white` at all times (no `bg-transparent` default), with `hover:bg-primary/90`.
-- Force the `h3`, Sparkles icon and chevron to white always.
-
-### 7. Expanded accordion font → white (across My Practice)
-
-Every `AccordionTrigger` in `src/pages/MyPractice.tsx` uses `[&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white`, which misses `<span>` labels (e.g. Service Offerings). Broaden each trigger's selector so all direct text turns white when open — add `data-[state=open]:[&_*]:text-white` (or explicit `[&_span]:group-data-[state=open]:text-white`). Apply to: Personal Information, Practice Information, Shared Practice Calendar, Service Offerings & Pricing, Digital Signature, Voice Narration Settings.
-
-### 8. Service Offerings & Pricing font parity
-
-Line 1868 uses `<span className="text-xs font-medium text-primary-dark">Service Offerings & Pricing</span>` while siblings use `<h3 className="text-base font-semibold text-primary-dark">`. Replace with the matching `<h3>` so it visually matches Digital Signature.
-
-### Files
-- `src/hooks/usePatients.ts` — silent flag on `createPatient`.
-- `src/pages/Patients.tsx` — pass `{ silent: true }` in auto-ME effect.
-- `src/pages/MySessions.tsx` — heading size, default-closed styling with green-when-open, content padding, smaller count pill, smaller status badge, Date/Patient grouping toggle.
-- `src/pages/MyPractice.tsx` — About Me default-green trigger, Service Offerings h3, broaden open-state white-text selector across all triggers.
+- No business-logic changes; presentation only.
+- Accordion pattern reused: `bg-transparent hover:bg-muted data-[state=open]:bg-primary data-[state=open]:text-white`.
+- Toaster offset must respect mobile (no desktop footer on mobile — use `mobileOffset` unchanged or small).
