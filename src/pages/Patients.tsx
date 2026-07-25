@@ -817,9 +817,9 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
       )}
 
       {/* Patient List */}
-      <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-primary/40 bg-card shadow-sm overflow-hidden">
         {sortedPatients.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
+          <div className="p-5 text-center text-muted-foreground">
             {searchQuery ? t("patients.noPatientsFound") : t("patients.noPatientsHint")}
           </div>
         ) : (

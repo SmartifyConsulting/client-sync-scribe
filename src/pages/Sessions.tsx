@@ -917,7 +917,7 @@ export default function Sessions() {
             </div>
 
           {/* Compact Recording Panel - Sidebar */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:order-2">
+          <div className="rounded-xl border border-primary/40 bg-card shadow-sm flex flex-col order-1 lg:order-2">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -1083,11 +1083,11 @@ export default function Sessions() {
       )}
 
       {sessionState === "processing" && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-primary bg-card p-12 text-center">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-primary/40 bg-card p-8 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
             <Sparkles className="h-8 w-8 text-primary animate-pulse" />
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">
+          <h2 className="text-sm font-semibold text-foreground mb-2">
             Processing Session
           </h2>
           <p className="text-muted-foreground max-w-md">
@@ -1411,8 +1411,8 @@ export default function Sessions() {
       )}
 
       {/* All Sessions List */}
-      <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+      <div className="rounded-xl border border-primary/40 bg-card p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">{t("sessions.allSessions")}</h2>
@@ -1453,7 +1453,7 @@ export default function Sessions() {
         </div>
 
         {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <div className="flex flex-col sm:flex-row gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
@@ -1482,7 +1482,7 @@ export default function Sessions() {
           </div>
         </div>
 
-        <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
+        <Alert className="mb-3 border-amber-500/30 bg-amber-500/5">
           <AlertCircle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-xs text-amber-700">
             Voice recordings and transcriptions are deleted after 7 days. Download them to keep. AI summaries remain permanently.
@@ -1627,7 +1627,7 @@ export default function Sessions() {
           );
 
           return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* This Week - always expanded, not collapsible */}
             {thisWeekSessions.length > 0 && (
               <div>
