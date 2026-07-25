@@ -25,28 +25,30 @@ Deno.serve(async (req) => {
     const email = String(body.email || "").trim().toLowerCase();
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Valid email required");
 
-    // Seeded test users may switch back to the Georgia Adams admin profile
-    // without being admins themselves. Any other target requires admin role.
-    const REVERSE_ADMIN_EMAIL = "info@georgiaadams.co.za";
+    // Test users and admins can switch profiles. Test users can switch to any other test user.
     const SEEDED_EMAILS = new Set([
-      "sme@smartify.co.za",
-      "dean.allie@gmail.com",
-      "projectmanager@smartify.co.za",
-      "paraskevoulasoldatos@gmail.com",
-      "xtina@smartify.co.za",
-      "christina@smartify.co.za",
-      "zano@smartify.co.za",
-      "renken@smartify.co.za",
-      "jeanprodromos@smartify.co.za",
-      "hospital.test@holarchealth.com",
-      "er.test@holarchealth.com",
+      "info@georgiaadams.co.za", // Georgia Adams (Admin)
+      "sme@smartify.co.za", // Dr Dean Allie (Doctor)
+      "dean.allie@gmail.com", // Dr Dean Allie (Patient)
+      "zano@smartify.co.za", // Zano (Hospital)
+      "renken@smartify.co.za", // Renken (ER Provider)
+      "hospital.test@holarchealth.com", // Hospital Admin (Test)
+      "er.test@holarchealth.com", // ER Provider (Test)
     ]);
-    const isReverseToAdmin = email === REVERSE_ADMIN_EMAIL && SEEDED_EMAILS.has(callerEmail);
 
-    if (!isReverseToAdmin) {
+    const isCallerSeededTest = SEEDED_EMAILS.has(callerEmail);
+    const isTargetSeededTest = SEEDED_EMAILS.has(email);
+
+    // Allow: test users switching to any seeded test user, or admins switching to anyone
+    let hasPermission = false;
+    if (isCallerSeededTest && isTargetSeededTest) {
+      hasPermission = true; // Test users can switch between test profiles
+    } else {
       const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
-      if (!isAdmin) throw new Error("Admin role required");
+      if (isAdmin) hasPermission = true; // Admins can switch to anyone
     }
+
+    if (!hasPermission) throw new Error("Only test users and admins can use profile switcher");
 
     const { data, error } = await sb.auth.admin.generateLink({ type: "magiclink", email });
     if (error) throw error;

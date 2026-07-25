@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import betaLogoAsset from "@/assets/holarc-beta-logo.png.asset.json";
+const betaLogo = betaLogoAsset.url;
 import {
   Dialog,
   DialogContent,
@@ -42,11 +43,11 @@ export function EarlyReleaseNotice() {
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Sparkles className="h-6 w-6 text-primary" />
+          <div className="mx-auto mb-2">
+            <img src={betaLogo} alt="Holarc Health BETA" className="h-16 w-auto object-contain" />
           </div>
           <DialogTitle className="text-center">{t("earlyRelease.title")}</DialogTitle>
-          <DialogDescription className="text-center leading-relaxed pt-2">
+          <DialogDescription className="text-center leading-relaxed pt-2 text-[10px]">
             {t("earlyRelease.description")}
           </DialogDescription>
         </DialogHeader>

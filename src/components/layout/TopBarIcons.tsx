@@ -230,8 +230,8 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
       {/* User Avatar & Profile Menu */}
       <Popover>
         <PopoverTrigger asChild>
-          <button className="h-11 w-11 rounded-full bg-muted hover:bg-muted/80 transition-colors flex items-center justify-center border-2 border-green-500">
-            <Avatar className="h-11 w-11">
+          <button className="h-11 w-11 rounded-full bg-muted hover:bg-muted/80 transition-colors flex items-center justify-center">
+            <Avatar className="h-11 w-11 border-2 border-green-500">
               <AvatarImage src={profile?.avatar_url} alt={profile?.full_name} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                 {getInitials()}
@@ -249,7 +249,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           <div className="mt-3 pt-3 border-t border-border">
             <p className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">TEST PROFILES</p>
             <div className="space-y-1 max-h-60 overflow-y-auto">
-              {TEST_PROFILES.map((tp) => (
+              {TEST_PROFILES.filter((tp) => tp.email !== currentEmail).map((tp) => (
                 <button
                   key={tp.email}
                   disabled={switching === tp.email}
