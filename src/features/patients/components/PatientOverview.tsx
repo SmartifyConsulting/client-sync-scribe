@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
+import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Session } from "@/hooks/useSessions";
 import { medicationSyncBus } from "@/lib/utils";
 import { format } from "date-fns";
@@ -717,166 +716,150 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
         </div>
       )}
 
-      {/* Allergies / Conditions + DISC (doctor-only) */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="md:col-span-1 space-y-4">
-          <Collapsible defaultOpen={false} className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
-            <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-              <ChevronDown className="h-4 w-4 text-red-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              <h4 className="font-medium text-foreground">Allergies</h4>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
-              <div className="flex flex-wrap gap-2">
-                {summaryData.allergies.length > 0 ? (
-                  summaryData.allergies.map((allergy, i) => (
-                    <Badge
-                      key={i}
-                      variant="outline"
-                      className={`${getSeverityColor(allergy.severity)} capitalize`}
-                    >
-                      {allergy.name} ({allergy.severity})
-                    </Badge>
-                  ))
-                ) : patient.allergies ? (
-                  <span className="text-sm text-foreground">{patient.allergies}</span>
-                ) : (
-                  <span className="text-sm text-muted-foreground italic">No allergies recorded</span>
-                )}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-
-          <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
-            <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-              <ChevronDown className="h-4 w-4 text-blue-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
-              <HeartPulse className="h-4 w-4 text-blue-600" />
-              <h4 className="font-medium text-foreground">Conditions / Diagnoses</h4>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
-              {summaryData.conditions.length > 0 ? (
-                <div className="space-y-2">
-                  {summaryData.conditions.map((cond, i) => (
-                    <div key={i} className="text-sm flex items-center justify-between gap-2 group">
-                      <div className="flex items-start gap-2 flex-1">
-                        <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/60"}`} />
-                        <div className={cond.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
-                          <span className={cond.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{cond.name}</span>
-                          <span className="text-muted-foreground ml-2 text-xs no-underline">({cond.date})</span>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 transition-opacity"
-                        onClick={() => toggleStatus("conditions", i)}
-                      >
-                        {cond.status === "active" ? (
-                          <span className="flex items-center gap-1 text-xs text-blue-600"><Check className="h-4 w-4" /> Active</span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Resolved</span>
-                        )}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No conditions/diagnoses recorded</p>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
+      {/* Compact Medical Summary Grid - Always Visible */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Allergies */}
+        <div className="rounded-xl border border-red-500/30 bg-red-500/5 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <h4 className="text-sm font-semibold text-foreground">Allergies</h4>
+          </div>
+          {summaryData.allergies.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {summaryData.allergies.map((allergy, i) => (
+                <Badge key={i} variant="outline" className={`${getSeverityColor(allergy.severity)} text-xs capitalize`}>
+                  {allergy.name} ({allergy.severity})
+                </Badge>
+              ))}
+            </div>
+          ) : patient.allergies ? (
+            <p className="text-xs text-foreground">{patient.allergies}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">No allergies recorded</p>
+          )}
         </div>
 
-        <div className="md:col-span-3">
-          <DiscPersonalityCard patientId={patient.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
+        {/* Conditions */}
+        <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <HeartPulse className="h-4 w-4 text-blue-600" />
+            <h4 className="text-sm font-semibold text-foreground">Conditions</h4>
+          </div>
+          {summaryData.conditions.length > 0 ? (
+            <div className="space-y-1.5">
+              {summaryData.conditions.map((cond, i) => (
+                <div key={i} className="text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/60"}`} />
+                    <div className="min-w-0">
+                      <span className={cond.status === "inactive" ? "text-muted-foreground line-through" : "text-foreground font-medium"}>
+                        {cond.name}
+                      </span>
+                      <span className="text-muted-foreground ml-1 text-[11px]">({cond.date})</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-1.5 transition-opacity shrink-0"
+                    onClick={() => toggleStatus("conditions", i)}
+                  >
+                    {cond.status === "active" ? (
+                      <span className="flex items-center gap-0.5 text-[11px] text-blue-600"><Check className="h-3 w-3" /></span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground"><X className="h-3 w-3" /></span>
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No conditions recorded</p>
+          )}
+        </div>
+
+        {/* Medications */}
+        <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Pill className="h-4 w-4 text-green-600" />
+            <h4 className="text-sm font-semibold text-foreground">Medications</h4>
+          </div>
+          {summaryData.medications.length > 0 ? (
+            <div className="space-y-1.5">
+              {summaryData.medications.map((med, i) => (
+                <div key={i} className="text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/60"}`} />
+                    <div className="min-w-0">
+                      <span className={med.status === "inactive" ? "text-muted-foreground line-through" : "text-foreground font-medium"}>
+                        {med.name}
+                      </span>
+                      <span className="text-muted-foreground ml-1 text-[11px]">({med.date})</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-1.5 transition-opacity shrink-0"
+                    onClick={() => toggleStatus("medications", i)}
+                  >
+                    {med.status === "active" ? (
+                      <span className="flex items-center gap-0.5 text-[11px] text-green-600"><Check className="h-3 w-3" /></span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground"><X className="h-3 w-3" /></span>
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No medications recorded</p>
+          )}
+        </div>
+
+        {/* Symptoms */}
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Activity className="h-4 w-4 text-amber-600" />
+            <h4 className="text-sm font-semibold text-foreground">Symptoms</h4>
+          </div>
+          {summaryData.symptoms.length > 0 ? (
+            <div className="space-y-1.5">
+              {summaryData.symptoms.map((symptom, i) => (
+                <div key={i} className="text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${symptom.status === "active" ? "bg-amber-500" : "bg-muted-foreground/60"}`} />
+                    <div className="min-w-0">
+                      <span className={symptom.status === "inactive" ? "text-muted-foreground line-through" : "text-foreground font-medium"}>
+                        {symptom.name}
+                      </span>
+                      <span className="text-muted-foreground ml-1 text-[11px]">({symptom.date})</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-1.5 transition-opacity shrink-0"
+                    onClick={() => toggleStatus("symptoms", i)}
+                  >
+                    {symptom.status === "active" ? (
+                      <span className="flex items-center gap-0.5 text-[11px] text-amber-600"><Check className="h-3 w-3" /></span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground"><X className="h-3 w-3" /></span>
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">No symptoms recorded</p>
+          )}
         </div>
       </div>
 
-      {/* Medications and Symptoms */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
-          <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-            <ChevronDown className="h-4 w-4 text-green-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
-            <Pill className="h-4 w-4 text-green-600" />
-            <h4 className="font-medium text-foreground">Medications</h4>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3">
-            {summaryData.medications.length > 0 ? (
-              <ul className="space-y-2">
-                {summaryData.medications.map((med, i) => (
-                  <li key={i} className="text-sm flex items-center justify-between gap-2 group">
-                    <div className="flex items-start gap-2 flex-1">
-                      <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/60"}`} />
-                      <div className={med.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
-                        <span className={med.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{med.name}</span>
-                        <span className="text-muted-foreground ml-2 text-xs no-underline">({med.date})</span>
-                        {med.status === "inactive" && med.end_date && (
-                          <span className="text-muted-foreground ml-2 text-xs no-underline italic">
-                            Stopped {(() => { try { return format(new Date(med.end_date), "d MMM yyyy"); } catch { return med.end_date; } })()}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 transition-opacity"
-
-                      onClick={() => toggleStatus("medications", i)}
-                    >
-                      {med.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-green-600"><Check className="h-4 w-4" /> In Use</span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Not Used</span>
-                      )}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground italic">No medications recorded</p>
-            )}
-          </CollapsibleContent>
-        </Collapsible>
-
-        <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
-          <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-            <ChevronDown className="h-4 w-4 text-amber-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
-            <Activity className="h-4 w-4 text-amber-600" />
-            <h4 className="font-medium text-foreground">Symptoms</h4>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3">
-            {summaryData.symptoms.length > 0 ? (
-              <ul className="space-y-2">
-                {summaryData.symptoms.map((symptom, i) => (
-                  <li key={i} className="text-sm flex items-center justify-between gap-2 group">
-                    <div className="flex items-start gap-2 flex-1">
-                      <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${symptom.status === "active" ? "bg-amber-500" : "bg-muted-foreground/60"}`} />
-                      <div className={symptom.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
-                        <span className={symptom.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{symptom.name}</span>
-                        <span className="text-muted-foreground ml-2 text-xs no-underline">({symptom.date})</span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 transition-opacity"
-                      onClick={() => toggleStatus("symptoms", i)}
-                    >
-                      {symptom.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-amber-600"><Check className="h-4 w-4" /> Active</span>
-                      ) : (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Resolved</span>
-                      )}
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground italic">No symptoms recorded</p>
-            )}
-          </CollapsibleContent>
-        </Collapsible>
+      {/* DISC Profile - 2x2 Grid spanning full width */}
+      <div className="md:col-span-full">
+        <DiscPersonalityCard patientId={patient.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
       </div>
     </div>
   );

@@ -130,16 +130,16 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
             ) : null}
           </p>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 grid-cols-2">
             {TILES.map((tile) => {
               const score = (profile as any)[tile.key] as number;
               const rationale = (profile as any)[`${tile.key}_rationale`] as string | null;
               return (
                 <div
                   key={tile.key}
-                  className="rounded-lg border border-border bg-background p-3"
+                  className="rounded-lg border border-border bg-background p-4"
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="text-sm font-semibold text-foreground">
                       {tile.letter} — {tile.label}
                     </span>
@@ -147,7 +147,7 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
                       {score}
                     </span>
                   </div>
-                  <div className="h-1 rounded-full bg-muted overflow-hidden mb-2">
+                  <div className="h-2 rounded-full bg-muted overflow-hidden mb-3">
                     <div
                       className={`h-full ${tile.barClass}`}
                       style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
