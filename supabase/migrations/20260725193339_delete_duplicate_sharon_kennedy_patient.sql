@@ -1,18 +1,19 @@
--- Delete duplicate Sharon Elise Kennedy (merged) patient record
--- Keep: 4b1032be-b2ad-4c96-b8da-3cd87d6b8dcb (20 sessions - primary test data)
--- Delete: 38640761-a91e-4b86-ae0b-1052d86ld965 (1 session - merged duplicate)
+-- Delete duplicate Sharon Kennedy patient records
+-- Keep: 4b1032be-b2ad-4c96-b8da-3cd87d6b8dcb (Sharon Elise Kennedy - 20 sessions - primary test data)
+-- Delete: Sharon Kennedy (archived) - 0 sessions
+-- Delete: Sharon Elise Kennedy (merged) - 1 session
 
 -- This will cascade delete:
--- - All sessions for this patient
--- - All documents for this patient
+-- - All sessions for these patients
+-- - All documents for these patients
 -- - All related medical data
 
 DELETE FROM public.patients
-WHERE id = '38640761-a91e-4b86-ae0b-1052d86ld965';
+WHERE name IN ('Sharon Kennedy (archived)', 'Sharon Elise Kennedy (merged)');
 
--- Verify deletion
-SELECT id, name, COUNT(s.id) as session_count
+-- Verify deletion - should show only 1 Sharon record with 20 sessions
+SELECT p.id, p.name, COUNT(s.id) as session_count
 FROM public.patients p
 LEFT JOIN public.sessions s ON s.patient_id = p.id
-WHERE name ILIKE '%sharon%' OR name ILIKE '%kennedy%'
+WHERE p.name ILIKE '%sharon%' OR p.name ILIKE '%kennedy%'
 GROUP BY p.id, p.name;
