@@ -1076,6 +1076,13 @@ ${tasksHtml}`;
         }
       }
 
+      // Fire-and-forget: refresh DISC personality profile from the new session content.
+      if (patientId) {
+        supabase.functions
+          .invoke('analyze-patient-disc', { body: { patient_id: patientId } })
+          .catch((e) => logger.debug('DISC refresh skipped:', e?.message || e));
+      }
+
       toast({ title: 'Session Completed', description: 'Session saved with AI summary and action items added to to-do list' });
       return transformedData;
     } catch (error: any) {
