@@ -257,17 +257,20 @@ export default function Sessions() {
   }, [patientId]);
 
   // Generate AI Clinician Diagnosis
-  const generateAIDiagnosis = async () => {
-    if (!currentPatient || !summary) return;
-    
+  const generateAIDiagnosis = async (override?: { summary?: string; transcript?: string }) => {
+    const summaryText = override?.summary ?? summary;
+    const transcriptText = override?.transcript ?? transcript;
+    if (!currentPatient || !summaryText) return;
+
     setIsGeneratingDiagnosis(true);
     setAiDiagnosis(null);
     
     try {
       const { data, error } = await supabase.functions.invoke('ai-clinician-diagnosis', {
         body: {
-          sessionSummary: summary,
-          sessionTranscript: transcript,
+          sessionSummary: summaryText,
+          sessionTranscript: transcriptText,
+
           patientName: currentPatient.name,
           patientAge: currentPatient.dob ? calculateAge(currentPatient.dob) : null,
           allergies: currentPatient.allergies,
