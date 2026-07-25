@@ -2302,7 +2302,7 @@ export default function MyPractice() {
         <TabsContent value="certificates" className="mt-4 my-practice-tab-body">
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
+              <h3 className="text-base font-semibold text-primary-dark">Credentials</h3>
               <Button
                 size="sm"
                 onClick={() => {
