@@ -1,61 +1,86 @@
-## 1. Rename "Vula Vouchers" → "Vulas"
+## Scope
 
-User-facing text only. Keep DB column names, hooks, and internal identifiers untouched.
+A batch of UI polish across My Rewards, My Practice, My Sessions, Add Task, Documents (patient + doctor), Tasks (doctor), Hospital Admissions, Referral Doctors, and Credentials. No business logic changes — presentation only.
 
-- `src/i18n/locales/*.json` (all 25 files): replace strings `"Vula Vouchers"`, `"Vula voucher"`, `"Vula voucher(s)"` with `"Vulas"` (and localized equivalents kept in English for now — same string).
-- `src/pages/patient/MyRewards.tsx`: card title `Vula Vouchers` → `Vulas`; `alt="Vula Vouchers"` → `alt="Vulas"`; "Use your Vula Vouchers at these merchants" → "Use your Vulas at these merchants".
-- `src/pages/patient/MyDetails.tsx`: subtitle "Track your Vula vouchers…" → "Track your Vulas…".
-- `src/pages/doctor/DoctorRewards.tsx`: all `alt="Vula Vouchers"` → `alt="Vulas"`.
-- `src/features/patients/components/PatientDetailsEditor.tsx`: 3 alt strings + 2 comments.
-- `src/features/rewards/components/VulaExplainerDialog.tsx`: alt.
-- `src/pages/Dashboard.tsx`: title key `doctorDashboard.vulaVouchers` value updated in locale JSON only.
-- `src/components/gamification/LollipopReport.tsx`: label "Vula Vouchers" → "Vulas".
+---
 
-## 2. Update the Vula logo
+## 0. Audit pass (do first)
+Before touching new work, walk every item in this plan and record its current state (DONE / PARTIAL / NOT DONE) with file:line evidence. Anything marked PARTIAL or NOT DONE gets picked up in this same turn. Explicitly re-check:
+- Accordion green-when-open + white font applied everywhere listed (My Practice, Personal Information, Medical Information, My Sessions, Documents, Tasks) — not just some.
+- Chevron on the right on every accordion.
+- Counts sitting next to labels, not floating far-right.
+- Light-grey hover on collapsed accordion rows AND template cards.
+- Description slot below trigger bars where copy exists.
+- Vulas logo 2x on standalone marks only.
+- Heading + subtext font parity across tab views.
+- Add Task composer redesigned.
+- Documents parity + grouping + only-top-expanded default.
+- Doctor Tasks default grouped by Today / This Week / This Month / 2026.
 
-Replace image files in place — no import changes needed:
+## 1. Footer alignment (new)
+Every page footer must be **left-aligned with the screen heading** — i.e. share the same left padding / container gutter as the H1 of the page, not centered and not full-bleed.
+- Audit the shared footer component(s) used across authenticated screens.
+- Remove any `mx-auto` / `text-center` / independent container that pushes the footer out of alignment with the page heading column.
+- Verify on: `/practice`, `/my-sessions`, `/documents` (patient + doctor), `/todo`, `/patient/*` tabs, Hospital Admissions, Referral Doctors, Credentials, My Rewards.
 
-- `src/assets/vula-vouchers-logo.png`
-- `src/assets/vula-vouchers-logo-v2.png`
-- `src/assets/vula-vouchers-logo-v3.png`
-- `src/assets/vula-symbol.png`
+## 2. My Rewards — VULAS logo sizing
+- `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`: double every standalone VULAS logo. Do **not** enlarge the logo inside the combined count circle.
 
-Copy `user-uploads://VulasLogoV2.png` to each path (transparent white background; existing components already control sizing via Tailwind).
+## 3. My Practice — accordion font consistency
+- `src/pages/MyPractice.tsx`: normalize "Service Offerings & Pricing" trigger to match About Me / Personal Information / Practice Information (same font size, weight, icon size).
 
-## 3. To-Do row: action label inside patient group
+## 4. Tab heading normalization
+- One shared pattern across Medical Information, Credentials, Referral Doctors, Hospital Admissions, My Sessions, Documents, Tasks: `text-base font-semibold` heading + `text-xs text-muted-foreground` subtext.
 
-Add an optional `insideGroup?: boolean` prop to `src/components/todos/TodoRow.tsx`.
+## 5. Hospital Admissions / Referral Doctors / Credentials
+- Fix Hospital Admissions layout regressions.
+- Reduce action buttons by one font size on all three pages.
+- **Log Admission** and **Upload Admission** form buttons must use the exact same button format (variant, size, font size, padding) as the buttons inside the Doctor's My Practice tab views.
 
-When `insideGroup` is true:
-- Do NOT render the patient name. Instead render a kind-based action label:
-  - `invoice` → "Review Invoice"
-  - `medical_certificate` → "Review Medical Certificate"
-  - `prescription` → "Review Prescription"
-  - `referral` → "Review Referral"
-  - `laboratory` → "Review Lab Request"
-  - `recommendation` → "Review Letter"
-  - `appointment` → the appointment title (date + time shown separately)
-  - other kinds fall back to `display.shortLabel`.
+## 6. Global accordion standard (My Sessions style)
+Apply across My Practice, Personal Information, Medical Information, My Sessions, Documents, Tasks:
+- Flat bar with fine grey divider between rows.
+- Chevron **always on the right**.
+- Count of units **next to the label**.
+- When expanded: `bg-primary` with **white** label, icon, chevron, count.
+- Collapsed hover: light but visible grey (`hover:bg-muted` / `hover:bg-neutral-100`). Same hover on **template cards**.
+- Padding below the bar for an optional short description (e.g. "Share a short pitch about your practice and approach. Patients see this when viewing your profile. Maximum 600 words.").
 
-Pass `insideGroup` from both `src/pages/TodoList.tsx` and `src/components/dashboard/CompactTodoList.tsx` when rendering rows inside a patient `Collapsible`.
+## 7. Add Task composer
+- `src/pages/TodoList.tsx` and `src/components/dashboard/CompactTodoList.tsx`: green, always-active **Add** button as the primary entry point. Textarea / mic appear after Add is clicked. Reduces vertical space.
 
-## 4. Appointment row layout & actions
+## 8. Documents — patient + doctor parity
+- Same visual shell across `PatientDocuments.tsx`, `DoctorDocumentsPage.tsx`, `DoctorDocumentsTab.tsx`.
+- Same header row (title, subtext, filters, group-by control).
+- Doctor gains full CRUD on rows.
+- Column header row above the list.
+- Group by **Type** or **Date**; doctor adds **Patient**.
+- Only the top accordion group expanded by default.
+- Template cards use the light-grey hover from section 6.
 
-In `TodoRow` when `display.kind === "appointment"`:
+## 9. Doctor Tasks grouping
+- `src/pages/TodoList.tsx` (doctor view): default group by **Today / This Week / This Month / 2026**; toggle to **By Patient**.
+- Only the first group expanded.
+- Same green-when-open / white-font / grey-hover accordion rule.
 
-- Hide the standalone "Preview" and "Edit / Accept" buttons currently rendered before the ellipsis. Move both into the `DropdownMenu` (ellipsis) as menu items:
-  - `Preview Calendar` (calls `onPreviewCalendar`)
-  - `Edit / Accept` (calls `onEditAppointment`)
-- Remove the "Mark complete / Reopen" menu item for appointments (cannot mark complete).
-- Hide the round `Checkbox` for appointments (replace with an equivalent-width spacer so the row still aligns).
-- Use the freed space to render **date and time together** (not just time). Show `display.date · display.time` (e.g. `24 Jul · 09:30`) as a single meta chunk, visible on all breakpoints (not `hidden sm:inline-flex`).
+---
 
-## 5. Indent the "Mark done" checkboxes
+## Files to touch
+- `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`
+- `src/components/gamification/LollipopDisplay.tsx`
+- `src/pages/MyPractice.tsx`
+- `src/pages/MySessions.tsx`, `src/pages/Sessions.tsx`
+- `src/features/patients/components/PatientDetailsEditor.tsx`, `EmergencyContactsInline.tsx`
+- `src/pages/patient/MyDetails.tsx` (Hospital Admissions section)
+- `src/features/sessions/admissions/ManualLogAdmissionDialog.tsx`, `UploadAdmissionDialog.tsx`
+- `src/pages/ReferralDoctors.tsx`, `src/pages/CPDCertificates.tsx`
+- `src/pages/TodoList.tsx`, `src/components/dashboard/CompactTodoList.tsx`
+- `src/pages/patient/PatientDocuments.tsx`, `src/pages/doctor/DoctorDocumentsPage.tsx`, `src/pages/doctor/DoctorDocumentsTab.tsx`
+- Template card components under Documents/Templates
+- Shared app footer component(s) — align to heading column
+- Shared: small `AccordionTriggerBar` helper (or shared class strings) so the green-when-open + right chevron + inline count + grey hover + description-slot rule is applied consistently.
 
-Add left padding to the row container in `TodoRow` (e.g. change `px-2` → `pl-6 pr-2`) so the round completion circles sit inset from the frame edge, reducing visual density inside the patient group. Applies uniformly to compact and full rows.
-
-## Notes / non-goals
-
-- No schema changes, no rename of the `vula_*` tables, columns, functions, or edge functions.
-- No changes to the Vula Vault (partner) branding — only "Vula Vouchers" wording is renamed.
-- Icon legend stays removed (per prior turn).
+## Out of scope
+- No color palette changes.
+- No data / RLS / edge function changes.
+- No new routes.
