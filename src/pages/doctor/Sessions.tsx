@@ -139,7 +139,7 @@ export default function Sessions() {
                     onClick={() => toggleGroup(groupKey)}
                   >
                     <div className="flex items-center gap-3">
-                      <h3 className="text-sm font-medium text-primary-dark">
+                      <h3 className="text-sm font-medium text-foreground">
                         {groupLabels[groupKey]}
                       </h3>
                       <span className="text-sm text-muted-foreground">

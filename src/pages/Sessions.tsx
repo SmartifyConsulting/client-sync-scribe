@@ -1001,7 +1001,7 @@ export default function Sessions() {
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-sm font-medium text-primary-dark">Live AI hint</p>
+                    <p className="text-sm font-medium text-foreground">Live AI hint</p>
                   </div>
                   {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                 </div>
@@ -1027,7 +1027,7 @@ export default function Sessions() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
                     <FileText className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-sm font-medium text-primary-dark">Transcript</p>
+                    <p className="text-sm font-medium text-foreground">Transcript</p>
                   </div>
                   {transcript && !isTranscribing && (
                     <span className="text-sm bg-success/15 text-success px-1.5 py-0.5 rounded">âœ“</span>

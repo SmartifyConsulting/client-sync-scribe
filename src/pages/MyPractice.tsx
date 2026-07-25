@@ -346,11 +346,11 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   const dirty = draft !== value;
   return (
     <Accordion type="single" collapsible className="space-y-4">
-      <AccordionItem value="about-me" className="rounded-xl border border-primary-dark bg-card shadow-sm">
-        <AccordionTrigger className="px-4 py-3 hover:no-underline">
+      <AccordionItem value="about-me" className="rounded-xl border border-primary/40 bg-card">
+        <AccordionTrigger className="px-5 py-3 hover:no-underline">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-medium text-primary-dark">{t("myPractice.aboutMe")}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t("myPractice.aboutMe")}</h3>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4 space-y-2">
@@ -1159,7 +1159,7 @@ export default function MyPractice() {
                 <Camera className="h-3 w-3 text-primary-foreground" />
               </div>
             </div>
-            <span className="text-sm font-medium text-primary-dark mt-0.5 whitespace-nowrap">
+            <span className="text-sm font-semibold text-foreground mt-0.5 whitespace-nowrap">
               {(profile as any)?.avatar_url ? "Change photo" : "Add photo"}
             </span>
             <input
@@ -1228,11 +1228,11 @@ export default function MyPractice() {
           />
           {/* Personal Information Accordion */}
           <Accordion type="multiple" className="space-y-4">
-            <AccordionItem value="personal" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="personal" className="rounded-xl border border-primary/40 bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-medium text-primary-dark">Personal Information</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Personal Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1326,11 +1326,11 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Practice Details Accordion */}
-            <AccordionItem value="practice-details" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="practice-details" className="rounded-xl border border-primary/40 bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-medium text-primary-dark">Practice Information</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Practice Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1736,11 +1736,11 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Shared Practice Calendar Accordion */}
-            <AccordionItem value="shared-calendar" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="shared-calendar" className="rounded-xl border border-primary/40 bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-medium text-primary-dark">Shared Practice Calendar</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Shared Practice Calendar</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1861,11 +1861,11 @@ export default function MyPractice() {
             </AccordionItem>
 
            {/* Service Offerings & Pricing Accordion */}
-            <AccordionItem value="service-pricing" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="service-pricing" className="rounded-xl border border-primary/40 bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary-dark">Service Offerings & Pricing</span>
+                  <span className="text-sm font-semibold text-foreground">Service Offerings & Pricing</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -2047,11 +2047,11 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Digital Signature Accordion */}
-            <AccordionItem value="signature" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="signature" className="rounded-xl border border-primary/40 bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-medium text-primary-dark">Digital Signature</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Digital Signature</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
@@ -2161,11 +2161,11 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Voice Narration Settings Accordion */}
-            <AccordionItem value="voice" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="voice" className="rounded-xl border border-primary/40 bg-card">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-medium text-primary-dark">Voice Narration Settings</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Voice Narration Settings</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
@@ -2291,7 +2291,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-medium text-primary-dark">Referral Doctors</h3>
+              <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
             </div>
             <ReferralDoctors hideHeader />
           </div>
@@ -2303,7 +2303,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-medium text-primary-dark">Credentials</h3>
+              <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-sm">

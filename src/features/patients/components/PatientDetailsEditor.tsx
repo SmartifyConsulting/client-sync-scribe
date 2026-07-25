@@ -1328,7 +1328,7 @@ export function PatientDetailsEditor({
                 )}
               </div>
             </div>
-            <span className="text-sm font-medium text-primary-dark mt-0.5">
+            <span className="text-sm font-medium text-foreground mt-0.5">
               {avatarUrl ? "Change photo" : "Add photo"}
             </span>
 
@@ -1342,7 +1342,7 @@ export function PatientDetailsEditor({
                 return `${greeting}, ${patient.name.split(" ")[0]}`;
               })()}
             </h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-base">
               Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
           </div>
@@ -1688,7 +1688,7 @@ export function PatientDetailsEditor({
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Team</h2>
+                <h2 className="text-[18px] font-semibold text-foreground">My Holarc Team</h2>
                 <p className="text-sm text-muted-foreground">Healthcare providers with access to your profile</p>
               </div>
               <Suspense
@@ -1708,7 +1708,7 @@ export function PatientDetailsEditor({
 <TabsContent value="personal" className="space-y-4 mt-4">
               <div className="mb-1 flex items-center justify-between">
                 <div>
-                  <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
+                  <h2 className="text-[18px] font-semibold text-foreground">{t("patientProfile.personalHeading")}</h2>
                   <p className="text-sm text-muted-foreground">{t("patientProfile.personalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
@@ -1844,7 +1844,7 @@ export function PatientDetailsEditor({
             <TabsContent value="medical" className="mt-4">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.medicalHeading")}</h2>
+                  <h2 className="text-[18px] font-semibold text-foreground">{t("patientProfile.medicalHeading")}</h2>
                   <p className="text-sm text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
@@ -2021,7 +2021,7 @@ export function PatientDetailsEditor({
                   {/* Organ Donor â€” collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-border bg-white overflow-hidden">
                     <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
-                      <h3 className="text-sm font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
+                      <h3 className="text-sm font-medium text-foreground tracking-wide flex items-center gap-1.5 text-left">
                         <Heart className="h-3.5 w-3.5" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
@@ -2074,7 +2074,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="tasks" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Tasks</h2>
+                  <h2 className="text-[18px] font-semibold text-foreground">My Tasks</h2>
                   <p className="text-sm text-muted-foreground">Manage your health tasks and to-dos</p>
                 </div>
                 <Suspense
@@ -2098,7 +2098,7 @@ export function PatientDetailsEditor({
                   </TabsList>
                   <TabsContent value="sessions" className="mt-3">
                     <div className="mb-4">
-                      <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
+                      <h2 className="text-[18px] font-semibold text-foreground">My Sessions</h2>
                       <p className="text-sm text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
                     </div>
                     <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
@@ -2156,7 +2156,7 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
-                  <h2 className="text-[18px] font-semibold text-primary-dark">My Round Table</h2>
+                  <h2 className="text-[18px] font-semibold text-foreground">My Round Table</h2>
                   <p className="text-sm text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
@@ -2417,7 +2417,7 @@ export function PatientDetailsEditor({
 <TabsContent value="personal" className="space-y-4 mt-4">
             <div className="mb-1 flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
+                <h2 className="text-[18px] font-semibold text-foreground">{t("patientProfile.personalHeading")}</h2>
                 <p className="text-sm text-muted-foreground">{t("patientProfile.personalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
@@ -2841,7 +2841,7 @@ export function PatientDetailsEditor({
           <TabsContent value="medical" className="mt-4">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.medicalHeading")}</h2>
+                <h2 className="text-[18px] font-semibold text-foreground">{t("patientProfile.medicalHeading")}</h2>
                 <p className="text-sm text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
@@ -3535,7 +3535,7 @@ export function PatientDetailsEditor({
                 {/* Organ Donor â€” collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-border bg-white overflow-hidden">
                   <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
-                    <h3 className="text-sm font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
+                    <h3 className="text-sm font-medium text-foreground tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
                     </h3>
                     <div className="flex items-center gap-2">
@@ -3703,7 +3703,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="tasks" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Tasks</h2>
+                <h2 className="text-[18px] font-semibold text-foreground">My Tasks</h2>
                 <p className="text-sm text-muted-foreground">Manage your health tasks and to-dos</p>
               </div>
               <Suspense
@@ -3727,7 +3727,7 @@ export function PatientDetailsEditor({
                 </TabsList>
                 <TabsContent value="sessions" className="mt-3">
                   <div className="mb-4">
-                    <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
+                    <h2 className="text-[18px] font-semibold text-foreground">My Sessions</h2>
                     <p className="text-sm text-muted-foreground">History of your consultations</p>
                   </div>
                   <Suspense
@@ -3766,7 +3766,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Documents</h2>
+                <h2 className="text-[18px] font-semibold text-foreground">My Documents</h2>
                 <p className="text-sm text-muted-foreground">
                   All your prescriptions, invoices, certificates and uploaded files
                 </p>
@@ -3786,7 +3786,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Round Table</h2>
+                <h2 className="text-[18px] font-semibold text-foreground">My Round Table</h2>
                 <p className="text-sm text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>
