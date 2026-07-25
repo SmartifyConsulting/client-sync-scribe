@@ -636,18 +636,20 @@ export default function Sessions() {
   const handleApproveReferral = async (data: ReferralData) => {
     if (!patientId) return;
     setReviewLoading(true);
+    let docId: string | null = null;
     try {
       const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from('documents').insert({
+        const { data: doc } = await supabase.from('documents').insert({
           user_id: user.id,
           patient_id: patientId,
           patient_name: currentPatient?.name || null,
           name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
           content,
           template_name: 'Referral Letter',
-        });
+        }).select('id').single();
+        docId = doc?.id || null;
         // Increment referral count if doctor exists in referral_doctors
         if (data.doctor_name) {
           const { data: refDoc } = await supabase.from('referral_doctors')
@@ -662,12 +664,20 @@ export default function Sessions() {
           }
         }
       }
-      toast({ title: "Referral Letter Created", description: "Document saved successfully." });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowReferralReview(false);
-    advanceToFollowUp();
+    runDelivery(
+      {
+        label: 'Referral Letter',
+        documentId: docId,
+        recipientEmail: (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      },
+      advanceToFollowUp,
+    );
   };
+
 
 
   const startSession = async () => {
