@@ -506,6 +506,7 @@ export default function TodoList() {
 
 
       {/* Task List — Grouped by Date */}
+      <TodoLegend className="mb-2" />
       <div className="space-y-3">
         {sortedDateKeys.length === 0 ? (
           <div className="rounded-xl border border-primary bg-card p-8 text-center text-muted-foreground">
