@@ -352,7 +352,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t("nav.myDocuments", "Documents")}</h1>
-            <p className="mt-1 text-muted-foreground text-sm">Manage header/footer layouts and content templates separately</p>
+            <p className="mt-1 text-muted-foreground text-base">Manage header/footer layouts and content templates separately</p>
           </div>
         </div>
       )}
@@ -424,7 +424,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               {filteredHFTemplates.map((template) => (
                 <div
                   key={template.id}
-                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
+                  className="group rounded-xl border border-primary/40 bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
@@ -531,7 +531,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               {filteredTemplates.map((template, index) => (
                 <div
                   key={template.id}
-                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
+                  className="group rounded-xl border border-primary/40 bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30 text-left cursor-pointer"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -652,7 +652,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-primary/40 bg-card shadow-sm overflow-hidden">
             <div className="max-h-[400px] overflow-y-auto">
               {filteredDocuments.length > 0 ? (
                 groupedDocuments.map(([groupName, docsInGroup]) => (
@@ -669,7 +669,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
                             <p className="text-sm text-muted-foreground">
-                              {doc.patient_name || "No patient"} Â· {formatDate(doc.created_at)} Â·{" "}
+                              {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
                               <span className="text-primary/70">{doc.template_name || "Custom"}</span>
                             </p>
                           </div>

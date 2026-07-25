@@ -1,4 +1,4 @@
-﻿import { ReactNode } from "react";
+import { ReactNode } from "react";
 import { Settings, LogOut, Share2, Stethoscope, HeartPulse, Gift, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES } from "./testProfiles";
 import { useImpersonate } from "./useImpersonate";
@@ -118,7 +118,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                     {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
-                      <p className="text-sm text-muted-foreground truncate">{p.role} Â· {p.email}</p>
+                      <p className="text-sm text-muted-foreground truncate">{p.role} - {p.email}</p>
                     </div>
                   </button>
                 );
@@ -144,7 +144,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
-                <p className="text-sm text-muted-foreground truncate">Georgia Adams Â· info@georgiaadams.co.za</p>
+                <p className="text-sm text-muted-foreground truncate">Georgia Adams - info@georgiaadams.co.za</p>
               </div>
             </button>
           </div>

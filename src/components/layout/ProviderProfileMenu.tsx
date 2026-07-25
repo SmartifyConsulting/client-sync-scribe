@@ -1,4 +1,4 @@
-﻿import { Loader2, LogOut, ShieldCheck, UserCog } from "lucide-react";
+import { Loader2, LogOut, ShieldCheck, UserCog } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -73,7 +73,7 @@ export function ProviderProfileMenu() {
                     {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
-                      <p className="text-sm text-muted-foreground truncate">{p.role} Â· {p.email}</p>
+                      <p className="text-sm text-muted-foreground truncate">{p.role} - {p.email}</p>
                     </div>
                   </button>
                 );
@@ -98,7 +98,7 @@ export function ProviderProfileMenu() {
             )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
-              <p className="text-sm text-muted-foreground truncate">Georgia Adams Â· {ADMIN_EMAIL}</p>
+              <p className="text-sm text-muted-foreground truncate">Georgia Adams - {ADMIN_EMAIL}</p>
             </div>
           </button>
         )}

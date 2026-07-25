@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -879,12 +879,12 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             </div>
                           )}
                           {!mePatient.email && !mePatient.phone && (
-                            <span className="text-sm text-muted-foreground">â€”</span>
+                            <span className="text-sm text-muted-foreground">-</span>
                           )}
                         </div>
                       </td>
                       <td className="px-3 lg:px-4 py-2.5 text-sm text-muted-foreground">
-                        {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">â€”</span>}
+                        {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">-</span>}
                       </td>
                       <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-sm text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
@@ -978,14 +978,14 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               </div>
                             )}
                             {!patient.email && !patient.phone && (
-                              <span className="text-sm text-muted-foreground">â€”</span>
+                              <span className="text-sm text-muted-foreground">-</span>
                             )}
                           </div>
                         </td>
                         <td className="px-3 lg:px-4 py-2.5 text-sm text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
-                            : <span className="text-muted-foreground/50">â€”</span>
+                            : <span className="text-muted-foreground/50">-</span>
                           }
                         </td>
                         <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-sm text-muted-foreground whitespace-nowrap">

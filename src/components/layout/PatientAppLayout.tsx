@@ -1,4 +1,4 @@
-﻿import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AlertCircle, LifeBuoy } from "lucide-react";
 import { PageTransition } from "./PageTransition";
 import { BottomNav } from "./BottomNav";
@@ -45,7 +45,7 @@ export function PatientAppLayout() {
             <img src={holarcLogo} alt="Holarc" className="h-10 w-auto object-contain" />
           </button>
 
-          {/* Right: shared icons (Bug Â· Calendar Â· Mic Â· Bell Â· Avatar) */}
+          {/* Right: shared icons (Bug - Calendar - Mic - Bell - Avatar) */}
           <TopBarIcons />
         </div>
       </header>

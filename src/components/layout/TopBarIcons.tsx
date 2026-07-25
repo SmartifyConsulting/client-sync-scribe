@@ -1,4 +1,4 @@
-﻿import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
+import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES, ADMIN_EMAIL } from "./testProfiles";
 import { useImpersonate } from "./useImpersonate";
 import { useEffect, useState } from "react";
@@ -146,7 +146,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Language switcher â€” sits immediately left of the bug-report icon */}
+      {/* Language switcher - sits immediately left of the bug-report icon */}
       <LanguageSwitcher />
 
       {/* Bug/Fix Report */}

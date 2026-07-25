@@ -91,12 +91,12 @@ export default function MySessions() {
   }, [sessions]);
 
   return (
-    <div className="container mx-auto p-4 max-w-5xl">
-      <div className="mb-6">
+    <div className="space-y-6 animate-fade-in max-w-5xl">
+      <div>
         <h1 className="text-3xl font-bold text-foreground">
           {t("nav.mySessions", "My Sessions")}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="mt-1 text-muted-foreground text-base">
           {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
         </p>
       </div>
@@ -104,7 +104,7 @@ export default function MySessions() {
       {loading ? (
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {t("common.loading", "Loadingâ€¦")}
+          {t("common.loading", "Loading...")}
         </div>
       ) : (
         <Accordion
@@ -118,7 +118,7 @@ export default function MySessions() {
               <AccordionItem
                 key={b.key}
                 value={b.key}
-                className="border border-primary/40 rounded-lg bg-card"
+                className="border border-primary/40 rounded-xl bg-card"
               >
                 <AccordionTrigger className="px-5 py-3 hover:no-underline">
                   <div className="flex items-center justify-between w-full pr-2">

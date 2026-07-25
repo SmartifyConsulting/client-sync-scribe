@@ -1104,7 +1104,7 @@ export default function MyPractice() {
       <div className="space-y-4 animate-fade-in">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Round Tables</h1>
-          <p className="text-muted-foreground text-sm">View round table discussions you've contributed to</p>
+          <p className="text-muted-foreground text-base">View round table discussions you've contributed to</p>
         </div>
         <DoctorRoundTables />
       </div>
@@ -1137,7 +1137,7 @@ export default function MyPractice() {
       </div>
 
       {/* Profile picture card */}
-      <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
+      <div className="rounded-xl border border-primary/40 bg-card p-4 shadow-sm">
         <div className="flex items-center gap-4">
           <label
             htmlFor="avatar-upload-practice"
@@ -1865,7 +1865,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">Service Offerings & Pricing</span>
+                  <h3 className="text-sm font-semibold text-foreground">Service Offerings & Pricing</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -2288,7 +2288,7 @@ export default function MyPractice() {
 
         {/* === REFERRALS TAB === */}
         <TabsContent value="referrals" className="mt-4 space-y-4">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary/40 bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
@@ -2300,7 +2300,7 @@ export default function MyPractice() {
 
         {/* === CERTIFICATES TAB === */}
         <TabsContent value="certificates" className="mt-4">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
+          <div className="rounded-xl border border-primary/40 bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
               <h3 className="text-sm font-semibold text-foreground">Credentials</h3>

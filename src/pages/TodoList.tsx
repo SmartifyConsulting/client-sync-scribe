@@ -432,7 +432,7 @@ export default function TodoList() {
       </div>
 
       {/* Add New Task - reduced by 60% */}
-      <div className="rounded-xl border border-primary bg-card p-2.5 shadow-sm">
+      <div className="rounded-xl border border-primary/40 bg-card p-2.5 shadow-sm">
         <h2 className="text-sm font-semibold text-foreground mb-2">{t("todo.addNewTask")}</h2>
         <div className="flex items-center gap-2 py-1.5 mb-1.5 border-b border-border">
           <button
@@ -508,7 +508,7 @@ export default function TodoList() {
       {/* Task List - Grouped by Date */}
       <div className="space-y-3">
         {sortedDateKeys.length === 0 ? (
-          <div className="rounded-xl border border-primary bg-card p-8 text-center text-muted-foreground">
+          <div className="rounded-xl border border-primary/40 bg-card p-8 text-center text-muted-foreground">
             {filter === "all" ? "No tasks yet. Add your first task above!" : filter === "active" ? "No active tasks. Great job!" : "No completed tasks yet."}
           </div>
         ) : (
@@ -524,7 +524,7 @@ export default function TodoList() {
                   <Badge variant="outline" className="ml-auto text-sm">{items.length}</Badge>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
+                  <div className="rounded-xl border border-primary/40 bg-card shadow-sm overflow-hidden mt-1">
                     <div className="divide-y divide-border">
                       {items.map((todo) => (
                         <TodoRow
