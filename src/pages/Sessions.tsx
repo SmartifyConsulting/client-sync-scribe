@@ -1645,7 +1645,7 @@ export default function Sessions() {
               <Accordion type="multiple">
                 {lastWeekSessions.length > 0 && (
                   <AccordionItem value="last-week">
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                    <AccordionTrigger className="group text-sm font-semibold px-3 py-2 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                       <span className="flex items-center gap-2">
                         Last Week <Badge variant="secondary" className="text-xs">{lastWeekSessions.length}</Badge>
                       </span>
@@ -1659,7 +1659,7 @@ export default function Sessions() {
                 )}
                 {Object.entries(monthGroups).map(([month, sessions]) => (
                   <AccordionItem key={month} value={month}>
-                    <AccordionTrigger className="text-sm font-semibold py-2 hover:no-underline">
+                    <AccordionTrigger className="group text-sm font-semibold px-3 py-2 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                       <span className="flex items-center gap-2">
                         {month} <Badge variant="secondary" className="text-xs">{sessions.length}</Badge>
                       </span>

@@ -118,9 +118,9 @@ export default function MySessions() {
               <AccordionItem
                 key={b.key}
                 value={b.key}
-                className="border border-primary-dark/40 rounded-lg bg-card data-[state=open]:border-primary-dark"
+                className="border-0 rounded-none bg-card"
               >
-                <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_span]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                   <div className="flex items-center justify-between w-full pr-2">
                     <span className="text-xs font-medium text-primary-dark">{t(b.labelKey, b.fallback)}</span>
                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
