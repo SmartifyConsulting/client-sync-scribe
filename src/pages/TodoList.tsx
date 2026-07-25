@@ -44,7 +44,7 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
-import { TodoLegend } from "@/components/todos/TodoLegend";
+import { getTodoDisplay } from "@/lib/todoDisplay";
 
 interface TodoItem {
   id: string;
@@ -408,14 +408,14 @@ export default function TodoList() {
     return true;
   });
 
-  // Group by date
+  // Group by patient
   const groupedTodos = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
-    const key = getDateKey(todo.created_at);
+    const key = todo.patient_name || (getTodoDisplay(todo as any).patient) || "Unassigned";
     if (!groups[key]) groups[key] = [];
     groups[key].push(todo);
     return groups;
   }, {});
-  const sortedDateKeys = Object.keys(groupedTodos).sort((a, b) => b.localeCompare(a));
+  const sortedPatientKeys = Object.keys(groupedTodos).sort((a, b) => a.localeCompare(b));
 
   const completedCount = todos.filter((t) => t.completed).length;
   const activeCount = todos.filter((t) => !t.completed).length;
@@ -506,49 +506,49 @@ export default function TodoList() {
       </div>
 
 
-      {/* Task List — Grouped by Date */}
-      <TodoLegend className="mb-2" />
-      <div className="space-y-3">
-        {sortedDateKeys.length === 0 ? (
-          <div className="rounded-xl border border-primary bg-card p-8 text-center text-muted-foreground">
+      {/* Task List — Grouped by Patient */}
+      <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden divide-y divide-neutral-300">
+        {sortedPatientKeys.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground text-sm">
             {filter === "all" ? "No tasks yet. Add your first task above!" : filter === "active" ? "No active tasks. Great job!" : "No completed tasks yet."}
           </div>
         ) : (
-          sortedDateKeys.map((dateKey) => {
-            const items = groupedTodos[dateKey];
-            const isCollapsed = collapsedDates.has(dateKey);
-            const label = getDateLabel(items[0].created_at);
+          sortedPatientKeys.map((patientKey) => {
+            const items = groupedTodos[patientKey];
+            const isCollapsed = !collapsedDates.has(patientKey) ? true : false;
+            const isOpen = collapsedDates.has(patientKey);
             return (
-              <Collapsible key={dateKey} open={!isCollapsed} onOpenChange={() => toggleDateCollapse(dateKey)}>
-                <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors">
-                  {isCollapsed ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-                  <span className="text-sm font-semibold text-foreground">{label}</span>
+              <Collapsible key={patientKey} open={isOpen} onOpenChange={() => toggleDateCollapse(patientKey)}>
+                <CollapsibleTrigger className="flex items-center gap-2 w-full px-4 py-3 hover:bg-muted/40 transition-colors">
+                  {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                  <User className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">{patientKey}</span>
                   <Badge variant="outline" className="ml-auto text-xs">{items.length}</Badge>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
-                    <div className="divide-y divide-border">
-                      {items.map((todo) => (
-                        <TodoRow
-                          key={todo.id}
-                          todo={todo as any}
-                          onToggle={toggleComplete}
-                          onStartEdit={(t) => startEditing(t as any)}
-                          onDelete={deleteTask}
-                          onDuplicate={duplicateTask}
-                          onSend={(t) => handleSendDoc(t as any)}
-                          onPreview={(t) => handlePreviewDoc(t as any)}
-                          onSetPriority={updatePriority}
-                          isEditing={editingId === todo.id}
-                          editText={editText}
-                          setEditText={setEditText}
-                          saveEdit={saveEdit}
-                          cancelEdit={cancelEdit}
-                          sending={sendingDocId === todo.document_id}
-                          previewing={loadingPreview === todo.document_id}
-                        />
-                      ))}
-                    </div>
+                  <div className="divide-y divide-neutral-200 border-t border-neutral-200 bg-muted/10">
+                    {items.map((todo) => (
+                      <TodoRow
+                        key={todo.id}
+                        todo={todo as any}
+                        onToggle={toggleComplete}
+                        onStartEdit={(t) => startEditing(t as any)}
+                        onDelete={deleteTask}
+                        onDuplicate={duplicateTask}
+                        onSend={(t) => handleSendDoc(t as any)}
+                        onPreview={(t) => handlePreviewDoc(t as any)}
+                        onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+                        onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+                        onSetPriority={updatePriority}
+                        isEditing={editingId === todo.id}
+                        editText={editText}
+                        setEditText={setEditText}
+                        saveEdit={saveEdit}
+                        cancelEdit={cancelEdit}
+                        sending={sendingDocId === todo.document_id}
+                        previewing={loadingPreview === todo.document_id}
+                      />
+                    ))}
                   </div>
                 </CollapsibleContent>
               </Collapsible>

@@ -346,7 +346,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   const dirty = draft !== value;
   return (
     <AccordionItem value="about-me" className="border-0">
-      <AccordionTrigger className="px-4 py-3 hover:no-underline">
+      <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
           <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
@@ -1229,7 +1229,7 @@ export default function MyPractice() {
               />
               {/* Personal Information */}
               <AccordionItem value="personal" className="border-0">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Personal Information</h3>
@@ -1327,7 +1327,7 @@ export default function MyPractice() {
 
           {/* Practice Details Accordion */}
             <AccordionItem value="practice-details" className="border-0">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Practice Information</h3>
@@ -1737,7 +1737,7 @@ export default function MyPractice() {
 
           {/* Shared Practice Calendar Accordion */}
             <AccordionItem value="shared-calendar" className="border-0">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Shared Practice Calendar</h3>
@@ -1862,7 +1862,7 @@ export default function MyPractice() {
 
            {/* Service Offerings & Pricing Accordion */}
             <AccordionItem value="service-pricing" className="border-0">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
                   <span className="text-xs font-medium text-primary-dark">Service Offerings & Pricing</span>
@@ -2048,7 +2048,7 @@ export default function MyPractice() {
 
           {/* Digital Signature Accordion */}
             <AccordionItem value="signature" className="border-0">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Digital Signature</h3>
@@ -2162,7 +2162,7 @@ export default function MyPractice() {
 
           {/* Voice Narration Settings Accordion */}
             <AccordionItem value="voice" className="border-0">
-              <AccordionTrigger className="px-4 py-3 hover:no-underline">
+              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_h3]:group-data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Voice Narration Settings</h3>

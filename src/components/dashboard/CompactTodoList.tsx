@@ -29,7 +29,9 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
-import { TodoLegend } from "@/components/todos/TodoLegend";
+import { getTodoDisplay } from "@/lib/todoDisplay";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronRight, User as UserIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface TodoItem {
@@ -412,11 +414,8 @@ export function CompactTodoList() {
           </TabsList>
         </Tabs>
 
-        {/* Icon legend */}
-        <TodoLegend />
-
-        {/* Task list */}
-        <div className="max-h-96 overflow-y-auto space-y-1">
+        {/* Task list — grouped by patient */}
+        <div className="max-h-96 overflow-y-auto divide-y divide-neutral-300 rounded-md border border-neutral-300">
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -426,39 +425,63 @@ export function CompactTodoList() {
               {filter === "active" ? t("doctorDashboard.noActiveTasks") : t("doctorDashboard.noCompletedTasks")}
             </p>
           ) : (
-            filteredTodos.map((todo) => (
-              <TodoRow
-                key={todo.id}
-                compact
-                todo={todo as any}
-                onToggle={toggleComplete}
-                onStartEdit={(t) => { setEditingId(t.id); setEditText(t.title); }}
-                onDelete={deleteTask}
-                onPreview={(t) => handlePreviewDoc(t as any)}
-                onSend={async (t) => {
-                  if (!t.document_id) return;
-                  setSendingDocId(t.document_id);
-                  try {
-                    const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', t.document_id).maybeSingle();
-                    if (!doc) return;
-                    const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
-                    const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
-                    if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: t.document_id, recipientEmail: email } });
-                    await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', t.document_id);
-                    await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', t.id);
-                    setTodos(prev => prev.map(x => x.id === t.id ? { ...x, completed: true } : x));
-                    toast({ title: "Document sent" });
-                  } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
-                }}
-                isEditing={editingId === todo.id}
-                editText={editText}
-                setEditText={setEditText}
-                saveEdit={saveEdit}
-                cancelEdit={() => { setEditingId(null); setEditText(""); }}
-                sending={sendingDocId === todo.document_id}
-                previewing={loadingPreview === todo.document_id}
-              />
-            ))
+            (() => {
+              const grouped = filteredTodos.reduce<Record<string, TodoItem[]>>((acc, t) => {
+                const key = (t as any).patient_name || getTodoDisplay(t as any).patient || "Unassigned";
+                (acc[key] ||= []).push(t);
+                return acc;
+              }, {});
+              const keys = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
+              return keys.map((k) => (
+                <Collapsible key={k} defaultOpen={false}>
+                  <CollapsibleTrigger className="group flex items-center gap-2 w-full px-3 py-2 hover:bg-muted/40 transition-colors data-[state=open]:bg-muted/30">
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-data-[state=open]:rotate-90" />
+                    <UserIcon className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-sm font-semibold text-foreground truncate flex-1 text-left">{k}</span>
+                    <Badge variant="outline" className="text-xs">{grouped[k].length}</Badge>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="divide-y divide-neutral-200">
+                      {grouped[k].map((todo) => (
+                        <TodoRow
+                          key={todo.id}
+                          compact
+                          todo={todo as any}
+                          onToggle={toggleComplete}
+                          onStartEdit={(t) => { setEditingId(t.id); setEditText(t.title); }}
+                          onDelete={deleteTask}
+                          onPreview={(t) => handlePreviewDoc(t as any)}
+                          onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+                          onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+                          onSend={async (t) => {
+                            if (!t.document_id) return;
+                            setSendingDocId(t.document_id);
+                            try {
+                              const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', t.document_id).maybeSingle();
+                              if (!doc) return;
+                              const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
+                              const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
+                              if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: t.document_id, recipientEmail: email } });
+                              await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', t.document_id);
+                              await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', t.id);
+                              setTodos(prev => prev.map(x => x.id === t.id ? { ...x, completed: true } : x));
+                              toast({ title: "Document sent" });
+                            } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
+                          }}
+                          isEditing={editingId === todo.id}
+                          editText={editText}
+                          setEditText={setEditText}
+                          saveEdit={saveEdit}
+                          cancelEdit={() => { setEditingId(null); setEditText(""); }}
+                          sending={sendingDocId === todo.document_id}
+                          previewing={loadingPreview === todo.document_id}
+                        />
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ));
+            })()
           )}
         </div>
       </div>

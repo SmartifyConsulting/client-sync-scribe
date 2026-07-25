@@ -51,6 +51,8 @@ interface TodoRowProps {
   onDuplicate?: (todo: TodoRowItem) => void;
   onSend?: (todo: TodoRowItem) => void;
   onPreview?: (todo: TodoRowItem) => void;
+  onPreviewCalendar?: (todo: TodoRowItem) => void;
+  onEditAppointment?: (todo: TodoRowItem) => void;
   onSetPriority?: (id: string, p: "low" | "medium" | "high") => void;
   isEditing?: boolean;
   editText?: string;
@@ -76,6 +78,8 @@ export function TodoRow({
   onDuplicate,
   onSend,
   onPreview,
+  onPreviewCalendar,
+  onEditAppointment,
   onSetPriority,
   isEditing,
   editText,
@@ -88,6 +92,7 @@ export function TodoRow({
   const { t } = useTranslation();
   const display = getTodoDisplay(todo);
   const Icon = display.icon;
+  const isAppointment = display.kind === "appointment";
 
   if (isEditing) {
     return (
@@ -173,6 +178,26 @@ export function TodoRow({
 
         {/* Actions */}
         <div className="flex items-center gap-0.5 shrink-0">
+          {isAppointment && onPreviewCalendar && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => onPreviewCalendar(todo)}>
+                  <CalendarDays className="h-3.5 w-3.5 mr-1" /> Preview
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Preview Calendar</TooltipContent>
+            </Tooltip>
+          )}
+          {isAppointment && onEditAppointment && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="default" className="h-7 px-2 text-xs" onClick={() => onEditAppointment(todo)}>
+                  <Check className="h-3.5 w-3.5 mr-1" /> Edit / Accept
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit or Accept</TooltipContent>
+            </Tooltip>
+          )}
           {todo.document_id && onPreview && (
             <Tooltip>
               <TooltipTrigger asChild>
