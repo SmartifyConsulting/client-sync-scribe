@@ -431,7 +431,7 @@ export default function TodoList() {
         <p className=”mt-1 text-muted-foreground text-base”>Manage your tasks with voice or text input - AI can auto-execute actions</p>
       </div>
 
-      {/* Add New Task â€” reduced by 60% */}
+      {/* Add New Task - reduced by 60% */}
       <div className="rounded-xl border border-primary bg-card p-2.5 shadow-sm">
         <h2 className="text-sm font-semibold text-foreground mb-2">{t("todo.addNewTask")}</h2>
         <div className="flex items-center gap-2 py-1.5 mb-1.5 border-b border-border">
