@@ -346,7 +346,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   const dirty = draft !== value;
   return (
     <Accordion type="single" collapsible className="space-y-4">
-      <AccordionItem value="about-me" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+      <AccordionItem value="about-me" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
         <AccordionTrigger className="px-4 py-3 hover:no-underline">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
@@ -1190,45 +1190,45 @@ export default function MyPractice() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
             value="referrals"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("myPractice.tabRewards")}
           </TabsTrigger>
         </TabsList>
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
-        <TabsContent value="practice" className="mt-4 space-y-4">
+        <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
           <AboutMeAccordion
             value={(profile as any)?.about_me || ""}
             onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
           />
           {/* Personal Information Accordion */}
           <Accordion type="multiple" className="space-y-4">
-            <AccordionItem value="personal" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="personal" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
@@ -1326,7 +1326,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Practice Details Accordion */}
-            <AccordionItem value="practice-details" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="practice-details" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
@@ -1736,7 +1736,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Shared Practice Calendar Accordion */}
-            <AccordionItem value="shared-calendar" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="shared-calendar" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
@@ -1861,7 +1861,7 @@ export default function MyPractice() {
             </AccordionItem>
 
            {/* Service Offerings & Pricing Accordion */}
-            <AccordionItem value="service-pricing" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="service-pricing" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
@@ -2047,7 +2047,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Digital Signature Accordion */}
-            <AccordionItem value="signature" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="signature" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
@@ -2161,7 +2161,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Voice Narration Settings Accordion */}
-            <AccordionItem value="voice" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="voice" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
@@ -2282,12 +2282,12 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === TEMPLATES TAB === */}
-        <TabsContent value="templates" className="mt-4">
+        <TabsContent value="templates" className="mt-4 my-practice-tab-body">
           <Documents hideHeader />
         </TabsContent>
 
         {/* === REFERRALS TAB === */}
-        <TabsContent value="referrals" className="mt-4 space-y-4">
+        <TabsContent value="referrals" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
@@ -2299,7 +2299,7 @@ export default function MyPractice() {
 
 
         {/* === CERTIFICATES TAB === */}
-        <TabsContent value="certificates" className="mt-4">
+        <TabsContent value="certificates" className="mt-4 my-practice-tab-body">
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
@@ -2478,7 +2478,7 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === REWARDS TAB === */}
-        <TabsContent value="rewards" className="mt-4">
+        <TabsContent value="rewards" className="mt-4 my-practice-tab-body">
           <DoctorRewards embedded />
         </TabsContent>
 

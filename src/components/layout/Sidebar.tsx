@@ -52,7 +52,7 @@ const doctorNavItems: (NavItem & { tour?: string })[] = [
 ];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
-  { icon: Users, label: "My Holarchy", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
+  { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
@@ -188,14 +188,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             align="start"
             alignOffset={0}
             trigger={
-              <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-primary rounded-xl transition-colors">
-                <Avatar className="h-[73px] w-[73px] border-2 border-primary">
+              <button className="flex w-full items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
+                <Avatar className="h-16 w-16 border-2 border-primary">
                   <AvatarImage
                     key={profile?.avatar_url}
                     src={profile?.avatar_url || undefined}
                     alt={profile?.full_name || "User"}
                   />
-                  <AvatarFallback className="bg-muted text-foreground text-sm">
+                  <AvatarFallback className="bg-muted text-foreground text-base">
                     {profile?.full_name
                       ?.split(" ")
                       .map((n) => n[0])

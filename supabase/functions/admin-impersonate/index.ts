@@ -25,25 +25,25 @@ Deno.serve(async (req) => {
     const email = String(body.email || "").trim().toLowerCase();
     if (!email || !/^\S+@\S+\.\S+$/.test(email)) throw new Error("Valid email required");
 
-    // Seeded test users may switch back to the Georgia Adams admin profile
-    // without being admins themselves. Any other target requires admin role.
+    // Seeded test users may switch to any other seeded test profile (including
+    // Georgia Adams admin) without needing the admin role themselves. Any
+    // target outside this list still requires admin.
     const REVERSE_ADMIN_EMAIL = "info@georgiaadams.co.za";
     const SEEDED_EMAILS = new Set([
+      "info@georgiaadams.co.za",
       "sme@smartify.co.za",
       "dean.allie@gmail.com",
       "projectmanager@smartify.co.za",
-      "paraskevoulasoldatos@gmail.com",
-      "xtina@smartify.co.za",
-      "christina@smartify.co.za",
       "zano@smartify.co.za",
       "renken@smartify.co.za",
-      "jeanprodromos@smartify.co.za",
       "hospital.test@holarchealth.com",
       "er.test@holarchealth.com",
     ]);
-    const isReverseToAdmin = email === REVERSE_ADMIN_EMAIL && SEEDED_EMAILS.has(callerEmail);
+    const callerIsSeeded = SEEDED_EMAILS.has(callerEmail);
+    const targetIsSeeded = SEEDED_EMAILS.has(email);
+    const isSeededSwitch = callerIsSeeded && targetIsSeeded;
 
-    if (!isReverseToAdmin) {
+    if (!isSeededSwitch) {
       const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
       if (!isAdmin) throw new Error("Admin role required");
     }

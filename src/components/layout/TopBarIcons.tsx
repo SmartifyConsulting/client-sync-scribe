@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { AccountMenu } from "./AccountMenu";
 
 const PROVIDER_PROFILE_NOTIF_TYPES = [
   "access_request",
@@ -227,6 +228,24 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
         </PopoverContent>
       </Popover>
 
+      {/* Account menu (avatar) */}
+      <AccountMenu
+        align="end"
+        trigger={
+          <button className="h-9 w-9 rounded-full overflow-hidden border-2 border-primary hover:opacity-80 transition-opacity">
+            <Avatar className="h-full w-full">
+              <AvatarImage
+                key={profile?.avatar_url}
+                src={profile?.avatar_url || undefined}
+                alt={profile?.full_name || "User"}
+              />
+              <AvatarFallback className="bg-muted text-foreground text-xs">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+          </button>
+        }
+      />
     </div>
   );
 }
