@@ -302,7 +302,7 @@ export function usePatients() {
       if (error) throw error;
       const typedPatient = toPatient(data);
       setPatients((prev) => [typedPatient, ...prev]);
-      toast({ title: 'Success', description: 'Patient added successfully' });
+      if (!opts?.silent) toast({ title: 'Success', description: 'Patient added successfully' });
       return typedPatient;
     } catch (error: any) {
       console.error('Error creating patient:', error);
