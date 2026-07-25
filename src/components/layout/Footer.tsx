@@ -18,7 +18,7 @@ export function Footer() {
   return (
     <footer className="bg-card/50 h-[var(--footer-height)] flex items-center">
       <div className="md:ml-[var(--sidebar-width)] w-full">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 w-full flex flex-wrap items-center justify-start gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <span>{t("footer.copyright", { year: currentYear })}</span>
           {links.map((l) => (
             <span key={l.to} className="flex items-center gap-3">
