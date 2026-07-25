@@ -443,7 +443,7 @@ export function CompactTodoList() {
                   <CollapsibleContent>
                     <div className="divide-y divide-neutral-200">
                       {grouped[k].map((todo) => (
-                        <TodoRow
+                        <TodoRow insideGroup
                           key={todo.id}
                           compact
                           todo={todo as any}
