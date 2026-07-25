@@ -497,32 +497,88 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Mark the matching "Review ..." to-do as done so sent/handled documents leave the list
+  const completeSessionTodo = async (match: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !currentSessionId) return;
+      await supabase
+        .from('todos')
+        .update({ status: 'completed', completed_at: new Date().toISOString() } as any)
+        .eq('user_id', user.id)
+        .eq('session_id', currentSessionId)
+        .ilike('title', `%${match}%`);
+    } catch (e) { console.error(e); }
+  };
+
+  // Show the generate → send progress for a document, then continue the chain
+  const runDelivery = (target: DocumentDeliveryTarget, next: () => void) => {
+    deliveryNextRef.current = next;
+    setDelivery(target);
+  };
+
+  const sendDeliveryDocument = async (target: DocumentDeliveryTarget) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-document-email', {
+        body: { documentId: target.documentId, recipientEmail: target.recipientEmail },
+      });
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.error('Send failed:', e);
+      toast({ title: 'Send failed', description: 'The document was generated but could not be emailed.', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const nextAfterMedCert = () => {
+    if (extractedPrescription) setShowPrescriptionReview(true);
+    else if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
+  };
+  const nextAfterPrescription = () => {
+    if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
+  };
+  const nextAfterInvoice = () => {
+    if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
+  };
+
   // Handlers for AI-extracted document approvals
   const handleApproveMedCert = async (data: MedCertData) => {
     if (!patientId || !currentSessionId) return;
     setReviewLoading(true);
+    let docId: string | null = null;
     try {
       const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from('documents').insert({
+        const { data: doc } = await supabase.from('documents').insert({
           user_id: user.id,
           patient_id: patientId,
           patient_name: currentPatient?.name || null,
           name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
           content,
           template_name: 'Medical Certificate',
-        });
+        }).select('id').single();
+        docId = doc?.id || null;
       }
-      toast({ title: "Medical Certificate Created", description: "Document saved and ready for sending." });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowMedCertReview(false);
-    // Show next dialog if available
-    if (extractedPrescription) setShowPrescriptionReview(true);
-    else if (extractedInvoice) setShowInvoiceReview(true);
-    else if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
+    runDelivery(
+      {
+        label: 'Medical Certificate',
+        documentId: docId,
+        recipientEmail: (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      },
+      nextAfterMedCert,
+    );
+
   };
 
   const handleApprovePrescription = async (data: PrescriptionData) => {
