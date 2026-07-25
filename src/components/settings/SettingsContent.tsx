@@ -284,7 +284,7 @@ export function SettingsContent() {
             <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
               <div className="flex items-center gap-3">
                 <Settings2 className="h-4 w-4 text-primary" />
-                <h2 className="text-sm font-semibold text-foreground">Preferences</h2>
+                <h2 className="text-xl font-semibold text-foreground">Preferences</h2>
               </div>
               <p className="text-muted-foreground text-sm">Manage your application preferences and integrations</p>
               {isPatientRole && (
@@ -385,7 +385,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <Bell className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Notifications</h2>
+              <h2 className="text-xl font-semibold text-foreground">Notifications</h2>
             </div>
             <p className="text-sm text-muted-foreground">Configure how you receive alerts and reminders</p>
             <div className="space-y-4">
@@ -485,7 +485,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <Shield className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Security</h2>
+              <h2 className="text-xl font-semibold text-foreground">Security</h2>
             </div>
             <p className="text-sm text-muted-foreground">Manage your authentication and account protection</p>
             <div className="space-y-4">
@@ -552,7 +552,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
             <div className="flex items-center gap-3 mb-4">
               <Database className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Data Management</h2>
+              <h2 className="text-xl font-semibold text-foreground">Data Management</h2>
             </div>
             <div className="space-y-4">
               <Button variant="outline">Export All Data</Button>
@@ -566,7 +566,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <CreditCard className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Subscription</h2>
+              <h2 className="text-xl font-semibold text-foreground">Subscription</h2>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -592,7 +592,7 @@ export function SettingsContent() {
           <div className="rounded-xl border border-primary bg-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <Receipt className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Payment History</h2>
+              <h2 className="text-xl font-semibold text-foreground">Payment History</h2>
             </div>
             {loadingPaymentHistory ? (
               <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
