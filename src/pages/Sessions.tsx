@@ -1243,7 +1243,7 @@ export default function Sessions() {
               <Button 
                 variant={aiDiagnosis ? "secondary" : "default"}
                 className="gap-2" 
-                onClick={generateAIDiagnosis}
+                onClick={() => generateAIDiagnosis()}
                 disabled={isGeneratingDiagnosis || !summary}
               >
                 {isGeneratingDiagnosis ? (
