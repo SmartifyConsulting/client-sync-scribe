@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
+import { PlaceholderPalette } from "./PlaceholderPalette";
 import {
   Select,
   SelectContent,
@@ -40,6 +41,12 @@ const defaultSectionContent = (): SectionContent => ({
   imageUrl: undefined,
 });
 
+const FONT_FAMILIES = [
+  { value: "sans", label: "DM Sans" },
+  { value: "serif", label: "Serif" },
+  { value: "mono", label: "Monospace" },
+];
+
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -48,6 +55,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const [selectedHeaderFooterId, setSelectedHeaderFooterId] = useState<string>(
     initialData?.headerFooterTemplateId || ""
   );
+  const [selectedFont, setSelectedFont] = useState<string>(initialData?.fontFamily || "sans");
 
   // Auto-default to the user's `is_default` letterhead (or first available) when
   // none is linked yet. This way doctors with multiple letterheads still get
@@ -105,8 +113,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       description: formData.description,
       category: "",
       content: body.text,
-      body,
+      body: { ...body, fontFamily: selectedFont },
       headerFooterTemplateId: selectedHeaderFooterId || undefined,
+      fontFamily: selectedFont,
     });
   };
 
@@ -128,16 +137,11 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   };
 
   const renderFormattedContent = (content: string) => {
-    const safeContent = content
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/&lt;b&gt;/g, '<b>')
-      .replace(/&lt;\/b&gt;/g, '</b>')
-      .replace(/&lt;i&gt;/g, '<i>')
-      .replace(/&lt;\/i&gt;/g, '</i>')
-      .replace(/&lt;u&gt;/g, '<u>')
-      .replace(/&lt;\/u&gt;/g, '</u>')
-      .replace(/\n/g, '<br/>');
+    let safeContent = content.replace(/\n/g, '<br/>');
+    safeContent = safeContent
+      .replace(/\{BOLD\}(.*?)\{\/BOLD\}/g, '<b>$1</b>')
+      .replace(/\{ITALIC\}(.*?)\{\/ITALIC\}/g, '<i>$1</i>')
+      .replace(/\{UNDERLINE\}(.*?)\{\/UNDERLINE\}/g, '<u>$1</u>');
     return safeContent;
   };
 
@@ -279,13 +283,13 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
 
       {/* Header/Footer Template Selector */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Header & Footer Template</label>
-        <Select 
-          value={selectedHeaderFooterId || "none"} 
+        <label className="text-sm font-medium text-foreground">Select Header and Footer Template</label>
+        <Select
+          value={selectedHeaderFooterId || "none"}
           onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select a header/footer template" />
+            <SelectValue placeholder="Choose letterhead (optional)" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">None</SelectItem>
@@ -297,48 +301,46 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          This header and footer will be used when creating documents with this template.
+          Select your practice letterhead. This will be added to the top and bottom of documents created with this template.
         </p>
       </div>
 
       {/* Dynamic Fields Info */}
-      <div className="p-3 rounded-lg bg-muted/50 border border-border">
-        <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
-        <p className="text-xs text-muted-foreground mb-2">
-          Drag a placeholder into the content area, or click to copy. They are replaced with real data when documents are created.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {[
-            "[PatientName]","[DoctorName]","[DoctorSignature]","[PracticeNumber]",
-            "[DoctorNumber]","[PracticeAddress]","[Date]","[PatientAddress]","[PatientDOB]",
-          ].map((token) => (
-            <code
-              key={token}
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("text/plain", token);
-                e.dataTransfer.effectAllowed = "copy";
-              }}
-              onClick={() => { navigator.clipboard?.writeText(token); }}
-              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
-              title="Drag into content or click to copy"
-            >
-              {token}
-            </code>
-          ))}
-        </div>
+      <div className="p-4 rounded-lg bg-muted/50 border border-border">
+        <p className="text-sm font-semibold text-foreground mb-3">Insert Dynamic Fields</p>
+        <PlaceholderPalette />
+      </div>
+
+      {/* Font Selection */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">Template Font</label>
+        <Select value={selectedFont} onValueChange={setSelectedFont}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_FAMILIES.map(f => (
+              <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* CONTENT SECTION */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-foreground">Content</h4>
-          <span className="text-xs text-muted-foreground">(Main body of the document)</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground">Template Content</h4>
+            <span className="text-xs text-muted-foreground">(Body of the document)</span>
+          </div>
         </div>
+        <p className="text-xs text-muted-foreground">Write your template below. Use the toolbar to format text, drag placeholders in, and include your signature. Changes will appear in the preview above.</p>
         <div className="p-4 border border-border rounded-lg bg-card">
           <TemplateSectionEditor
             value={body}
             onChange={setBody}
+            label="Template Body"
+            showFontControls={true}
             placeholder="Enter the main content of your template here...
 
 Example:
@@ -346,10 +348,15 @@ To Whom It May Concern,
 
 This is to certify that [PatientName] was examined at our practice on [Date].
 
-[Additional details here...]
+Findings:
+[Add clinical findings here...]
+
+Recommendation:
+[Add recommendations here...]
 
 Yours faithfully,
-[DoctorName]"
+[DoctorName]
+[DoctorSignature]"
             rows={12}
           />
         </div>
