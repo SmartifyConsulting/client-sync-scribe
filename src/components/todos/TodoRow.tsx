@@ -51,6 +51,8 @@ interface TodoRowProps {
   onDuplicate?: (todo: TodoRowItem) => void;
   onSend?: (todo: TodoRowItem) => void;
   onPreview?: (todo: TodoRowItem) => void;
+  onPreviewCalendar?: (todo: TodoRowItem) => void;
+  onEditAppointment?: (todo: TodoRowItem) => void;
   onSetPriority?: (id: string, p: "low" | "medium" | "high") => void;
   isEditing?: boolean;
   editText?: string;
