@@ -94,7 +94,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
             <Gift className="h-3.5 w-3.5" /> {t("topbar.myRewards")}
           </Link>
         )}
-        {isAdmin && (
+        {(isAdmin || TEST_PROFILES.some((p) => p.email === currentEmail)) && (
           <div className="border-t border-border mt-1 pt-1">
             <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               <UserCog className="h-3 w-3" /> {t("topbar.switchProfile")}
@@ -124,29 +124,6 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                 );
               })}
             </div>
-          </div>
-        )}
-        {!isAdmin && currentEmail &&
-          TEST_PROFILES.some((p) => p.email !== "info@georgiaadams.co.za" && p.email === currentEmail) && (
-          <div className="border-t border-border mt-1 pt-1">
-            <button
-              onClick={() => impersonate("info@georgiaadams.co.za")}
-              disabled={!!switching}
-              className={cn(
-                "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors text-left hover:bg-accent",
-                switching && "opacity-50",
-              )}
-            >
-              {switching === "info@georgiaadams.co.za" ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-              ) : (
-                <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
-                <p className="text-xs text-muted-foreground truncate">Georgia Adams · info@georgiaadams.co.za</p>
-              </div>
-            </button>
           </div>
         )}
         {isAdmin && (
