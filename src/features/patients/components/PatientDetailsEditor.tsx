@@ -190,7 +190,7 @@ const SectionHeader = ({
   onEdit?: () => void;
   titleClassName?: string;
 }) => (
-  <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group data-[state=open]:bg-primary data-[state=open]:text-white">
+  <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group hover:bg-muted data-[state=open]:bg-primary data-[state=open]:hover:bg-primary/90 data-[state=open]:text-white">
     <h3 className={cn("text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left group-data-[state=open]:text-white", titleClassName)}>
       <Icon className="h-4 w-4 text-primary group-data-[state=open]:text-white" /> {label}
     </h3>
@@ -1633,6 +1633,9 @@ export function PatientDetailsEditor({
 
             {/* === INSURANCE SUB-TAB (view) === */}
             <TabsContent value="insurance" className="mt-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-foreground">Insurance</h3>
+              </div>
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
                 <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
                 <CollapsibleContent className="p-3">
@@ -1649,6 +1652,9 @@ export function PatientDetailsEditor({
 
             {/* === PHARMACIES SUB-TAB (view) === */}
             <TabsContent value="pharmacies" className="mt-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-foreground">Pharmacies</h3>
+              </div>
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
                 <SectionHeader icon={Store} label="Pharmacies" />
                 <CollapsibleContent className="p-3">
@@ -1684,6 +1690,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
             </TabsContent>
+
 
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
@@ -2101,12 +2108,13 @@ export function PatientDetailsEditor({
                     <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
                   </TabsList>
                   <TabsContent value="sessions" className="mt-3">
-                    <div className="mb-4">
-                      <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
-                      <p className="text-xs text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
                     </div>
+                    <p className="text-xs text-muted-foreground mb-3">History of your consultations. Record sessions with doctors not on the platform.</p>
                     <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
                   </TabsContent>
+
                   <TabsContent value="admissions" className="mt-3">
                     <Tabs defaultValue="admissions_view">
                       <TabsList className="bg-primary">
@@ -3730,10 +3738,11 @@ export function PatientDetailsEditor({
                   <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
                 </TabsList>
                 <TabsContent value="sessions" className="mt-3">
-                  <div className="mb-4">
-                    <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
-                    <p className="text-xs text-muted-foreground">History of your consultations</p>
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
                   </div>
+                  <p className="text-xs text-muted-foreground mb-3">History of your consultations</p>
+
                   <Suspense
                     fallback={
                       <div className="flex items-center justify-center py-12">
