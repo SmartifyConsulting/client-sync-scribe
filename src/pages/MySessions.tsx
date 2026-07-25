@@ -223,7 +223,7 @@ export default function MySessions() {
                     <AccordionTrigger className={TRIGGER_CLASS}>
                       <div className="flex items-center justify-between w-full pr-2">
                         <span className="text-xs font-medium">{t(b.labelKey, b.fallback)}</span>
-                        <CountPill count={rows.length} open={b.key === "today"} />
+                        <CountPill count={rows.length} />
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="px-3 pt-3 pb-3">
@@ -253,7 +253,7 @@ export default function MySessions() {
                   <AccordionTrigger className={TRIGGER_CLASS}>
                     <div className="flex items-center justify-between w-full pr-2">
                       <span className="text-xs font-medium">{name}</span>
-                      <CountPill count={rows.length} open={idx === 0} />
+                      <CountPill count={rows.length} />
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-3 pt-3 pb-3">
