@@ -399,7 +399,7 @@ export default function MyRewards() {
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm font-medium text-blue-100">Vula Vouchers</p>
+                <p className="text-xs md:text-sm font-medium text-blue-100">Vulas</p>
                 <p className="text-2xl md:text-4xl font-bold text-white">{lollipopCount}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
@@ -518,7 +518,7 @@ export default function MyRewards() {
             <CardContent>
               {rewards.length === 0 ? (
                 <div className="text-center py-8">
-                  <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-20 md:h-10 w-auto object-contain mx-auto mb-4" />
+                  <img src={vulaVouchersLogo} alt="Vulas" className="h-20 md:h-10 w-auto object-contain mx-auto mb-4" />
                   <p className="text-muted-foreground">{t("patientRewards.empty")}</p>
                 </div>
               ) : (
@@ -769,7 +769,7 @@ export default function MyRewards() {
                   <CardContent className="space-y-6">
                     <img
                       src={vulaVaultMerchants}
-                      alt="Use your Vula Vouchers at these merchants"
+                      alt="Use your Vulas at these merchants"
                       className="w-full max-w-3xl mx-auto h-auto object-contain"
                     />
 

@@ -195,7 +195,7 @@
     "thisWeek": "This Week",
     "doctorRating": "Doctor Rating",
     "noRatings": "No ratings yet",
-    "vulaVouchers": "Vula Vouchers",
+    "vulaVouchers": "Vulas",
     "myRoundTables": "My Round Tables",
     "searchRoundTable": "Search patient to start round table...",
     "noPatientsFound": "No patients found",
@@ -1180,7 +1180,7 @@
       "communicationAbbr": "Comm:",
       "expertiseAbbr": "Exp:",
       "professionalismAbbr": "Prof:",
-      "vulaVouchers": "Vula Vouchers"
+      "vulaVouchers": "Vulas"
     },
     "roundTables": {
       "title": "My Round Tables",
@@ -1349,7 +1349,7 @@
       "recentActivity": "Recent Activity",
       "aiSummary": "AI Health Summary",
       "upcomingAppointments": "Upcoming Appointments",
-      "myVulas": "My Vula Vouchers",
+      "myVulas": "My Vulas",
       "earnVulas": "Earn More Vulas",
       "recentClaims": "Recent Claims",
       "documentation": "Documentation",
@@ -1395,7 +1395,7 @@
     "appointmentsTitle": "Upcoming Appointments",
     "appointmentsEmpty": "No upcoming appointments.",
     "doctorFallback": "Doctor",
-    "vulaLabel": "My Vula Vouchers",
+    "vulaLabel": "My Vulas",
     "earnVulasTitle": "Earn More Vulas",
     "earnVulasDescription": "Tips to boost your rewards",
     "tip1": "Log daily medication intake",
@@ -2130,12 +2130,12 @@
       "explainer": {
         "headline": "Earn rewards in every",
         "languages": "language you speak",
-        "tagline": "Vula Vouchers reward you for helping your community access better care.",
+        "tagline": "Vulas reward you for helping your community access better care.",
         "section1Title": "Refer & Earn",
         "section1Desc": "Invite friends and family to Holarc Health and earn vouchers when they join.",
         "section1Tagline": "Sharing care, sharing rewards",
         "section2Title": "Track your progress and redeem vouchers anytime",
-        "cta": "Learn more about Vula Vouchers",
+        "cta": "Learn more about Vulas",
         "footerTagline": "Made with care, for our community"
       }
     }

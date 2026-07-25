@@ -18,7 +18,7 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
       <div className="flex justify-center pt-1">
         <img
           src={vulaVouchersLogo}
-          alt="Vula Vouchers"
+          alt="Vulas"
           className="h-20 w-auto object-contain"
         />
       </div>

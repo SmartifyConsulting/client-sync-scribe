@@ -165,7 +165,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                 <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{doctorVulas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-8 object-contain" />
+                <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-8 object-contain" />
               </div>
             </div>
           </CardContent>
@@ -178,7 +178,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{patientVulas}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0">
-                <img src={vulaVouchersLogo} alt="Vula Vouchers" className="h-8 w-8 object-contain" />
+                <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-8 object-contain" />
               </div>
             </div>
           </CardContent>
