@@ -360,6 +360,9 @@ export default function Sessions() {
         setCurrentSessionId(result.id);
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
+        // Rolling live hint is done — now complete the full (non-binding) AI assessment.
+        generateAIDiagnosis({ summary: result.summary || "", transcript: fullContent || "" });
+
         setShowDiagnosticsModal(true);
 
         const docs = (result as any)._extractedDocuments;
