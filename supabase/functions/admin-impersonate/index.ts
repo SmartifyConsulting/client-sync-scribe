@@ -31,6 +31,8 @@ Deno.serve(async (req) => {
       "sme@smartify.co.za", // Dr Dean Allie (Doctor)
       "dean.allie@gmail.com", // Dr Dean Allie (Patient)
       "projectmanager@smartify.co.za", // Shannon Kennedy (Patient)
+      "dr.buttons@smartify.co.za", // Dr Buttons (Doctor)
+      "okili.samuel@smartify.co.za", // Okili Samuel (Patient)
       "zano@smartify.co.za", // Zano (Hospital)
       "renken@smartify.co.za", // Renken (ER Provider)
       "hospital.test@holarchealth.com", // Hospital Admin (Test)
