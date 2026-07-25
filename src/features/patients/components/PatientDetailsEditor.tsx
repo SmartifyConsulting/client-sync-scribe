@@ -1739,7 +1739,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={MapPin} label="Addresses" />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -1752,7 +1752,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={Users} label="Next of Kin" />
                 <CollapsibleContent className="p-3">
                   {nokMembers.length > 0 ? (
@@ -1811,6 +1811,7 @@ export function PatientDetailsEditor({
               {isSelfService && emergencyContacts && onEmergencyContactsChange && (
                 <EmergencyContactsInline
                   patientId={patient.id}
+                  flat
                   contacts={emergencyContacts}
                   onChange={onEmergencyContactsChange}
                   nokMembers={nokMembers}
@@ -1823,7 +1824,7 @@ export function PatientDetailsEditor({
                 />
               )}
 
-              <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={Briefcase} label="Employer" />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -1834,12 +1835,13 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={StickyNote} label="General Notes" />
                 <CollapsibleContent className="p-3">
                   <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
                 </CollapsibleContent>
               </Collapsible>
+              </div>
             </TabsContent>
 
             {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
