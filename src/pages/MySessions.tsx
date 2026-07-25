@@ -186,20 +186,22 @@ export default function MySessions() {
             {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
           </p>
         </div>
-        <ToggleGroup
-          type="single"
-          value={groupMode}
-          onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
-          size="sm"
-          variant="outline"
-        >
-          <ToggleGroupItem value="date" className="text-xs px-3">
-            {t("mySessions.groupByDate", "Date")}
-          </ToggleGroupItem>
-          <ToggleGroupItem value="patient" className="text-xs px-3">
-            {t("mySessions.groupByPatient", "Patient")}
-          </ToggleGroupItem>
-        </ToggleGroup>
+        {isDoctor && (
+          <ToggleGroup
+            type="single"
+            value={groupMode}
+            onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="date" className="text-xs px-3">
+              {t("mySessions.groupByDate", "Date")}
+            </ToggleGroupItem>
+            <ToggleGroupItem value="patient" className="text-xs px-3">
+              {t("mySessions.groupByPatient", "Patient")}
+            </ToggleGroupItem>
+          </ToggleGroup>
+        )}
       </div>
 
       {loading ? (
