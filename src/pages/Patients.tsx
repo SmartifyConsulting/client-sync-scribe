@@ -240,7 +240,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         next_of_kin_members: null,
         current_medications: null,
         patient_user_id: user.id,
-      });
+      }, { silent: true });
     }
   }, [loading, user, patients, profile]);
 
