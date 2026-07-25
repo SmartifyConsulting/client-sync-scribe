@@ -1,51 +1,51 @@
-## Diagnosis
+## Add DISC Personality Profile (doctor-only) to Patient Overview
 
-**1. Why Dr Gianna sees no hospitals**
+### Feature
+Derive a longitudinal DISC personality profile for each patient from the accumulating session transcripts and AI summaries, and surface it in the Patient Overview — visible only to authenticated doctors, positioned to share the row directly beneath the AI Patient Summary with the existing Allergies & Conditions block.
 
-`HospitalAffiliations.tsx` reads from the view `public.holarchelp_hospitals_public`, and `HospitalsDirectoryScreen.tsx` reads from `public.holarchelp_hospitals` directly.
+### Scope
 
-- The **view has no `GRANT SELECT`** to `authenticated` or `anon` — only `sandbox_exec`. PostgREST therefore returns 0 rows to every logged-in doctor. This is the primary cause. All 100 approved hospitals exist in the table but are unreachable from the client.
-- The **base table's RLS** only allows the hospital owner, hospital admins, and platform admins to `SELECT`. So the directory screen also returns 0 to any non-owner doctor.
+**1. Storage — `patient_disc_profiles` table**
+- Columns: `patient_id` (FK, unique), `dominance`, `influence`, `steadiness`, `conscientiousness` (int 0–100), `primary_trait`, `secondary_trait` (text), `dominance_rationale`, `influence_rationale`, `steadiness_rationale`, `conscientiousness_rationale` (text), `sessions_analyzed` (int), `last_session_id` (uuid), `generated_at`, `updated_at`.
+- RLS: SELECT/UPDATE/INSERT only for users with `doctor` role who have active `doctor_patient_access` to the patient; service_role full access. Patient role has NO access.
+- GRANT to `authenticated` + `service_role`.
 
-**2. Why patients can't find Dr Gianna**
+**2. Edge function — `analyze-patient-disc`**
+- Input: `patient_id`.
+- Auth: verify caller is a doctor with access to the patient (reuse the pattern from `summarize-session`).
+- Loads the patient's session transcripts + AI summaries (all sessions, capped at the most recent N to stay under token limits) and any prior stored DISC row.
+- Calls Lovable AI (`google/gemini-2.5-pro`) with a strict JSON schema asking for the four DISC scores (0–100), primary/secondary traits, and one short evidence-based rationale per trait grounded in transcript excerpts.
+- Upserts into `patient_disc_profiles`.
 
-Her `profiles` row (`132ab89a-…`) is a real doctor (`role='doctor'`, `user_roles.role='doctor'`), but `profiles.specialty` is `NULL`. Her about_me says "Physiotherapist…" but that field isn't indexed by search.
+**3. Auto-refresh trigger**
+- After each session's AI summary completes successfully (existing `handleSessionComplete` chain in `useSessions.ts`), enqueue a background call to `analyze-patient-disc` for that patient. Runs after all auto-documents and before/independent of Vula awarding — it must not block the session-close pipeline (fire-and-forget with error logging only).
 
-- The `search_providers` RPC finds her by **name** (confirmed via a simulated authenticated call — she returns).
-- She is **excluded any time a patient filters by specialty**, because the RPC does `p.specialty ILIKE '%…%'` and hers is null. Most patients discover doctors by specialty, not by exact name.
-- Separately, `ReferralDoctors.tsx` searches `profiles` directly, and `profiles` RLS only lets patients see doctors they're already **connected to** — so she never appears there for a new patient. This is a pre-existing limitation of that screen (not Gianna-specific), worth noting but not part of this fix.
+**4. UI — `PatientOverview.tsx`**
+- New component `DiscPersonalityCard` rendered ONLY when `useUserRole().isDoctor === true`.
+- Layout: convert the existing "Allergies & Conditions" row (currently full width) into a 4-column grid: **col 1 = Allergies & Conditions (current content), cols 2–4 = DISC card** spanning three columns, matching the reference screenshot (header row with "Primary: X · Secondary: Y", then a 2×2 grid of D/I/S/C tiles, each with a colored progress bar, score in top-right, and rationale text).
+- On mobile the DISC card stacks below allergies (single column).
+- Colors reuse existing semantic tokens: D = destructive/red, I = amber, S = primary/teal, C = blue accent.
+- Manual "Refresh" button on the card (doctor only) invokes the edge function; shows generated-at timestamp and `sessions_analyzed` count.
+- Empty state: "Not enough sessions yet — DISC profile will generate after the next completed consultation."
 
-## Fix
+**5. Translations**
+- Add `patientProfile.disc.*` keys (title, primary, secondary, trait names, tile labels, refresh, empty state, generatedAt) to `src/i18n/locales/en.json`.
 
-### 1. Migration — expose approved hospitals to authenticated users
+### Non-goals
+- No patient-facing surface anywhere in the app.
+- No changes to session recording flow beyond the fire-and-forget hook.
+- No historical/trend chart in v1 — single current snapshot only.
 
-```sql
-GRANT SELECT ON public.holarchelp_hospitals_public TO authenticated, anon;
+### Files touched
+- New migration for `patient_disc_profiles` + RLS + GRANTs.
+- New `supabase/functions/analyze-patient-disc/index.ts` + `config.toml` entry.
+- `src/features/patients/components/PatientOverview.tsx` — insert `DiscPersonalityCard` and re-grid the allergies row.
+- New `src/features/patients/components/DiscPersonalityCard.tsx`.
+- `src/hooks/useSessions.ts` — post-summary DISC refresh call.
+- `src/i18n/locales/en.json` — new keys.
 
--- Also allow any authenticated user to read approved hospitals from the base
--- table so the ambulance/ER directory screen works. Sensitive owner-only
--- columns are already excluded from the _public view; the base-table policy
--- below only exposes approved rows.
-CREATE POLICY "Authenticated users can view approved hospitals"
-  ON public.holarchelp_hospitals
-  FOR SELECT
-  TO authenticated
-  USING (status = 'approved');
-```
-
-### 2. Data fix — set Gianna's specialty
-
-Update her profile so specialty-filtered searches surface her (derived from her own about_me):
-
-```sql
-UPDATE public.profiles
-SET specialty = 'Physiotherapist'
-WHERE id = '132ab89a-572a-4f31-ba61-27ab750cc709'
-  AND (specialty IS NULL OR specialty = '');
-```
-
-No code changes required — `search_providers` already returns her by name today, and once `specialty` is populated she'll match `Physiotherapist` filters.
-
-## Out of scope (flagged, not fixed here)
-
-`ReferralDoctors.tsx` cannot find any unconnected doctor for a patient because `profiles` RLS restricts patient reads to connected doctors only. If you want patients to discover doctors from that screen too, we'd swap that lookup to the `search_doctor_profiles` RPC in a follow-up.
+### Verification
+- Build passes.
+- As a doctor viewing a patient with ≥1 session: DISC card renders to the right of Allergies with the 2×2 tile grid.
+- As a patient viewing their own record: DISC card absent; RLS blocks direct table access.
+- Manual Refresh triggers the edge function and updates the tiles.
