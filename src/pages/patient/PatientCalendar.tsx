@@ -383,11 +383,10 @@ export default function PatientCalendar() {
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {upcomingAppointments.slice(0, 5).map((apt) => (
                 <div key={apt.id} className="p-2 rounded-lg bg-card border border-border/50 min-w-[140px] shrink-0 space-y-0.5">
-                  <p className="font-medium text-xs truncate">{apt.title}</p>
-                  {apt.doctor_name && (
-                    <p className="text-xs text-primary font-medium flex items-center gap-0.5">
-                      <User className="h-2 w-2" /> Dr. {apt.doctor_name}
-                    </p>
+                  {apt.doctor_name ? (
+                    <p className="text-xs text-primary font-semibold truncate">Dr. {apt.doctor_name}</p>
+                  ) : (
+                    <p className="font-medium text-xs truncate">{apt.title}</p>
                   )}
                   <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                     <CalendarIcon className="h-2 w-2" />
