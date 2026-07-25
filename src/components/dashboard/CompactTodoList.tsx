@@ -411,6 +411,9 @@ export function CompactTodoList() {
           </TabsList>
         </Tabs>
 
+        {/* Icon legend */}
+        <TodoLegend />
+
         {/* Task list */}
         <div className="max-h-96 overflow-y-auto space-y-1">
           {loading ? (
