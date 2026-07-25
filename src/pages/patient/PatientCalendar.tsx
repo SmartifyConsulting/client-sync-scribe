@@ -239,7 +239,7 @@ export default function PatientCalendar() {
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
-                <span className="text-xs md:text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
+                <span className="text-xs md:text-xs font-bold">{getCalendarShortWeekdayName(t, day)}</span>
                 <span className="text-base md:text-lg font-semibold">{format(day, "d")}</span>
                 {dayAppointments.length > 0 && (
                   <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
