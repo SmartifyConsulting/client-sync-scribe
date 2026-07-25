@@ -2289,10 +2289,9 @@ export default function MyPractice() {
 
         {/* === REFERRALS TAB === */}
         <TabsContent value="referrals" className="mt-4 space-y-4 my-practice-tab-body">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-            <div className="flex items-center gap-2">
-              <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-base font-semibold text-primary-dark">Referral Doctors</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
             </div>
             <ReferralDoctors hideHeader />
           </div>
@@ -2301,15 +2300,9 @@ export default function MyPractice() {
 
         {/* === CERTIFICATES TAB === */}
         <TabsContent value="certificates" className="mt-4 my-practice-tab-body">
-          <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-            <div className="flex items-center gap-2">
-              <GraduationCap className="h-4 w-4 text-primary" />
-              <h3 className="text-base font-semibold text-primary-dark">Credentials</h3>
-            </div>
-            <div className="flex items-center justify-between">
-              <p className="text-muted-foreground text-sm">
-                Track your professional credentials and CPD points.
-              </p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-foreground">Credentials</h3>
               <Button
                 size="sm"
                 onClick={() => {
@@ -2319,12 +2312,15 @@ export default function MyPractice() {
                   setCertificateFile(null);
                   setCertErrors({});
                 }}
-                className="gap-1.5 shrink-0"
+                className="gap-1"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-4 w-4" />
                 Add Credential
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Track your professional credentials and CPD points.
+            </p>
             {showCertForm && (
               <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
                 <p className="text-sm font-medium">{editingCertId ? "Edit" : "Add"} Credential</p>
