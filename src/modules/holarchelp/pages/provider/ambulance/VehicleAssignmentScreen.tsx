@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Users, MapPin, Clock } from "lucide-react";
 
@@ -50,7 +50,7 @@ export default function VehicleAssignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
+        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Assignment</h1>
         <p className="text-sm text-muted-foreground mt-2">Assign vehicles to crew and routes</p>
       </header>
@@ -73,7 +73,7 @@ export default function VehicleAssignmentScreen() {
               }`}
             >
               <p className="font-bold text-lg">{vehicle}</p>
-              <p className="text-xs text-muted-foreground">Type-A Ambulance</p>
+              <p className="text-sm text-muted-foreground">Type-A Ambulance</p>
             </button>
           ))}
         </div>
@@ -99,7 +99,7 @@ export default function VehicleAssignmentScreen() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold">{crew.name}</p>
-                  <p className="text-xs text-muted-foreground">{crew.role}</p>
+                  <p className="text-sm text-muted-foreground">{crew.role}</p>
                 </div>
                 <div
                   className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
@@ -108,11 +108,11 @@ export default function VehicleAssignmentScreen() {
                       : "border-border"
                   }`}
                 >
-                  {selectedCrew.includes(crew.id) && <span className="text-sm">✓</span>}
+                  {selectedCrew.includes(crew.id) && <span className="text-sm">âœ“</span>}
                 </div>
               </div>
               {!crew.available && (
-                <p className="text-xs text-destructive mt-1">Not available</p>
+                <p className="text-sm text-destructive mt-1">Not available</p>
               )}
             </div>
           ))}
@@ -124,7 +124,7 @@ export default function VehicleAssignmentScreen() {
         <h2 className="font-bold text-lg">Assignment Details</h2>
         <div className="space-y-3">
           <div>
-            <label className="text-xs text-muted-foreground block mb-1">Route/Location</label>
+            <label className="text-sm text-muted-foreground block mb-1">Route/Location</label>
             <input
               type="text"
               placeholder="Enter route or location"
@@ -132,14 +132,14 @@ export default function VehicleAssignmentScreen() {
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground block mb-1">Start Time</label>
+            <label className="text-sm text-muted-foreground block mb-1">Start Time</label>
             <input
               type="datetime-local"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div>
-            <label className="text-xs text-muted-foreground block mb-1">Duration (minutes)</label>
+            <label className="text-sm text-muted-foreground block mb-1">Duration (minutes)</label>
             <input
               type="number"
               placeholder="Duration"
@@ -162,8 +162,8 @@ export default function VehicleAssignmentScreen() {
             </p>
             <div className="space-y-1">
               {MOCK_CREW.filter((c) => selectedCrew.includes(c.id)).map((crew) => (
-                <p key={crew.id} className="text-xs text-muted-foreground ml-4">
-                  • {crew.name} ({crew.role})
+                <p key={crew.id} className="text-sm text-muted-foreground ml-4">
+                  â€¢ {crew.name} ({crew.role})
                 </p>
               ))}
             </div>
@@ -183,3 +183,4 @@ export default function VehicleAssignmentScreen() {
     </div>
   );
 }
+

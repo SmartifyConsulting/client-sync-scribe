@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, Clock, MapPin, Loader2, Plus, User, DollarSign, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -151,12 +151,12 @@ export default function PatientCalendar() {
       <div className="flex-1 min-w-0">
         <p className="font-medium text-sm">{apt.title}</p>
         {apt.doctor_name && (
-          <p className="text-xs text-primary font-medium flex items-center gap-1 mt-0.5">
+          <p className="text-sm text-primary font-medium flex items-center gap-1 mt-0.5">
             <User className="h-4 w-4" />
             with Dr. {apt.doctor_name}
           </p>
         )}
-        <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
+        <div className="mt-1 flex flex-wrap gap-2 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
             {format(parseISO(apt.start_time), "h:mm a")} - {format(parseISO(apt.end_time), "h:mm a")}
@@ -167,16 +167,16 @@ export default function PatientCalendar() {
         </div>
         <div className="mt-1 flex flex-wrap gap-1">
           {apt.service_name && (
-            <Badge variant="secondary" className="text-xs">{apt.service_name}</Badge>
+            <Badge variant="secondary" className="text-sm">{apt.service_name}</Badge>
           )}
           {apt.service_price != null && apt.service_price > 0 && (
-            <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
+            <Badge className="text-sm bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0">
               <DollarSign className="h-4 w-4 mr-0.5" />
               {formatCurrency(apt.service_price)}
             </Badge>
           )}
         </div>
-        {apt.description && <p className="mt-1 text-xs text-muted-foreground truncate">{apt.description}</p>}
+        {apt.description && <p className="mt-1 text-sm text-muted-foreground truncate">{apt.description}</p>}
       </div>
     </div>
   );
@@ -219,9 +219,9 @@ export default function PatientCalendar() {
             {formatCalendarMonthYear(t, currentWeekStart)}
           </CardTitle>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>{t("calendar.previous", "Previous")}</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>{t("calendar.today", "Today")}</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>{t("calendar.next", "Next")}</Button>
+            <Button variant="outline" size="sm" className="text-sm px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, -7))}>{t("calendar.previous", "Previous")}</Button>
+            <Button variant="outline" size="sm" className="text-sm px-1.5 md:px-2" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))}>{t("calendar.today", "Today")}</Button>
+            <Button variant="outline" size="sm" className="text-sm px-1.5 md:px-2" onClick={() => setCurrentWeekStart(addDays(currentWeekStart, 7))}>{t("calendar.next", "Next")}</Button>
           </div>
         </div>
       </CardHeader>
@@ -239,7 +239,7 @@ export default function PatientCalendar() {
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
-                <span className="text-xs md:text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
+                <span className="text-sm md:text-sm font-medium">{getCalendarShortWeekdayName(t, day)}</span>
                 <span className="text-base md:text-lg font-semibold">{format(day, "d")}</span>
                 {dayAppointments.length > 0 && (
                   <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
@@ -258,16 +258,16 @@ export default function PatientCalendar() {
         <div className="flex items-center justify-between">
             <CardTitle className="text-base md:text-lg">{formatCalendarMonthYear(t, currentMonth)}</CardTitle>
           <div className="flex gap-1">
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>{t("calendar.previous", "Previous")}</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(new Date())}>{t("calendar.today", "Today")}</Button>
-            <Button variant="outline" size="sm" className="text-xs px-1.5 md:px-2" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>{t("calendar.next", "Next")}</Button>
+            <Button variant="outline" size="sm" className="text-sm px-1.5 md:px-2" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>{t("calendar.previous", "Previous")}</Button>
+            <Button variant="outline" size="sm" className="text-sm px-1.5 md:px-2" onClick={() => setCurrentMonth(new Date())}>{t("calendar.today", "Today")}</Button>
+            <Button variant="outline" size="sm" className="text-sm px-1.5 md:px-2" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>{t("calendar.next", "Next")}</Button>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-7 mb-1 md:mb-2">
           {getCalendarShortWeekdayNames(t, true).map((d) => (
-            <div key={d} className="py-1 md:py-2 text-center text-xs md:text-sm font-medium text-muted-foreground">{d}</div>
+            <div key={d} className="py-1 md:py-2 text-center text-sm md:text-sm font-medium text-muted-foreground">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-0 md:gap-1">
@@ -290,7 +290,7 @@ export default function PatientCalendar() {
                 )}
               >
                 <span className={cn(
-                  "flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full text-xs md:text-sm",
+                  "flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full text-sm md:text-sm",
                   isTodayDay && "bg-primary text-primary-foreground font-semibold"
                 )}>
                   {day}
@@ -343,9 +343,9 @@ export default function PatientCalendar() {
               >
                 <p className={cn("text-sm font-semibold", isCurrent && "text-primary")}>{getCalendarMonthName(t, month)}</p>
                 {monthApts.length > 0 ? (
-                  <p className="text-xs text-primary mt-1">{monthApts.length} appointment{monthApts.length !== 1 ? "s" : ""}</p>
+                  <p className="text-sm text-primary mt-1">{monthApts.length} appointment{monthApts.length !== 1 ? "s" : ""}</p>
                 ) : (
-                  <p className="text-xs text-muted-foreground mt-1">No appointments</p>
+                  <p className="text-sm text-muted-foreground mt-1">No appointments</p>
                 )}
               </button>
             );
@@ -360,11 +360,11 @@ export default function PatientCalendar() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h1 className="text-3xl font-bold text-foreground">My Calendar</h1>
-          <p className="text-muted-foreground text-xs">View and manage your appointments</p>
+          <p className="text-muted-foreground text-sm">View and manage your appointments</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <ViewToggle />
-          <Button onClick={() => setBookDialogOpen(true)} size="sm" className="gap-1 text-xs">
+          <Button onClick={() => setBookDialogOpen(true)} size="sm" className="gap-1 text-sm">
             <Plus className="h-3.5 w-3.5" />
             Book
           </Button>
@@ -377,21 +377,21 @@ export default function PatientCalendar() {
       {upcomingAppointments.length > 0 && (
         <Card className="bg-muted/30">
           <CardHeader className="pb-1 pt-2 px-3">
-            <CardTitle className="text-xs">Upcoming</CardTitle>
+            <CardTitle className="text-sm">Upcoming</CardTitle>
           </CardHeader>
           <CardContent className="px-3 pb-2">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {upcomingAppointments.slice(0, 5).map((apt) => (
                 <div key={apt.id} className="p-2 rounded-lg bg-card border border-border/50 min-w-[140px] shrink-0 space-y-0.5">
-                  <p className="font-medium text-xs truncate">{apt.title}</p>
+                  <p className="font-medium text-sm truncate">{apt.title}</p>
                   {apt.doctor_name && (
-                    <p className="text-xs text-primary font-medium flex items-center gap-0.5">
+                    <p className="text-sm text-primary font-medium flex items-center gap-0.5">
                       <User className="h-2 w-2" /> Dr. {apt.doctor_name}
                     </p>
                   )}
-                  <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-0.5 text-sm text-muted-foreground">
                     <CalendarIcon className="h-2 w-2" />
-                    {formatCalendarShortMonthDay(t, parseISO(apt.start_time))} · {format(parseISO(apt.start_time), "h:mm a")}
+                    {formatCalendarShortMonthDay(t, parseISO(apt.start_time))} Â· {format(parseISO(apt.start_time), "h:mm a")}
                   </div>
                 </div>
               ))}
@@ -430,3 +430,4 @@ export default function PatientCalendar() {
     </div>
   );
 }
+

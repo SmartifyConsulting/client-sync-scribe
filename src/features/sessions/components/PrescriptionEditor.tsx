@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+﻿import { useState, useCallback, useEffect } from "react";
 import {
   X,
   Save,
@@ -110,7 +110,7 @@ export function PrescriptionEditor({
     const medicationLines = medications
       .filter(m => m.medication.trim())
       .map(m => {
-        let line = `• ${m.medication}`;
+        let line = `â€¢ ${m.medication}`;
         if (m.dosage) line += ` - ${m.dosage}`;
         if (m.frequency) line += ` - ${m.frequency}`;
         if (m.duration) line += ` for ${m.duration}`;
@@ -126,13 +126,13 @@ Date: ${new Date().toLocaleDateString()}
 Patient: ${patientName}
 Doctor: ${doctorName}
 
-─────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 MEDICATIONS:
 
 ${medicationLines}
 
-─────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 Instructions: Take medications as prescribed above.
 Follow-up: As directed by physician.
@@ -177,7 +177,7 @@ Signature: ___________________
       if (data?.conflicts && data.conflicts.length > 0) {
         setConflicts(data.conflicts);
         toast({
-          title: "⚠️ Medication Conflict Detected",
+          title: "âš ï¸ Medication Conflict Detected",
           description: `${data.conflicts.length} potential conflict(s) found. Please review before saving.`,
           variant: "destructive",
         });
@@ -311,7 +311,7 @@ Signature: ___________________
             await supabase.from('notifications').insert({
               user_id: patientCheck.patient_user_id,
               title: 'New Chronic Medication Assigned',
-              description: `Your doctor has prescribed chronic medication. Track your daily adherence in My Rewards → Chronic Meds to earn Vulas!`,
+              description: `Your doctor has prescribed chronic medication. Track your daily adherence in My Rewards â†’ Chronic Meds to earn Vulas!`,
               type: 'medication_assigned',
               reference_id: patientId,
             });
@@ -492,19 +492,19 @@ Signature: ___________________
                       )} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <Badge variant="outline" className="text-xs bg-card">
+                          <Badge variant="outline" className="text-sm bg-card">
                             {conflict.medication1}
                           </Badge>
                           {conflict.medication2 && (
                             <>
-                              <span className="text-xs text-muted-foreground">+</span>
-                              <Badge variant="outline" className="text-xs bg-card">
+                              <span className="text-sm text-muted-foreground">+</span>
+                              <Badge variant="outline" className="text-sm bg-card">
                                 {conflict.medication2}
                               </Badge>
                             </>
                           )}
                           <Badge className={cn(
-                            "text-xs capitalize ml-auto",
+                            "text-sm capitalize ml-auto",
                             conflict.severity === "high" 
                               ? "bg-red-500/20 text-red-700 dark:text-red-400"
                               : conflict.severity === "moderate"
@@ -515,8 +515,8 @@ Signature: ___________________
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">{conflict.explanation}</p>
-                        <p className="text-xs text-foreground mt-1 font-medium">
-                          → {conflict.recommendation}
+                        <p className="text-sm text-foreground mt-1 font-medium">
+                          â†’ {conflict.recommendation}
                         </p>
                       </div>
                     </div>
@@ -603,3 +603,4 @@ Signature: ___________________
     </div>
   );
 }
+

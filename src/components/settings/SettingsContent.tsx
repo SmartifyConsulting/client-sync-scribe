@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   Calendar, Bell, Shield, Database, CheckCircle, Loader2, ShieldCheck, ShieldOff,
   CreditCard, Receipt, Download, Check, ExternalLink, XCircle, RotateCcw, Users,
@@ -272,10 +272,10 @@ export function SettingsContent() {
     <div className="space-y-4 max-w-3xl">
       <Tabs defaultValue="preferences" className="w-full">
         <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
-          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
-          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
-          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
+          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Preferences</TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Notifications</TabsTrigger>
+          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Security</TabsTrigger>
+          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Billing</TabsTrigger>
         </TabsList>
 
         {/* PREFERENCES */}
@@ -407,7 +407,7 @@ export function SettingsContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium text-foreground">Alert my Emergency Contacts if I miss medication</p>
-                  <p className="text-sm text-muted-foreground">Master switch — per-contact and per-medication opt-ins must also be on.</p>
+                  <p className="text-sm text-muted-foreground">Master switch â€” per-contact and per-medication opt-ins must also be on.</p>
                 </div>
                 <Switch
                   checked={(profile as any)?.notify_contacts_on_missed_meds ?? true}
@@ -544,7 +544,7 @@ export function SettingsContent() {
                 >
                   Replay app tour
                 </Button>
-                <p className="text-xs text-muted-foreground mt-2">Re-run the first-time walkthrough on your next page load.</p>
+                <p className="text-sm text-muted-foreground mt-2">Re-run the first-time walkthrough on your next page load.</p>
               </div>
             </div>
           </div>
@@ -685,3 +685,4 @@ export function SettingsContent() {
     </div>
   );
 }
+

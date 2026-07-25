@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2, MapPin } from "lucide-react";
@@ -73,11 +73,11 @@ export default function UnlinkedTripsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Unlinked Trips</h1>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Detect vehicle movements without an authorized incident, dispatch, or approved purpose.
           </p>
         </div>
@@ -85,19 +85,19 @@ export default function UnlinkedTripsScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             High Risk Trips
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">{highRiskCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Unauthorized Distance
           </p>
           <p className="mt-1 text-2xl font-bold">{totalDistance.toFixed(1)} km</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Total Trips
           </p>
           <p className="mt-1 text-2xl font-bold">{TRIPS_DATA.length}</p>
@@ -107,7 +107,7 @@ export default function UnlinkedTripsScreen() {
       <div className="space-y-2">
         <div className="flex items-start gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/40/20">
           <AlertCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-primary">
+          <p className="text-sm text-primary">
             Every ambulance trip must be linked to a dispatch, maintenance job, fuel stop, or other authorized purpose.
           </p>
         </div>
@@ -119,7 +119,7 @@ export default function UnlinkedTripsScreen() {
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : TRIPS_DATA.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground">
+          <div className="p-8 text-center text-sm text-muted-foreground">
             <MapPin className="mx-auto mb-2 h-5 w-5 opacity-50" />
             No unlinked trips detected.
           </div>
@@ -138,18 +138,18 @@ export default function UnlinkedTripsScreen() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{trip.ambulance_code}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase ${SEVERITY_COLORS[trip.severity]}`}>
+                      <span className={`rounded-full border px-2 py-0.5 text-sm font-bold uppercase ${SEVERITY_COLORS[trip.severity]}`}>
                         Unlinked Trip
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs mt-2">
+                    <div className="flex items-center gap-1 text-sm mt-2">
                       <MapPin className="h-3 w-3" />
                       <span>{trip.start_location}</span>
-                      <span>→</span>
+                      <span>â†’</span>
                       <span>{trip.end_location}</span>
                     </div>
-                    <p className="text-xs mt-2">{trip.reason}</p>
-                    <div className="grid grid-cols-4 gap-3 mt-2 text-xs">
+                    <p className="text-sm mt-2">{trip.reason}</p>
+                    <div className="grid grid-cols-4 gap-3 mt-2 text-sm">
                       <div>
                         <p className="text-muted-foreground">Distance</p>
                         <p className="font-semibold">{trip.distance_km} km</p>
@@ -180,3 +180,4 @@ export default function UnlinkedTripsScreen() {
     </div>
   );
 }
+

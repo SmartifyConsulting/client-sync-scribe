@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+﻿import { useState, useRef, useCallback } from "react";
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Upload, X, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -221,9 +221,9 @@ export function TemplateSectionEditor({
       {showFontControls && (
         <div className="flex items-center gap-3 p-2 border border-border rounded-md bg-muted/20">
           <div className="flex-1">
-            <label className="text-xs font-medium text-muted-foreground block mb-1">Font Family</label>
+            <label className="text-sm font-medium text-muted-foreground block mb-1">Font Family</label>
             <Select value={value.fontFamily || "sans"} onValueChange={(font) => onChange({ ...value, fontFamily: font })}>
-              <SelectTrigger className="h-7 text-xs">
+              <SelectTrigger className="h-7 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -234,9 +234,9 @@ export function TemplateSectionEditor({
             </Select>
           </div>
           <div className="flex-1">
-            <label className="text-xs font-medium text-muted-foreground block mb-1">Font Size</label>
+            <label className="text-sm font-medium text-muted-foreground block mb-1">Font Size</label>
             <Select value={(value.fontSize || 14).toString()} onValueChange={(size) => onChange({ ...value, fontSize: parseInt(size) })}>
-              <SelectTrigger className="h-7 text-xs">
+              <SelectTrigger className="h-7 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -356,7 +356,7 @@ export function TemplateSectionEditor({
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           className={`
-            border border-dashed rounded p-2 text-center transition-colors cursor-pointer text-xs
+            border border-dashed rounded p-2 text-center transition-colors cursor-pointer text-sm
             ${isDragging 
               ? 'border-primary bg-primary/5' 
               : 'border-border/50 hover:border-primary/50'
@@ -404,7 +404,7 @@ export function TemplateSectionEditor({
           }}
         />
         {value.text && (
-          <div className="absolute -bottom-6 right-0 text-xs text-muted-foreground">
+          <div className="absolute -bottom-6 right-0 text-sm text-muted-foreground">
             Drag placeholders or paste with Ctrl+V
           </div>
         )}
@@ -412,3 +412,4 @@ export function TemplateSectionEditor({
     </div>
   );
 }
+

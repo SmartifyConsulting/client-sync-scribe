@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+﻿import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Wrench, AlertCircle, CheckCircle2, Clock, Fuel } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -68,9 +68,9 @@ const MOCK_VEHICLES: Record<string, Vehicle> = {
 };
 
 const STATUS_CONFIG = {
-  available: { icon: "✓", label: "AVAILABLE", color: "text-success", bg: "bg-success/10", badge: "bg-success/10 text-success" },
-  assigned: { icon: "🚑", label: "IN-SERVICE", color: "text-warning", bg: "bg-warning/10", badge: "bg-warning/10 text-warning" },
-  out_of_service: { icon: "⚙", label: "MAINTENANCE", color: "text-muted-foreground", bg: "bg-muted", badge: "bg-muted text-muted-foreground" },
+  available: { icon: "âœ“", label: "AVAILABLE", color: "text-success", bg: "bg-success/10", badge: "bg-success/10 text-success" },
+  assigned: { icon: "ðŸš‘", label: "IN-SERVICE", color: "text-warning", bg: "bg-warning/10", badge: "bg-warning/10 text-warning" },
+  out_of_service: { icon: "âš™", label: "MAINTENANCE", color: "text-muted-foreground", bg: "bg-muted", badge: "bg-muted text-muted-foreground" },
 };
 
 export default function VehicleProfileScreen() {
@@ -99,12 +99,12 @@ export default function VehicleProfileScreen() {
           Back to Fleet
         </Button>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">{vehicle.code}</h1>
           <p className="text-sm text-muted-foreground mt-1">{vehicle.make} {vehicle.model}</p>
-          <p className="text-xs text-muted-foreground">{vehicle.type} • {vehicle.location}</p>
+          <p className="text-sm text-muted-foreground">{vehicle.type} â€¢ {vehicle.location}</p>
         </div>
-        <div className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${config.badge}`}>
+        <div className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${config.badge}`}>
           {config.icon} {config.label}
         </div>
       </div>
@@ -114,31 +114,31 @@ export default function VehicleProfileScreen() {
         <h2 className="font-bold text-lg">Vehicle Information</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <p className="text-xs text-muted-foreground">Registration</p>
+            <p className="text-sm text-muted-foreground">Registration</p>
             <p className="font-semibold">{vehicle.registration}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">VIN</p>
+            <p className="text-sm text-muted-foreground">VIN</p>
             <p className="font-semibold text-sm">{vehicle.vin}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Year</p>
+            <p className="text-sm text-muted-foreground">Year</p>
             <p className="font-semibold">{vehicle.year}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Make/Model</p>
+            <p className="text-sm text-muted-foreground">Make/Model</p>
             <p className="font-semibold">{vehicle.make} {vehicle.model}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Engine</p>
+            <p className="text-sm text-muted-foreground">Engine</p>
             <p className="font-semibold">{vehicle.engine}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Seats</p>
+            <p className="text-sm text-muted-foreground">Seats</p>
             <p className="font-semibold">{vehicle.seats}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Color</p>
+            <p className="text-sm text-muted-foreground">Color</p>
             <p className="font-semibold">{vehicle.color}</p>
           </div>
         </div>
@@ -149,23 +149,23 @@ export default function VehicleProfileScreen() {
         <h2 className="font-bold text-lg">Operational Status</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
-            <p className="text-xs text-muted-foreground">Mileage</p>
+            <p className="text-sm text-muted-foreground">Mileage</p>
             <p className="font-semibold">{vehicle.mileage.toLocaleString()} km</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Engine Hours</p>
+            <p className="text-sm text-muted-foreground">Engine Hours</p>
             <p className="font-semibold">{vehicle.engineHours.toLocaleString()} hrs</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Fuel Type</p>
+            <p className="text-sm text-muted-foreground">Fuel Type</p>
             <p className="font-semibold">{vehicle.fuelType}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Tank Capacity</p>
+            <p className="text-sm text-muted-foreground">Tank Capacity</p>
             <p className="font-semibold">{vehicle.fuelCapacity}L</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Fuel Level</p>
+            <p className="text-sm text-muted-foreground">Fuel Level</p>
             <div className="flex items-center gap-2 mt-1">
               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                 <div className="h-full bg-success" style={{ width: `${vehicle.fuelLevel}%` }} />
@@ -174,7 +174,7 @@ export default function VehicleProfileScreen() {
             </div>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Last GPS Check</p>
+            <p className="text-sm text-muted-foreground">Last GPS Check</p>
             <p className="font-semibold text-sm">{vehicle.lastGpsCheck}</p>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function VehicleProfileScreen() {
           <div className="rounded-lg bg-muted/50 p-3">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <p className="text-xs text-muted-foreground">Last Service</p>
+                <p className="text-sm text-muted-foreground">Last Service</p>
                 <p className="font-semibold">{vehicle.lastService}</p>
               </div>
               <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
@@ -196,9 +196,9 @@ export default function VehicleProfileScreen() {
           <div className={`rounded-lg ${serviceDays < 0 ? "bg-destructive/10" : serviceDays < 30 ? "bg-warning/10" : "bg-success/10"} p-3`}>
             <div className="flex items-start justify-between mb-2">
               <div>
-                <p className="text-xs text-muted-foreground">Next Service</p>
+                <p className="text-sm text-muted-foreground">Next Service</p>
                 <p className="font-semibold">{vehicle.nextService}</p>
-                <p className={`text-xs mt-1 ${serviceDays < 0 ? "text-destructive" : serviceDays < 30 ? "text-warning" : "text-success"}`}>
+                <p className={`text-sm mt-1 ${serviceDays < 0 ? "text-destructive" : serviceDays < 30 ? "text-warning" : "text-success"}`}>
                   {serviceDays < 0 ? "OVERDUE" : `${serviceDays} days`}
                 </p>
               </div>
@@ -206,18 +206,18 @@ export default function VehicleProfileScreen() {
             </div>
           </div>
           <div className="rounded-lg bg-muted/50 p-3">
-            <p className="text-xs text-muted-foreground">Last Inspection</p>
+            <p className="text-sm text-muted-foreground">Last Inspection</p>
             <p className="font-semibold">{vehicle.lastInspection}</p>
           </div>
           <div className={`rounded-lg ${insuranceDays < 30 ? "bg-warning/10" : "bg-success/10"} p-3`}>
-            <p className="text-xs text-muted-foreground">Insurance Expiry</p>
+            <p className="text-sm text-muted-foreground">Insurance Expiry</p>
             <p className="font-semibold">{vehicle.insuranceExpiry}</p>
-            <p className={`text-xs mt-1 ${insuranceDays < 30 ? "text-warning" : "text-success"}`}>{insuranceDays} days</p>
+            <p className={`text-sm mt-1 ${insuranceDays < 30 ? "text-warning" : "text-success"}`}>{insuranceDays} days</p>
           </div>
           <div className={`rounded-lg ${motDays < 30 ? "bg-warning/10" : "bg-success/10"} p-3`}>
-            <p className="text-xs text-muted-foreground">MOT Expiry</p>
+            <p className="text-sm text-muted-foreground">MOT Expiry</p>
             <p className="font-semibold">{vehicle.motExpiry}</p>
-            <p className={`text-xs mt-1 ${motDays < 30 ? "text-warning" : "text-success"}`}>{motDays} days</p>
+            <p className={`text-sm mt-1 ${motDays < 30 ? "text-warning" : "text-success"}`}>{motDays} days</p>
           </div>
         </div>
         <Button variant="outline" size="sm" className="w-full">
@@ -256,3 +256,4 @@ export default function VehicleProfileScreen() {
     </div>
   );
 }
+

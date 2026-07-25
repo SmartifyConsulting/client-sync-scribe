@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from "react-router-dom";
+﻿import { Outlet, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
 import { AnimatePresence } from "framer-motion";
 import { LifeBuoy } from "lucide-react";
@@ -33,7 +33,7 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
       </div>
 
 
-      {/* Mobile header (no sidebar drawer for providers yet — Holarc logo + TopBarIcons) */}
+      {/* Mobile header (no sidebar drawer for providers yet â€” Holarc logo + TopBarIcons) */}
       <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-3 bg-background border-b border-border md:hidden">
         <img src={logo} alt={logoAlt} className="h-10 w-auto object-contain" />
         <TopBarIcons variant="provider" />
@@ -65,7 +65,7 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
       <div className="md:hidden px-4 pb-4">
         <a
           href="mailto:support@holarchealth.com?subject=Holarc%20Health%20Support"
-          className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-primary"
+          className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-primary"
         >
           <LifeBuoy className="h-3.5 w-3.5" /> {t("common.support")}
         </a>
@@ -78,4 +78,5 @@ export function ProviderAppLayout({ portal, statsStrip }: ProviderAppLayoutProps
     </div>
   );
 }
+
 

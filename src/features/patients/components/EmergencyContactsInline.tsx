@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -118,7 +118,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
           Notified by default when you trigger SOS. They can be the same as your Next of Kin, or someone different entirely.
         </p>
 
-        <label className="flex items-center gap-2 text-xs">
+        <label className="flex items-center gap-2 text-sm">
           <Switch checked={sameAsNok} onCheckedChange={handleSameAsNok} />
           Same as Next of Kin
         </label>
@@ -126,7 +126,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
         {!sameAsNok && (
           <>
             {contacts.length === 0 && (
-              <p className="text-xs text-muted-foreground">No emergency contacts yet.</p>
+              <p className="text-sm text-muted-foreground">No emergency contacts yet.</p>
             )}
             {contacts.map((c) => (
               <div key={c.id} className="rounded-lg border border-border p-2.5 space-y-2 bg-muted/30">
@@ -153,7 +153,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
                       className={!isValidOptionalEmail(c.email) ? "border-destructive focus-visible:ring-destructive" : undefined}
                     />
                     {!isValidOptionalEmail(c.email) && (
-                      <p className="text-xs text-destructive mt-0.5">Enter a valid email address.</p>
+                      <p className="text-sm text-destructive mt-0.5">Enter a valid email address.</p>
                     )}
                   </div>
 
@@ -182,3 +182,4 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
     </Collapsible>
   );
 }
+

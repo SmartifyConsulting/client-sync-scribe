@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { TrendingUp, FileText, CreditCard, AlertCircle } from "lucide-react";
 
 export default function BillingDashboardScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Finance</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Finance</p>
         <h1 className="text-3xl font-extrabold mt-2">Billing & Client Management</h1>
         <p className="text-sm text-muted-foreground mt-2">Manage contracts, invoices, and payments</p>
       </header>
@@ -13,24 +13,24 @@ export default function BillingDashboardScreen() {
       {/* Financial Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Monthly Revenue</p>
+          <p className="text-sm text-muted-foreground">Monthly Revenue</p>
           <p className="text-2xl font-bold mt-2">$24,500</p>
-          <p className="text-xs text-success mt-1">↑ 8% vs last month</p>
+          <p className="text-sm text-success mt-1">â†‘ 8% vs last month</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Pending Invoices</p>
+          <p className="text-sm text-muted-foreground">Pending Invoices</p>
           <p className="text-2xl font-bold mt-2">$8,750</p>
-          <p className="text-xs text-warning mt-1">6 invoices</p>
+          <p className="text-sm text-warning mt-1">6 invoices</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Paid This Month</p>
+          <p className="text-sm text-muted-foreground">Paid This Month</p>
           <p className="text-2xl font-bold mt-2">$18,200</p>
-          <p className="text-xs text-success mt-1">74% collected</p>
+          <p className="text-sm text-success mt-1">74% collected</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Active Contracts</p>
+          <p className="text-sm text-muted-foreground">Active Contracts</p>
           <p className="text-2xl font-bold mt-2">12</p>
-          <p className="text-xs text-primary mt-1">All active</p>
+          <p className="text-sm text-primary mt-1">All active</p>
         </div>
       </div>
 
@@ -63,7 +63,7 @@ export default function BillingDashboardScreen() {
                   <td className="p-2">{row.amount}</td>
                   <td className="p-2">
                     <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
+                      className={`px-2 py-1 rounded text-sm font-semibold ${
                         row.status === "Paid"
                           ? "bg-success/10 text-success"
                           : row.status === "Pending"
@@ -94,7 +94,7 @@ export default function BillingDashboardScreen() {
             <div key={idx} className="flex items-center justify-between p-2 rounded bg-muted/50">
               <div>
                 <p className="font-semibold text-sm">{contract.client}</p>
-                <p className="text-xs text-muted-foreground">Expires: {contract.expires}</p>
+                <p className="text-sm text-muted-foreground">Expires: {contract.expires}</p>
               </div>
               <p className="font-semibold">{contract.value}</p>
             </div>
@@ -112,3 +112,4 @@ export default function BillingDashboardScreen() {
     </div>
   );
 }
+

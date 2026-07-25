@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveMap } from "../components/LiveMap";
@@ -47,7 +47,7 @@ export default function PublicTrack() {
     );
   }
 
-  if (!incident) return <div className="flex min-h-dvh items-center justify-center text-muted-foreground">Loading live tracking…</div>;
+  if (!incident) return <div className="flex min-h-dvh items-center justify-center text-muted-foreground">Loading live trackingâ€¦</div>;
 
   const latest = locations[0];
 
@@ -60,16 +60,16 @@ export default function PublicTrack() {
       <div className="mx-auto max-w-2xl px-5 py-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Live emergency tracking</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Live emergency tracking</p>
             <h1 className="mt-1 text-2xl font-extrabold">{incident.full_name ?? "Someone"} needs help</h1>
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${incident.status === "active" ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
+          <span className={`rounded-full px-3 py-1 text-sm font-semibold ${incident.status === "active" ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
             {incident.status.toUpperCase()}
           </span>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           Started {new Date(incident.created_at).toLocaleString()}
-          {latest && <> · Last update <strong>{formatAgo(latest.recorded_at)}</strong> · refreshing every 7s</>}
+          {latest && <> Â· Last update <strong>{formatAgo(latest.recorded_at)}</strong> Â· refreshing every 7s</>}
         </p>
         {latest && (
           <p className="mt-3 text-sm font-medium">
@@ -80,7 +80,7 @@ export default function PublicTrack() {
         {latest && (
           <div className="mt-3 flex flex-wrap gap-2">
             <a
-              className="rounded-full border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              className="rounded-full border px-3 py-1.5 text-sm font-semibold hover:bg-muted"
               href={`https://maps.google.com/?q=${latest.latitude},${latest.longitude}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -88,7 +88,7 @@ export default function PublicTrack() {
               Open in Google Maps
             </a>
             <a
-              className="rounded-full border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              className="rounded-full border px-3 py-1.5 text-sm font-semibold hover:bg-muted"
               href={`https://maps.apple.com/?ll=${latest.latitude},${latest.longitude}&q=Live%20location`}
               target="_blank"
               rel="noopener noreferrer"
@@ -97,7 +97,7 @@ export default function PublicTrack() {
             </a>
             <button
               type="button"
-              className="rounded-full border px-3 py-1.5 text-xs font-semibold hover:bg-muted"
+              className="rounded-full border px-3 py-1.5 text-sm font-semibold hover:bg-muted"
               onClick={() => navigator.clipboard?.writeText(`${latest.latitude}, ${latest.longitude}`)}
             >
               Copy coordinates
@@ -108,3 +108,4 @@ export default function PublicTrack() {
     </div>
   );
 }
+

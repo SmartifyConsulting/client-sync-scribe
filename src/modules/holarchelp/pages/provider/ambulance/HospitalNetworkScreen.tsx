@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,7 +94,7 @@ export default function HospitalNetworkScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Partnerships</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Partnerships</p>
         <h1 className="text-3xl font-extrabold mt-2">Hospital Network</h1>
         <p className="text-sm text-muted-foreground mt-2">{hospitals.length} hospitals in your network</p>
       </header>
@@ -152,10 +152,10 @@ export default function HospitalNetworkScreen() {
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-bold text-lg">{hospital.name}</h3>
                     {hospital.affiliated && (
-                      <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">⭐ AFFILIATED</span>
+                      <span className="text-sm bg-blue-600 text-white px-2 py-1 rounded">â­ AFFILIATED</span>
                     )}
                     {hospital.trauma && (
-                      <span className="text-xs bg-red-600 text-white px-2 py-1 rounded">🚑 TRAUMA</span>
+                      <span className="text-sm bg-red-600 text-white px-2 py-1 rounded">ðŸš‘ TRAUMA</span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -167,12 +167,12 @@ export default function HospitalNetworkScreen() {
 
               <div className="grid grid-cols-3 gap-3 pt-3 border-t border-current border-opacity-20">
                 <div>
-                  <p className="text-xs text-muted-foreground">ER Wait Time</p>
+                  <p className="text-sm text-muted-foreground">ER Wait Time</p>
                   <p className="font-semibold mt-1">{hospital.wait}</p>
                 </div>
                 {hospital.affiliated && hospital.beds && (
                   <div>
-                    <p className="text-xs text-muted-foreground">Available Beds</p>
+                    <p className="text-sm text-muted-foreground">Available Beds</p>
                     <p className="font-semibold mt-1 text-green-600">{hospital.beds}</p>
                   </div>
                 )}
@@ -187,7 +187,7 @@ export default function HospitalNetworkScreen() {
 
               {hospital.affiliated && hospital.contact && (
                 <p className="text-sm text-blue-700 dark:text-blue-300 mt-3 flex items-center gap-1">
-                  ✓ {hospital.contact}
+                  âœ“ {hospital.contact}
                 </p>
               )}
             </div>
@@ -200,17 +200,18 @@ export default function HospitalNetworkScreen() {
         <h3 className="font-bold mb-3">Key indicators</h3>
         <div className="space-y-2 text-sm">
           <div>
-            <span className="text-blue-600 dark:text-blue-400 font-semibold">⭐ AFFILIATED</span>
-            <span className="text-muted-foreground"> — Direct dispatch, priority routing, bed sync</span>
+            <span className="text-blue-600 dark:text-blue-400 font-semibold">â­ AFFILIATED</span>
+            <span className="text-muted-foreground"> â€” Direct dispatch, priority routing, bed sync</span>
           </div>
           <div>
-            <span className="text-red-600 dark:text-red-400 font-semibold">🚑 TRAUMA</span>
-            <span className="text-muted-foreground"> — Designated trauma facility</span>
+            <span className="text-red-600 dark:text-red-400 font-semibold">ðŸš‘ TRAUMA</span>
+            <span className="text-muted-foreground"> â€” Designated trauma facility</span>
           </div>
-          <div className="text-muted-foreground">📍 Distance helps with dispatch decisions</div>
-          <div className="text-muted-foreground">⏱ Wait times updated in real-time</div>
+          <div className="text-muted-foreground">ðŸ“ Distance helps with dispatch decisions</div>
+          <div className="text-muted-foreground">â± Wait times updated in real-time</div>
         </div>
       </div>
     </div>
   );
 }
+

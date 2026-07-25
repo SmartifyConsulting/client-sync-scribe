@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +25,7 @@ export default function HolarcHelpHome() {
   const channelRef = useRef<any>(null);
 
   type AckKey = "a" | "b" | "c";
-  // Default ticked — patient can untick if they want, but SOS should be one-tap by default.
+  // Default ticked â€” patient can untick if they want, but SOS should be one-tap by default.
   const [ack, setAck] = useState<Record<AckKey, boolean>>({ a: true, b: true, c: true });
   const allAck = ack.a && ack.b && ack.c;
   const setAckField = (k: AckKey, v: boolean) => {
@@ -161,7 +161,7 @@ export default function HolarcHelpHome() {
                 onCheckedChange={(v) => setAckField(item.k, v === true)}
                 className="mt-0.5"
               />
-              <span className="text-xs leading-relaxed text-foreground">{item.label}</span>
+              <span className="text-sm leading-relaxed text-foreground">{item.label}</span>
             </label>
           ))}
         </div>
@@ -193,18 +193,18 @@ export default function HolarcHelpHome() {
             ) : (
               <>
                 <span className="text-3xl tracking-[0.18em]">{t("sos.sosLabel")}</span>
-                <span className="mt-1 text-xs font-bold uppercase tracking-[0.32em] opacity-90">{t("sos.tapForHelp")}</span>
+                <span className="mt-1 text-sm font-bold uppercase tracking-[0.32em] opacity-90">{t("sos.tapForHelp")}</span>
               </>
             )}
           </button>
         </div>
 
-        {/* What happens when you tap SOS — static notice, no spinners */}
-        <p className="mt-6 max-w-xs text-center text-xs leading-relaxed text-muted-foreground">
+        {/* What happens when you tap SOS â€” static notice, no spinners */}
+        <p className="mt-6 max-w-xs text-center text-sm leading-relaxed text-muted-foreground">
           {t("sos.footerCaption")}
         </p>
 
-        {/* Active SOS — surfaced directly under the hint */}
+        {/* Active SOS â€” surfaced directly under the hint */}
         {activeIncidentId && (
           <button
             onClick={() => navigate(`/patient/holarchelp/incident/${activeIncidentId}`)}
@@ -220,20 +220,20 @@ export default function HolarcHelpHome() {
                 <p className="text-sm font-semibold text-red-900">Tap to resume live tracking</p>
               </div>
             </div>
-            <span className="text-red-700">→</span>
+            <span className="text-red-700">â†’</span>
           </button>
         )}
 
         {/* Inline alert pills */}
         {permDenied && (
-          <div className="mt-4 flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">
-            <MapPin className="h-3.5 w-3.5" /> Location off — enable to send SOS
+          <div className="mt-4 flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-900">
+            <MapPin className="h-3.5 w-3.5" /> Location off â€” enable to send SOS
           </div>
         )}
         {hasEmergency === false && (
           <button
             onClick={() => navigate("/patient/details?section=health")}
-            className="mt-4 text-xs font-semibold text-amber-700 underline-offset-4 hover:underline"
+            className="mt-4 text-sm font-semibold text-amber-700 underline-offset-4 hover:underline"
           >
             Add someone we can notify first
           </button>
@@ -244,13 +244,13 @@ export default function HolarcHelpHome() {
       <div className="mb-8 mt-6 flex flex-col items-center gap-2">
         <button
           onClick={() => navigate("/patient/holarchelp/contacts")}
-          className="text-xs font-semibold text-primary underline-offset-4 hover:underline"
+          className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
         >
           {t("sos.manageContacts")}
         </button>
         <button
           onClick={() => navigate("/patient/holarchelp/incidents")}
-          className="text-xs font-semibold text-muted-foreground underline-offset-4 hover:underline"
+          className="text-sm font-semibold text-muted-foreground underline-offset-4 hover:underline"
         >
           {t("sos.viewHistory")}
         </button>
@@ -258,3 +258,4 @@ export default function HolarcHelpHome() {
     </div>
   );
 }
+

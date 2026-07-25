@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
@@ -68,7 +68,7 @@ export default function DispatchReassignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Dispatch Management
         </p>
         <h1 className="text-3xl font-extrabold">Reassign Dispatch</h1>
@@ -87,22 +87,22 @@ export default function DispatchReassignmentScreen() {
 
           <div className="space-y-3">
             <div>
-              <p className="text-xs text-muted-foreground">Ambulance</p>
+              <p className="text-sm text-muted-foreground">Ambulance</p>
               <p className="text-lg font-bold text-orange-900">{CURRENT_AMBULANCE.code}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Location</p>
+              <p className="text-sm text-muted-foreground">Location</p>
               <p className="text-base font-semibold text-orange-900">
                 {CURRENT_AMBULANCE.location}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-orange-200">
               <div>
-                <p className="text-xs text-muted-foreground">Status</p>
+                <p className="text-sm text-muted-foreground">Status</p>
                 <p className="font-semibold text-orange-900">{CURRENT_AMBULANCE.status}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">ETA</p>
+                <p className="text-sm text-muted-foreground">ETA</p>
                 <p className="font-semibold text-orange-900">{CURRENT_AMBULANCE.eta} min</p>
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function DispatchReassignmentScreen() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold text-green-600">Available</p>
-                    <p className="text-xs text-muted-foreground">ETA: {ambulance.eta} min</p>
+                    <p className="text-sm text-muted-foreground">ETA: {ambulance.eta} min</p>
                   </div>
                 </div>
               </div>
@@ -182,8 +182,8 @@ export default function DispatchReassignmentScreen() {
                     AVAILABLE_AMBULANCES.find((a) => a.code === selectedAmbulance)!.eta -
                     CURRENT_AMBULANCE.eta;
                   return (
-                    <p className="text-xs text-blue-700">
-                      ℹ️ The new ambulance will arrive {Math.abs(diff)} minute(s){" "}
+                    <p className="text-sm text-blue-700">
+                      â„¹ï¸ The new ambulance will arrive {Math.abs(diff)} minute(s){" "}
                       {diff >= 0 ? "later" : "earlier"}
                     </p>
                   );
@@ -221,3 +221,4 @@ export default function DispatchReassignmentScreen() {
     </div>
   );
 }
+

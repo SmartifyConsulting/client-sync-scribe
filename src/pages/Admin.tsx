@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+﻿import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DoctorInvoices from "@/pages/doctor/Invoices";
 import Documents from "@/pages/Documents";
 import CalendarView from "@/pages/CalendarView";
@@ -12,25 +12,25 @@ export default function Admin() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="calendar"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm"
           >
             Calendar
           </TabsTrigger>
           <TabsTrigger
             value="todo"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm"
           >
             To-Do
           </TabsTrigger>
           <TabsTrigger
             value="invoices"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm"
           >
             Invoices
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm"
           >
             Templates
           </TabsTrigger>
@@ -63,3 +63,4 @@ export default function Admin() {
     </div>
   );
 }
+

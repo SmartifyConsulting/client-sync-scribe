@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -203,7 +203,7 @@ export function IncidentPhotos({
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       ) : photos.length === 0 ? (
-        <div className="rounded-2xl border border-dashed bg-muted/30 p-6 text-center text-xs text-muted-foreground">
+        <div className="rounded-2xl border border-dashed bg-muted/30 p-6 text-center text-sm text-muted-foreground">
           {t("incidentPhotos.none")} {!readOnly && t("incidentPhotos.tapCamera")}
         </div>
       ) : (
@@ -223,7 +223,7 @@ export function IncidentPhotos({
                   loading="lazy"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
                   {t("common.loading")}
                 </div>
               )}
@@ -255,7 +255,7 @@ export function IncidentPhotos({
                     setPreview(null);
                     if (p) removePhoto(p);
                   }}
-                  className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground"
+                  className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-destructive px-3 py-1.5 text-sm font-semibold text-destructive-foreground"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> {t("common.delete")}
                 </button>
@@ -267,3 +267,4 @@ export function IncidentPhotos({
     </section>
   );
 }
+

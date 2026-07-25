@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, CheckCircle2, Clock, Loader2, Truck } from "lucide-react";
@@ -54,14 +54,14 @@ export default function VehicleAvailabilityScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
+        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Availability</h1>
         <p className="text-sm text-muted-foreground mt-2">Live status of every vehicle in your fleet.</p>
       </header>
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading vehicles…
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading vehiclesâ€¦
         </div>
       ) : vehicles.length === 0 ? (
         <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -84,9 +84,9 @@ export default function VehicleAvailabilityScreen() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className="font-bold text-lg">{v.vehicle_code}</h3>
-                    <p className="text-xs text-muted-foreground">{v.registration_number ?? "No registration"}</p>
+                    <p className="text-sm text-muted-foreground">{v.registration_number ?? "No registration"}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${chip.cls}`}>{chip.label}</span>
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${chip.cls}`}>{chip.label}</span>
                 </div>
                 {active && (
                   <div className="mt-3 pt-3 border-t space-y-2">
@@ -102,20 +102,21 @@ export default function VehicleAvailabilityScreen() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <CheckCircle2 className="h-6 w-6 text-success mx-auto mb-2" />
-          <p className="text-xs text-muted-foreground">Available Now</p>
+          <p className="text-sm text-muted-foreground">Available Now</p>
           <p className="text-2xl font-bold mt-1">{availableNow}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <Clock className="h-6 w-6 text-warning mx-auto mb-2" />
-          <p className="text-xs text-muted-foreground">On a call</p>
+          <p className="text-sm text-muted-foreground">On a call</p>
           <p className="text-2xl font-bold mt-1">{onCall}</p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 text-center">
           <AlertCircle className="h-6 w-6 text-destructive mx-auto mb-2" />
-          <p className="text-xs text-muted-foreground">Out of service</p>
+          <p className="text-sm text-muted-foreground">Out of service</p>
           <p className="text-2xl font-bold mt-1">{outOfService}</p>
         </div>
       </div>
     </div>
   );
 }
+

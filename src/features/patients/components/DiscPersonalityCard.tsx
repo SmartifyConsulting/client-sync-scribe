@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Brain, RefreshCw, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -103,18 +103,18 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
           ) : (
             <RefreshCw className="h-3.5 w-3.5" />
           )}
-          <span className="text-xs">{profile ? "Refresh" : "Generate"}</span>
+          <span className="text-sm">{profile ? "Refresh" : "Generate"}</span>
         </Button>
       </div>
 
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading profile…
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading profileâ€¦
         </div>
       ) : !profile ? (
         <p className="text-sm text-muted-foreground italic">
           {hasSessions
-            ? "No DISC profile yet — click Generate to build one from this patient's sessions."
+            ? "No DISC profile yet â€” click Generate to build one from this patient's sessions."
             : "DISC profile will generate after the patient's first completed consultation."}
         </p>
       ) : (
@@ -124,7 +124,7 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
             <span className="font-medium text-foreground">{profile.primary_trait}</span>
             {profile.secondary_trait ? (
               <>
-                {" · "}Secondary:{" "}
+                {" Â· "}Secondary:{" "}
                 <span className="font-medium text-foreground">{profile.secondary_trait}</span>
               </>
             ) : null}
@@ -141,9 +141,9 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="text-sm font-semibold text-foreground">
-                      {tile.letter} — {tile.label}
+                      {tile.letter} â€” {tile.label}
                     </span>
-                    <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                    <span className="text-sm font-medium text-muted-foreground tabular-nums">
                       {score}
                     </span>
                   </div>
@@ -154,7 +154,7 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
                     />
                   </div>
                   {rationale ? (
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {rationale}
                     </p>
                   ) : null}
@@ -163,9 +163,9 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
             })}
           </div>
 
-          <p className="mt-3 text-xs text-muted-foreground">
+          <p className="mt-3 text-sm text-muted-foreground">
             Based on {profile.sessions_analyzed} session
-            {profile.sessions_analyzed === 1 ? "" : "s"} · updated{" "}
+            {profile.sessions_analyzed === 1 ? "" : "s"} Â· updated{" "}
             {new Date(profile.generated_at).toLocaleDateString()}
           </p>
         </>
@@ -173,3 +173,4 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+﻿import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
@@ -141,7 +141,7 @@ export default function MyDetails() {
 
     setPatient((prev) => prev ? { ...prev, ...updates } : prev);
 
-    // Autosave fires frequently while typing — only surface a toast every
+    // Autosave fires frequently while typing â€” only surface a toast every
     // 20s so it doesn't interrupt the user mid-keystroke.
     const now = Date.now();
     if (now - lastSavedToastRef.current > 20000) {
@@ -185,7 +185,7 @@ export default function MyDetails() {
     <div className="space-y-4 p-4 md:p-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">{heading.title}</h1>
-        <p className="text-muted-foreground text-xs">{heading.subtitle}</p>
+        <p className="text-muted-foreground text-sm">{heading.subtitle}</p>
       </div>
 
       {isIncomplete && section === "health" && <ProfileCompletionBanner />}
@@ -211,3 +211,4 @@ export default function MyDetails() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -355,7 +355,7 @@ export default function Notifications() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Notifications</h1>
-          <p className="mt-1 text-muted-foreground text-xs">
+          <p className="mt-1 text-muted-foreground text-sm">
             Messages, documents, and alerts
           </p>
         </div>
@@ -382,7 +382,7 @@ export default function Notifications() {
             <span className="text-muted-foreground">Document Mailbox:</span>
             <code className="font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">{mailboxEmail}</code>
           </div>
-          <p className="text-xs text-muted-foreground mt-1.5">
+          <p className="text-sm text-muted-foreground mt-1.5">
             External parties can email documents to this address and you'll be notified here.
           </p>
         </div>
@@ -424,7 +424,7 @@ export default function Notifications() {
                     {activeTab === "messages" ? selectedMessage.sender?.full_name : selectedMessage.recipient?.full_name}
                   </span>
                 </span>
-                <span>•</span>
+                <span>â€¢</span>
                 <span>{format(new Date(selectedMessage.created_at), 'dd MMM yyyy, HH:mm')}</span>
               </div>
               {selectedMessage.patient && (
@@ -707,7 +707,7 @@ function NotificationList({
               )}>
                 {notification.title}
               </p>
-              <span className="text-xs text-muted-foreground shrink-0">
+              <span className="text-sm text-muted-foreground shrink-0">
                 {format(new Date(notification.created_at), 'dd MMM')}
               </span>
             </div>
@@ -827,7 +827,7 @@ function MessageList({
               )}>
                 {showSender ? message.sender?.full_name : message.recipient?.full_name}
               </p>
-              <span className="text-xs text-muted-foreground shrink-0">
+              <span className="text-sm text-muted-foreground shrink-0">
                 {format(new Date(message.created_at), 'dd MMM')}
               </span>
             </div>
@@ -838,7 +838,7 @@ function MessageList({
               {message.subject}
             </p>
             {message.patient && (
-              <p className="text-xs text-muted-foreground mt-1 truncate">
+              <p className="text-sm text-muted-foreground mt-1 truncate">
                 Re: {message.patient.name}
               </p>
             )}
@@ -851,3 +851,4 @@ function MessageList({
     </div>
   );
 }
+

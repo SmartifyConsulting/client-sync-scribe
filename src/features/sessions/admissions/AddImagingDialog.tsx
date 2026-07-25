@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,7 +103,7 @@ export function AddImagingDialog({ open, onOpenChange, admissionId, hospitalId }
           <div>
             <Label className="text-sm">Attach PDF Summary</Label>
             <Input type="file" accept="application/pdf,image/*" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} disabled={uploading} />
-            {attachmentUrl && <p className="text-xs text-muted-foreground mt-1">Attached ✓</p>}
+            {attachmentUrl && <p className="text-sm text-muted-foreground mt-1">Attached âœ“</p>}
           </div>
           <div><Label className="text-sm">Summary</Label><Textarea value={summary} onChange={(e) => setSummary(e.target.value)} rows={2} /></div>
         </div>
@@ -115,3 +115,4 @@ export function AddImagingDialog({ open, onOpenChange, admissionId, hospitalId }
     </Dialog>
   );
 }
+

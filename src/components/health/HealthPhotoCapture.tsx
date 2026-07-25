@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+﻿import { useState, useRef, useCallback } from "react";
 import { Camera, X, Check, Loader2, Dumbbell, Utensils, Pill } from "lucide-react";
 import { mapCameraError } from "@/lib/cameraErrors";
 
@@ -111,7 +111,7 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
 
       if (uploadError) throw uploadError;
 
-      // Bucket is private — store the path; UI mints signed URLs on demand.
+      // Bucket is private â€” store the path; UI mints signed URLs on demand.
       // The validator receives the photo as a data URL so it never needs public access.
       const photoPath = fileName;
 
@@ -146,7 +146,7 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
         return;
       }
 
-      // Save to database — store the storage path, not a public URL.
+      // Save to database â€” store the storage path, not a public URL.
       const { error: saveError } = await supabase
         .from('health_photos')
         .insert({
@@ -178,7 +178,7 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
 
       toast({
         title: "Photo Saved!",
-        description: `Great job! You earned ${validationData.lollipopsToAward} lollipop${validationData.lollipopsToAward > 1 ? 's' : ''}! 🍭`,
+        description: `Great job! You earned ${validationData.lollipopsToAward} lollipop${validationData.lollipopsToAward > 1 ? 's' : ''}! ðŸ­`,
       });
 
       onPhotoSaved();
@@ -238,7 +238,7 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
                   </div>
                   <div className="text-left">
                     <p className="font-medium">{cat.label}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Earn {cat.lollipops} lollipop{cat.lollipops > 1 ? 's' : ''}
                     </p>
                   </div>
@@ -315,3 +315,4 @@ export function HealthPhotoCapture({ patientId, onPhotoSaved }: HealthPhotoCaptu
     </>
   );
 }
+

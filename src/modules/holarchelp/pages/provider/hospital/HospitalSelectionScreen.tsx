@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,7 +30,7 @@ export default function HospitalSelectionScreen() {
         coords && h.latitude != null && h.longitude != null
           ? distanceKm(coords, { lat: h.latitude, lng: h.longitude })
           : null;
-      // Rough ETA: assume 50 km/h urban average → 1.2 min/km
+      // Rough ETA: assume 50 km/h urban average â†’ 1.2 min/km
       const eta = km != null ? Math.max(2, Math.round(km * 1.2)) : null;
       return { ...h, _km: km, _eta: eta };
     });
@@ -43,7 +43,7 @@ export default function HospitalSelectionScreen() {
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
           {t("holarcHelp.emergency.dispatch.dispatchManagement")}
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">
@@ -79,14 +79,14 @@ export default function HospitalSelectionScreen() {
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="min-w-0">
-                  <h3 className="text-xs font-medium text-primary-dark truncate">
+                  <h3 className="text-sm font-medium text-primary-dark truncate">
                     {hospital.name}
                   </h3>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
                     <MapPin className="h-3.5 w-3.5 shrink-0" />
                     {[hospital.address, hospital.city, hospital.state]
                       .filter(Boolean)
-                      .join(", ") || "—"}
+                      .join(", ") || "â€”"}
                   </p>
                 </div>
                 {hospital._eta != null && (
@@ -94,14 +94,14 @@ export default function HospitalSelectionScreen() {
                     <p className="text-sm font-semibold text-warning">
                       {t("holarcHelp.emergency.dispatch.etaLabel", { minutes: hospital._eta })}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {t("holarcHelp.emergency.dispatch.kmAway", { km: hospital._km!.toFixed(1) })}
                     </p>
                   </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-3 gap-2 mb-2 p-2 bg-muted rounded text-xs">
+              <div className="grid grid-cols-3 gap-2 mb-2 p-2 bg-muted rounded text-sm">
                 <div>
                   <p className="text-muted-foreground">{t("holarcHelp.emergency.dispatch.beds")}</p>
                   <p className="font-semibold">{hospital.beds_available ?? t("common.dash")}</p>
@@ -116,13 +116,13 @@ export default function HospitalSelectionScreen() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-success">
+              <div className="flex items-center gap-2 text-sm text-success">
                 <AlertCircle className="h-3.5 w-3.5" />
                 <span className="font-medium">{t("holarcHelp.emergency.dispatch.acceptingPatients")}</span>
               </div>
 
               {hospital.contact_phone && (
-                <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                <p className="mt-2 text-sm text-muted-foreground flex items-center gap-1">
                   <Phone className="h-3.5 w-3.5" />
                   {hospital.contact_phone}
                 </p>
@@ -134,7 +134,7 @@ export default function HospitalSelectionScreen() {
 
       {selectedHospital && (
         <div className="rounded-xl border bg-card p-4 max-w-2xl">
-          <h3 className="text-xs font-semibold uppercase mb-1 text-muted-foreground">
+          <h3 className="text-sm font-semibold uppercase mb-1 text-muted-foreground">
             {t("holarcHelp.emergency.dispatch.selectedDestination")}
           </h3>
           <p className="text-sm font-semibold">
@@ -164,3 +164,4 @@ export default function HospitalSelectionScreen() {
     </div>
   );
 }
+

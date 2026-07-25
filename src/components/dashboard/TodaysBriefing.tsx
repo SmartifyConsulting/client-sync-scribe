@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Clock, User, Volume2, VolumeX, Loader2, AlertCircle, Play, Pause, Pill, Users, MessageCircle, ChevronLeft, ChevronRight, ChevronDown, SkipBack, SkipForward } from "lucide-react";
@@ -618,10 +618,10 @@ export function TodaysBriefing() {
             <ChevronLeft className="h-3.5 w-3.5 md:h-5 md:w-5" />
           </Button>
           <div className="text-center">
-            <h3 className="text-xs md:text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
-            <p className="text-xs md:text-sm text-white">
+            <h3 className="text-sm md:text-lg font-semibold text-primary-foreground">{briefingTitle}</h3>
+            <p className="text-sm md:text-sm text-white">
               <span>{formattedSelectedDate}</span>
-              <span className="inline md:hidden"> • {doneCount}/{appointments.length}</span>
+              <span className="inline md:hidden"> â€¢ {doneCount}/{appointments.length}</span>
               <span className="hidden md:block">{t("briefing.completedOf", { done: doneCount, total: appointments.length })}</span>
             </p>
           </div>
@@ -639,8 +639,8 @@ export function TodaysBriefing() {
           {isPlaying ? (
             <div className="flex flex-col items-center gap-1">
               {segments.length > 1 && (
-                <span className="text-xs md:text-sm text-primary-foreground/80 whitespace-nowrap">
-                  {currentSegmentIndex + 1}/{segments.length} — {segments[currentSegmentIndex]?.label}
+                <span className="text-sm md:text-sm text-primary-foreground/80 whitespace-nowrap">
+                  {currentSegmentIndex + 1}/{segments.length} â€” {segments[currentSegmentIndex]?.label}
                 </span>
               )}
               <div className="flex items-center gap-1">
@@ -648,14 +648,14 @@ export function TodaysBriefing() {
                 size="sm"
                 onClick={handleSkipBack}
                 disabled={currentSegmentIndex === 0}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-sm md:text-sm h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 <SkipBack className="h-2.5 w-2.5 md:h-3 md:w-3" />
               </Button>
               <Button
                 size="sm"
                 onClick={handlePauseResume}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-sm md:text-sm h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 {isPaused ? (
                   <>
@@ -673,14 +673,14 @@ export function TodaysBriefing() {
                 size="sm"
                 onClick={handleSkipForward}
                 disabled={currentSegmentIndex >= segmentAudioUrls.length - 1}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-sm md:text-sm h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 <SkipForward className="h-2.5 w-2.5 md:h-3 md:w-3" />
               </Button>
               <Button
                 size="sm"
                 onClick={handleStop}
-                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
+                className="bg-white/20 text-white border border-white/30 hover:bg-white/30 text-sm md:text-sm h-6 px-1.5 md:h-7 md:px-2 gap-0.5"
               >
                 <VolumeX className="h-2.5 w-2.5 md:h-3 md:w-3" />
                 <span className="hidden md:inline">Stop</span>
@@ -693,7 +693,7 @@ export function TodaysBriefing() {
               size="sm"
               onClick={handleNarrate}
               disabled={isNarrating}
-              className="gap-0.5 bg-white text-primary border border-white/50 hover:bg-muted hover:text-primary text-xs md:text-xs h-6 px-1.5 md:h-7 md:px-2"
+              className="gap-0.5 bg-white text-primary border border-white/50 hover:bg-muted hover:text-primary text-sm md:text-sm h-6 px-1.5 md:h-7 md:px-2"
             >
               {isNarrating ? (
                  <>
@@ -713,7 +713,7 @@ export function TodaysBriefing() {
       </div>
 
       {isTranslating && (
-        <div className="px-4 py-2 flex items-center gap-2 text-xs text-muted-foreground border-b border-border">
+        <div className="px-4 py-2 flex items-center gap-2 text-sm text-muted-foreground border-b border-border">
           <Loader2 className="h-4 w-4 animate-spin" />
           {t("briefing.translating")}
         </div>
@@ -748,7 +748,7 @@ export function TodaysBriefing() {
                             {apt.patientName}
                           </span>
                         )}
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+                        <span className="flex items-center gap-1 text-sm text-muted-foreground shrink-0">
                           <Clock className="h-4 w-4" />
                           {apt.formattedTime}
                         </span>
@@ -756,7 +756,7 @@ export function TodaysBriefing() {
                           <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
                         )}
                         {apt.unreadRoundTableNotes.length > 0 && (
-                          <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 text-xs px-1.5 py-0.5 rounded-full">
+                          <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 text-sm px-1.5 py-0.5 rounded-full">
                             {apt.unreadRoundTableNotes.length}
                           </span>
                         )}
@@ -769,7 +769,7 @@ export function TodaysBriefing() {
                 <CollapsibleContent className="mt-2 space-y-2 ml-11">
 
                   {apt.allergies && (
-                    <div className="flex items-center gap-1 text-xs text-destructive">
+                    <div className="flex items-center gap-1 text-sm text-destructive">
                       <AlertCircle className="h-4 w-4" />
                       <span>{translatedLabels['Allergies'] || 'Allergies'}: {apt.allergies}</span>
                     </div>
@@ -777,7 +777,7 @@ export function TodaysBriefing() {
 
                   {apt.lastSessionSummary ? (
                     <div className="bg-muted/50 rounded-lg p-2">
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         <span className="font-medium text-foreground">{translatedLabels['Last session'] || 'Last session'}: </span>
                         {apt.lastSessionSummary.length > 150 
                           ? apt.lastSessionSummary.substring(0, 150) + '...' 
@@ -785,20 +785,20 @@ export function TodaysBriefing() {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground italic">
+                    <p className="text-sm text-muted-foreground italic">
                       {translatedLabels['No previous session notes'] || 'No previous session notes'}
                     </p>
                   )}
 
                   {apt.lastPrescription && (
-                    <div className="flex items-center gap-1.5 text-xs">
+                    <div className="flex items-center gap-1.5 text-sm">
                       <Pill className="h-4 w-4 text-green-600" />
                       <span className="text-muted-foreground">{apt.lastPrescription}</span>
                     </div>
                   )}
 
                   {apt.linkedDoctors.length > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs">
+                    <div className="flex items-center gap-1.5 text-sm">
                       <Users className="h-4 w-4 text-blue-600" />
                       <span className="text-muted-foreground">
                         {apt.linkedDoctors.map(d => 
@@ -810,7 +810,7 @@ export function TodaysBriefing() {
 
                   {apt.unreadRoundTableNotes.length > 0 && (
                     <div className="space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-xs">
+                      <div className="flex items-center gap-1.5 text-sm">
                         <MessageCircle className="h-4 w-4 text-amber-600" />
                         <span className="font-medium text-amber-600">
                           {apt.unreadRoundTableNotes.length} {apt.unreadRoundTableNotes.length > 1 ? (translatedLabels['unread notes'] || 'unread notes') : (translatedLabels['unread note'] || 'unread note')}
@@ -818,10 +818,10 @@ export function TodaysBriefing() {
                       </div>
                       {apt.unreadRoundTableNotes.slice(0, 1).map((note, noteIndex) => (
                         <div key={noteIndex} className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded p-2">
-                          <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                          <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
                             {note.doctorName}
                           </p>
-                          <p className="text-xs text-foreground mt-0.5">
+                          <p className="text-sm text-foreground mt-0.5">
                             {note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content}
                           </p>
                         </div>
@@ -837,3 +837,4 @@ export function TodaysBriefing() {
     </div>
   );
 }
+

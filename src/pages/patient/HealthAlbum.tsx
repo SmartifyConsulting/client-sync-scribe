@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Camera, Dumbbell, Utensils, Pill, Trash2, Calendar, Award, Loader2, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,7 +84,7 @@ export default function HealthAlbum() {
         variant: "destructive",
       });
     } else {
-      // Bucket is private — sign each photo URL for display.
+      // Bucket is private â€” sign each photo URL for display.
       const signed = await Promise.all(
         (data || []).map(async (p: any) => {
           const signedUrl = await getSignedUrl('health-photos', p.photo_url);
@@ -108,7 +108,7 @@ export default function HealthAlbum() {
 
   const deletePhoto = async (photo: HealthPhoto) => {
     try {
-      // photo.photo_url has been signed for display — derive the underlying
+      // photo.photo_url has been signed for display â€” derive the underlying
       // storage path from the signed URL, falling back to the value itself.
       const path = extractStoragePath('health-photos', photo.photo_url);
 
@@ -163,7 +163,7 @@ export default function HealthAlbum() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Health Album</h1>
-          <p className="text-muted-foreground text-xs mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             Capture your healthy habits and earn rewards
           </p>
         </div>
@@ -177,31 +177,31 @@ export default function HealthAlbum() {
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-primary">{stats.total}</p>
-            <p className="text-xs text-muted-foreground">Total Photos</p>
+            <p className="text-sm text-muted-foreground">Total Photos</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-blue-600">{stats.gym}</p>
-            <p className="text-xs text-muted-foreground">Gym Sessions</p>
+            <p className="text-sm text-muted-foreground">Gym Sessions</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-green-600">{stats.healthy_meal}</p>
-            <p className="text-xs text-muted-foreground">Healthy Meals</p>
+            <p className="text-sm text-muted-foreground">Healthy Meals</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-purple-600">{stats.medication}</p>
-            <p className="text-xs text-muted-foreground">Medications</p>
+            <p className="text-sm text-muted-foreground">Medications</p>
           </CardContent>
         </Card>
         <Card className="col-span-2 sm:col-span-1">
           <CardContent className="pt-4 text-center">
             <p className="text-3xl font-bold text-yellow-600">{stats.lollipops}</p>
-            <p className="text-xs text-muted-foreground">Lollipops Earned</p>
+            <p className="text-sm text-muted-foreground">Lollipops Earned</p>
           </CardContent>
         </Card>
       </div>
@@ -285,7 +285,7 @@ export default function HealthAlbum() {
 
                         {/* Bottom Info */}
                         <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="flex items-center justify-between text-white text-xs">
+                          <div className="flex items-center justify-between text-white text-sm">
                             <span className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
                               {format(new Date(photo.captured_at), 'MMM d, yyyy')}
@@ -356,3 +356,4 @@ export default function HealthAlbum() {
     </div>
   );
 }
+

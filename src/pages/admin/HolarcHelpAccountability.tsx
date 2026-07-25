@@ -1,4 +1,4 @@
-import { toastError } from "@/lib/userMessage";
+﻿import { toastError } from "@/lib/userMessage";
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,11 +85,11 @@ export function AccountabilityPanel() {
                   <div className="text-sm text-muted-foreground capitalize">{r.status}</div>
                 </TableCell>
                 <TableCell className="py-2 text-sm">{r.accepts}</TableCell>
-                <TableCell className="py-2 text-sm">{r.avg_arr_min == null ? "—" : Number(r.avg_arr_min).toFixed(1)}</TableCell>
+                <TableCell className="py-2 text-sm">{r.avg_arr_min == null ? "â€”" : Number(r.avg_arr_min).toFixed(1)}</TableCell>
                 <TableCell className="py-2 text-sm">{r.cancels}</TableCell>
                 <TableCell className="py-2 text-sm">{r.critical_cancels}</TableCell>
                 <TableCell className="py-2 text-sm">{r.stalled}</TableCell>
-                <TableCell className="py-2 text-sm">{r.avg_rating == null ? "—" : Number(r.avg_rating).toFixed(1)}</TableCell>
+                <TableCell className="py-2 text-sm">{r.avg_rating == null ? "â€”" : Number(r.avg_rating).toFixed(1)}</TableCell>
                 <TableCell className="py-2 text-sm">{r.flags}</TableCell>
                 <TableCell className="py-2 text-sm font-semibold">{r.dispatch_priority}</TableCell>
                 <TableCell className="py-2 text-right space-x-1">
@@ -133,9 +133,9 @@ export function AccountabilityPanel() {
               <AccordionTrigger className="px-4 py-2.5 hover:no-underline hover:bg-muted/40">
                 <div className="flex items-center gap-3">
                   <span className="text-base">{countryFlag(country)}</span>
-                  <span className="text-xs font-medium text-primary-dark">{country}</span>
+                  <span className="text-sm font-medium text-primary-dark">{country}</span>
                   <span className="text-sm text-muted-foreground">
-                    {approved.length} approved · {unapproved.length} unapproved
+                    {approved.length} approved Â· {unapproved.length} unapproved
                   </span>
                 </div>
               </AccordionTrigger>
@@ -149,7 +149,7 @@ export function AccountabilityPanel() {
                       <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-muted/30">
                         <div className="flex items-center gap-2">
                           <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
-                          <span className="text-xs font-medium text-primary-dark">{label}</span>
+                          <span className="text-sm font-medium text-primary-dark">{label}</span>
                           <span className="text-sm text-muted-foreground">{items.length}</span>
                         </div>
                       </AccordionTrigger>
@@ -215,3 +215,4 @@ export default function HolarcHelpAccountability() {
     </div>
   );
 }
+

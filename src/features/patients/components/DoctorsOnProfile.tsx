@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -250,7 +250,7 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
                     <p className="font-medium text-foreground">
                       {doctor.doctor_profile?.full_name || "Unknown Doctor"}
                       {isCurrentUser && (
-                        <span className="ml-2 text-xs text-muted-foreground">(You)</span>
+                        <span className="ml-2 text-sm text-muted-foreground">(You)</span>
                       )}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -376,3 +376,4 @@ export function DoctorsOnProfile({ patientId, patientName }: DoctorsOnProfilePro
     </div>
   );
 }
+

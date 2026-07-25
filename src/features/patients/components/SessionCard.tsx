@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import {
@@ -48,7 +48,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
             </p>
             <p className="text-sm text-muted-foreground">
               {format(new Date(session.started_at), "h:mm a")}
-              {session.duration_minutes && ` · ${session.duration_minutes} min`}
+              {session.duration_minutes && ` Â· ${session.duration_minutes} min`}
             </p>
           </div>
         </div>
@@ -60,7 +60,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
         <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/10">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <p className="text-xs font-medium text-primary">AI Summary</p>
+            <p className="text-sm font-medium text-primary">AI Summary</p>
           </div>
           <p className="text-sm text-muted-foreground">{session.summary}</p>
         </div>
@@ -70,7 +70,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
       {session.transcript && (
         <Collapsible open={isTranscriptOpen} onOpenChange={setIsTranscriptOpen} className="mt-3">
           <CollapsibleTrigger asChild>
-            <button className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors w-full justify-between p-2 rounded-lg hover:bg-muted/50">
+            <button className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors w-full justify-between p-2 rounded-lg hover:bg-muted/50">
               <div className="flex items-center gap-2">
                 <Mic className="h-3.5 w-3.5" />
                 <span>View Transcription</span>
@@ -89,7 +89,7 @@ export function SessionCard({ session, index }: SessionCardProps) {
       {/* Action Points */}
       {session.action_points && session.action_points.length > 0 && (
         <div className="mt-4">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
             Action Points
           </p>
           <ul className="mt-2 space-y-1">
@@ -108,3 +108,4 @@ export function SessionCard({ session, index }: SessionCardProps) {
     </div>
   );
 }
+

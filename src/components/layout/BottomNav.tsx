@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+﻿import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -52,7 +52,7 @@ export function BottomNav() {
 
   const isOnAdminRoute = location.pathname.startsWith("/admin");
 
-  // Admin variant — shown whenever an admin is on an /admin/* route
+  // Admin variant â€” shown whenever an admin is on an /admin/* route
   if (isAdmin && isOnAdminRoute) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-area-pb font-size-preserve md:hidden">
@@ -109,7 +109,7 @@ export function BottomNav() {
                 >
                   <div className="flex flex-col items-center justify-center h-11 w-11 rounded-full bg-red-600 hover:bg-red-700 active:scale-95 transition-all duration-200">
                     <item.icon className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
-                    <span className="text-xs font-bold text-white leading-none mt-0.5">SOS</span>
+                    <span className="text-sm font-bold text-white leading-none mt-0.5">SOS</span>
                   </div>
                 </button>
               );
@@ -167,7 +167,7 @@ export function BottomNav() {
               >
                 <div className="flex flex-col items-center justify-center h-11 w-11 rounded-full bg-red-600 active:scale-95 transition-transform">
                   <item.icon className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
-                  <span className="text-xs font-bold text-white leading-none mt-0.5">SOS</span>
+                  <span className="text-sm font-bold text-white leading-none mt-0.5">SOS</span>
                 </div>
               </button>
             );
@@ -197,3 +197,4 @@ export function BottomNav() {
     </nav>
   );
 }
+

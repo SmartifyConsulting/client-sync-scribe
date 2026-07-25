@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+﻿import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
@@ -53,7 +53,7 @@ const ambulanceNav: NavItem[] = [
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
   // MONITORING (Fleet Live)
   { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
-  // ADMIN — Users, Crew, Fleet Admin, Hospitals
+  // ADMIN â€” Users, Crew, Fleet Admin, Hospitals
   { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
 ];
 
@@ -129,7 +129,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-primary truncate">{profile?.full_name || t("common.provider")}</p>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground truncate">
+              <p className="text-sm uppercase tracking-wider text-muted-foreground truncate">
                 {portal === "hospital" ? t("provider.hospitalOps") : t("provider.erProvider")}
               </p>
             </div>
@@ -181,3 +181,4 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
     </aside>
   );
 }
+

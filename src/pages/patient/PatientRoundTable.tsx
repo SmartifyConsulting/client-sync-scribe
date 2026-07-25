@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { MessageSquare, User } from "lucide-react";
@@ -50,7 +50,7 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
       {!hideHeader && (
         <div>
           <h1 className="text-3xl font-bold text-foreground">Round Table</h1>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-muted-foreground text-sm">
             Notes shared by your healthcare providers about your care.
           </p>
         </div>
@@ -104,3 +104,4 @@ export default function PatientRoundTable({ hideHeader = false }: { hideHeader?:
     </div>
   );
 }
+

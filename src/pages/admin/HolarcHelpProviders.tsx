@@ -1,4 +1,4 @@
-import { toastError } from "@/lib/userMessage";
+﻿import { toastError } from "@/lib/userMessage";
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -40,8 +40,8 @@ type Status = "all" | "active" | "inactive";
 type Kind = "hospital" | "ambulance" | "pharmacy" | "insurance";
 
 const COUNTRY_FLAGS: Record<string, string> = {
-  "South Africa": "🇿🇦", "ZA": "🇿🇦", "RSA": "🇿🇦",
-  "Nigeria": "🇳🇬", "NG": "🇳🇬",
+  "South Africa": "ðŸ‡¿ðŸ‡¦", "ZA": "ðŸ‡¿ðŸ‡¦", "RSA": "ðŸ‡¿ðŸ‡¦",
+  "Nigeria": "ðŸ‡³ðŸ‡¬", "NG": "ðŸ‡³ðŸ‡¬",
 };
 const COUNTRY_PINS = ["South Africa", "Nigeria"];
 const TIER_ORDER = ["tier_1", "tier_2", "tier_3", "tier_4"];
@@ -181,20 +181,20 @@ export default function HolarcHelpProviders() {
     return (
       <TableRow key={r.id}>
         <TableCell className="font-medium">{r[nameField(kind)]}</TableCell>
-        <TableCell className="text-xs">
+        <TableCell className="text-sm">
           {userEmail
             ? <><span className="font-semibold">{userEmail}</span>
                 {r.contact_email && r.contact_email.toLowerCase() !== userEmail.toLowerCase() && (
                   <><br /><span className="text-muted-foreground">Org: {r.contact_email}</span></>
                 )}
               </>
-            : <span>{r.contact_email ?? "—"}</span>}
+            : <span>{r.contact_email ?? "â€”"}</span>}
           {r.contact_phone && <><br /><span className="text-muted-foreground">{r.contact_phone}</span></>}
         </TableCell>
-        <TableCell className="text-xs">{r.city ?? "—"}</TableCell>
+        <TableCell className="text-sm">{r.city ?? "â€”"}</TableCell>
         <TableCell>
           {kind === "insurance" ? (
-            <span className="text-xs text-muted-foreground">—</span>
+            <span className="text-sm text-muted-foreground">â€”</span>
           ) : (
             <Select value={r.tier ?? "tier_3"} onValueChange={(v) => setTier(kind, r.id, v)}>
               <SelectTrigger className="h-8 w-28"><SelectValue /></SelectTrigger>
@@ -243,14 +243,14 @@ export default function HolarcHelpProviders() {
         {countries.map((country) => {
           const tiers = grouped[country];
           const total = Object.values(tiers).reduce((s, arr) => s + arr.length, 0);
-          const flag = COUNTRY_FLAGS[country] ?? "🌍";
+          const flag = COUNTRY_FLAGS[country] ?? "ðŸŒ";
           return (
             <AccordionItem key={country} value={country} className="border rounded-2xl bg-card overflow-hidden border-primary/30">
               <AccordionTrigger className="px-4 hover:no-underline">
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{flag}</span>
                   <span className="font-bold">{country}</span>
-                  <span className="text-xs text-muted-foreground">{total} {noun}</span>
+                  <span className="text-sm text-muted-foreground">{total} {noun}</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3">
@@ -262,7 +262,7 @@ export default function HolarcHelpProviders() {
                           <span className={`px-2 py-0.5 rounded-full text-sm font-semibold border ${TIER_CHIP[t]}`}>
                             {t.replace("_", " ").replace("tier", "Tier")}
                           </span>
-                          <span className="text-xs text-muted-foreground">{tiers[t].length} {noun}</span>
+                          <span className="text-sm text-muted-foreground">{tiers[t].length} {noun}</span>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="p-0">
@@ -326,7 +326,7 @@ export default function HolarcHelpProviders() {
               <Input
                 value={providerSearch[k]}
                 onChange={(e) => setProviderSearch((prev) => ({ ...prev, [k]: e.target.value }))}
-                placeholder={`Search ${noun}…`}
+                placeholder={`Search ${noun}â€¦`}
                 className="h-8 w-48 pl-7 text-sm"
               />
             </div>
@@ -449,15 +449,15 @@ export default function HolarcHelpProviders() {
           <div className="grid grid-cols-3 gap-3 py-2">
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("hospital"); setEdit({ kind: "hospital", row: null }); }}>
               <Hospital className="h-6 w-6" />
-              <span className="text-xs font-semibold">Hospital</span>
+              <span className="text-sm font-semibold">Hospital</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("ambulance"); setEdit({ kind: "ambulance", row: null }); }}>
               <Ambulance className="h-6 w-6" />
-              <span className="text-xs font-semibold">Emergency Response</span>
+              <span className="text-sm font-semibold">Emergency Response</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col gap-1" onClick={() => { setChooserOpen(false); setTab("pharmacy"); setEdit({ kind: "pharmacy", row: null }); }}>
               <Pill className="h-6 w-6" />
-              <span className="text-xs font-semibold">Pharmacy</span>
+              <span className="text-sm font-semibold">Pharmacy</span>
             </Button>
           </div>
         </DialogContent>
@@ -684,7 +684,7 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
       const { data, error } = await supabase.functions.invoke("google-places-autocomplete", { body: { input, types: "any" } });
       if (error) {
         console.error("Places autocomplete invoke error:", error);
-        toast.error("Location search failed — check API settings");
+        toast.error("Location search failed â€” check API settings");
         setItems([]);
         return;
       }
@@ -715,7 +715,7 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
       onPick(data as PlaceDetails);
       setQ(data?.formatted_address || label);
       setOpen(false);
-      toast.success("Location pinned — fields auto-filled");
+      toast.success("Location pinned â€” fields auto-filled");
     } catch (e: any) {
       toast.error(e?.message ?? "Could not load place details");
     } finally { setPicking(null); }
@@ -728,7 +728,7 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
         <Input
           value={q}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Type the provider name or address…"
+          placeholder="Type the provider name or addressâ€¦"
           onFocus={() => items.length > 0 && setOpen(true)}
         />
         {searching && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
@@ -740,7 +740,7 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
                 type="button"
                 onClick={() => pick(s.place_id, s.description)}
                 disabled={picking === s.place_id}
-                className="block w-full text-left px-3 py-2 text-xs hover:bg-muted disabled:opacity-50"
+                className="block w-full text-left px-3 py-2 text-sm hover:bg-muted disabled:opacity-50"
               >
                 {picking === s.place_id ? <Loader2 className="inline mr-2 h-4 w-4 animate-spin" /> : null}
                 {s.description}
@@ -753,3 +753,4 @@ function LocationPicker({ onPick, initialQuery }: { onPick: (d: PlaceDetails) =>
     </div>
   );
 }
+

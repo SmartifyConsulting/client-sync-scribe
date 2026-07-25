@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+﻿import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -816,7 +816,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
         </Popover>
 
         <div className="flex items-center gap-2 w-32">
-          <span className="text-xs text-muted-foreground">Size:</span>
+          <span className="text-sm text-muted-foreground">Size:</span>
           <Slider
             value={[strokeWidth]}
             onValueChange={(v) => setStrokeWidth(v[0])}
@@ -908,7 +908,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
           <div className="p-2 border-b space-y-2">
             <h4 className="font-medium text-sm">Anatomy</h4>
             <Select defaultValue="face" onValueChange={(val) => setAnatomyCategory(val)}>
-              <SelectTrigger className="w-full h-8 text-xs">
+              <SelectTrigger className="w-full h-8 text-sm">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
@@ -938,7 +938,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                         <asset.component />
                       )}
                     </div>
-                    <p className="text-xs text-center mt-1">{asset.name}</p>
+                    <p className="text-sm text-center mt-1">{asset.name}</p>
                   </div>
                 ))}
             </div>
@@ -1016,7 +1016,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               );
             })}
 
-          {/* Shape overlays — rendered as DOM elements for interactivity */}
+          {/* Shape overlays â€” rendered as DOM elements for interactivity */}
           {elements
             .filter((el) => el.type === "shape")
             .map((el) => {
@@ -1124,7 +1124,7 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
               );
             })}
 
-          {/* Text overlays — rendered as DOM elements for interactivity */}
+          {/* Text overlays â€” rendered as DOM elements for interactivity */}
           {elements
             .filter((el) => el.type === "text")
             .map((el) => {
@@ -1231,13 +1231,13 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                 size="sm"
                 onClick={() => setShowVersions(false)}
               >
-                ×
+                Ã—
               </Button>
             </div>
             <ScrollArea className="h-full">
               <div className="p-2 space-y-2">
                 {drawings.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">
+                  <p className="text-sm text-muted-foreground text-center py-4">
                     No versions saved yet
                   </p>
                 ) : (
@@ -1255,12 +1255,12 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
                           Version {drawing.version}
                         </span>
                         {drawing.is_current && (
-                          <Badge variant="default" className="text-xs">
+                          <Badge variant="default" className="text-sm">
                             Current
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         {format(new Date(drawing.created_at), "MMM d, yyyy h:mm a")}
                       </p>
                     </div>
@@ -1274,3 +1274,4 @@ export function DrawingPad({ patientId, sessionId, patientName, onClose, isModal
     </div>
   );
 }
+

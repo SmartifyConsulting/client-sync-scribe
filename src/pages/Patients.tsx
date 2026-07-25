@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+﻿import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -396,7 +396,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         {!hideHeader && (
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t("nav.myPatients", "Patients")}</h1>
-            <p className="mt-1 text-muted-foreground text-xs">
+            <p className="mt-1 text-muted-foreground text-sm">
               {t("patients.subtitle")}
             </p>
           </div>
@@ -405,7 +405,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
 
           <PatientImportDialog 
             trigger={
-              <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-xs md:text-xs">
+              <Button variant="outline" className="gap-1.5 h-8 md:h-9 text-sm md:text-sm">
                 <Upload className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 {t("patients.importPatients")}
               </Button>
@@ -414,7 +414,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           />
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="gap-1.5 h-8 md:h-9 text-xs md:text-xs">
+              <Button className="gap-1.5 h-8 md:h-9 text-sm md:text-sm">
                 <Plus className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 {t("patients.addPatient")}
               </Button>
@@ -453,7 +453,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               onClick={() => handleSelectPatientSuggestion(s)}
                             >
                               <p className="font-medium text-foreground text-sm">{s.full_name}</p>
-                              {s.mobile_number && <p className="text-xs text-muted-foreground">{s.mobile_number}</p>}
+                              {s.mobile_number && <p className="text-sm text-muted-foreground">{s.mobile_number}</p>}
                             </button>
                           ))}
                         </div>
@@ -704,7 +704,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
               <Filter className="h-4 w-4" />
               {t("patients.filter")}
               {hasActiveFilters && (
-                <span className="ml-1 rounded-full bg-primary text-primary-foreground px-1.5 py-0.5 text-xs">
+                <span className="ml-1 rounded-full bg-primary text-primary-foreground px-1.5 py-0.5 text-sm">
                   {[statusFilter !== "all", dateFrom, dateTo].filter(Boolean).length}
                 </span>
               )}
@@ -715,7 +715,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">Filters</h4>
                 {hasActiveFilters && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-xs">
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 text-sm">
                     <X className="h-4 w-4 mr-1" />
                     Clear all
                   </Button>
@@ -827,19 +827,19 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
             <table className="w-full">
               <thead>
                 <tr className="bg-primary">
-                  <th className="px-2 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-2 lg:px-4 py-2.5 text-left text-sm font-medium text-primary-foreground">
                     {t("patients.colPatient")}
                   </th>
-                  <th className="hidden lg:table-cell px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="hidden lg:table-cell px-4 py-2.5 text-left text-sm font-medium text-primary-foreground">
                     {t("patients.colContact")}
                   </th>
-                  <th className="px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="px-3 lg:px-4 py-2.5 text-left text-sm font-medium text-primary-foreground">
                     {t("patients.colLastSeen")}
                   </th>
-                  <th className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-left text-xs font-medium text-primary-foreground">
+                  <th className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-left text-sm font-medium text-primary-foreground">
                     {t("patients.colSince")}
                   </th>
-                  <th className="px-3 lg:px-4 py-2.5 text-right text-xs font-medium text-primary-foreground">
+                  <th className="px-3 lg:px-4 py-2.5 text-right text-sm font-medium text-primary-foreground">
                     {t("patients.colActions")}
                   </th>
                 </tr>
@@ -851,11 +851,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                     <tr className="group transition-colors bg-gray-100 hover:bg-gray-200/60 dark:bg-gray-800/20 dark:hover:bg-gray-800/30">
                       <td className="px-2 lg:px-4 py-2.5">
                         <Link to={`/patients/${mePatient.id}`} className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs bg-[#E01837] text-white">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full font-medium text-sm bg-[#E01837] text-white">
                             ME
                           </div>
                           <div className={cn("h-2 w-2 rounded-full flex-shrink-0", mePatient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
-                          <span className="font-medium text-xs text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
+                          <span className="font-medium text-sm text-foreground group-hover:text-[#E01837] dark:group-hover:text-red-400 transition-colors whitespace-nowrap">
                             {mePatient.name.includes(',') ? mePatient.name : (() => {
                               const parts = mePatient.name.trim().split(/\s+/);
                               if (parts.length <= 1) return mePatient.name;
@@ -869,24 +869,24 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                       <td className="hidden lg:table-cell px-4 py-2.5">
                         <div className="space-y-0.5">
                           {mePatient.email && (
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                               <Mail className="h-4 w-4" /> <span className="truncate">{mePatient.email}</span>
                             </div>
                           )}
                           {mePatient.phone && (
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                               <Phone className="h-4 w-4" /> {mePatient.phone}
                             </div>
                           )}
                           {!mePatient.email && !mePatient.phone && (
-                            <span className="text-xs text-muted-foreground">—</span>
+                            <span className="text-sm text-muted-foreground">â€”</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-3 lg:px-4 py-2.5 text-xs text-muted-foreground">
-                        {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">—</span>}
+                      <td className="px-3 lg:px-4 py-2.5 text-sm text-muted-foreground">
+                        {mePatient.last_visit ? new Date(mePatient.last_visit).toLocaleDateString() : <span className="text-muted-foreground/50">â€”</span>}
                       </td>
-                      <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-xs text-muted-foreground">
+                      <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-sm text-muted-foreground">
                         {new Date(mePatient.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-3 lg:px-4 py-2.5 text-right">
@@ -906,10 +906,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                     >
                       <td colSpan={5} className="px-4 py-1">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
+                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-sm font-bold">
                             {letter}
                           </span>
-                          <span className="text-xs text-muted-foreground">({groupedPatients[letter].length})</span>
+                          <span className="text-sm text-muted-foreground">({groupedPatients[letter].length})</span>
                           <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground ml-auto transition-transform", expandedLetters.has(letter) && "rotate-180")} />
                         </div>
                       </td>
@@ -925,7 +925,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                             className="flex items-center gap-2.5"
                           >
                             <div className={cn(
-                              "flex h-8 w-8 items-center justify-center rounded-full font-medium text-xs",
+                              "flex h-8 w-8 items-center justify-center rounded-full font-medium text-sm",
                               (() => {
                                 const letterIdx = availableLetters.indexOf(letter);
                                 const avatarColors = [
@@ -943,7 +943,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center rounded-full bg-terracotta/10 px-1.5 py-0.5 text-xs font-bold text-terracotta">
+                                    <span className="inline-flex items-center rounded-full bg-terracotta/10 px-1.5 py-0.5 text-sm font-bold text-terracotta">
                                       <Pill className="h-2.5 w-2.5" />
                                     </span>
                                   </TooltipTrigger>
@@ -951,7 +951,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 </Tooltip>
                               </TooltipProvider>
                             )}
-                            <span className={cn("font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap inline-flex items-center gap-1", isSamplePatient(patient) && "italic")}>
+                            <span className={cn("font-medium text-sm text-foreground group-hover:text-primary transition-colors whitespace-nowrap inline-flex items-center gap-1", isSamplePatient(patient) && "italic")}>
                               {patient.name.includes(',') ? patient.name : (() => {
                                 const parts = patient.name.trim().split(/\s+/);
                                 if (parts.length <= 1) return patient.name;
@@ -966,29 +966,29 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                         <td className="hidden lg:table-cell px-4 py-2.5">
                           <div className="space-y-0.5">
                             {patient.email && (
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                 <Mail className="h-4 w-4" />
                                 <span className="truncate max-w-[160px]">{patient.email}</span>
                               </div>
                             )}
                             {patient.phone && (
-                              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                 <Phone className="h-4 w-4" />
                                 {patient.phone}
                               </div>
                             )}
                             {!patient.email && !patient.phone && (
-                              <span className="text-xs text-muted-foreground">—</span>
+                              <span className="text-sm text-muted-foreground">â€”</span>
                             )}
                           </div>
                         </td>
-                        <td className="px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-3 lg:px-4 py-2.5 text-sm text-muted-foreground whitespace-nowrap">
                           {patient.last_visit 
                             ? new Date(patient.last_visit).toLocaleDateString() 
-                            : <span className="text-muted-foreground/50">—</span>
+                            : <span className="text-muted-foreground/50">â€”</span>
                           }
                         </td>
-                        <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="hidden lg:table-cell px-3 lg:px-4 py-2.5 text-sm text-muted-foreground whitespace-nowrap">
                           {new Date(patient.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-3 lg:px-4 py-2.5 text-right">

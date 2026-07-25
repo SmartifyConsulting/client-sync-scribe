@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Shield, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,7 +110,7 @@ export function MfaChallengeScreen({ onVerified }: Props) {
                 await supabase.auth.signOut();
                 window.location.href = "/auth";
               }}
-              className="flex items-center justify-center gap-1.5 w-full text-xs text-muted-foreground hover:text-destructive pt-2 border-t border-border"
+              className="flex items-center justify-center gap-1.5 w-full text-sm text-muted-foreground hover:text-destructive pt-2 border-t border-border"
             >
               <LogOut className="h-3.5 w-3.5" /> Cancel and sign out
             </button>
@@ -120,3 +120,4 @@ export function MfaChallengeScreen({ onVerified }: Props) {
     </div>
   );
 }
+

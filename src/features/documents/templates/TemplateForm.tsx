@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -168,7 +168,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             )}
           </>
         ) : placeholder ? (
-          <span className="text-xs text-gray-400">{placeholder}</span>
+          <span className="text-sm text-gray-400">{placeholder}</span>
         ) : null}
       </div>
     );
@@ -182,7 +182,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         <div className="grid grid-cols-3 gap-4">
           {placeholders.map((label) => (
             <div key={label} className="min-h-[24px] border border-dashed border-gray-300 rounded flex items-center justify-center p-2">
-              <span className="text-xs text-gray-400">{label}</span>
+              <span className="text-sm text-gray-400">{label}</span>
             </div>
           ))}
         </div>
@@ -234,7 +234,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             <div className="pb-4 border-b border-gray-200 mb-4">
               {renderHeaderFooterPreview('header')}
               {!selectedHeaderFooter && (
-                <p className="text-gray-400 italic text-xs text-center mt-2">Select a Header/Footer template below</p>
+                <p className="text-gray-400 italic text-sm text-center mt-2">Select a Header/Footer template below</p>
               )}
             </div>
             
@@ -300,7 +300,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Select your practice letterhead. This will be added to the top and bottom of documents created with this template.
         </p>
       </div>
@@ -331,10 +331,10 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold text-foreground">Template Content</h4>
-            <span className="text-xs text-muted-foreground">(Body of the document)</span>
+            <span className="text-sm text-muted-foreground">(Body of the document)</span>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">Write your template below. Use the toolbar to format text, drag placeholders in, and include your signature. Changes will appear in the preview above.</p>
+        <p className="text-sm text-muted-foreground">Write your template below. Use the toolbar to format text, drag placeholders in, and include your signature. Changes will appear in the preview above.</p>
         <div className="p-4 border border-border rounded-lg bg-card">
           <TemplateSectionEditor
             value={body}
@@ -374,3 +374,4 @@ Yours faithfully,
     </div>
   );
 }
+

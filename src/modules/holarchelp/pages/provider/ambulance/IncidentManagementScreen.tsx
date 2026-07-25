@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Clock, MapPin, Loader2, CheckCircle2, XCircle } from "lucide-react";
@@ -163,13 +163,13 @@ export default function IncidentManagementScreen() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "pending":
-        return "⚠ PENDING YOUR RESPONSE";
+        return "âš  PENDING YOUR RESPONSE";
       case "accepted":
-        return "✓ ACCEPTED";
+        return "âœ“ ACCEPTED";
       case "active":
-        return "🚑 ACTIVE";
+        return "ðŸš‘ ACTIVE";
       case "completed":
-        return "✓ COMPLETED";
+        return "âœ“ COMPLETED";
       default:
         return status;
     }
@@ -178,7 +178,7 @@ export default function IncidentManagementScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
           ER Provider Operations
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Incident Management</h1>
@@ -241,43 +241,43 @@ export default function IncidentManagementScreen() {
             {/* Source Badge */}
             {incident.type === "from-hospital" && (
               <div className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">
-                🏥 FROM: {incident.hospital_name}
+                ðŸ¥ FROM: {incident.hospital_name}
               </div>
             )}
             {incident.type === "self-created" && (
               <div className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm font-semibold">
-                📋 Self-Created
+                ðŸ“‹ Self-Created
               </div>
             )}
 
             {/* Details Grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2">
               <div>
-                <p className="text-xs text-muted-foreground">Location</p>
+                <p className="text-sm text-muted-foreground">Location</p>
                 <p className="font-semibold flex items-center gap-1 mt-1">
                   <MapPin className="h-4 w-4" />
                   {incident.location}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Received</p>
+                <p className="text-sm text-muted-foreground">Received</p>
                 <p className="font-semibold mt-1">{incident.time_created}</p>
               </div>
               {incident.distance_km && (
                 <div>
-                  <p className="text-xs text-muted-foreground">Distance</p>
+                  <p className="text-sm text-muted-foreground">Distance</p>
                   <p className="font-semibold mt-1">{incident.distance_km} km away</p>
                 </div>
               )}
               {incident.current_capacity_percent !== undefined && (
                 <div>
-                  <p className="text-xs text-muted-foreground">Your Capacity</p>
+                  <p className="text-sm text-muted-foreground">Your Capacity</p>
                   <p className="font-semibold mt-1">{incident.current_capacity_percent}%</p>
                 </div>
               )}
               {incident.duration_minutes && (
                 <div>
-                  <p className="text-xs text-muted-foreground">Duration</p>
+                  <p className="text-sm text-muted-foreground">Duration</p>
                   <p className="font-semibold flex items-center gap-1 mt-1">
                     <Clock className="h-4 w-4" />
                     {incident.duration_minutes} minutes
@@ -286,7 +286,7 @@ export default function IncidentManagementScreen() {
               )}
               {incident.assigned_ambulance && (
                 <div>
-                  <p className="text-xs text-muted-foreground">Assigned Ambulance</p>
+                  <p className="text-sm text-muted-foreground">Assigned Ambulance</p>
                   <p className="font-semibold mt-1">{incident.assigned_ambulance}</p>
                 </div>
               )}
@@ -358,9 +358,9 @@ export default function IncidentManagementScreen() {
               {incident.status === "declined" && incident.type === "from-hospital" && (
                 <div className="w-full">
                   <p className="text-sm text-muted-foreground">
-                    ✗ Declined at • Reason: "{incident.decline_reason}"
+                    âœ— Declined at â€¢ Reason: "{incident.decline_reason}"
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Hospital is selecting alternative provider
                   </p>
                 </div>
@@ -424,3 +424,4 @@ export default function IncidentManagementScreen() {
     </div>
   );
 }
+

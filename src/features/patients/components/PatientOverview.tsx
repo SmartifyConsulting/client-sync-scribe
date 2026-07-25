@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
 import { Button } from "@/components/ui/button";
@@ -161,7 +161,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
       if (patientData?.patient_user_id) {
         await supabase.from("notifications").insert({
           user_id: patientData.patient_user_id,
-          title: "🎉 Your Doctor Congratulated You!",
+          title: "ðŸŽ‰ Your Doctor Congratulated You!",
           description: `Your doctor congratulated you on your ${maxStreak}-day medication streak! You earned 250 Vulas!`,
           type: "congratulation",
           reference_id: patientId,
@@ -169,7 +169,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
       }
 
       toast({
-        title: "🎉 Congratulations Sent!",
+        title: "ðŸŽ‰ Congratulations Sent!",
         description: `${patientName} received 250 Vulas for their ${maxStreak}-day streak. You also earned 250 Vulas!`,
       });
     } catch (error: any) {
@@ -198,11 +198,11 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
             ) : (
               <PartyPopper className="h-4 w-4" />
             )}
-            Congratulate (+250 Ⓜ each)
+            Congratulate (+250 â“‚ each)
           </Button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         This patient is on chronic medication and can earn adherence rewards for daily medication logging.
       </p>
       {!loading && adherenceData.length > 0 && (
@@ -332,13 +332,13 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
   // Render summary as timeline bullets with dates, grouped by year
   const renderSummaryTimeline = (text: string) => {
     const cleanText = text.replace(/<\/?(?:med|symptom|condition)>/g, '');
-    const sentences = cleanText.split(/(?<=[.!?])\s+|(?:^|\n)\s*[-•]\s*/).filter(s => s.trim().length > 0);
+    const sentences = cleanText.split(/(?<=[.!?])\s+|(?:^|\n)\s*[-â€¢]\s*/).filter(s => s.trim().length > 0);
     
     if (sentences.length <= 1) {
       return <div className="text-foreground leading-relaxed">{renderInlineHighlights(text)}</div>;
     }
 
-    const datePattern = /^(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s+\d{4}|\d{4}-\d{2}-\d{2}|\w+\s+\d{4})\s*[-–:]\s*/;
+    const datePattern = /^(\d{1,2}\s+\w+\s+\d{4}|\w+\s+\d{1,2},?\s+\d{4}|\d{4}-\d{2}-\d{2}|\w+\s+\d{4})\s*[-â€“:]\s*/;
     
     interface TimelineItem {
       date: string | null;
@@ -389,7 +389,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                 <ChevronDown className="h-4 w-4 transition-transform data-[state=closed]:rotate-[-90deg]" />
                 <span className={`w-3 h-3 rounded-full ${dotColor}`} />
                 {yearStr}
-                <Badge variant="secondary" className="ml-auto text-xs">{items.length} event{items.length !== 1 ? 's' : ''}</Badge>
+                <Badge variant="secondary" className="ml-auto text-sm">{items.length} event{items.length !== 1 ? 's' : ''}</Badge>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="space-y-3 ml-4 mt-2 pl-4 border-l-2" style={{ borderColor: `var(--${yearIndex === 0 ? 'primary' : 'border'})` }}>
@@ -401,7 +401,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                       </div>
                       <div className="pb-2">
                         {item.date && (
-                          <p className={`text-xs font-bold mb-0.5 ${colorClass.split(' ')[0]}`}>{item.date}</p>
+                          <p className={`text-sm font-bold mb-0.5 ${colorClass.split(' ')[0]}`}>{item.date}</p>
                         )}
                         {item.lines.map((line, j) => (
                           <p key={j} className="text-sm text-foreground leading-relaxed">{line}</p>
@@ -519,7 +519,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
       {/* Blood Type Badge */}
       {patient.blood_type && (
         <div className="flex items-center gap-2 -mt-2">
-          <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-0 text-xs font-bold">
+          <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-0 text-sm font-bold">
             <Droplets className="h-4 w-4 mr-1" />
             Blood Type: {patient.blood_type}
           </Badge>
@@ -588,7 +588,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
             </div>
             <div>
               <h3 className="font-semibold text-foreground">{t("patientProfile.aiSummaryTitle")}</h3>
-              <p className="text-xs text-muted-foreground">{t("patientProfile.aiSummarySubtitle")}</p>
+              <p className="text-sm text-muted-foreground">{t("patientProfile.aiSummarySubtitle")}</p>
             </div>
           </div>
           {!isSelfService && (
@@ -602,7 +602,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
         {/* Overall AI narrative summary first */}
         {summaryData.summary && (
           <div className="mb-4 p-4 rounded-lg bg-primary/5 border border-primary/10">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{t("patientProfile.aiSummarySectionSummary")}</h4>
+            <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-2">{t("patientProfile.aiSummarySectionSummary")}</h4>
             <p className="text-sm text-foreground leading-relaxed">
               {summaryData.summary.replace(/<\/?(?:med|symptom|condition)>/g, '').split(/(?<=[.!?])\s+/).slice(0, 3).join(' ')}
             </p>
@@ -611,12 +611,12 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
 
         {/* Timeline breakdown */}
         <div className="prose prose-sm max-w-none">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("patientProfile.aiSummarySectionTimeline")}</h4>
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("patientProfile.aiSummarySectionTimeline")}</h4>
           {renderSummaryTimeline(summaryData.summary)}
         </div>
       </div>
 
-      {/* Legend — Allergy, Condition, Medication, Symptom */}
+      {/* Legend â€” Allergy, Condition, Medication, Symptom */}
       <div className="flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-500/15 text-red-700 dark:text-red-400 font-medium">
@@ -656,7 +656,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
             <AlertTriangle className="h-5 w-5 text-orange-600" />
             <h4 className="font-semibold text-foreground">Conflicting Medication Alert</h4>
           </div>
-          <p className="text-xs text-muted-foreground mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             The following medications may conflict with each other or with patient allergies. Please review before prescribing.
           </p>
           <div className="space-y-3">
@@ -688,7 +688,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     </Badge>
                     {conflict.medication2 && (
                       <>
-                        <span className="text-muted-foreground text-xs">+</span>
+                        <span className="text-muted-foreground text-sm">+</span>
                         <Badge variant="outline" className="bg-card border-border text-foreground font-medium">
                           <Pill className="h-4 w-4 mr-1" />
                           {conflict.medication2}
@@ -697,7 +697,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                     )}
                     <Badge
                       variant="outline"
-                      className={`ml-auto capitalize text-xs ${
+                      className={`ml-auto capitalize text-sm ${
                         conflict.severity === "high"
                           ? "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30"
                           : conflict.severity === "moderate"
@@ -727,15 +727,15 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           {summaryData.allergies.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {summaryData.allergies.map((allergy, i) => (
-                <Badge key={i} variant="outline" className={`${getSeverityColor(allergy.severity)} text-xs capitalize`}>
+                <Badge key={i} variant="outline" className={`${getSeverityColor(allergy.severity)} text-sm capitalize`}>
                   {allergy.name} ({allergy.severity})
                 </Badge>
               ))}
             </div>
           ) : patient.allergies ? (
-            <p className="text-xs text-foreground">{patient.allergies}</p>
+            <p className="text-sm text-foreground">{patient.allergies}</p>
           ) : (
-            <p className="text-xs text-muted-foreground">No allergies recorded</p>
+            <p className="text-sm text-muted-foreground">No allergies recorded</p>
           )}
         </div>
 
@@ -748,7 +748,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           {summaryData.conditions.length > 0 ? (
             <div className="space-y-1.5">
               {summaryData.conditions.map((cond, i) => (
-                <div key={i} className="text-xs flex items-center justify-between gap-2">
+                <div key={i} className="text-sm flex items-center justify-between gap-2">
                   <div className="flex items-start gap-2 flex-1 min-w-0">
                     <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/60"}`} />
                     <div className="min-w-0">
@@ -774,7 +774,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
               ))}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">No conditions recorded</p>
+            <p className="text-sm text-muted-foreground">No conditions recorded</p>
           )}
         </div>
 
@@ -787,7 +787,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           {summaryData.medications.length > 0 ? (
             <div className="space-y-1.5">
               {summaryData.medications.map((med, i) => (
-                <div key={i} className="text-xs flex items-center justify-between gap-2">
+                <div key={i} className="text-sm flex items-center justify-between gap-2">
                   <div className="flex items-start gap-2 flex-1 min-w-0">
                     <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/60"}`} />
                     <div className="min-w-0">
@@ -813,7 +813,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
               ))}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">No medications recorded</p>
+            <p className="text-sm text-muted-foreground">No medications recorded</p>
           )}
         </div>
 
@@ -826,7 +826,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           {summaryData.symptoms.length > 0 ? (
             <div className="space-y-1.5">
               {summaryData.symptoms.map((symptom, i) => (
-                <div key={i} className="text-xs flex items-center justify-between gap-2">
+                <div key={i} className="text-sm flex items-center justify-between gap-2">
                   <div className="flex items-start gap-2 flex-1 min-w-0">
                     <span className={`w-1.5 h-1.5 rounded-full mt-1 shrink-0 ${symptom.status === "active" ? "bg-amber-500" : "bg-muted-foreground/60"}`} />
                     <div className="min-w-0">
@@ -852,7 +852,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
               ))}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">No symptoms recorded</p>
+            <p className="text-sm text-muted-foreground">No symptoms recorded</p>
           )}
         </div>
       </div>
@@ -864,3 +864,4 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
     </div>
   );
 }
+

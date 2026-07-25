@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,7 @@ export function StartShiftDialog({
       const payload = { selections: Object.values(selections) };
       const { error } = await supabase.rpc("holarchelp_start_shifts_bulk" as any, { _payload: payload });
       if (error) throw error;
-      toast.success(`Started ${selectedCount} shift${selectedCount === 1 ? "" : "s"} · ${totalCrew} crew on duty`);
+      toast.success(`Started ${selectedCount} shift${selectedCount === 1 ? "" : "s"} Â· ${totalCrew} crew on duty`);
       await refresh();
       onOpenChange(false);
     } catch (e: any) {
@@ -240,14 +240,14 @@ export function StartShiftDialog({
                     <Truck className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">
                       {v.vehicle_code}
-                      {v.registration_number ? <span className="text-muted-foreground"> · {v.registration_number}</span> : null}
+                      {v.registration_number ? <span className="text-muted-foreground"> Â· {v.registration_number}</span> : null}
                     </span>
                   </label>
 
                   {checked && sel && (
                     <div className="mt-3 space-y-3 pl-6">
                       <div className="space-y-1.5">
-                        <Label className="text-xs">Lead paramedic</Label>
+                        <Label className="text-sm">Lead paramedic</Label>
                         <Select
                           value={sel.lead_user_id ?? ""}
                           onValueChange={(val) => setLead(v.id, val)}
@@ -256,7 +256,7 @@ export function StartShiftDialog({
                           <SelectContent>
                             {leadPool.map((m) => (
                               <SelectItem key={m.id} value={m.user_id!}>
-                                {labelFor(m)} <span className="text-muted-foreground">· {m.role}</span>
+                                {labelFor(m)} <span className="text-muted-foreground">Â· {m.role}</span>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -264,7 +264,7 @@ export function StartShiftDialog({
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label className="text-xs flex items-center gap-1.5">
+                        <Label className="text-sm flex items-center gap-1.5">
                           <Users className="h-3.5 w-3.5" /> Crew partners
                         </Label>
                         <div className="max-h-40 overflow-y-auto rounded-lg border bg-background p-1.5 space-y-1">
@@ -278,7 +278,7 @@ export function StartShiftDialog({
                               return (
                                 <label
                                   key={m.id}
-                                  className={`flex items-center gap-2 text-xs rounded px-1.5 py-1 ${
+                                  className={`flex items-center gap-2 text-sm rounded px-1.5 py-1 ${
                                     disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-muted/50 cursor-pointer"
                                   }`}
                                 >
@@ -289,9 +289,9 @@ export function StartShiftDialog({
                                   />
                                   <span className="truncate">
                                     {labelFor(m)}
-                                    <span className="ml-1 text-xs uppercase text-muted-foreground">· {m.role}</span>
+                                    <span className="ml-1 text-sm uppercase text-muted-foreground">Â· {m.role}</span>
                                     {disabled && (
-                                      <span className="ml-1 text-xs text-muted-foreground italic">
+                                      <span className="ml-1 text-sm text-muted-foreground italic">
                                         (already on {onOther})
                                       </span>
                                     )}
@@ -323,3 +323,4 @@ export function StartShiftDialog({
     </Dialog>
   );
 }
+

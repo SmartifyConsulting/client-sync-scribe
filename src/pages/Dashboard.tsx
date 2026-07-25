@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, Award, MessageSquare, Search } from "lucide-react";
+﻿import { Users, Calendar, TrendingUp, Award, MessageSquare, Search } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -289,7 +289,7 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-foreground">
             {greeting}{displayName ? `, ${displayName}` : ''}
           </h1>
-          <p className="mt-2 text-muted-foreground text-xs">
+          <p className="mt-2 text-muted-foreground text-sm">
             {t("doctorDashboard.subtitle")}
             <span className="block md:inline"> {formattedDate}</span>
           </p>
@@ -362,7 +362,7 @@ export default function Dashboard() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       placeholder={t("doctorDashboard.searchRoundTable")}
-                      className="pl-9 h-8 text-xs"
+                      className="pl-9 h-8 text-sm"
                       value={rtSearch}
                       onChange={(e) => setRtSearch(e.target.value)}
                     />
@@ -373,7 +373,7 @@ export default function Dashboard() {
                         <button
                           key={p.id}
                           onClick={() => { navigate(`/patients/${p.id}?tab=roundtable`); setRtSearch(""); }}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-xs font-medium text-foreground transition-colors"
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-sm font-medium text-foreground transition-colors"
                         >
                           {p.name}
                         </button>
@@ -381,7 +381,7 @@ export default function Dashboard() {
                     </div>
                   )}
                   {rtSearch.trim() && filteredPatients.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
+                    <p className="text-sm text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
                   )}
                   <DoctorRoundTables />
                 </div>
@@ -403,7 +403,7 @@ export default function Dashboard() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       placeholder={t("doctorDashboard.searchRoundTable")}
-                      className="pl-9 h-8 text-xs"
+                      className="pl-9 h-8 text-sm"
                       value={rtSearch}
                       onChange={(e) => setRtSearch(e.target.value)}
                     />
@@ -414,7 +414,7 @@ export default function Dashboard() {
                         <button
                           key={p.id}
                           onClick={() => { navigate(`/patients/${p.id}?tab=roundtable`); setRtSearch(""); }}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-xs font-medium text-foreground transition-colors"
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-sm font-medium text-foreground transition-colors"
                         >
                           {p.name}
                         </button>
@@ -422,7 +422,7 @@ export default function Dashboard() {
                     </div>
                   )}
                   {rtSearch.trim() && filteredPatients.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
+                    <p className="text-sm text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
                   )}
                   <DoctorRoundTables />
                 </div>
@@ -434,3 +434,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

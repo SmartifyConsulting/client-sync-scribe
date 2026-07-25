@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -147,7 +147,7 @@ export function InviteDoctorDialog({
         if (insertError) throw insertError;
       }
 
-      // Create notification for the doctor (via SECURITY DEFINER RPC — RLS blocks
+      // Create notification for the doctor (via SECURITY DEFINER RPC â€” RLS blocks
       // direct cross-user inserts on notifications)
       try {
         const { error: notifErr } = await supabase.rpc("create_doctor_invite_notification" as any, {
@@ -200,16 +200,16 @@ export function InviteDoctorDialog({
             <div className="flex items-center gap-3 p-3 rounded-lg border border-green-500 bg-green-50/30">
               <Avatar className="h-10 w-10">
                 {prefillAvatarUrl && <AvatarImage src={prefillAvatarUrl} alt={prefillDoctorName} />}
-                <AvatarFallback className="text-xs font-semibold">
+                <AvatarFallback className="text-sm font-semibold">
                   {prefillDoctorName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <p className="text-sm font-semibold text-foreground">{prefillDoctorName}</p>
                 {prefillSpecialty && (
-                  <Badge variant="secondary" className="text-xs mt-0.5">{prefillSpecialty}</Badge>
+                  <Badge variant="secondary" className="text-sm mt-0.5">{prefillSpecialty}</Badge>
                 )}
-                {!prefillSpecialty && <p className="text-xs text-muted-foreground">Selected healthcare provider</p>}
+                {!prefillSpecialty && <p className="text-sm text-muted-foreground">Selected healthcare provider</p>}
               </div>
             </div>
           )}
@@ -217,7 +217,7 @@ export function InviteDoctorDialog({
           {/* Permission Transparency */}
           <div className="space-y-2">
             <Label>Data Sharing Transparency</Label>
-            <p className="text-xs text-muted-foreground">What your doctor will and won't be able to see:</p>
+            <p className="text-sm text-muted-foreground">What your doctor will and won't be able to see:</p>
             <PermissionTransparencyModal inline isPatientFacing />
           </div>
         </div>
@@ -232,3 +232,4 @@ export function InviteDoctorDialog({
     </Dialog>
   );
 }
+

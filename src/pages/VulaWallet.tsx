@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +44,7 @@ export default function VulaWallet() {
 
           <div className="space-y-1">
             <h1 className="text-3xl font-bold text-foreground">{t("doctor.wallet.title")}</h1>
-            <p className="text-xs text-muted-foreground">{t("doctor.wallet.powered_by")}</p>
+            <p className="text-sm text-muted-foreground">{t("doctor.wallet.powered_by")}</p>
           </div>
 
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -55,7 +55,7 @@ export default function VulaWallet() {
             {t("doctor.wallet.continue_signin")} <ArrowRight className="h-4 w-4" />
           </Button>
 
-          <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 text-left">
+          <div className="flex items-start gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 text-left">
             <ShieldCheck className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
             <span>
               {t("doctor.wallet.security_notice")}
@@ -67,7 +67,7 @@ export default function VulaWallet() {
               <Sparkles className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold">{t("doctor.wallet.overlay_title")}</h2>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {t("doctor.wallet.overlay_description")}
             </p>
             <Button
@@ -81,11 +81,11 @@ export default function VulaWallet() {
 
             <Accordion type="single" collapsible>
               <AccordionItem value="install" className="border-primary/20">
-                <AccordionTrigger className="text-xs py-2">
+                <AccordionTrigger className="text-sm py-2">
                   {t("doctor.wallet.install_instructions")}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal pl-4">
+                  <ol className="text-sm text-muted-foreground space-y-1.5 list-decimal pl-4">
                     <li>{t("doctor.wallet.step_1")}</li>
                     <li>{t("doctor.wallet.step_2")}</li>
                     <li>{t("doctor.wallet.step_3")}</li>
@@ -110,3 +110,4 @@ export default function VulaWallet() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { Clock, Loader2, AlertTriangle } from "lucide-react";
@@ -72,11 +72,11 @@ export default function AfterHoursScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">After-Hours Vehicle Use</h1>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Track vehicles that are used outside scheduled operating hours.
           </p>
         </div>
@@ -84,19 +84,19 @@ export default function AfterHoursScreen() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Critical Events
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">{criticalCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             High Risk
           </p>
           <p className="mt-1 text-2xl font-bold text-warning">{highCount}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Total Events
           </p>
           <p className="mt-1 text-2xl font-bold">{HOURS_DATA.length}</p>
@@ -109,7 +109,7 @@ export default function AfterHoursScreen() {
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : HOURS_DATA.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground">
+          <div className="p-8 text-center text-sm text-muted-foreground">
             <Clock className="mx-auto mb-2 h-5 w-5 opacity-50" />
             No after-hours events detected.
           </div>
@@ -128,14 +128,14 @@ export default function AfterHoursScreen() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{event.ambulance_code}</span>
-                      <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase ${SEVERITY_COLORS[event.severity]}`}>
+                      <span className={`rounded-full border px-2 py-0.5 text-sm font-bold uppercase ${SEVERITY_COLORS[event.severity]}`}>
                         {event.event_type === "start" ? "Unauthorized Start" :
                          event.event_type === "extended_hours" ? "Extended Hours" :
                          "Unauthorized Movement"}
                       </span>
                     </div>
-                    <p className="text-xs mt-1">{event.description}</p>
-                    <div className="grid grid-cols-3 gap-4 mt-2 text-xs">
+                    <p className="text-sm mt-1">{event.description}</p>
+                    <div className="grid grid-cols-3 gap-4 mt-2 text-sm">
                       <div>
                         <p className="text-muted-foreground">Time</p>
                         <p className="font-semibold">{new Date(event.started_at).toLocaleTimeString()}</p>
@@ -149,8 +149,8 @@ export default function AfterHoursScreen() {
                         <p className="font-semibold">{event.unauthorized_minutes} min</p>
                       </div>
                     </div>
-                    <p className="text-xs mt-2 opacity-60">
-                      {new Date(event.started_at).toLocaleDateString()} • Authorized shift end: {event.authorized_shift_end}
+                    <p className="text-sm mt-2 opacity-60">
+                      {new Date(event.started_at).toLocaleDateString()} â€¢ Authorized shift end: {event.authorized_shift_end}
                     </p>
                   </div>
                 </div>
@@ -165,3 +165,4 @@ export default function AfterHoursScreen() {
     </div>
   );
 }
+

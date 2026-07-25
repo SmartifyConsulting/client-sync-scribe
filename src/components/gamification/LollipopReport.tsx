@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+﻿import { format, parseISO } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,7 +33,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
       <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-blue-200 dark:border-blue-800/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="text-3xl font-bold text-blue-600">Ⓜ</span>
+            <span className="text-3xl font-bold text-blue-600">â“‚</span>
             Vula Summary
           </CardTitle>
           <CardDescription>
@@ -90,7 +90,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
         <CardContent>
           {rewards.length === 0 ? (
             <div className="text-center py-12">
-              <span className="text-5xl mb-4 block font-bold text-blue-600">Ⓜ</span>
+              <span className="text-5xl mb-4 block font-bold text-blue-600">â“‚</span>
               <p className="text-muted-foreground">No Vulas earned yet</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Attend healthy visits to start collecting Vulas!
@@ -113,7 +113,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         {format(parseISO(reward.awarded_at), "MMM d, yyyy")}
                       </div>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-sm text-muted-foreground">
                         {format(parseISO(reward.awarded_at), "h:mm a")}
                       </span>
                     </TableCell>
@@ -124,7 +124,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex items-center gap-1 text-blue-600 font-semibold">
-                        +{reward.lollipops_count || 1} Ⓜ
+                        +{reward.lollipops_count || 1} â“‚
                       </span>
                     </TableCell>
                   </TableRow>
@@ -137,3 +137,4 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
     </div>
   );
 }
+

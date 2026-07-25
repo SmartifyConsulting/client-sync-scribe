@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -214,7 +214,7 @@ export default function ProviderSignup() {
         }
       }
 
-      // 5. Sign out — no role granted until admin approval
+      // 5. Sign out â€” no role granted until admin approval
       await supabase.auth.signOut();
 
       setResult({ email: vetting.admin_email.trim(), password });
@@ -269,7 +269,7 @@ export default function ProviderSignup() {
                 </div>
               </div>
 
-              <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-xs">
+              <div className="rounded-lg border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 p-3 text-sm">
                 <p className="font-bold text-amber-900 dark:text-amber-200">{t("auth.provider.savePassword")}</p>
                 <p className="text-amber-900/80 dark:text-amber-200/80">
                   This password is shown only once. Your administrator will need it to sign in after approval.
@@ -342,3 +342,4 @@ export default function ProviderSignup() {
     </div>
   );
 }
+

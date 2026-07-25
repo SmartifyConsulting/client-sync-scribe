@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -103,7 +103,7 @@ export function ImportNursesDialog({ hospitalId, onImported }: { hospitalId: str
         </DialogHeader>
 
         <div className="space-y-3 text-sm">
-          <div className="rounded-md border bg-muted/30 p-3 text-xs">
+          <div className="rounded-md border bg-muted/30 p-3 text-sm">
             <p className="font-semibold mb-1">Expected columns ({HEADERS.length})</p>
             <p className="text-muted-foreground">{HEADERS.join(", ")}</p>
             <a href="/templates/hospital-nurses-template.csv" download
@@ -117,9 +117,9 @@ export function ImportNursesDialog({ hospitalId, onImported }: { hospitalId: str
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold">CSV or XLSX file</label>
+            <label className="text-sm font-semibold">CSV or XLSX file</label>
             <Input type="file" accept=".csv,.xlsx,.xls" onChange={onFile} />
-            {rows.length > 0 && <p className="text-xs text-muted-foreground">{rows.length} row(s) loaded</p>}
+            {rows.length > 0 && <p className="text-sm text-muted-foreground">{rows.length} row(s) loaded</p>}
           </div>
 
           {results && summary && (
@@ -130,7 +130,7 @@ export function ImportNursesDialog({ hospitalId, onImported }: { hospitalId: str
                 <Badge variant="outline">{summary.skipped} skipped</Badge>
                 {summary.errors > 0 && <Badge variant="destructive">{summary.errors} errors</Badge>}
               </div>
-              <div className="max-h-56 overflow-auto rounded-md border divide-y text-xs">
+              <div className="max-h-56 overflow-auto rounded-md border divide-y text-sm">
                 {results.map((r, i) => (
                   <div key={i} className="flex items-center justify-between px-2 py-1.5">
                     <span className="truncate">{r.full_name || <em className="text-muted-foreground">(no name)</em>}</span>
@@ -139,7 +139,7 @@ export function ImportNursesDialog({ hospitalId, onImported }: { hospitalId: str
                         r.status === "matched" ? "default"
                         : r.status === "pending" ? "secondary"
                         : r.status === "error" ? "destructive" : "outline"
-                      } className="text-xs">{r.status}</Badge>
+                      } className="text-sm">{r.status}</Badge>
                       {r.reason && <span className="text-muted-foreground">{r.reason}</span>}
                     </span>
                   </div>
@@ -160,3 +160,4 @@ export function ImportNursesDialog({ hospitalId, onImported }: { hospitalId: str
     </Dialog>
   );
 }
+

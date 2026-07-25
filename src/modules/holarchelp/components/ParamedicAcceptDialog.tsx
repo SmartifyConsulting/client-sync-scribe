@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -110,7 +110,7 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
       return;
     }
     const hospName = hospitals.find((h) => h.id === hospitalId)?.name ?? "the hospital";
-    toast.success(`Locked in — ${hospName} notified.`);
+    toast.success(`Locked in â€” ${hospName} notified.`);
     onOpenChange(false);
     navigate(`/provider/ambulance/incident/${incidentId}`);
   };
@@ -124,7 +124,7 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
           <DialogTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5 text-primary" /> {t("paramedicAccept.acceptSos")}
             {incident?.incident_number && (
-              <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold tracking-wider text-primary">
+              <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 text-sm font-bold tracking-wider text-primary">
                 {incident.incident_number}
               </span>
             )}
@@ -136,27 +136,27 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
             <p className="flex items-center gap-2 font-semibold text-destructive">
               <AlertCircle className="h-4 w-4" /> {t("paramedicAccept.notAvailableShift")}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground">
               {t("paramedicAccept.startBeforeAccept")}
             </p>
           </div>
         ) : step === "confirm" ? (
           <div className="rounded-lg border bg-muted/30 p-4 text-sm">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("paramedicAccept.respondingWith")}</p>
-            <p className="mt-1 text-lg font-bold">{t("liveSos.ambulance")} · {shift.ambulance_id.slice(0, 8)}</p>
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="text-sm uppercase tracking-wider text-muted-foreground">{t("paramedicAccept.respondingWith")}</p>
+            <p className="mt-1 text-lg font-bold">{t("liveSos.ambulance")} Â· {shift.ambulance_id.slice(0, 8)}</p>
+            <p className="mt-2 text-sm text-muted-foreground">
               {t("paramedicAccept.busyUntilCompleted")}
             </p>
-            <p className="mt-3 text-xs text-foreground">
+            <p className="mt-3 text-sm text-foreground">
               Next: select the receiving hospital so they're alerted as you head out.
             </p>
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">
               <Hospital className="h-4 w-4 text-primary" /> Choose destination hospital
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Pick where you'll deliver the patient. They will be notified immediately.
             </p>
             <ul className="mt-2 max-h-72 space-y-1.5 overflow-auto">
@@ -177,13 +177,13 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
                           <p className="truncate text-sm font-semibold">{h.name}</p>
                           {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
                         </div>
-                        <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs">
+                        <div className="mt-0.5 flex flex-wrap items-center gap-1 text-sm">
                           <span className={`rounded-full border px-1.5 py-0.5 font-semibold ${capColor(h.er_capacity_status)}`}>
                             {(h.er_capacity_status ?? "green").toUpperCase()}
                           </span>
                           {h.er_beds_available != null && <span className="text-muted-foreground">{h.er_beds_available} ER beds</span>}
-                          {h.city && <span className="text-muted-foreground">· {h.city}</span>}
-                          {h.distance_km != null && <span className="text-muted-foreground">· {h.distance_km.toFixed(1)} km</span>}
+                          {h.city && <span className="text-muted-foreground">Â· {h.city}</span>}
+                          {h.distance_km != null && <span className="text-muted-foreground">Â· {h.distance_km.toFixed(1)} km</span>}
                         </div>
                       </div>
                     </button>
@@ -191,7 +191,7 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
                 );
               })}
               {!hospitals.length && (
-                <li className="py-4 text-center text-xs text-muted-foreground">No hospitals currently accepting.</li>
+                <li className="py-4 text-center text-sm text-muted-foreground">No hospitals currently accepting.</li>
               )}
             </ul>
           </div>
@@ -217,3 +217,4 @@ export function ParamedicAcceptDialog({ incidentId, open, onOpenChange, onNeedSh
     </Dialog>
   );
 }
+

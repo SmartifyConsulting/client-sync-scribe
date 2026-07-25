@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,7 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
   const [newCode, setNewCode] = useState<CodeRow>({ code: "", description: "" });
   const [saving, setSaving] = useState(false);
 
-  // Approved hospitals (public view — readable by signed-in users)
+  // Approved hospitals (public view â€” readable by signed-in users)
   const { data: hospitals = [] } = useQuery({
     queryKey: ["holarchelp_hospitals", "approved", "for-admission"],
     queryFn: async () => {
@@ -119,7 +119,7 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
                 <SelectContent>
                   {hospitals.map((h: any) => (
                     <SelectItem key={h.id} value={h.id}>
-                      {h.name}{h.city ? ` — ${h.city}` : ""}
+                      {h.name}{h.city ? ` â€” ${h.city}` : ""}
                     </SelectItem>
                   ))}
                   <SelectItem value={FREE_TEXT}>+ Type a hospital not listed</SelectItem>
@@ -159,11 +159,11 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
           {/* Codes section */}
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
             <Label className="text-sm font-semibold">Diagnosis / procedure codes (ICD-10, CPT, etc.)</Label>
-            <p className="text-xs text-muted-foreground mb-2">Add a code and a matching description.</p>
+            <p className="text-sm text-muted-foreground mb-2">Add a code and a matching description.</p>
             {codes.length > 0 && (
               <ul className="space-y-1.5 mb-2">
                 {codes.map((c, i) => (
-                  <li key={i} className="flex items-center gap-2 rounded bg-background border p-2 text-xs">
+                  <li key={i} className="flex items-center gap-2 rounded bg-background border p-2 text-sm">
                     <span className="font-mono font-semibold text-primary">{c.code}</span>
                     {c.description && <span className="text-muted-foreground flex-1 truncate">{c.description}</span>}
                     <button type="button" onClick={() => removeCode(i)} className="text-destructive hover:opacity-70">
@@ -178,13 +178,13 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
                 placeholder="Code"
                 value={newCode.code}
                 onChange={(e) => setNewCode((p) => ({ ...p, code: e.target.value }))}
-                className="font-mono text-xs"
+                className="font-mono text-sm"
               />
               <Input
                 placeholder="Description"
                 value={newCode.description}
                 onChange={(e) => setNewCode((p) => ({ ...p, description: e.target.value }))}
-                className="text-xs"
+                className="text-sm"
               />
               <Button type="button" variant="outline" size="sm" onClick={addCode} disabled={!newCode.code.trim()}>
                 <Plus className="h-3.5 w-3.5" />
@@ -194,9 +194,10 @@ export function ManualLogAdmissionDialog({ open, onOpenChange, patientId }: Prop
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+          <Button onClick={submit} disabled={saving}>{saving ? "Savingâ€¦" : "Save"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

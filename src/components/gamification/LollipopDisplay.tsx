@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { PatientReward } from "@/hooks/usePatientRewards";
@@ -79,10 +79,10 @@ export function LollipopDisplay({
         
         {showHistory && rewards.length > 0 && (
           <div className="mt-4 pt-4 border-t border-secondary/20">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Recent rewards:</p>
+            <p className="text-sm font-medium text-muted-foreground mb-2">Recent rewards:</p>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {rewards.slice(0, 5).map((reward) => (
-                <div key={reward.id} className="flex items-center justify-between text-xs">
+                <div key={reward.id} className="flex items-center justify-between text-sm">
                   <span className="text-foreground">{reward.visit_category}</span>
                   <span className="text-muted-foreground">
                     {format(parseISO(reward.awarded_at), "MMM d, yyyy")}
@@ -96,3 +96,4 @@ export function LollipopDisplay({
     </Card>
   );
 }
+

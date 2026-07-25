@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -116,7 +116,7 @@ export function VisitCategoryDialog({
     const cats = Array.from(selectedCategories);
     const otherText = customCategory.trim();
     if (otherText) {
-      // "Other" suggestions are NOT awarded as a real Vula — they're sent to
+      // "Other" suggestions are NOT awarded as a real Vula â€” they're sent to
       // platform admins as a suggested new reward category for review.
       try {
         const { data: admins } = await supabase
@@ -164,7 +164,7 @@ export function VisitCategoryDialog({
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="text-2xl">Ⓜ️</span>
+            <span className="text-2xl">â“‚ï¸</span>
             Award Vula?
           </DialogTitle>
           <DialogDescription>
@@ -190,33 +190,33 @@ export function VisitCategoryDialog({
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">{cat.visit_category}</p>
                   {cat.description && (
-                    <p className="text-xs text-muted-foreground">{cat.description}</p>
+                    <p className="text-sm text-muted-foreground">{cat.description}</p>
                   )}
                 </div>
-                <span className="text-xs font-medium text-primary shrink-0">
-                  +{cat.lollipops_awarded} Ⓜ️
+                <span className="text-sm font-medium text-primary shrink-0">
+                  +{cat.lollipops_awarded} â“‚ï¸
                 </span>
               </label>
             ))
           )}
 
           <div className="pt-2 border-t border-border">
-            <Label className="text-xs text-muted-foreground">Other (suggest a new category)</Label>
+            <Label className="text-sm text-muted-foreground">Other (suggest a new category)</Label>
             <Input
               placeholder="Suggest a new reward type..."
               value={customCategory}
               onChange={(e) => setCustomCategory(e.target.value)}
               className="mt-1"
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              Suggestions are sent to an admin for review — no Vula is awarded for "Other".
+            <p className="text-sm text-muted-foreground mt-1">
+              Suggestions are sent to an admin for review â€” no Vula is awarded for "Other".
             </p>
           </div>
         </div>
 
         {selectedCategories.size > 0 && (
           <div className="text-sm font-medium text-primary text-center">
-            Total: {totalVulas} Ⓜ️ for {selectedCategories.size} categor{selectedCategories.size === 1 ? 'y' : 'ies'}
+            Total: {totalVulas} â“‚ï¸ for {selectedCategories.size} categor{selectedCategories.size === 1 ? 'y' : 'ies'}
           </div>
         )}
 
@@ -230,10 +230,11 @@ export function VisitCategoryDialog({
             disabled={selectedCategories.size === 0 && !customCategory.trim()}
             className="bg-pink-500 hover:bg-pink-600 text-white"
           >
-            Ⓜ️ Award Vula
+            â“‚ï¸ Award Vula
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

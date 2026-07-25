@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { FileText, CheckCircle, MessageSquare, Clock, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -136,24 +136,24 @@ export function RecentActivity() {
                     <Icon className="h-3.5 w-3.5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-foreground truncate">
+                    <p className="text-sm text-foreground truncate">
                       {activity.title}
                     </p>
                     {activity.patientId && activity.patientName ? (
                       <Link
                         to={`/patients/${activity.patientId}`}
-                        className={cn("text-xs text-primary hover:underline truncate inline-flex items-center gap-1", isSamplePatient({ name: activity.patientName }) && "italic")}
+                        className={cn("text-sm text-primary hover:underline truncate inline-flex items-center gap-1", isSamplePatient({ name: activity.patientName }) && "italic")}
                       >
                         {activity.patientName}
                         {isSamplePatient({ name: activity.patientName }) && <SampleBadge />}
                       </Link>
                     ) : (
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className="text-sm text-muted-foreground truncate">
                         {activity.description}
                       </p>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
                     {relativeTimeLabel(activity.timeIso)}
                   </span>
                 </div>
@@ -165,3 +165,4 @@ export function RecentActivity() {
     </Collapsible>
   );
 }
+

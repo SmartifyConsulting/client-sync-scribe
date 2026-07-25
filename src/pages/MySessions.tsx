@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,7 +96,7 @@ export default function MySessions() {
         <h1 className="text-3xl font-bold text-foreground">
           {t("nav.mySessions", "My Sessions")}
         </h1>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
         </p>
       </div>
@@ -104,7 +104,7 @@ export default function MySessions() {
       {loading ? (
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {t("common.loading", "Loading…")}
+          {t("common.loading", "Loadingâ€¦")}
         </div>
       ) : (
         <Accordion
@@ -122,15 +122,15 @@ export default function MySessions() {
               >
                 <AccordionTrigger className="px-4 py-3 hover:no-underline">
                   <div className="flex items-center justify-between w-full pr-2">
-                    <span className="text-xs font-medium text-primary-dark">{t(b.labelKey, b.fallback)}</span>
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                    <span className="text-sm font-medium text-primary-dark">{t(b.labelKey, b.fallback)}</span>
+                    <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                       {rows.length}
                     </span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-3 pb-3">
                   {rows.length === 0 ? (
-                    <p className="text-xs text-muted-foreground px-2 py-3">
+                    <p className="text-sm text-muted-foreground px-2 py-3">
                       {t("mySessions.empty", "No sessions in this period.")}
                     </p>
                   ) : (
@@ -145,7 +145,7 @@ export default function MySessions() {
                                     <FileText className="h-4 w-4 text-primary shrink-0" />
                                     {s.title || s.patient?.name || t("mySessions.untitled", "Untitled session")}
                                   </p>
-                                  <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                  <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
                                     {s.patient?.name && (
                                       <span className="flex items-center gap-1">
                                         <UserIcon className="h-3 w-3" />
@@ -162,7 +162,7 @@ export default function MySessions() {
                                   </div>
                                 </div>
                                 <span
-                                  className={`text-xs uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                                  className={`text-sm uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 ${
                                     s.status === "completed"
                                       ? "bg-success/10 text-success"
                                       : s.status === "in_progress"
@@ -188,3 +188,4 @@ export default function MySessions() {
     </div>
   );
 }
+

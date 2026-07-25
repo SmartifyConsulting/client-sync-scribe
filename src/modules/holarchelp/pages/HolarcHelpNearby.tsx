@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -135,10 +135,10 @@ export default function HolarcHelpNearby() {
             <div className="flex items-center gap-2 font-semibold text-amber-800">
               <AlertTriangle className="h-4 w-4" /> Location is blocked
             </div>
-            <p className="text-amber-900/80 text-xs">
+            <p className="text-amber-900/80 text-sm">
               To find nearby hospitals and emergency responders, enable location access for this site:
             </p>
-            <ul className="list-disc pl-5 text-xs text-amber-900/80 space-y-0.5">
+            <ul className="list-disc pl-5 text-sm text-amber-900/80 space-y-0.5">
               <li>Tap the lock/info icon in the address bar</li>
               <li>Find <strong>Location</strong> permission and set to <strong>Allow</strong></li>
               <li>Reload this page and try again</li>
@@ -157,8 +157,8 @@ export default function HolarcHelpNearby() {
           </div>
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {loadingProviders ? "Loading providers…" : `${sorted.length} nearest`}
+            <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              {loadingProviders ? "Loading providersâ€¦" : `${sorted.length} nearest`}
             </p>
             {sorted.map((p) => {
               const isPublic = (p.ownership ?? 'private') === 'public';
@@ -168,14 +168,14 @@ export default function HolarcHelpNearby() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold truncate">{p.name}</p>
                   <div className="flex items-center gap-1.5 text-sm text-muted-foreground capitalize">
-                    <span>{p.type === "ambulance" ? "ER" : p.type}{p.subtitle && ` · ${p.subtitle}`}</span>
-                    <span className={`rounded-full px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
+                    <span>{p.type === "ambulance" ? "ER" : p.type}{p.subtitle && ` Â· ${p.subtitle}`}</span>
+                    <span className={`rounded-full px-1.5 py-0.5 text-sm font-semibold uppercase tracking-wide ${isPublic ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}`}>
                       {isPublic ? 'Public' : 'Private'}
                     </span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs font-bold">{p._d.toFixed(1)} km</p>
+                  <p className="text-sm font-bold">{p._d.toFixed(1)} km</p>
                 </div>
               </div>
               );
@@ -185,7 +185,7 @@ export default function HolarcHelpNearby() {
               const ambCount = sorted.filter((p) => p.type === "ambulance").length;
               if (sorted.length === 0) {
                 return (
-                  <p className="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
+                  <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
                     No approved providers with mapped locations yet.
                   </p>
                 );
@@ -203,3 +203,4 @@ export default function HolarcHelpNearby() {
     </div>
   );
 }
+

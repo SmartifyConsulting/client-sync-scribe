@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+﻿import { useState, useRef } from "react";
 import { Loader2, Plus, Pencil, Trash2, Save, X, Gift, Flame, Calendar, Globe, Upload, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -469,7 +469,7 @@ export default function GamificationAdmin() {
                         value={newConfig.visit_category}
                         onChange={(e) => setNewConfig({ ...newConfig, visit_category: e.target.value })}
                       />
-                      <p className="text-xs text-muted-foreground">Must be unique. Spaces become underscores.</p>
+                      <p className="text-sm text-muted-foreground">Must be unique. Spaces become underscores.</p>
                     </div>
                     <div className="space-y-2">
                       <Label>Vulas Awarded</Label>
@@ -789,7 +789,7 @@ export default function GamificationAdmin() {
                         value={newStreakConfig.streak_interval_months}
                         onChange={(e) => setNewStreakConfig({ ...newStreakConfig, streak_interval_months: parseInt(e.target.value) || 12 })}
                       />
-                      <p className="text-xs text-muted-foreground">How often must this visit be completed to maintain streak</p>
+                      <p className="text-sm text-muted-foreground">How often must this visit be completed to maintain streak</p>
                     </div>
                     <div className="space-y-2">
                       <Label>Bonus Vulas per Streak</Label>
@@ -1063,7 +1063,7 @@ export default function GamificationAdmin() {
                           {editingAppId === app.id ? (
                             <Input value={editAppValues.signup_url || ""} onChange={(e) => setEditAppValues({ ...editAppValues, signup_url: e.target.value })} className="w-40" placeholder="Signup URL" />
                           ) : app.signup_url ? (
-                            <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline hover:text-primary/80">Sign up</a>
+                            <a href={app.signup_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline hover:text-primary/80">Sign up</a>
                           ) : (
                             <span className="text-sm text-muted-foreground">-</span>
                           )}
@@ -1076,8 +1076,8 @@ export default function GamificationAdmin() {
                             </div>
                           ) : (
                             <div className="flex flex-col gap-1">
-                              {app.google_play_url && <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">Play Store</a>}
-                              {app.app_store_url && <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">App Store</a>}
+                              {app.google_play_url && <a href={app.google_play_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">Play Store</a>}
+                              {app.app_store_url && <a href={app.app_store_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">App Store</a>}
                               {!app.google_play_url && !app.app_store_url && <span className="text-sm text-muted-foreground">-</span>}
                             </div>
                           )}
@@ -1126,3 +1126,4 @@ export default function GamificationAdmin() {
     </AdminPage>
   );
 }
+

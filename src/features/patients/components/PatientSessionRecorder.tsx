@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Mic, Square, Loader2, Plus, Eye, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -165,14 +165,14 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
                 <p className="text-sm font-medium">
                   {format(new Date(s.started_at), "MMM d, yyyy h:mm a")}
                 </p>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-sm text-muted-foreground truncate">
                   {s.external_doctor_name
-                    ? `${s.external_doctor_name}${s.external_doctor_specialty ? ` · ${s.external_doctor_specialty}` : ""}`
+                    ? `${s.external_doctor_name}${s.external_doctor_specialty ? ` Â· ${s.external_doctor_specialty}` : ""}`
                     : s.summary || "Session"}
                 </p>
               </div>
               {s.duration_minutes != null && (
-                <span className="text-xs text-muted-foreground">{s.duration_minutes} min</span>
+                <span className="text-sm text-muted-foreground">{s.duration_minutes} min</span>
               )}
               <Eye className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -232,7 +232,7 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
             ) : (
               <div className="space-y-2">
                 {(isTranscribing || isSavingAudio) && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-2">
+                  <p className="text-sm text-muted-foreground flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     {isSavingAudio ? "Saving audio..." : "Transcribing..."}
                   </p>
@@ -263,3 +263,4 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
     </div>
   );
 }
+

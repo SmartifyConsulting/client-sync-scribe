@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -90,7 +90,7 @@ export function VehicleEditDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save changes"}</Button>
+          <Button onClick={save} disabled={saving}>{saving ? "Savingâ€¦" : "Save changes"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -100,8 +100,9 @@ export function VehicleEditDialog({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs">{label}</Label>
+      <Label className="text-sm">{label}</Label>
       {children}
     </div>
   );
 }
+

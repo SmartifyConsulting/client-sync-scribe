@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { Calendar, Clock, Check, X, MessageSquare, Loader2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -225,7 +225,7 @@ export function AppointmentRequestsPanel() {
       <Card className="border-primary/30">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Badge variant="destructive" className="rounded-full px-2 py-0.5 text-xs">{requests.length}</Badge>
+            <Badge variant="destructive" className="rounded-full px-2 py-0.5 text-sm">{requests.length}</Badge>
             Appointment Requests
           </CardTitle>
         </CardHeader>
@@ -237,14 +237,14 @@ export function AppointmentRequestsPanel() {
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium text-sm">{req.patient_name}</span>
                 </div>
-                <Badge variant={req.status === "proposed" ? "secondary" : "outline"} className="text-xs">
+                <Badge variant={req.status === "proposed" ? "secondary" : "outline"} className="text-sm">
                   {req.status}
                 </Badge>
               </div>
               {req.service_name && (
-                <p className="text-xs text-muted-foreground">Service: {req.service_name}</p>
+                <p className="text-sm text-muted-foreground">Service: {req.service_name}</p>
               )}
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   {format(parseISO(req.requested_start), "MMM d, yyyy")}
@@ -254,10 +254,10 @@ export function AppointmentRequestsPanel() {
                   {format(parseISO(req.requested_start), "h:mm a")}
                 </span>
               </div>
-              {req.notes && <p className="text-xs text-muted-foreground italic">"{req.notes}"</p>}
+              {req.notes && <p className="text-sm text-muted-foreground italic">"{req.notes}"</p>}
               {req.status === "proposed" && req.proposed_start && (
-                <p className="text-xs text-primary font-medium">
-                  Proposed: {format(parseISO(req.proposed_start), "MMM d 'at' h:mm a")} — waiting for patient
+                <p className="text-sm text-primary font-medium">
+                  Proposed: {format(parseISO(req.proposed_start), "MMM d 'at' h:mm a")} â€” waiting for patient
                 </p>
               )}
               {req.status === "pending" && (
@@ -307,3 +307,4 @@ export function AppointmentRequestsPanel() {
     </>
   );
 }
+

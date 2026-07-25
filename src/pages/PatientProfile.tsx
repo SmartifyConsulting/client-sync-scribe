@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+﻿import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -334,27 +334,27 @@ export default function PatientProfile() {
         <div className="grid gap-2 grid-cols-2 md:grid-cols-4">
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.totalSessions")}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("patientProfile.totalSessions")}</p>
               <FileText className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">{completedSessions.length}</p>
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.lastSeen")}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("patientProfile.lastSeen")}</p>
               <Clock className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
               {patient.last_visit ? (
                 format(new Date(patient.last_visit), "MMM d")
               ) : (
-                <span className="text-muted-foreground text-xs font-medium">—</span>
+                <span className="text-muted-foreground text-sm font-medium">â€”</span>
               )}
             </p>
           </div>
           <div className="rounded-lg bg-card p-2 shadow-sm border border-border/50">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.since")}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("patientProfile.since")}</p>
               <Calendar className="h-4 w-4 text-primary" />
             </div>
             <p className="mt-1 text-sm font-bold text-foreground">
@@ -364,7 +364,7 @@ export default function PatientProfile() {
           {/* Vula Rewards */}
           <div className="rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 p-2 shadow-sm border border-emerald-200 dark:border-emerald-800/30 flex flex-col items-center justify-center gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
             <div className="flex flex-col items-center sm:items-start min-w-0">
-              <p className="text-xs font-medium text-muted-foreground">{t("patientProfile.vulas")}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("patientProfile.vulas")}</p>
               <p className="mt-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">{lollipopCount}</p>
             </div>
             <img
@@ -467,7 +467,7 @@ export default function PatientProfile() {
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs font-medium bg-amber-500/15 text-amber-600 px-3 py-1.5 rounded-full">
+                      <span className="text-sm font-medium bg-amber-500/15 text-amber-600 px-3 py-1.5 rounded-full">
                         Ongoing
                       </span>
                     </div>
@@ -523,7 +523,7 @@ export default function PatientProfile() {
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">
                   Documents can be emailed to your documents tab by external parties (e.g., radiologists, labs) to{" "}
-                  <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground">
+                  <code className="font-mono text-sm bg-muted px-1.5 py-0.5 rounded text-foreground">
                     {displayEmail}
                   </code>
                   <button
@@ -599,13 +599,13 @@ export default function PatientProfile() {
                   };
                   recorder.start();
                   toast({
-                    title: "🎙️ Recording...",
-                    description: "Click the microphone again or wait — recording for 60s max.",
+                    title: "ðŸŽ™ï¸ Recording...",
+                    description: "Click the microphone again or wait â€” recording for 60s max.",
                   });
                   setTimeout(() => {
                     if (recorder.state === "recording") recorder.stop();
                   }, 60000);
-                  // Store recorder to stop on next click — simplified: auto-stop after 60s
+                  // Store recorder to stop on next click â€” simplified: auto-stop after 60s
                 } catch {
                   toast({
                     title: "Permission denied",
@@ -674,7 +674,7 @@ export default function PatientProfile() {
                     fetchDocuments();
                   };
                   recorder.start();
-                  toast({ title: "🎥 Recording video...", description: "Auto-stops after 5 minutes." });
+                  toast({ title: "ðŸŽ¥ Recording video...", description: "Auto-stops after 5 minutes." });
                   setTimeout(() => {
                     if (recorder.state === "recording") recorder.stop();
                   }, 300000);
@@ -782,8 +782,8 @@ export default function PatientProfile() {
                     <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-7 w-7 text-muted-foreground" />
                     </div>
-                    <p className="text-xs text-muted-foreground">No documents yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Create a new document from a template</p>
+                    <p className="text-sm text-muted-foreground">No documents yet</p>
+                    <p className="text-sm text-muted-foreground mt-1">Create a new document from a template</p>
                   </div>
                 );
               }
@@ -1119,7 +1119,7 @@ export default function PatientProfile() {
                   {(analysisDialog as any).ai_analysis}
                 </div>
                 {(analysisDialog as any)?.ai_analyzed_at && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Analysed on {format(new Date((analysisDialog as any).ai_analyzed_at), "dd MMM yyyy 'at' HH:mm")}
                   </p>
                 )}
@@ -1133,7 +1133,7 @@ export default function PatientProfile() {
             <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
               <div className="flex gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-800 dark:text-amber-300">
+                <p className="text-sm text-amber-800 dark:text-amber-300">
                   This AI analysis is for informational purposes only and does not constitute a medical diagnosis. Always consult a qualified healthcare professional for clinical interpretation and treatment decisions.
                 </p>
               </div>
@@ -1277,3 +1277,4 @@ function DocumentPreviewWithLetterhead({
     />
   );
 }
+

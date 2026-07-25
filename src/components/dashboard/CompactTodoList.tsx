@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { translateTodoTitle } from "@/lib/translateTodoTitle";
@@ -49,14 +49,14 @@ const priorityColors = {
 };
 
 const actionTypeLabels: Record<string, string> = {
-  schedule_appointment: "📅 Scheduled appointment",
-  write_prescription: "💊 Created prescription",
-  create_invoice: "🧾 Created invoice",
-  write_medical_certificate: "📋 Created medical certificate",
-  write_referral_letter: "✉️ Created referral letter",
-  write_general_letter: "📝 Created general letter",
-  manual_task: "📌 Manual task created",
-  document_review: "📄 Review document",
+  schedule_appointment: "ðŸ“… Scheduled appointment",
+  write_prescription: "ðŸ’Š Created prescription",
+  create_invoice: "ðŸ§¾ Created invoice",
+  write_medical_certificate: "ðŸ“‹ Created medical certificate",
+  write_referral_letter: "âœ‰ï¸ Created referral letter",
+  write_general_letter: "ðŸ“ Created general letter",
+  manual_task: "ðŸ“Œ Manual task created",
+  document_review: "ðŸ“„ Review document",
 };
 
 export function CompactTodoList() {
@@ -216,7 +216,7 @@ export function CompactTodoList() {
         }
       }, POLL_INTERVAL_MS);
 
-      toast({ title: "Listening...", description: "Speak your task — stops after a pause" });
+      toast({ title: "Listening...", description: "Speak your task â€” stops after a pause" });
     } catch {
       toast({ title: "Microphone access denied", variant: "destructive" });
     }
@@ -387,7 +387,7 @@ export function CompactTodoList() {
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
             placeholder={t("doctorDashboard.addTask")}
-            className="h-8 text-xs border-border rounded-lg px-2.5"
+            className="h-8 text-sm border-border rounded-lg px-2.5"
             disabled={isProcessing || isAiProcessing}
           />
           <button
@@ -473,3 +473,4 @@ export function CompactTodoList() {
     </div>
   );
 }
+

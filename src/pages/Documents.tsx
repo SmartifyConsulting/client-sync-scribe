@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -337,7 +337,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         {section.imageUrl && <img src={section.imageUrl} alt="" className="max-h-10 inline-block mb-1" />}
         {section.text && (
           <div
-            className="whitespace-pre-wrap text-xs"
+            className="whitespace-pre-wrap text-sm"
             dangerouslySetInnerHTML={{ __html: renderFormattedContent(section.text) }}
           />
         )}
@@ -352,7 +352,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">{t("nav.myDocuments", "Documents")}</h1>
-            <p className="mt-1 text-muted-foreground text-xs">Manage header/footer layouts and content templates separately</p>
+            <p className="mt-1 text-muted-foreground text-sm">Manage header/footer layouts and content templates separately</p>
           </div>
         </div>
       )}
@@ -649,7 +649,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               {filteredDocuments.length > 0 ? (
                 groupedDocuments.map(([groupName, docsInGroup]) => (
                   <div key={groupName}>
-                    <div className="px-4 py-2 bg-muted/50 text-xs font-semibold text-primary sticky top-0">
+                    <div className="px-4 py-2 bg-muted/50 text-sm font-semibold text-primary sticky top-0">
                       {groupName} <span className="text-muted-foreground font-normal">({docsInGroup.length})</span>
                     </div>
                     <div className="divide-y divide-border">
@@ -661,7 +661,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
                             <p className="text-sm text-muted-foreground">
-                              {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
+                              {doc.patient_name || "No patient"} Â· {formatDate(doc.created_at)} Â·{" "}
                               <span className="text-primary/70">{doc.template_name || "Custom"}</span>
                             </p>
                           </div>
@@ -729,7 +729,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   </div>
                 ))
               ) : (
-                <div className="p-8 text-center text-xs text-muted-foreground">
+                <div className="p-8 text-center text-sm text-muted-foreground">
                   {documents.length === 0
                     ? "No documents yet. Create your first document using a template above."
                     : "No documents found matching your search."}
@@ -919,7 +919,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
               {/* Show which header/footer is linked */}
               {previewTemplate.header_footer_template_id && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Using header/footer:{" "}
                   <span className="font-medium">
                     {headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id)?.name ||
@@ -1269,3 +1269,4 @@ function DocumentPreviewBody({
     </>
   );
 }
+

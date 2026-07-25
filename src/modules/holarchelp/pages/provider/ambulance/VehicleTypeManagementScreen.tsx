@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
@@ -54,7 +54,7 @@ export default function VehicleTypeManagementScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Configuration</p>
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Fleet Configuration</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Types</h1>
           <p className="text-sm text-muted-foreground mt-2">Manage ambulance types, equipment, and configurations</p>
         </div>
@@ -77,7 +77,7 @@ export default function VehicleTypeManagementScreen() {
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="font-bold text-lg">{type.name}</h3>
-                <p className="text-xs text-muted-foreground">{type.code}</p>
+                <p className="text-sm text-muted-foreground">{type.code}</p>
               </div>
               <div className="flex gap-1">
                 <Button
@@ -97,29 +97,29 @@ export default function VehicleTypeManagementScreen() {
             {/* Specifications */}
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div>
-                <p className="text-xs text-muted-foreground">Capacity</p>
+                <p className="text-sm text-muted-foreground">Capacity</p>
                 <p className="font-semibold text-sm">{type.capacity}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Crew Size</p>
+                <p className="text-sm text-muted-foreground">Crew Size</p>
                 <p className="font-semibold text-sm">{type.crew} members</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Monthly Cost</p>
+                <p className="text-sm text-muted-foreground">Monthly Cost</p>
                 <p className="font-semibold text-sm">${type.cost.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">In Fleet</p>
+                <p className="text-sm text-muted-foreground">In Fleet</p>
                 <p className="font-semibold text-sm">{type.count} vehicles</p>
               </div>
             </div>
 
             {/* Equipment */}
             <div className="pt-2 border-t">
-              <p className="text-xs text-muted-foreground mb-2">Standard Equipment</p>
+              <p className="text-sm text-muted-foreground mb-2">Standard Equipment</p>
               <div className="flex flex-wrap gap-2">
                 {type.equipment.map((item) => (
-                  <span key={item} className="px-2 py-1 rounded-full bg-muted text-xs font-medium">
+                  <span key={item} className="px-2 py-1 rounded-full bg-muted text-sm font-medium">
                     {item}
                   </span>
                 ))}
@@ -165,21 +165,21 @@ export default function VehicleTypeManagementScreen() {
         <h2 className="font-bold text-lg mb-4">Fleet Summary</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-xs text-muted-foreground">Total Types</p>
+            <p className="text-sm text-muted-foreground">Total Types</p>
             <p className="text-2xl font-bold mt-1">{types.length}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total Vehicles</p>
+            <p className="text-sm text-muted-foreground">Total Vehicles</p>
             <p className="text-2xl font-bold mt-1">{types.reduce((sum, t) => sum + t.count, 0)}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Avg Monthly Cost</p>
+            <p className="text-sm text-muted-foreground">Avg Monthly Cost</p>
             <p className="text-2xl font-bold mt-1">
               ${Math.round(types.reduce((sum, t) => sum + t.cost, 0) / types.length).toLocaleString()}
             </p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total Crew Capacity</p>
+            <p className="text-sm text-muted-foreground">Total Crew Capacity</p>
             <p className="text-2xl font-bold mt-1">{types.reduce((sum, t) => sum + t.crew * t.count, 0)}</p>
           </div>
         </div>
@@ -187,3 +187,4 @@ export default function VehicleTypeManagementScreen() {
     </div>
   );
 }
+

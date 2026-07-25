@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, Activity, Pill, Phone, UserRound, Stethoscope, Droplet } from "lucide-react";
 import { VoiceNoteAudio } from "./VoiceNoteAudio";
@@ -67,10 +67,10 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
   }, [incidentId]);
 
   if (error) {
-    return <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">{error}</div>;
+    return <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{error}</div>;
   }
   if (!ctx) {
-    return <div className="rounded-2xl border bg-card p-3 text-xs text-muted-foreground">{t("emergencyContext.loading")}</div>;
+    return <div className="rounded-2xl border bg-card p-3 text-sm text-muted-foreground">{t("emergencyContext.loading")}</div>;
   }
 
   const age = ageFromDob(ctx.profile?.date_of_birth);
@@ -80,18 +80,18 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
   return (
     <div className="space-y-3 rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">{t("emergencyContext.title")}</p>
-        <span className="text-xs uppercase text-muted-foreground">{t("emergencyContext.permission")}</span>
+        <p className="text-sm font-bold uppercase tracking-wider text-primary">{t("emergencyContext.title")}</p>
+        <span className="text-sm uppercase text-muted-foreground">{t("emergencyContext.permission")}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-        <Field icon={UserRound} label={t("emergencyContext.name")} value={ctx.profile?.full_name ?? "—"} />
-        <Field label={t("emergencyContext.ageSex")} value={`${age ?? "—"}${ctx.profile?.gender ? " · " + ctx.profile.gender : ""}`} />
-        <Field icon={Droplet} label={t("emergencyContext.blood")} value={ctx.profile?.blood_type ?? "—"} />
-        <Field label={t("emergencyContext.language")} value={ctx.profile?.preferred_language ?? "—"} />
+        <Field icon={UserRound} label={t("emergencyContext.name")} value={ctx.profile?.full_name ?? "â€”"} />
+        <Field label={t("emergencyContext.ageSex")} value={`${age ?? "â€”"}${ctx.profile?.gender ? " Â· " + ctx.profile.gender : ""}`} />
+        <Field icon={Droplet} label={t("emergencyContext.blood")} value={ctx.profile?.blood_type ?? "â€”"} />
+        <Field label={t("emergencyContext.language")} value={ctx.profile?.preferred_language ?? "â€”"} />
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-xs">
+      <div className="grid grid-cols-3 gap-2 text-sm">
         <Pill2 ok={ctx.conscious !== false} label={ctx.conscious === false ? t("ambulance.unconscious") : t("emergencyContext.conscious")} />
         <Pill2 ok={ctx.breathing !== false} label={ctx.breathing === false ? t("ambulance.notBreathing") : t("incomingSos.breathing")} />
         <Pill2 ok={(ctx.severity ?? "high") !== "critical"} label={(ctx.severity ?? "high").toUpperCase()} />
@@ -102,7 +102,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
           <p className="mb-1 flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground">
             <Stethoscope className="h-3.5 w-3.5" /> {t("emergencyContext.aiSummary")}
           </p>
-          <p className="text-xs leading-snug">{ctx.ai_summary}</p>
+          <p className="text-sm leading-snug">{ctx.ai_summary}</p>
         </div>
       )}
 
@@ -110,7 +110,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
         <div className="rounded-xl border bg-muted/40 p-2.5">
           <p className="mb-1 text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("emergencyContext.voiceClip")}</p>
           {ctx.voice_note_url && <VoiceNoteAudio path={ctx.voice_note_url} />}
-          {ctx.voice_note_transcript && <p className="mt-1 text-xs italic text-muted-foreground">"{ctx.voice_note_transcript}"</p>}
+          {ctx.voice_note_transcript && <p className="mt-1 text-sm italic text-muted-foreground">"{ctx.voice_note_transcript}"</p>}
         </div>
       )}
 
@@ -124,11 +124,11 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
       <Section icon={Pill} label={t("emergencyContext.activeMedications")}>
         {ctx.medications?.length ? (
-          <ul className="space-y-1 text-xs">
+          <ul className="space-y-1 text-sm">
             {ctx.medications.slice(0, 10).map((m, i) => (
               <li key={i} className="flex justify-between gap-2 border-b border-border/40 pb-1 last:border-0">
                 <span className="font-medium">{m.medication}</span>
-                <span className="text-muted-foreground">{[m.dosage, m.frequency].filter(Boolean).join(" · ")}</span>
+                <span className="text-muted-foreground">{[m.dosage, m.frequency].filter(Boolean).join(" Â· ")}</span>
               </li>
             ))}
           </ul>
@@ -137,7 +137,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
       <Section icon={Phone} label={t("emergencyContext.emergencyContacts")}>
         {ctx.emergency_contacts?.length ? (
-          <ul className="space-y-1 text-xs">
+          <ul className="space-y-1 text-sm">
             {ctx.emergency_contacts.map((c, i) => (
               <li key={i} className="flex justify-between gap-2">
                 <span className="font-medium">{c.name} <span className="text-muted-foreground font-normal">({c.relationship ?? t("emergencyContext.contact")})</span></span>
@@ -150,9 +150,9 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
       {!!ctx.linked_providers?.length && (
         <Section icon={Stethoscope} label={t("emergencyContext.linkedProviders")}>
-          <ul className="text-xs text-muted-foreground">
+          <ul className="text-sm text-muted-foreground">
             {ctx.linked_providers.map((p, i) => (
-              <li key={i}>{p.name}{p.specialty ? ` · ${p.specialty}` : ""}</li>
+              <li key={i}>{p.name}{p.specialty ? ` Â· ${p.specialty}` : ""}</li>
             ))}
           </ul>
         </Section>
@@ -163,7 +163,7 @@ export function EmergencyPatientContext({ incidentId }: { incidentId: string }) 
 
 const Field = ({ icon: Icon, label, value }: any) => (
   <div>
-    <p className="flex items-center gap-1 text-xs uppercase tracking-wider text-muted-foreground">
+    <p className="flex items-center gap-1 text-sm uppercase tracking-wider text-muted-foreground">
       {Icon && <Icon className="h-3 w-3" />}{label}
     </p>
     <p className="truncate text-sm font-semibold">{value}</p>
@@ -191,4 +191,5 @@ const Chips = ({ items, tone }: { items: string[]; tone?: "destructive" }) => (
   </div>
 );
 
-const Empty = ({ children }: any) => <p className="text-xs text-muted-foreground">{children}</p>;
+const Empty = ({ children }: any) => <p className="text-sm text-muted-foreground">{children}</p>;
+

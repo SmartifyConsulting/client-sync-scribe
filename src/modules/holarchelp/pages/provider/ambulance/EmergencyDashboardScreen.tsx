@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Siren, AlertTriangle, Clock, Radio } from "lucide-react";
@@ -41,7 +41,7 @@ export default function EmergencyDashboardScreen() {
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [startOpen, setStartOpen] = useState(false);
 
-  // Live SOS queue — incoming (unassigned) + this provider's assigned/rolling incidents
+  // Live SOS queue â€” incoming (unassigned) + this provider's assigned/rolling incidents
   useEffect(() => {
     const load = async () => {
       const incomingP = supabase.from("holarchelp_incidents" as any)
@@ -82,19 +82,19 @@ export default function EmergencyDashboardScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           {t("provider.emergencyResponseDispatch") || "Emergency Response Dispatch"}
         </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <Siren className="h-5 w-5 text-primary" />
           {t("nav.emergencyDashboard", "Dispatch Dashboard")}
         </h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Dispatcher console, live SOS queue and dispatch actions — all on one screen.
+        <p className="text-sm text-muted-foreground mt-1">
+          Dispatcher console, live SOS queue and dispatch actions â€” all on one screen.
         </p>
       </header>
 
-      {/* INCOMING SOS — banner + stats + queue */}
+      {/* INCOMING SOS â€” banner + stats + queue */}
       <section className="space-y-2">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
           <Siren className="h-4 w-4 text-sos" /> Incoming SOS
@@ -106,24 +106,24 @@ export default function EmergencyDashboardScreen() {
         </div>
 
         {isOffShift && (
-          <div className="rounded-2xl border border-warning/40 bg-warning/10 p-3 text-xs">
+          <div className="rounded-2xl border border-warning/40 bg-warning/10 p-3 text-sm">
             <p className="font-bold text-warning">You are off shift.</p>
             <p className="mt-1 text-muted-foreground">Start a shift to accept incidents.</p>
-            <Button size="sm" className="mt-2 h-7 text-xs" onClick={() => setStartOpen(true)}>
+            <Button size="sm" className="mt-2 h-7 text-sm" onClick={() => setStartOpen(true)}>
               Start shift
             </Button>
           </div>
         )}
 
         {!isOffShift && isBusy && (
-          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-xs">
+          <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
             <p className="font-bold text-destructive">You have an active incident.</p>
             <p className="mt-1 text-muted-foreground">Finish it before accepting another.</p>
           </div>
         )}
 
         {!isOffShift && !isBusy && !rows.length && (
-          <div className="rounded-2xl border border-dashed p-8 text-center text-xs text-muted-foreground">
+          <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
             <Siren className="mx-auto mb-2 h-5 w-5 opacity-50" />
             No incoming SOS right now.
           </div>
@@ -135,8 +135,8 @@ export default function EmergencyDashboardScreen() {
               <div key={r.id} className={`rounded-2xl border-2 p-3 ${sevBig(r.severity)}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-sos">
-                      <Siren className="h-3 w-3" /> {(r.severity ?? "high").toUpperCase()} · {r.incident_type ?? "Emergency"}
+                    <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-sos">
+                      <Siren className="h-3 w-3" /> {(r.severity ?? "high").toUpperCase()} Â· {r.incident_type ?? "Emergency"}
                     </p>
                     <p className="mt-1 text-base font-extrabold">{r.incident_number ?? `INC-${r.id.slice(0, 8)}`}</p>
                     <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
@@ -145,12 +145,12 @@ export default function EmergencyDashboardScreen() {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     {r.assigned_provider_id === providerId && (
-                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-bold uppercase text-primary">
-                        {r.assigned_ambulance_id ? "Rolling" : "Assigned · needs vehicle"}
+                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-sm font-bold uppercase text-primary">
+                        {r.assigned_ambulance_id ? "Rolling" : "Assigned Â· needs vehicle"}
                       </span>
                     )}
                     {(r.conscious === false || r.breathing === false) && (
-                      <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-bold uppercase text-destructive">
+                      <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-sm font-bold uppercase text-destructive">
                         <AlertTriangle className="mr-1 inline h-3 w-3" /> Life threat
                       </span>
                     )}
@@ -180,7 +180,7 @@ export default function EmergencyDashboardScreen() {
         <DispatcherConsoleScreen />
       </section>
 
-      {/* ACTIVE MISSIONS — own red-framed panel */}
+      {/* ACTIVE MISSIONS â€” own red-framed panel */}
       <ActiveMissionsPanel />
 
 
@@ -204,8 +204,9 @@ function StatCard({
     : "text-muted-foreground";
   return (
     <div className="rounded-xl border border-border bg-card px-3 py-2">
-      <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-sm uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={`text-xl font-extrabold mt-0.5 tabular-nums ${toneClass}`}>{value}</p>
     </div>
   );
 }
+

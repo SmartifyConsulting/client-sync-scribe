@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Shield, Loader2, CheckCircle, Copy, AlertTriangle, Check, Download, Apple, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -116,7 +116,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
       toast({
         title: "That code didn't work",
         description:
-          "Codes refresh every 30 seconds — open your authenticator app and try the newest 6-digit code.",
+          "Codes refresh every 30 seconds â€” open your authenticator app and try the newest 6-digit code.",
         variant: "destructive",
       });
     } finally {
@@ -153,7 +153,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
             <img src={holarcLogo} alt="Holarc Health" className="h-8 w-auto" />
           </div>
           <p className="text-center text-sm uppercase tracking-wider text-muted-foreground">
-            Account security · One-time setup
+            Account security Â· One-time setup
           </p>
           <DialogTitle className="flex items-center justify-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
@@ -175,33 +175,33 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
         ) : step === "setup" ? (
           <div className="space-y-4">
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
-              <p className="text-xs font-semibold text-foreground">Don't have an authenticator app yet?</p>
+              <p className="text-sm font-semibold text-foreground">Don't have an authenticator app yet?</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <a
                   href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-medium hover:bg-muted min-h-11"
                 >
-                  <Download className="h-4 w-4 text-primary" /> Google Authenticator — Android
+                  <Download className="h-4 w-4 text-primary" /> Google Authenticator â€” Android
                 </a>
                 <a
                   href="https://apps.apple.com/app/google-authenticator/id388497605"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-medium hover:bg-muted min-h-11"
                 >
-                  <Apple className="h-4 w-4 text-primary" /> Google Authenticator — iPhone
+                  <Apple className="h-4 w-4 text-primary" /> Google Authenticator â€” iPhone
                 </a>
                 <a
                   href="https://authy.com/download/"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-medium hover:bg-muted min-h-11"
                 >
                   <Download className="h-4 w-4 text-primary" /> Authy
                 </a>
                 <a
                   href="https://www.microsoft.com/en-us/security/mobile-authenticator-app"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-11"
+                  className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 text-sm font-medium hover:bg-muted min-h-11"
                 >
                   <Shield className="h-4 w-4 text-primary" /> Microsoft Authenticator
                 </a>
@@ -217,7 +217,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                     className="w-[min(70vw,200px)] h-[min(70vw,200px)] sm:w-48 sm:h-48"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-sm text-muted-foreground text-center">
                   Scan with Google Authenticator, Authy, or any TOTP app
                 </p>
               </div>
@@ -225,12 +225,12 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
 
             {secret && (
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">
+                <Label className="text-sm text-muted-foreground">
                   Can't scan? Enter this code manually:
                 </Label>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-muted px-3 py-2 rounded text-sm font-mono break-all select-all">
-                    {secretVisible ? secret : "•".repeat(secret.length)}
+                    {secretVisible ? secret : "â€¢".repeat(secret.length)}
                   </code>
                   <button
                     type="button"
@@ -265,7 +265,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
 
             <a
               href="mailto:support@holarchealth.com"
-              className="block text-center text-xs text-muted-foreground hover:text-primary"
+              className="block text-center text-sm text-muted-foreground hover:text-primary"
             >
               Need help? Contact support
             </a>
@@ -285,7 +285,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
                 className="text-center text-2xl tracking-widest font-mono h-14"
                 maxLength={6}
               />
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-sm text-muted-foreground text-center">
                 Enter the 6-digit code from your authenticator app
               </p>
             </div>
@@ -301,7 +301,7 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
             </div>
             <a
               href="mailto:support@holarchealth.com"
-              className="block text-center text-xs text-muted-foreground hover:text-primary"
+              className="block text-center text-sm text-muted-foreground hover:text-primary"
             >
               Need help? Contact support
             </a>
@@ -333,3 +333,4 @@ export function TwoFactorSetup({ open, onOpenChange, onSuccess }: TwoFactorSetup
     </Dialog>
   );
 }
+

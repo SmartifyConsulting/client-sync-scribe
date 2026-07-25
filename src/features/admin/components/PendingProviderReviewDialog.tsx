@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Loader2, ExternalLink, FileText, CheckCircle2, XCircle } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -100,7 +100,7 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
         </DialogHeader>
 
         {isLoading ? (
-          <div className="py-8 text-center text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Loading…</div>
+          <div className="py-8 text-center text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin inline mr-2" />Loadingâ€¦</div>
         ) : !submission ? (
           <div className="py-8 text-center text-muted-foreground">No pending submission found for this user.</div>
         ) : (
@@ -128,11 +128,11 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
 
             <Section title={`Directors (${submission.directors.length})`}>
               <ul className="space-y-1">
-                {submission.directors.length === 0 && <li className="text-muted-foreground">—</li>}
+                {submission.directors.length === 0 && <li className="text-muted-foreground">â€”</li>}
                 {submission.directors.map((d, i) => (
                   <li key={i} className="text-sm">
                     <span className="font-medium">{d.full_name}</span>
-                    {d.role && <span className="text-muted-foreground"> — {d.role}</span>}
+                    {d.role && <span className="text-muted-foreground"> â€” {d.role}</span>}
                   </li>
                 ))}
               </ul>
@@ -145,8 +145,8 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
                     <FileText className="h-5 w-5 text-primary shrink-0" />
                     <div className="min-w-0">
                       <p className="text-sm truncate">{submission.license_file_path.split("/").pop()}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {submission.license_file_mime} · {submission.license_file_size_bytes
+                      <p className="text-sm text-muted-foreground">
+                        {submission.license_file_mime} Â· {submission.license_file_size_bytes
                           ? `${(submission.license_file_size_bytes / 1024).toFixed(0)} KB`
                           : ""}
                       </p>
@@ -207,7 +207,7 @@ export function PendingProviderReviewDialog({ open, ownerUserId, onClose, onActi
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5 rounded-lg border p-3">
-      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
+      <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
       <div className="space-y-1">{children}</div>
     </div>
   );
@@ -217,7 +217,8 @@ function Field({ label, value }: { label: string; value: string | null | undefin
   return (
     <div className="flex gap-2 text-sm">
       <span className="text-muted-foreground w-24 shrink-0">{label}:</span>
-      <span className="font-medium break-words">{value || "—"}</span>
+      <span className="font-medium break-words">{value || "â€”"}</span>
     </div>
   );
 }
+

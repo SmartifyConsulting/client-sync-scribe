@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+﻿import { ReactNode } from "react";
 import { Settings, LogOut, Share2, Stethoscope, HeartPulse, Gift, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES } from "./testProfiles";
 import { useImpersonate } from "./useImpersonate";
@@ -54,8 +54,8 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
             >
               <Stethoscope className="h-3.5 w-3.5 text-primary" />
               <div className="text-left">
-                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{t("topbar.doctor")}</p>
+                <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                <p className="text-sm text-muted-foreground">{t("topbar.doctor")}</p>
               </div>
             </button>
             <button
@@ -67,8 +67,8 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
             >
               <HeartPulse className="h-3.5 w-3.5 text-primary" />
               <div className="text-left">
-                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{t("topbar.patient")}</p>
+                <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                <p className="text-sm text-muted-foreground">{t("topbar.patient")}</p>
               </div>
             </button>
           </div>
@@ -84,19 +84,19 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                 : t("topbar.patient");
           return (
             <div className="px-2 py-1.5 border-b border-border mb-1">
-              <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-              <p className="text-xs text-muted-foreground">{roleLabel}</p>
+              <p className="text-sm font-semibold text-foreground">{profile?.full_name || "User"}</p>
+              <p className="text-sm text-muted-foreground">{roleLabel}</p>
             </div>
           );
         })()}
         {isDoctor && !isOnPatientRoute && (
-          <Link to="/doctor/rewards" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+          <Link to="/doctor/rewards" className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors">
             <Gift className="h-3.5 w-3.5" /> {t("topbar.myRewards")}
           </Link>
         )}
         {isAdmin && (
           <div className="border-t border-border mt-1 pt-1">
-            <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <div className="flex items-center gap-1.5 px-2 py-1 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               <UserCog className="h-3 w-3" /> {t("topbar.switchProfile")}
             </div>
             <div className="max-h-64 overflow-y-auto">
@@ -117,8 +117,8 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                   >
                     {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{p.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{p.role} · {p.email}</p>
+                      <p className="text-sm font-medium text-foreground truncate">{p.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">{p.role} Â· {p.email}</p>
                     </div>
                   </button>
                 );
@@ -143,29 +143,30 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                 <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
-                <p className="text-xs text-muted-foreground truncate">Georgia Adams · info@georgiaadams.co.za</p>
+                <p className="text-sm font-medium text-foreground truncate">{t("topbar.switchToAdmin")}</p>
+                <p className="text-sm text-muted-foreground truncate">Georgia Adams Â· info@georgiaadams.co.za</p>
               </div>
             </button>
           </div>
         )}
         {isAdmin && (
-          <Link to="/admin/users" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+          <Link to="/admin/users" className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors">
             <ShieldCheck className="h-3.5 w-3.5" /> {t("topbar.admin")}
           </Link>
         )}
-        <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+        <Link to="/settings" className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors">
           <Settings className="h-3.5 w-3.5" /> {t("common.settings")}
         </Link>
         <ShareAppDialog trigger={
-          <button className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors w-full">
+          <button className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-accent transition-colors w-full">
             <Share2 className="h-3.5 w-3.5" /> {t("topbar.shareApp")}
           </button>
         } />
-        <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
+        <button onClick={async () => { await supabase.auth.signOut(); window.location.href = "/auth"; }} className="flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-destructive/10 text-destructive transition-colors w-full">
           <LogOut className="h-3.5 w-3.5" /> {t("common.signOut")}
         </button>
       </PopoverContent>
     </Popover>
   );
 }
+

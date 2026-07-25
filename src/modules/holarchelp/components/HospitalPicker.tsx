@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Hospital, Check } from "lucide-react";
@@ -68,7 +68,7 @@ export function HospitalPicker({
 
   return (
     <div className="rounded-2xl border bg-card p-3">
-      <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("hospitalPicker.destination")}</p>
+      <p className="mb-2 text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("hospitalPicker.destination")}</p>
       <ul className="max-h-72 space-y-1.5 overflow-auto">
         {list.map((h) => {
           const isSelected = h.id === selectedId;
@@ -82,25 +82,26 @@ export function HospitalPicker({
                   <p className="truncate text-sm font-semibold">{h.name}</p>
                   {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs">
+                <div className="mt-0.5 flex flex-wrap items-center gap-1 text-sm">
                   <span className={`rounded-full border px-1.5 py-0.5 font-semibold ${capColor(h.er_capacity_status)}`}>
                     {(h.er_capacity_status ?? "green").toUpperCase()}
                   </span>
                   {h.er_beds_available != null && <span className="text-muted-foreground">{h.er_beds_available} {t("common.beds")}</span>}
-                  {h.ownership && <span className="capitalize text-muted-foreground">· {h.ownership}</span>}
-                  {h.distance_km != null && <span className="text-muted-foreground">· {h.distance_km.toFixed(1)} km</span>}
-                  {!h.accepting_patients && <span className="text-destructive">· {t("hospitalPicker.notAccepting")}</span>}
+                  {h.ownership && <span className="capitalize text-muted-foreground">Â· {h.ownership}</span>}
+                  {h.distance_km != null && <span className="text-muted-foreground">Â· {h.distance_km.toFixed(1)} km</span>}
+                  {!h.accepting_patients && <span className="text-destructive">Â· {t("hospitalPicker.notAccepting")}</span>}
                 </div>
               </div>
               <Button size="sm" variant={isSelected ? "secondary" : "default"} className="h-8 shrink-0"
                       disabled={!!picking || (!open && !isSelected)} onClick={() => choose(h)}>
-                {isSelected ? t("common.selected") : picking === h.id ? "…" : t("common.pick")}
+                {isSelected ? t("common.selected") : picking === h.id ? "â€¦" : t("common.pick")}
               </Button>
             </li>
           );
         })}
-        {!list.length && <li className="py-4 text-center text-xs text-muted-foreground">{t("hospitalPicker.none")}</li>}
+        {!list.length && <li className="py-4 text-center text-sm text-muted-foreground">{t("hospitalPicker.none")}</li>}
       </ul>
     </div>
   );
 }
+

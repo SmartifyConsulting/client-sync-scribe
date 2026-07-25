@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useHospitalAdmissions, useAdmissionVitals, useAdmissionMedications, useAdmissionLabResults, useAdmissionImaging, type HospitalAdmission } from "@/hooks/useHospitalAdmissions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,11 +55,11 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
               {(admission as any).title || admission.diagnosis || admission.hospital || "Admission"}
             </h3>
             <p className="text-sm text-muted-foreground truncate">
-              {admission.hospital ? `${admission.hospital} · ` : ""}
+              {admission.hospital ? `${admission.hospital} Â· ` : ""}
               Admitted {format(new Date(admission.admission_date), "dd MMM yyyy")}
-              {admission.discharge_date && ` · Discharged ${format(new Date(admission.discharge_date), "dd MMM yyyy")}`}
+              {admission.discharge_date && ` Â· Discharged ${format(new Date(admission.discharge_date), "dd MMM yyyy")}`}
             </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               Logged {format(new Date((admission as any).created_at || admission.admission_date), "dd MMM yyyy HH:mm")}
             </p>
           </div>
@@ -77,17 +77,17 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
 
       <Accordion type="multiple" className="w-full" defaultValue={["vitals"]}>
         <AccordionItem value="vitals">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Activity className="h-4 w-4" /> Vitals ({vitals.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-sm"><span className="flex items-center gap-2"><Activity className="h-4 w-4" /> Vitals ({vitals.length})</span></AccordionTrigger>
           <AccordionContent>
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowVitals(true)}><Plus className="h-4 w-4 mr-1" /> Add Vitals</Button>}
             <div className="space-y-2">
               {vitals.map((v: any) => (
-                <div key={v.id} className="text-xs p-2 rounded bg-muted/40">
-                  <p className="text-xs text-muted-foreground">
+                <div key={v.id} className="text-sm p-2 rounded bg-muted/40">
+                  <p className="text-sm text-muted-foreground">
                     {format(new Date(v.recorded_at), "dd MMM yyyy HH:mm")}
-                    {v.nurse_name_snapshot && <span> · Nurse: {v.nurse_name_snapshot}</span>}
+                    {v.nurse_name_snapshot && <span> Â· Nurse: {v.nurse_name_snapshot}</span>}
                   </p>
-                  <p>HR: {v.heart_rate || "-"} bpm · BP: {v.bp_systolic || "-"}/{v.bp_diastolic || "-"} · SpO₂: {v.spo2 || "-"}% · Temp: {v.temperature_c || "-"}°C · BMI: {v.bmi || "-"}</p>
+                  <p>HR: {v.heart_rate || "-"} bpm Â· BP: {v.bp_systolic || "-"}/{v.bp_diastolic || "-"} Â· SpOâ‚‚: {v.spo2 || "-"}% Â· Temp: {v.temperature_c || "-"}Â°C Â· BMI: {v.bmi || "-"}</p>
                   {v.notes && <p className="text-muted-foreground mt-1">{v.notes}</p>}
                   <RateNurseControl
                     admissionId={admission.id}
@@ -103,15 +103,15 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </AccordionItem>
 
         <AccordionItem value="meds">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Pill className="h-4 w-4" /> Active Medications ({meds.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-sm"><span className="flex items-center gap-2"><Pill className="h-4 w-4" /> Active Medications ({meds.length})</span></AccordionTrigger>
           <AccordionContent>
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowMeds(true)}><Plus className="h-4 w-4 mr-1" /> Add Medication</Button>}
             <div className="space-y-2">
               {meds.map((m: any) => (
-                <div key={m.id} className="text-xs p-2 rounded bg-muted/40">
+                <div key={m.id} className="text-sm p-2 rounded bg-muted/40">
                   <p className="font-medium">{m.name}</p>
-                  <p className="text-muted-foreground">{m.dosage} · {m.frequency}</p>
-                  {m.nurse_name_snapshot && <p className="text-xs text-muted-foreground">Nurse: {m.nurse_name_snapshot}</p>}
+                  <p className="text-muted-foreground">{m.dosage} Â· {m.frequency}</p>
+                  {m.nurse_name_snapshot && <p className="text-sm text-muted-foreground">Nurse: {m.nurse_name_snapshot}</p>}
                   <RateNurseControl admissionId={admission.id} recordTable="admission_medications" recordId={m.id} nurseId={m.nurse_id ?? null} nurseName={m.nurse_name_snapshot} />
                 </div>
               ))}
@@ -120,19 +120,19 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </AccordionItem>
 
         <AccordionItem value="labs">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><FlaskConical className="h-4 w-4" /> Lab Results ({labs.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-sm"><span className="flex items-center gap-2"><FlaskConical className="h-4 w-4" /> Lab Results ({labs.length})</span></AccordionTrigger>
           <AccordionContent>
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowLabs(true)}><Plus className="h-4 w-4 mr-1" /> Add Lab Result</Button>}
             <div className="space-y-2">
               {labs.map((l: any) => (
-                <div key={l.id} className="text-xs p-2 rounded bg-muted/40">
+                <div key={l.id} className="text-sm p-2 rounded bg-muted/40">
                   <p className="font-medium">{l.test_name}</p>
                   <p>{l.result_value} {l.units} {l.reference_range && <span className="text-muted-foreground">(ref: {l.reference_range})</span>}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {format(new Date(l.result_date), "dd MMM yyyy")}
-                    {l.nurse_name_snapshot && <span> · Nurse: {l.nurse_name_snapshot}</span>}
+                    {l.nurse_name_snapshot && <span> Â· Nurse: {l.nurse_name_snapshot}</span>}
                   </p>
-                  {l.attachment_url && <a href={l.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-xs inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> View attachment</a>}
+                  {l.attachment_url && <a href={l.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-sm inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> View attachment</a>}
                   <RateNurseControl admissionId={admission.id} recordTable="admission_lab_results" recordId={l.id} nurseId={l.nurse_id ?? null} nurseName={l.nurse_name_snapshot} />
                 </div>
               ))}
@@ -141,20 +141,20 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </AccordionItem>
 
         <AccordionItem value="imaging">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Scan className="h-4 w-4" /> Imaging ({imaging.length})</span></AccordionTrigger>
+          <AccordionTrigger className="text-sm"><span className="flex items-center gap-2"><Scan className="h-4 w-4" /> Imaging ({imaging.length})</span></AccordionTrigger>
           <AccordionContent>
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowImaging(true)}><Plus className="h-4 w-4 mr-1" /> Add Imaging</Button>}
             <div className="space-y-2">
               {imaging.map((i: any) => (
-                <div key={i.id} className="text-xs p-2 rounded bg-muted/40">
-                  <p className="font-medium">{i.modality} · {i.body_region}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div key={i.id} className="text-sm p-2 rounded bg-muted/40">
+                  <p className="font-medium">{i.modality} Â· {i.body_region}</p>
+                  <p className="text-sm text-muted-foreground">
                     {format(new Date(i.performed_at), "dd MMM yyyy")}
-                    {i.nurse_name_snapshot && <span> · Nurse: {i.nurse_name_snapshot}</span>}
+                    {i.nurse_name_snapshot && <span> Â· Nurse: {i.nurse_name_snapshot}</span>}
                   </p>
                   {i.summary && <p className="mt-1">{i.summary}</p>}
-                  {i.pacs_link && <a href={i.pacs_link} target="_blank" rel="noreferrer" className="text-primary text-xs inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> PACS</a>}
-                  {i.attachment_url && <a href={i.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-xs inline-flex items-center gap-1 ml-2"><ExternalLink className="h-2 w-2" /> PDF</a>}
+                  {i.pacs_link && <a href={i.pacs_link} target="_blank" rel="noreferrer" className="text-primary text-sm inline-flex items-center gap-1"><ExternalLink className="h-2 w-2" /> PACS</a>}
+                  {i.attachment_url && <a href={i.attachment_url} target="_blank" rel="noreferrer" className="text-primary text-sm inline-flex items-center gap-1 ml-2"><ExternalLink className="h-2 w-2" /> PDF</a>}
                   <RateNurseControl admissionId={admission.id} recordTable="admission_imaging" recordId={i.id} nurseId={i.nurse_id ?? null} nurseName={i.nurse_name_snapshot} />
                 </div>
               ))}
@@ -200,7 +200,7 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
         <Card className="p-8 text-center">
           <Hospital className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">No hospital admissions on record.</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Entries are created automatically when a doctor saves a Hospital Admission Form, or you can upload one yourself.
           </p>
         </Card>
@@ -215,3 +215,4 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
     </div>
   );
 }
+

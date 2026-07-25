@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
@@ -99,7 +99,7 @@ export default function NavigationScreen() {
       <div className="rounded-2xl border border-dashed p-10 text-center">
         <NavIcon className="mx-auto h-8 w-8 text-muted-foreground" />
         <p className="mt-3 text-sm font-semibold">{t("navigationScreen.noActiveMission")}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{t("navigationScreen.acceptToStart")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("navigationScreen.acceptToStart")}</p>
         <Button asChild className="mt-4"><Link to="/provider/ambulance/incoming">{t("navigationScreen.openIncomingSos")}</Link></Button>
       </div>
     );
@@ -111,23 +111,23 @@ export default function NavigationScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            {t("provider.emergencyResponseDispatch")} · {t("navigationScreen.activeMission", "Active Mission")}
+          <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            {t("provider.emergencyResponseDispatch")} Â· {t("navigationScreen.activeMission", "Active Mission")}
           </p>
           <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
             <NavIcon className="h-5 w-5 text-primary" />
             {t("navigationScreen.mission")} #{(incident.incident_number ?? activeId.slice(0,8))}
           </h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            {t("navigationScreen.helper", "Your current mission — turn-by-turn route, status and destination hospital.")}
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("navigationScreen.helper", "Your current mission â€” turn-by-turn route, status and destination hospital.")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full border border-sos/40 bg-sos/10 px-2 py-1 text-xs font-bold uppercase tracking-wider text-sos">
+          <span className="rounded-full border border-sos/40 bg-sos/10 px-2 py-1 text-sm font-bold uppercase tracking-wider text-sos">
             <Siren className="mr-1 inline h-3 w-3" /> {(incident.status ?? "").replace(/_/g," ")}
           </span>
           {incident.eta_minutes != null && (
-            <span className="rounded-full border bg-card px-2 py-1 text-xs font-bold uppercase tracking-wider">
+            <span className="rounded-full border bg-card px-2 py-1 text-sm font-bold uppercase tracking-wider">
               {t("navigationScreen.eta")} <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
             </span>
           )}
@@ -148,9 +148,9 @@ export default function NavigationScreen() {
             treatedOnScene={incident.status === "treated_on_scene"}
           />
 
-          {/* Course-deviation banner — set by the auto-advance trigger via incident_events */}
+          {/* Course-deviation banner â€” set by the auto-advance trigger via incident_events */}
           {deviationActive && (
-            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-800">
+            <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-800">
               <p className="flex items-center gap-1.5 font-bold">
                 <AlertTriangle className="h-3.5 w-3.5" /> Off planned route to hospital
               </p>
@@ -158,11 +158,11 @@ export default function NavigationScreen() {
             </div>
           )}
 
-          {/* Treated on scene — cancel transport (only meaningful at scene / with patient) */}
+          {/* Treated on scene â€” cancel transport (only meaningful at scene / with patient) */}
           {isAssigned && ["arrived","patient_collected","en_route_to_hospital"].includes(incident.status) && (
             <Button
               variant="outline"
-              className="h-11 w-full border-amber-500/50 text-amber-700 hover:bg-amber-500/10 text-xs font-bold"
+              className="h-11 w-full border-amber-500/50 text-amber-700 hover:bg-amber-500/10 text-sm font-bold"
               onClick={async () => {
                 if (!confirm("Mark this patient as treated on scene and cancel transport?")) return;
                 const { error } = await supabase.rpc("holarchelp_cancel_transport" as any, {
@@ -173,7 +173,7 @@ export default function NavigationScreen() {
                 navigate("/provider/ambulance");
               }}
             >
-              <HeartHandshake className="mr-1.5 h-4 w-4" /> Treated on scene — cancel transport
+              <HeartHandshake className="mr-1.5 h-4 w-4" /> Treated on scene â€” cancel transport
             </Button>
           )}
 
@@ -182,11 +182,11 @@ export default function NavigationScreen() {
             <div className="rounded-2xl border bg-card p-3">
               <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">After handover</p>
               <div className="mt-2 grid grid-cols-2 gap-1.5">
-                <Button size="sm" variant="outline" className="h-10 text-xs font-bold"
+                <Button size="sm" variant="outline" className="h-10 text-sm font-bold"
                   onClick={() => setStatus("completed")}>
                   <Home className="mr-1 h-3.5 w-3.5" /> Return to base
                 </Button>
-                <Button size="sm" className="h-10 text-xs font-bold"
+                <Button size="sm" className="h-10 text-sm font-bold"
                   onClick={async () => { await setStatus("completed"); navigate("/provider/ambulance/dashboard"); }}>
                   <ListChecks className="mr-1 h-3.5 w-3.5" /> Next incident
                 </Button>
@@ -202,7 +202,7 @@ export default function NavigationScreen() {
           />
 
           <Link to={`/provider/ambulance/incident/${activeId}`}
-                className="block rounded-2xl border bg-card p-3 text-center text-xs font-semibold hover:bg-muted">
+                className="block rounded-2xl border bg-card p-3 text-center text-sm font-semibold hover:bg-muted">
             {t("navigationScreen.fullConsole")}
           </Link>
         </aside>
@@ -210,3 +210,4 @@ export default function NavigationScreen() {
     </div>
   );
 }
+

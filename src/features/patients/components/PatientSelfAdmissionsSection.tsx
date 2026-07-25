@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,28 +84,28 @@ export function PatientSelfAdmissionsSection({ patientId, userId }: { patientId:
             <Hospital className="h-5 w-5 text-primary" />
             Hospital admissions
           </CardTitle>
-          <p className="text-xs text-muted-foreground">Log past or current hospital stays.</p>
+          <p className="text-sm text-muted-foreground">Log past or current hospital stays.</p>
         </div>
         <Button size="sm" onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4 mr-1" /> Log admission
         </Button>
       </CardHeader>
       <CardContent className="space-y-2">
-        {loading && <p className="text-xs text-muted-foreground">Loading…</p>}
+        {loading && <p className="text-sm text-muted-foreground">Loadingâ€¦</p>}
         {!loading && items.length === 0 && (
-          <p className="text-xs text-muted-foreground">No admissions logged yet.</p>
+          <p className="text-sm text-muted-foreground">No admissions logged yet.</p>
         )}
         {items.map((a) => (
           <div key={a.id} className="rounded-lg border border-border p-3 bg-muted/30">
             <div className="flex items-start justify-between">
               <div>
                 <p className="font-medium text-sm">{a.hospital ?? "Hospital"}</p>
-                <p className="text-xs text-muted-foreground">
-                  {a.admission_date}{a.discharge_date ? ` → ${a.discharge_date}` : " (ongoing)"}
+                <p className="text-sm text-muted-foreground">
+                  {a.admission_date}{a.discharge_date ? ` â†’ ${a.discharge_date}` : " (ongoing)"}
                 </p>
-                {a.diagnosis && <p className="text-xs mt-1">{a.diagnosis}</p>}
+                {a.diagnosis && <p className="text-sm mt-1">{a.diagnosis}</p>}
               </div>
-              <Badge variant="outline" className="text-xs">{a.source ?? "doctor"}</Badge>
+              <Badge variant="outline" className="text-sm">{a.source ?? "doctor"}</Badge>
             </div>
           </div>
         ))}
@@ -136,10 +136,11 @@ export function PatientSelfAdmissionsSection({ patientId, userId }: { patientId:
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={submit} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+            <Button onClick={submit} disabled={saving}>{saving ? "Savingâ€¦" : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
   );
 }
+

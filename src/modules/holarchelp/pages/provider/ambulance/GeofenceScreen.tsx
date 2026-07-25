@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
@@ -111,11 +111,11 @@ export default function GeofenceScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Vehicle Abuse Prevention
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Geofence Management</h1>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Create geographic zones and receive alerts when vehicles enter or leave them.
           </p>
         </div>
@@ -126,13 +126,13 @@ export default function GeofenceScreen() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Active Geofences
           </p>
           <p className="mt-1 text-2xl font-bold">{geofences.length}</p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Restricted Zones
           </p>
           <p className="mt-1 text-2xl font-bold text-destructive">
@@ -140,7 +140,7 @@ export default function GeofenceScreen() {
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Coverage Area
           </p>
           <p className="mt-1 text-2xl font-bold">
@@ -152,8 +152,8 @@ export default function GeofenceScreen() {
       <div className="space-y-2">
         <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/40/20">
           <AlertCircle className="h-4 w-4 text-primary" />
-          <p className="text-xs text-primary">
-            💡 Create geofences around depots, hospitals, and restricted areas. Vehicles will be monitored for breaches.
+          <p className="text-sm text-primary">
+            ðŸ’¡ Create geofences around depots, hospitals, and restricted areas. Vehicles will be monitored for breaches.
           </p>
         </div>
       </div>
@@ -164,13 +164,13 @@ export default function GeofenceScreen() {
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : geofences.length === 0 ? (
-          <div className="p-8 text-center text-xs text-muted-foreground">
+          <div className="p-8 text-center text-sm text-muted-foreground">
             <MapPin className="mx-auto mb-2 h-5 w-5 opacity-50" />
             No geofences configured yet.
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+            <thead className="bg-muted/50 text-sm uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-3 py-2 text-left">Name</th>
                 <th className="px-3 py-2 text-left">Type</th>
@@ -186,17 +186,17 @@ export default function GeofenceScreen() {
                   <td className="px-3 py-2">
                     <span
                       className={cn(
-                        "rounded-full border px-2 py-0.5 text-xs font-bold uppercase",
+                        "rounded-full border px-2 py-0.5 text-sm font-bold uppercase",
                         GEOFENCE_TYPE_COLORS[geofence.type]
                       )}
                     >
                       {GEOFENCE_TYPE_LABELS[geofence.type]}
                     </span>
                   </td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {geofence.latitude.toFixed(4)}°, {geofence.longitude.toFixed(4)}°
+                  <td className="px-3 py-2 text-sm text-muted-foreground">
+                    {geofence.latitude.toFixed(4)}Â°, {geofence.longitude.toFixed(4)}Â°
                   </td>
-                  <td className="px-3 py-2 text-xs">{geofence.radius_km} km</td>
+                  <td className="px-3 py-2 text-sm">{geofence.radius_km} km</td>
                   <td className="px-3 py-2 text-right space-x-1">
                     <Button
                       size="icon"
@@ -251,3 +251,4 @@ export default function GeofenceScreen() {
     </div>
   );
 }
+

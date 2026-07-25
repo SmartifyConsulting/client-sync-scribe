@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,7 +82,7 @@ export function UploadAdmissionDialog({ open, onOpenChange, patientId }: Props) 
         setUploading(false);
 
         // Persist a documents row so the file lives in the documents library
-        const docName = `Hospital Admission${hospital ? " — " + hospital : ""} (${admissionDate})`;
+        const docName = `Hospital Admission${hospital ? " â€” " + hospital : ""} (${admissionDate})`;
         const { data: docRow, error: docError } = await supabase
           .from("documents")
           .insert({
@@ -188,7 +188,7 @@ export function UploadAdmissionDialog({ open, onOpenChange, patientId }: Props) 
               onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
             />
             {file && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {file.name} ({(file.size / 1024).toFixed(0)} KB)
               </p>
             )}
@@ -216,3 +216,4 @@ export function UploadAdmissionDialog({ open, onOpenChange, patientId }: Props) 
     </Dialog>
   );
 }
+

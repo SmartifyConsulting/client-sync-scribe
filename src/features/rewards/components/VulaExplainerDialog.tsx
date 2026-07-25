@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+﻿import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Droplet, Users, TrendingUp, Ticket, Heart } from "lucide-react";
@@ -32,7 +32,7 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
             {t("rewards.vula.explainer.languages")}
           </span>
         </h2>
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-sm text-muted-foreground leading-relaxed">
           {t("rewards.vula.explainer.tagline")}
         </p>
       </div>
@@ -52,13 +52,13 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
           <Users className="h-4 w-4 text-blue-500" />
         </div>
         <div className="flex-1 space-y-0.5">
-          <p className="text-xs font-bold text-foreground leading-snug">
+          <p className="text-sm font-bold text-foreground leading-snug">
             {t("rewards.vula.explainer.section1Title")}
           </p>
-          <p className="text-xs text-foreground/80 leading-relaxed">
+          <p className="text-sm text-foreground/80 leading-relaxed">
             {t("rewards.vula.explainer.section1Desc")}
           </p>
-          <p className="text-xs font-medium bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
+          <p className="text-sm font-medium bg-gradient-to-r from-blue-500 to-teal-500 bg-clip-text text-transparent">
             {t("rewards.vula.explainer.section1Tagline")}
           </p>
         </div>
@@ -72,7 +72,7 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
           <TrendingUp className="h-4 w-4 text-blue-500" />
         </div>
         <div className="flex-1">
-          <p className="text-xs font-bold text-foreground leading-snug">
+          <p className="text-sm font-bold text-foreground leading-snug">
             {t("rewards.vula.explainer.section2Title")}
           </p>
         </div>
@@ -90,7 +90,7 @@ export function VulaExplainerContent({ onCta, hideCta }: VulaExplainerContentPro
       )}
 
       {/* Footer tagline */}
-      <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+      <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
         <Heart className="h-4 w-4 text-blue-500 fill-blue-500" />
         <span>{t("rewards.vula.explainer.footerTagline")}</span>
       </div>
@@ -118,3 +118,4 @@ export function VulaExplainerDialog({ open, onOpenChange, onCta }: VulaExplainer
     </Dialog>
   );
 }
+

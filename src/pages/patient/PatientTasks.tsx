@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+﻿import { useState, useRef, useCallback, useEffect } from "react";
 import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Pill, Square, Play, Mic, MicOff, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -179,7 +179,7 @@ export default function PatientTasks() {
             <Mic className="h-6 w-6" />
           )}
         </Button>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {isRecordingTask ? "Recording... tap to stop" : isTranscribing ? "Transcribing..." : "Tap to dictate a task"}
         </p>
         <div className="flex w-full max-w-md gap-2">
@@ -393,7 +393,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      toast({ title: "Extracting frames…", description: "Processing your video for AI validation." });
+      toast({ title: "Extracting framesâ€¦", description: "Processing your video for AI validation." });
 
       const frames = await extractFrames(recordedBlob);
       if (frames.length < FRAME_COUNT) throw new Error("Could not extract enough frames from video");
@@ -446,7 +446,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           });
         }
 
-        toast({ title: "✅ Task verified!", description: `AI confirmed your proof. +${todo.vulas_reward} Vulas earned!` });
+        toast({ title: "âœ… Task verified!", description: `AI confirmed your proof. +${todo.vulas_reward} Vulas earned!` });
         handleCloseRecording();
         queryClient.invalidateQueries({ queryKey: ["my-rewards"] });
         onComplete();
@@ -490,19 +490,19 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
           </div>
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-medium ${isCompleted ? "line-through text-muted-foreground" : "text-foreground"}`}>{todo.title}</p>
-            {todo.description && <p className="text-xs text-muted-foreground mt-0.5">{todo.description}</p>}
+            {todo.description && <p className="text-sm text-muted-foreground mt-0.5">{todo.description}</p>}
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <Badge variant="outline" className={`text-xs ${priorityColors[todo.priority] || ""}`}>
+              <Badge variant="outline" className={`text-sm ${priorityColors[todo.priority] || ""}`}>
                 {todo.priority}
               </Badge>
               {todo.due_date && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   Due {format(new Date(todo.due_date), "MMM d, yyyy")}
                 </span>
               )}
               {todo.vulas_reward > 0 && (
-                <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                  🪙 {todo.vulas_reward} Vulas
+                <Badge variant="outline" className="text-sm bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                  ðŸª™ {todo.vulas_reward} Vulas
                 </Badge>
               )}
             </div>
@@ -510,13 +510,13 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
             {!isCompleted && (
               <div className="flex items-center gap-2 mt-3">
                 {hasVulasReward && (
-                  <Button size="sm" onClick={() => setShowRecordDialog(true)} className="gap-1.5 text-xs h-8">
+                  <Button size="sm" onClick={() => setShowRecordDialog(true)} className="gap-1.5 text-sm h-8">
                     <Video className="h-3.5 w-3.5" />
                     Record Proof
                   </Button>
                 )}
                 {isMedicationType && (
-                  <Button size="sm" variant="outline" onClick={() => navigate("/patient/rewards?tab=chronic-meds")} className="gap-1.5 text-xs h-8">
+                  <Button size="sm" variant="outline" onClick={() => navigate("/patient/rewards?tab=chronic-meds")} className="gap-1.5 text-sm h-8">
                     <Pill className="h-3.5 w-3.5" />
                     Chronic Meds
                   </Button>
@@ -549,7 +549,7 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
                 <video ref={liveVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
               )}
               {isRecording && (
-                <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-destructive/90 text-destructive-foreground px-2 py-1 rounded-full text-xs font-medium">
+                <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-destructive/90 text-destructive-foreground px-2 py-1 rounded-full text-sm font-medium">
                   <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
                   {elapsed}s / {MAX_RECORDING_SECONDS}s
                 </div>
@@ -593,3 +593,4 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
     </>
   );
 }
+

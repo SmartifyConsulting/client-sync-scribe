@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Loader2, Lock } from "lucide-react";
@@ -45,7 +45,7 @@ export default function ManualOverrideScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Admin Functions
         </p>
         <h1 className="text-3xl font-extrabold">Manual Override</h1>
@@ -59,7 +59,7 @@ export default function ManualOverrideScreen() {
         <div className="flex gap-3">
           <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-bold text-red-900">⚠️ Restricted Function</h3>
+            <h3 className="font-bold text-red-900">âš ï¸ Restricted Function</h3>
             <p className="text-sm text-red-800 mt-1">
               Manual overrides bypass established safety protocols and must be authorized by
               management. All actions will be logged for audit purposes.
@@ -83,7 +83,7 @@ export default function ManualOverrideScreen() {
             <option value="emergency_override">Emergency System Override</option>
           </select>
 
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             {override.override_type === "skip_triage" &&
               "Skip standard triage and proceed directly to dispatch"}
             {override.override_type === "force_dispatch" &&
@@ -142,7 +142,7 @@ export default function ManualOverrideScreen() {
 
             {override.supervisor_approval && (
               <div className="rounded-lg bg-green-50 border border-green-200 p-3">
-                <p className="text-sm text-green-800">✓ Authorization confirmed</p>
+                <p className="text-sm text-green-800">âœ“ Authorization confirmed</p>
               </div>
             )}
           </div>
@@ -158,15 +158,15 @@ export default function ManualOverrideScreen() {
             rows={2}
             className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             This information will be permanently recorded in the audit log
           </p>
         </div>
 
         {/* Summary */}
         <div className="rounded-2xl border bg-blue-50 p-4">
-          <p className="text-sm font-semibold text-blue-900">⚠️ Important Reminder</p>
-          <ul className="text-xs text-blue-800 mt-2 space-y-1 ml-4 list-disc">
+          <p className="text-sm font-semibold text-blue-900">âš ï¸ Important Reminder</p>
+          <ul className="text-sm text-blue-800 mt-2 space-y-1 ml-4 list-disc">
             <li>All overrides are permanently logged and audited</li>
             <li>Misuse of overrides may result in disciplinary action</li>
             <li>Overrides should only be used in genuine emergencies</li>
@@ -202,3 +202,4 @@ export default function ManualOverrideScreen() {
     </div>
   );
 }
+

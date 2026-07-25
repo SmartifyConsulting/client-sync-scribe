@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -130,7 +130,7 @@ export function IncidentVoiceNoteRecorder({
   return (
     <div className="rounded-2xl border bg-card p-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("voiceNotes.title")}</p>
+        <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("voiceNotes.title")}</p>
         {!recording ? (
           <Button size="sm" onClick={start} disabled={busy} className="gap-1.5">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />} {t("voiceNotes.record")}
@@ -145,11 +145,11 @@ export function IncidentVoiceNoteRecorder({
         {notes.length === 0 && <p className="text-sm text-muted-foreground">{t("voiceNotes.none")}</p>}
         {notes.map((n) => (
           <div key={n.id} className="rounded-xl border p-3">
-            <p className="text-xs font-semibold">
-              🎤 {n.actor_name ?? t("common.unknown")} {n.provider_name ? `— ${n.provider_name}` : ""}
+            <p className="text-sm font-semibold">
+              ðŸŽ¤ {n.actor_name ?? t("common.unknown")} {n.provider_name ? `â€” ${n.provider_name}` : ""}
             </p>
             <p className="text-sm text-muted-foreground">
-              {new Date(n.created_at).toLocaleString()} {n.duration_seconds ? `· ${n.duration_seconds.toFixed(1)}s` : ""}
+              {new Date(n.created_at).toLocaleString()} {n.duration_seconds ? `Â· ${n.duration_seconds.toFixed(1)}s` : ""}
             </p>
             {n.transcript && <p className="mt-1.5 whitespace-pre-wrap text-sm">{n.transcript}</p>}
             <div className="mt-2 flex items-center gap-2">
@@ -157,7 +157,7 @@ export function IncidentVoiceNoteRecorder({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-7 text-xs"
+                className="h-7 text-sm"
                 onClick={async () => {
                   toast.message(t("voiceNotes.retranscribing"));
                   try {
@@ -189,3 +189,4 @@ export function IncidentVoiceNoteRecorder({
     </div>
   );
 }
+

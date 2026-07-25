@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import {
@@ -92,14 +92,14 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
                       <p className="font-medium text-foreground">
                         {format(new Date(session.started_at), "MMM d, yyyy")}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {format(new Date(session.started_at), "h:mm a")}
                       </p>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  {session.duration_minutes ? `${session.duration_minutes} min` : "—"}
+                  {session.duration_minutes ? `${session.duration_minutes} min` : "â€”"}
                 </TableCell>
                 <TableCell>
                   <p className="text-sm text-muted-foreground line-clamp-2">

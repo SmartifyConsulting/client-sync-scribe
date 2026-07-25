@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+﻿import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { translateTodoTitle } from "@/lib/translateTodoTitle";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -74,14 +74,14 @@ const priorityKey = {
 } as const;
 
 const actionTypeLabels: Record<string, string> = {
-  schedule_appointment: "📅 Scheduled appointment",
-  write_prescription: "💊 Created prescription",
-  create_invoice: "🧾 Created invoice",
-  write_medical_certificate: "📋 Created medical certificate",
-  write_referral_letter: "✉️ Created referral letter",
-  write_general_letter: "📝 Created general letter",
-  manual_task: "📌 Manual task created",
-  document_review: "📄 Review document",
+  schedule_appointment: "ðŸ“… Scheduled appointment",
+  write_prescription: "ðŸ’Š Created prescription",
+  create_invoice: "ðŸ§¾ Created invoice",
+  write_medical_certificate: "ðŸ“‹ Created medical certificate",
+  write_referral_letter: "âœ‰ï¸ Created referral letter",
+  write_general_letter: "ðŸ“ Created general letter",
+  manual_task: "ðŸ“Œ Manual task created",
+  document_review: "ðŸ“„ Review document",
 };
 
 function getDateLabel(dateStr: string): string {
@@ -230,7 +230,7 @@ export default function TodoList() {
         const avg = dataArray.reduce((s, v) => s + v, 0) / dataArray.length;
         if (avg < 10) { silenceTimerRef.current += 200; if (silenceTimerRef.current >= 8000 && mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop(); setIsRecording(false); } } else { silenceTimerRef.current = 0; }
       }, 200);
-      toast({ title: "Listening...", description: "Speak your task — recording stops automatically after a pause" });
+      toast({ title: "Listening...", description: "Speak your task â€” recording stops automatically after a pause" });
     } catch { toast({ title: "Microphone access denied", variant: "destructive" }); }
   };
 
@@ -285,7 +285,7 @@ export default function TodoList() {
           if (patient?.patient_user_id) {
             await supabase.from('notifications').insert({
               user_id: patient.patient_user_id,
-              title: `📋 New task assigned: ${data.title}`,
+              title: `ðŸ“‹ New task assigned: ${data.title}`,
               description: data.description || 'You have been assigned a new task by your healthcare provider.',
               type: 'task_assigned',
               reference_id: data.id,
@@ -378,7 +378,7 @@ export default function TodoList() {
             if (newTodo) {
               await supabase.from('notifications').insert({
                 user_id: patient.patient_user_id,
-                title: `📋 New task assigned: ${title}`,
+                title: `ðŸ“‹ New task assigned: ${title}`,
                 description: 'You have been assigned a new task by your healthcare provider.',
                 type: 'task_assigned',
                 reference_id: newTodo.id,
@@ -428,10 +428,10 @@ export default function TodoList() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
-        <p className="mt-1 text-muted-foreground text-xs">Manage your tasks with voice or text input — AI can auto-execute actions</p>
+        <p className="mt-1 text-muted-foreground text-sm">Manage your tasks with voice or text input â€” AI can auto-execute actions</p>
       </div>
 
-      {/* Add New Task — reduced by 60% */}
+      {/* Add New Task â€” reduced by 60% */}
       <div className="rounded-xl border border-primary bg-card p-2.5 shadow-sm">
         <h2 className="text-sm font-semibold text-foreground mb-2">{t("todo.addNewTask")}</h2>
         <div className="flex items-center gap-2 py-1.5 mb-1.5 border-b border-border">
@@ -447,27 +447,27 @@ export default function TodoList() {
           >
             {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
           </button>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {isProcessing ? t("todo.transcribing") : isAiProcessing ? t("todo.aiProcessing") : isRecording ? t("todo.listening") : t("todo.tapToRecord")}
           </p>
         </div>
         <div className="space-y-2">
           <div className="flex gap-2">
             <Input placeholder={t("todo.typeTask")} value={newTaskText} onChange={(e) => setNewTaskText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTask()} className="flex-1 h-8 text-sm" />
-            <Button onClick={addTask} disabled={!newTaskText.trim() || isAiProcessing} className="gap-1 h-8 px-3 text-xs"><Plus className="h-3.5 w-3.5" />{t("todo.add")}</Button>
+            <Button onClick={addTask} disabled={!newTaskText.trim() || isAiProcessing} className="gap-1 h-8 px-3 text-sm"><Plus className="h-3.5 w-3.5" />{t("todo.add")}</Button>
           </div>
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-muted-foreground">{t("todo.priority")}</span>
+              <span className="text-sm text-muted-foreground">{t("todo.priority")}</span>
               <div className="flex gap-1">
                 {(["low", "medium", "high"] as const).map((p) => (
-                  <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-xs font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
+                  <button key={p} onClick={() => setNewTaskPriority(p)} className={cn("rounded-full px-2 py-0.5 text-sm font-medium transition-all", newTaskPriority === p ? p === "high" ? "bg-destructive text-destructive-foreground" : p === "medium" ? "bg-warning text-warning-foreground" : "bg-muted text-muted-foreground ring-2 ring-primary" : priorityColors[p])}>
                     {t(priorityKey[p])}
                   </button>
                 ))}
               </div>
             </div>
-            <Button onClick={() => handleAiProcess()} disabled={!newTaskText.trim() || isAiProcessing} variant="secondary" className="gap-1 h-7 px-2 text-xs">
+            <Button onClick={() => handleAiProcess()} disabled={!newTaskText.trim() || isAiProcessing} variant="secondary" className="gap-1 h-7 px-2 text-sm">
               {isAiProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}{t("todo.aiProcess")}
             </Button>
           </div>
@@ -485,7 +485,7 @@ export default function TodoList() {
             {aiResults.map((result, idx) => (
               <div key={idx} className="flex items-center gap-2 text-sm">
                 <span>{actionTypeLabels[result.action_type] || result.action_type}</span>
-                <span className="text-muted-foreground">—</span>
+                <span className="text-muted-foreground">â€”</span>
                 <span className="text-muted-foreground truncate">{result.description}</span>
                 {result.auto_executed ? <Badge className="bg-success/10 text-success border-success/20 ml-auto shrink-0"><Zap className="h-4 w-4 mr-1" />Done</Badge> : <Badge variant="outline" className="ml-auto shrink-0">Manual</Badge>}
               </div>
@@ -499,13 +499,13 @@ export default function TodoList() {
         {(["active", "completed", "all"] as const).map((f) => (
           <button key={f} onClick={() => setFilter(f)} className={cn("rounded-lg px-4 py-2 text-sm font-medium transition-colors", filter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80")}>
             {t(`todo.${f}`)}
-            <span className="ml-1.5 text-xs opacity-70">({f === "all" ? todos.length : f === "active" ? activeCount : completedCount})</span>
+            <span className="ml-1.5 text-sm opacity-70">({f === "all" ? todos.length : f === "active" ? activeCount : completedCount})</span>
           </button>
         ))}
       </div>
 
 
-      {/* Task List — Grouped by Date */}
+      {/* Task List â€” Grouped by Date */}
       <div className="space-y-3">
         {sortedDateKeys.length === 0 ? (
           <div className="rounded-xl border border-primary bg-card p-8 text-center text-muted-foreground">
@@ -521,7 +521,7 @@ export default function TodoList() {
                 <CollapsibleTrigger className="flex items-center gap-2 w-full px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted/80 transition-colors">
                   {isCollapsed ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                   <span className="text-sm font-semibold text-foreground">{label}</span>
-                  <Badge variant="outline" className="ml-auto text-xs">{items.length}</Badge>
+                  <Badge variant="outline" className="ml-auto text-sm">{items.length}</Badge>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden mt-1">
@@ -574,3 +574,4 @@ export default function TodoList() {
     </div>
   );
 }
+

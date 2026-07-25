@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { MapPin, Users, Clock, Loader2, CheckCircle2 } from "lucide-react";
@@ -70,7 +70,7 @@ export default function NearestAmbulanceScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Emergency Dispatch
         </p>
         <h1 className="text-3xl font-extrabold">Recommended Ambulances</h1>
@@ -104,7 +104,7 @@ export default function NearestAmbulanceScreen() {
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-orange-600" />
                 <span className="font-medium">{ambulance.distance_km} km away</span>
-                <span className="text-muted-foreground">• {ambulance.location}</span>
+                <span className="text-muted-foreground">â€¢ {ambulance.location}</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm">
@@ -119,13 +119,13 @@ export default function NearestAmbulanceScreen() {
 
               <div className="pt-2">
                 <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
                     ambulance.status === "available"
                       ? "bg-green-100 text-green-800"
                       : "bg-yellow-100 text-yellow-800"
                   }`}
                 >
-                  {ambulance.status === "available" ? "✓ Available" : "En Route"}
+                  {ambulance.status === "available" ? "âœ“ Available" : "En Route"}
                 </span>
               </div>
             </div>
@@ -189,3 +189,4 @@ export default function NearestAmbulanceScreen() {
     </div>
   );
 }
+

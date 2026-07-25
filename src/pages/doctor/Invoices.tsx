@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { format, differenceInDays, startOfMonth, endOfMonth, parseISO, isWithinInterval } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { jsPDF } from "jspdf";
@@ -111,10 +111,10 @@ type StatusFilter = "all" | "issued" | "paid" | "overdue" | "issued_overdue" | "
 const CURRENCIES = [
   { code: "ZAR", symbol: "R" },
   { code: "USD", symbol: "$" },
-  { code: "EUR", symbol: "€" },
-  { code: "GBP", symbol: "£" },
+  { code: "EUR", symbol: "â‚¬" },
+  { code: "GBP", symbol: "Â£" },
   { code: "BWP", symbol: "P" },
-  { code: "NGN", symbol: "₦" },
+  { code: "NGN", symbol: "â‚¦" },
   { code: "SZL", symbol: "E" },
   { code: "LSL", symbol: "M" },
 ];
@@ -336,7 +336,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
               user_id: user.id,
               patient_id: invoice.patient.id,
               session_id: invoice.session_id ?? null,
-              name: `Invoice ${invoice.invoice_number} — PAID`,
+              name: `Invoice ${invoice.invoice_number} â€” PAID`,
               template_name: "Invoice (Paid)",
               content: html,
               patient_name: invoice.patient.name,
@@ -352,7 +352,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         body: {
           to: patientData.claims_email,
           subject: `Invoice ${invoice.invoice_number} (PAID) - ${patientData.name}`,
-          documentName: `Invoice ${invoice.invoice_number} — PAID`,
+          documentName: `Invoice ${invoice.invoice_number} â€” PAID`,
           documentHtml: html,
           senderName: profile?.full_name || "Doctor",
           practiceName: profile?.practice_number || undefined,
@@ -483,7 +483,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     }
   };
 
-  // Build a (rendered) preview HTML for any invoice — paid or unpaid.
+  // Build a (rendered) preview HTML for any invoice â€” paid or unpaid.
   const previewInvoice = async (invoice: Invoice) => {
     setLoadingPreviewId(invoice.id);
     try {
@@ -973,7 +973,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         {!hideHeader && (
           <div>
             <h1 className="text-3xl font-bold text-foreground">Invoices</h1>
-            <p className="mt-1 text-muted-foreground text-xs">
+            <p className="mt-1 text-muted-foreground text-sm">
               Manage and track all patient invoices
             </p>
           </div>
@@ -1118,7 +1118,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                         </Command>
                       </PopoverContent>
                     </Popover>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Select a service to auto-fill description and amount. You can override the price below.
                     </p>
                   </div>
@@ -1530,20 +1530,20 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                     <TableCell>{getStatusBadge(status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        {/* Set Amount — pending zero-amount auto-invoices */}
+                        {/* Set Amount â€” pending zero-amount auto-invoices */}
                         {Number(invoice.amount) === 0 && status !== "paid" && status !== "archived" && (
                           <Button
                             size="sm"
                             variant="outline"
                             className="h-8 text-sm border-amber-500/40 text-amber-700 hover:bg-amber-500/10"
                             onClick={() => openEditDialog(invoice)}
-                            title="This invoice has no amount — click to set it"
+                            title="This invoice has no amount â€” click to set it"
                           >
                             Set amount
                           </Button>
                         )}
 
-                        {/* Preview — every row */}
+                        {/* Preview â€” every row */}
                         <Button
                           size="icon"
                           variant="ghost"
@@ -1559,7 +1559,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           )}
                         </Button>
 
-                        {/* Edit — every row */}
+                        {/* Edit â€” every row */}
                         <Button
                           size="icon"
                           variant="ghost"
@@ -1586,7 +1586,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                         )}
                         {status === "paid" && invoice.paid_at && (
                           <>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm text-muted-foreground">
                               Paid {format(new Date(invoice.paid_at), 'dd MMM')}
                             </span>
                             <Button
@@ -1728,7 +1728,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold text-foreground">{previewHtml.title}</h2>
-                  <p className="text-xs text-muted-foreground">Invoice preview</p>
+                  <p className="text-sm text-muted-foreground">Invoice preview</p>
                 </div>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setPreviewHtml(null)}>
@@ -1795,7 +1795,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
             <div className="p-6 border-b border-border">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">From</p>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wide mb-2">From</p>
                   <p className="font-semibold text-foreground">{profile?.full_name || "Doctor"}</p>
                   {profile?.practice_number && (
                     <p className="text-sm text-muted-foreground">Practice No: {profile.practice_number}</p>
@@ -1808,7 +1808,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   )}
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Bill To</p>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wide mb-2">Bill To</p>
                   <p className="font-semibold text-foreground">{viewingInvoice.patient?.name || "Unknown"}</p>
                 </div>
               </div>
@@ -1911,3 +1911,4 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
     </div>
   );
 }
+

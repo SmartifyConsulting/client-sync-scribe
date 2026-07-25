@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
+﻿import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
@@ -125,19 +125,19 @@ const ORGAN_OPTIONS = [
 const RELATIONSHIP_OPTIONS = ["Spouse", "Parent", "Child", "Sibling", "Grandparent", "Friend", "Partner", "Guardian"];
 
 const COUNTRY_CODES = [
-  { code: "+27", label: "🇿🇦 +27" },
-  { code: "+1", label: "🇺🇸 +1" },
-  { code: "+44", label: "🇬🇧 +44" },
-  { code: "+61", label: "🇦🇺 +61" },
-  { code: "+91", label: "🇮🇳 +91" },
-  { code: "+49", label: "🇩🇪 +49" },
-  { code: "+33", label: "🇫🇷 +33" },
-  { code: "+86", label: "🇨🇳 +86" },
-  { code: "+81", label: "🇯🇵 +81" },
-  { code: "+55", label: "🇧🇷 +55" },
-  { code: "+234", label: "🇳🇬 +234" },
-  { code: "+254", label: "🇰🇪 +254" },
-  { code: "+971", label: "🇦🇪 +971" },
+  { code: "+27", label: "ðŸ‡¿ðŸ‡¦ +27" },
+  { code: "+1", label: "ðŸ‡ºðŸ‡¸ +1" },
+  { code: "+44", label: "ðŸ‡¬ðŸ‡§ +44" },
+  { code: "+61", label: "ðŸ‡¦ðŸ‡º +61" },
+  { code: "+91", label: "ðŸ‡®ðŸ‡³ +91" },
+  { code: "+49", label: "ðŸ‡©ðŸ‡ª +49" },
+  { code: "+33", label: "ðŸ‡«ðŸ‡· +33" },
+  { code: "+86", label: "ðŸ‡¨ðŸ‡³ +86" },
+  { code: "+81", label: "ðŸ‡¯ðŸ‡µ +81" },
+  { code: "+55", label: "ðŸ‡§ðŸ‡· +55" },
+  { code: "+234", label: "ðŸ‡³ðŸ‡¬ +234" },
+  { code: "+254", label: "ðŸ‡°ðŸ‡ª +254" },
+  { code: "+971", label: "ðŸ‡¦ðŸ‡ª +971" },
 ];
 
 const sectionFrame = "rounded-xl border border-primary bg-card p-4 shadow-sm";
@@ -154,21 +154,21 @@ const AutosaveStatus = ({
 }) => {
   if (saving) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…
+      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Savingâ€¦
       </span>
     );
   }
   if (hasChanges) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
         <Loader2 className="h-3.5 w-3.5 animate-spin" /> Unsaved changes
       </span>
     );
   }
   if (lastSavedAt) {
     return (
-      <span className="flex items-center gap-1.5 text-xs text-emerald-600">
+      <span className="flex items-center gap-1.5 text-sm text-emerald-600">
         <Save className="h-3.5 w-3.5" /> Saved
       </span>
     );
@@ -253,7 +253,7 @@ const PhoneInput = ({
   return (
     <div className="flex gap-1">
       <Select value={countryCode} onValueChange={(v) => handleChange(v, number)}>
-        <SelectTrigger className="w-[105px] text-xs shrink-0 [&>span]:line-clamp-none">
+        <SelectTrigger className="w-[105px] text-sm shrink-0 [&>span]:line-clamp-none">
           <SelectValue>
             <span className="whitespace-nowrap">
               {COUNTRY_CODES.find((cc) => cc.code === countryCode)?.label}
@@ -294,7 +294,7 @@ const RelationshipSelect = ({ value, onChange }: { value: string; onChange: (v: 
         <Button
           variant="ghost"
           size="sm"
-          className="text-xs h-9 shrink-0"
+          className="text-sm h-9 shrink-0"
           onClick={() => {
             setShowOther(false);
             onChange("");
@@ -379,8 +379,8 @@ function AnimatedCounter({ target }: { target: number }) {
   const fromRef = useRef<number>(target);
   const lastTargetRef = useRef<number>(target);
   useEffect(() => {
-    // Skip if target hasn't actually changed — prevents the double-animation
-    // that happens when lollipopCount arrives in two passes (0 → real value).
+    // Skip if target hasn't actually changed â€” prevents the double-animation
+    // that happens when lollipopCount arrives in two passes (0 â†’ real value).
     if (target === lastTargetRef.current && count === target) return;
     lastTargetRef.current = target;
     if (target <= 0) {
@@ -846,7 +846,7 @@ export function PatientDetailsEditor({
         conditions_diagnoses: conditionsDiagnoses,
         is_chronic: isChronic,
       } as any);
-      // Sync chronic meds → prescriptions so they appear under Rewards
+      // Sync chronic meds â†’ prescriptions so they appear under Rewards
       await syncChronicMedsToPrescriptions(currentMedications);
       setSaving(false);
       setHasChanges(false);
@@ -1079,10 +1079,10 @@ export function PatientDetailsEditor({
   // Compose a human-readable dosage string from structured fields
   const composeDosage = (m: { quantity?: string; strength?: string; units?: string; times_per_day?: string; dosage?: string }) => {
     const parts: string[] = [];
-    if (m.quantity && m.strength) parts.push(`${m.quantity} × ${m.strength}${m.units || "mg"}`);
+    if (m.quantity && m.strength) parts.push(`${m.quantity} Ã— ${m.strength}${m.units || "mg"}`);
     else if (m.strength) parts.push(`${m.strength}${m.units || "mg"}`);
     else if (m.quantity && m.quantity !== "1") parts.push(`${m.quantity} units`);
-    if (m.times_per_day && m.times_per_day !== "1") parts.push(`${m.times_per_day}× daily`);
+    if (m.times_per_day && m.times_per_day !== "1") parts.push(`${m.times_per_day}Ã— daily`);
     else if (m.times_per_day === "1") parts.push("once daily");
     const composed = parts.join(", ");
     return composed || m.dosage || "";
@@ -1328,7 +1328,7 @@ export function PatientDetailsEditor({
                 )}
               </div>
             </div>
-            <span className="text-xs font-medium text-primary-dark mt-0.5">
+            <span className="text-sm font-medium text-primary-dark mt-0.5">
               {avatarUrl ? "Change photo" : "Add photo"}
             </span>
 
@@ -1342,7 +1342,7 @@ export function PatientDetailsEditor({
                 return `${greeting}, ${patient.name.split(" ")[0]}`;
               })()}
             </h3>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground text-sm">
               Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
             </p>
           </div>
@@ -1361,7 +1361,7 @@ export function PatientDetailsEditor({
         <div className="mt-3 border-t border-border pt-3">
           <div className="flex items-center gap-1.5 mb-2">
             <Calendar className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold text-foreground">Upcoming Appointments</span>
+            <span className="text-sm font-semibold text-foreground">Upcoming Appointments</span>
           </div>
           {upcomingAppointments.length > 0 ? (
             <div className="space-y-1.5">
@@ -1371,14 +1371,14 @@ export function PatientDetailsEditor({
                 return (
                   <div
                     key={appt.id}
-                    className="flex items-center justify-between text-xs bg-muted/50 rounded-md px-2.5 py-1.5"
+                    className="flex items-center justify-between text-sm bg-muted/50 rounded-md px-2.5 py-1.5"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-medium text-foreground truncate">
                         {doctorProfile?.full_name || "Doctor"}
                       </span>
                       {doctorProfile?.specialty && (
-                        <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 shrink-0">
+                        <Badge variant="secondary" className="text-sm px-1.5 py-0 h-4 shrink-0">
                           {doctorProfile.specialty}
                         </Badge>
                       )}
@@ -1391,7 +1391,7 @@ export function PatientDetailsEditor({
               })}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">No upcoming appointments.</p>
+            <p className="text-sm text-muted-foreground">No upcoming appointments.</p>
           )}
         </div>
 
@@ -1412,7 +1412,7 @@ export function PatientDetailsEditor({
           <Button
             variant="outline"
             size="sm"
-            className="w-full h-9 text-xs gap-1.5"
+            className="w-full h-9 text-sm gap-1.5"
             onClick={() => {
               setActiveTab("calendar");
               if (isMobile && isSelfService) navigate("/patient/details?section=admin");
@@ -1423,7 +1423,7 @@ export function PatientDetailsEditor({
           </Button>
           <Button
             size="sm"
-            className="w-full h-9 text-xs gap-1.5"
+            className="w-full h-9 text-sm gap-1.5"
             onClick={() => {
               setActiveTab("tasks");
               if (isMobile && isSelfService) navigate("/patient/details?section=admin");
@@ -1477,7 +1477,7 @@ export function PatientDetailsEditor({
     const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
     const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
     const triggerClass =
-      "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5";
+      "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5";
 
     // Self-service (mobile + tablet + web): tabs filtered by current section
     if (isSelfService && section) {
@@ -1532,13 +1532,13 @@ export function PatientDetailsEditor({
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
         <TabsTrigger
           value="personal"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5"
         >
           {t("patientProfile.togglePersonal")}
         </TabsTrigger>
         <TabsTrigger
           value="medical"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5"
         >
           {t("patientProfile.toggleMedical")}
         </TabsTrigger>
@@ -1599,7 +1599,7 @@ export function PatientDetailsEditor({
               <Mic className="h-3.5 w-3.5" />
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {upcomingAppointments.length > 0
               ? `${upcomingAppointments.length} upcoming appointment${upcomingAppointments.length > 1 ? "s" : ""}`
               : "No upcoming appointments."}
@@ -1626,9 +1626,9 @@ export function PatientDetailsEditor({
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
                 <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5">My Holarc Team</TabsTrigger>
-                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5">Insurance</TabsTrigger>
-                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5">Pharmacies</TabsTrigger>
+                  <TabsTrigger value="team" className="whitespace-nowrap text-sm px-2.5 py-1.5">My Holarc Team</TabsTrigger>
+                  <TabsTrigger value="insurance" className="whitespace-nowrap text-sm px-2.5 py-1.5">Insurance</TabsTrigger>
+                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-sm px-2.5 py-1.5">Pharmacies</TabsTrigger>
                 </TabsList>
 
             {/* === INSURANCE SUB-TAB (view) === */}
@@ -1653,7 +1653,7 @@ export function PatientDetailsEditor({
                 <SectionHeader icon={Store} label="Pharmacies" />
                 <CollapsibleContent className="p-3">
                   {pharmacies.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
+                    <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
                   ) : (
                     <div className="space-y-2">
                       {pharmacies.map((pharmacy) => (
@@ -1662,19 +1662,19 @@ export function PatientDetailsEditor({
                           className="flex items-center justify-between p-2 rounded-lg bg-muted/30 border border-border/50"
                         >
                           <div>
-                            <p className="text-xs font-medium text-foreground flex items-center gap-2">
+                            <p className="text-sm font-medium text-foreground flex items-center gap-2">
                               {pharmacy.name}
                               {pharmacy.branch && (
                                 <span className="text-muted-foreground">({pharmacy.branch})</span>
                               )}
                               {pharmacy.is_primary && (
-                                <span className="text-xs bg-primary text-primary px-1.5 py-0.5 rounded-full font-medium">
+                                <span className="text-sm bg-primary text-primary px-1.5 py-0.5 rounded-full font-medium">
                                   Primary
                                 </span>
                               )}
                             </p>
                             {pharmacy.email && (
-                              <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
+                              <p className="text-sm text-muted-foreground">{pharmacy.email}</p>
                             )}
                           </div>
                         </div>
@@ -1689,7 +1689,7 @@ export function PatientDetailsEditor({
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
                 <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Team</h2>
-                <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
+                <p className="text-sm text-muted-foreground">Healthcare providers with access to your profile</p>
               </div>
               <Suspense
                 fallback={
@@ -1709,7 +1709,7 @@ export function PatientDetailsEditor({
               <div className="mb-1 flex items-center justify-between">
                 <div>
                   <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
-                  <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
+                  <p className="text-sm text-muted-foreground">{t("patientProfile.personalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                   <Pencil className="h-4 w-4" />
@@ -1731,7 +1731,7 @@ export function PatientDetailsEditor({
                     <ViewField label="Email" value={patient.email} />
                     <ViewField label="Phone" value={patient.phone} />
                     <ViewField label="Marital Status" value={patient.marital_status} />
-                    <ViewField label="Language" value={LANGUAGES.find(l => l.code === (patient as any).preferred_language)?.name || (patient as any).preferred_language || "—"} />
+                    <ViewField label="Language" value={LANGUAGES.find(l => l.code === (patient as any).preferred_language)?.name || (patient as any).preferred_language || "â€”"} />
                     <ViewField label="Referred By" value={patient.referred_by} />
                   </div>
                 </CollapsibleContent>
@@ -1761,12 +1761,12 @@ export function PatientDetailsEditor({
                           className="flex items-center justify-between p-1.5 rounded-lg bg-muted/30 border border-border/50"
                         >
                           <div>
-                            <p className="text-xs font-medium text-foreground">
+                            <p className="text-sm font-medium text-foreground">
                               {nok.name}{" "}
                               {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
                             </p>
-                            {nok.phone && <p className="text-xs text-muted-foreground">{nok.phone}</p>}
-                            {nok.email && <p className="text-xs text-muted-foreground">{nok.email}</p>}
+                            {nok.phone && <p className="text-sm text-muted-foreground">{nok.phone}</p>}
+                            {nok.email && <p className="text-sm text-muted-foreground">{nok.email}</p>}
                           </div>
                           <div className="flex gap-1">
                             <Button
@@ -1805,7 +1805,7 @@ export function PatientDetailsEditor({
                 </CollapsibleContent>
               </Collapsible>
 
-              {/* Emergency Contacts (linked to NOK) — visible in view mode too */}
+              {/* Emergency Contacts (linked to NOK) â€” visible in view mode too */}
               {isSelfService && emergencyContacts && onEmergencyContactsChange && (
                 <EmergencyContactsInline
                   patientId={patient.id}
@@ -1840,12 +1840,12 @@ export function PatientDetailsEditor({
               </Collapsible>
             </TabsContent>
 
-            {/* === MEDICAL INFORMATION TAB — TWO COLUMNS === */}
+            {/* === MEDICAL INFORMATION TAB â€” TWO COLUMNS === */}
             <TabsContent value="medical" className="mt-4">
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.medicalHeading")}</h2>
-                  <p className="text-xs text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
+                  <p className="text-sm text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsEditing(true)}>
                   <Pencil className="h-4 w-4" />
@@ -1872,19 +1872,19 @@ export function PatientDetailsEditor({
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
-                        <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
+                        <h4 className="text-sm font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <AlertCircle className="h-3.5 w-3.5" /> Allergies
                         </h4>
-                        <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                        <p className="text-sm text-foreground">{patient.allergies || "None recorded"}</p>
                       </div>
 
                       {/* Medication */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
-                        <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
+                        <h4 className="text-sm font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <Pill className="h-3.5 w-3.5" /> Medication
                         </h4>
                         {currentMedications.length === 0 ? (
-                          <p className="text-xs text-muted-foreground">No medications recorded</p>
+                          <p className="text-sm text-muted-foreground">No medications recorded</p>
                         ) : (
                           <div className="space-y-1">
                             {currentMedications.map((m) => (
@@ -1894,24 +1894,24 @@ export function PatientDetailsEditor({
                               >
                                 <Pill className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-medium text-foreground">
+                                  <p className="text-sm font-medium text-foreground">
                                     {m.name}
-                                    {m.dosage ? ` — ${m.dosage}` : ""}
+                                    {m.dosage ? ` â€” ${m.dosage}` : ""}
                                   </p>
                                   {(m.start_date || m.end_date) && (
-                                    <p className="text-xs text-muted-foreground">
-                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} —{" "}
+                                    <p className="text-sm text-muted-foreground">
+                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} â€”{" "}
                                       {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
                                     </p>
                                   )}
                                 </div>
                                 <Badge
-                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
+                                  className={`text-sm border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
                                 >
                                   {m.status === "past" ? "Past" : "Current"}
                                 </Badge>
                                 {m.is_chronic && (
-                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-bold text-destructive shrink-0">
+                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-sm font-bold text-destructive shrink-0">
                                     Chronic
                                   </span>
                                 )}
@@ -1921,7 +1921,7 @@ export function PatientDetailsEditor({
                         )}
                         {isChronic && (
                           <div className="mt-2">
-                            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-sm font-bold text-destructive">
                               <Pill className="h-2.5 w-2.5" />
                               Chronic Patient
                             </span>
@@ -1932,27 +1932,27 @@ export function PatientDetailsEditor({
                       {/* Conditions moved to its own block below */}
                       {/* Conditions & Diagnoses */}
                       <div className="rounded-lg border border-border/50 p-2.5 space-y-1">
-                        <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
+                        <h4 className="text-sm font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <HeartPulse className="h-3.5 w-3.5" /> Conditions & Diagnoses
                         </h4>
                         {conditionsDiagnoses.length === 0 ? (
-                          <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                          <p className="text-sm text-muted-foreground">No conditions recorded</p>
                         ) : (
                           <div className="space-y-1">
                             {conditionsDiagnoses.map((c) => (
                               <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-foreground">{c.name}</p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-sm font-medium text-foreground">{c.name}</p>
+                                    <p className="text-sm text-muted-foreground">
                                       {c.diagnosed_date
                                         ? format(new Date(c.diagnosed_date), "MMM d, yyyy")
                                         : "Date unknown"}
-                                      {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                                      {c.diagnosed_by ? ` Â· Dr. ${c.diagnosed_by}` : ""}
                                     </p>
                                   </div>
                                   <Badge
-                                    className={`text-xs border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
+                                    className={`text-sm border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
                                   >
                                     {c.status === "resolved" ? "Resolved" : "Active"}
                                   </Badge>
@@ -1965,7 +1965,7 @@ export function PatientDetailsEditor({
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Daily Vitamins, Supplements & OTC — own accordion */}
+                  {/* Daily Vitamins, Supplements & OTC â€” own accordion */}
                   {isSelfService && (
                     <Collapsible defaultOpen={false} className="rounded-xl border border-border bg-white overflow-hidden">
                       <SectionHeader icon={Sparkles} label="Daily Vitamins, Supplements & OTC" />
@@ -1980,17 +1980,17 @@ export function PatientDetailsEditor({
                     <SectionHeader icon={Scissors} label="Surgeries & Dates" />
                     <CollapsibleContent className="px-3 pb-3">
                       {surgeries.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No surgeries recorded</p>
+                        <p className="text-sm text-muted-foreground">No surgeries recorded</p>
                       ) : (
                         <div className="space-y-1">
                           {surgeries.map((surgery) => (
                             <div key={surgery.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                              <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-sm font-medium text-foreground">{surgery.name}</p>
+                              <p className="text-sm text-muted-foreground">
                                 {formatSurgeryDate(surgery.date, surgery.date_precision)}
                               </p>
                               {surgery.notes && (
-                                <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>
+                                <p className="text-sm text-muted-foreground mt-0.5">{surgery.notes}</p>
                               )}
                             </div>
                           ))}
@@ -2004,13 +2004,13 @@ export function PatientDetailsEditor({
                     <SectionHeader icon={GitBranch} label="Family History" />
                     <CollapsibleContent className="px-3 pb-3">
                       {familyHistory.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No family history recorded</p>
+                        <p className="text-sm text-muted-foreground">No family history recorded</p>
                       ) : (
                         <div className="space-y-1">
                           {familyHistory.map((entry) => (
                             <div key={entry.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
-                              <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                              <p className="text-xs text-muted-foreground">{entry.condition}</p>
+                              <p className="text-sm font-medium text-foreground">{entry.relation}</p>
+                              <p className="text-sm text-muted-foreground">{entry.condition}</p>
                             </div>
                           ))}
                         </div>
@@ -2018,16 +2018,16 @@ export function PatientDetailsEditor({
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Organ Donor — collapsible with inline Yes/No */}
+                  {/* Organ Donor â€” collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-border bg-white overflow-hidden">
                     <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
-                      <h3 className="text-xs font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
+                      <h3 className="text-sm font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
                         <Heart className="h-3.5 w-3.5" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
                         <span
                           className={cn(
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-sm font-semibold",
                             patient.organ_donor
                               ? "bg-primary text-primary-foreground"
                               : "bg-muted text-muted-foreground",
@@ -2044,7 +2044,7 @@ export function PatientDetailsEditor({
                           {patient.organ_donor_organs!.map((organ) => (
                             <span
                               key={organ}
-                              className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs text-foreground"
+                              className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-sm text-foreground"
                             >
                               {organ}
                             </span>
@@ -2052,7 +2052,7 @@ export function PatientDetailsEditor({
                         </div>
                       )}
                       {!patient.organ_donor && (
-                        <p className="text-xs text-muted-foreground mt-2">Not registered as an organ donor</p>
+                        <p className="text-sm text-muted-foreground mt-2">Not registered as an organ donor</p>
                       )}
                     </CollapsibleContent>
                   </Collapsible>
@@ -2075,7 +2075,7 @@ export function PatientDetailsEditor({
               <TabsContent value="tasks" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-[18px] font-semibold text-primary-dark">My Tasks</h2>
-                  <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
+                  <p className="text-sm text-muted-foreground">Manage your health tasks and to-dos</p>
                 </div>
                 <Suspense
                   fallback={
@@ -2093,21 +2093,21 @@ export function PatientDetailsEditor({
               <TabsContent value="history" className="mt-4">
                 <Tabs defaultValue="sessions">
                   <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                    <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Sessions</TabsTrigger>
-                    <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Admissions</TabsTrigger>
+                    <TabsTrigger value="sessions" className="whitespace-nowrap text-sm px-2.5 py-1.5">Sessions</TabsTrigger>
+                    <TabsTrigger value="admissions" className="whitespace-nowrap text-sm px-2.5 py-1.5">Admissions</TabsTrigger>
                   </TabsList>
                   <TabsContent value="sessions" className="mt-3">
                     <div className="mb-4">
                       <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
-                      <p className="text-xs text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
+                      <p className="text-sm text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
                     </div>
                     <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
                   </TabsContent>
                   <TabsContent value="admissions" className="mt-3">
                     <Tabs defaultValue="admissions_view">
                       <TabsList className="bg-primary">
-                        <TabsTrigger value="admissions_view" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Hospital Admissions</TabsTrigger>
-                        <TabsTrigger value="incidents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Emergency Incidents</TabsTrigger>
+                        <TabsTrigger value="admissions_view" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Hospital Admissions</TabsTrigger>
+                        <TabsTrigger value="incidents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-sm">Emergency Incidents</TabsTrigger>
                       </TabsList>
                       <TabsContent value="admissions_view" className="mt-3">
                         <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
@@ -2157,7 +2157,7 @@ export function PatientDetailsEditor({
               <TabsContent value="roundtable" className="mt-4">
                 <div className="mb-4">
                   <h2 className="text-[18px] font-semibold text-primary-dark">My Round Table</h2>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Notes shared by your healthcare providers about your care
                   </p>
                 </div>
@@ -2187,7 +2187,7 @@ export function PatientDetailsEditor({
           {renderTabsList()}
           {saving && (
             <div className="flex justify-end mt-2">
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Saving...
               </span>
@@ -2195,7 +2195,7 @@ export function PatientDetailsEditor({
           )}
           {!saving && !hasChanges && isEditing && (
             <div className="flex justify-end mt-2">
-              <span className="flex items-center gap-1.5 text-xs text-green-600">
+              <span className="flex items-center gap-1.5 text-sm text-green-600">
                 <Save className="h-4 w-4" />
                 Saved
               </span>
@@ -2206,9 +2206,9 @@ export function PatientDetailsEditor({
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
               <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5">My Holarc Team</TabsTrigger>
-                <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5">Insurance</TabsTrigger>
-                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5">Pharmacies</TabsTrigger>
+                <TabsTrigger value="team" className="whitespace-nowrap text-sm px-2.5 py-1.5">My Holarc Team</TabsTrigger>
+                <TabsTrigger value="insurance" className="whitespace-nowrap text-sm px-2.5 py-1.5">Insurance</TabsTrigger>
+                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-sm px-2.5 py-1.5">Pharmacies</TabsTrigger>
               </TabsList>
 
           {/* === INSURANCE SUB-TAB (EDIT) === */}
@@ -2281,7 +2281,7 @@ export function PatientDetailsEditor({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1 text-xs h-8 px-3"
+                      className="gap-1 text-sm h-8 px-3"
                       onClick={() => setShowAddPharmacy(true)}
                     >
                       <Plus className="h-4 w-4" />
@@ -2325,7 +2325,7 @@ export function PatientDetailsEditor({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs h-7"
+                        className="text-sm h-7"
                         onClick={() => {
                           setShowAddPharmacy(false);
                           setEditingPharmacyId(null);
@@ -2334,14 +2334,14 @@ export function PatientDetailsEditor({
                       >
                         Cancel
                       </Button>
-                      <Button size="sm" className="text-xs h-7" onClick={handleAddPharmacy}>
+                      <Button size="sm" className="text-sm h-7" onClick={handleAddPharmacy}>
                         {editingPharmacyId ? "Save" : "Add"}
                       </Button>
                     </div>
                   </div>
                 )}
                 {pharmacies.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">No pharmacies recorded</p>
+                  <p className="text-sm text-muted-foreground">No pharmacies recorded</p>
                 ) : (
                   <div className="space-y-1.5">
                     {pharmacies.map((pharmacy) => (
@@ -2352,7 +2352,7 @@ export function PatientDetailsEditor({
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleSetPrimaryPharmacy(pharmacy.id)}
-                            className="text-xs text-primary hover:underline"
+                            className="text-sm text-primary hover:underline"
                           >
                             {pharmacy.is_primary ? (
                               <Star className="h-3.5 w-3.5 fill-primary text-primary" />
@@ -2361,14 +2361,14 @@ export function PatientDetailsEditor({
                             )}
                           </button>
                           <div>
-                            <p className="text-xs font-medium text-foreground">
+                            <p className="text-sm font-medium text-foreground">
                               {pharmacy.name}
                               {pharmacy.branch && (
                                 <span className="text-muted-foreground ml-1">({pharmacy.branch})</span>
                               )}
                             </p>
                             {pharmacy.email && (
-                              <p className="text-xs text-muted-foreground">{pharmacy.email}</p>
+                              <p className="text-sm text-muted-foreground">{pharmacy.email}</p>
                             )}
                           </div>
                         </div>
@@ -2418,7 +2418,7 @@ export function PatientDetailsEditor({
             <div className="mb-1 flex items-center justify-between">
               <div>
                 <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.personalHeading")}</h2>
-                <p className="text-xs text-muted-foreground">{t("patientProfile.personalHelper")}</p>
+                <p className="text-sm text-muted-foreground">{t("patientProfile.personalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
@@ -2589,7 +2589,7 @@ export function PatientDetailsEditor({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1 text-xs h-8 px-3"
+                      className="gap-1 text-sm h-8 px-3"
                       onClick={() => setShowAddNOK(true)}
                     >
                       <Plus className="h-4 w-4" />
@@ -2675,7 +2675,7 @@ export function PatientDetailsEditor({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs h-7"
+                        className="text-sm h-7"
                         onClick={() => {
                           setShowAddNOK(false);
                           setEditingNOKId(null);
@@ -2684,7 +2684,7 @@ export function PatientDetailsEditor({
                       >
                         Cancel
                       </Button>
-                      <Button size="sm" className="text-xs h-7" onClick={handleAddNOK}>
+                      <Button size="sm" className="text-sm h-7" onClick={handleAddNOK}>
                         {editingNOKId ? "Save" : "Add"}
                       </Button>
                     </div>
@@ -2700,11 +2700,11 @@ export function PatientDetailsEditor({
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs font-medium text-foreground">
+                            <p className="text-sm font-medium text-foreground">
                               {nok.name}{" "}
                               {nok.relationship && <span className="text-muted-foreground">({nok.relationship})</span>}
                             </p>
-                            {nok.phone && <p className="text-xs text-muted-foreground">{nok.phone}</p>}
+                            {nok.phone && <p className="text-sm text-muted-foreground">{nok.phone}</p>}
                           </div>
                           <div className="flex gap-1">
                             <Button
@@ -2817,7 +2817,7 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ reporting_to_email: e.target.value })}
                       placeholder="manager@company.com"
                     />
-                    <p className="text-xs text-muted-foreground">Used for e-mailing of Medical Certificates</p>
+                    <p className="text-sm text-muted-foreground">Used for e-mailing of Medical Certificates</p>
                   </div>
                 </div>
               </CollapsibleContent>
@@ -2842,7 +2842,7 @@ export function PatientDetailsEditor({
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-[18px] font-semibold text-primary-dark">{t("patientProfile.medicalHeading")}</h2>
-                <p className="text-xs text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
+                <p className="text-sm text-muted-foreground">{t("patientProfile.medicalHelper")}</p>
               </div>
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
@@ -2879,7 +2879,7 @@ export function PatientDetailsEditor({
                       </div>
                       <div className="space-y-1.5">
                         <Label>BMI</Label>
-                        <Input className="text-sm bg-muted" value={bmi || "—"} disabled />
+                        <Input className="text-sm bg-muted" value={bmi || "â€”"} disabled />
                       </div>
                       <div className="space-y-1.5">
                         <Label className="flex items-center gap-1.5">
@@ -2934,7 +2934,7 @@ export function PatientDetailsEditor({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1 text-xs h-8 px-3"
+                            className="gap-1 text-sm h-8 px-3"
                             onClick={() => setShowAddMed(true)}
                           >
                             <Plus className="h-4 w-4" />
@@ -3004,11 +3004,11 @@ export function PatientDetailsEditor({
                               checked={newMed.is_chronic}
                               onCheckedChange={(c) => setNewMed((p) => ({ ...p, is_chronic: c as boolean }))}
                             />
-                            <Label className="text-xs">This is a chronic medication</Label>
+                            <Label className="text-sm">This is a chronic medication</Label>
                           </div>
                           <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-border/40">
                             <div className="space-y-1.5">
-                              <Label className="text-xs">Take at</Label>
+                              <Label className="text-sm">Take at</Label>
                               <Input
                                 type="time"
                                 className="text-sm h-8"
@@ -3021,14 +3021,14 @@ export function PatientDetailsEditor({
                                 checked={newMed.reminders_enabled}
                                 onCheckedChange={(v) => setNewMed((p) => ({ ...p, reminders_enabled: v }))}
                               />
-                              <Label className="text-xs">Remind me 5 min before</Label>
+                              <Label className="text-sm">Remind me 5 min before</Label>
                             </div>
                           </div>
                           <div className="flex justify-end gap-2">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-xs h-7"
+                              className="text-sm h-7"
                               onClick={() => {
                                 setShowAddMed(false);
                                 setEditingMedId(null);
@@ -3050,14 +3050,14 @@ export function PatientDetailsEditor({
                             >
                               Cancel
                             </Button>
-                            <Button size="sm" className="text-xs h-7" onClick={handleAddMed}>
+                            <Button size="sm" className="text-sm h-7" onClick={handleAddMed}>
                               {editingMedId ? "Save" : "Add"}
                             </Button>
                           </div>
                         </div>
                       )}
                       {currentMedications.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No medications recorded</p>
+                        <p className="text-sm text-muted-foreground">No medications recorded</p>
                       ) : (
                         <div className="space-y-1">
                           {currentMedications.map((m) => (
@@ -3072,24 +3072,24 @@ export function PatientDetailsEditor({
                                   className="shrink-0 scale-75"
                                 />
                                 <div className="min-w-0">
-                                  <p className="text-xs font-medium text-foreground truncate">
+                                  <p className="text-sm font-medium text-foreground truncate">
                                     {m.name}
-                                    {m.dosage ? ` — ${m.dosage}` : ""}
+                                    {m.dosage ? ` â€” ${m.dosage}` : ""}
                                   </p>
                                   {(m.start_date || m.end_date) && (
-                                    <p className="text-xs text-muted-foreground">
-                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} —{" "}
+                                    <p className="text-sm text-muted-foreground">
+                                      {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} â€”{" "}
                                       {m.end_date ? format(new Date(m.end_date), "MMM yyyy") : "Present"}
                                     </p>
                                   )}
                                 </div>
                                 <Badge
-                                  className={`text-xs border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
+                                  className={`text-sm border-0 ${m.status === "past" ? "bg-muted text-muted-foreground" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"}`}
                                 >
                                   {m.status === "past" ? "Past" : "Current"}
                                 </Badge>
                                 {m.is_chronic && (
-                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-bold text-destructive shrink-0">
+                                  <span className="inline-flex items-center rounded-full bg-destructive/10 px-1.5 py-0.5 text-sm font-bold text-destructive shrink-0">
                                     Chronic
                                   </span>
                                 )}
@@ -3132,7 +3132,7 @@ export function PatientDetailsEditor({
                       )}
                       {isChronic && (
                         <div className="mt-2">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-sm font-bold text-destructive">
                             <Pill className="h-2.5 w-2.5" />
                             Chronic Patient
                           </span>
@@ -3150,7 +3150,7 @@ export function PatientDetailsEditor({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="gap-1 text-xs h-8 px-3"
+                            className="gap-1 text-sm h-8 px-3"
                             onClick={() => setShowAddCondition(true)}
                           >
                             <Plus className="h-4 w-4" />
@@ -3210,7 +3210,7 @@ export function PatientDetailsEditor({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-xs h-7"
+                              className="text-sm h-7"
                               onClick={() => {
                                 setShowAddCondition(false);
                                 setEditingConditionId(null);
@@ -3219,14 +3219,14 @@ export function PatientDetailsEditor({
                             >
                               Cancel
                             </Button>
-                            <Button size="sm" className="text-xs h-7" onClick={handleAddCondition}>
+                            <Button size="sm" className="text-sm h-7" onClick={handleAddCondition}>
                               {editingConditionId ? "Save" : "Add"}
                             </Button>
                           </div>
                         </div>
                       )}
                       {conditionsDiagnoses.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No conditions recorded</p>
+                        <p className="text-sm text-muted-foreground">No conditions recorded</p>
                       ) : (
                         <div className="space-y-1">
                           {conditionsDiagnoses.map((c) => (
@@ -3235,17 +3235,17 @@ export function PatientDetailsEditor({
                               className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20"
                             >
                               <div>
-                                <p className="text-xs font-medium text-foreground">{c.name}</p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-sm font-medium text-foreground">{c.name}</p>
+                                <p className="text-sm text-muted-foreground">
                                   {c.diagnosed_date
                                     ? format(new Date(c.diagnosed_date), "MMM d, yyyy")
                                     : "Date unknown"}
-                                  {c.diagnosed_by ? ` · Dr. ${c.diagnosed_by}` : ""}
+                                  {c.diagnosed_by ? ` Â· Dr. ${c.diagnosed_by}` : ""}
                                 </p>
                               </div>
                               <div className="flex items-center gap-1 shrink-0">
                                 <Badge
-                                  className={`text-xs border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
+                                  className={`text-sm border-0 ${c.status === "resolved" ? "bg-muted text-muted-foreground" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}
                                 >
                                   {c.status === "resolved" ? "Resolved" : "Active"}
                                 </Badge>
@@ -3277,7 +3277,7 @@ export function PatientDetailsEditor({
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* Daily Vitamins, Supplements & OTC — own accordion */}
+                {/* Daily Vitamins, Supplements & OTC â€” own accordion */}
                 {isSelfService && (
                   <Collapsible defaultOpen={false} className="rounded-xl border border-border bg-white overflow-hidden">
                     <SectionHeader icon={Sparkles} label="Daily Vitamins, Supplements & OTC" />
@@ -3296,7 +3296,7 @@ export function PatientDetailsEditor({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 text-xs h-8 px-3"
+                          className="gap-1 text-sm h-8 px-3"
                           onClick={() => setShowAddSurgery(true)}
                         >
                           <Plus className="h-4 w-4" />
@@ -3378,7 +3378,7 @@ export function PatientDetailsEditor({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-xs h-7"
+                            className="text-sm h-7"
                             onClick={() => {
                               setShowAddSurgery(false);
                               setEditingSurgeryId(null);
@@ -3387,14 +3387,14 @@ export function PatientDetailsEditor({
                           >
                             Cancel
                           </Button>
-                          <Button size="sm" className="text-xs h-7" onClick={handleAddSurgery}>
+                          <Button size="sm" className="text-sm h-7" onClick={handleAddSurgery}>
                             {editingSurgeryId ? "Save" : "Add"}
                           </Button>
                         </div>
                       </div>
                     )}
                     {surgeries.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No surgeries recorded</p>
+                      <p className="text-sm text-muted-foreground">No surgeries recorded</p>
                     ) : (
                       <div className="space-y-1">
                         {surgeries.map((surgery) => (
@@ -3403,12 +3403,12 @@ export function PatientDetailsEditor({
                             className="flex items-start justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20"
                           >
                             <div>
-                              <p className="text-xs font-medium text-foreground">{surgery.name}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-sm font-medium text-foreground">{surgery.name}</p>
+                              <p className="text-sm text-muted-foreground">
                                 {formatSurgeryDate(surgery.date, surgery.date_precision)}
                               </p>
                               {surgery.notes && (
-                                <p className="text-xs text-muted-foreground mt-0.5">{surgery.notes}</p>
+                                <p className="text-sm text-muted-foreground mt-0.5">{surgery.notes}</p>
                               )}
                             </div>
                             <div className="flex gap-1 shrink-0">
@@ -3445,7 +3445,7 @@ export function PatientDetailsEditor({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-1 text-xs h-8 px-3"
+                          className="gap-1 text-sm h-8 px-3"
                           onClick={() => setShowAddFamily(true)}
                         >
                           <Plus className="h-4 w-4" />
@@ -3479,7 +3479,7 @@ export function PatientDetailsEditor({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-xs h-7"
+                            className="text-sm h-7"
                             onClick={() => {
                               setShowAddFamily(false);
                               setEditingFamilyId(null);
@@ -3488,14 +3488,14 @@ export function PatientDetailsEditor({
                           >
                             Cancel
                           </Button>
-                          <Button size="sm" className="text-xs h-7" onClick={handleAddFamilyEntry}>
+                          <Button size="sm" className="text-sm h-7" onClick={handleAddFamilyEntry}>
                             {editingFamilyId ? "Save" : "Add"}
                           </Button>
                         </div>
                       </div>
                     )}
                     {familyHistory.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No family history recorded</p>
+                      <p className="text-sm text-muted-foreground">No family history recorded</p>
                     ) : (
                       <div className="space-y-1">
                         {familyHistory.map((entry) => (
@@ -3504,8 +3504,8 @@ export function PatientDetailsEditor({
                             className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20"
                           >
                             <div>
-                              <p className="text-xs font-medium text-foreground">{entry.relation}</p>
-                              <p className="text-xs text-muted-foreground">{entry.condition}</p>
+                              <p className="text-sm font-medium text-foreground">{entry.relation}</p>
+                              <p className="text-sm text-muted-foreground">{entry.condition}</p>
                             </div>
                             <div className="flex gap-1 shrink-0">
                               <Button
@@ -3532,16 +3532,16 @@ export function PatientDetailsEditor({
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* Organ Donor — collapsible with inline Yes/No */}
+                {/* Organ Donor â€” collapsible with inline Yes/No */}
                 <Collapsible defaultOpen={false} className="rounded-xl border border-border bg-white overflow-hidden">
                   <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
-                    <h3 className="text-xs font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
+                    <h3 className="text-sm font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
                     </h3>
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-sm font-semibold",
                           formData.organ_donor
                             ? "bg-primary text-primary-foreground"
                             : "bg-muted text-muted-foreground",
@@ -3596,14 +3596,14 @@ export function PatientDetailsEditor({
                         placeholder="Search or type GP name"
                       />
                       {gpAutoDetected && (
-                        <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+                        <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
                           <span className="text-foreground">
-                            We noticed <span className="font-medium">{gpAutoDetected.full_name}</span> is connected to your care — use them as your GP?
+                            We noticed <span className="font-medium">{gpAutoDetected.full_name}</span> is connected to your care â€” use them as your GP?
                           </span>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-7 px-2.5 text-xs shrink-0"
+                            className="h-7 px-2.5 text-sm shrink-0"
                             onClick={() => {
                               updateFormData({ general_practitioner: gpAutoDetected.full_name });
                               setGpAutoDetected(null);
@@ -3618,12 +3618,12 @@ export function PatientDetailsEditor({
                           {gpSearchResults.map((doc) => (
                             <div
                               key={doc.id}
-                              className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-xs"
+                              className="flex items-center justify-between px-3 py-2 hover:bg-muted/50 text-sm"
                             >
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground truncate">{doc.full_name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {doc.specialty || "General"} {doc.practice_number ? `• ${doc.practice_number}` : ""}
+                                <p className="text-sm text-muted-foreground">
+                                  {doc.specialty || "General"} {doc.practice_number ? `â€¢ ${doc.practice_number}` : ""}
                                 </p>
                               </div>
                               <div className="flex gap-1 shrink-0 ml-2">
@@ -3656,12 +3656,12 @@ export function PatientDetailsEditor({
                             </div>
                           ))}
                           <div className="px-3 py-2 border-t border-border">
-                            <p className="text-xs text-muted-foreground mb-1">Doctor not on the app?</p>
+                            <p className="text-sm text-muted-foreground mb-1">Doctor not on the app?</p>
                             <div className="flex gap-1">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1 text-xs h-6"
+                                className="gap-1 text-sm h-6"
                                 onClick={() => {
                                   toast({ title: "Invitation sent", description: "An invitation email will be sent" });
                                   setGpSearchOpen(false);
@@ -3673,7 +3673,7 @@ export function PatientDetailsEditor({
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1 text-xs h-6"
+                                className="gap-1 text-sm h-6"
                                 onClick={() => {
                                   toast({
                                     title: "Invite & Connect",
@@ -3704,7 +3704,7 @@ export function PatientDetailsEditor({
             <TabsContent value="tasks" className="mt-4">
               <div className="mb-4">
                 <h2 className="text-[18px] font-semibold text-primary-dark">My Tasks</h2>
-                <p className="text-xs text-muted-foreground">Manage your health tasks and to-dos</p>
+                <p className="text-sm text-muted-foreground">Manage your health tasks and to-dos</p>
               </div>
               <Suspense
                 fallback={
@@ -3722,13 +3722,13 @@ export function PatientDetailsEditor({
             <TabsContent value="history" className="mt-4">
               <Tabs defaultValue="sessions">
                 <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Sessions</TabsTrigger>
-                  <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Admissions</TabsTrigger>
+                  <TabsTrigger value="sessions" className="whitespace-nowrap text-sm px-2.5 py-1.5">Sessions</TabsTrigger>
+                  <TabsTrigger value="admissions" className="whitespace-nowrap text-sm px-2.5 py-1.5">Admissions</TabsTrigger>
                 </TabsList>
                 <TabsContent value="sessions" className="mt-3">
                   <div className="mb-4">
                     <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
-                    <p className="text-xs text-muted-foreground">History of your consultations</p>
+                    <p className="text-sm text-muted-foreground">History of your consultations</p>
                   </div>
                   <Suspense
                     fallback={
@@ -3767,7 +3767,7 @@ export function PatientDetailsEditor({
             <TabsContent value="documents" className="mt-4">
               <div className="mb-4">
                 <h2 className="text-[18px] font-semibold text-primary-dark">My Documents</h2>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   All your prescriptions, invoices, certificates and uploaded files
                 </p>
               </div>
@@ -3787,7 +3787,7 @@ export function PatientDetailsEditor({
             <TabsContent value="roundtable" className="mt-4">
               <div className="mb-4">
                 <h2 className="text-[18px] font-semibold text-primary-dark">My Round Table</h2>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Notes shared by your healthcare providers about your care
                 </p>
               </div>
@@ -3807,3 +3807,4 @@ export function PatientDetailsEditor({
     </div>
   );
 }
+

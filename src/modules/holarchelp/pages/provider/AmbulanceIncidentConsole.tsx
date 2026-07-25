@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SosLiveMap } from "../../components/SosLiveMap";
@@ -128,10 +128,10 @@ export default function AmbulanceIncidentConsole() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <button onClick={() => navigate("/provider/ambulance")} className="text-xs text-muted-foreground hover:text-foreground">{t("incidentConsole.backToDispatch")}</button>
+          <button onClick={() => navigate("/provider/ambulance")} className="text-sm text-muted-foreground hover:text-foreground">{t("incidentConsole.backToDispatch")}</button>
           <h1 className="mt-1 text-xl font-extrabold">{t("incidentConsole.title")}</h1>
         </div>
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
+        <span className={`rounded-full px-2.5 py-1 text-sm font-semibold ${isLive ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
           {statusLabel(incident.status, t).toUpperCase()}
         </span>
       </div>
@@ -150,7 +150,7 @@ export default function AmbulanceIncidentConsole() {
           {(isAssignedParamedic || isAssignedProvider) && (
             <>
               <div className="rounded-2xl border bg-card p-3 space-y-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("incidentConsole.statusStepper")}</p>
+                <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("incidentConsole.statusStepper")}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {STEPS.map((s) => (
                     <Button key={s.v}
@@ -165,12 +165,12 @@ export default function AmbulanceIncidentConsole() {
 
               <div className="rounded-2xl border bg-card p-3 space-y-2">
                 <div className="grid gap-1.5">
-                  <Label htmlFor="eta" className="text-xs">{t("incidentConsole.etaToHospital")}</Label>
+                  <Label htmlFor="eta" className="text-sm">{t("incidentConsole.etaToHospital")}</Label>
                   <div className="flex gap-2">
                     <Input id="eta" type="number" value={eta} onChange={(e) => setEta(e.target.value)} className="rounded-xl" />
                     <Button size="sm" onClick={setEtaMinutes}>{t("incidentConsole.share")}</Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {t("incidentConsole.countdown")}: <EtaCountdown etaMinutes={incident.eta_minutes} lastUpdate={incident.last_eta_update} />
                   </p>
                 </div>
@@ -184,7 +184,7 @@ export default function AmbulanceIncidentConsole() {
               />
 
               <div className="rounded-2xl border bg-card p-3 space-y-2">
-                <Label className="text-xs">{t("incidentConsole.preArrivalNotes")}</Label>
+                <Label className="text-sm">{t("incidentConsole.preArrivalNotes")}</Label>
                 <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="min-h-[80px] rounded-xl" placeholder={t("incidentConsole.notesPlaceholder")} />
                 <Button size="sm" variant="outline" onClick={saveNotes} disabled={savingNotes}>{t("incidentConsole.saveNotes")}</Button>
               </div>
@@ -206,3 +206,4 @@ export default function AmbulanceIncidentConsole() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Textarea } from "@/components/ui/textarea";
 
 interface SessionNotepadProps {
@@ -21,7 +21,7 @@ export function SessionNotepad({
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold text-foreground">Session Notes</h3>
           {isRecording && (
-            <span className="text-xs bg-destructive/15 text-destructive px-2 py-0.5 rounded-full animate-pulse">
+            <span className="text-sm bg-destructive/15 text-destructive px-2 py-0.5 rounded-full animate-pulse">
               Recording
             </span>
           )}
@@ -40,3 +40,4 @@ export function SessionNotepad({
     </div>
   );
 }
+

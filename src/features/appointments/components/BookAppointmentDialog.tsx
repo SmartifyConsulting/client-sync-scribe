@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { format, addDays, setHours, setMinutes, isBefore, parseISO } from "date-fns";
 import { Calendar as CalendarIcon, Clock, User, DollarSign, Loader2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -315,7 +315,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
         {/* Step 2: Select Service */}
         {step === 2 && (
           <div className="space-y-2 pt-2">
-            <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mb-2">← Back</Button>
+            <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="mb-2">â† Back</Button>
             {loading ? (
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
             ) : services.length === 0 ? (
@@ -352,7 +352,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
                         <div className="flex items-center gap-2">
                           <p className="font-medium text-foreground">{svc.service_name}</p>
                           {(svc as any).is_first_consultation && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">First Visit</span>
+                            <span className="text-sm bg-primary/10 text-primary px-2 py-0.5 rounded-full">First Visit</span>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -364,7 +364,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
                   );
                 })}
                 <Button variant="ghost" size="sm" onClick={() => { setSelectedService(null); setStep(3); }} className="w-full mt-2">
-                  Skip — no specific service
+                  Skip â€” no specific service
                 </Button>
               </>
             )}
@@ -374,7 +374,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
         {/* Step 3: Date & Time */}
         {step === 3 && (
           <div className="space-y-4 pt-2">
-            <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="mb-2">← Back</Button>
+            <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="mb-2">â† Back</Button>
 
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">Select Date</label>
@@ -390,7 +390,7 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
             {selectedDate && (
               <div>
                 <label className="text-sm font-medium text-foreground mb-2 block">
-                  Available Slots — {format(selectedDate, "EEEE, MMM d")}
+                  Available Slots â€” {format(selectedDate, "EEEE, MMM d")}
                 </label>
                 <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
                   {ALL_SLOTS.map((slot) => {
@@ -430,20 +430,20 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
         {/* Step 4: Confirm */}
         {step === 4 && (
           <div className="space-y-4 pt-2">
-            <Button variant="ghost" size="sm" onClick={() => setStep(3)} className="mb-2">← Back</Button>
+            <Button variant="ghost" size="sm" onClick={() => setStep(3)} className="mb-2">â† Back</Button>
 
             <div className="rounded-lg border border-border p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{selectedDoctor?.full_name}</span>
                 {selectedDoctor?.specialty && (
-                  <Badge variant="secondary" className="text-xs">{selectedDoctor.specialty}</Badge>
+                  <Badge variant="secondary" className="text-sm">{selectedDoctor.specialty}</Badge>
                 )}
               </div>
               {selectedService && (
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{selectedService.service_name} — {selectedService.currency} {selectedService.default_price.toFixed(2)}</span>
+                  <span className="text-sm">{selectedService.service_name} â€” {selectedService.currency} {selectedService.default_price.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex items-center gap-2">
@@ -476,3 +476,4 @@ export function BookAppointmentDialog({ open, onOpenChange, onBooked }: BookAppo
     </Dialog>
   );
 }
+

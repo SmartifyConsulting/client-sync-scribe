@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Siren, Truck, Wifi, PlayCircle, StopCircle, Loader2 } from "lucide-react";
 import { ProviderAppLayout } from "@/components/layout/ProviderAppLayout";
@@ -53,7 +53,7 @@ function AmbulanceStatsStrip() {
       {!shift ? (
         <button
           onClick={() => setStartOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/15"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-sm font-bold uppercase tracking-wider text-primary hover:bg-primary/15"
         >
           <PlayCircle className="h-3.5 w-3.5" /> {t("provider.startShift")}
         </button>
@@ -62,7 +62,7 @@ function AmbulanceStatsStrip() {
           onClick={onEnd}
           disabled={ending || shift.status === "busy"}
           title={shift.status === "busy" ? t("provider.finishActiveIncidentFirst") : ""}
-          className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted disabled:opacity-50"
         >
           {ending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StopCircle className="h-3.5 w-3.5" />}
           {t("provider.endShift")}
@@ -71,22 +71,22 @@ function AmbulanceStatsStrip() {
 
       {/* 2. Status badge */}
       <span className={cn(
-        "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
+        "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-sm font-bold uppercase tracking-wider",
         statusTone,
       )}>
         <Truck className="h-3.5 w-3.5" />
         {!shift ? t("status.offShift") : shift.status === "busy" ? t("status.busy") : t("status.available")}
       </span>
 
-      {/* 3. Active mission chip — ONLY when there is one */}
+      {/* 3. Active mission chip â€” ONLY when there is one */}
       {stats.currentIncidentId && (
         <Link
           to={`/provider/ambulance/incident/${stats.currentIncidentId}`}
           className="inline-flex items-center gap-2 rounded-xl border border-sos/40 bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
         >
           <Siren className="h-3.5 w-3.5" />
-          <span className="text-xs font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
-          <span className="text-xs font-bold">#{stats.currentIncidentId.slice(0, 8)}</span>
+          <span className="text-sm font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
+          <span className="text-sm font-bold">#{stats.currentIncidentId.slice(0, 8)}</span>
         </Link>
       )}
 
@@ -104,3 +104,4 @@ function AmbulanceStatsStrip() {
 export default function AmbulanceOpsLayout() {
   return <ProviderAppLayout portal="ambulance" statsStrip={<AmbulanceStatsStrip />} />;
 }
+

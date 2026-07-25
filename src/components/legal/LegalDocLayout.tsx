@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+﻿import { ReactNode, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Printer, FileText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -144,7 +144,7 @@ export function LegalDocLayout({
               </div>
             </div>
 
-            <dl className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <dl className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <dt className="uppercase tracking-wider text-muted-foreground">Effective</dt>
                 <dd className="mt-0.5 font-medium text-foreground">{effectiveDate}</dd>
@@ -195,12 +195,12 @@ export function LegalDocLayout({
             <article className="legal-body">{children}</article>
 
             {/* Signature footer */}
-            <div className="mt-12 pt-6 border-t border-border text-xs text-muted-foreground space-y-1">
+            <div className="mt-12 pt-6 border-t border-border text-sm text-muted-foreground space-y-1">
               <p className="font-semibold text-foreground">{owner}</p>
-              <p>contact@holarchealth.com · legal@holarchealth.com</p>
+              <p>contact@holarchealth.com Â· legal@holarchealth.com</p>
               <p>This document is governed by the laws of the Republic of South Africa.</p>
               <p>
-                © {new Date().getFullYear()} {owner}. All rights reserved.
+                Â© {new Date().getFullYear()} {owner}. All rights reserved.
               </p>
             </div>
           </div>
@@ -209,3 +209,4 @@ export function LegalDocLayout({
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Ambulance, Hospital } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
@@ -87,7 +87,7 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
   if (events.length === 0) return null;
   return (
     <div className="rounded-2xl border bg-card p-4">
-      <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("timeline.title")}</p>
+      <p className="mb-3 text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("timeline.title")}</p>
       <ol className="relative space-y-3 border-l-2 border-primary/20 pl-4">
         {events.map((e) => {
           const pid = e.provider_id || e.payload?.provider_id;
@@ -95,7 +95,7 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
           const showProvider = prov && PROVIDER_EVENTS.has(e.event_type);
           const suffix =
             e.event_type === "auto_assigned"
-              ? t("timeline.autoAssigned").replace(/^🤖\s*/, "").toLowerCase()
+              ? t("timeline.autoAssigned").replace(/^ðŸ¤–\s*/, "").toLowerCase()
               : e.event_type === "accepted" || e.event_type === "patient_picked"
                 ? t("timeline.respondedPicked")
                 : null;
@@ -104,14 +104,14 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
             <li key={e.id} className="relative">
               <span className="absolute -left-[22px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
               <p className="text-sm font-semibold">{labelFor(e, t)}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {new Date(e.created_at).toLocaleString([], { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" })}
               </p>
               {showProvider && (
-                <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border-2 border-primary/40 bg-primary/5 px-2.5 py-1 text-xs">
+                <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border-2 border-primary/40 bg-primary/5 px-2.5 py-1 text-sm">
                   <Icon className="h-3.5 w-3.5 text-primary" />
                   <span className="font-semibold text-foreground">{prov!.name}</span>
-                  {suffix && <span className="text-muted-foreground">· {suffix}</span>}
+                  {suffix && <span className="text-muted-foreground">Â· {suffix}</span>}
                 </div>
               )}
             </li>
@@ -121,3 +121,4 @@ export function IncidentTimeline({ incidentId }: { incidentId: string }) {
     </div>
   );
 }
+

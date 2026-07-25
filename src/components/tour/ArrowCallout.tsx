@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -98,7 +98,7 @@ export function ArrowCallout({ targetEl, title, message, stepIndex, totalSteps, 
       break;
   }
 
-  const arrowChar = placement === "right" ? "←" : placement === "left" ? "→" : placement === "bottom" ? "↑" : "↓";
+  const arrowChar = placement === "right" ? "â†" : placement === "left" ? "â†’" : placement === "bottom" ? "â†‘" : "â†“";
 
   return (
     <>
@@ -146,16 +146,16 @@ export function ArrowCallout({ targetEl, title, message, stepIndex, totalSteps, 
             <X className="h-4 w-4" />
           </button>
         </div>
-        <p className="text-xs text-muted-foreground leading-relaxed mb-3">{message}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-3">{message}</p>
         <div className="flex items-center justify-between">
-          <span className="text-xs uppercase tracking-wide text-muted-foreground">
+          <span className="text-sm uppercase tracking-wide text-muted-foreground">
             Step {stepIndex + 1} of {totalSteps}
           </span>
           <div className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={onSkip} className="h-7 text-xs">
+            <Button size="sm" variant="ghost" onClick={onSkip} className="h-7 text-sm">
               Skip
             </Button>
-            <Button size="sm" onClick={onNext} className="h-7 text-xs">
+            <Button size="sm" onClick={onNext} className="h-7 text-sm">
               {stepIndex + 1 === totalSteps ? "Finish" : "Next"}
             </Button>
           </div>
@@ -164,3 +164,4 @@ export function ArrowCallout({ targetEl, title, message, stepIndex, totalSteps, 
     </>
   );
 }
+

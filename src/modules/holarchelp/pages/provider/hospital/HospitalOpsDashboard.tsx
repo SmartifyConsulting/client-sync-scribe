@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
@@ -82,12 +82,12 @@ export default function HospitalOpsDashboard() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <h1 className="text-2xl font-extrabold leading-tight">{t("hospital.liveQueue")}</h1>
-        <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">{rows.length} {t("hospital.active")}</span>
+        <span className="rounded-full border bg-card px-2.5 py-1 text-sm font-semibold">{rows.length} {t("hospital.active")}</span>
       </header>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+          <thead className="bg-muted/50 text-sm uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-3 py-2 text-left">{t("common.patient")}</th>
               <th className="px-3 py-2 text-left">{t("hospital.severity")}</th>
@@ -104,29 +104,29 @@ export default function HospitalOpsDashboard() {
                 <td className="px-3 py-2">
                   <p className="font-semibold">{r.user_id ? (patients[r.user_id] ?? `${t("common.patient")} ${r.id.slice(0,6)}`) : `${t("ambulance.incident")} ${r.id.slice(0,6)}`}</p>
                   <p className="text-sm text-muted-foreground">
-                    {r.conscious === false && <span className="text-destructive font-semibold">{t("ambulance.unconscious")} · </span>}
-                    {r.breathing === false && <span className="text-destructive font-semibold">{t("ambulance.notBreathing")} · </span>}
+                    {r.conscious === false && <span className="text-destructive font-semibold">{t("ambulance.unconscious")} Â· </span>}
+                    {r.breathing === false && <span className="text-destructive font-semibold">{t("ambulance.notBreathing")} Â· </span>}
                     {t("ambulance.triggered")} {ago(r.created_at)} {t("common.ago")}
                   </p>
                 </td>
                 <td className="px-3 py-2">
-                  <span className={`rounded-full border px-1.5 py-0.5 text-xs font-bold ${sevTone(r.severity)}`}>
-                    {(r.severity ?? "—").toUpperCase()}
+                  <span className={`rounded-full border px-1.5 py-0.5 text-sm font-bold ${sevTone(r.severity)}`}>
+                    {(r.severity ?? "â€”").toUpperCase()}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-xs">{r.incident_type ?? t("ambulance.emergency")}</td>
-                <td className="px-3 py-2 text-xs">
+                <td className="px-3 py-2 text-sm">{r.incident_type ?? t("ambulance.emergency")}</td>
+                <td className="px-3 py-2 text-sm">
                   <span className="inline-flex items-center gap-1"><Ambulance className="h-3.5 w-3.5 text-destructive" />
-                    {crews[r.assigned_provider_id ?? ""] ?? "—"}
+                    {crews[r.assigned_provider_id ?? ""] ?? "â€”"}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-right">
                   {r.eta_minutes != null
                     ? <span className="text-base font-extrabold tabular-nums"><EtaCountdown etaMinutes={r.eta_minutes} lastUpdate={r.last_eta_update} /></span>
-                    : <span className="text-xs uppercase text-muted-foreground">—</span>}
+                    : <span className="text-sm uppercase text-muted-foreground">â€”</span>}
                 </td>
                 <td className="px-3 py-2">
-                  <span className={`rounded-full border px-1.5 py-0.5 text-xs font-semibold ${statusTone(r.status)}`}>
+                  <span className={`rounded-full border px-1.5 py-0.5 text-sm font-semibold ${statusTone(r.status)}`}>
                     {r.status.replace(/_/g," ")}
                   </span>
                 </td>
@@ -139,7 +139,7 @@ export default function HospitalOpsDashboard() {
             ))}
             {!rows.length && (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-xs text-muted-foreground">
+                <td colSpan={7} className="p-8 text-center text-sm text-muted-foreground">
                   <AlertTriangle className="mx-auto mb-1 h-4 w-4 opacity-50" />
                   {t("hospital.noActive")}
                 </td>
@@ -151,3 +151,4 @@ export default function HospitalOpsDashboard() {
     </div>
   );
 }
+

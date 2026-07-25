@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2, Phone } from "lucide-react";
@@ -64,7 +64,7 @@ export default function CreateIncidentScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
             Emergency Dispatch
           </p>
           <h1 className="text-3xl font-extrabold">Create New Incident</h1>
@@ -233,3 +233,4 @@ export default function CreateIncidentScreen() {
     </div>
   );
 }
+

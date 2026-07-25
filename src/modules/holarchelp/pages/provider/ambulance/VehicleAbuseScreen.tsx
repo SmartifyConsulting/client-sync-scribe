@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
@@ -141,18 +141,18 @@ export default function VehicleAbuseScreen() {
       harsh_driving: "Harsh Driving",
       route_deviation: "Route Deviation",
     };
-    return <span className="text-xs font-bold uppercase">{labels[type] || type}</span>;
+    return <span className="text-sm font-bold uppercase">{labels[type] || type}</span>;
   };
 
   return (
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Emergency Response Dispatch
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Vehicle Abuse Prevention</h1>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Monitor suspicious vehicle activity, geofence breaches, and unauthorized usage.
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function VehicleAbuseScreen() {
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 Critical Events
               </p>
               <p className="mt-1 text-2xl font-bold text-destructive">{criticalCount}</p>
@@ -173,7 +173,7 @@ export default function VehicleAbuseScreen() {
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 High Risk
               </p>
               <p className="mt-1 text-2xl font-bold text-warning">{highCount}</p>
@@ -184,7 +184,7 @@ export default function VehicleAbuseScreen() {
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 Medium Priority
               </p>
               <p className="mt-1 text-2xl font-bold text-warning">{mediumCount}</p>
@@ -195,7 +195,7 @@ export default function VehicleAbuseScreen() {
         <div className="rounded-2xl border bg-card p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 Total Events
               </p>
               <p className="mt-1 text-2xl font-bold">{events.length}</p>
@@ -220,7 +220,7 @@ export default function VehicleAbuseScreen() {
                 <Loader2 className="h-5 w-5 animate-spin" />
               </div>
             ) : events.length === 0 ? (
-              <div className="p-8 text-center text-xs text-muted-foreground">
+              <div className="p-8 text-center text-sm text-muted-foreground">
                 <AlertTriangle className="mx-auto mb-2 h-5 w-5 opacity-50" />
                 No abuse events detected.
               </div>
@@ -243,11 +243,11 @@ export default function VehicleAbuseScreen() {
                             <EventBadge type={event.event_type} />
                           </span>
                         </div>
-                        <p className="text-xs mt-1">{event.description}</p>
+                        <p className="text-sm mt-1">{event.description}</p>
                         {event.location && (
-                          <p className="text-xs mt-1 opacity-75">📍 {event.location}</p>
+                          <p className="text-sm mt-1 opacity-75">ðŸ“ {event.location}</p>
                         )}
-                        <p className="text-xs mt-1 opacity-60">
+                        <p className="text-sm mt-1 opacity-60">
                           {new Date(event.occurred_at).toLocaleString()}
                         </p>
                       </div>
@@ -264,7 +264,7 @@ export default function VehicleAbuseScreen() {
 
         <TabsContent value="geofence" className="space-y-2">
           <div className="overflow-hidden rounded-2xl border bg-card">
-            <div className="p-8 text-center text-xs text-muted-foreground">
+            <div className="p-8 text-center text-sm text-muted-foreground">
               <MapPin className="mx-auto mb-2 h-5 w-5 opacity-50" />
               <p>Geofence Management & Breach Alerts coming soon.</p>
               <p className="mt-2 text-sm">Create geographic boundaries and get alerted when vehicles breach them.</p>
@@ -274,7 +274,7 @@ export default function VehicleAbuseScreen() {
 
         <TabsContent value="hours" className="space-y-2">
           <div className="overflow-hidden rounded-2xl border bg-card">
-            <div className="p-8 text-center text-xs text-muted-foreground">
+            <div className="p-8 text-center text-sm text-muted-foreground">
               <Clock className="mx-auto mb-2 h-5 w-5 opacity-50" />
               <p>After-Hours Detection coming soon.</p>
               <p className="mt-2 text-sm">Track vehicles that are used outside scheduled operating hours.</p>
@@ -284,7 +284,7 @@ export default function VehicleAbuseScreen() {
 
         <TabsContent value="routes" className="space-y-2">
           <div className="overflow-hidden rounded-2xl border bg-card">
-            <div className="p-8 text-center text-xs text-muted-foreground">
+            <div className="p-8 text-center text-sm text-muted-foreground">
               <MapPin className="mx-auto mb-2 h-5 w-5 opacity-50" />
               <p>Route Deviation & Tracking coming soon.</p>
               <p className="mt-2 text-sm">Monitor if ambulances follow dispatch routes or deviate.</p>
@@ -295,3 +295,4 @@ export default function VehicleAbuseScreen() {
     </div>
   );
 }
+

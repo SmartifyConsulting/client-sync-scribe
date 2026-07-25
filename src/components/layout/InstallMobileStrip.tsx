@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -54,7 +54,7 @@ export function InstallMobileStrip() {
   };
 
   return (
-    <div className="md:hidden flex items-center justify-between gap-2 bg-primary text-primary-foreground px-3 py-1.5 text-xs">
+    <div className="md:hidden flex items-center justify-between gap-2 bg-primary text-primary-foreground px-3 py-1.5 text-sm">
       <button
         onClick={handleInstall}
         className="flex items-center gap-1.5 flex-1 text-left font-medium"
@@ -72,3 +72,4 @@ export function InstallMobileStrip() {
     </div>
   );
 }
+

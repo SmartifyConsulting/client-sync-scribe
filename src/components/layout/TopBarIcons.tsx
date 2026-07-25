@@ -1,4 +1,4 @@
-import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
+﻿import { Bell, Mic, User, Settings, LogOut, Award, Share2, Stethoscope, HeartPulse, Calendar as CalendarIcon, Gift, Bug, Scale, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES, ADMIN_EMAIL } from "./testProfiles";
 import { useImpersonate } from "./useImpersonate";
 import { useEffect, useState } from "react";
@@ -136,7 +136,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Language switcher — sits immediately left of the bug-report icon */}
+      {/* Language switcher â€” sits immediately left of the bug-report icon */}
       <LanguageSwitcher />
 
       {/* Bug/Fix Report */}
@@ -193,7 +193,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           <button className="relative h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
             <Bell className="h-4 w-4 text-white stroke-white fill-none" />
             {unreadNotifCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-white">
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-sm font-bold text-white">
                 {unreadNotifCount > 99 ? "99+" : unreadNotifCount}
               </span>
             )}
@@ -201,22 +201,22 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
         </PopoverTrigger>
         <PopoverContent className="w-72 p-0" align="end">
           <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-            <p className="text-xs font-semibold">{t("topbar.notifications")}</p>
+            <p className="text-sm font-semibold">{t("topbar.notifications")}</p>
             {recentNotifications.length > 0 && (
-              <Button variant="ghost" size="sm" className="text-xs h-6 text-destructive hover:text-destructive" onClick={clearAllNotifications}>
+              <Button variant="ghost" size="sm" className="text-sm h-6 text-destructive hover:text-destructive" onClick={clearAllNotifications}>
                 {t("topbar.clearAll")}
               </Button>
             )}
           </div>
           <div className="max-h-56 overflow-y-auto">
             {recentNotifications.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-4">{t("topbar.noNotifications")}</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t("topbar.noNotifications")}</p>
             ) : (
               recentNotifications.map((n: any) => (
-                <div key={n.id} className="px-3 py-2 border-b border-border/50 text-xs bg-primary/5 flex items-start justify-between gap-2">
+                <div key={n.id} className="px-3 py-2 border-b border-border/50 text-sm bg-primary/5 flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground">{n.title}</p>
-                    {n.description && <p className="text-xs text-muted-foreground mt-0.5">{n.description}</p>}
+                    {n.description && <p className="text-sm text-muted-foreground mt-0.5">{n.description}</p>}
                   </div>
                   <Button variant="ghost" size="sm" className="h-5 px-1 text-[9px] text-muted-foreground hover:text-destructive shrink-0" onClick={() => clearNotification(n.id)}>
                     {t("common.close")}
@@ -234,7 +234,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           <button className="h-11 w-11 rounded-full bg-muted hover:bg-muted/80 transition-colors flex items-center justify-center">
             <Avatar className="h-11 w-11 border-2 border-green-500">
               <AvatarImage src={profile?.avatar_url} alt={profile?.full_name} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
                 {getInitials()}
               </AvatarFallback>
             </Avatar>
@@ -243,19 +243,19 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
         <PopoverContent className="w-56" align="end">
           <div className="space-y-2 mb-3">
             <p className="text-sm font-medium text-foreground">{profile?.full_name}</p>
-            <p className="text-xs text-muted-foreground truncate">{currentEmail}</p>
+            <p className="text-sm text-muted-foreground truncate">{currentEmail}</p>
           </div>
 
           {/* Profile Switcher - Available to All Users */}
           <div className="mt-3 pt-3 border-t border-border">
-            <p className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">TEST PROFILES</p>
+            <p className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wider">TEST PROFILES</p>
             <div className="space-y-1 max-h-60 overflow-y-auto">
               {TEST_PROFILES.filter((tp) => tp.email !== currentEmail).map((tp) => (
                 <button
                   key={tp.email}
                   disabled={switching === tp.email}
                   onClick={() => impersonate(tp.email)}
-                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="w-full text-left text-sm px-2 py-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {switching === tp.email ? (
                     <Loader2 className="h-3 w-3 animate-spin shrink-0" />
@@ -264,7 +264,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
                   )}
                   <div className="min-w-0">
                     <span className="font-medium block">{tp.name}</span>
-                    <span className="text-muted-foreground text-xs block">{tp.role}</span>
+                    <span className="text-muted-foreground text-sm block">{tp.role}</span>
                   </div>
                 </button>
               ))}
@@ -273,13 +273,13 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
 
           <div className="mt-3 pt-3 border-t border-border space-y-1">
             <Link to="/profile" className="block">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8">
                 <User className="h-3.5 w-3.5 mr-2 shrink-0" />
                 Profile
               </Button>
             </Link>
             <Link to="/settings" className="block">
-              <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8">
+              <Button variant="ghost" size="sm" className="w-full justify-start text-sm h-8">
                 <Settings className="h-3.5 w-3.5 mr-2 shrink-0" />
                 Settings
               </Button>
@@ -287,7 +287,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-xs h-8 text-destructive hover:text-destructive"
+              className="w-full justify-start text-sm h-8 text-destructive hover:text-destructive"
               onClick={async () => {
                 await supabase.auth.signOut();
                 navigate("/auth");

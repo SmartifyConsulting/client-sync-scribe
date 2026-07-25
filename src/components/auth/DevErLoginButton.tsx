@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Loader2, Ambulance } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,7 @@ export function DevErLoginButton() {
 
   return (
     <div className="mt-4 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/30 p-3">
-      <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+      <p className="text-sm uppercase tracking-wider text-muted-foreground mb-2">
         {t("components.auth.dev_login.dev_only_label")}
       </p>
       <Button
@@ -68,9 +68,10 @@ export function DevErLoginButton() {
         )}
         {t("components.auth.dev_login.button_text")}
       </Button>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-2 text-sm text-muted-foreground">
         {t("components.auth.dev_login.test_description")}
       </p>
     </div>
   );
 }
+

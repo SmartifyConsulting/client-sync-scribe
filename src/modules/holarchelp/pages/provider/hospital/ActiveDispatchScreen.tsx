@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Clock, Zap, AlertCircle } from "lucide-react";
@@ -66,7 +66,7 @@ export default function ActiveDispatchScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Real-time Tracking
         </p>
         <h1 className="text-3xl font-extrabold">Active Dispatch: {dispatch.ambulance_id}</h1>
@@ -80,7 +80,7 @@ export default function ActiveDispatchScreen() {
         <div className="rounded-2xl border bg-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-xs text-muted-foreground">DISPATCH STATUS</p>
+              <p className="text-sm text-muted-foreground">DISPATCH STATUS</p>
               <h2 className="text-2xl font-bold mt-1">{dispatch.ambulance_id}</h2>
             </div>
             <div
@@ -94,11 +94,11 @@ export default function ActiveDispatchScreen() {
 
           <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t">
             <div>
-              <p className="text-xs text-muted-foreground">Incident ID</p>
+              <p className="text-sm text-muted-foreground">Incident ID</p>
               <p className="text-lg font-bold mt-1">{dispatch.incident_id}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Crew Lead</p>
+              <p className="text-sm text-muted-foreground">Crew Lead</p>
               <p className="text-lg font-bold mt-1">{dispatch.crew_lead}</p>
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function ActiveDispatchScreen() {
 
           <div className="space-y-4">
             <div>
-              <p className="text-xs text-muted-foreground">CURRENT LOCATION</p>
+              <p className="text-sm text-muted-foreground">CURRENT LOCATION</p>
               <p className="text-base font-semibold mt-1">{dispatch.current_location}</p>
             </div>
 
@@ -123,12 +123,12 @@ export default function ActiveDispatchScreen() {
                 <p className="text-sm font-semibold text-blue-900">
                   {dispatch.distance_km} km away
                 </p>
-                <p className="text-xs text-blue-700">ETA: {dispatch.eta} minutes</p>
+                <p className="text-sm text-blue-700">ETA: {dispatch.eta} minutes</p>
               </div>
             </div>
 
             <div>
-              <p className="text-xs text-muted-foreground">DESTINATION</p>
+              <p className="text-sm text-muted-foreground">DESTINATION</p>
               <p className="text-base font-semibold mt-1">{dispatch.destination}</p>
             </div>
 
@@ -149,7 +149,7 @@ export default function ActiveDispatchScreen() {
           <div className="space-y-2">
             <p className="text-base font-semibold">{dispatch.patient_status}</p>
             <div className="bg-green-50 rounded-lg p-3 border-l-4 border-green-500">
-              <p className="text-sm text-green-800">✓ Patient vitals stable and normal</p>
+              <p className="text-sm text-green-800">âœ“ Patient vitals stable and normal</p>
             </div>
           </div>
         </div>
@@ -167,10 +167,10 @@ export default function ActiveDispatchScreen() {
               Call Crew Lead
             </Button>
             <Button className="w-full" variant="outline">
-              📱 Send SMS Message
+              ðŸ“± Send SMS Message
             </Button>
             <Button className="w-full" variant="outline">
-              💬 Open Chat
+              ðŸ’¬ Open Chat
             </Button>
           </div>
         </div>
@@ -197,7 +197,7 @@ export default function ActiveDispatchScreen() {
                 />
                 <div>
                   <p className="text-sm font-semibold">{item.event}</p>
-                  <p className="text-xs text-muted-foreground">{item.time}</p>
+                  <p className="text-sm text-muted-foreground">{item.time}</p>
                 </div>
               </div>
             ))}
@@ -205,10 +205,11 @@ export default function ActiveDispatchScreen() {
         </div>
 
         {/* Info */}
-        <div className="text-xs text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           Last updated: {dispatch.last_update}
         </div>
       </div>
     </div>
   );
 }
+

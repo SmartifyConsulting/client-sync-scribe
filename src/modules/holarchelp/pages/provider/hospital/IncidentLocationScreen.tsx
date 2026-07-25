@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { MapPin, Loader2, Navigation } from "lucide-react";
@@ -60,7 +60,7 @@ export default function IncidentLocationScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Emergency Dispatch
         </p>
         <h1 className="text-3xl font-extrabold">Capture Incident Location</h1>
@@ -80,7 +80,7 @@ export default function IncidentLocationScreen() {
                 : "border-border hover:border-primary/50"
             }`}
           >
-            <h3 className="font-semibold mb-2">📝 Manual Address Entry</h3>
+            <h3 className="font-semibold mb-2">ðŸ“ Manual Address Entry</h3>
             {selectedMethod === "manual" && (
               <input
                 type="text"
@@ -108,7 +108,7 @@ export default function IncidentLocationScreen() {
           >
             <div className="flex items-center gap-2">
               <Navigation className="h-5 w-5" />
-              <h3 className="font-semibold">📍 GPS Location</h3>
+              <h3 className="font-semibold">ðŸ“ GPS Location</h3>
             </div>
             {selectedMethod === "gps" && location.latitude && (
               <div className="mt-2 text-sm text-muted-foreground">
@@ -140,7 +140,7 @@ export default function IncidentLocationScreen() {
                 : "border-border hover:border-primary/50"
             }`}
           >
-            <h3 className="font-semibold mb-2">🗺️ What3Words Code</h3>
+            <h3 className="font-semibold mb-2">ðŸ—ºï¸ What3Words Code</h3>
             {selectedMethod === "what3words" && (
               <input
                 type="text"
@@ -166,7 +166,7 @@ export default function IncidentLocationScreen() {
                 : "border-border hover:border-primary/50"
             }`}
           >
-            <h3 className="font-semibold mb-2">🏥 Search Landmark</h3>
+            <h3 className="font-semibold mb-2">ðŸ¥ Search Landmark</h3>
             {selectedMethod === "search" && (
               <input
                 type="text"
@@ -226,3 +226,4 @@ export default function IncidentLocationScreen() {
     </div>
   );
 }
+

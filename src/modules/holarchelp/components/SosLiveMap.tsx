@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveMap, type LiveMapPoint, type LiveMapRoute } from "./LiveMap";
 
@@ -19,11 +19,11 @@ const TRANSPORT_STATUSES = new Set(["en_route", "patient_collected", "at_hospita
  * SOS live tracker on Leaflet/OpenStreetMap.
  *
  * Three phases:
- *  - selecting: no destination chosen yet → patient only (ambulance hidden).
+ *  - selecting: no destination chosen yet â†’ patient only (ambulance hidden).
  *  - pickup:    destination chosen, ambulance heading to patient.
- *               Lines: red patient↔ambulance + teal patient↔hospital. PICKUP countdown.
- *  - transport: ambulance en_route/patient_collected → heading to hospital.
- *               Lines: teal patient↔hospital + red ambulance↔hospital. TRANSPORT countdown.
+ *               Lines: red patientâ†”ambulance + teal patientâ†”hospital. PICKUP countdown.
+ *  - transport: ambulance en_route/patient_collected â†’ heading to hospital.
+ *               Lines: teal patientâ†”hospital + red ambulanceâ†”hospital. TRANSPORT countdown.
  */
 export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
   const [patient, setPatient] = useState<LatLng | null>(null);
@@ -95,7 +95,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       } else if (assignedAmb?.latitude && assignedAmb?.longitude) {
         setProvider({ lat: assignedAmb.latitude, lng: assignedAmb.longitude, kind: "ambulance" });
       } else if (patientPos) {
-        // No assigned ER provider yet — show the nearest available ER provider
+        // No assigned ER provider yet â€” show the nearest available ER provider
         // as a visual hint to the patient. No DB write; dispatch will confirm.
         const { data: ambs } = await supabase
           .from("holarchelp_ambulance_providers_public" as any)
@@ -234,7 +234,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
       ? "transport"
       : "pickup";
 
-  // ETA for pickup leg (ambulance → patient)
+  // ETA for pickup leg (ambulance â†’ patient)
   useEffect(() => {
     if (phase !== "pickup" || !provider || !patient) {
       setPickupEta(null);
@@ -251,7 +251,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     };
   }, [phase, provider?.lat, provider?.lng, patient?.lat, patient?.lng]);
 
-  // ETA for transport leg (ambulance → hospital)
+  // ETA for transport leg (ambulance â†’ hospital)
   useEffect(() => {
     if (phase !== "transport" || !provider || !hospital) {
       setTransportEta(null);
@@ -268,7 +268,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     };
   }, [phase, provider?.lat, provider?.lng, hospital?.lat, hospital?.lng]);
 
-  // ETA while still searching/awaiting an ER (nearest ambulance → patient)
+  // ETA while still searching/awaiting an ER (nearest ambulance â†’ patient)
   useEffect(() => {
     if (phase !== "selecting" || !provider || !patient || provider.kind !== "ambulance") {
       setSearchEta(null);
@@ -286,7 +286,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
   }, [phase, provider?.lat, provider?.lng, provider?.kind, patient?.lat, patient?.lng]);
 
 
-  // Arrival event emission — only the patient view writes these (to avoid duplicates)
+  // Arrival event emission â€” only the patient view writes these (to avoid duplicates)
   const arrivedSceneRef = useRef(false);
   const arrivedDestRef = useRef(false);
   useEffect(() => {
@@ -389,7 +389,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
     if (hospital && patient) {
       rs.push({ from: patient, to: { lat: hospital.lat, lng: hospital.lng }, color: "teal" });
     }
-    // Red patient↔ambulance line: shown during selecting AND pickup phases
+    // Red patientâ†”ambulance line: shown during selecting AND pickup phases
     if (phase !== "transport" && provider && patient && provider.kind === "ambulance") {
       rs.push({ from: patient, to: { lat: provider.lat, lng: provider.lng }, color: "red" });
     }
@@ -423,7 +423,7 @@ export function SosLiveMap({ incidentId, mode, height = 320 }: Props) {
         )}
       </div>
 
-      <div className="absolute right-2 top-2 z-[400] rounded-full bg-background/95 px-2 py-1 text-xs font-semibold uppercase text-muted-foreground shadow-md">
+      <div className="absolute right-2 top-2 z-[400] rounded-full bg-background/95 px-2 py-1 text-sm font-semibold uppercase text-muted-foreground shadow-md">
         {mode}
       </div>
     </div>
@@ -464,9 +464,9 @@ function CountdownBadge({
         <span className="absolute inset-0 animate-ping rounded-full bg-white/70" />
         <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
       </span>
-      <span className="text-xs font-bold uppercase tracking-wider opacity-90">{label}</span>
+      <span className="text-sm font-bold uppercase tracking-wider opacity-90">{label}</span>
       <span className="text-base font-extrabold tabular-nums leading-none">{display}</span>
-      <span className="text-xs font-semibold opacity-90">· {eta.km.toFixed(1)} km</span>
+      <span className="text-sm font-semibold opacity-90">Â· {eta.km.toFixed(1)} km</span>
     </div>
   );
 }
@@ -499,3 +499,4 @@ function haversineKm(a: LatLng, b: LatLng) {
     Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(x));
 }
+

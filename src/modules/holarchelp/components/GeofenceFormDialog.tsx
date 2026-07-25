@@ -1,4 +1,4 @@
-import { toastError } from "@/lib/userMessage";
+﻿import { toastError } from "@/lib/userMessage";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
 
         <div className="space-y-4">
           <div>
-            <Label htmlFor="gf-name" className="text-xs">
+            <Label htmlFor="gf-name" className="text-sm">
               {t("geofence.name")}
             </Label>
             <Input
@@ -95,7 +95,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
           </div>
 
           <div>
-            <Label htmlFor="gf-type" className="text-xs">
+            <Label htmlFor="gf-type" className="text-sm">
               {t("geofence.type")}
             </Label>
             <Select value={type} onValueChange={(v) => setType(v as any)}>
@@ -114,7 +114,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label htmlFor="gf-lat" className="text-xs">
+              <Label htmlFor="gf-lat" className="text-sm">
                 {t("geofence.latitude")}
               </Label>
               <Input
@@ -128,7 +128,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
               />
             </div>
             <div>
-              <Label htmlFor="gf-lng" className="text-xs">
+              <Label htmlFor="gf-lng" className="text-sm">
                 {t("geofence.longitude")}
               </Label>
               <Input
@@ -144,7 +144,7 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
           </div>
 
           <div>
-            <Label htmlFor="gf-radius" className="text-xs">
+            <Label htmlFor="gf-radius" className="text-sm">
               {t("geofence.radiusKm")}
             </Label>
             <Input
@@ -172,3 +172,4 @@ export function GeofenceFormDialog({ open, onOpenChange, providerId, initial, on
     </Dialog>
   );
 }
+

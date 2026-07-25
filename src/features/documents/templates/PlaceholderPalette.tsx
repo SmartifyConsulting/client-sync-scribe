@@ -1,4 +1,4 @@
-import { GripHorizontal } from "lucide-react";
+﻿import { GripHorizontal } from "lucide-react";
 
 export interface PlaceholderItem {
   token: string;
@@ -49,10 +49,10 @@ const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  patient: "👤 Patient Information",
-  doctor: "👨‍⚕️ Doctor Information",
-  practice: "🏥 Practice Information",
-  document: "📄 Document Information",
+  patient: "ðŸ‘¤ Patient Information",
+  doctor: "ðŸ‘¨â€âš•ï¸ Doctor Information",
+  practice: "ðŸ¥ Practice Information",
+  document: "ðŸ“„ Document Information",
 };
 
 interface PlaceholderPaletteProps {
@@ -85,7 +85,7 @@ export function PlaceholderPalette({ onDragStart, onCopy }: PlaceholderPalettePr
 
         return (
           <div key={category}>
-            <h4 className="text-xs font-semibold text-muted-foreground mb-2">
+            <h4 className="text-sm font-semibold text-muted-foreground mb-2">
               {CATEGORY_LABELS[category]}
             </h4>
             <div className="grid grid-cols-2 gap-2">
@@ -104,7 +104,7 @@ export function PlaceholderPalette({ onDragStart, onCopy }: PlaceholderPalettePr
                 >
                   <GripHorizontal className="h-3 w-3 opacity-50 shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-xs font-medium truncate">{item.label}</div>
+                    <div className="text-sm font-medium truncate">{item.label}</div>
                     <div className="text-[10px] opacity-60 font-mono truncate">
                       {item.token}
                     </div>
@@ -117,11 +117,12 @@ export function PlaceholderPalette({ onDragStart, onCopy }: PlaceholderPalettePr
       })}
 
       <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-dashed border-muted-foreground/30">
-        <p className="text-xs text-muted-foreground">
-          💡 <strong>Tip:</strong> Drag any placeholder into your template content. They'll
+        <p className="text-sm text-muted-foreground">
+          ðŸ’¡ <strong>Tip:</strong> Drag any placeholder into your template content. They'll
           automatically fill with real data when documents are created.
         </p>
       </div>
     </div>
   );
 }
+

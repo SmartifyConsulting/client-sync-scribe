@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2, Send, MapPin, Phone } from "lucide-react";
@@ -45,7 +45,7 @@ export default function DispatchAssignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Emergency Dispatch
         </p>
         <h1 className="text-3xl font-extrabold">Confirm Dispatch Assignment</h1>
@@ -107,7 +107,7 @@ export default function DispatchAssignmentScreen() {
             <option>North General Hospital</option>
             <option>Emergency Care Unit</option>
           </select>
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Crew will navigate to this hospital destination
           </p>
         </div>
@@ -149,7 +149,7 @@ export default function DispatchAssignmentScreen() {
                 />
                 <div className="ml-3 flex-1">
                   <p className="text-sm font-semibold">{option.label}</p>
-                  <p className="text-xs text-muted-foreground">{option.desc}</p>
+                  <p className="text-sm text-muted-foreground">{option.desc}</p>
                 </div>
               </label>
             ))}
@@ -175,9 +175,9 @@ export default function DispatchAssignmentScreen() {
             <div>
               <p className="text-sm font-semibold">Notifications will be sent to:</p>
               <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                <li>✓ Crew Lead ({dispatch.crew_lead})</li>
-                <li>✓ Hospital Destination</li>
-                <li>✓ Dispatch Control Center</li>
+                <li>âœ“ Crew Lead ({dispatch.crew_lead})</li>
+                <li>âœ“ Hospital Destination</li>
+                <li>âœ“ Dispatch Control Center</li>
               </ul>
             </div>
           </div>
@@ -214,3 +214,4 @@ export default function DispatchAssignmentScreen() {
     </div>
   );
 }
+

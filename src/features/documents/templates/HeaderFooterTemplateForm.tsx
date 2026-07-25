@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -245,7 +245,7 @@ export function HeaderFooterTemplateForm({
       {/* Dynamic Fields Info */}
       <div className="p-4 rounded-lg bg-blue-50/50 border border-blue-200 dark:bg-blue-950/20 dark:border-blue-900">
         <p className="text-sm font-semibold text-foreground mb-2">Dynamic Fields for Headers & Footers</p>
-        <p className="text-xs text-muted-foreground mb-3">
+        <p className="text-sm text-muted-foreground mb-3">
           Click to copy these placeholders. They'll be replaced with real data on all documents using this letterhead.
         </p>
         <div className="flex flex-wrap gap-2">
@@ -256,7 +256,7 @@ export function HeaderFooterTemplateForm({
             <code
               key={token}
               onClick={() => navigator.clipboard?.writeText(token)}
-              className="text-xs bg-primary/15 text-primary px-3 py-2 rounded cursor-pointer select-none hover:bg-primary/25 transition-colors border border-primary/30"
+              className="text-sm bg-primary/15 text-primary px-3 py-2 rounded cursor-pointer select-none hover:bg-primary/25 transition-colors border border-primary/30"
               title="Click to copy"
             >
               {token}
@@ -269,11 +269,11 @@ export function HeaderFooterTemplateForm({
       <div className="space-y-3">
         <div>
           <h4 className="text-sm font-semibold text-foreground">Header Section</h4>
-          <p className="text-xs text-muted-foreground mt-1">Appears at the top of every document (Left, Center, Right columns)</p>
+          <p className="text-sm text-muted-foreground mt-1">Appears at the top of every document (Left, Center, Right columns)</p>
         </div>
         <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-2 block">📍 Left Column</label>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ Left Column</label>
             <TemplateSectionEditor
               value={header.left}
               onChange={(v) => setHeader({ ...header, left: v })}
@@ -283,7 +283,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-2 block">⬆️ Center Column</label>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">â¬†ï¸ Center Column</label>
             <TemplateSectionEditor
               value={header.center}
               onChange={(v) => setHeader({ ...header, center: v })}
@@ -293,7 +293,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-2 block">📞 Right Column</label>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ž Right Column</label>
             <TemplateSectionEditor
               value={header.right}
               onChange={(v) => setHeader({ ...header, right: v })}
@@ -309,11 +309,11 @@ export function HeaderFooterTemplateForm({
       <div className="space-y-3">
         <div>
           <h4 className="text-sm font-semibold text-foreground">Footer Section</h4>
-          <p className="text-xs text-muted-foreground mt-1">Appears at the bottom of every document (Left, Center, Right columns)</p>
+          <p className="text-sm text-muted-foreground mt-1">Appears at the bottom of every document (Left, Center, Right columns)</p>
         </div>
         <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-2 block">📍 Left Column</label>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ Left Column</label>
             <TemplateSectionEditor
               value={footer.left}
               onChange={(v) => setFooter({ ...footer, left: v })}
@@ -323,7 +323,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-2 block">⬇️ Center Column</label>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">â¬‡ï¸ Center Column</label>
             <TemplateSectionEditor
               value={footer.center}
               onChange={(v) => setFooter({ ...footer, center: v })}
@@ -333,7 +333,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground mb-2 block">📞 Right Column</label>
+            <label className="text-sm font-semibold text-muted-foreground mb-2 block">ðŸ“ž Right Column</label>
             <TemplateSectionEditor
               value={footer.right}
               onChange={(v) => setFooter({ ...footer, right: v })}

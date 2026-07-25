@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+﻿import { useState, useRef, useCallback, useEffect } from "react";
 import { Pill, Video, Flame, Check, Clock, AlertCircle, Loader2, Square, Camera, RefreshCw, Sparkles, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -228,7 +228,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
     createTodayRecords();
   }, [prescriptions.length, today]);
 
-  // Skipped/missed doses no longer notify doctors — only the patient and their
+  // Skipped/missed doses no longer notify doctors â€” only the patient and their
   // emergency contacts / next of kin are notified (see check-missed-medications
   // edge function), based on the patient's own preference.
 
@@ -247,7 +247,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         (r) => r.prescription_id === focusRxId && r.scheduled_date === today,
       );
       if (todayRecord && todayRecord.status !== "pending") {
-        // already done — just leave the card focused
+        // already done â€” just leave the card focused
       } else if (needsBaseline(focusRxId)) {
         setBaselineCapture({ open: true, rxId: rx.id, medication: rx.medication, dosage: rx.dosage });
       } else {
@@ -401,7 +401,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
     });
   };
 
-  // STAGE 1 — Capture a single still and verify the pill matches the prescription
+  // STAGE 1 â€” Capture a single still and verify the pill matches the prescription
   const capturePillImage = async () => {
     if (!stream || !videoRef.current || !recordingPrescriptionId) return;
     setIsCheckingPill(true);
@@ -539,7 +539,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         setCelebration({ open: true, vulasEarned: data?.molesAwarded ?? 5, streak: earnedStreak, medicationName: rxName });
       } else if (data?.provisional) {
         toast({
-          title: `Confidence ${Math.round(data.confidence ?? 0)}% — provisional`,
+          title: `Confidence ${Math.round(data.confidence ?? 0)}% â€” provisional`,
           description: "Vulas added now. We'll confirm at month-end if your monthly average stays above 50%.",
         });
         handleCloseRecording();
@@ -556,7 +556,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         const reason = validation?.description || "Could not confirm medication ingestion.";
         toast({
           title: "Verification failed",
-          description: `${reason} Your medication intake was logged but not auto-confirmed — please contact your doctor if this was an error.`,
+          description: `${reason} Your medication intake was logged but not auto-confirmed â€” please contact your doctor if this was an error.`,
           variant: "destructive",
         });
         handleCloseRecording();
@@ -599,7 +599,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
           {profileChronicState?.hasUnsyncedChronic ? (
             <>
               <p className="text-sm text-muted-foreground mt-1">
-                Some of your chronic meds aren't tracked yet — add your doctor under My Healthcare so we can set up baseline capture.
+                Some of your chronic meds aren't tracked yet â€” add your doctor under My Healthcare so we can set up baseline capture.
               </p>
               <Button
                 variant="outline"
@@ -664,7 +664,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">{rx.dosage?.trim() || "—"} • {rx.frequency?.trim() || "once daily"}</p>
+                  <p className="text-sm text-muted-foreground">{rx.dosage?.trim() || "â€”"} â€¢ {rx.frequency?.trim() || "once daily"}</p>
 
                   {(() => {
                     const ref = getReference(rx.id);
@@ -691,9 +691,9 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                         </div>
                         <p className="text-sm text-muted-foreground">
                           Reference: {ref.observed_description?.split(/[,.]/)[0] || "tablet"}
-                          {methodLabel ? ` · ${methodLabel}` : ""}
-                          {captured ? ` · captured ${captured}` : ""}
-                          {" · "}
+                          {methodLabel ? ` Â· ${methodLabel}` : ""}
+                          {captured ? ` Â· captured ${captured}` : ""}
+                          {" Â· "}
                           <button
                             type="button"
                             className="underline hover:text-foreground"
@@ -712,7 +712,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                       <span className="text-sm font-medium">{streak}-day streak</span>
                     </div>
                     <div className="flex-1 max-w-[200px]">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-1">
                         <span>Adherence</span>
                         <span>{adherenceRate}%</span>
                       </div>
@@ -762,7 +762,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
         );
       })}
 
-      {/* Recording Dialog — two stages: pill_check, then ingestion */}
+      {/* Recording Dialog â€” two stages: pill_check, then ingestion */}
       <Dialog open={!!recordingPrescriptionId} onOpenChange={(open) => { if (!open) handleCloseRecording(); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -780,7 +780,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
               const expectedQty = Math.max(1, Number(rxNow?.quantity_per_dose) || parseQuantity(rxNow?.dosage));
               if (stage === "pill_check" && expectedQty > 1) {
                 return (
-                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 text-xs text-foreground flex items-center gap-2">
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-2 text-sm text-foreground flex items-center gap-2">
                     <Pill className="h-4 w-4 text-primary" />
                     Show <strong>all {expectedQty} tablets</strong> together in the frame.
                   </div>
@@ -807,7 +807,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                   onError={() =>
                     toast({
                       title: "Replay not supported on this device",
-                      description: "Don't worry — the recording was sent for verification.",
+                      description: "Don't worry â€” the recording was sent for verification.",
                     })
                   }
                 />
@@ -815,13 +815,13 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover mirror" />
               )}
               {isRecording && (
-                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+                <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-full text-sm font-bold animate-pulse">
                   REC {countdown}s
                 </div>
               )}
             </div>
 
-            {/* STAGE 1 — Pill capture */}
+            {/* STAGE 1 â€” Pill capture */}
             {stage === "pill_check" && (
               <>
                 {pillCheckResult && (
@@ -848,9 +848,9 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
                           {!pillCheckResult.isPillVisible
                             ? "No pill detected"
                             : pillCheckResult.expectedCount && pillCheckResult.detectedCount !== undefined && pillCheckResult.detectedCount < pillCheckResult.expectedCount
-                            ? `We saw ${pillCheckResult.detectedCount} of ${pillCheckResult.expectedCount} tablets — please show them all`
+                            ? `We saw ${pillCheckResult.detectedCount} of ${pillCheckResult.expectedCount} tablets â€” please show them all`
                             : pillCheckResult.isMatch
-                            ? "Looks right — proceed to take it"
+                            ? "Looks right â€” proceed to take it"
                             : "This does not match your prescribed medication. You cannot record intake until the correct pill is shown."}
                         </p>
                         <p className="opacity-80 mt-0.5">{pillCheckResult.matchReason}</p>
@@ -896,7 +896,7 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
               </>
             )}
 
-            {/* STAGE 2 — Ingestion recording */}
+            {/* STAGE 2 â€” Ingestion recording */}
             {stage === "ingestion" && (
               <div className="flex gap-2 justify-center">
                 {!recordedBlob ? (
@@ -957,3 +957,4 @@ export function MedicationAdherenceTab({ patientId, focusRxId, onFocusHandled }:
     </div>
   );
 }
+

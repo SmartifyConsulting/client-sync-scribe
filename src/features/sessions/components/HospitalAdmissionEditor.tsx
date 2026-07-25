@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+﻿import { useState, useEffect, useCallback, useRef } from "react";
 import { X, FileText, Loader2, Save, Eye, Plus, Trash2, Search } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ const FALLBACK_TEMPLATE = `HOSPITAL ADMISSION FORM
 Practice No: [PRACTICE_NUMBER]
 Registration No: [DOCTOR_NUMBER]
 
-─────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 ADMISSION DETAILS
 
@@ -59,13 +59,13 @@ Practice Number: [PRACTICE_NUMBER]
 Hospital: [HOSPITAL]
 Date of Admission: [ADMISSION_DATE]
 
-─────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-DIAGNOSIS DETAILS — ICD-10 CODES
+DIAGNOSIS DETAILS â€” ICD-10 CODES
 
 [ICD10_CODES]
 
-─────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 PROCEDURE DETAILS
 
@@ -74,7 +74,7 @@ Procedure Description: [PROCEDURE_DESCRIPTION]
 
 [PROCEDURE_CODES]
 
-─────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 [ADDITIONAL_CODE_SYSTEMS]
 
@@ -82,7 +82,7 @@ PATIENT SPECIAL INSTRUCTIONS
 
 [SPECIAL_INSTRUCTIONS]
 
-─────────────────────────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 Patient: [PATIENT_NAME]
 
@@ -351,13 +351,13 @@ export function HospitalAdmissionEditor({
 
     const icd10Text = icd10System?.entries
       .filter((e) => e.code.trim())
-      .map((e) => `• ${e.code}${e.description ? ` — ${e.description}` : ""}`)
+      .map((e) => `â€¢ ${e.code}${e.description ? ` â€” ${e.description}` : ""}`)
       .join("\n") || "None specified";
 
     const nhrplText = nhrplSystem?.entries
       .filter((e) => e.code.trim())
-      .map((e) => `• ${e.code}${e.description ? ` — ${e.description}` : ""}`)
-      .join("\n") || "—";
+      .map((e) => `â€¢ ${e.code}${e.description ? ` â€” ${e.description}` : ""}`)
+      .join("\n") || "â€”";
 
     const procedureCodesText = `NHRPL Codes:\n${nhrplText}`;
 
@@ -365,16 +365,16 @@ export function HospitalAdmissionEditor({
       .map(sys => {
         const entries = sys.entries
           .filter(e => e.code.trim())
-          .map(e => `• ${e.code}${e.description ? ` — ${e.description}` : ""}`)
+          .map(e => `â€¢ ${e.code}${e.description ? ` â€” ${e.description}` : ""}`)
           .join("\n");
-        return entries ? `${sys.name} CODES\n\n${entries}\n\n─────────────────────────────────────\n` : "";
+        return entries ? `${sys.name} CODES\n\n${entries}\n\nâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n` : "";
       })
       .filter(Boolean)
       .join("\n");
 
     const instructionsText = specialInstructions
       .filter((e) => e.instruction.trim())
-      .map((e) => `• ${e.instruction}${e.description ? ` — ${e.description}` : ""}`)
+      .map((e) => `â€¢ ${e.instruction}${e.description ? ` â€” ${e.description}` : ""}`)
       .join("\n");
 
     return baseTemplate
@@ -388,11 +388,11 @@ export function HospitalAdmissionEditor({
       .replace(/\[DoctorNumber\]/g, doctorNumber)
       .replace(/\[PATIENT_NAME\]/g, patientName)
       .replace(/\[PatientName\]/g, patientName)
-      .replace("[HOSPITAL]", hospital || "—")
-      .replace("[ADMISSION_DATE]", admissionDate ? format(admissionDate, "dd/MM/yyyy") : "—")
+      .replace("[HOSPITAL]", hospital || "â€”")
+      .replace("[ADMISSION_DATE]", admissionDate ? format(admissionDate, "dd/MM/yyyy") : "â€”")
       .replace("[ICD10_CODES]", icd10Text)
-      .replace("[PROCEDURE_DATE]", procedureDate ? format(procedureDate, "dd/MM/yyyy") : "—")
-      .replace("[PROCEDURE_DESCRIPTION]", procedureDescription || "—")
+      .replace("[PROCEDURE_DATE]", procedureDate ? format(procedureDate, "dd/MM/yyyy") : "â€”")
+      .replace("[PROCEDURE_DESCRIPTION]", procedureDescription || "â€”")
       .replace("[PROCEDURE_CODES]", procedureCodesText)
       .replace("[NHRPL_CODES]", nhrplText)
       .replace("[ADDITIONAL_CODE_SYSTEMS]", additionalText)
@@ -604,7 +604,7 @@ export function HospitalAdmissionEditor({
                   </div>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">NHRPL codes will be auto-filled based on the procedure</p>
+              <p className="text-sm text-muted-foreground">NHRPL codes will be auto-filled based on the procedure</p>
             </div>
           </div>
 
@@ -613,8 +613,8 @@ export function HospitalAdmissionEditor({
             <div key={sys.key}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
-                  {sys.key === "icd10" ? "Diagnosis Details — ICD-10 Codes" :
-                   sys.key === "nhrpl" ? "Procedure — NHRPL Codes" :
+                  {sys.key === "icd10" ? "Diagnosis Details â€” ICD-10 Codes" :
+                   sys.key === "nhrpl" ? "Procedure â€” NHRPL Codes" :
                    `${sys.name} Codes`}
                 </h3>
                 {sys.key !== "icd10" && sys.key !== "nhrpl" && (
@@ -761,3 +761,4 @@ export function HospitalAdmissionEditor({
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,11 @@ import { useTranslation } from "react-i18next";
 import { toastError } from "@/lib/userMessage";
 
 const PRIORITIES = [
-  { v: "esi-1", label: "ESI 1 — Resuscitation" },
-  { v: "esi-2", label: "ESI 2 — Emergent" },
-  { v: "esi-3", label: "ESI 3 — Urgent" },
-  { v: "esi-4", label: "ESI 4 — Less urgent" },
-  { v: "esi-5", label: "ESI 5 — Non-urgent" },
+  { v: "esi-1", label: "ESI 1 â€” Resuscitation" },
+  { v: "esi-2", label: "ESI 2 â€” Emergent" },
+  { v: "esi-3", label: "ESI 3 â€” Urgent" },
+  { v: "esi-4", label: "ESI 4 â€” Less urgent" },
+  { v: "esi-5", label: "ESI 5 â€” Non-urgent" },
 ];
 
 export function TriageControls({
@@ -47,10 +47,10 @@ export function TriageControls({
 
   return (
     <div className="rounded-2xl border bg-card p-3 space-y-3">
-      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("triageControls.assignment")}</p>
+      <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("triageControls.assignment")}</p>
       <div className="grid gap-2 sm:grid-cols-3">
         <div className="grid gap-1.5">
-          <Label className="text-xs">{t("triageControls.priority")}</Label>
+          <Label className="text-sm">{t("triageControls.priority")}</Label>
           <Select value={priority} onValueChange={setPriority}>
             <SelectTrigger className="rounded-xl"><SelectValue placeholder={t("triageControls.selectPriority")} /></SelectTrigger>
             <SelectContent>
@@ -59,11 +59,11 @@ export function TriageControls({
           </Select>
         </div>
         <div className="grid gap-1.5">
-          <Label className="text-xs">{t("triageControls.bay")}</Label>
+          <Label className="text-sm">{t("triageControls.bay")}</Label>
           <Input value={bay} onChange={(e) => setBay(e.target.value)} placeholder="e.g. Resus-2" className="rounded-xl" />
         </div>
         <div className="grid gap-1.5">
-          <Label className="text-xs">{t("triageControls.intakeNurse")}</Label>
+          <Label className="text-sm">{t("triageControls.intakeNurse")}</Label>
           <Input value={nurse} onChange={(e) => setNurse(e.target.value)} placeholder={t("common.name")} className="rounded-xl" />
         </div>
       </div>
@@ -71,3 +71,4 @@ export function TriageControls({
     </div>
   );
 }
+

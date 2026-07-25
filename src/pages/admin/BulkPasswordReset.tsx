@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -85,7 +85,7 @@ export default function BulkPasswordReset() {
     <div className="container max-w-3xl py-8 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">{t('admin.bulkPasswordReset.title')}</h1>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           {t('admin.bulkPasswordReset.description')}
         </p>
       </div>
@@ -157,7 +157,7 @@ export default function BulkPasswordReset() {
                     {r.status === "ok" && (
                       <>
                         <CheckCircle2 className="h-4 w-4 text-primary" />
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-sm text-muted-foreground">
                           {r.message}
                         </span>
                       </>
@@ -165,7 +165,7 @@ export default function BulkPasswordReset() {
                     {r.status === "error" && (
                       <>
                         <XCircle className="h-4 w-4 text-destructive" />
-                        <span className="text-xs text-destructive">{r.message}</span>
+                        <span className="text-sm text-destructive">{r.message}</span>
                       </>
                     )}
                   </span>
@@ -178,3 +178,4 @@ export default function BulkPasswordReset() {
     </div>
   );
 }
+

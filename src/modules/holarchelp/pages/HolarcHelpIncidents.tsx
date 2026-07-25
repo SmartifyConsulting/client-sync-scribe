@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,14 +71,14 @@ export default function HolarcHelpIncidents() {
                 )}
                 <p className="font-semibold">{new Date(i.created_at).toLocaleString()}</p>
                 {i.provider_name && (
-                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 truncate">
+                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400 truncate">
                     {i.provider_name}
-                    {i.auto && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">{t("holarcHelp.emergency.incidents.auto")}</span>}
+                    {i.auto && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-sm font-bold text-emerald-800">{t("holarcHelp.emergency.incidents.auto")}</span>}
                   </p>
                 )}
-                <p className="text-xs text-muted-foreground">{i.resolved_at ? t("holarcHelp.emergency.incidents.resolved", { date: new Date(i.resolved_at).toLocaleString() }) : t("holarcHelp.emergency.incidents.inProgress")}</p>
+                <p className="text-sm text-muted-foreground">{i.resolved_at ? t("holarcHelp.emergency.incidents.resolved", { date: new Date(i.resolved_at).toLocaleString() }) : t("holarcHelp.emergency.incidents.inProgress")}</p>
               </div>
-              <span className={`ml-2 shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${["completed","cancelled"].includes(i.status) ? "bg-secondary text-primary" : "bg-sos/10 text-sos"}`}>
+              <span className={`ml-2 shrink-0 rounded-full px-2.5 py-1 text-sm font-semibold ${["completed","cancelled"].includes(i.status) ? "bg-secondary text-primary" : "bg-sos/10 text-sos"}`}>
                 {(i.status ?? "").toUpperCase().replace(/_/g, " ")}
               </span>
             </Link>
@@ -88,3 +88,4 @@ export default function HolarcHelpIncidents() {
     </div>
   );
 }
+

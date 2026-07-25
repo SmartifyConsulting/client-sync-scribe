@@ -1,4 +1,4 @@
-import { ExternalLink } from "lucide-react";
+﻿import { ExternalLink } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "react-router-dom";
@@ -27,7 +27,7 @@ export function TrialSignupSection({
           onCheckedChange={(checked) => onAcceptedTermsChange(checked as boolean)}
           className="mt-0.5"
         />
-        <Label htmlFor="acceptTerms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+        <Label htmlFor="acceptTerms" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
           I have read and agree to the{" "}
           <Link
             to={primaryConsentDocument.path}
@@ -52,3 +52,4 @@ export function TrialSignupSection({
     </div>
   );
 }
+

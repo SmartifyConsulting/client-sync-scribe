@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+﻿import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -65,7 +65,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-// ── Constants ──────────────────────────────────────────────────────
+// â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 import { COUNTRY_DIAL_CODES as _COUNTRY_DIAL_CODES } from "@/lib/countryDialCodes";
 // Shape adapter so the existing JSX (which reads `code`/`country`/`flag`) keeps working.
 const COUNTRY_CODES = _COUNTRY_DIAL_CODES.map((c) => ({
@@ -114,10 +114,10 @@ const DOCTOR_SPECIALTIES = [
 const CURRENCIES = [
   { code: "ZAR", symbol: "R", name: "South African Rand" },
   { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "EUR", symbol: "€", name: "Euro" },
-  { code: "GBP", symbol: "£", name: "British Pound" },
+  { code: "EUR", symbol: "â‚¬", name: "Euro" },
+  { code: "GBP", symbol: "Â£", name: "British Pound" },
   { code: "BWP", symbol: "P", name: "Botswana Pula" },
-  { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
+  { code: "NGN", symbol: "â‚¦", name: "Nigerian Naira" },
   { code: "SZL", symbol: "E", name: "Swazi Lilangeni" },
   { code: "LSL", symbol: "M", name: "Lesotho Loti" },
 ];
@@ -162,7 +162,7 @@ const SIGNATURE_COLORS = [
   { value: "dark-green", label: "Dark Green", color: "#006400" },
 ];
 
-// ── Interfaces ──────────────────────────────────────────────────────
+// â”€â”€ Interfaces â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface Partner {
   id: string;
   full_name: string;
@@ -188,7 +188,7 @@ interface CPDCertificate {
   certificate_url: string | null;
 }
 
-// ── Helper ──────────────────────────────────────────────────────
+// â”€â”€ Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function formatPhoneNumber(value: string): string {
   const digits = value.replace(/\D/g, "");
   if (digits.length <= 2) return digits;
@@ -273,18 +273,18 @@ function MailboxSection({ userId }: { userId?: string }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-medium text-sm text-foreground">Document Mailbox</p>
-          <p className="text-xs text-muted-foreground mt-0.5">External parties can email documents to this address.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">External parties can email documents to this address.</p>
           <div className="mt-2 flex items-start gap-1.5 rounded-md border border-primary/30 bg-primary/5 p-2">
             <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
             <p className="text-sm leading-snug text-foreground/80">
-              This address is solely for emailing files (scans, referrals, lab results) directly to your <strong>My Documents</strong> tab — it is not for standard messaging and you will not receive replies in your normal inbox. Share it with anyone sending you medical records so they are routed straight to your Holarc Health profile.
+              This address is solely for emailing files (scans, referrals, lab results) directly to your <strong>My Documents</strong> tab â€” it is not for standard messaging and you will not receive replies in your normal inbox. Share it with anyone sending you medical records so they are routed straight to your Holarc Health profile.
             </p>
           </div>
           {displayEmail ? (
 
             <div className="mt-2 space-y-2">
               <div className="flex items-center gap-2">
-                <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-foreground border border-border truncate">
+                <code className="text-sm bg-muted px-2 py-1 rounded font-mono text-foreground border border-border truncate">
                   {displayEmail}
                 </code>
                 <Button variant="ghost" size="icon" onClick={handleCopy} className="h-7 w-7 shrink-0">
@@ -301,7 +301,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                         placeholder="your-name"
                         className="rounded-r-none max-w-[160px] h-8 text-sm"
                       />
-                      <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">
+                      <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-sm text-muted-foreground">
                         @holarc.com
                       </span>
                     </div>
@@ -316,7 +316,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs"
+                    className="h-7 text-sm"
                     onClick={() => {
                       setEditingAlias(true);
                       setAliasInput("");
@@ -327,7 +327,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                 ))}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground mt-1">Loading...</p>
+            <p className="text-sm text-muted-foreground mt-1">Loading...</p>
           )}
         </div>
       </div>
@@ -335,7 +335,7 @@ function MailboxSection({ userId }: { userId?: string }) {
   );
 }
 
-// ── About Me accordion (doctor pitch, max 600 words) ──
+// â”€â”€ About Me accordion (doctor pitch, max 600 words) â”€â”€
 function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string) => Promise<void> }) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState(value);
@@ -350,18 +350,18 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
         <AccordionTrigger className="px-4 py-3 hover:no-underline">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-xs font-medium text-primary-dark">{t("myPractice.aboutMe")}</h3>
+            <h3 className="text-sm font-medium text-primary-dark">{t("myPractice.aboutMe")}</h3>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4 space-y-2">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t("myPractice.aboutMeHelper")}
           </p>
           <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             rows={6}
-            placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
+            placeholder="Tell patients about your background, philosophy of care, and what makes your practice uniqueâ€¦"
           />
           <div className="flex items-center justify-between">
             <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
@@ -386,7 +386,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
 }
 
 
-// ── Main Component ──────────────────────────────────────────────────
+// â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function MyPractice() {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -409,13 +409,13 @@ export default function MyPractice() {
   } = usePractice();
   const [searchParams] = useSearchParams();
 
-  // ── Shared calendar form state ──
+  // â”€â”€ Shared calendar form state â”€â”€
   const [newPracticeName, setNewPracticeName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [practiceColor, setPracticeColor] = useState<string>("#0EA5E9");
   const colorDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Form state (auto-save) ──
+  // â”€â”€ Form state (auto-save) â”€â”€
   const [savedStatus, setSavedStatus] = useState<"idle" | "saving" | "saved">("idle");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInitialized = useRef(false);
@@ -433,7 +433,7 @@ export default function MyPractice() {
     country_code: "+27",
   });
 
-  // ── Signature form state (auto-save) ──
+  // â”€â”€ Signature form state (auto-save) â”€â”€
   const sigDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sigHasInitialized = useRef(false);
   const sigIsSettingFromProfile = useRef(false);
@@ -447,16 +447,16 @@ export default function MyPractice() {
     signature_italic: false,
   });
 
-  // ── Avatar / Logo upload ──
+  // â”€â”€ Avatar / Logo upload â”€â”€
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
-  // ── Email editing ──
+  // â”€â”€ Email editing â”€â”€
   const [editEmail, setEditEmail] = useState("");
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isSavingEmail, setIsSavingEmail] = useState(false);
 
-  // ── Partners ──
+  // â”€â”€ Partners â”€â”€
   const [partners, setPartners] = useState<Partner[]>([]);
   const [newPartner, setNewPartner] = useState({
     full_name: "",
@@ -470,7 +470,7 @@ export default function MyPractice() {
   const [editingPartner, setEditingPartner] = useState({ full_name: "", registration_number: "", mobile_number: "" });
   const [isSavingPartner, setIsSavingPartner] = useState(false);
 
-  // ── Existing-user partner search ──
+  // â”€â”€ Existing-user partner search â”€â”€
   const [partnerSearch, setPartnerSearch] = useState("");
   const [partnerSearchResults, setPartnerSearchResults] = useState<
     Array<{ id: string; full_name: string | null; doctor_number: string | null; mobile_number: string | null }>
@@ -510,7 +510,7 @@ export default function MyPractice() {
       .insert({
         user_id: user.id,
         full_name: existing.full_name || "Partner",
-        registration_number: existing.doctor_number || "—",
+        registration_number: existing.doctor_number || "â€”",
         mobile_number: existing.mobile_number || null,
       } as any)
       .select()
@@ -537,7 +537,7 @@ export default function MyPractice() {
   };
 
 
-  // ── Service Prices ──
+  // â”€â”€ Service Prices â”€â”€
   const [servicePrices, setServicePrices] = useState<ServicePrice[]>([]);
   const [newService, setNewService] = useState({
     service_name: "",
@@ -551,10 +551,10 @@ export default function MyPractice() {
   const [editingService, setEditingService] = useState({ service_name: "", default_price: "", color: "" });
   const [isSavingService, setIsSavingService] = useState(false);
 
-  // ── Voice narration local state ──
+  // â”€â”€ Voice narration local state â”€â”€
   const [localVoice, setLocalVoice] = useState(profile?.narration_voice || "shimmer");
 
-  // ── CPD Certificates ──
+  // â”€â”€ CPD Certificates â”€â”€
   const [certs, setCerts] = useState<CPDCertificate[]>([]);
   const [certsLoading, setCertsLoading] = useState(true);
   const [showCertForm, setShowCertForm] = useState(false);
@@ -566,7 +566,7 @@ export default function MyPractice() {
   const [certForm, setCertForm] = useState({ certificate_name: "", issuing_body: "", date_earned: "", cpd_points: "" });
   const [certErrors, setCertErrors] = useState<Record<string, string>>({});
 
-  // ── Profile data sync ──
+  // â”€â”€ Profile data sync â”€â”€
   useEffect(() => {
     if (profile) {
       let countryCode = "+27";
@@ -635,7 +635,7 @@ export default function MyPractice() {
     SIGNATURE_FONTS.find((f) => f.value === v)?.fontFamily || SIGNATURE_FONTS[0].fontFamily;
   const getSignatureColor = (v: string) => SIGNATURE_COLORS.find((c) => c.value === v)?.color || "#000000";
 
-  // ── Auto-save debounce ──
+  // â”€â”€ Auto-save debounce â”€â”€
   useEffect(() => {
     if (!hasInitialized.current || !user || isSettingFromProfile.current) return;
     if (profileLoadedData.current && JSON.stringify(formData) === JSON.stringify(profileLoadedData.current)) {
@@ -670,7 +670,7 @@ export default function MyPractice() {
     };
   }, [formData]);
 
-  // ── Auto-save signature debounce ──
+  // â”€â”€ Auto-save signature debounce â”€â”€
   useEffect(() => {
     if (!sigHasInitialized.current || !user || sigIsSettingFromProfile.current) return;
     if (sigProfileLoadedData.current && JSON.stringify(sigFormData) === JSON.stringify(sigProfileLoadedData.current)) {
@@ -701,7 +701,7 @@ export default function MyPractice() {
     };
   }, [sigFormData]);
 
-  // ── Auto-guess language from country code ──
+  // â”€â”€ Auto-guess language from country code â”€â”€
   const handleCountryCodeChange = async (code: string) => {
     setFormData({ ...formData, country_code: code });
     const guessedLang = COUNTRY_CODE_TO_LANGUAGE[code];
@@ -710,7 +710,7 @@ export default function MyPractice() {
     }
   };
 
-  // ── Fetch doctor data ──
+  // â”€â”€ Fetch doctor data â”€â”€
   useEffect(() => {
     if (user) {
       fetchPartners();
@@ -729,7 +729,7 @@ export default function MyPractice() {
       .slice(0, 2);
   const getCurrencySymbol = (code: string) => CURRENCIES.find((c) => c.code === code)?.symbol || code;
 
-  // ── Partner functions ──
+  // â”€â”€ Partner functions â”€â”€
   const fetchPartners = async () => {
     if (!user) return;
     const { data, error } = await supabase
@@ -823,7 +823,7 @@ export default function MyPractice() {
     setIsSavingPartner(false);
   };
 
-  // ── Service price functions ──
+  // â”€â”€ Service price functions â”€â”€
   const fetchServicePrices = async () => {
     if (!user) return;
     const { data, error } = await supabase
@@ -932,7 +932,7 @@ export default function MyPractice() {
     }
   };
 
-  // ── CPD Certificate functions ──
+  // â”€â”€ CPD Certificate functions â”€â”€
   const fetchCerts = async () => {
     setCertsLoading(true);
     const { data, error } = await supabase
@@ -952,7 +952,7 @@ export default function MyPractice() {
       toast({ title: "Upload Error", description: error.message, variant: "destructive" });
       return null;
     }
-    // Bucket is private — store the path; signed URLs are generated on demand.
+    // Bucket is private â€” store the path; signed URLs are generated on demand.
     return filePath;
   };
 
@@ -1028,7 +1028,7 @@ export default function MyPractice() {
     }
   };
 
-  // ── Upload handlers ──
+  // â”€â”€ Upload handlers â”€â”€
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
@@ -1111,14 +1111,14 @@ export default function MyPractice() {
     );
   }
 
-  // ── RENDER ──
+  // â”€â”€ RENDER â”€â”€
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">My Holarprac</h1>
-          <p className="text-muted-foreground text-xs">Manage your personal and practice information</p>
+          <p className="text-muted-foreground text-sm">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === "saving" && (
@@ -1159,7 +1159,7 @@ export default function MyPractice() {
                 <Camera className="h-3 w-3 text-primary-foreground" />
               </div>
             </div>
-            <span className="text-xs font-medium text-primary-dark mt-0.5 whitespace-nowrap">
+            <span className="text-sm font-medium text-primary-dark mt-0.5 whitespace-nowrap">
               {(profile as any)?.avatar_url ? "Change photo" : "Add photo"}
             </span>
             <input
@@ -1173,8 +1173,8 @@ export default function MyPractice() {
           </label>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-foreground truncate">{combinedFullName || "Your Name"}</p>
-            <p className="text-xs text-muted-foreground">{user?.email}</p>
-            {isUploadingAvatar && <p className="text-xs text-muted-foreground">Uploading...</p>}
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            {isUploadingAvatar && <p className="text-sm text-muted-foreground">Uploading...</p>}
           </div>
           {totalCpdPoints > 0 && (
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 shrink-0">
@@ -1190,31 +1190,31 @@ export default function MyPractice() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5"
           >
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
             value="referrals"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-sm px-1.5 py-1 sm:text-sm sm:px-3 sm:py-1.5"
           >
             {t("myPractice.tabRewards")}
           </TabsTrigger>
@@ -1232,7 +1232,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-medium text-primary-dark">Personal Information</h3>
+                  <h3 className="text-sm font-medium text-primary-dark">Personal Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1330,7 +1330,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-medium text-primary-dark">Practice Information</h3>
+                  <h3 className="text-sm font-medium text-primary-dark">Practice Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1477,9 +1477,9 @@ export default function MyPractice() {
                       ) : (
                         <div>
                           <p className="font-medium text-sm text-foreground">{partner.full_name}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             Reg: {partner.registration_number}
-                            {partner.mobile_number && ` · ${partner.mobile_number}`}
+                            {partner.mobile_number && ` Â· ${partner.mobile_number}`}
                           </p>
                         </div>
                       )}
@@ -1587,22 +1587,22 @@ export default function MyPractice() {
                       <TabsTrigger value="share">Share app link</TabsTrigger>
                     </TabsList>
 
-                    {/* ── Existing user ── */}
+                    {/* â”€â”€ Existing user â”€â”€ */}
                     <TabsContent value="existing" className="space-y-2 pt-3">
-                      <Label className="text-xs">Search Holarc users by name or registration #</Label>
+                      <Label className="text-sm">Search Holarc users by name or registration #</Label>
                       <Input
                         value={partnerSearch}
                         onChange={(e) => setPartnerSearch(e.target.value)}
-                        placeholder="Start typing a name…"
+                        placeholder="Start typing a nameâ€¦"
                       />
                       <div className="max-h-56 overflow-y-auto space-y-1">
                         {searchingPartners && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1.5 px-2 py-2">
-                            <Loader2 className="h-3 w-3 animate-spin" /> Searching…
+                          <p className="text-sm text-muted-foreground flex items-center gap-1.5 px-2 py-2">
+                            <Loader2 className="h-3 w-3 animate-spin" /> Searchingâ€¦
                           </p>
                         )}
                         {!searchingPartners && partnerSearch.length >= 2 && partnerSearchResults.length === 0 && (
-                          <p className="text-xs text-muted-foreground px-2 py-2">No matching users found.</p>
+                          <p className="text-sm text-muted-foreground px-2 py-2">No matching users found.</p>
                         )}
                         {partnerSearchResults.map((r) => (
                           <button
@@ -1623,7 +1623,7 @@ export default function MyPractice() {
                       </div>
                     </TabsContent>
 
-                    {/* ── Invite by email ── */}
+                    {/* â”€â”€ Invite by email â”€â”€ */}
                     <TabsContent value="invite" className="space-y-3 pt-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
@@ -1667,13 +1667,13 @@ export default function MyPractice() {
                       </div>
                     </TabsContent>
 
-                    {/* ── Share link ── */}
+                    {/* â”€â”€ Share link â”€â”€ */}
                     <TabsContent value="share" className="space-y-3 pt-3">
-                      <p className="text-xs text-muted-foreground">
-                        Share this link with a colleague — they can sign up and be linked to your practice.
+                      <p className="text-sm text-muted-foreground">
+                        Share this link with a colleague â€” they can sign up and be linked to your practice.
                       </p>
                       <div className="flex items-center gap-2">
-                        <Input value={partnerShareLink} readOnly className="font-mono text-xs" />
+                        <Input value={partnerShareLink} readOnly className="font-mono text-sm" />
                         <Button size="sm" variant="outline" onClick={copyShareLink} className="gap-1.5 shrink-0">
                           {copiedShareLink ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                           {copiedShareLink ? "Copied" : "Copy"}
@@ -1740,13 +1740,13 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-medium text-primary-dark">Shared Practice Calendar</h3>
+                  <h3 className="text-sm font-medium text-primary-dark">Shared Practice Calendar</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
                 <p className="text-sm text-muted-foreground">
                   Share a single calendar across multiple doctors. Each doctor's appointments show in their assigned color.
-                  Google Calendar sync stays personal — only your own appointments mirror.
+                  Google Calendar sync stays personal â€” only your own appointments mirror.
                 </p>
 
                 {pendingInvites.length > 0 && (
@@ -1786,7 +1786,7 @@ export default function MyPractice() {
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{practice.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {isPracticeOwner ? "You are the owner" : "You are a member"} · {members.length} member{members.length === 1 ? "" : "s"}
+                          {isPracticeOwner ? "You are the owner" : "You are a member"} Â· {members.length} member{members.length === 1 ? "" : "s"}
                         </p>
                       </div>
                       {isPracticeOwner ? (
@@ -1807,12 +1807,12 @@ export default function MyPractice() {
                             <div className="flex items-center gap-2.5 min-w-0">
                               <Avatar className="h-7 w-7">
                                 {m.avatar_url ? <AvatarImage src={m.avatar_url} /> : null}
-                                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                                <AvatarFallback className="text-sm">{initials}</AvatarFallback>
                               </Avatar>
                               <span className="inline-block h-3 w-3 rounded-full border border-border shrink-0" style={{ backgroundColor: m.practice_color || "#0EA5E9" }} />
                               <div className="min-w-0">
                                 <p className="text-sm font-medium text-foreground truncate">{m.full_name || "Unnamed"}</p>
-                                <p className="text-xs text-muted-foreground capitalize">{m.role}</p>
+                                <p className="text-sm text-muted-foreground capitalize">{m.role}</p>
                               </div>
                             </div>
                             {isPracticeOwner && m.role !== "owner" && (
@@ -1846,7 +1846,7 @@ export default function MyPractice() {
                           <div key={inv.id} className="flex items-center justify-between p-2 bg-muted/20 rounded-lg border border-border">
                             <div className="min-w-0">
                               <p className="text-sm truncate">{inv.invited_email}</p>
-                              <p className="text-xs text-muted-foreground">Sent {format(new Date(inv.created_at), "MMM d")}</p>
+                              <p className="text-sm text-muted-foreground">Sent {format(new Date(inv.created_at), "MMM d")}</p>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => revokeInvitation(inv.id)} className="h-7 w-7 text-destructive" title="Revoke">
                               <X className="h-3.5 w-3.5" />
@@ -1865,7 +1865,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
-                  <span className="text-xs font-medium text-primary-dark">Service Offerings & Pricing</span>
+                  <span className="text-sm font-medium text-primary-dark">Service Offerings & Pricing</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-4">
@@ -1918,7 +1918,7 @@ export default function MyPractice() {
                                 onChange={(e) => setEditingService({ ...editingService, color: e.target.value })}
                                 className="h-8 w-10 rounded border border-border cursor-pointer"
                               />
-                              <span className="text-xs text-muted-foreground">Color</span>
+                              <span className="text-sm text-muted-foreground">Color</span>
                             </div>
                           </div>
                         ) : (
@@ -1947,7 +1947,7 @@ export default function MyPractice() {
                               <div className="flex items-center gap-2">
                                 <p className="font-medium text-sm text-foreground">{service.service_name}</p>
                               </div>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-sm text-muted-foreground">
                                 {getCurrencySymbol(service.currency)} {Number(service.default_price).toFixed(2)}
                               </p>
                             </div>
@@ -2034,7 +2034,7 @@ export default function MyPractice() {
                           onChange={(e) => setNewService({ ...newService, color: e.target.value })}
                           className="h-10 w-12 rounded border border-border cursor-pointer"
                         />
-                        <span className="text-xs text-muted-foreground">Used in calendar</span>
+                        <span className="text-sm text-muted-foreground">Used in calendar</span>
                       </div>
                     </div>
                   </div>
@@ -2051,7 +2051,7 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-medium text-primary-dark">Digital Signature</h3>
+                  <h3 className="text-sm font-medium text-primary-dark">Digital Signature</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
@@ -2060,7 +2060,7 @@ export default function MyPractice() {
                 value={sigFormData.signature_font}
                 onValueChange={(v) => setSigFormData({ ...sigFormData, signature_font: v })}
               >
-                <SelectTrigger className="w-[120px] h-8 text-xs">
+                <SelectTrigger className="w-[120px] h-8 text-sm">
                   <span style={{ fontFamily: getSignatureFontFamily(sigFormData.signature_font), fontSize: "14px" }}>
                     {SIGNATURE_FONTS.find((f) => f.value === sigFormData.signature_font)?.label || "Font"}
                   </span>
@@ -2071,7 +2071,7 @@ export default function MyPractice() {
                       <div className="flex flex-col">
                         <span style={{ fontFamily: f.fontFamily, fontSize: "22px", lineHeight: "1.4" }}>{f.label}</span>
                         {combinedFullName && (
-                          <span className="text-xs text-muted-foreground" style={{ fontFamily: f.fontFamily }}>
+                          <span className="text-sm text-muted-foreground" style={{ fontFamily: f.fontFamily }}>
                             {combinedFullName}
                           </span>
                         )}
@@ -2084,7 +2084,7 @@ export default function MyPractice() {
                 value={sigFormData.signature_color}
                 onValueChange={(v) => setSigFormData({ ...sigFormData, signature_color: v })}
               >
-                <SelectTrigger className="w-[100px] h-8 text-xs">
+                <SelectTrigger className="w-[100px] h-8 text-sm">
                   <span className="flex items-center gap-1.5">
                     <span
                       className="h-3 w-3 rounded-full border border-border"
@@ -2110,7 +2110,7 @@ export default function MyPractice() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-1.5 min-w-[80px] flex-1">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
                   {sigFormData.signature_font_size}px
                 </span>
                 <Slider
@@ -2153,7 +2153,7 @@ export default function MyPractice() {
               >
                 {combinedFullName}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric" })}
               </p>
             </div>
@@ -2165,13 +2165,13 @@ export default function MyPractice() {
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-xs font-medium text-primary-dark">Voice Narration Settings</h3>
+                  <h3 className="text-sm font-medium text-primary-dark">Voice Narration Settings</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 space-y-2">
-            <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
+            <p className="text-sm text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
             <div className="space-y-1.5">
-              <Label className="text-xs">Narration Voice</Label>
+              <Label className="text-sm">Narration Voice</Label>
               <Select
                 value={localVoice}
                 onValueChange={async (v) => {
@@ -2192,12 +2192,12 @@ export default function MyPractice() {
                 </SelectTrigger>
                 <SelectContent>
                   {[
-                    { value: "alloy", label: "Alloy – Neutral & balanced" },
-                    { value: "echo", label: "Echo – Warm & clear" },
-                    { value: "fable", label: "Fable – Expressive & British" },
-                    { value: "onyx", label: "Onyx – Deep & authoritative" },
-                    { value: "nova", label: "Nova – Friendly & natural" },
-                    { value: "shimmer", label: "Shimmer – Soft & gentle" },
+                    { value: "alloy", label: "Alloy â€“ Neutral & balanced" },
+                    { value: "echo", label: "Echo â€“ Warm & clear" },
+                    { value: "fable", label: "Fable â€“ Expressive & British" },
+                    { value: "onyx", label: "Onyx â€“ Deep & authoritative" },
+                    { value: "nova", label: "Nova â€“ Friendly & natural" },
+                    { value: "shimmer", label: "Shimmer â€“ Soft & gentle" },
                   ].map((voice) => (
                     <SelectItem key={voice.value} value={voice.value}>
                       {voice.label}
@@ -2209,7 +2209,7 @@ export default function MyPractice() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 text-xs mt-2"
+              className="gap-2 text-sm mt-2"
               onClick={async () => {
                 try {
                   const SAMPLE_TEXTS: Record<string, string> = {
@@ -2219,32 +2219,32 @@ export default function MyPractice() {
                     xh: "Wamkelekile kwi-Holarc Health. Sebenzisa ezi sethingi ukwenza amava akho abe ngawakho.",
                     st: "Rea u amohela ho Holarc Health. Sebelisa litlhophiso tsena ho etsa hore boiphihlelo ba hau bo be ba hau.",
                     tn: "O amogelesegile mo Holarc Health. Dirisa ditlhophiso tseno go itirela maitemogelo a gago.",
-                    fr: "Bienvenue chez Holarc Health. Utilisez ces paramètres pour personnaliser votre expérience.",
-                    pt: "Bem-vindo ao Holarc Health. Use estas configurações para personalizar a sua experiência.",
+                    fr: "Bienvenue chez Holarc Health. Utilisez ces paramÃ¨tres pour personnaliser votre expÃ©rience.",
+                    pt: "Bem-vindo ao Holarc Health. Use estas configuraÃ§Ãµes para personalizar a sua experiÃªncia.",
                     es: "Bienvenido a Holarc Health. Usa estos ajustes para personalizar tu experiencia.",
                     de: "Willkommen bei Holarc Health. Verwenden Sie diese Einstellungen, um Ihr Erlebnis zu personalisieren.",
-                    ar: "مرحبًا بك في Holarc Health. استخدم هذه الإعدادات لتخصيص تجربتك.",
+                    ar: "Ù…Ø±Ø­Ø¨Ù‹Ø§ Ø¨Ùƒ ÙÙŠ Holarc Health. Ø§Ø³ØªØ®Ø¯Ù… Ù‡Ø°Ù‡ Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ù„ØªØ®ØµÙŠØµ ØªØ¬Ø±Ø¨ØªÙƒ.",
                     sw: "Karibu Holarc Health. Tumia mipangilio hii kubinafsisha uzoefu wako.",
                     nr: "Siyakwamukela ku-Holarc Health. Sebenzisa iinsethingi lezi ukwenza isipiliyoni sakho sibe ngesakho.",
                     ss: "Siyakwemukela ku-Holarc Health. Sebentisa letilungiselelo kutentisa sipiliyoni sakho sibe ngesakho.",
                     ts: "Xa amukeriwa eka Holarc Health. Tirhisa switirhisiwa leswi ku endla leswaku ntokoto wa wena wu va wa wena.",
-                    ve: "Vho ṱanganedzwa kha Holarc Health. Shumisani zwishumiswa izwi u itela tshenzhemo yaṋu.",
+                    ve: "Vho á¹±anganedzwa kha Holarc Health. Shumisani zwishumiswa izwi u itela tshenzhemo yaá¹‹u.",
                     nl: "Welkom bij Holarc Health. Gebruik deze instellingen om uw ervaring te personaliseren.",
-                    el: "Καλώς ήρθατε στο Holarc Health. Χρησιμοποιήστε αυτές τις ρυθμίσεις για να εξατομικεύσετε την εμπειρία σας.",
-                    he: "ברוכים הבאים ל-Holarc Health. השתמשו בהגדרות אלה כדי להתאים אישית את החוויה שלכם.",
-                    hi: "Holarc Health में आपका स्वागत है। अपने अनुभव को निजीकृत करने के लिए इन सेटिंग्स का उपयोग करें।",
+                    el: "ÎšÎ±Î»ÏŽÏ‚ Î®ÏÎ¸Î±Ï„Îµ ÏƒÏ„Î¿ Holarc Health. Î§ÏÎ·ÏƒÎ¹Î¼Î¿Ï€Î¿Î¹Î®ÏƒÏ„Îµ Î±Ï…Ï„Î­Ï‚ Ï„Î¹Ï‚ ÏÏ…Î¸Î¼Î¯ÏƒÎµÎ¹Ï‚ Î³Î¹Î± Î½Î± ÎµÎ¾Î±Ï„Î¿Î¼Î¹ÎºÎµÏÏƒÎµÏ„Îµ Ï„Î·Î½ ÎµÎ¼Ï€ÎµÎ¹ÏÎ¯Î± ÏƒÎ±Ï‚.",
+                    he: "×‘×¨×•×›×™× ×”×‘××™× ×œ-Holarc Health. ×”×©×ª×ž×©×• ×‘×”×’×“×¨×•×ª ××œ×” ×›×“×™ ×œ×”×ª××™× ××™×©×™×ª ××ª ×”×—×•×•×™×” ×©×œ×›×.",
+                    hi: "Holarc Health à¤®à¥‡à¤‚ à¤†à¤ªà¤•à¤¾ à¤¸à¥à¤µà¤¾à¤—à¤¤ à¤¹à¥ˆà¥¤ à¤…à¤ªà¤¨à¥‡ à¤…à¤¨à¥à¤­à¤µ à¤•à¥‹ à¤¨à¤¿à¤œà¥€à¤•à¥ƒà¤¤ à¤•à¤°à¤¨à¥‡ à¤•à¥‡ à¤²à¤¿à¤ à¤‡à¤¨ à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸ à¤•à¤¾ à¤‰à¤ªà¤¯à¥‹à¤— à¤•à¤°à¥‡à¤‚à¥¤",
                     id: "Selamat datang di Holarc Health. Gunakan pengaturan ini untuk mempersonalisasi pengalaman Anda.",
                     it: "Benvenuti in Holarc Health. Usa queste impostazioni per personalizzare la tua esperienza.",
-                    ja: "Holarc Healthへようこそ。これらの設定を使って、あなたの体験をカスタマイズしてください。",
-                    ko: "Holarc Health에 오신 것을 환영합니다. 이 설정을 사용하여 경험을 맞춤 설정하세요.",
+                    ja: "Holarc Healthã¸ã‚ˆã†ã“ãã€‚ã“ã‚Œã‚‰ã®è¨­å®šã‚’ä½¿ã£ã¦ã€ã‚ãªãŸã®ä½“é¨“ã‚’ã‚«ã‚¹ã‚¿ãƒžã‚¤ã‚ºã—ã¦ãã ã•ã„ã€‚",
+                    ko: "Holarc Healthì— ì˜¤ì‹  ê²ƒì„ í™˜ì˜í•©ë‹ˆë‹¤. ì´ ì„¤ì •ì„ ì‚¬ìš©í•˜ì—¬ ê²½í—˜ì„ ë§žì¶¤ ì„¤ì •í•˜ì„¸ìš”.",
                     ms: "Selamat datang ke Holarc Health. Gunakan tetapan ini untuk memperibadikan pengalaman anda.",
-                    zh: "欢迎来到Holarc Health。使用这些设置来个性化您的体验。",
-                    pl: "Witamy w Holarc Health. Użyj tych ustawień, aby spersonalizować swoje doświadczenie.",
-                    ru: "Добро пожаловать в Holarc Health. Используйте эти настройки для персонализации вашего опыта.",
-                    th: "ยินดีต้อนรับสู่ Holarc Health ใช้การตั้งค่าเหล่านี้เพื่อปรับแต่งประสบการณ์ของคุณ",
-                    tr: "Holarc Health'e hoş geldiniz. Deneyiminizi kişiselleştirmek için bu ayarları kullanın.",
-                    uk: "Ласкаво просимо до Holarc Health. Використовуйте ці налаштування, щоб персоналізувати свій досвід.",
-                    vi: "Chào mừng bạn đến với Holarc Health. Sử dụng các cài đặt này để cá nhân hóa trải nghiệm của bạn.",
+                    zh: "æ¬¢è¿Žæ¥åˆ°Holarc Healthã€‚ä½¿ç”¨è¿™äº›è®¾ç½®æ¥ä¸ªæ€§åŒ–æ‚¨çš„ä½“éªŒã€‚",
+                    pl: "Witamy w Holarc Health. UÅ¼yj tych ustawieÅ„, aby spersonalizowaÄ‡ swoje doÅ›wiadczenie.",
+                    ru: "Ð”Ð¾Ð±Ñ€Ð¾ Ð¿Ð¾Ð¶Ð°Ð»Ð¾Ð²Ð°Ñ‚ÑŒ Ð² Holarc Health. Ð˜ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐ¹Ñ‚Ðµ ÑÑ‚Ð¸ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ð´Ð»Ñ Ð¿ÐµÑ€ÑÐ¾Ð½Ð°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ð¸ Ð²Ð°ÑˆÐµÐ³Ð¾ Ð¾Ð¿Ñ‹Ñ‚Ð°.",
+                    th: "à¸¢à¸´à¸™à¸”à¸µà¸•à¹‰à¸­à¸™à¸£à¸±à¸šà¸ªà¸¹à¹ˆ Holarc Health à¹ƒà¸Šà¹‰à¸à¸²à¸£à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¹€à¸«à¸¥à¹ˆà¸²à¸™à¸µà¹‰à¹€à¸žà¸·à¹ˆà¸­à¸›à¸£à¸±à¸šà¹à¸•à¹ˆà¸‡à¸›à¸£à¸°à¸ªà¸šà¸à¸²à¸£à¸“à¹Œà¸‚à¸­à¸‡à¸„à¸¸à¸“",
+                    tr: "Holarc Health'e hoÅŸ geldiniz. Deneyiminizi kiÅŸiselleÅŸtirmek iÃ§in bu ayarlarÄ± kullanÄ±n.",
+                    uk: "Ð›Ð°ÑÐºÐ°Ð²Ð¾ Ð¿Ñ€Ð¾ÑÐ¸Ð¼Ð¾ Ð´Ð¾ Holarc Health. Ð’Ð¸ÐºÐ¾Ñ€Ð¸ÑÑ‚Ð¾Ð²ÑƒÐ¹Ñ‚Ðµ Ñ†Ñ– Ð½Ð°Ð»Ð°ÑˆÑ‚ÑƒÐ²Ð°Ð½Ð½Ñ, Ñ‰Ð¾Ð± Ð¿ÐµÑ€ÑÐ¾Ð½Ð°Ð»Ñ–Ð·ÑƒÐ²Ð°Ñ‚Ð¸ ÑÐ²Ñ–Ð¹ Ð´Ð¾ÑÐ²Ñ–Ð´.",
+                    vi: "ChÃ o má»«ng báº¡n Ä‘áº¿n vá»›i Holarc Health. Sá»­ dá»¥ng cÃ¡c cÃ i Ä‘áº·t nÃ y Ä‘á»ƒ cÃ¡ nhÃ¢n hÃ³a tráº£i nghiá»‡m cá»§a báº¡n.",
                   };
                   const primaryLang = (profile as any)?.preferred_language || "en";
                   const sampleText = SAMPLE_TEXTS[primaryLang] || SAMPLE_TEXTS.en;
@@ -2291,7 +2291,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <Stethoscope className="h-4 w-4 text-primary" />
-              <h3 className="text-xs font-medium text-primary-dark">Referral Doctors</h3>
+              <h3 className="text-sm font-medium text-primary-dark">Referral Doctors</h3>
             </div>
             <ReferralDoctors hideHeader />
           </div>
@@ -2303,7 +2303,7 @@ export default function MyPractice() {
           <div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
-              <h3 className="text-xs font-medium text-primary-dark">Credentials</h3>
+              <h3 className="text-sm font-medium text-primary-dark">Credentials</h3>
             </div>
             <div className="flex items-center justify-between">
               <p className="text-muted-foreground text-sm">
@@ -2335,7 +2335,7 @@ export default function MyPractice() {
                       onChange={(e) => setCertForm({ ...certForm, certificate_name: e.target.value })}
                       placeholder="e.g., Advanced Cardiac Life Support"
                     />
-                    {certErrors.certificate_name && <p className="text-xs text-destructive">{certErrors.certificate_name}</p>}
+                    {certErrors.certificate_name && <p className="text-sm text-destructive">{certErrors.certificate_name}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label>Issuing Body <span className="text-destructive">*</span></Label>
@@ -2344,7 +2344,7 @@ export default function MyPractice() {
                       onChange={(e) => setCertForm({ ...certForm, issuing_body: e.target.value })}
                       placeholder="e.g., HPCSA"
                     />
-                    {certErrors.issuing_body && <p className="text-xs text-destructive">{certErrors.issuing_body}</p>}
+                    {certErrors.issuing_body && <p className="text-sm text-destructive">{certErrors.issuing_body}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label>Date Earned <span className="text-destructive">*</span></Label>
@@ -2353,7 +2353,7 @@ export default function MyPractice() {
                       value={certForm.date_earned}
                       onChange={(e) => setCertForm({ ...certForm, date_earned: e.target.value })}
                     />
-                    {certErrors.date_earned && <p className="text-xs text-destructive">{certErrors.date_earned}</p>}
+                    {certErrors.date_earned && <p className="text-sm text-destructive">{certErrors.date_earned}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label>CPD Points <span className="text-destructive">*</span></Label>
@@ -2363,7 +2363,7 @@ export default function MyPractice() {
                       value={certForm.cpd_points}
                       onChange={(e) => setCertForm({ ...certForm, cpd_points: e.target.value })}
                     />
-                    {certErrors.cpd_points && <p className="text-xs text-destructive">{certErrors.cpd_points}</p>}
+                    {certErrors.cpd_points && <p className="text-sm text-destructive">{certErrors.cpd_points}</p>}
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -2392,7 +2392,7 @@ export default function MyPractice() {
                       </Button>
                     )}
                   </div>
-                  {certErrors.certificate_file && <p className="text-xs text-destructive">{certErrors.certificate_file}</p>}
+                  {certErrors.certificate_file && <p className="text-sm text-destructive">{certErrors.certificate_file}</p>}
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={handleCertSave} disabled={certSaving || certUploading}>
@@ -2445,13 +2445,13 @@ export default function MyPractice() {
                           <button
                             type="button"
                             onClick={() => openCertificate(cert.certificate_url!)}
-                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                           >
                             <ExternalLink className="h-4 w-4" />
                             View
                           </button>
                         ) : (
-                          <span className="text-muted-foreground text-xs">-</span>
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -2486,3 +2486,4 @@ export default function MyPractice() {
     </div>
   );
 }
+

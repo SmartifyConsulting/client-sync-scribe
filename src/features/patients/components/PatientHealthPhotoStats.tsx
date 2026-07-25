@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Camera, Dumbbell, Utensils, Pill, Calendar, Award, Loader2, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -127,35 +127,35 @@ export function PatientHealthPhotoStats({ patientId }: PatientHealthPhotoStatsPr
           <CardContent className="pt-4 text-center">
             <Camera className="h-5 w-5 mx-auto mb-2 text-primary" />
             <p className="text-2xl font-bold text-primary">{totals.total}</p>
-            <p className="text-xs text-muted-foreground">Total Activities</p>
+            <p className="text-sm text-muted-foreground">Total Activities</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <Dumbbell className="h-5 w-5 mx-auto mb-2 text-blue-600" />
             <p className="text-2xl font-bold text-blue-600">{totals.gym}</p>
-            <p className="text-xs text-muted-foreground">Gym Sessions</p>
+            <p className="text-sm text-muted-foreground">Gym Sessions</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <Utensils className="h-5 w-5 mx-auto mb-2 text-green-600" />
             <p className="text-2xl font-bold text-green-600">{totals.healthy_meal}</p>
-            <p className="text-xs text-muted-foreground">Healthy Meals</p>
+            <p className="text-sm text-muted-foreground">Healthy Meals</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
             <Pill className="h-5 w-5 mx-auto mb-2 text-purple-600" />
             <p className="text-2xl font-bold text-purple-600">{totals.medication}</p>
-            <p className="text-xs text-muted-foreground">Medications</p>
+            <p className="text-sm text-muted-foreground">Medications</p>
           </CardContent>
         </Card>
         <Card className="col-span-2 sm:col-span-1">
           <CardContent className="pt-4 text-center">
-            <span className="text-xl mb-2 block">🍭</span>
+            <span className="text-xl mb-2 block">ðŸ­</span>
             <p className="text-2xl font-bold text-yellow-600">{totals.lollipops}</p>
-            <p className="text-xs text-muted-foreground">Lollipops Earned</p>
+            <p className="text-sm text-muted-foreground">Lollipops Earned</p>
           </CardContent>
         </Card>
       </div>
@@ -226,3 +226,4 @@ export function PatientHealthPhotoStats({ patientId }: PatientHealthPhotoStatsPr
     </div>
   );
 }
+

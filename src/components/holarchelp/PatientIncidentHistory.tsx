@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -124,11 +124,11 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
         {loading ? (
           <div className="flex justify-center py-6"><Loader2 className="h-4 w-4 animate-spin" /></div>
         ) : rows.length === 0 ? (
-          <p className="text-xs text-muted-foreground py-4 text-center">No SOS calls on record.</p>
+          <p className="text-sm text-muted-foreground py-4 text-center">No SOS calls on record.</p>
         ) : (
           <div className="space-y-2">
             {rows.map((i) => (
-              <div key={i.id} className="rounded-lg border p-2.5 text-xs space-y-1">
+              <div key={i.id} className="rounded-lg border p-2.5 text-sm space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="font-semibold">{format(parseISO(i.created_at), "MMM d, yyyy h:mm a")}</span>
                   <div className="flex items-center gap-1.5">
@@ -136,12 +136,12 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
                       <Badge className={`border-0 capitalize ${SEVERITY_CHIP[i.severity] ?? "bg-muted text-foreground"}`}>{i.severity}</Badge>
                     )}
                     <Badge variant="outline" className="capitalize">{i.status}</Badge>
-                    {i.manually_logged && <Badge variant="outline" className="text-xs">Manual</Badge>}
+                    {i.manually_logged && <Badge variant="outline" className="text-sm">Manual</Badge>}
                   </div>
                 </div>
                 <div className="text-muted-foreground">
                   Provider: <span className="text-foreground font-medium">{i.provider_name}</span>
-                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-xs font-bold text-emerald-800">AUTO</span>}
+                  {i.auto_assigned && <span className="ml-1.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-sm font-bold text-emerald-800">AUTO</span>}
                 </div>
                 {i.notes && <div className="text-sm">{i.notes}</div>}
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
@@ -183,10 +183,11 @@ export default function PatientIncidentHistory({ userId, title = "Emergency inci
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button onClick={submitManual} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+            <Button onClick={submitManual} disabled={saving}>{saving ? "Savingâ€¦" : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
   );
 }
+

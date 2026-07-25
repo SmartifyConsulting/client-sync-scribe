@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -109,17 +109,17 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
         <Hospital className="h-4 w-4 text-primary" />
         <h3 className="text-sm font-semibold">Hospitals We Serve</h3>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Hospitals you deliver patients to. Affiliated hospitals will see your unit as a partner. Unknown hospitals are submitted to admin for activation and won't be used for SOS dispatch until approved.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-[1fr,220px] gap-2">
         <div className="space-y-1.5">
-          <Label className="text-xs">Search hospital</Label>
+          <Label className="text-sm">Search hospital</Label>
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="e.g. Groote Schuur" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs">Role</Label>
+          <Label className="text-sm">Role</Label>
           <Input value={roleInput} onChange={(e) => setRoleInput(e.target.value)} placeholder="Primary receiving ER" />
         </div>
       </div>
@@ -136,9 +136,9 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
               <span className="flex items-center gap-2">
                 <Building2 className="h-3.5 w-3.5 text-primary" />
                 <span>{h.name}</span>
-                {h.city && <span className="text-xs text-muted-foreground">· {h.city}</span>}
+                {h.city && <span className="text-sm text-muted-foreground">Â· {h.city}</span>}
               </span>
-              <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-xs">{h.status}</Badge>
+              <Badge variant={h.status === "approved" ? "default" : "secondary"} className="text-sm">{h.status}</Badge>
             </button>
           ))}
           {!hasExactMatch && (
@@ -156,7 +156,7 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
 
       <div className="space-y-2">
         {affiliations.length === 0 && (
-          <p className="text-xs text-muted-foreground italic">No hospital affiliations added yet.</p>
+          <p className="text-sm text-muted-foreground italic">No hospital affiliations added yet.</p>
         )}
         {affiliations.map((a) => (
           <Card key={a.id} className="p-3 flex items-center justify-between">
@@ -164,10 +164,10 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
               <Building2 className="h-4 w-4 text-primary shrink-0" />
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">{a.hospital?.name || a.hospital_name_snapshot}</div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   {a.role && <span>{a.role}</span>}
                   {a.hospital?.status && a.hospital.status !== "approved" && (
-                    <Badge variant="secondary" className="text-xs">pending admin review</Badge>
+                    <Badge variant="secondary" className="text-sm">pending admin review</Badge>
                   )}
                 </div>
               </div>
@@ -181,3 +181,4 @@ export default function AmbulanceHospitalAffiliations({ providerId }: { provider
     </div>
   );
 }
+

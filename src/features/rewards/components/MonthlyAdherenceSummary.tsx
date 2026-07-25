@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+﻿import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -96,9 +96,9 @@ export function MonthlyAdherenceSummary({ patientId }: MonthlyAdherenceSummaryPr
                     <p className="text-sm font-medium text-foreground">
                       {monthLabel}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       {confirmed}/{total} doses confirmed
-                      {avg !== null ? ` · ${avg}% average confidence` : ""}
+                      {avg !== null ? ` Â· ${avg}% average confidence` : ""}
                     </p>
                   </div>
                   {wasAutoApproved && (
@@ -118,3 +118,4 @@ export function MonthlyAdherenceSummary({ patientId }: MonthlyAdherenceSummaryPr
     </Card>
   );
 }
+
