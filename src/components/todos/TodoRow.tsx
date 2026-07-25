@@ -137,33 +137,15 @@ export function TodoRow({
         {/* Kind icon */}
         <Icon className="h-4 w-4 text-primary shrink-0" />
 
-        {/* AI badge */}
-        {todo.is_auto_executed && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Sparkles className="h-4 w-4 text-success shrink-0" />
-            </TooltipTrigger>
-            <TooltipContent>AI-generated</TooltipContent>
-          </Tooltip>
-        )}
-
-        {/* Label */}
+        {/* Label: patient name (or fallback to type) */}
         <span
           className={cn(
             "flex-1 min-w-0 truncate font-medium",
             todo.completed && "line-through text-muted-foreground"
           )}
         >
-          {display.shortLabel}
+          {display.patient || display.shortLabel}
         </span>
-
-        {/* Meta: patient */}
-        {display.patient && (
-          <span className="inline-flex items-center gap-1 text-muted-foreground shrink-0 max-w-[10rem] truncate">
-            <UserIcon className="h-3.5 w-3.5 hidden sm:inline-block shrink-0" />
-            <span className="truncate">{display.patient}</span>
-          </span>
-        )}
 
         {/* Meta: date */}
         {display.date && !compact && (

@@ -29,6 +29,7 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
+import { TodoLegend } from "@/components/todos/TodoLegend";
 import { useTranslation } from "react-i18next";
 
 interface TodoItem {
@@ -410,6 +411,9 @@ export function CompactTodoList() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+
+        {/* Icon legend */}
+        <TodoLegend />
 
         {/* Task list */}
         <div className="max-h-96 overflow-y-auto space-y-1">

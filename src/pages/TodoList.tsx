@@ -44,6 +44,7 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
+import { TodoLegend } from "@/components/todos/TodoLegend";
 
 interface TodoItem {
   id: string;
@@ -506,6 +507,7 @@ export default function TodoList() {
 
 
       {/* Task List — Grouped by Date */}
+      <TodoLegend className="mb-2" />
       <div className="space-y-3">
         {sortedDateKeys.length === 0 ? (
           <div className="rounded-xl border border-primary bg-card p-8 text-center text-muted-foreground">

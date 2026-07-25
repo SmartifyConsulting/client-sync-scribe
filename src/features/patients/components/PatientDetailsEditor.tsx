@@ -1625,10 +1625,10 @@ export function PatientDetailsEditor({
             {/* === MY HOLARCHY TAB (overview) === */}
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
-                <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5">My Holarc Team</TabsTrigger>
-                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5">Insurance</TabsTrigger>
-                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5">Pharmacies</TabsTrigger>
+                <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
+                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
+                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
                 </TabsList>
 
             {/* === INSURANCE SUB-TAB (view) === */}
@@ -2020,9 +2020,9 @@ export function PatientDetailsEditor({
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
-                      <h3 className="text-xs font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
-                        <Heart className="h-3.5 w-3.5" /> Organ Donor
+                    <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-primary/5 transition-colors px-4 py-3 group">
+                      <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left">
+                        <Heart className="h-4 w-4 text-primary" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
                         <span
@@ -2092,9 +2092,9 @@ export function PatientDetailsEditor({
             {isSelfService && (
               <TabsContent value="history" className="mt-4">
                 <Tabs defaultValue="sessions">
-                  <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                    <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Sessions</TabsTrigger>
-                    <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Admissions</TabsTrigger>
+                  <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                    <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Sessions</TabsTrigger>
+                    <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
                   </TabsList>
                   <TabsContent value="sessions" className="mt-3">
                     <div className="mb-4">
@@ -2205,10 +2205,10 @@ export function PatientDetailsEditor({
           {/* === MY HOLARCHY TAB (EDIT, overview) === */}
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
-              <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5">My Holarc Team</TabsTrigger>
-                <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5">Insurance</TabsTrigger>
-                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5">Pharmacies</TabsTrigger>
+              <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
+                <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
+                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
               </TabsList>
 
           {/* === INSURANCE SUB-TAB (EDIT) === */}
@@ -3721,9 +3721,9 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="history" className="mt-4">
               <Tabs defaultValue="sessions">
-                <TabsList className="bg-muted flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Sessions</TabsTrigger>
-                  <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5">Admissions</TabsTrigger>
+                <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                  <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Sessions</TabsTrigger>
+                  <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
                 </TabsList>
                 <TabsContent value="sessions" className="mt-3">
                   <div className="mb-4">

@@ -239,7 +239,7 @@ export default function PatientCalendar() {
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
-                <span className="text-xs md:text-xs font-medium">{getCalendarShortWeekdayName(t, day)}</span>
+                <span className="text-xs md:text-xs font-bold">{getCalendarShortWeekdayName(t, day)}</span>
                 <span className="text-base md:text-lg font-semibold">{format(day, "d")}</span>
                 {dayAppointments.length > 0 && (
                   <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
@@ -267,7 +267,7 @@ export default function PatientCalendar() {
       <CardContent>
         <div className="grid grid-cols-7 mb-1 md:mb-2">
           {getCalendarShortWeekdayNames(t, true).map((d) => (
-            <div key={d} className="py-1 md:py-2 text-center text-xs md:text-sm font-medium text-muted-foreground">{d}</div>
+            <div key={d} className="py-1 md:py-2 text-center text-xs md:text-sm font-bold text-foreground">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-0 md:gap-1">
@@ -291,7 +291,7 @@ export default function PatientCalendar() {
               >
                 <span className={cn(
                   "flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full text-xs md:text-sm",
-                  isTodayDay && "bg-primary text-primary-foreground font-semibold"
+                  isTodayDay && "bg-success text-white font-semibold"
                 )}>
                   {day}
                 </span>
@@ -383,11 +383,10 @@ export default function PatientCalendar() {
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {upcomingAppointments.slice(0, 5).map((apt) => (
                 <div key={apt.id} className="p-2 rounded-lg bg-card border border-border/50 min-w-[140px] shrink-0 space-y-0.5">
-                  <p className="font-medium text-xs truncate">{apt.title}</p>
-                  {apt.doctor_name && (
-                    <p className="text-xs text-primary font-medium flex items-center gap-0.5">
-                      <User className="h-2 w-2" /> Dr. {apt.doctor_name}
-                    </p>
+                  {apt.doctor_name ? (
+                    <p className="text-xs text-primary font-semibold truncate">Dr. {apt.doctor_name}</p>
+                  ) : (
+                    <p className="font-medium text-xs truncate">{apt.title}</p>
                   )}
                   <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
                     <CalendarIcon className="h-2 w-2" />
