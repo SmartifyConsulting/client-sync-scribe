@@ -4,7 +4,7 @@ import {
   CalendarDays,
   Phone,
   FileText,
-  Stethoscope,
+  Award,
   FlaskConical,
   ArrowUpRight,
   Mail,
