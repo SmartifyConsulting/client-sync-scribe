@@ -345,45 +345,44 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   const overLimit = wordCount > 600;
   const dirty = draft !== value;
   return (
-    <Accordion type="single" collapsible className="space-y-4">
-      <AccordionItem value="about-me" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
-        <AccordionTrigger className="px-4 py-3 hover:no-underline">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pb-4 space-y-2">
-          <p className="text-xs text-muted-foreground">
-            {t("myPractice.aboutMeHelper")}
-          </p>
-          <Textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={6}
-            placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
-          />
-          <div className="flex items-center justify-between">
-            <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
-              {t("myPractice.wordCount", { count: wordCount })}
-            </span>
-            <Button
-              size="sm"
-              disabled={!dirty || overLimit || saving}
-              onClick={async () => {
-                setSaving(true);
-                try { await onSave(draft); } finally { setSaving(false); }
-              }}
-            >
-              {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
-              {t("myPractice.save")}
-            </Button>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <AccordionItem value="about-me" className="border-0">
+      <AccordionTrigger className="px-4 py-3 hover:no-underline">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent className="px-4 pb-4 space-y-2">
+        <p className="text-xs text-muted-foreground">
+          {t("myPractice.aboutMeHelper")}
+        </p>
+        <Textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={6}
+          placeholder="Tell patients about your background, philosophy of care, and what makes your practice unique…"
+        />
+        <div className="flex items-center justify-between">
+          <span className={cn("text-sm", overLimit ? "text-destructive" : "text-muted-foreground")}>
+            {t("myPractice.wordCount", { count: wordCount })}
+          </span>
+          <Button
+            size="sm"
+            disabled={!dirty || overLimit || saving}
+            onClick={async () => {
+              setSaving(true);
+              try { await onSave(draft); } finally { setSaving(false); }
+            }}
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
+            {t("myPractice.save")}
+          </Button>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
+
 
 
 // ── Main Component ──────────────────────────────────────────────────
