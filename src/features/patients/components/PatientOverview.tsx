@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
+import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
