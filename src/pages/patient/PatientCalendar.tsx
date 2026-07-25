@@ -291,7 +291,7 @@ export default function PatientCalendar() {
               >
                 <span className={cn(
                   "flex h-6 w-6 md:h-7 md:w-7 items-center justify-center rounded-full text-xs md:text-sm",
-                  isTodayDay && "bg-primary text-primary-foreground font-semibold"
+                  isTodayDay && "bg-success text-white font-semibold"
                 )}>
                   {day}
                 </span>
