@@ -151,6 +151,11 @@ export default function Sessions() {
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
+  // Per-document generate → send progress state
+  const [delivery, setDelivery] = useState<DocumentDeliveryTarget | null>(null);
+  const deliveryNextRef = useRef<(() => void) | null>(null);
+
+
   // AI-extracted document review state
   const [showMedCertReview, setShowMedCertReview] = useState(false);
   const [showPrescriptionReview, setShowPrescriptionReview] = useState(false);
