@@ -472,7 +472,10 @@ export default function Sessions() {
   const { hint: liveHint, isLoading: liveHintLoading } = useLiveDiagnosticHint({
     enabled: isRecording && !isPaused,
     transcript,
-    patientAge: (currentPatient as any)?.dob ? calculateAge((currentPatient as any).dob) : ((currentPatient as any)?.age ?? null),
+    patientAge: (currentPatient as any)?.dob
+      ? Math.max(0, Math.floor((Date.now() - new Date((currentPatient as any).dob).getTime()) / 31557600000))
+      : ((currentPatient as any)?.age ?? null),
+
     patientSex: (currentPatient as any)?.gender ?? null,
     currentMedications: currentMedications?.length ? currentMedications : ((currentPatient as any)?.current_medications ?? null),
     chronicConditions: (currentPatient as any)?.chronic_conditions ?? null,
