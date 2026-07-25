@@ -188,8 +188,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             align="start"
             alignOffset={0}
             trigger={
-              <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-primary rounded-xl transition-colors">
-                <Avatar className="h-[73px] w-[73px] border-2 border-primary">
+              <button className="flex w-full items-center gap-3 px-4 py-3 border border-transparent hover:border-green-500 rounded-xl transition-colors">
+                <Avatar className="h-11 w-11 border-2 border-green-500 shrink-0">
                   <AvatarImage
                     key={profile?.avatar_url}
                     src={profile?.avatar_url || undefined}

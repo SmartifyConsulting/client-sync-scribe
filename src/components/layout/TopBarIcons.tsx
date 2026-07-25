@@ -230,8 +230,8 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
       {/* User Avatar & Profile Menu */}
       <Popover>
         <PopoverTrigger asChild>
-          <button className="h-9 w-9 rounded-full bg-muted hover:bg-muted/80 transition-colors flex items-center justify-center">
-            <Avatar className="h-9 w-9">
+          <button className="h-11 w-11 rounded-full bg-muted hover:bg-muted/80 transition-colors flex items-center justify-center border-2 border-green-500">
+            <Avatar className="h-11 w-11">
               <AvatarImage src={profile?.avatar_url} alt={profile?.full_name} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                 {getInitials()}
@@ -245,32 +245,30 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
             <p className="text-xs text-muted-foreground truncate">{currentEmail}</p>
           </div>
 
-          {/* Profile Switcher (Test Only - Admin) */}
-          {isAdmin && (
-            <div className="mt-3 pt-3 border-t border-border">
-              <p className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">TEST PROFILES</p>
-              <div className="space-y-1 max-h-60 overflow-y-auto">
-                {TEST_PROFILES.map((tp) => (
-                  <button
-                    key={tp.email}
-                    disabled={switching === tp.email}
-                    onClick={() => impersonate(tp.email)}
-                    className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {switching === tp.email ? (
-                      <Loader2 className="h-3 w-3 animate-spin shrink-0" />
-                    ) : (
-                      <tp.icon className="h-3 w-3 shrink-0" />
-                    )}
-                    <div className="min-w-0">
-                      <span className="font-medium block">{tp.name}</span>
-                      <span className="text-muted-foreground text-xs block">{tp.role}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
+          {/* Profile Switcher - Available to All Users */}
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-xs font-semibold mb-2 text-muted-foreground uppercase tracking-wider">TEST PROFILES</p>
+            <div className="space-y-1 max-h-60 overflow-y-auto">
+              {TEST_PROFILES.map((tp) => (
+                <button
+                  key={tp.email}
+                  disabled={switching === tp.email}
+                  onClick={() => impersonate(tp.email)}
+                  className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {switching === tp.email ? (
+                    <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+                  ) : (
+                    <tp.icon className="h-3 w-3 shrink-0" />
+                  )}
+                  <div className="min-w-0">
+                    <span className="font-medium block">{tp.name}</span>
+                    <span className="text-muted-foreground text-xs block">{tp.role}</span>
+                  </div>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
           <div className="mt-3 pt-3 border-t border-border space-y-1">
             <Link to="/profile" className="block">
