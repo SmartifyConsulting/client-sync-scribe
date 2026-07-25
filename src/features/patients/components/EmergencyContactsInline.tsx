@@ -18,9 +18,11 @@ interface Props {
   onChange: (next: EmergencyContact[]) => void;
   nokMembers: NextOfKinMember[];
   legacyNok?: { name?: string; phone?: string; email?: string; relationship?: string };
+  flat?: boolean;
 }
 
-export function EmergencyContactsInline({ patientId, contacts, onChange, nokMembers, legacyNok }: Props) {
+export function EmergencyContactsInline({ patientId, contacts, onChange, nokMembers, legacyNok, flat }: Props) {
+
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [sameAsNok, setSameAsNok] = useState(false);
