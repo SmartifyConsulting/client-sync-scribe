@@ -52,12 +52,12 @@ export default function DoctorDocumentsTab() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-10 text-center text-xs text-muted-foreground">
+        <div className="rounded-lg border border-dashed p-5 text-center text-xs text-muted-foreground">
           No documents yet.
         </div>
       ) : (
         <>
-          <ul className="divide-y rounded-lg border bg-card">
+          <ul className="divide-y rounded-lg border border-primary/40 bg-card">
             {filtered.slice(0, visibleCount).map((doc) => {
               const target = doc.patient_id
                 ? `/patients/${doc.patient_id}?tab=documents&doc=${doc.id}`

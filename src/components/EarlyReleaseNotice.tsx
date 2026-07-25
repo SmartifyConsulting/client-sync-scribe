@@ -42,11 +42,11 @@ export function EarlyReleaseNotice() {
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="mx-auto mb-2">
-            <img src={betaLogo} alt="Holarc Health BETA" className="h-16 w-auto object-contain" />
+          <div className="mx-auto mb-4">
+            <img src={betaLogo} alt="Holarc Health BETA" className="h-32 w-auto object-contain" />
           </div>
           <DialogTitle className="text-center">{t("earlyRelease.title")}</DialogTitle>
-          <DialogDescription className="text-center leading-relaxed pt-2 text-[10px]">
+          <DialogDescription className="text-center leading-relaxed pt-2 text-[12px]">
             {t("earlyRelease.description")}
           </DialogDescription>
         </DialogHeader>

@@ -214,7 +214,7 @@ export default function PatientProfile() {
           <ArrowLeft className="h-4 w-4" />
           {t("patientProfile.backToPatients")}
         </Link>
-        <div className="rounded-xl border border-primary bg-card p-8 text-center">
+        <div className="rounded-xl border border-primary/40 bg-card p-5 text-center">
           <p className="text-muted-foreground">{t("patientProfile.patientNotFound")}</p>
         </div>
       </div>
