@@ -1,60 +1,23 @@
-# Match Referral Doctors / Credentials / Sessions sub-tab headings to Hospital Admissions
+## Fix: My Sessions screen
 
-## Reference style (Hospital Admissions)
-`src/features/sessions/admissions/AdmissionsView.tsx:185-197`
-- Header row: `<div className="flex items-center justify-between gap-2">`
-- Title: `<h3 className="text-sm font-semibold text-foreground">Hospital Admissions</h3>`
-- Right side: primary action buttons at `size="sm"` with icon.
-- **No** surrounding `rounded-xl border border-primary bg-card p-4 shadow-sm` box — the section renders flat.
+Bring `src/pages/MySessions.tsx` in line with the requested pattern (matching My Practice / Hospital Admissions styling).
 
-## Changes
+### Changes
 
-### 1. Referral Doctors sub-tab (`src/pages/MyPractice.tsx` ~2291-2299)
-Current:
-```
-<div className="rounded-xl border border-primary bg-card p-4 shadow-sm space-y-4">
-  <div className="flex items-center gap-2">
-    <Stethoscope className="h-4 w-4 text-primary" />
-    <h3 className="text-base font-semibold text-primary-dark">Referral Doctors</h3>
-  </div>
-  <ReferralDoctors hideHeader />
-</div>
-```
-New:
-```
-<div className="space-y-3">
-  <div className="flex items-center justify-between gap-2">
-    <h3 className="text-sm font-semibold text-foreground">Referral Doctors</h3>
-    {/* Add Doctor button surfaces here from ReferralDoctors via a new right-slot render */}
-  </div>
-  <ReferralDoctors hideHeader />
-</div>
-```
-- Drop the primary-bordered card frame and the icon.
-- The existing "Add Doctor" button already lives inside `ReferralDoctors` (hideHeader branch) — keep it there; no action-slot lifting needed.
+1. **Unified table frame**  
+   Wrap the `Accordion` in a single `rounded-lg border bg-card overflow-hidden` container with `divide-y` between items, removing the current `space-y-3` gaps. Each `AccordionItem` becomes a flat row inside one shared frame (same as My Practice).
 
-### 2. Credentials sub-tab (`src/pages/MyPractice.tsx` ~2303-2327)
-Current wraps content in `rounded-xl border border-primary bg-card p-4 shadow-sm` with a `text-base font-semibold text-primary-dark` heading and the "Add Credential" button on its own row below the intro paragraph.
-New:
-- Remove the outer bordered frame; use `space-y-3` container.
-- Header row becomes `flex items-center justify-between gap-2` with `<h3 className="text-sm font-semibold text-foreground">Credentials</h3>` on the left and the existing "Add Credential" `<Button size="sm">` on the right (mirroring Log Admission / Upload Admission Form placement).
-- Move the "Track your professional credentials and CPD points." paragraph below the header row as a `text-xs text-muted-foreground` subtitle.
+2. **Green bar by default (white font)**  
+   The accordion trigger currently only turns green when open. Update it so the bar is `bg-primary text-white` at all times, with the chevron and count also white. Remove the `data-[state=open]` conditional green styling since it is now the default.
+   - Hover: slightly darker green (`hover:bg-primary/90`) instead of grey.
+   - Count badge: white pill with primary text so it stays legible on the green bar.
+   - Chevron stays on the right (default Radix behavior).
 
-### 3. Sessions sub-tab
-Confirm which "Sessions" screen the user means. Two candidates:
-- `src/pages/MyPractice.tsx` "Sessions" tab (if present) — search shows no dedicated Sessions tab inside MyPractice; the app-level route is `/my-sessions` → `src/pages/MySessions.tsx`.
-- `src/pages/MySessions.tsx` heading — currently `<h1 className="text-base font-semibold text-foreground">My Sessions</h1>`.
+3. **Heading parity**  
+   Keep the page heading as `text-sm font-semibold` with the `text-xs text-muted-foreground` subtitle, matching Hospital Admissions.
 
-Update `src/pages/MySessions.tsx` header block to match the Hospital Admissions row format:
-```
-<div className="flex items-center justify-between gap-2 mb-3">
-  <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
-</div>
-<p className="text-xs text-muted-foreground mb-4">Browse your consultation sessions grouped by date.</p>
-```
-(Downgrade `<h1>` to `<h3>` and `text-base` → `text-sm` so it visually matches Hospital Admissions.)
+4. **No logic changes**  
+   Data fetching, bucketing, and session card rendering remain untouched.
 
-## Technical notes
-- Presentation-only changes in `src/pages/MyPractice.tsx` and `src/pages/MySessions.tsx`.
-- No colour scheme changes; existing tokens only.
-- No changes to the child components (`ReferralDoctors`, credentials form logic, session list).
+### Files
+- `src/pages/MySessions.tsx` — accordion frame + trigger styling only.
