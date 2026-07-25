@@ -270,7 +270,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
             <h1 className="text-base font-semibold text-foreground">Referrals</h1>
             <p className="mt-1 text-muted-foreground text-xs">Manage doctors you refer patients to</p>
           </div>
-          <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
+          <Button size="sm" variant="outline" onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
             <Plus className="h-4 w-4" /> Add Doctor
           </Button>
         </div>
