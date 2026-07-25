@@ -59,9 +59,10 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
 
   useEffect(() => {
     if (!isAdmin || seeded) return;
+    if (currentEmail !== "info@georgiaadams.co.za") return;
     setSeeded(true);
     supabase.functions.invoke("admin-seed-test-users").catch(() => {});
-  }, [isAdmin, seeded]);
+  }, [isAdmin, seeded, currentEmail]);
 
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-topbar", variant],
