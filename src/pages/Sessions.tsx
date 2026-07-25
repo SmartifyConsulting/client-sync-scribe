@@ -45,6 +45,8 @@ import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmission
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
+import { DocumentDeliveryProgress, type DocumentDeliveryTarget } from "@/components/sessions/DocumentDeliveryProgress";
+
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import {
   MedCertReviewDialog,
