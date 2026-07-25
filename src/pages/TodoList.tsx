@@ -408,14 +408,14 @@ export default function TodoList() {
     return true;
   });
 
-  // Group by date
+  // Group by patient
   const groupedTodos = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
-    const key = getDateKey(todo.created_at);
+    const key = todo.patient_name || (getTodoDisplay(todo as any).patient) || "Unassigned";
     if (!groups[key]) groups[key] = [];
     groups[key].push(todo);
     return groups;
   }, {});
-  const sortedDateKeys = Object.keys(groupedTodos).sort((a, b) => b.localeCompare(a));
+  const sortedPatientKeys = Object.keys(groupedTodos).sort((a, b) => a.localeCompare(b));
 
   const completedCount = todos.filter((t) => t.completed).length;
   const activeCount = todos.filter((t) => !t.completed).length;
