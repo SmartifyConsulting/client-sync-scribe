@@ -45,6 +45,8 @@ import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmission
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
+import { DocumentDeliveryProgress, type DocumentDeliveryTarget } from "@/components/sessions/DocumentDeliveryProgress";
+
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import {
   MedCertReviewDialog,
@@ -151,6 +153,11 @@ export default function Sessions() {
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
+  // Per-document generate → send progress state
+  const [delivery, setDelivery] = useState<DocumentDeliveryTarget | null>(null);
+  const deliveryNextRef = useRef<(() => void) | null>(null);
+
+
   // AI-extracted document review state
   const [showMedCertReview, setShowMedCertReview] = useState(false);
   const [showPrescriptionReview, setShowPrescriptionReview] = useState(false);
@@ -250,17 +257,20 @@ export default function Sessions() {
   }, [patientId]);
 
   // Generate AI Clinician Diagnosis
-  const generateAIDiagnosis = async () => {
-    if (!currentPatient || !summary) return;
-    
+  const generateAIDiagnosis = async (override?: { summary?: string; transcript?: string }) => {
+    const summaryText = override?.summary ?? summary;
+    const transcriptText = override?.transcript ?? transcript;
+    if (!currentPatient || !summaryText) return;
+
     setIsGeneratingDiagnosis(true);
     setAiDiagnosis(null);
     
     try {
       const { data, error } = await supabase.functions.invoke('ai-clinician-diagnosis', {
         body: {
-          sessionSummary: summary,
-          sessionTranscript: transcript,
+          sessionSummary: summaryText,
+          sessionTranscript: transcriptText,
+
           patientName: currentPatient.name,
           patientAge: currentPatient.dob ? calculateAge(currentPatient.dob) : null,
           allergies: currentPatient.allergies,
@@ -350,6 +360,9 @@ export default function Sessions() {
         setCurrentSessionId(result.id);
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
+        // Rolling live hint is done — now complete the full (non-binding) AI assessment.
+        generateAIDiagnosis({ summary: result.summary || "", transcript: fullContent || "" });
+
         setShowDiagnosticsModal(true);
 
         const docs = (result as any)._extractedDocuments;
@@ -459,10 +472,16 @@ export default function Sessions() {
   const { hint: liveHint, isLoading: liveHintLoading } = useLiveDiagnosticHint({
     enabled: isRecording && !isPaused,
     transcript,
-    patientAge: (currentPatient as any)?.age ?? null,
+    patientAge: (currentPatient as any)?.dob
+      ? Math.max(0, Math.floor((Date.now() - new Date((currentPatient as any).dob).getTime()) / 31557600000))
+      : ((currentPatient as any)?.age ?? null),
+
     patientSex: (currentPatient as any)?.gender ?? null,
-    currentMedications: (currentPatient as any)?.current_medications ?? null,
+    currentMedications: currentMedications?.length ? currentMedications : ((currentPatient as any)?.current_medications ?? null),
     chronicConditions: (currentPatient as any)?.chronic_conditions ?? null,
+    allergies: (currentPatient as any)?.allergies ?? null,
+    pastSessions: pastPatientSessions,
+
     language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
 
@@ -484,32 +503,88 @@ export default function Sessions() {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Mark the matching "Review ..." to-do as done so sent/handled documents leave the list
+  const completeSessionTodo = async (match: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !currentSessionId) return;
+      await supabase
+        .from('todos')
+        .update({ status: 'completed', completed_at: new Date().toISOString() } as any)
+        .eq('user_id', user.id)
+        .eq('session_id', currentSessionId)
+        .ilike('title', `%${match}%`);
+    } catch (e) { console.error(e); }
+  };
+
+  // Show the generate → send progress for a document, then continue the chain
+  const runDelivery = (target: DocumentDeliveryTarget, next: () => void) => {
+    deliveryNextRef.current = next;
+    setDelivery(target);
+  };
+
+  const sendDeliveryDocument = async (target: DocumentDeliveryTarget) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-document-email', {
+        body: { documentId: target.documentId, recipientEmail: target.recipientEmail },
+      });
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.error('Send failed:', e);
+      toast({ title: 'Send failed', description: 'The document was generated but could not be emailed.', variant: 'destructive' });
+      return false;
+    }
+  };
+
+  const nextAfterMedCert = () => {
+    if (extractedPrescription) setShowPrescriptionReview(true);
+    else if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
+  };
+  const nextAfterPrescription = () => {
+    if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
+  };
+  const nextAfterInvoice = () => {
+    if (extractedReferral) setShowReferralReview(true);
+    else advanceToFollowUp();
+  };
+
   // Handlers for AI-extracted document approvals
   const handleApproveMedCert = async (data: MedCertData) => {
     if (!patientId || !currentSessionId) return;
     setReviewLoading(true);
+    let docId: string | null = null;
     try {
       const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from('documents').insert({
+        const { data: doc } = await supabase.from('documents').insert({
           user_id: user.id,
           patient_id: patientId,
           patient_name: currentPatient?.name || null,
           name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
           content,
           template_name: 'Medical Certificate',
-        });
+        }).select('id').single();
+        docId = doc?.id || null;
       }
-      toast({ title: "Medical Certificate Created", description: "Document saved and ready for sending." });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowMedCertReview(false);
-    // Show next dialog if available
-    if (extractedPrescription) setShowPrescriptionReview(true);
-    else if (extractedInvoice) setShowInvoiceReview(true);
-    else if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
+    runDelivery(
+      {
+        label: 'Medical Certificate',
+        documentId: docId,
+        recipientEmail: (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      },
+      nextAfterMedCert,
+    );
+
   };
 
   const handleApprovePrescription = async (data: PrescriptionData) => {
@@ -530,13 +605,11 @@ export default function Sessions() {
           });
         }
       }
-      toast({ title: "Prescription Saved", description: `${data.medications.length} medication(s) added.` });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowPrescriptionReview(false);
-    if (extractedInvoice) setShowInvoiceReview(true);
-    else if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
+    runDelivery({ label: 'Prescription' }, nextAfterPrescription);
+
   };
 
   const handleApproveInvoice = async (data: InvoiceData) => {
@@ -559,29 +632,30 @@ export default function Sessions() {
         }).select().single();
         if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
       }
-      toast({ title: "Invoice Created", description: "Invoice saved successfully." });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowInvoiceReview(false);
-    if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
+    runDelivery({ label: 'Invoice' }, nextAfterInvoice);
+
   };
 
   const handleApproveReferral = async (data: ReferralData) => {
     if (!patientId) return;
     setReviewLoading(true);
+    let docId: string | null = null;
     try {
       const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase.from('documents').insert({
+        const { data: doc } = await supabase.from('documents').insert({
           user_id: user.id,
           patient_id: patientId,
           patient_name: currentPatient?.name || null,
           name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
           content,
           template_name: 'Referral Letter',
-        });
+        }).select('id').single();
+        docId = doc?.id || null;
         // Increment referral count if doctor exists in referral_doctors
         if (data.doctor_name) {
           const { data: refDoc } = await supabase.from('referral_doctors')
@@ -596,12 +670,20 @@ export default function Sessions() {
           }
         }
       }
-      toast({ title: "Referral Letter Created", description: "Document saved successfully." });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowReferralReview(false);
-    advanceToFollowUp();
+    runDelivery(
+      {
+        label: 'Referral Letter',
+        documentId: docId,
+        recipientEmail: (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      },
+      advanceToFollowUp,
+    );
   };
+
 
 
   const startSession = async () => {
@@ -661,9 +743,11 @@ export default function Sessions() {
         open={showDiagnosticsModal}
         summary={summary}
         actionPoints={actionPoints}
+        fullDiagnosis={aiDiagnosis}
+        diagnosisLoading={isGeneratingDiagnosis}
         onClose={() => setShowDiagnosticsModal(false)}
         onProgressComplete={() => {
-          // After progress complete, show document reviews if any exist
+          // Only after the doctor acknowledges the full assessment do documents appear
           if (extractedMedCert) {
             setShowMedCertReview(true);
           } else if (extractedPrescription) {
@@ -678,6 +762,21 @@ export default function Sessions() {
           }
         }}
       />
+
+      {/* Per-document generate → send progress */}
+      <DocumentDeliveryProgress
+        target={delivery}
+        onSend={sendDeliveryDocument}
+        onFinish={async (sent) => {
+          const label = delivery?.label;
+          setDelivery(null);
+          if (sent && label) await completeSessionTodo(label);
+          const next = deliveryNextRef.current;
+          deliveryNextRef.current = null;
+          setTimeout(() => next?.(), 200);
+        }}
+      />
+
 
       {/* Visit Category Dialog */}
       <VisitCategoryDialog
@@ -1233,7 +1332,7 @@ export default function Sessions() {
               <Button 
                 variant={aiDiagnosis ? "secondary" : "default"}
                 className="gap-2" 
-                onClick={generateAIDiagnosis}
+                onClick={() => generateAIDiagnosis()}
                 disabled={isGeneratingDiagnosis || !summary}
               >
                 {isGeneratingDiagnosis ? (

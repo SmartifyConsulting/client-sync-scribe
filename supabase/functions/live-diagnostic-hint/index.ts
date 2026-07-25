@@ -38,6 +38,8 @@ serve(async (req) => {
       patientSex,
       currentMedications,
       chronicConditions,
+      allergies,
+      pastSessions,
       language,
     } = body || {};
 
@@ -54,11 +56,16 @@ serve(async (req) => {
     const patientContext = [
       patientAge ? `Age: ${patientAge}` : null,
       patientSex ? `Sex: ${patientSex}` : null,
+      allergies ? `Allergies: ${allergies}` : null,
       chronicConditions?.length ? `Chronic conditions: ${chronicConditions.join(", ")}` : null,
       currentMedications?.length
-        ? `Current meds: ${currentMedications.slice(0, 10).map((m: any) => m.name || m).join(", ")}`
+        ? `Current meds: ${currentMedications.slice(0, 10).map((m: any) => m.medication || m.name || m).join(", ")}`
+        : null,
+      Array.isArray(pastSessions) && pastSessions.length
+        ? `Recent history:\n${pastSessions.slice(0, 3).map((s: any, i: number) => `- ${s.date || `Visit ${i + 1}`}: ${(s.summary || "").slice(0, 400)}`).join("\n")}`
         : null,
     ].filter(Boolean).join("\n");
+
 
     const systemPrompt = `You are an experienced clinician assistant listening to a live consultation.
 Based on the ROLLING TRANSCRIPT so far, produce a very short live diagnostic hint the doctor can glance at WHILE still with the patient.

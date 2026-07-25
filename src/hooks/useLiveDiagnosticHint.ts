@@ -15,10 +15,13 @@ interface Args {
   patientSex?: string | null;
   currentMedications?: any[] | null;
   chronicConditions?: string[] | null;
+  allergies?: string | null;
+  pastSessions?: { date?: string; summary?: string | null }[] | null;
   language?: string;
   intervalMs?: number;
   minGrowthChars?: number;
 }
+
 
 /**
  * Polls the live-diagnostic-hint edge function while the doctor is recording,
@@ -31,6 +34,9 @@ export function useLiveDiagnosticHint({
   patientSex,
   currentMedications,
   chronicConditions,
+  allergies,
+  pastSessions,
+
   language,
   intervalMs = 20000,
   minGrowthChars = 80,
@@ -68,6 +74,9 @@ export function useLiveDiagnosticHint({
             patientSex,
             currentMedications,
             chronicConditions,
+            allergies,
+            pastSessions: (pastSessions ?? []).slice(0, 3),
+
             language,
           },
         });
