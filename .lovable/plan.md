@@ -1,56 +1,26 @@
-## Current diagnosis
+## 1. AI Summary font +2pt
 
-- Patient **Personal / Medical Information** still use separate `Collapsible` blocks with their own rounded borders, so they don't match the single-frame My Practice table in the mockup. This is a layout choice, not a technical limit.
-- The green-bar / white-font expanded state is achievable (My Practice already does it with `data-[state=open]:bg-primary` + `[&_*]:text-white`); the patient screen just isn't using that pattern consistently.
-- Session document success toasts fire during auto-creation, so they stack over the AI summary modal before the doctor has reviewed anything.
-- `useLiveDiagnosticHint` only sends the rolling transcript + basic vitals; no historical session context. The full AI diagnosis currently only runs off the final summary.
+In `src/components/sessions/SessionDiagnosticsModal.tsx`, bump every `text-sm` body/heading in the summary, action points, and full assessment blocks to `text-base` (and the disclaimer `text-xs` → `text-sm`), keeping colors and spacing unchanged.
 
-## Plan
+## 2. Hide "Generate Analysis" button
 
-### 1. Patient profile formatting (Personal + Medical)
-- Wrap each tab's sections in ONE `rounded-xl border` frame with `divide-y` grey dividers (same as My Practice).
-- Remove per-section rounded borders.
-- Collapsed rows: white, light-grey hover shading.
-- Expanded rows: green bar, white title/icon/chevron, with padding before content.
-- No field/content removal — visual only.
+In `src/pages/Sessions.tsx` (AI Clinician card header), remove the manual Generate/Regenerate button from the UI. The analysis is already auto-triggered after the session completes / rolling hint finishes, so the button is redundant. Keep the inline "Analyzing…" spinner state visible so the doctor sees progress, and keep the `generateAIDiagnosis()` function intact (still called programmatically).
 
-### 2. Session completion sequence (rewritten flow)
-New strict order after recording stops:
+## 3. Organ Donor row title
 
-```text
-Stop recording
-  → transcription
-  → ROLLING LIVE HINT ends
-  → FULL AI DIAGNOSIS modal (with non-binding disclaimer)
-       [Close / OK button, click-outside, Esc all dismiss]
-  → Document review, ONE AT A TIME
-       each doc: review / edit → Approve
-         → progress bar: "Generating..." → "Generated"
-         → optional "Send" → progress bar: "Sending..." → "Sent"
-  → follow-up appointment
-  → Vulas awarded LAST
-```
+Both Organ Donor collapsibles in `src/features/patients/components/PatientDetailsEditor.tsx` (view mode ~line 2032, edit mode ~line 3549) use custom triggers instead of the shared `SectionHeader`. Change their titles to the same markup as every other row: `text-sm font-semibold text-primary tracking-wide`, `h-4 w-4` icon, plus the open-state white text rule.
 
-- **All generated-document dialogs get an explicit Close/OK button**, and can be dismissed by clicking outside or pressing Esc (currently the diagnostics modal blocks `onOpenChange`).
-- **Full AI diagnosis** shown after the rolling hint completes, using the complete transcript + patient history, with a visible disclaimer that the output is clinical decision support only and not binding.
-- Remove all document-created success toasts (Medical Certificate, Prescription, Invoice, Referral, Admission, Patient Tasks, Session Completed). Keep error toasts.
-- Progress feedback moves into the per-document review card: "Generating" → "Generated" → (if sent) "Sending" → "Sent".
-- **Send from the review step**: doctor can approve-and-send in one flow.
-- **To-do suppression**: when a document is generated AND sent (or explicitly marked done) in this flow, do not create the `Review <doc>` todo; if already created, mark it completed so it never appears on the To-Do List.
+## 4. Flatten accordion rows and green top row
 
-### 3. Live AI diagnostic guidance during recording
-- Extend the live hint payload with richer context: past session summaries, allergies, current medications, chronic conditions, age/sex.
-- Keep polling concurrently with live transcription; label output as provisional working guidance.
-- Full diagnosis (step 2) then supersedes it once the transcript is complete.
+Applies to Personal Information and Medical Information tabs (view + edit) in `PatientDetailsEditor.tsx`, and the matching Organ Donor triggers:
 
-## Technical notes
-- `src/features/patients/components/PatientDetailsEditor.tsx` — accordion frame refactor for personal + medical tabs.
-- `src/components/sessions/SessionDiagnosticsModal.tsx` — dismissible (Close/OK, outside click, Esc), add disclaimer, host the full diagnosis.
-- `src/pages/Sessions.tsx` — reorder: diagnosis modal → sequential doc review → follow-up; add per-doc generate/send progress states.
-- `src/hooks/useSessions.ts` — strip doc-created toasts; skip/complete todos for documents that were sent.
-- `src/hooks/useLiveDiagnosticHint.ts` + `supabase/functions/live-diagnostic-hint/index.ts` — accept and use past-session context.
+- Remove per-row rounded/card framing (`rounded-lg`, `bg-card`, per-row borders) so rows sit flush inside the single outer `rounded-xl` frame, separated only by the existing `divide-y` grey lines.
+- Row states, driven by Collapsible `data-[state]`:
+  - collapsed: transparent background, green title text, light grey `hover:bg-muted`
+  - open: `bg-primary` background with white title, icon, chevron, and inline badge
+- The first row in each frame gets `defaultOpen`, so it renders green with white text on load; clicking any other row turns that row green/white (and the previously open one reverts to white/green).
 
-## Expected result
-- Patient Personal/Medical match the My Practice table style with green expanded bars and white text.
-- No toast pile-up; every generated-document dialog is dismissable via OK/Close, outside click, or Esc.
-- Doctor sees full non-binding AI diagnosis first, then reviews documents one by one with generate → send progress bars, and sent documents never land on the To-Do List.
+### Technical notes
+- The shared `SectionHeader` already applies `data-[state=open]:bg-primary` + `group-data-[state=open]:text-white`; the fix is mostly (a) converting the two bespoke Organ Donor triggers to the same classes, (b) stripping leftover `rounded-lg`/`bg-card`/`border-b` on triggers, and (c) setting `defaultOpen` on the first section of each tab frame instead of `defaultOpen={false}`.
+- White-on-green enforced with `!text-white` variants where a hardcoded `text-primary`/`text-primary-dark` would otherwise win.
+- No color tokens changed; only existing `primary` / `muted` / `neutral` tokens reused.
