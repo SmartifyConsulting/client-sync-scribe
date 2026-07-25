@@ -15,10 +15,13 @@ interface Args {
   patientSex?: string | null;
   currentMedications?: any[] | null;
   chronicConditions?: string[] | null;
+  allergies?: string | null;
+  pastSessions?: { date?: string; summary?: string | null }[] | null;
   language?: string;
   intervalMs?: number;
   minGrowthChars?: number;
 }
+
 
 /**
  * Polls the live-diagnostic-hint edge function while the doctor is recording,
