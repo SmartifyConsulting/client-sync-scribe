@@ -2478,7 +2478,7 @@ export default function MyPractice() {
         </TabsContent>
 
         {/* === REWARDS TAB === */}
-        <TabsContent value="rewards" className="mt-4">
+        <TabsContent value="rewards" className="mt-4 my-practice-tab-body">
           <DoctorRewards embedded />
         </TabsContent>
 
