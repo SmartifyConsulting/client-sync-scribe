@@ -346,7 +346,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   const dirty = draft !== value;
   return (
     <Accordion type="single" collapsible className="space-y-4">
-      <AccordionItem value="about-me" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+      <AccordionItem value="about-me" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
         <AccordionTrigger className="px-4 py-3 hover:no-underline">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
@@ -1228,7 +1228,7 @@ export default function MyPractice() {
           />
           {/* Personal Information Accordion */}
           <Accordion type="multiple" className="space-y-4">
-            <AccordionItem value="personal" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="personal" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
@@ -1326,7 +1326,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Practice Details Accordion */}
-            <AccordionItem value="practice-details" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="practice-details" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
@@ -1736,7 +1736,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Shared Practice Calendar Accordion */}
-            <AccordionItem value="shared-calendar" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="shared-calendar" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
@@ -1861,7 +1861,7 @@ export default function MyPractice() {
             </AccordionItem>
 
            {/* Service Offerings & Pricing Accordion */}
-            <AccordionItem value="service-pricing" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="service-pricing" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
@@ -2047,7 +2047,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Digital Signature Accordion */}
-            <AccordionItem value="signature" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="signature" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
@@ -2161,7 +2161,7 @@ export default function MyPractice() {
             </AccordionItem>
 
           {/* Voice Narration Settings Accordion */}
-            <AccordionItem value="voice" className="rounded-xl border border-primary-dark bg-card shadow-sm">
+            <AccordionItem value="voice" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
