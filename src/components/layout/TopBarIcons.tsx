@@ -60,8 +60,18 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
   useEffect(() => {
     if (!isAdmin || seeded) return;
     if (currentEmail !== "info@georgiaadams.co.za") return;
+    if (typeof window !== "undefined" && localStorage.getItem("admin-test-users-seeded") === "1") {
+      setSeeded(true);
+      return;
+    }
     setSeeded(true);
-    supabase.functions.invoke("admin-seed-test-users").catch(() => {});
+    supabase.functions.invoke("admin-seed-test-users")
+      .then(({ error }) => {
+        if (!error && typeof window !== "undefined") {
+          localStorage.setItem("admin-test-users-seeded", "1");
+        }
+      })
+      .catch(() => {});
   }, [isAdmin, seeded, currentEmail]);
 
   const { data: unreadNotifCount = 0 } = useQuery({
