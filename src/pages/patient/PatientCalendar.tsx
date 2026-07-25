@@ -267,7 +267,7 @@ export default function PatientCalendar() {
       <CardContent>
         <div className="grid grid-cols-7 mb-1 md:mb-2">
           {getCalendarShortWeekdayNames(t, true).map((d) => (
-            <div key={d} className="py-1 md:py-2 text-center text-xs md:text-sm font-medium text-muted-foreground">{d}</div>
+            <div key={d} className="py-1 md:py-2 text-center text-xs md:text-sm font-bold text-foreground">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-0 md:gap-1">
