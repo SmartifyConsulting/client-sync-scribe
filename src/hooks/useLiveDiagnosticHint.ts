@@ -34,6 +34,9 @@ export function useLiveDiagnosticHint({
   patientSex,
   currentMedications,
   chronicConditions,
+  allergies,
+  pastSessions,
+
   language,
   intervalMs = 20000,
   minGrowthChars = 80,
