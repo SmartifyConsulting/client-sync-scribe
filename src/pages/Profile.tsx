@@ -274,7 +274,7 @@ export default function Profile() {
     <div className="space-y-4 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">My Holarchive</h1>
-        <p className="text-muted-foreground text-sm">Manage your health information</p>
+        <p className="text-muted-foreground text-base">Manage your health information</p>
       </div>
 
       {patientLoading ? (

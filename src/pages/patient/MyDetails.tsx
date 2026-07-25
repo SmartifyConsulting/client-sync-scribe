@@ -185,7 +185,7 @@ export default function MyDetails() {
     <div className="space-y-4 p-4 md:p-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">{heading.title}</h1>
-        <p className="text-muted-foreground text-sm">{heading.subtitle}</p>
+        <p className="text-muted-foreground text-base">{heading.subtitle}</p>
       </div>
 
       {isIncomplete && section === "health" && <ProfileCompletionBanner />}

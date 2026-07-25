@@ -720,7 +720,7 @@ export function TodaysBriefing() {
       )}
 
       {appointments.length === 0 ? (
-        <div className="p-8 text-center text-sm text-muted-foreground">
+        <div className="p-8 text-center text-base text-muted-foreground">
           {translatedLabels['No appointments scheduled for today.'] || t("briefing.noAppointments")}
         </div>
       ) : (

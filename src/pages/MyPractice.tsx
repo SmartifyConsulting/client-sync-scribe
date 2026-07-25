@@ -1118,7 +1118,7 @@ export default function MyPractice() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">My Holarprac</h1>
-          <p className="text-muted-foreground text-sm">Manage your personal and practice information</p>
+          <p className="text-muted-foreground text-base">Manage your personal and practice information</p>
         </div>
         <div className="text-sm text-muted-foreground flex items-center gap-1.5">
           {savedStatus === "saving" && (

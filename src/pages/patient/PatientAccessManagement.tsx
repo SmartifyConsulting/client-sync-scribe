@@ -283,7 +283,7 @@ export default function PatientAccessManagement() {
     <div className="space-y-6 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Invites</h1>
-        <p className="text-muted-foreground text-sm">Manage your doctor invitations and preferences</p>
+        <p className="text-muted-foreground text-base">Manage your doctor invitations and preferences</p>
       </div>
 
       {/* Round Table Access */}
