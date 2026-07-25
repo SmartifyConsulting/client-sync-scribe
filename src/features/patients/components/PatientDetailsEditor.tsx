@@ -1863,9 +1863,9 @@ export function PatientDetailsEditor({
                 </Button>
               </div>
               <div className="space-y-3">
-                <div className="space-y-3">
+                <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
                   {/* General Information */}
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={Activity} label="General Information" />
                     <CollapsibleContent className="px-3 pb-3">
                       <div className="grid gap-3 sm:grid-cols-4">
@@ -1878,7 +1878,7 @@ export function PatientDetailsEditor({
                   </Collapsible>
 
                   {/* Allergies, Medication & Conditions */}
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
                     <CollapsibleContent className="px-3 pb-3 space-y-3">
                       {/* Allergies */}
@@ -1978,7 +1978,7 @@ export function PatientDetailsEditor({
 
                   {/* Daily Vitamins, Supplements & OTC — own accordion */}
                   {isSelfService && (
-                    <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                    <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                       <SectionHeader icon={Sparkles} label="Daily Vitamins, Supplements & OTC" />
                       <CollapsibleContent className="px-3 pb-3">
                         <DailyMedsInline patientId={patient.id} patientUserId={userId} />
@@ -1987,7 +1987,7 @@ export function PatientDetailsEditor({
                   )}
 
                   {/* Surgeries & Dates */}
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={Scissors} label="Surgeries & Dates" />
                     <CollapsibleContent className="px-3 pb-3">
                       {surgeries.length === 0 ? (
@@ -2011,7 +2011,7 @@ export function PatientDetailsEditor({
                   </Collapsible>
 
                   {/* Family History */}
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={GitBranch} label="Family History" />
                     <CollapsibleContent className="px-3 pb-3">
                       {familyHistory.length === 0 ? (
@@ -2030,7 +2030,7 @@ export function PatientDetailsEditor({
                   </Collapsible>
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-primary/5 transition-colors px-4 py-3 group">
                       <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left">
                         <Heart className="h-4 w-4 text-primary" /> Organ Donor
@@ -2068,7 +2068,7 @@ export function PatientDetailsEditor({
                     </CollapsibleContent>
                   </Collapsible>
 
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={User} label="General Practitioner" />
                     <CollapsibleContent className="p-3">
                       <ViewField label="General Practitioner" value={patient.general_practitioner} />
@@ -2435,7 +2435,7 @@ export function PatientDetailsEditor({
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
 
-            <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -2554,7 +2554,7 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={MapPin} label="Addresses" />
               <CollapsibleContent className="p-3">
                 <div className="space-y-3">
@@ -2593,7 +2593,7 @@ export function PatientDetailsEditor({
             </Collapsible>
 
             {/* Next of Kin (multiple) */}
-            <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={Users} label="Next of Kin" />
               <CollapsibleContent className="p-3">
                 <div className="flex justify-end mb-3">
@@ -2795,7 +2795,7 @@ export function PatientDetailsEditor({
               />
             )}
 
-            <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={Briefcase} label="Employer" />
               <CollapsibleContent className="p-3">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -2835,7 +2835,7 @@ export function PatientDetailsEditor({
               </CollapsibleContent>
             </Collapsible>
 
-            <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={StickyNote} label="General Notes" />
               <CollapsibleContent className="p-3">
                 <Textarea
@@ -2859,9 +2859,9 @@ export function PatientDetailsEditor({
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
             <div className="space-y-3">
-              <div className="space-y-3">
+              <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
                 {/* General Information */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <SectionHeader icon={Activity} label="General Information" />
                   <CollapsibleContent className="px-3 pb-3">
                     <div className="grid gap-3 sm:grid-cols-4">
@@ -2918,7 +2918,7 @@ export function PatientDetailsEditor({
                 </Collapsible>
 
                 {/* Allergies, Medication & Conditions */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <SectionHeader icon={Pill} label="Allergies, Medication & Conditions" />
                   <CollapsibleContent className="px-3 pb-3 space-y-3">
                     {/* Allergies */}
@@ -3291,7 +3291,7 @@ export function PatientDetailsEditor({
 
                 {/* Daily Vitamins, Supplements & OTC — own accordion */}
                 {isSelfService && (
-                  <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={Sparkles} label="Daily Vitamins, Supplements & OTC" />
                     <CollapsibleContent className="px-3 pb-3">
                       <DailyMedsInline patientId={patient.id} patientUserId={userId} />
@@ -3300,7 +3300,7 @@ export function PatientDetailsEditor({
                 )}
 
                 {/* Surgeries & Dates */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <SectionHeader icon={Scissors} label="Surgeries & Dates" />
                   <CollapsibleContent className="px-3 pb-3 space-y-2">
                     <div className="flex justify-end">
@@ -3449,7 +3449,7 @@ export function PatientDetailsEditor({
                 </Collapsible>
 
                 {/* Family History */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <SectionHeader icon={GitBranch} label="Family History" />
                   <CollapsibleContent className="px-3 pb-3 space-y-2">
                     <div className="flex justify-end">
@@ -3545,7 +3545,7 @@ export function PatientDetailsEditor({
                 </Collapsible>
 
                 {/* Organ Donor — collapsible with inline Yes/No */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <CollapsibleTrigger className="flex w-full items-center justify-between bg-card rounded-lg px-3 py-2 group">
                     <h3 className="text-xs font-medium text-primary-dark tracking-wide flex items-center gap-1.5 text-left">
                       <Heart className="h-3.5 w-3.5" /> Organ Donor
@@ -3596,7 +3596,7 @@ export function PatientDetailsEditor({
                 </Collapsible>
 
                 {/* GP Search */}
-                <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <SectionHeader icon={User} label="General Practitioner" />
                   <CollapsibleContent className="p-3">
                     <div className="space-y-1.5 relative">
