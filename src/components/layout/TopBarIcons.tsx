@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
+import { AccountMenu } from "./AccountMenu";
 
 const PROVIDER_PROFILE_NOTIF_TYPES = [
   "access_request",
