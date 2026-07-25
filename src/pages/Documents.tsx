@@ -616,7 +616,15 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
           <h2 className="text-lg font-semibold text-foreground">{t("documents.patientDocuments")}</h2>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              className="gap-2 bg-primary hover:bg-primary/90"
+              onClick={() => setActiveTab("content")}
+              title="Create a new document from a template"
+            >
+              <Plus className="h-4 w-4" />
+              Create Document
+            </Button>
             <div className="relative max-w-xs">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
