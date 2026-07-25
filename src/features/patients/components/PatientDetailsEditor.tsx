@@ -2435,6 +2435,7 @@ export function PatientDetailsEditor({
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
 
+            <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
@@ -2847,6 +2848,7 @@ export function PatientDetailsEditor({
                 />
               </CollapsibleContent>
             </Collapsible>
+            </div>
           </TabsContent>
 
           {/* === MEDICAL TAB (EDIT) === */}
