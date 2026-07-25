@@ -267,7 +267,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       {!hideHeader && (
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Referrals</h1>
+            <h1 className="text-base font-semibold text-foreground">Referrals</h1>
             <p className="mt-1 text-muted-foreground text-xs">Manage doctors you refer patients to</p>
           </div>
           <Button onClick={() => { resetForm(); setShowForm(true); }} className="gap-2">
