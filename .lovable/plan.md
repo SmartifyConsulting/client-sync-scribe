@@ -1,51 +1,29 @@
-## Add DISC Personality Profile (doctor-only) to Patient Overview
+## Redesign Landing hero + swap logo
 
-### Feature
-Derive a longitudinal DISC personality profile for each patient from the accumulating session transcripts and AI summaries, and surface it in the Patient Overview — visible only to authenticated doctors, positioned to share the row directly beneath the AI Patient Summary with the existing Allergies & Conditions block.
+### 1. Upload new logo
+- Upload `user-uploads://HolarcTransparent-2.png` via `lovable-assets create` → write `src/assets/holarc-health-logo.png.asset.json` (overwriting the existing pointer so every consumer of `holarcLogoAsset` gets the new deep-red art with no code changes elsewhere).
+- Existing sizing (`h-16 sm:h-20` on Landing, and all other places importing the same pointer) is preserved.
 
-### Scope
+### 2. Rework hero layout in `src/pages/Landing.tsx` to match the mockup
+Current hero is a 12-col split with logo + big H1 + pills + CTAs on the left, and a mosaic on the right. Change to match the reference:
 
-**1. Storage — `patient_disc_profiles` table**
-- Columns: `patient_id` (FK, unique), `dominance`, `influence`, `steadiness`, `conscientiousness` (int 0–100), `primary_trait`, `secondary_trait` (text), `dominance_rationale`, `influence_rationale`, `steadiness_rationale`, `conscientiousness_rationale` (text), `sessions_analyzed` (int), `last_session_id` (uuid), `generated_at`, `updated_at`.
-- RLS: SELECT/UPDATE/INSERT only for users with `doctor` role who have active `doctor_patient_access` to the patient; service_role full access. Patient role has NO access.
-- GRANT to `authenticated` + `service_role`.
+- **Top row (2 columns)**
+  - Left col: large logo only (`h-24 sm:h-32 lg:h-40 w-auto`), left-aligned. No H1, no badge here.
+  - Right col: keep the existing feature mosaic (Medication Adherence + Round Table + AI Clinical Assistant cards) exactly as-is.
+- **Middle band (full width, centered)**
+  - Small mono-style eyebrow: `landing.hero.badge` reformatted as `A revolutionary healthcare ecosystem / [STATUS: ACTIVE]` line + `[ built around you ]` in monospace brackets, matching the mockup. Reuses existing `landing.hero.badge` / `landing.hero.titleHighlight` translation keys — no content removed, just re-presented (the removed H1 text was already flagged for removal in the earlier approved plan).
+  - Under it: the capability pills row, laid over a subtle audio-waveform SVG motif on both sides (decorative only, uses `bg-primary/30` bars — no new colors).
+- **Bottom row (full width)**
+  - Left: `Join the Ecosystem` + `Doctors` + `Patients` CTA cluster (existing buttons, unchanged).
+  - Right: `Holarc Help (SOS)` card (existing content from the features section pulled up next to CTAs so it sits where the mockup shows it). Chips underneath: Emergency responders · Hospitals · Blood banks (existing `landing.features.emergencyResponders/hospitals/bloodBanks` keys).
+- Description paragraph and Trust strip stay, moved just below the CTA row so no content is lost.
+- Mobile app download card + InstallAppPrompt keep their current positions further down the page.
 
-**2. Edge function — `analyze-patient-disc`**
-- Input: `patient_id`.
-- Auth: verify caller is a doctor with access to the patient (reuse the pattern from `summarize-session`).
-- Loads the patient's session transcripts + AI summaries (all sessions, capped at the most recent N to stay under token limits) and any prior stored DISC row.
-- Calls Lovable AI (`google/gemini-2.5-pro`) with a strict JSON schema asking for the four DISC scores (0–100), primary/secondary traits, and one short evidence-based rationale per trait grounded in transcript excerpts.
-- Upserts into `patient_disc_profiles`.
-
-**3. Auto-refresh trigger**
-- After each session's AI summary completes successfully (existing `handleSessionComplete` chain in `useSessions.ts`), enqueue a background call to `analyze-patient-disc` for that patient. Runs after all auto-documents and before/independent of Vula awarding — it must not block the session-close pipeline (fire-and-forget with error logging only).
-
-**4. UI — `PatientOverview.tsx`**
-- New component `DiscPersonalityCard` rendered ONLY when `useUserRole().isDoctor === true`.
-- Layout: convert the existing "Allergies & Conditions" row (currently full width) into a 4-column grid: **col 1 = Allergies & Conditions (current content), cols 2–4 = DISC card** spanning three columns, matching the reference screenshot (header row with "Primary: X · Secondary: Y", then a 2×2 grid of D/I/S/C tiles, each with a colored progress bar, score in top-right, and rationale text).
-- On mobile the DISC card stacks below allergies (single column).
-- Colors reuse existing semantic tokens: D = destructive/red, I = amber, S = primary/teal, C = blue accent.
-- Manual "Refresh" button on the card (doctor only) invokes the edge function; shows generated-at timestamp and `sessions_analyzed` count.
-- Empty state: "Not enough sessions yet — DISC profile will generate after the next completed consultation."
-
-**5. Translations**
-- Add `patientProfile.disc.*` keys (title, primary, secondary, trait names, tile labels, refresh, empty state, generatedAt) to `src/i18n/locales/en.json`.
-
-### Non-goals
-- No patient-facing surface anywhere in the app.
-- No changes to session recording flow beyond the fire-and-forget hook.
-- No historical/trend chart in v1 — single current snapshot only.
-
-### Files touched
-- New migration for `patient_disc_profiles` + RLS + GRANTs.
-- New `supabase/functions/analyze-patient-disc/index.ts` + `config.toml` entry.
-- `src/features/patients/components/PatientOverview.tsx` — insert `DiscPersonalityCard` and re-grid the allergies row.
-- New `src/features/patients/components/DiscPersonalityCard.tsx`.
-- `src/hooks/useSessions.ts` — post-summary DISC refresh call.
-- `src/i18n/locales/en.json` — new keys.
+### 3. Constraints
+- No color changes: only current tokens (`primary`, `#E01837`, `muted`, `card`, `border`) reused.
+- No copy removed except the `landing.hero.title` H1 ("A revolutionary healthcare ecosystem built around you.") per the earlier instruction; every other translation key stays wired.
+- No changes outside `src/pages/Landing.tsx` and the logo `.asset.json` pointer.
 
 ### Verification
-- Build passes.
-- As a doctor viewing a patient with ≥1 session: DISC card renders to the right of Allergies with the 2×2 tile grid.
-- As a patient viewing their own record: DISC card absent; RLS blocks direct table access.
-- Manual Refresh triggers the edge function and updates the tiles.
+- `bun run build` passes.
+- Visual check via Playwright screenshot of `/` at 1280 wide confirms: new logo top-left, mosaic top-right, mono eyebrow + pills mid, CTAs + SOS card bottom, colors unchanged.
