@@ -282,7 +282,7 @@ export function usePatients() {
     }
   };
 
-  const createPatient = async (patient: Omit<Patient, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+  const createPatient = async (patient: Omit<Patient, 'id' | 'user_id' | 'created_at' | 'updated_at'>, opts?: { silent?: boolean }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -302,7 +302,7 @@ export function usePatients() {
       if (error) throw error;
       const typedPatient = toPatient(data);
       setPatients((prev) => [typedPatient, ...prev]);
-      toast({ title: 'Success', description: 'Patient added successfully' });
+      if (!opts?.silent) toast({ title: 'Success', description: 'Patient added successfully' });
       return typedPatient;
     } catch (error: any) {
       console.error('Error creating patient:', error);
