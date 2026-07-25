@@ -78,6 +78,8 @@ export function TodoRow({
   onDuplicate,
   onSend,
   onPreview,
+  onPreviewCalendar,
+  onEditAppointment,
   onSetPriority,
   isEditing,
   editText,
@@ -90,6 +92,7 @@ export function TodoRow({
   const { t } = useTranslation();
   const display = getTodoDisplay(todo);
   const Icon = display.icon;
+  const isAppointment = display.kind === "appointment";
 
   if (isEditing) {
     return (
