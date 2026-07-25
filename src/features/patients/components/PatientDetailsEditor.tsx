@@ -2101,12 +2101,13 @@ export function PatientDetailsEditor({
                     <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
                   </TabsList>
                   <TabsContent value="sessions" className="mt-3">
-                    <div className="mb-4">
-                      <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
-                      <p className="text-xs text-muted-foreground">History of your consultations. Record sessions with doctors not on the platform.</p>
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
                     </div>
+                    <p className="text-xs text-muted-foreground mb-3">History of your consultations. Record sessions with doctors not on the platform.</p>
                     <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
                   </TabsContent>
+
                   <TabsContent value="admissions" className="mt-3">
                     <Tabs defaultValue="admissions_view">
                       <TabsList className="bg-primary">
