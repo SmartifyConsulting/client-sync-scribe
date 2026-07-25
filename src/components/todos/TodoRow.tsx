@@ -82,6 +82,7 @@ const PRIORITY_DOT: Record<"low" | "medium" | "high", string> = {
 export function TodoRow({
   todo,
   compact = false,
+  insideGroup = false,
   onToggle,
   onStartEdit,
   onDelete,
@@ -103,6 +104,11 @@ export function TodoRow({
   const display = getTodoDisplay(todo);
   const Icon = display.icon;
   const isAppointment = display.kind === "appointment";
+  const primaryLabel = insideGroup
+    ? (isAppointment
+        ? (todo.title || display.shortLabel)
+        : (REVIEW_LABEL[display.kind] || display.shortLabel))
+    : (display.patient || display.shortLabel);
 
   if (isEditing) {
     return (
