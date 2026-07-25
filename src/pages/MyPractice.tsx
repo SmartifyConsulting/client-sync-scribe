@@ -1221,13 +1221,14 @@ export default function MyPractice() {
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
-          <AboutMeAccordion
-            value={(profile as any)?.about_me || ""}
-            onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
-          />
-          {/* Personal Information Accordion */}
-          <Accordion type="multiple" className="space-y-4">
-            <AccordionItem value="personal" className="rounded-xl border border-neutral-400 bg-card shadow-sm">
+          <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden">
+            <Accordion type="multiple" className="divide-y divide-neutral-300">
+              <AboutMeAccordion
+                value={(profile as any)?.about_me || ""}
+                onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
+              />
+              {/* Personal Information */}
+              <AccordionItem value="personal" className="border-0">
               <AccordionTrigger className="px-4 py-3 hover:no-underline">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
