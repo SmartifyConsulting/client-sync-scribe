@@ -1716,7 +1716,9 @@ export function PatientDetailsEditor({
                 </Button>
               </div>
 
-              <Collapsible defaultOpen={false} className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+              <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+
                 <SectionHeader icon={User} label="Personal Details" />
                 <CollapsibleContent className="p-3">
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
