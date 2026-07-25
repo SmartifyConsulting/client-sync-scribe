@@ -3578,6 +3578,74 @@ export type Database = {
           },
         ]
       }
+      patient_disc_profiles: {
+        Row: {
+          conscientiousness: number
+          conscientiousness_rationale: string | null
+          created_at: string
+          dominance: number
+          dominance_rationale: string | null
+          generated_at: string
+          id: string
+          influence: number
+          influence_rationale: string | null
+          last_session_id: string | null
+          patient_id: string
+          primary_trait: string | null
+          secondary_trait: string | null
+          sessions_analyzed: number
+          steadiness: number
+          steadiness_rationale: string | null
+          updated_at: string
+        }
+        Insert: {
+          conscientiousness?: number
+          conscientiousness_rationale?: string | null
+          created_at?: string
+          dominance?: number
+          dominance_rationale?: string | null
+          generated_at?: string
+          id?: string
+          influence?: number
+          influence_rationale?: string | null
+          last_session_id?: string | null
+          patient_id: string
+          primary_trait?: string | null
+          secondary_trait?: string | null
+          sessions_analyzed?: number
+          steadiness?: number
+          steadiness_rationale?: string | null
+          updated_at?: string
+        }
+        Update: {
+          conscientiousness?: number
+          conscientiousness_rationale?: string | null
+          created_at?: string
+          dominance?: number
+          dominance_rationale?: string | null
+          generated_at?: string
+          id?: string
+          influence?: number
+          influence_rationale?: string | null
+          last_session_id?: string | null
+          patient_id?: string
+          primary_trait?: string | null
+          secondary_trait?: string | null
+          sessions_analyzed?: number
+          steadiness?: number
+          steadiness_rationale?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_disc_profiles_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_hidden_doctors: {
         Row: {
           doctor_id: string
