@@ -45,6 +45,7 @@ export interface TodoRowItem extends TodoDisplayInput {
 interface TodoRowProps {
   todo: TodoRowItem;
   compact?: boolean;
+  insideGroup?: boolean;
   onToggle: (id: string) => void;
   onStartEdit?: (todo: TodoRowItem) => void;
   onDelete: (id: string) => void;
@@ -62,6 +63,15 @@ interface TodoRowProps {
   sending?: boolean;
   previewing?: boolean;
 }
+
+const REVIEW_LABEL: Partial<Record<string, string>> = {
+  invoice: "Review Invoice",
+  medical_certificate: "Review Medical Certificate",
+  prescription: "Review Prescription",
+  referral: "Review Referral",
+  laboratory: "Review Lab Request",
+  recommendation: "Review Letter",
+};
 
 const PRIORITY_DOT: Record<"low" | "medium" | "high", string> = {
   low: "bg-muted-foreground/40",
