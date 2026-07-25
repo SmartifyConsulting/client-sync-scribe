@@ -1636,7 +1636,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   <Pencil className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Edit Invoice</h2>
+                  <h2 className="text-sm font-semibold text-foreground">Edit Invoice</h2>
                   <p className="text-sm text-muted-foreground">{editingInvoice.invoice_number}</p>
                 </div>
               </div>
@@ -1727,7 +1727,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                   <Eye className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">{previewHtml.title}</h2>
+                  <h2 className="text-sm font-semibold text-foreground">{previewHtml.title}</h2>
                   <p className="text-xs text-muted-foreground">Invoice preview</p>
                 </div>
               </div>

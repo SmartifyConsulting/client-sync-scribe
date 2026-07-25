@@ -441,7 +441,7 @@ export default function DoctorRewards({ embedded = false }: { embedded?: boolean
       {showTransferDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
          <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md shadow-lg space-y-4">
-            <h3 className="text-lg font-semibold">Transfer Vulas</h3>
+            <h3 className="text-sm font-semibold">Transfer Vulas</h3>
             <p className="text-sm text-muted-foreground">Available balance: {totalVulas} <img src={vulaVouchersLogo} alt="Vula" className="h-4 w-4 inline-block" /></p>
             <div className="space-y-2">
               <Label>From</Label>

@@ -585,7 +585,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Stethoscope className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold text-foreground">No healthcare providers on your profile</h3>
+            <h3 className="text-sm font-semibold text-foreground">No healthcare providers on your profile</h3>
              <p className="text-muted-foreground text-center mt-2 max-w-md">
                Search for a healthcare provider above or use the invite button to connect.
             </p>
@@ -656,7 +656,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           {/* Provider list */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-foreground">Healthcare Providers</h2>
+              <h2 className="text-sm font-semibold text-foreground">Healthcare Providers</h2>
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as "name-asc" | "name-desc")}>
                 <SelectTrigger className="h-9 w-[160px] text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>

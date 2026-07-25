@@ -281,7 +281,7 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
               <FileText className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Create Invoice</h2>
+              <h2 className="text-sm font-semibold text-foreground">Create Invoice</h2>
               <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
             </div>
           </div>

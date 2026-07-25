@@ -823,7 +823,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <FileText className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-1">
+            <h3 className="text-sm font-semibold text-foreground mb-1">
               {filter === "all" ? t("patientDocuments.noDocuments") : "No matching documents"}
             </h3>
             <p className="text-muted-foreground text-sm">

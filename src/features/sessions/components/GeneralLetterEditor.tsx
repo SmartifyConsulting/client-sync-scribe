@@ -151,7 +151,7 @@ export function GeneralLetterEditor({
               <FileEdit className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground">General Letter</h2>
+              <h2 className="text-sm font-semibold text-foreground">General Letter</h2>
               <p className="text-sm text-muted-foreground">Patient: {patientName}</p>
             </div>
           </div>
