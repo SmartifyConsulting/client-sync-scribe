@@ -231,7 +231,19 @@ export function TodoRow({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {onStartEdit && (
+              {isAppointment && onPreviewCalendar && (
+                <DropdownMenuItem onClick={() => onPreviewCalendar(todo)}>
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  Preview Calendar
+                </DropdownMenuItem>
+              )}
+              {isAppointment && onEditAppointment && (
+                <DropdownMenuItem onClick={() => onEditAppointment(todo)}>
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Edit / Accept
+                </DropdownMenuItem>
+              )}
+              {onStartEdit && !isAppointment && (
                 <DropdownMenuItem onClick={() => onStartEdit(todo)}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   {t("todo.actions.edit")}
@@ -247,25 +259,27 @@ export function TodoRow({
                   {t("todo.actions.send")}
                 </DropdownMenuItem>
               )}
-              {onDuplicate && (
+              {onDuplicate && !isAppointment && (
                 <DropdownMenuItem onClick={() => onDuplicate(todo)}>
                   <Copy className="h-4 w-4 mr-2" />
                   {t("todo.actions.duplicate")}
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => onToggle(todo.id)}>
-                {todo.completed ? (
-                  <>
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    {t("todo.actions.reopen")}
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    {t("todo.actions.markComplete")}
-                  </>
-                )}
-              </DropdownMenuItem>
+              {!isAppointment && (
+                <DropdownMenuItem onClick={() => onToggle(todo.id)}>
+                  {todo.completed ? (
+                    <>
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      {t("todo.actions.reopen")}
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      {t("todo.actions.markComplete")}
+                    </>
+                  )}
+                </DropdownMenuItem>
+              )}
               {onSetPriority && (
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
