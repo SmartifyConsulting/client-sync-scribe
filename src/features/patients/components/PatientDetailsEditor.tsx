@@ -190,9 +190,9 @@ const SectionHeader = ({
   onEdit?: () => void;
   titleClassName?: string;
 }) => (
-  <CollapsibleTrigger className="flex w-full items-center justify-between data-[state=open]:border-b border-border hover:bg-primary/5 transition-colors px-4 py-3 group">
-    <h3 className={cn("text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left", titleClassName)}>
-      <Icon className="h-4 w-4 text-primary" /> {label}
+  <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group data-[state=open]:bg-primary data-[state=open]:text-white">
+    <h3 className={cn("text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left group-data-[state=open]:text-white", titleClassName)}>
+      <Icon className="h-4 w-4 text-primary group-data-[state=open]:text-white" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
@@ -203,13 +203,13 @@ const SectionHeader = ({
             e.stopPropagation();
             onEdit();
           }}
-          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground group-data-[state=open]:text-white transition-colors"
           aria-label={`Edit ${label}`}
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
       )}
-      <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+      <ChevronDown className="h-4 w-4 text-foreground group-data-[state=open]:text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
 );
