@@ -1329,24 +1329,13 @@ export default function Sessions() {
                   </p>
                 </div>
               </div>
-              <Button 
-                variant={aiDiagnosis ? "secondary" : "default"}
-                className="gap-2" 
-                onClick={() => generateAIDiagnosis()}
-                disabled={isGeneratingDiagnosis || !summary}
-              >
-                {isGeneratingDiagnosis ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Brain className="h-4 w-4" />
-                    {aiDiagnosis ? "Regenerate" : "Generate Analysis"}
-                  </>
-                )}
-              </Button>
+              {isGeneratingDiagnosis && (
+                <span className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing...
+                </span>
+              )}
+
             </div>
 
             {/* Disclaimer Banner */}
