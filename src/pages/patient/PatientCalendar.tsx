@@ -239,7 +239,7 @@ export default function PatientCalendar() {
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
-                <span className="text-sm md:text-sm font-medium">{getCalendarShortWeekdayName(t, day)}</span>
+                <span className="text-base md:text-base font-medium">{getCalendarShortWeekdayName(t, day)}</span>
                 <span className="text-base md:text-lg font-semibold">{format(day, "d")}</span>
                 {dayAppointments.length > 0 && (
                   <div className={cn("mt-1 h-1.5 w-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary")} />
@@ -267,7 +267,7 @@ export default function PatientCalendar() {
       <CardContent>
         <div className="grid grid-cols-7 mb-1 md:mb-2">
           {getCalendarShortWeekdayNames(t, true).map((d) => (
-            <div key={d} className="py-1 md:py-2 text-center text-sm md:text-sm font-medium text-muted-foreground">{d}</div>
+            <div key={d} className="py-1 md:py-2 text-center text-base md:text-base font-medium text-muted-foreground">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-0 md:gap-1">
