@@ -191,8 +191,8 @@ const SectionHeader = ({
   titleClassName?: string;
 }) => (
   <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group hover:bg-muted data-[state=open]:bg-primary data-[state=open]:hover:bg-primary/90 data-[state=open]:text-white">
-    <h3 className={cn("text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left group-data-[state=open]:text-white", titleClassName)}>
-      <Icon className="h-4 w-4 text-primary group-data-[state=open]:text-white" /> {label}
+    <h3 className={cn("text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left group-data-[state=open]:!text-white", titleClassName)}>
+      <Icon className="h-4 w-4 text-primary group-data-[state=open]:!text-white" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
@@ -209,7 +209,7 @@ const SectionHeader = ({
           <Pencil className="h-3.5 w-3.5" />
         </button>
       )}
-      <ChevronDown className="h-4 w-4 text-foreground group-data-[state=open]:text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
+      <ChevronDown className="h-4 w-4 text-foreground group-data-[state=open]:!text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
     </div>
   </CollapsibleTrigger>
 );
@@ -1724,7 +1724,7 @@ export function PatientDetailsEditor({
               </div>
 
               <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
-              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <Collapsible defaultOpen className="bg-white overflow-hidden">
 
                 <SectionHeader icon={User} label="Personal Details" />
                 <CollapsibleContent className="p-3">
@@ -1865,7 +1865,7 @@ export function PatientDetailsEditor({
               <div className="space-y-3">
                 <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
                   {/* General Information */}
-                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+                  <Collapsible defaultOpen className="bg-white overflow-hidden">
                     <SectionHeader icon={Activity} label="General Information" />
                     <CollapsibleContent className="px-3 pb-3">
                       <div className="grid gap-3 sm:grid-cols-4">
@@ -2038,7 +2038,7 @@ export function PatientDetailsEditor({
                       <div className="flex items-center gap-2">
                         <span
                           className={cn(
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary",
                             patient.organ_donor
                               ? "bg-primary text-primary-foreground"
                               : "bg-muted text-muted-foreground",
@@ -2046,7 +2046,7 @@ export function PatientDetailsEditor({
                         >
                           {patient.organ_donor ? "Yes" : "No"}
                         </span>
-                        <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                        <ChevronDown className="h-4 w-4 text-foreground group-data-[state=open]:!text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-3 pb-3">
@@ -2436,7 +2436,7 @@ export function PatientDetailsEditor({
             </div>
 
             <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+            <Collapsible defaultOpen className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -2863,7 +2863,7 @@ export function PatientDetailsEditor({
             <div className="space-y-3">
               <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
                 {/* General Information */}
-                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+                <Collapsible defaultOpen className="bg-white overflow-hidden">
                   <SectionHeader icon={Activity} label="General Information" />
                   <CollapsibleContent className="px-3 pb-3">
                     <div className="grid gap-3 sm:grid-cols-4">
@@ -3555,7 +3555,7 @@ export function PatientDetailsEditor({
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
-                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary",
                           formData.organ_donor
                             ? "bg-primary text-primary-foreground"
                             : "bg-muted text-muted-foreground",
@@ -3563,7 +3563,7 @@ export function PatientDetailsEditor({
                       >
                         {formData.organ_donor ? "Yes" : "No"}
                       </span>
-                      <ChevronDown className="h-4 w-4 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      <ChevronDown className="h-4 w-4 text-foreground group-data-[state=open]:!text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="p-3">
