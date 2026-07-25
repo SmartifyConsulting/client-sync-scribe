@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import betaLogo from "@/assets/holarc-beta-logo.png";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
-import { Sparkles } from "lucide-react";
 
 const STORAGE_PREFIX = "holarc_early_release_seen_";
 
@@ -42,8 +42,8 @@ export function EarlyReleaseNotice() {
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Sparkles className="h-6 w-6 text-primary" />
+          <div className="mx-auto mb-2">
+            <img src={betaLogo} alt="Holarc Health BETA" className="h-16 w-auto object-contain" />
           </div>
           <DialogTitle className="text-center">{t("earlyRelease.title")}</DialogTitle>
           <DialogDescription className="text-center leading-relaxed pt-2 text-[10px]">
