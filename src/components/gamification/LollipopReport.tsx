@@ -45,7 +45,7 @@ export function LollipopReport({ rewards, loading, totalCount }: LollipopReportP
             <div className="rounded-lg bg-white/50 dark:bg-black/20 p-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Award className="h-4 w-4" />
-                Vula Vouchers
+                Vulas
               </div>
               <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
                 {totalCount}

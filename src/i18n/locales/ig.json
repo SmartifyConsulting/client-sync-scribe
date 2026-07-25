@@ -120,7 +120,7 @@
     "thisWeek": "Izu A",
     "doctorRating": "Ọkwa Dọkịta",
     "noRatings": "Enwebeghị ọkwa",
-    "vulaVouchers": "Vula Vouchers",
+    "vulaVouchers": "Vulas",
     "myRoundTables": "Tebụl Okirikiri M",
     "searchRoundTable": "Chọọ onye ọrịa ịmalite tebụl okirikiri...",
     "noPatientsFound": "Achọtaghị ndị ọrịa",
@@ -908,7 +908,7 @@
       "communicationAbbr": "Comm:",
       "expertiseAbbr": "Exp:",
       "professionalismAbbr": "Prof:",
-      "vulaVouchers": "Vula Vouchers"
+      "vulaVouchers": "Vulas"
     },
     "roundTables": {
       "title": "My Round Tables",
@@ -1077,7 +1077,7 @@
       "recentActivity": "Recent Activity",
       "aiSummary": "AI Health Summary",
       "upcomingAppointments": "Upcoming Appointments",
-      "myVulas": "My Vula Vouchers",
+      "myVulas": "My Vulas",
       "earnVulas": "Earn More Vulas",
       "recentClaims": "Recent Claims",
       "documentation": "Documentation",
@@ -1123,7 +1123,7 @@
     "appointmentsTitle": "Upcoming Appointments",
     "appointmentsEmpty": "No upcoming appointments.",
     "doctorFallback": "Doctor",
-    "vulaLabel": "My Vula Vouchers",
+    "vulaLabel": "My Vulas",
     "earnVulasTitle": "Earn More Vulas",
     "earnVulasDescription": "Tips to boost your rewards",
     "tip1": "Log daily medication intake",

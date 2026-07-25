@@ -45,6 +45,7 @@ export interface TodoRowItem extends TodoDisplayInput {
 interface TodoRowProps {
   todo: TodoRowItem;
   compact?: boolean;
+  insideGroup?: boolean;
   onToggle: (id: string) => void;
   onStartEdit?: (todo: TodoRowItem) => void;
   onDelete: (id: string) => void;
@@ -63,6 +64,15 @@ interface TodoRowProps {
   previewing?: boolean;
 }
 
+const REVIEW_LABEL: Partial<Record<string, string>> = {
+  invoice: "Review Invoice",
+  medical_certificate: "Review Medical Certificate",
+  prescription: "Review Prescription",
+  referral: "Review Referral",
+  laboratory: "Review Lab Request",
+  recommendation: "Review Letter",
+};
+
 const PRIORITY_DOT: Record<"low" | "medium" | "high", string> = {
   low: "bg-muted-foreground/40",
   medium: "bg-warning",
@@ -72,6 +82,7 @@ const PRIORITY_DOT: Record<"low" | "medium" | "high", string> = {
 export function TodoRow({
   todo,
   compact = false,
+  insideGroup = false,
   onToggle,
   onStartEdit,
   onDelete,
@@ -93,6 +104,11 @@ export function TodoRow({
   const display = getTodoDisplay(todo);
   const Icon = display.icon;
   const isAppointment = display.kind === "appointment";
+  const primaryLabel = insideGroup
+    ? (isAppointment
+        ? (todo.title || display.shortLabel)
+        : (REVIEW_LABEL[display.kind] || display.shortLabel))
+    : (display.patient || display.shortLabel);
 
   if (isEditing) {
     return (
@@ -122,16 +138,21 @@ export function TodoRow({
     <TooltipProvider delayDuration={300}>
       <div
         className={cn(
-          "flex items-center gap-3 rounded-md px-2 hover:bg-muted/40 group text-sm",
+          "flex items-center gap-3 rounded-md pr-2 hover:bg-muted/40 group text-sm",
+          insideGroup ? "pl-6" : "pl-2",
           compact ? "py-1.5" : "py-2",
           todo.completed && "bg-muted/20"
         )}
       >
-        <Checkbox
-          checked={todo.completed}
-          onCheckedChange={() => onToggle(todo.id)}
-          className="h-4 w-4 shrink-0"
-        />
+        {isAppointment ? (
+          <span className="h-4 w-4 shrink-0" aria-hidden />
+        ) : (
+          <Checkbox
+            checked={todo.completed}
+            onCheckedChange={() => onToggle(todo.id)}
+            className="h-4 w-4 shrink-0"
+          />
+        )}
 
         {/* Priority dot */}
         <span
@@ -142,26 +163,34 @@ export function TodoRow({
         {/* Kind icon */}
         <Icon className="h-4 w-4 text-primary shrink-0" />
 
-        {/* Label: patient name (or fallback to type) */}
+        {/* Label */}
         <span
           className={cn(
             "flex-1 min-w-0 truncate font-medium",
             todo.completed && "line-through text-muted-foreground"
           )}
         >
-          {display.patient || display.shortLabel}
+          {primaryLabel}
         </span>
 
-        {/* Meta: date */}
-        {display.date && !compact && (
+        {/* Appointment: date · time chunk always visible */}
+        {isAppointment && (display.date || display.time) && (
+          <span className="inline-flex items-center gap-1 text-muted-foreground shrink-0">
+            <CalendarDays className="h-3.5 w-3.5" />
+            {[display.date, display.time].filter(Boolean).join(" · ")}
+          </span>
+        )}
+
+        {/* Non-appointment meta: date */}
+        {!isAppointment && display.date && !compact && (
           <span className="hidden sm:inline-flex items-center gap-1 text-muted-foreground shrink-0">
             <CalendarDays className="h-3.5 w-3.5" />
             {display.date}
           </span>
         )}
 
-        {/* Meta: time */}
-        {display.time && (
+        {/* Non-appointment meta: time */}
+        {!isAppointment && display.time && (
           <span className="hidden sm:inline-flex items-center gap-1 text-muted-foreground shrink-0">
             <Clock className="h-3.5 w-3.5" />
             {display.time}
@@ -178,27 +207,7 @@ export function TodoRow({
 
         {/* Actions */}
         <div className="flex items-center gap-0.5 shrink-0">
-          {isAppointment && onPreviewCalendar && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={() => onPreviewCalendar(todo)}>
-                  <CalendarDays className="h-3.5 w-3.5 mr-1" /> Preview
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Preview Calendar</TooltipContent>
-            </Tooltip>
-          )}
-          {isAppointment && onEditAppointment && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="default" className="h-7 px-2 text-xs" onClick={() => onEditAppointment(todo)}>
-                  <Check className="h-3.5 w-3.5 mr-1" /> Edit / Accept
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Edit or Accept</TooltipContent>
-            </Tooltip>
-          )}
-          {todo.document_id && onPreview && (
+          {!isAppointment && todo.document_id && onPreview && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -222,7 +231,19 @@ export function TodoRow({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {onStartEdit && (
+              {isAppointment && onPreviewCalendar && (
+                <DropdownMenuItem onClick={() => onPreviewCalendar(todo)}>
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  Preview Calendar
+                </DropdownMenuItem>
+              )}
+              {isAppointment && onEditAppointment && (
+                <DropdownMenuItem onClick={() => onEditAppointment(todo)}>
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Edit / Accept
+                </DropdownMenuItem>
+              )}
+              {onStartEdit && !isAppointment && (
                 <DropdownMenuItem onClick={() => onStartEdit(todo)}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   {t("todo.actions.edit")}
@@ -238,25 +259,27 @@ export function TodoRow({
                   {t("todo.actions.send")}
                 </DropdownMenuItem>
               )}
-              {onDuplicate && (
+              {onDuplicate && !isAppointment && (
                 <DropdownMenuItem onClick={() => onDuplicate(todo)}>
                   <Copy className="h-4 w-4 mr-2" />
                   {t("todo.actions.duplicate")}
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => onToggle(todo.id)}>
-                {todo.completed ? (
-                  <>
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    {t("todo.actions.reopen")}
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    {t("todo.actions.markComplete")}
-                  </>
-                )}
-              </DropdownMenuItem>
+              {!isAppointment && (
+                <DropdownMenuItem onClick={() => onToggle(todo.id)}>
+                  {todo.completed ? (
+                    <>
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      {t("todo.actions.reopen")}
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      {t("todo.actions.markComplete")}
+                    </>
+                  )}
+                </DropdownMenuItem>
+              )}
               {onSetPriority && (
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>

@@ -528,7 +528,7 @@ export default function TodoList() {
                 <CollapsibleContent>
                   <div className="divide-y divide-neutral-200 border-t border-neutral-200 bg-muted/10">
                     {items.map((todo) => (
-                      <TodoRow
+                      <TodoRow insideGroup
                         key={todo.id}
                         todo={todo as any}
                         onToggle={toggleComplete}
