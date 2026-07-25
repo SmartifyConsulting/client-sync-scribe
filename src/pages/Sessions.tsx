@@ -626,12 +626,11 @@ export default function Sessions() {
         }).select().single();
         if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
       }
-      toast({ title: "Invoice Created", description: "Invoice saved successfully." });
     } catch (e) { console.error(e); }
     setReviewLoading(false);
     setShowInvoiceReview(false);
-    if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
+    runDelivery({ label: 'Invoice' }, nextAfterInvoice);
+
   };
 
   const handleApproveReferral = async (data: ReferralData) => {
