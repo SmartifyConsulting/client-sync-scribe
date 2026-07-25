@@ -460,3 +460,47 @@
   height: 36px;
 }
 
+
+/* ── My Practice tab bodies: 12px baseline, matching My Holarchy density ── */
+.my-practice-tab-body,
+.my-practice-tab-body p,
+.my-practice-tab-body span,
+.my-practice-tab-body label,
+.my-practice-tab-body button,
+.my-practice-tab-body input,
+.my-practice-tab-body textarea,
+.my-practice-tab-body select,
+.my-practice-tab-body td,
+.my-practice-tab-body th,
+.my-practice-tab-body li {
+  font-size: 12px;
+  line-height: 1.35;
+}
+.my-practice-tab-body h1,
+.my-practice-tab-body h2,
+.my-practice-tab-body h3 {
+  font-size: 14px;
+}
+
+/* ── Global: bold field labels and input text ── */
+label,
+[data-slot="label"],
+.form-label {
+  font-weight: 600;
+}
+input,
+textarea,
+select,
+[data-slot="input"],
+[data-slot="textarea"],
+[data-slot="select-trigger"],
+[role="combobox"],
+[role="spinbutton"],
+[role="textbox"],
+[contenteditable="true"] {
+  font-weight: 600;
+}
+input::placeholder,
+textarea::placeholder {
+  font-weight: 500;
+}
