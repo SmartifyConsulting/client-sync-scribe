@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { translateTodoTitle } from "@/lib/translateTodoTitle";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -74,14 +74,14 @@ const priorityKey = {
 } as const;
 
 const actionTypeLabels: Record<string, string> = {
-  schedule_appointment: "ðŸ“… Scheduled appointment",
-  write_prescription: "ðŸ’Š Created prescription",
-  create_invoice: "ðŸ§¾ Created invoice",
-  write_medical_certificate: "ðŸ“‹ Created medical certificate",
-  write_referral_letter: "âœ‰ï¸ Created referral letter",
-  write_general_letter: "ðŸ“ Created general letter",
-  manual_task: "ðŸ“Œ Manual task created",
-  document_review: "ðŸ“„ Review document",
+  schedule_appointment: "📅 Scheduled appointment",
+  write_prescription: "💊 Created prescription",
+  create_invoice: "🧾 Created invoice",
+  write_medical_certificate: "📋 Created medical certificate",
+  write_referral_letter: "✉️ Created referral letter",
+  write_general_letter: "📄 Created general letter",
+  manual_task: "📌 Manual task created",
+  document_review: "📄 Review document",
 };
 
 function getDateLabel(dateStr: string): string {
@@ -230,7 +230,7 @@ export default function TodoList() {
         const avg = dataArray.reduce((s, v) => s + v, 0) / dataArray.length;
         if (avg < 10) { silenceTimerRef.current += 200; if (silenceTimerRef.current >= 8000 && mediaRecorderRef.current?.state === 'recording') { mediaRecorderRef.current.stop(); setIsRecording(false); } } else { silenceTimerRef.current = 0; }
       }, 200);
-      toast({ title: "Listening...", description: "Speak your task â€” recording stops automatically after a pause" });
+      toast({ title: "Listening...", description: "Speak your task - recording stops automatically after a pause" });
     } catch { toast({ title: "Microphone access denied", variant: "destructive" }); }
   };
 
@@ -285,7 +285,7 @@ export default function TodoList() {
           if (patient?.patient_user_id) {
             await supabase.from('notifications').insert({
               user_id: patient.patient_user_id,
-              title: `ðŸ“‹ New task assigned: ${data.title}`,
+              title: `ðŸ"‹ New task assigned: ${data.title}`,
               description: data.description || 'You have been assigned a new task by your healthcare provider.',
               type: 'task_assigned',
               reference_id: data.id,
@@ -378,7 +378,7 @@ export default function TodoList() {
             if (newTodo) {
               await supabase.from('notifications').insert({
                 user_id: patient.patient_user_id,
-                title: `ðŸ“‹ New task assigned: ${title}`,
+                title: `ðŸ"‹ New task assigned: ${title}`,
                 description: 'You have been assigned a new task by your healthcare provider.',
                 type: 'task_assigned',
                 reference_id: newTodo.id,
@@ -428,7 +428,7 @@ export default function TodoList() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
-        <p className=”mt-1 text-muted-foreground text-base”>Manage your tasks with voice or text input - AI can auto-execute actions</p>
+        <p className="mt-1 text-muted-foreground text-base">Manage your tasks with voice or text input - AI can auto-execute actions</p>
       </div>
 
       {/* Add New Task - reduced by 60% */}
@@ -485,7 +485,7 @@ export default function TodoList() {
             {aiResults.map((result, idx) => (
               <div key={idx} className="flex items-center gap-2 text-sm">
                 <span>{actionTypeLabels[result.action_type] || result.action_type}</span>
-                <span className="text-muted-foreground">â€”</span>
+                <span className="text-muted-foreground">-</span>
                 <span className="text-muted-foreground truncate">{result.description}</span>
                 {result.auto_executed ? <Badge className="bg-success/10 text-success border-success/20 ml-auto shrink-0"><Zap className="h-4 w-4 mr-1" />Done</Badge> : <Badge variant="outline" className="ml-auto shrink-0">Manual</Badge>}
               </div>
@@ -505,7 +505,7 @@ export default function TodoList() {
       </div>
 
 
-      {/* Task List â€” Grouped by Date */}
+      {/* Task List - Grouped by Date */}
       <div className="space-y-3">
         {sortedDateKeys.length === 0 ? (
           <div className="rounded-xl border border-primary bg-card p-8 text-center text-muted-foreground">
