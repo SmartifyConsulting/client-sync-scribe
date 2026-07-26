@@ -677,6 +677,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                       <p className="text-xs text-muted-foreground px-4 py-3">No documents in this group.</p>
                     ) : (
                       <div className="divide-y divide-border">
+                        {group.items.map((doc) => (
                         <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
                           <FileText className="h-5 w-5 text-accent-foreground" />
@@ -747,6 +748,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                           </Button>
                         </div>
                       </div>
+                        ))}
                       </div>
                     )}
                   </AccordionContent>
