@@ -4940,6 +4940,8 @@ export type Database = {
       sessions: {
         Row: {
           action_points: Json | null
+          ai_diagnosis: string | null
+          ai_findings_note: string | null
           audio_url: string | null
           created_at: string
           duration_minutes: number | null
@@ -4961,6 +4963,8 @@ export type Database = {
         }
         Insert: {
           action_points?: Json | null
+          ai_diagnosis?: string | null
+          ai_findings_note?: string | null
           audio_url?: string | null
           created_at?: string
           duration_minutes?: number | null
@@ -4982,6 +4986,8 @@ export type Database = {
         }
         Update: {
           action_points?: Json | null
+          ai_diagnosis?: string | null
+          ai_findings_note?: string | null
           audio_url?: string | null
           created_at?: string
           duration_minutes?: number | null
