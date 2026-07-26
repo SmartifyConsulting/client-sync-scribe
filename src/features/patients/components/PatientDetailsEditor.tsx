@@ -2439,7 +2439,9 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {/* Horizontal label/field rows: bold, one size smaller labels */}
+                <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3 [&>div]:flex [&>div]:items-center [&>div]:gap-2 [&>div]:space-y-0 [&_label]:w-28 [&_label]:shrink-0 [&_label]:text-[11px] [&_label]:font-bold [&_input]:h-8 [&_input]:text-xs [&_button]:h-8 [&_button]:text-xs [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs">
+
                   <div className="space-y-1.5">
                     <Label htmlFor="first_name">First Name(s) *</Label>
                     <Input

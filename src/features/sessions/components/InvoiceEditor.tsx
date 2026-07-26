@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
@@ -386,6 +387,13 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
               <Eye className="h-4 w-4" />
               Preview
             </Button>
+            <SendDocumentButton
+              patientId={patientId}
+              patientName={patientName}
+              documentLabel="Invoice"
+              getContent={generateContent}
+              preferredField="claims_email"
+            />
             <Button onClick={handleSubmit} className="gap-2" disabled={isSubmitting || totalAmount <= 0}>
               {isSubmitting ? (
                 <>

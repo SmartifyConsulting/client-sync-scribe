@@ -1391,35 +1391,47 @@ export type Database = {
       }
       emoticon_messages: {
         Row: {
+          ai_reason: string | null
+          ai_verdict: string | null
           created_at: string | null
           emoticon: string
           id: string
           is_ai_flagged: boolean | null
+          message: string | null
           patient_id: string
           profile_viewed: boolean | null
           recipient_id: string
+          reply_to_id: string | null
           sender_id: string
           vulas_awarded: number | null
         }
         Insert: {
+          ai_reason?: string | null
+          ai_verdict?: string | null
           created_at?: string | null
           emoticon: string
           id?: string
           is_ai_flagged?: boolean | null
+          message?: string | null
           patient_id: string
           profile_viewed?: boolean | null
           recipient_id: string
+          reply_to_id?: string | null
           sender_id: string
           vulas_awarded?: number | null
         }
         Update: {
+          ai_reason?: string | null
+          ai_verdict?: string | null
           created_at?: string | null
           emoticon?: string
           id?: string
           is_ai_flagged?: boolean | null
+          message?: string | null
           patient_id?: string
           profile_viewed?: boolean | null
           recipient_id?: string
+          reply_to_id?: string | null
           sender_id?: string
           vulas_awarded?: number | null
         }
@@ -1429,6 +1441,13 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emoticon_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "emoticon_messages"
             referencedColumns: ["id"]
           },
         ]

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
+import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
 
 interface GeneralLetterEditorProps {
@@ -194,6 +195,12 @@ export function GeneralLetterEditor({
               <Eye className="h-4 w-4" />
               Preview
             </Button>
+            <SendDocumentButton
+              patientId={patientId}
+              patientName={patientName}
+              documentLabel="Letter"
+              getContent={generateContent}
+            />
             <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
               {isSaving ? (
                 <>

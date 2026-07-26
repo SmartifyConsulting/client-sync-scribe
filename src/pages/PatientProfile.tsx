@@ -286,33 +286,8 @@ export default function PatientProfile() {
                     recipientName={patient.name}
                   />
                 )}
-                {(patient as any).patient_user_id && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={async () => {
-                      const { data, error } = await supabase.rpc("award_doctor_checkin", {
-                        _patient_user_id: (patient as any).patient_user_id,
-                        _note: null,
-                      });
-                      if (error) {
-                        toast({ title: "Check-in failed", description: error.message, variant: "destructive" });
-                      } else {
-                        const r = data as any;
-                        toast({
-                          title: r?.awarded ? "+30 Vulas" : "Check-in logged",
-                          description: r?.awarded
-                            ? `Monthly total: ${r.total} Vulas`
-                            : "Monthly cap reached for this patient.",
-                        });
-                      }
-                    }}
-                  >
-                    <img src={vulaSymbol} alt="" className="h-3.5 w-3.5" />
-                    {t("patientProfile.checkIn")}
-                  </Button>
-                )}
+                {null}
+
               </>
             )}
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleScheduleAppointment}>

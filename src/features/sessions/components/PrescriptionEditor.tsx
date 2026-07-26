@@ -13,6 +13,7 @@ import {
   Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -537,6 +538,13 @@ Signature: ___________________
               <Eye className="h-4 w-4" />
               Preview
             </Button>
+            <SendDocumentButton
+              patientId={patientId}
+              patientName={patientName}
+              documentLabel="Prescription"
+              getContent={generateContent}
+              preferredField="pharmacy_email"
+            />
             <Button
               variant="outline"
               className="gap-2"

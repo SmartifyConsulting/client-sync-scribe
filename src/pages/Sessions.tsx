@@ -55,7 +55,6 @@ import {
   ReferralReviewDialog,
 } from "@/components/sessions/TranscriptionReviewDialogs";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
-import { EditFindingsModal } from "@/components/sessions/EditFindingsModal";
 import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -147,7 +146,6 @@ export default function Sessions() {
   const currentSessionIdRef = useRef<string | null>(null);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
-  const [showEditFindings, setShowEditFindings] = useState(false);
   const [findingsNote, setFindingsNote] = useState("");
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
@@ -301,6 +299,21 @@ export default function Sessions() {
     }
   };
 
+  // Manual AI Clinician consult — can be triggered at any point during a session.
+  const handleAiConsult = async () => {
+    const liveTranscript = latestTranscriptRef.current || transcript || notes || "";
+    if (!liveTranscript.trim()) {
+      toast({
+        title: "Nothing to analyse yet",
+        description: "Record or type some session content first.",
+      });
+      return;
+    }
+    setShowDiagnosticsModal(true);
+    await generateAIDiagnosis({ summary: summary || liveTranscript, transcript: liveTranscript });
+  };
+
+
   // Helper to calculate age from DOB
   const calculateAge = (dob: string): number => {
     const birthDate = new Date(dob);
@@ -389,10 +402,7 @@ export default function Sessions() {
         setCurrentSessionId(result.id);
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
-        // Rolling live hint is done — now complete the full (non-binding) AI assessment.
-        generateAIDiagnosis({ summary: result.summary || "", transcript: fullContent || "" });
-
-        setShowDiagnosticsModal(true);
+        // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
 
         const docs = (result as any)._extractedDocuments;
         if (docs?.follow_up_appointment?.follow_up_date) {
@@ -438,21 +448,21 @@ export default function Sessions() {
           setExtractedReferral(docs.referral);
           if (!hasDocs) { hasDocs = true; }
         }
+        // Go straight into the sequential document review.
+        setTimeout(() => startDocumentReview(), 0);
       } else {
         setSummary("Session completed. No content was recorded or noted.");
         setActionPoints([]);
-        setShowDiagnosticsModal(true);
       }
     } catch (error) {
       console.error("Error in handleSessionComplete:", error);
       setSummary("Session completed. No content was recorded or noted.");
       setActionPoints([]);
-      setShowDiagnosticsModal(true);
     }
 
     setSessionState("completed");
     pendingCompletionRef.current = false;
-  }, [completeSession, patientId, advanceToFollowUp]);
+  }, [completeSession, patientId, advanceToFollowUp, startDocumentReview]);
 
   // Visit-category dialog now runs at the END of the post-session chain (Vula award)
   const handleVisitCategoryConfirm = async (categories: string[] | null) => {
@@ -811,33 +821,14 @@ export default function Sessions() {
         diagnosisLoading={isGeneratingDiagnosis}
         patientName={currentPatient?.name}
         sessionDate={new Date().toLocaleDateString()}
-        onClose={() => setShowDiagnosticsModal(false)}
-        onEditFindings={() => {
+        onClose={() => {
           setShowDiagnosticsModal(false);
-          setShowEditFindings(true);
-        }}
-        onProgressComplete={() => {
           persistAssessment();
-          startDocumentReview();
         }}
       />
 
-      {/* Doctor's own findings before documents are reviewed */}
-      <EditFindingsModal
-        open={showEditFindings}
-        fullDiagnosis={aiDiagnosis}
-        value={findingsNote}
-        onChange={setFindingsNote}
-        onCancel={() => {
-          setShowEditFindings(false);
-          setShowDiagnosticsModal(true);
-        }}
-        onContinue={async () => {
-          await persistAssessment(findingsNote);
-          setShowEditFindings(false);
-          startDocumentReview();
-        }}
-      />
+
+
 
       {/* Per-document generate → send progress */}
       <DocumentDeliveryProgress
@@ -1149,7 +1140,28 @@ export default function Sessions() {
                     <span>{isPaused ? "Resume recording" : "Pause recording"}</span>
                   </button>
                 )}
+
+                {/* Manual AI Clinician consult — available at any point in the session */}
+                <button
+                  onClick={handleAiConsult}
+                  disabled={isGeneratingDiagnosis}
+                  aria-label="AI Consult"
+                  title="Ask the AI Clinician for findings so far"
+                  className={cn(
+                    "flex h-12 items-center justify-center gap-2 rounded-full px-4 border-2 border-primary text-sm font-medium transition-all duration-300",
+                    "bg-primary/10 text-primary hover:bg-primary/20",
+                    isGeneratingDiagnosis && "opacity-60 cursor-not-allowed"
+                  )}
+                >
+                  {isGeneratingDiagnosis ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-5 w-5" />
+                  )}
+                  <span>AI Consult</span>
+                </button>
               </div>
+
               
               <p className="text-xs text-muted-foreground text-center">
                 {isTranscribing 
@@ -1181,15 +1193,15 @@ export default function Sessions() {
                   {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                 </div>
                 {liveHint?.suggestion && (
-                  <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
+                  <p className="text-[10px] text-foreground leading-relaxed">{liveHint.suggestion}</p>
                 )}
                 {liveHint?.differentials && liveHint.differentials.length > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-[10px] text-muted-foreground">
                     <span className="font-medium text-foreground">Consider:</span> {liveHint.differentials.join(" · ")}
                   </p>
                 )}
                 {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p className="mt-1 text-[10px] text-destructive">
                     <span className="font-medium">Rule out:</span> {liveHint.red_flags.join(" · ")}
                   </p>
                 )}
@@ -1222,16 +1234,16 @@ export default function Sessions() {
                           const speakerLower = speaker.toLowerCase().trim();
                           const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                           return (
-                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                            <p key={index} className={`text-[10px] leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                               <span className="font-bold">{speaker}</span>:{text}
                             </p>
                           );
                         }
-                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
+                        return line.trim() ? <p key={index} className="text-[10px] text-foreground leading-relaxed">{line}</p> : null;
                       })}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
+                    <p className="text-[10px] text-muted-foreground italic">Transcribing...</p>
                   )}
                 </div>
               </div>
