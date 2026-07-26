@@ -301,6 +301,21 @@ export default function Sessions() {
     }
   };
 
+  // Manual AI Clinician consult — can be triggered at any point during a session.
+  const handleAiConsult = async () => {
+    const liveTranscript = latestTranscriptRef.current || transcript || notes || "";
+    if (!liveTranscript.trim()) {
+      toast({
+        title: "Nothing to analyse yet",
+        description: "Record or type some session content first.",
+      });
+      return;
+    }
+    setShowDiagnosticsModal(true);
+    await generateAIDiagnosis({ summary: summary || liveTranscript, transcript: liveTranscript });
+  };
+
+
   // Helper to calculate age from DOB
   const calculateAge = (dob: string): number => {
     const birthDate = new Date(dob);
