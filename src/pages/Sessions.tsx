@@ -829,22 +829,8 @@ export default function Sessions() {
         }}
       />
 
-      {/* Doctor's own findings before documents are reviewed */}
-      <EditFindingsModal
-        open={showEditFindings}
-        fullDiagnosis={aiDiagnosis}
-        value={findingsNote}
-        onChange={setFindingsNote}
-        onCancel={() => {
-          setShowEditFindings(false);
-          setShowDiagnosticsModal(true);
-        }}
-        onContinue={async () => {
-          await persistAssessment(findingsNote);
-          setShowEditFindings(false);
-          startDocumentReview();
-        }}
-      />
+
+
 
       {/* Per-document generate → send progress */}
       <DocumentDeliveryProgress
