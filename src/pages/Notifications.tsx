@@ -771,7 +771,13 @@ function NotificationList({
                 </Button>
               </div>
             )}
+
+            {/* Patient reply to a doctor's check-in */}
+            {notification.type === 'emoticon_received' && (
+              <CheckInReply patientId={notification.reference_id} />
+            )}
           </div>
+
           {!notification.is_read && notification.type !== 'invitation_received' && (
             <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-2" />
           )}
