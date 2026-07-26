@@ -230,7 +230,7 @@ export function InvoiceReviewDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Skip</Button>
+
           <Button onClick={() => onApprove({ items, total })} disabled={loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Approve & Create
