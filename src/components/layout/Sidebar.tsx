@@ -189,7 +189,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             alignOffset={0}
             trigger={
               <button className="flex w-full items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
-                <Avatar className="h-16 w-16 border-2 border-primary">
+                <Avatar className="h-[3.2rem] w-[3.2rem] border-2 border-primary">
                   <AvatarImage
                     key={profile?.avatar_url}
                     src={profile?.avatar_url || undefined}
@@ -207,7 +207,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   {loading ? (
                     <div className="h-3 w-20 rounded bg-muted animate-pulse" />
                   ) : (
-                    <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
+                    <>
+                      <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
+                      {mailboxAddress && (
+                        <p className="text-[11px] text-muted-foreground truncate">{mailboxAddress}</p>
+                      )}
+                    </>
                   )}
                 </div>
               </button>
