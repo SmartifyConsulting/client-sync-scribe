@@ -739,6 +739,19 @@ export default function Sessions() {
 
 
 
+  // Auto-start when arriving from a patient profile ("Start Session")
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (searchParams.get("autoStart") !== "true") return;
+    if (autoStartedRef.current) return;
+    if (!patientId || !currentPatient) return;
+    autoStartedRef.current = true;
+    const next = new URLSearchParams(searchParams);
+    next.delete("autoStart");
+    setSearchParams(next, { replace: true });
+    startSession();
+  }, [searchParams, patientId, currentPatient]);
+
   const startSession = async () => {
     setSessionState("active");
     setNotes("");
