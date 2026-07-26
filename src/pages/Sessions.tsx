@@ -404,10 +404,7 @@ export default function Sessions() {
         setCurrentSessionId(result.id);
         setSummary(result.summary || "Session completed successfully.");
         setActionPoints(result.action_points || []);
-        // Rolling live hint is done — now complete the full (non-binding) AI assessment.
-        generateAIDiagnosis({ summary: result.summary || "", transcript: fullContent || "" });
-
-        setShowDiagnosticsModal(true);
+        // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
 
         const docs = (result as any)._extractedDocuments;
         if (docs?.follow_up_appointment?.follow_up_date) {
@@ -453,21 +450,21 @@ export default function Sessions() {
           setExtractedReferral(docs.referral);
           if (!hasDocs) { hasDocs = true; }
         }
+        // Go straight into the sequential document review.
+        setTimeout(() => startDocumentReview(), 0);
       } else {
         setSummary("Session completed. No content was recorded or noted.");
         setActionPoints([]);
-        setShowDiagnosticsModal(true);
       }
     } catch (error) {
       console.error("Error in handleSessionComplete:", error);
       setSummary("Session completed. No content was recorded or noted.");
       setActionPoints([]);
-      setShowDiagnosticsModal(true);
     }
 
     setSessionState("completed");
     pendingCompletionRef.current = false;
-  }, [completeSession, patientId, advanceToFollowUp]);
+  }, [completeSession, patientId, advanceToFollowUp, startDocumentReview]);
 
   // Visit-category dialog now runs at the END of the post-session chain (Vula award)
   const handleVisitCategoryConfirm = async (categories: string[] | null) => {
@@ -1217,15 +1214,15 @@ export default function Sessions() {
                   {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                 </div>
                 {liveHint?.suggestion && (
-                  <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
+                  <p className="text-[10px] text-foreground leading-relaxed">{liveHint.suggestion}</p>
                 )}
                 {liveHint?.differentials && liveHint.differentials.length > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-[10px] text-muted-foreground">
                     <span className="font-medium text-foreground">Consider:</span> {liveHint.differentials.join(" · ")}
                   </p>
                 )}
                 {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
-                  <p className="mt-1 text-xs text-destructive">
+                  <p className="mt-1 text-[10px] text-destructive">
                     <span className="font-medium">Rule out:</span> {liveHint.red_flags.join(" · ")}
                   </p>
                 )}
@@ -1258,16 +1255,16 @@ export default function Sessions() {
                           const speakerLower = speaker.toLowerCase().trim();
                           const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                           return (
-                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                            <p key={index} className={`text-[10px] leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                               <span className="font-bold">{speaker}</span>:{text}
                             </p>
                           );
                         }
-                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
+                        return line.trim() ? <p key={index} className="text-[10px] text-foreground leading-relaxed">{line}</p> : null;
                       })}
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
+                    <p className="text-[10px] text-muted-foreground italic">Transcribing...</p>
                   )}
                 </div>
               </div>
