@@ -45,7 +45,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { format, isToday, isYesterday } from "date-fns";
+import { format, isToday, isYesterday, differenceInCalendarDays } from "date-fns";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
@@ -102,6 +102,16 @@ function getDateLabel(dateStr: string): string {
 function getDateKey(dateStr: string): string {
   return format(new Date(dateStr), "yyyy-MM-dd");
 }
+
+type DateBucket = "today" | "week" | "month" | "older";
+const DATE_BUCKETS: { key: DateBucket; label: string }[] = [
+  { key: "today", label: "Today" },
+  { key: "week", label: "This week" },
+  { key: "month", label: "This month" },
+  { key: "older", label: "Older" },
+];
+const TODO_TRIGGER_CLASS =
+  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white [&>svg]:group-data-[state=open]:!text-white";
 
 export default function TodoList() {
   const { t } = useTranslation();
@@ -408,6 +418,9 @@ export default function TodoList() {
       return next;
     });
   };
+
+  const [groupMode, setGroupMode] = useState<"date" | "patient">("date");
+  const [showAddTask, setShowAddTask] = useState(false);
 
   const filteredTodos = todos.filter((todo) => {
     if (filter === "active") return !todo.completed;
