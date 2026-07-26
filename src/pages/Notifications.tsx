@@ -24,6 +24,7 @@ import {
   MessageCircle,
   Star,
 } from "lucide-react";
+import { CheckInReply } from "@/components/notifications/CheckInReply";
 import { StarRatingDialog } from "@/components/sessions/StarRatingDialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
