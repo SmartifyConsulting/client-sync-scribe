@@ -10,9 +10,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Clock, User as UserIcon, Loader2, FileText } from "lucide-react";
+import { Clock, User as UserIcon, Loader2, FileText, Plus } from "lucide-react";
 import { format, isToday, differenceInCalendarDays } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -186,6 +187,7 @@ export default function MySessions() {
             {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
           </p>
         </div>
+        <div className="flex items-center gap-2">
         {isDoctor && (
           <ToggleGroup
             type="single"
@@ -202,6 +204,15 @@ export default function MySessions() {
             </ToggleGroupItem>
           </ToggleGroup>
         )}
+        {isDoctor && (
+          <Button asChild size="sm" className="gap-2">
+            <Link to="/sessions">
+              <Plus className="h-4 w-4" />
+              {t("mySessions.addSession", "Add Session")}
+            </Link>
+          </Button>
+        )}
+        </div>
       </div>
 
       {loading ? (
