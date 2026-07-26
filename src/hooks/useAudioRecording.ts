@@ -35,6 +35,30 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     optionsRef.current = options;
   }, [options]);
 
+  const releaseStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  }, []);
+
+  // Always release the microphone when the component using this hook unmounts
+  useEffect(() => {
+    return () => {
+      try {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop();
+        }
+      } catch {}
+      try { speechRecognitionRef.current?.stop(); } catch {}
+      speechRecognitionRef.current = null;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+    };
+  }, []);
+
   const uploadAudioToStorage = async (audioBlob: Blob, sessionId: string): Promise<string | null> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -93,32 +117,34 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       };
 
       mediaRecorder.onstop = async () => {
+        // Release the microphone immediately — the recorded chunks are already buffered.
+        releaseStream();
+
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        
+
         // Create URL for local playback
         const url = URL.createObjectURL(audioBlob);
         setAudioUrl(url);
-        
-        // Upload to storage first if sessionId is provided, then use storage URL for transcription
-        const currentSessionId = optionsRef.current.sessionId;
-        let storageUrl: string | null = null;
-        if (currentSessionId) {
-          setIsSavingAudio(true);
-          storageUrl = await uploadAudioToStorage(audioBlob, currentSessionId);
-          if (storageUrl) {
-            setSavedAudioUrl(storageUrl);
-            optionsRef.current.onAudioSaved?.(storageUrl);
+
+        try {
+          // Upload to storage first if sessionId is provided, then use storage URL for transcription
+          const currentSessionId = optionsRef.current.sessionId;
+          let storageUrl: string | null = null;
+          if (currentSessionId) {
+            setIsSavingAudio(true);
+            storageUrl = await uploadAudioToStorage(audioBlob, currentSessionId);
+            if (storageUrl) {
+              setSavedAudioUrl(storageUrl);
+              optionsRef.current.onAudioSaved?.(storageUrl);
+            }
+            setIsSavingAudio(false);
           }
-          setIsSavingAudio(false);
-        }
-        
-        // Use storage URL if available (avoids large base64 payload), otherwise fall back to blob
-        await transcribeAudio(audioBlob, storageUrl);
-        
-        // Stop all tracks
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop());
-          streamRef.current = null;
+
+          // Use storage URL if available (avoids large base64 payload), otherwise fall back to blob
+          await transcribeAudio(audioBlob, storageUrl);
+        } finally {
+          // Safety net: make sure the mic is never left open
+          releaseStream();
         }
       };
 
@@ -179,7 +205,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [toast, releaseStream]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecording) {
@@ -188,6 +214,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         try { mediaRecorderRef.current.resume(); } catch {}
       }
       mediaRecorderRef.current.stop();
+      // Free the microphone right away so the browser tab indicator clears
+      releaseStream();
       setIsRecording(false);
       setIsPaused(false);
       // Stop speech recognition
@@ -196,7 +224,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         speechRecognitionRef.current = null;
       }
     }
-  }, [isRecording]);
+  }, [isRecording, releaseStream]);
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'recording') {

@@ -185,10 +185,10 @@ export default function PatientProfile() {
   };
 
   const handleStartSession = () => {
-    navigate(`/sessions?patient=${id}`);
+    navigate(`/sessions?patient=${id}&autoStart=true`);
     toast({
-      title: "Starting Session",
-      description: `Session started for ${patient?.name}`,
+      title: "Opening session",
+      description: `Preparing consultation for ${patient?.name}`,
     });
   };
 
