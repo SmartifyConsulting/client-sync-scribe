@@ -823,14 +823,9 @@ export default function Sessions() {
         diagnosisLoading={isGeneratingDiagnosis}
         patientName={currentPatient?.name}
         sessionDate={new Date().toLocaleDateString()}
-        onClose={() => setShowDiagnosticsModal(false)}
-        onEditFindings={() => {
+        onClose={() => {
           setShowDiagnosticsModal(false);
-          setShowEditFindings(true);
-        }}
-        onProgressComplete={() => {
           persistAssessment();
-          startDocumentReview();
         }}
       />
 

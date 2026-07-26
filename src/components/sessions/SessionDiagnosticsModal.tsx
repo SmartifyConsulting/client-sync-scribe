@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Brain, Loader2, AlertTriangle, ArrowRight, PenLine } from "lucide-react";
+import { Brain, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
 
 interface SessionDiagnosticsModalProps {
   open: boolean;
@@ -17,10 +17,6 @@ interface SessionDiagnosticsModalProps {
   patientName?: string;
   sessionDate?: string;
   onClose: () => void;
-  /** Continue to the document review sequence. */
-  onProgressComplete?: () => void;
-  /** Open the doctor's own findings note before continuing. */
-  onEditFindings?: () => void;
 }
 
 type Block =
