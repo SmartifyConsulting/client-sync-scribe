@@ -53,6 +53,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { renderFormattedContent } from "@/utils/documentFormatting";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  SECTION_TRIGGER_CLASS,
+  SECTION_FRAME_CLASS,
+  SECTION_ITEM_CLASS,
+  SectionCountPill,
+  DATE_BUCKETS,
+  dateBucketFor,
+} from "@/components/ui/section-accordion";
 
 const STORAGE_LIMIT_MB = 100;
 
@@ -208,6 +218,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // AI Analysis state
+  const [docGroupBy, setDocGroupBy] = useState<"date" | "type">("date");
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
@@ -608,6 +619,24 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     }
   };
 
+  const patientDocGroups: { key: string; label: string; items: typeof pagedDocs }[] = (() => {
+    if (docGroupBy === "date") {
+      const buckets: Record<string, typeof pagedDocs> = { today: [], week: [], month: [], older: [] };
+      for (const doc of pagedDocs) buckets[dateBucketFor(doc.date as any)].push(doc);
+      return DATE_BUCKETS.map((b) => ({ key: b.key, label: b.label, items: buckets[b.key] }));
+    }
+    const map = new Map<string, typeof pagedDocs>();
+    for (const doc of pagedDocs) {
+      const key = DOC_TYPE_CONFIG[doc.type].label;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(doc);
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, items]) => ({ key, label: key, items }));
+  })();
+  const defaultOpenDocGroup = patientDocGroups.length ? [patientDocGroups[0].key] : [];
+
   return (
     <div className="space-y-3 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -621,6 +650,17 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         ) : <div />}
 
         <div className="flex items-center gap-1.5 flex-wrap">
+          <ToggleGroup
+            type="single"
+            value={docGroupBy}
+            onValueChange={(v) => v && setDocGroupBy(v as typeof docGroupBy)}
+            size="sm"
+            variant="outline"
+            className="mr-1"
+          >
+            <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
+            <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
+          </ToggleGroup>
           <Button
             variant="outline"
             size="icon"
@@ -832,13 +872,26 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           </CardContent>
         </Card>
       ) : (
-        <ul className="divide-y rounded-lg border bg-card">
-          {pagedDocs.map((doc) => {
-            const config = DOC_TYPE_CONFIG[doc.type];
-            const IconComponent = config.icon;
-            const isAnalyzing = analyzingDocId === doc.id;
-            const isImageDoc = doc.type === "image" && doc.mediaUrl;
-            return (
+        <Accordion key={docGroupBy} type="multiple" defaultValue={defaultOpenDocGroup} className={SECTION_FRAME_CLASS}>
+          {patientDocGroups.map((group) => (
+            <AccordionItem key={group.key} value={group.key} className={SECTION_ITEM_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                <div className="flex items-center justify-between w-full pr-2">
+                  <span className="text-xs font-medium">{group.label}</span>
+                  <SectionCountPill count={group.items.length} />
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-0 pb-0">
+                {group.items.length === 0 ? (
+                  <p className="text-xs text-muted-foreground px-4 py-3">No documents in this group.</p>
+                ) : (
+                  <ul className="divide-y">
+                    {group.items.map((doc) => {
+                      const config = DOC_TYPE_CONFIG[doc.type];
+                      const IconComponent = config.icon;
+                      const isAnalyzing = analyzingDocId === doc.id;
+                      const isImageDoc = doc.type === "image" && doc.mediaUrl;
+                      return (
               <li
                 key={`${doc.source}-${doc.id}`}
                 className={`flex items-center gap-3 px-3 py-2 border-l-4 ${config.borderColor} hover:bg-accent/40 transition-colors`}
@@ -925,9 +978,14 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                   </span>
                 </div>
               </li>
-            );
-          })}
-        </ul>
+                      );
+                    })}
+                  </ul>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
       )}
       {visibleDocCount < filteredDocs.length && (
         <div className="flex justify-center mt-3">

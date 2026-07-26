@@ -49,6 +49,7 @@ import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -346,7 +347,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
   const dirty = draft !== value;
   return (
     <AccordionItem value="about-me" className="border-0">
-      <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-primary hover:bg-primary/90 [&_*]:text-white">
+      <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
           <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
@@ -1222,14 +1223,14 @@ export default function MyPractice() {
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden">
-            <Accordion type="multiple" className="divide-y divide-neutral-300">
+            <Accordion type="multiple" defaultValue={["about-me"]} className="divide-y divide-neutral-300">
               <AboutMeAccordion
                 value={(profile as any)?.about_me || ""}
                 onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
               />
               {/* Personal Information */}
               <AccordionItem value="personal" className="border-0">
-              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:hover:bg-primary/90 data-[state=open]:bg-primary data-[state=open]:[&_*]:text-white">
+              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Personal Information</h3>
@@ -1327,7 +1328,7 @@ export default function MyPractice() {
 
           {/* Practice Details Accordion */}
             <AccordionItem value="practice-details" className="border-0">
-              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:hover:bg-primary/90 data-[state=open]:bg-primary data-[state=open]:[&_*]:text-white">
+              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Practice Information</h3>
@@ -1737,7 +1738,7 @@ export default function MyPractice() {
 
           {/* Shared Practice Calendar Accordion */}
             <AccordionItem value="shared-calendar" className="border-0">
-              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:hover:bg-primary/90 data-[state=open]:bg-primary data-[state=open]:[&_*]:text-white">
+              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Shared Practice Calendar</h3>
@@ -1862,7 +1863,7 @@ export default function MyPractice() {
 
            {/* Service Offerings & Pricing Accordion */}
             <AccordionItem value="service-pricing" className="border-0">
-              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:hover:bg-primary/90 data-[state=open]:bg-primary data-[state=open]:[&_*]:text-white">
+              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Service Offerings & Pricing</h3>
@@ -2048,7 +2049,7 @@ export default function MyPractice() {
 
           {/* Digital Signature Accordion */}
             <AccordionItem value="signature" className="border-0">
-              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:hover:bg-primary/90 data-[state=open]:bg-primary data-[state=open]:[&_*]:text-white">
+              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Digital Signature</h3>
@@ -2162,7 +2163,7 @@ export default function MyPractice() {
 
           {/* Voice Narration Settings Accordion */}
             <AccordionItem value="voice" className="border-0">
-              <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:hover:bg-primary/90 data-[state=open]:bg-primary data-[state=open]:[&_*]:text-white">
+              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Voice Narration Settings</h3>

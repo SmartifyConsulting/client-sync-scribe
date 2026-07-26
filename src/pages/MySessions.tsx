@@ -16,6 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Clock, User as UserIcon, Loader2, FileText, Plus } from "lucide-react";
 import { format, isToday, differenceInCalendarDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
 
 interface SessionRow {
   id: string;
@@ -48,8 +49,7 @@ function getSurname(name: string) {
   return (parts[parts.length - 1] || "").toUpperCase();
 }
 
-const TRIGGER_CLASS =
-  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white [&>svg]:group-data-[state=open]:!text-white";
+const TRIGGER_CLASS = SECTION_TRIGGER_CLASS;
 
 function CountPill({ count }: { count: number }) {
   return (

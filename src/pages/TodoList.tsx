@@ -38,6 +38,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -110,8 +111,7 @@ const DATE_BUCKETS: { key: DateBucket; label: string }[] = [
   { key: "month", label: "This month" },
   { key: "older", label: "Older" },
 ];
-const TODO_TRIGGER_CLASS =
-  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white [&>svg]:group-data-[state=open]:!text-white";
+const TODO_TRIGGER_CLASS = SECTION_TRIGGER_CLASS;
 
 export default function TodoList() {
   const { t } = useTranslation();
