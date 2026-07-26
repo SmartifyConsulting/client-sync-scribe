@@ -55,7 +55,6 @@ import {
   ReferralReviewDialog,
 } from "@/components/sessions/TranscriptionReviewDialogs";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
-import { EditFindingsModal } from "@/components/sessions/EditFindingsModal";
 import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -147,7 +146,6 @@ export default function Sessions() {
   const currentSessionIdRef = useRef<string | null>(null);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
-  const [showEditFindings, setShowEditFindings] = useState(false);
   const [findingsNote, setFindingsNote] = useState("");
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
