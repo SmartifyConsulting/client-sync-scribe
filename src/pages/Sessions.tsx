@@ -55,6 +55,7 @@ import {
   ReferralReviewDialog,
 } from "@/components/sessions/TranscriptionReviewDialogs";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
+import { EditFindingsModal } from "@/components/sessions/EditFindingsModal";
 import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -146,6 +147,8 @@ export default function Sessions() {
   const currentSessionIdRef = useRef<string | null>(null);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
+  const [showEditFindings, setShowEditFindings] = useState(false);
+  const [findingsNote, setFindingsNote] = useState("");
   const [showReferralLetterEditor, setShowReferralLetterEditor] = useState(false);
   const [showGeneralLetterEditor, setShowGeneralLetterEditor] = useState(false);
   const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
@@ -329,6 +332,32 @@ export default function Sessions() {
     }
   }, [currentPatient]);
 
+  // Persist the AI assessment + doctor findings note against the session row
+  const persistAssessment = useCallback(async (note?: string) => {
+    const sid = currentSessionIdRef.current;
+    if (!sid) return;
+    try {
+      await supabase
+        .from("sessions")
+        .update({
+          ai_diagnosis: aiDiagnosis ?? null,
+          ...(note !== undefined ? { ai_findings_note: note || null } : {}),
+        } as any)
+        .eq("id", sid);
+    } catch (e) {
+      console.error("Failed to persist AI assessment:", e);
+    }
+  }, [aiDiagnosis]);
+
+  // Begin the sequential document review chain
+  const startDocumentReview = useCallback(() => {
+    if (extractedMedCert) setShowMedCertReview(true);
+    else if (extractedPrescription) setShowPrescriptionReview(true);
+    else if (extractedInvoice) setShowInvoiceReview(true);
+    else if (extractedReferral) setShowReferralReview(true);
+    else setTimeout(() => advanceToFollowUp(), 300);
+  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, advanceToFollowUp]);
+
   const handleFollowUpDone = useCallback(() => {
     setShowVisitCategoryDialog(true);
   }, []);
@@ -377,8 +406,32 @@ export default function Sessions() {
           setExtractedPrescription(docs.prescription);
           if (!hasDocs) { hasDocs = true; }
         }
-        if (docs?.invoice) {
+        if (docs?.invoice?.items?.length) {
           setExtractedInvoice(docs.invoice);
+          if (!hasDocs) { hasDocs = true; }
+        } else if (fullContent?.trim()) {
+          // A consultation always bills — synthesise a default line item so the
+          // doctor is always offered an invoice to review (amount pre-filled from
+          // their Service Offerings & Pricing where available).
+          let amount = 0;
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const { data: price } = await supabase
+                .from('service_prices')
+                .select('price, service_name')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: true })
+                .limit(20);
+              const consult = (price || []).find((p: any) =>
+                (p.service_name || '').toLowerCase().includes('consult'));
+              amount = Number(consult?.price ?? (price?.[0] as any)?.price ?? 0) || 0;
+            }
+          } catch (e) { console.error('Pricing lookup failed:', e); }
+          setExtractedInvoice({
+            items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
+            total: amount,
+          } as any);
           if (!hasDocs) { hasDocs = true; }
         }
         if (docs?.referral) {
@@ -741,25 +794,35 @@ export default function Sessions() {
       {/* Session Diagnostics Modal */}
       <SessionDiagnosticsModal
         open={showDiagnosticsModal}
-        summary={summary}
-        actionPoints={actionPoints}
         fullDiagnosis={aiDiagnosis}
         diagnosisLoading={isGeneratingDiagnosis}
+        patientName={currentPatient?.name}
+        sessionDate={new Date().toLocaleDateString()}
         onClose={() => setShowDiagnosticsModal(false)}
+        onEditFindings={() => {
+          setShowDiagnosticsModal(false);
+          setShowEditFindings(true);
+        }}
         onProgressComplete={() => {
-          // Only after the doctor acknowledges the full assessment do documents appear
-          if (extractedMedCert) {
-            setShowMedCertReview(true);
-          } else if (extractedPrescription) {
-            setShowPrescriptionReview(true);
-          } else if (extractedInvoice) {
-            setShowInvoiceReview(true);
-          } else if (extractedReferral) {
-            setShowReferralReview(true);
-          } else {
-            // No documents, jump to follow-up
-            setTimeout(() => advanceToFollowUp(), 300);
-          }
+          persistAssessment();
+          startDocumentReview();
+        }}
+      />
+
+      {/* Doctor's own findings before documents are reviewed */}
+      <EditFindingsModal
+        open={showEditFindings}
+        fullDiagnosis={aiDiagnosis}
+        value={findingsNote}
+        onChange={setFindingsNote}
+        onCancel={() => {
+          setShowEditFindings(false);
+          setShowDiagnosticsModal(true);
+        }}
+        onContinue={async () => {
+          await persistAssessment(findingsNote);
+          setShowEditFindings(false);
+          startDocumentReview();
         }}
       />
 
