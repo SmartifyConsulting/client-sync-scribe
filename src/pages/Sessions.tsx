@@ -1149,7 +1149,28 @@ export default function Sessions() {
                     <span>{isPaused ? "Resume recording" : "Pause recording"}</span>
                   </button>
                 )}
+
+                {/* Manual AI Clinician consult — available at any point in the session */}
+                <button
+                  onClick={handleAiConsult}
+                  disabled={isGeneratingDiagnosis}
+                  aria-label="AI Consult"
+                  title="Ask the AI Clinician for findings so far"
+                  className={cn(
+                    "flex h-12 items-center justify-center gap-2 rounded-full px-4 border-2 border-primary text-sm font-medium transition-all duration-300",
+                    "bg-primary/10 text-primary hover:bg-primary/20",
+                    isGeneratingDiagnosis && "opacity-60 cursor-not-allowed"
+                  )}
+                >
+                  {isGeneratingDiagnosis ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-5 w-5" />
+                  )}
+                  <span>AI Consult</span>
+                </button>
               </div>
+
               
               <p className="text-xs text-muted-foreground text-center">
                 {isTranscribing 
