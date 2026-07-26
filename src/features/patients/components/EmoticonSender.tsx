@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
@@ -7,7 +8,8 @@ import {
 } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, SmilePlus } from "lucide-react";
+import { Loader2, SmilePlus, Send } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const EMOTICONS = ["👍", "💪", "❤️", "🌟", "👏", "🎉", "🙏", "😊"];
 
@@ -20,9 +22,20 @@ interface EmoticonSenderProps {
 export function EmoticonSender({ recipientId, patientId, recipientName }: EmoticonSenderProps) {
   const [sending, setSending] = useState(false);
   const [open, setOpen] = useState(false);
+  const [emoticon, setEmoticon] = useState<string>(EMOTICONS[0]);
+  const [message, setMessage] = useState("");
   const { toast } = useToast();
 
-  const sendEmoticon = async (emoticon: string) => {
+  const sendCheckIn = async () => {
+    if (!message.trim()) {
+      toast({
+        title: "Check-In Message required",
+        description: "Write a short, meaningful note for your patient.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSending(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -48,26 +61,46 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         .gte('created_at', twentyFourHoursAgo);
 
       const tooManyEmoticons = (recentEmoticons?.length || 0) >= 5;
-      const isAiFlagged = !profileViewed || tooManyEmoticons;
+
+      // AI genuineness check — points are only earned for real check-ins
+      let aiGenuine = true;
+      let aiReason = "";
+      try {
+        const { data: verdict, error: verdictError } = await supabase.functions.invoke(
+          "validate-checkin-message",
+          { body: { message, patientName: recipientName } },
+        );
+        if (verdictError) throw verdictError;
+        aiGenuine = !!verdict?.genuine;
+        aiReason = verdict?.reason || "";
+      } catch (e) {
+        console.error("Check-in validation failed:", e);
+      }
+
+      const isAiFlagged = !profileViewed || tooManyEmoticons || !aiGenuine;
       const vulasAwarded = isAiFlagged ? 0 : 1;
 
-      // Insert emoticon message
+      // Insert check-in
       await supabase.from('emoticon_messages' as any).insert({
         sender_id: user.id,
         recipient_id: recipientId,
         patient_id: patientId,
         emoticon,
+        message,
+        ai_verdict: aiGenuine ? 'genuine' : 'not_genuine',
+        ai_reason: aiReason,
         vulas_awarded: vulasAwarded,
         is_ai_flagged: isAiFlagged,
         profile_viewed: profileViewed,
       });
 
-      // Create notification for recipient
+      // Create notification for recipient (patient can reply from Notifications)
       await supabase.from('notifications').insert({
         user_id: recipientId,
         type: 'emoticon_received',
-        title: `${emoticon} from your doctor`,
-        description: `Your healthcare provider sent you a check-in emoticon`,
+        title: `${emoticon} Check-in from your doctor`,
+        description: message,
+        reference_id: patientId,
         is_read: false,
       });
 
@@ -76,25 +109,26 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
         await supabase.from('doctor_rewards' as any).insert({
           doctor_id: user.id,
           reward_type: 'emoticon_checkin',
-          description: `Sent ${emoticon} to ${recipientName}`,
+          description: `Checked in on ${recipientName}`,
           vulas_count: vulasAwarded,
           reference_id: patientId,
         });
       }
 
       toast({
-        title: `${emoticon} Sent!`,
+        title: `${emoticon} Check-in sent`,
         description: isAiFlagged
-          ? "Emoticon sent (no Vulas — view profile first or daily limit reached)"
-          : `Emoticon sent to ${recipientName} (+1 Ⓜ️)`,
+          ? aiReason || "Sent (no Vulas — view the profile first, daily limit reached, or the note wasn't meaningful)"
+          : `Sent to ${recipientName} (+1 Vula)`,
       });
 
+      setMessage("");
       setOpen(false);
     } catch (error: any) {
-      console.error("Error sending emoticon:", error);
+      console.error("Error sending check-in:", error);
       toast({
         title: "Error",
-        description: "Failed to send emoticon",
+        description: "Failed to send check-in",
         variant: "destructive",
       });
     } finally {
@@ -110,21 +144,42 @@ export function EmoticonSender({ recipientId, patientId, recipientName }: Emotic
           Check In
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-3" align="end">
-        <p className="text-xs text-muted-foreground mb-2">Send a check-in emoticon</p>
-        <div className="flex gap-1.5 flex-wrap max-w-[200px]">
+      <PopoverContent className="w-80 p-3" align="end">
+        <p className="text-xs text-muted-foreground mb-2">Choose an emoticon</p>
+        <div className="flex gap-1.5 flex-wrap">
           {EMOTICONS.map((emoji) => (
             <button
               key={emoji}
-              onClick={() => sendEmoticon(emoji)}
+              onClick={() => setEmoticon(emoji)}
               disabled={sending}
-              className="text-2xl hover:scale-125 transition-transform p-1 rounded hover:bg-accent"
+              className={cn(
+                "text-2xl transition-transform p-1 rounded hover:scale-125 hover:bg-accent",
+                emoticon === emoji && "bg-primary/10 ring-1 ring-primary scale-110",
+              )}
             >
               {emoji}
             </button>
           ))}
         </div>
+
+        <p className="text-xs font-medium text-foreground mt-3 mb-1">Check-In Message</p>
+        <Textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder={`How is ${recipientName} doing since the last visit?`}
+          className="min-h-[80px] text-xs"
+          disabled={sending}
+        />
+        <p className="mt-1 text-[10px] text-muted-foreground">
+          Vulas are only awarded for genuine, meaningful check-ins.
+        </p>
+
+        <Button size="sm" className="mt-2 w-full gap-2" onClick={sendCheckIn} disabled={sending}>
+          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          Send Check-In
+        </Button>
       </PopoverContent>
     </Popover>
   );
 }
+
