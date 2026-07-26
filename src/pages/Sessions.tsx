@@ -419,13 +419,13 @@ export default function Sessions() {
             if (user) {
               const { data: price } = await supabase
                 .from('service_prices')
-                .select('price, service_name')
+                .select('default_price, service_name')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: true })
                 .limit(20);
               const consult = (price || []).find((p: any) =>
                 (p.service_name || '').toLowerCase().includes('consult'));
-              amount = Number(consult?.price ?? (price?.[0] as any)?.price ?? 0) || 0;
+              amount = Number(consult?.default_price ?? (price?.[0] as any)?.default_price ?? 0) || 0;
             }
           } catch (e) { console.error('Pricing lookup failed:', e); }
           setExtractedInvoice({
