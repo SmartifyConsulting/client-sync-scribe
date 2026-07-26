@@ -83,6 +83,16 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
   const isOnAdminRoute = location.pathname.startsWith("/admin");
 
+  const mailboxAlias = (profile as any)?.mailbox_alias as string | null | undefined;
+  const mailboxId = (profile as any)?.mailbox_id as string | null | undefined;
+  const mailboxAddress = mailboxAlias
+    ? `${mailboxAlias}@holarc.com`
+    : mailboxId
+      ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
+      : "";
+
+
+
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems
     : (isPatient || isOnPatientRoute) ? patientNavItems : doctorNavItems;
