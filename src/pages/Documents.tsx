@@ -747,7 +747,6 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </div>
                         ))}
                       </div>
                     )}
@@ -756,6 +755,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               ))
             )}
           </Accordion>
+        )}
         {visibleDocCount < filteredDocuments.length && (
           <div className="flex justify-center mt-3">
             <Button variant="outline" onClick={() => setVisibleDocCount((c) => c + DOC_PAGE_SIZE)}>
