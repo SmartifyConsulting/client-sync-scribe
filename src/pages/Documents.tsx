@@ -20,6 +20,16 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  SECTION_TRIGGER_CLASS,
+  SECTION_FRAME_CLASS,
+  SECTION_ITEM_CLASS,
+  SectionCountPill,
+  DATE_BUCKETS,
+  dateBucketFor,
+} from "@/components/ui/section-accordion";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -114,7 +124,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const [activeTab, setActiveTab] = useState("content");
   const [templateSearchQuery, setTemplateSearchQuery] = useState("");
   const [documentSearchQuery, setDocumentSearchQuery] = useState("");
-  const [groupBy, setGroupBy] = useState<"patient" | "month" | "year" | "type">("patient");
+  const [groupBy, setGroupBy] = useState<"date" | "type" | "patient">("date");
   const DOC_PAGE_SIZE = 10;
   const [visibleDocCount, setVisibleDocCount] = useState(DOC_PAGE_SIZE);
   useEffect(() => { setVisibleDocCount(DOC_PAGE_SIZE); }, [documentSearchQuery]);
@@ -173,30 +183,26 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       (doc.template_name?.toLowerCase() || "").includes(documentSearchQuery.toLowerCase()),
   );
 
-  const getGroupKey = (doc: Document): string => {
-    switch (groupBy) {
-      case "patient":
-        return doc.patient_name || "No patient";
-      case "month":
-        return new Date(doc.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" });
-      case "year":
-        return new Date(doc.created_at).getFullYear().toString();
-      case "type":
-        return doc.template_name || "Custom";
-      default:
-        return "";
+  const documentGroups: { key: string; label: string; items: Document[] }[] = (() => {
+    if (groupBy === "date") {
+      const buckets: Record<string, Document[]> = { today: [], week: [], month: [], older: [] };
+      for (const doc of filteredDocuments) buckets[dateBucketFor(doc.created_at)].push(doc);
+      return DATE_BUCKETS.map((b) => ({ key: b.key, label: b.label, items: buckets[b.key] }));
     }
-  };
-
-  const groupedDocuments = (() => {
-    const groups = new Map<string, Document[]>();
+    const map = new Map<string, Document[]>();
     for (const doc of filteredDocuments) {
-      const key = getGroupKey(doc);
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push(doc);
+      const key =
+        groupBy === "patient"
+          ? doc.patient_name || "No patient"
+          : doc.template_name || "Custom";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(doc);
     }
-    return Array.from(groups.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, items]) => ({ key, label: key, items }));
   })();
+  const defaultOpenDocGroup = documentGroups.length ? [documentGroups[0].key] : [];
 
   const handleSelectTemplate = (template: DisplayTemplate) => {
     setSelectedTemplate(template);
@@ -626,17 +632,18 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 className="pl-10"
               />
             </div>
-            <Select value={groupBy} onValueChange={(v) => setGroupBy(v as typeof groupBy)}>
-              <SelectTrigger className="w-[160px] shrink-0">
-                <SelectValue placeholder="Group by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="patient">Group by Patient</SelectItem>
-                <SelectItem value="month">Group by Month</SelectItem>
-                <SelectItem value="year">Group by Year</SelectItem>
-                <SelectItem value="type">Group by Document Type</SelectItem>
-              </SelectContent>
-            </Select>
+            <ToggleGroup
+              type="single"
+              value={groupBy}
+              onValueChange={(v) => v && setGroupBy(v as typeof groupBy)}
+              size="sm"
+              variant="outline"
+              className="shrink-0"
+            >
+              <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
+              <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
+              <ToggleGroupItem value="patient" className="text-xs px-3">Patient</ToggleGroupItem>
+            </ToggleGroup>
           </div>
         </div>
         {documentsLoading ? (
@@ -644,100 +651,109 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-            <div className="max-h-[400px] overflow-y-auto">
-              {filteredDocuments.length > 0 ? (
-                groupedDocuments.map(([groupName, docsInGroup]) => (
-                  <div key={groupName}>
-                    <div className="px-4 py-2 bg-muted/50 text-xs font-semibold text-primary sticky top-0">
-                      {groupName} <span className="text-muted-foreground font-normal">({docsInGroup.length})</span>
+          <Accordion
+            key={groupBy}
+            type="multiple"
+            defaultValue={defaultOpenDocGroup}
+            className={SECTION_FRAME_CLASS}
+          >
+            {filteredDocuments.length === 0 ? (
+              <div className="p-8 text-center text-xs text-muted-foreground">
+                {documents.length === 0
+                  ? "No documents yet. Create your first document using a template above."
+                  : "No documents found matching your search."}
+              </div>
+            ) : (
+              documentGroups.map((group) => (
+                <AccordionItem key={group.key} value={group.key} className={SECTION_ITEM_CLASS}>
+                  <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                    <div className="flex items-center justify-between w-full pr-2">
+                      <span className="text-xs font-medium">{group.label}</span>
+                      <SectionCountPill count={group.items.length} />
                     </div>
-                    <div className="divide-y divide-border">
-                      {docsInGroup.map((doc) => (
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-0 pb-0">
+                    {group.items.length === 0 ? (
+                      <p className="text-xs text-muted-foreground px-4 py-3">No documents in this group.</p>
+                    ) : (
+                      <div className="divide-y divide-border">
                         <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                            <FileText className="h-5 w-5 text-accent-foreground" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
-                              <span className="text-primary/70">{doc.template_name || "Custom"}</span>
-                            </p>
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setPreviewDocument(doc)}
-                              title="Preview"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => {
-                                setEditingDocument(doc);
-                                setEditDocName(doc.name);
-                                setEditDocContent(doc.content);
-                              }}
-                              title="Edit"
-                            >
-                              <Edit3 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => setShareDocument(doc)}
-                              title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
-                            >
-                              {(doc as any).email_sent_at ? (
-                                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                              ) : (
-                                <Send className="h-4 w-4 text-green-600" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => {
-                                exportToPDF({ title: doc.name, content: doc.content });
-                                toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
-                              }}
-                              title="Download PDF"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                              onClick={() => setDocumentToDelete(doc)}
-                              title="Delete"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                          <FileText className="h-5 w-5 text-accent-foreground" />
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-xs text-muted-foreground">
-                  {documents.length === 0
-                    ? "No documents yet. Create your first document using a template above."
-                    : "No documents found matching your search."}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
+                            <span className="text-primary/70">{doc.template_name || "Custom"}</span>
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setPreviewDocument(doc)}
+                            title="Preview"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setEditingDocument(doc);
+                              setEditDocName(doc.name);
+                              setEditDocContent(doc.content);
+                            }}
+                            title="Edit"
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setShareDocument(doc)}
+                            title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
+                          >
+                            {(doc as any).email_sent_at ? (
+                              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Send className="h-4 w-4 text-green-600" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              exportToPDF({ title: doc.name, content: doc.content });
+                              toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
+                            }}
+                            title="Download PDF"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => setDocumentToDelete(doc)}
+                            title="Delete"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              ))
+            )}
+          </Accordion>
         {visibleDocCount < filteredDocuments.length && (
           <div className="flex justify-center mt-3">
             <Button variant="outline" onClick={() => setVisibleDocCount((c) => c + DOC_PAGE_SIZE)}>
