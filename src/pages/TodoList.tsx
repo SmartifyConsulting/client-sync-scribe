@@ -31,6 +31,13 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -409,13 +416,47 @@ export default function TodoList() {
   });
 
   // Group by patient
-  const groupedTodos = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
+  const groupedByPatient = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
     const key = todo.patient_name || (getTodoDisplay(todo as any).patient) || "Unassigned";
     if (!groups[key]) groups[key] = [];
     groups[key].push(todo);
     return groups;
   }, {});
-  const sortedPatientKeys = Object.keys(groupedTodos).sort((a, b) => a.localeCompare(b));
+  const sortedPatientKeys = Object.keys(groupedByPatient).sort((a, b) => a.localeCompare(b));
+
+  // Group by date bucket (default view)
+  const dateBucketFor = (todo: TodoItem): DateBucket => {
+    const raw = (todo as any).due_date || (todo as any).created_at;
+    const d = raw ? new Date(raw) : new Date();
+    if (isToday(d)) return "today";
+    const days = differenceInCalendarDays(new Date(), d);
+    if (days <= 7 && days >= -7) return "week";
+    if (days <= 30 && days >= -30) return "month";
+    return "older";
+  };
+  const groupedByDate = filteredTodos.reduce<Record<DateBucket, TodoItem[]>>(
+    (acc, todo) => {
+      acc[dateBucketFor(todo)].push(todo);
+      return acc;
+    },
+    { today: [], week: [], month: [], older: [] } as Record<DateBucket, TodoItem[]>,
+  );
+
+  const groups: { key: string; label: string; items: TodoItem[]; icon: "date" | "patient" }[] =
+    groupMode === "date"
+      ? DATE_BUCKETS.map((b) => ({
+          key: b.key,
+          label: b.label,
+          items: groupedByDate[b.key],
+          icon: "date" as const,
+        }))
+      : sortedPatientKeys.map((k) => ({
+          key: k,
+          label: k,
+          items: groupedByPatient[k],
+          icon: "patient" as const,
+        }));
+  const defaultOpenGroup = groups.length ? [groups[0].key] : [];
 
   const completedCount = todos.filter((t) => t.completed).length;
   const activeCount = todos.filter((t) => !t.completed).length;
@@ -427,12 +468,31 @@ export default function TodoList() {
   return (
     <div className="space-y-6 animate-fade-in max-w-3xl">
       {/* Header */}
-      <div>
-        <h1 className="text-base font-semibold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
-        <p className="mt-1 text-muted-foreground text-xs">Manage your tasks with voice or text input — AI can auto-execute actions</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-base font-semibold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
+          <p className="mt-1 text-muted-foreground text-xs">Manage your tasks with voice or text input — AI can auto-execute actions</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <ToggleGroup
+            type="single"
+            value={groupMode}
+            onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="date" className="text-xs px-3">{t("todo.groupByDate", "Date")}</ToggleGroupItem>
+            <ToggleGroupItem value="patient" className="text-xs px-3">{t("todo.groupByPatient", "Patient")}</ToggleGroupItem>
+          </ToggleGroup>
+          <Button size="sm" className="gap-2" onClick={() => setShowAddTask((v) => !v)}>
+            <Plus className="h-4 w-4" />
+            {t("todo.addNewTask", "Add Task")}
+          </Button>
+        </div>
       </div>
 
-      {/* Add New Task — reduced by 60% */}
+      {/* Add New Task — only shown on demand */}
+      {showAddTask && (
       <div className="rounded-xl border border-primary bg-card p-2.5 shadow-sm">
         <h2 className="text-sm font-semibold text-foreground mb-2">{t("todo.addNewTask")}</h2>
         <div className="flex items-center gap-2 py-1.5 mb-1.5 border-b border-border">
@@ -474,6 +534,7 @@ export default function TodoList() {
           </div>
         </div>
       </div>
+      )}
 
       {/* AI Results Banner */}
       {aiResults && (
@@ -506,28 +567,34 @@ export default function TodoList() {
       </div>
 
 
-      {/* Task List — Grouped by Patient */}
-      <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden divide-y divide-neutral-300">
-        {sortedPatientKeys.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground text-sm">
-            {filter === "all" ? "No tasks yet. Add your first task above!" : filter === "active" ? "No active tasks. Great job!" : "No completed tasks yet."}
-          </div>
-        ) : (
-          sortedPatientKeys.map((patientKey) => {
-            const items = groupedTodos[patientKey];
-            const isCollapsed = !collapsedDates.has(patientKey) ? true : false;
-            const isOpen = collapsedDates.has(patientKey);
-            return (
-              <Collapsible key={patientKey} open={isOpen} onOpenChange={() => toggleDateCollapse(patientKey)}>
-                <CollapsibleTrigger className="flex items-center gap-2 w-full px-4 py-3 hover:bg-muted/40 transition-colors">
-                  {isOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                  <User className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold text-foreground">{patientKey}</span>
-                  <Badge variant="outline" className="ml-auto text-xs">{items.length}</Badge>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="divide-y divide-neutral-200 border-t border-neutral-200 bg-muted/10">
-                    {items.map((todo) => (
+      {/* Task List — grouped by date or patient */}
+      {groups.every((g) => g.items.length === 0) ? (
+        <div className="rounded-xl border border-neutral-400 bg-card shadow-sm p-8 text-center text-muted-foreground text-sm">
+          {filter === "all" ? "No tasks yet. Add your first task with the Add Task button." : filter === "active" ? "No active tasks. Great job!" : "No completed tasks yet."}
+        </div>
+      ) : (
+        <Accordion
+          key={groupMode}
+          type="multiple"
+          defaultValue={defaultOpenGroup}
+          className="rounded-lg border bg-card overflow-hidden divide-y"
+        >
+          {groups.map((g) => (
+            <AccordionItem key={g.key} value={g.key} className="border-0 rounded-none bg-card">
+              <AccordionTrigger className={TODO_TRIGGER_CLASS}>
+                <div className="flex items-center justify-between w-full pr-2">
+                  <span className="text-xs font-medium">{g.label}</span>
+                  <span className="text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full bg-muted text-muted-foreground group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary">
+                    {g.items.length}
+                  </span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-2 pb-2">
+                {g.items.length === 0 ? (
+                  <p className="text-xs text-muted-foreground px-4 py-3">No tasks in this group.</p>
+                ) : (
+                  <div className="divide-y divide-neutral-200">
+                    {g.items.map((todo) => (
                       <TodoRow insideGroup
                         key={todo.id}
                         todo={todo as any}
@@ -550,12 +617,12 @@ export default function TodoList() {
                       />
                     ))}
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            );
-          })
-        )}
-      </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      )}
 
       {/* Summary */}
       {todos.length > 0 && (
