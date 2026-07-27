@@ -2312,7 +2312,7 @@ export function PatientDetailsEditor({
                 </div>
                 {showAddPharmacy && (
                   <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className={FIELD_GRID_2_CLASS}>
                       <div className="space-y-1.5">
                         <Label>Name *</Label>
                         <Input
@@ -2624,7 +2624,7 @@ export function PatientDetailsEditor({
 
                 {/* Legacy single NOK if no members yet */}
                 {nokMembers.length === 0 && (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
+                  <div className={FIELD_GRID_4_CLASS + " mb-3"}>
                     <div className="space-y-1.5">
                       <Label>Name</Label>
                       <Input
@@ -2663,7 +2663,7 @@ export function PatientDetailsEditor({
 
                 {showAddNOK && (
                   <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className={FIELD_GRID_2_CLASS}>
                       <div className="space-y-1.5">
                         <Label>Name *</Label>
                         <Input
@@ -2969,7 +2969,7 @@ export function PatientDetailsEditor({
                       </div>
                       {showAddMed && (
                         <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                          <div className="grid gap-2 sm:grid-cols-2">
+                          <div className={FIELD_GRID_2_CLASS}>
                             <div className="space-y-1.5">
                               <Label>Medication Name *</Label>
                               <Input
@@ -3031,7 +3031,7 @@ export function PatientDetailsEditor({
                             />
                             <Label className="text-xs">This is a chronic medication</Label>
                           </div>
-                          <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-border/40">
+                          <div className={FIELD_GRID_2_CLASS + " pt-2 border-t border-border/40"}>
                             <div className="space-y-1.5">
                               <Label className="text-xs">Take at</Label>
                               <Input
@@ -3185,7 +3185,7 @@ export function PatientDetailsEditor({
                       </div>
                       {showAddCondition && (
                         <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                          <div className="grid gap-2 sm:grid-cols-2">
+                          <div className={FIELD_GRID_2_CLASS}>
                             <div className="space-y-1.5">
                               <Label>Condition/Diagnosis *</Label>
                               <Input
@@ -3331,7 +3331,7 @@ export function PatientDetailsEditor({
                     </div>
                     {showAddSurgery && (
                       <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className={FIELD_GRID_2_CLASS}>
                           <div className="space-y-1.5">
                             <Label>Surgery Name *</Label>
                             <Input
@@ -3480,7 +3480,7 @@ export function PatientDetailsEditor({
                     </div>
                     {showAddFamily && (
                       <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className={FIELD_GRID_2_CLASS}>
                           <div className="space-y-1.5">
                             <Label>Relation *</Label>
                             <Input
