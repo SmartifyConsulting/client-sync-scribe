@@ -140,20 +140,22 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     const timer = setTimeout(async () => {
       setSearchingProfiles(true);
       try {
-        // Doctor role can live in either `profiles.role` or the separate
-        // `user_roles` table depending on when the account was created, so
-        // check both and match on either to avoid missing real doctors.
-        const [{ data: roleRows }, { data: matchingProfiles, error }] = await Promise.all([
-          supabase.from("user_roles").select("user_id").eq("role", "doctor"),
-          supabase
-            .from("profiles")
-            .select("id, full_name, specialty, practice_number, mobile_number, role")
-            .or(`full_name.ilike.%${profileSearch}%,practice_number.ilike.%${profileSearch}%,doctor_number.ilike.%${profileSearch}%`)
-            .limit(20),
-        ]);
+        // RLS blocks doctors from reading other doctors' profile rows, so go
+        // through the security-definer directory search instead.
+        const { data, error } = await supabase.rpc("search_doctor_profiles", {
+          _name: profileSearch,
+        });
         if (error) throw error;
-        const doctorIds = new Set((roleRows || []).map((r: any) => r.user_id));
-        const doctors = (matchingProfiles || []).filter((p: any) => p.role === "doctor" || doctorIds.has(p.id)).slice(0, 5);
+        const doctors = ((data as any[]) || [])
+          .filter((p) => p.id !== user?.id)
+          .slice(0, 5)
+          .map((p) => ({
+            id: p.id,
+            full_name: p.full_name,
+            specialty: p.specialty,
+            practice_number: p.practice_number,
+            mobile_number: p.mobile_number,
+          }));
         setProfileSuggestions(doctors);
         setShowProfileSuggestions(true);
       } catch (e) {
