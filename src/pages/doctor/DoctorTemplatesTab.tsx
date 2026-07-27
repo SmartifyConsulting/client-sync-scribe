@@ -75,7 +75,7 @@ export default function DoctorTemplatesTab() {
                 </span>
               </div>
               <Button size="sm" variant="outline" className="text-xs shrink-0" onClick={() => setSelected(t)}>
-                Use
+                View
               </Button>
             </Card>
           ))}
