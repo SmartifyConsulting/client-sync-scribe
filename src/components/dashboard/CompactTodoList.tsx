@@ -499,8 +499,8 @@ export function CompactTodoList() {
                 <Accordion type="multiple" defaultValue={[buckets[0].key]} className={SECTION_FRAME_CLASS}>
                   {buckets.map((b) => (
                     <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_CLASS}>
-                      <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
-  SECTION_CONTENT_CLASS, "px-3 py-2")}>
+                      <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "px-3 py-2")}>
+
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
                           <span className="text-sm font-semibold truncate text-left">{b.label}</span>
