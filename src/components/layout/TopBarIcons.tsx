@@ -161,7 +161,7 @@ export function TopBarIcons({ variant = "default" }: TopBarIconsProps = {}) {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to={isOnPatientRoute ? "/patient/calendar" : "/calendar"}>
+                <Link to={(isOnPatientRoute && !isDoctor) ? "/patient/calendar" : "/calendar"}>
                   <div className="h-9 w-9 rounded-full bg-terracotta flex items-center justify-center hover:bg-terracotta-dark transition-colors">
                     <CalendarIcon className="h-4 w-4 text-white" />
                   </div>
