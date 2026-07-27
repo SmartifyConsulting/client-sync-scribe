@@ -190,7 +190,7 @@ const SectionHeader = ({
   onEdit?: () => void;
   titleClassName?: string;
 }) => (
-  <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary hover:bg-primary/90 text-white border-b border-white [&_*]:!text-white">
+  <CollapsibleTrigger className="patient-section-trigger flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary hover:bg-primary/90 text-white border-b border-white [&_*]:!text-white">
     <h3 className={cn("text-sm font-semibold tracking-wide flex items-center gap-2 text-left text-white", titleClassName)}>
       <Icon className="h-4 w-4 text-white" /> {label}
     </h3>
@@ -1723,7 +1723,7 @@ export function PatientDetailsEditor({
                 </Button>
               </div>
 
-              <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
+              <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
               <Collapsible defaultOpen className="bg-white overflow-hidden">
 
                 <SectionHeader icon={User} label="Personal Details" />
@@ -1863,7 +1863,7 @@ export function PatientDetailsEditor({
                 </Button>
               </div>
               <div className="space-y-3">
-                <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
+                <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
                   {/* General Information */}
                   <Collapsible defaultOpen className="bg-white overflow-hidden">
                     <SectionHeader icon={Activity} label="General Information" />
@@ -2435,7 +2435,7 @@ export function PatientDetailsEditor({
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
 
-            <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
+            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
             <Collapsible defaultOpen className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
@@ -2863,7 +2863,7 @@ export function PatientDetailsEditor({
               <AutosaveStatus saving={saving} hasChanges={hasChanges} lastSavedAt={lastSavedAt} />
             </div>
             <div className="space-y-3">
-              <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-neutral-300">
+              <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
                 {/* General Information */}
                 <Collapsible defaultOpen className="bg-white overflow-hidden">
                   <SectionHeader icon={Activity} label="General Information" />
