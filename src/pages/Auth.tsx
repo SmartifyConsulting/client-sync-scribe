@@ -421,6 +421,17 @@ export default function Auth() {
       }
       await supabase.from("profiles").update(profileUpdate).eq("id", userId);
 
+      if (userRole === "doctor") {
+        supabase.functions.invoke("generate-about-me", { body: { notes: "" } })
+          .then(async ({ data, error }) => {
+            if (error) throw error;
+            const aboutMe = (data as any)?.about_me?.trim();
+            if (!aboutMe) return;
+            await supabase.from("profiles").update({ about_me: aboutMe } as any).eq("id", userId).is("about_me", null);
+          })
+          .catch((error) => console.error("Auto About Me generation failed:", error));
+      }
+
 
       if (userRole === "patient") {
         if (inviteToken) {

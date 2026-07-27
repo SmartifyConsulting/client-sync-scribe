@@ -34,6 +34,14 @@ const activityColors = {
   session: "bg-primary/10 text-primary",
 };
 
+function activityHref(activity: Activity) {
+  if (activity.type === "task") return "/todos";
+  if (activity.type === "message") return "/notifications";
+  if (!activity.patientId) return "/doctor-dashboard";
+  if (activity.type === "document") return `/patients/${activity.patientId}?tab=documents`;
+  return `/patients/${activity.patientId}?tab=sessions`;
+}
+
 export function RecentActivity() {
   const { t } = useTranslation();
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -136,17 +144,14 @@ export function RecentActivity() {
                     <Icon className="h-3.5 w-3.5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-foreground truncate">
+                    <Link to={activityHref(activity)} className="text-xs text-primary hover:underline truncate block">
                       {activity.title}
-                    </p>
+                    </Link>
                     {activity.patientId && activity.patientName ? (
-                      <Link
-                        to={`/patients/${activity.patientId}`}
-                        className={cn("text-xs text-primary hover:underline truncate inline-flex items-center gap-1", isSamplePatient({ name: activity.patientName }) && "italic")}
-                      >
+                      <p className={cn("text-xs text-muted-foreground truncate inline-flex items-center gap-1", isSamplePatient({ name: activity.patientName }) && "italic")}>
                         {activity.patientName}
                         {isSamplePatient({ name: activity.patientName }) && <SampleBadge />}
-                      </Link>
+                      </p>
                     ) : (
                       <p className="text-xs text-muted-foreground truncate">
                         {activity.description}
