@@ -87,10 +87,11 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       setSelectedHeaderFooterId(initialData.headerFooterTemplateId || "");
       
       if (initialData.body) {
-        setBody(initialData.body);
+        setBody({ ...initialData.body, text: stripHeadingMarkup(initialData.body.text || "") });
       } else if (initialData.content) {
-        setBody({ text: initialData.content, alignment: "left" });
+        setBody({ text: stripHeadingMarkup(initialData.content), alignment: "left" });
       }
+
     }
   }, [initialData]);
 
