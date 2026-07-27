@@ -782,10 +782,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           <button
             onClick={() => setSelectedLetter(null)}
             className={cn(
-              "flex-1 min-w-0 h-7 rounded-lg text-sm font-semibold transition-colors",
+              "flex-1 min-w-0 h-7 rounded-lg text-sm font-semibold transition-colors border",
               selectedLetter === null
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-foreground hover:bg-primary/20"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-transparent text-foreground border-neutral-300 hover:bg-primary/10"
             )}
           >
             All
@@ -801,18 +801,19 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                   }
                 }}
                 className={cn(
-                  "flex-1 min-w-0 h-7 rounded-lg text-sm font-semibold transition-colors",
+                  "flex-1 min-w-0 h-7 rounded-lg text-sm font-semibold transition-colors border",
                   hasPatients
                     ? selectedLetter === letter
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground hover:bg-primary/20"
-                    : "bg-muted/30 text-muted-foreground/40 cursor-default"
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-transparent text-foreground border-neutral-300 hover:bg-primary/10"
+                    : "bg-transparent text-muted-foreground/40 border-neutral-200 cursor-default"
                 )}
               >
                 {letter}
               </button>
             );
           })}
+
         </div>
       )}
 
