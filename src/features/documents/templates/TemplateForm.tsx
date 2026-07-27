@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
+import { stripHeadingMarkup } from "@/features/documents/utils/documentFormatting";
+
 import {
   Select,
   SelectContent,
