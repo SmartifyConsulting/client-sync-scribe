@@ -494,8 +494,44 @@ export default function TodoList() {
         }));
   const defaultOpenGroup = groups.length ? [groups[0].key] : [];
 
+  // Sub-group a bucket's tasks by patient (collapsed by default)
+  const patientSubGroups = (items: TodoItem[]) => {
+    const map = items.reduce<Record<string, TodoItem[]>>((acc, todo) => {
+      const key = todo.patient_name || getTodoDisplay(todo as any).patient || "Unassigned";
+      (acc[key] ||= []).push(todo);
+      return acc;
+    }, {});
+    return Object.keys(map)
+      .sort((a, b) => (a === "Unassigned" ? 1 : b === "Unassigned" ? -1 : a.localeCompare(b)))
+      .map((key) => ({ key, items: map[key] }));
+  };
+
+  const renderTodoRow = (todo: TodoItem) => (
+    <TodoRow insideGroup
+      key={todo.id}
+      todo={todo as any}
+      onToggle={toggleComplete}
+      onStartEdit={(t) => startEditing(t as any)}
+      onDelete={deleteTask}
+      onDuplicate={duplicateTask}
+      onSend={(t) => handleSendDoc(t as any)}
+      onPreview={(t) => handlePreviewDoc(t as any)}
+      onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+      onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+      onSetPriority={updatePriority}
+      isEditing={editingId === todo.id}
+      editText={editText}
+      setEditText={setEditText}
+      saveEdit={saveEdit}
+      cancelEdit={cancelEdit}
+      sending={sendingDocId === todo.document_id}
+      previewing={loadingPreview === todo.document_id}
+    />
+  );
+
   const completedCount = todos.filter((t) => t.completed).length;
   const activeCount = todos.filter((t) => !t.completed).length;
+
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -651,33 +687,36 @@ export default function TodoList() {
               <AccordionContent className={SECTION_CONTENT_CLASS}>
                 {g.items.length === 0 ? (
                   <p className="text-xs text-muted-foreground px-4 py-3">No tasks in this group.</p>
+                ) : groupMode === "date" ? (
+                  <Accordion type="multiple" className="divide-y divide-neutral-200">
+                    {patientSubGroups(g.items).map((sub) => (
+                      <AccordionItem key={sub.key} value={`${g.key}-${sub.key}`} className="border-0">
+                        <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-muted/50">
+                          <div className="flex items-center justify-between w-full pr-2">
+                            <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                              <User className="h-3.5 w-3.5 text-muted-foreground" />
+                              {sub.key}
+                            </span>
+                            <span className="text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full bg-muted text-muted-foreground">
+                              {sub.items.length}
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-0">
+                          <div className="divide-y divide-neutral-200">
+                            {sub.items.map((todo) => renderTodoRow(todo))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
                 ) : (
                   <div className="divide-y divide-neutral-200">
-                    {g.items.map((todo) => (
-                      <TodoRow insideGroup
-                        key={todo.id}
-                        todo={todo as any}
-                        onToggle={toggleComplete}
-                        onStartEdit={(t) => startEditing(t as any)}
-                        onDelete={deleteTask}
-                        onDuplicate={duplicateTask}
-                        onSend={(t) => handleSendDoc(t as any)}
-                        onPreview={(t) => handlePreviewDoc(t as any)}
-                        onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
-                        onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
-                        onSetPriority={updatePriority}
-                        isEditing={editingId === todo.id}
-                        editText={editText}
-                        setEditText={setEditText}
-                        saveEdit={saveEdit}
-                        cancelEdit={cancelEdit}
-                        sending={sendingDocId === todo.document_id}
-                        previewing={loadingPreview === todo.document_id}
-                      />
-                    ))}
+                    {g.items.map((todo) => renderTodoRow(todo))}
                   </div>
                 )}
               </AccordionContent>
+
             </AccordionItem>
           ))}
         </Accordion>

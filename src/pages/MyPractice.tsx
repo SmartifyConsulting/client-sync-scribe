@@ -339,12 +339,43 @@ function MailboxSection({ userId }: { userId?: string }) {
 // ── About Me accordion (doctor pitch, max 600 words) ──
 function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string) => Promise<void> }) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [draft, setDraft] = useState(value);
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
   useEffect(() => { setDraft(value); }, [value]);
   const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
   const overLimit = wordCount > 600;
   const dirty = draft !== value;
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-about-me", {
+        body: { notes: draft.slice(0, 1000) },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const text = (data as any)?.about_me?.trim();
+      if (!text) throw new Error("No text returned");
+      setDraft(text);
+      toast({ title: "Synopsis generated", description: "Review and edit before saving." });
+    } catch (e: any) {
+      const msg = String(e?.message || "");
+      toast({
+        variant: "destructive",
+        title: "Could not generate",
+        description: msg.includes("rate_limited")
+          ? "Too many requests — please try again shortly."
+          : msg.includes("credits_exhausted")
+            ? "AI credits exhausted. Please top up to continue."
+            : msg || "Please try again.",
+      });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <AccordionItem value="about-me" className="border-0">
       <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
@@ -354,9 +385,15 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4 pb-4 space-y-2">
-        <p className="text-xs text-muted-foreground">
-          {t("myPractice.aboutMeHelper")}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            {t("myPractice.aboutMeHelper")}
+          </p>
+          <Button size="sm" variant="outline" className="shrink-0 text-xs" disabled={generating} onClick={handleGenerate}>
+            {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
+            {generating ? "Generating…" : "Generate with AI"}
+          </Button>
+        </div>
         <Textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -379,6 +416,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
             {t("myPractice.save")}
           </Button>
         </div>
+
       </AccordionContent>
     </AccordionItem>
   );
