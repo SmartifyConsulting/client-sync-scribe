@@ -588,7 +588,30 @@ export default function TodoList() {
             <span className="ml-1.5 text-xs opacity-70">({f === "all" ? todos.length : f === "active" ? activeCount : completedCount})</span>
           </button>
         ))}
+        {filter === "completed" && completedCount > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="ml-auto gap-1.5 text-xs">
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear all
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear all completed tasks?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently deletes your {completedCount} completed task{completedCount === 1 ? "" : "s"}. Active tasks are not affected.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={clearAllCompleted}>Clear all</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
+
 
 
       {/* Task List — grouped by date or patient */}
