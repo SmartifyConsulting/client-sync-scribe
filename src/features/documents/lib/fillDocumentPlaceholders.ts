@@ -28,7 +28,13 @@ export interface FillProfile {
   practice_address?: string | null;
   specialty?: string | null;
   signature_url?: string | null;
+  signature_font?: string | null;
+  signature_color?: string | null;
+  signature_font_size?: number | null;
+  signature_bold?: boolean | null;
+  signature_italic?: boolean | null;
   logo_url?: string | null;
+
   // Bank details aren't a real column today — accept any to be future-proof.
   bank_account_details?: string | null;
   bank_details?: string | null;
