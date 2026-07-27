@@ -39,6 +39,18 @@ import {
 } from "@/components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
@@ -332,6 +344,17 @@ export default function TodoList() {
     catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
+  const clearAllCompleted = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from('todos').delete().eq('user_id', user.id).eq('status', 'completed');
+      setTodos((prev) => prev.filter((t) => !t.completed));
+      toast({ title: "Completed tasks cleared" });
+    } catch { toast({ title: "Error", variant: "destructive" }); }
+  };
+
+
   const startEditing = (todo: TodoItem) => { setEditingId(todo.id); setEditText(todo.title); };
   const saveEdit = async (id: string) => {
     if (!editText.trim()) return;
@@ -577,7 +600,30 @@ export default function TodoList() {
             <span className="ml-1.5 text-xs opacity-70">({f === "all" ? todos.length : f === "active" ? activeCount : completedCount})</span>
           </button>
         ))}
+        {filter === "completed" && completedCount > 0 && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" className="ml-auto gap-1.5 text-xs">
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear all
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear all completed tasks?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently deletes your {completedCount} completed task{completedCount === 1 ? "" : "s"}. Active tasks are not affected.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={clearAllCompleted}>Clear all</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
+
 
 
       {/* Task List — grouped by date or patient */}

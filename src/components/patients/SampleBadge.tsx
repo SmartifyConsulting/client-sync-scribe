@@ -9,12 +9,10 @@ interface SampleBadgeProps {
 }
 
 /**
- * Small circled "s" mark (like the © symbol) in crimson red, indicating
- * the adjacent record is sample/demo data — not a real person.
+ * Crimson pill badge with white uppercase text marking a record as
+ * sample/demo data — not a real person.
  */
 export function SampleBadge({ size = "sm", className }: SampleBadgeProps) {
-  const dim = size === "md" ? 14 : 12;
-  const fontSize = size === "md" ? 10 : 9;
   return (
     <TooltipProvider>
       <Tooltip>
@@ -22,18 +20,14 @@ export function SampleBadge({ size = "sm", className }: SampleBadgeProps) {
           <span
             role="img"
             aria-label="Sample data — not a real patient"
-            className={cn("inline-flex items-center justify-center rounded-full border align-middle leading-none font-bold select-none", className)}
-            style={{
-              width: dim,
-              height: dim,
-              borderColor: CRIMSON,
-              color: CRIMSON,
-              borderWidth: 1.25,
-              fontSize,
-              lineHeight: 1,
-            }}
+            className={cn(
+              "inline-flex items-center justify-center rounded-full align-middle font-semibold uppercase tracking-wide text-white select-none whitespace-nowrap leading-none",
+              size === "md" ? "text-[10px] px-2 py-[3px]" : "text-[9px] px-1.5 py-[2px]",
+              className,
+            )}
+            style={{ backgroundColor: CRIMSON, color: "#fff" }}
           >
-            s
+            Sample data
           </span>
         </TooltipTrigger>
         <TooltipContent>Sample data — not a real patient</TooltipContent>
