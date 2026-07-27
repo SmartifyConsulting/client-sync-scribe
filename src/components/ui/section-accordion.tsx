@@ -25,9 +25,11 @@ export const SECTION_TRIGGER_CLASS = cn(
 export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
   "group px-4 py-3 hover:no-underline border-0 rounded-none",
   "!bg-primary hover:!bg-primary/90 !text-white",
-  "[&_*]:!text-white",
+  "[&_*:not(.section-count-pill)]:!text-white",
   "[&>svg]:!text-white",
+  "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-primary",
 );
+
 
 /** Padding for accordion content so sub-rows aren't flush against the header. */
 export const SECTION_CONTENT_CLASS = "px-3 pt-3 pb-3 space-y-2";
