@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocuments } from "@/hooks/useDocuments";
+import { fillDocumentPlaceholders } from "@/features/documents/lib/fillDocumentPlaceholders";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
