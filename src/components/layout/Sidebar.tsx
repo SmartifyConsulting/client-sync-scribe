@@ -94,9 +94,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
 
 
+  // Doctors keep their own menu even when viewing patient-scoped routes such as
+  // "My Profile" (/patient/details) — the route alone must not flip the nav.
+  const isDoctor = role === "doctor";
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems
-    : (isPatient || isOnPatientRoute) ? patientNavItems : doctorNavItems;
+    : (!isDoctor && (isPatient || isOnPatientRoute)) ? patientNavItems : doctorNavItems;
 
   // For admins not currently on an admin route, surface an "Admin" entry so
   // they can always reach the admin section.

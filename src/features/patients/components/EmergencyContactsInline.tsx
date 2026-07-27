@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, ShieldAlert, ChevronDown } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Plus, Trash2, ShieldAlert } from "lucide-react";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { SectionHeader, FIELD_GRID_2_CLASS } from "./sectionStyles";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { isValidOptionalEmail } from "@/lib/validation";
@@ -109,12 +110,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
 
   return (
     <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-      <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group hover:bg-muted data-[state=open]:bg-primary data-[state=open]:text-white data-[state=open]:hover:bg-primary [&[data-state=open]_*]:!text-white">
-        <h3 className="text-sm font-semibold text-primary tracking-wide flex items-center gap-2 text-left group-data-[state=open]:text-white">
-          <ShieldAlert className="h-4 w-4 text-primary group-data-[state=open]:text-white" /> Emergency Contacts
-        </h3>
-        <ChevronDown className="h-4 w-4 text-foreground group-data-[state=open]:text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
+      <SectionHeader icon={ShieldAlert} label="Emergency Contacts" />
       <CollapsibleContent className="p-3 space-y-3">
         <p className="text-sm text-muted-foreground">
           Notified by default when you trigger SOS. They can be the same as your Next of Kin, or someone different entirely.
@@ -132,21 +128,21 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
             )}
             {contacts.map((c) => (
               <div key={c.id} className="rounded-lg border border-border p-2.5 space-y-2 bg-muted/30">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className={FIELD_GRID_2_CLASS}>
                   <div>
-                    <Label className="text-sm">Name</Label>
+                    <Label className="text-xs font-bold">Name</Label>
                     <Input value={c.name} onChange={(e) => updateContact(c.id, { name: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-sm">Relationship</Label>
+                    <Label className="text-xs font-bold">Relationship</Label>
                     <Input value={c.relationship ?? ""} onChange={(e) => updateContact(c.id, { relationship: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-sm">Phone</Label>
+                    <Label className="text-xs font-bold">Phone</Label>
                     <Input value={c.phone} onChange={(e) => updateContact(c.id, { phone: e.target.value })} />
                   </div>
                   <div>
-                    <Label className="text-sm">Email</Label>
+                    <Label className="text-xs font-bold">Email</Label>
                     <Input
                       type="email"
                       value={c.email ?? ""}

@@ -54,6 +54,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import {
+  SectionHeader,
+  FIELD_ROW_CLASS,
+  FIELD_GRID_CLASS,
+  FIELD_GRID_2_CLASS,
+  FIELD_GRID_4_CLASS,
+} from "./sectionStyles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
@@ -176,43 +183,8 @@ const AutosaveStatus = ({
   return null;
 };
 
-// Reusable collapsible section header with optional inline edit pencil
-const SectionHeader = ({
-  icon: Icon,
-  label,
-  extra,
-  onEdit,
-  titleClassName,
-}: {
-  icon: any;
-  label: string;
-  extra?: React.ReactNode;
-  onEdit?: () => void;
-  titleClassName?: string;
-}) => (
-  <CollapsibleTrigger className="patient-section-trigger flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary hover:bg-primary/90 text-white border-b border-white [&_*]:!text-white">
-    <h3 className={cn("text-sm font-semibold tracking-wide flex items-center gap-2 text-left text-white", titleClassName)}>
-      <Icon className="h-4 w-4 text-white" /> {label}
-    </h3>
-    <div className="flex items-center gap-2">
-      {extra}
-      {onEdit && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          className="p-1 rounded hover:bg-white/15 text-white transition-colors"
-          aria-label={`Edit ${label}`}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </button>
-      )}
-      <ChevronDown className="h-4 w-4 text-white transition-transform duration-200 group-data-[state=open]:rotate-180" />
-    </div>
-  </CollapsibleTrigger>
-);
+
+
 
 // Phone input with country code
 const PhoneInput = ({
@@ -1287,9 +1259,9 @@ export function PatientDetailsEditor({
   const isChronic = currentMedications.some((m) => m.is_chronic);
 
   const ViewField = ({ label, value }: { label: string; value: string | null | undefined }) => (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <Input value={value || "Not provided"} disabled className="bg-muted/50" />
+    <div className="flex items-center gap-2">
+      <Label className="w-28 shrink-0 text-xs font-bold">{label}</Label>
+      <Input value={value || "Not provided"} disabled className="bg-muted/50 h-8 text-xs" />
     </div>
   );
 
@@ -1639,7 +1611,7 @@ export function PatientDetailsEditor({
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
                 <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Insurance Provider" value={patient.medical_aid} />
                     <ViewField label="Insurance Product" value={patient.medical_insurance_product} />
                     <ViewField label="Insurance Number" value={patient.medical_aid_number} />
@@ -1728,7 +1700,7 @@ export function PatientDetailsEditor({
 
                 <SectionHeader icon={User} label="Personal Details" />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className={FIELD_GRID_CLASS}>
                     <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
                     <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
                     <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
@@ -1749,7 +1721,7 @@ export function PatientDetailsEditor({
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={MapPin} label="Addresses" />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Physical Address" value={patient.physical_address || patient.address} />
                     <ViewField
                       label="Postal Address"
@@ -1804,7 +1776,7 @@ export function PatientDetailsEditor({
                       ))}
                     </div>
                   ) : (
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className={FIELD_GRID_4_CLASS}>
                       <ViewField label="Name" value={patient.next_of_kin_name} />
                       <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
                       <ViewField label="Phone" value={patient.next_of_kin_phone} />
@@ -1834,7 +1806,7 @@ export function PatientDetailsEditor({
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={Briefcase} label="Employer" />
                 <CollapsibleContent className="p-3">
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className={FIELD_GRID_CLASS}>
                     <ViewField label="Employer" value={patient.employer} />
                     <ViewField label="Occupation" value={patient.occupation} />
                     <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
@@ -1868,7 +1840,7 @@ export function PatientDetailsEditor({
                   <Collapsible defaultOpen className="bg-white overflow-hidden">
                     <SectionHeader icon={Activity} label="General Information" />
                     <CollapsibleContent className="px-3 pb-3">
-                      <div className="grid gap-3 sm:grid-cols-4">
+                      <div className={FIELD_GRID_4_CLASS}>
                         <ViewField label="Height (cm)" value={patient.height_cm ? `${patient.height_cm}` : undefined} />
                         <ViewField label="Weight (kg)" value={patient.weight_kg ? `${patient.weight_kg}` : undefined} />
                         <ViewField label="BMI" value={bmi || undefined} />
@@ -2228,7 +2200,7 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
               <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
               <CollapsibleContent className="p-3">
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className={FIELD_GRID_2_CLASS}>
                   <div className="space-y-1.5">
                     <Label>Insurance Provider</Label>
                     <Input
@@ -2303,7 +2275,7 @@ export function PatientDetailsEditor({
                 </div>
                 {showAddPharmacy && (
                   <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className={FIELD_GRID_2_CLASS}>
                       <div className="space-y-1.5">
                         <Label>Name *</Label>
                         <Input
@@ -2440,7 +2412,7 @@ export function PatientDetailsEditor({
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 {/* Horizontal label/field rows: bold, one size smaller labels */}
-                <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3 [&>div]:flex [&>div]:items-center [&>div]:gap-2 [&>div]:space-y-0 [&_label]:w-28 [&_label]:shrink-0 [&_label]:text-[11px] [&_label]:font-bold [&_input]:h-8 [&_input]:text-xs [&_button]:h-8 [&_button]:text-xs [&_[role=combobox]]:h-8 [&_[role=combobox]]:text-xs">
+                <div className={FIELD_GRID_CLASS}>
 
                   <div className="space-y-1.5">
                     <Label htmlFor="first_name">First Name(s) *</Label>
@@ -2560,9 +2532,9 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={MapPin} label="Addresses" />
               <CollapsibleContent className="p-3">
-                <div className="space-y-3">
+                <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="physical_address">Physical Address</Label>
+                    <Label htmlFor="physical_address" className="text-xs font-bold">Physical Address</Label>
                     <AddressAutocomplete
                       id="physical_address"
                       value={formData.physical_address}
@@ -2570,18 +2542,28 @@ export function PatientDetailsEditor({
                       placeholder="Start typing to search address..."
                       rows={2}
                     />
+                    <div className="flex items-center gap-2 pt-1">
+                      <Checkbox
+                        id="same_as_physical"
+                        checked={formData.same_as_physical}
+                        onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })}
+                      />
+                      <Label htmlFor="same_as_physical" className="text-xs font-bold">
+                        Postal address same as physical address
+                      </Label>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="same_as_physical"
-                      checked={formData.same_as_physical}
-                      onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })}
-                    />
-                    <Label htmlFor="same_as_physical">Postal address same as physical address</Label>
-                  </div>
-                  {!formData.same_as_physical && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="postal_address">Postal Address</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="postal_address" className="text-xs font-bold">Postal Address</Label>
+                    {formData.same_as_physical ? (
+                      <Textarea
+                        id="postal_address"
+                        value={formData.physical_address}
+                        disabled
+                        rows={2}
+                        className="bg-muted/50 text-sm"
+                      />
+                    ) : (
                       <AddressAutocomplete
                         id="postal_address"
                         value={formData.postal_address}
@@ -2589,10 +2571,11 @@ export function PatientDetailsEditor({
                         placeholder="Start typing to search address..."
                         rows={2}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </CollapsibleContent>
+
             </Collapsible>
 
             {/* Next of Kin (multiple) */}
@@ -2615,7 +2598,7 @@ export function PatientDetailsEditor({
 
                 {/* Legacy single NOK if no members yet */}
                 {nokMembers.length === 0 && (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-3">
+                  <div className={FIELD_GRID_4_CLASS + " mb-3"}>
                     <div className="space-y-1.5">
                       <Label>Name</Label>
                       <Input
@@ -2654,7 +2637,7 @@ export function PatientDetailsEditor({
 
                 {showAddNOK && (
                   <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className={FIELD_GRID_2_CLASS}>
                       <div className="space-y-1.5">
                         <Label>Name *</Label>
                         <Input
@@ -2801,7 +2784,7 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={Briefcase} label="Employer" />
               <CollapsibleContent className="p-3">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className={FIELD_GRID_CLASS}>
                   <div className="space-y-1.5">
                     <Label htmlFor="employer">Employer</Label>
                     <Input
@@ -2868,7 +2851,7 @@ export function PatientDetailsEditor({
                 <Collapsible defaultOpen className="bg-white overflow-hidden">
                   <SectionHeader icon={Activity} label="General Information" />
                   <CollapsibleContent className="px-3 pb-3">
-                    <div className="grid gap-3 sm:grid-cols-4">
+                    <div className={FIELD_GRID_4_CLASS}>
                       <div className="space-y-1.5">
                         <Label htmlFor="height_cm">Height (cm)</Label>
                         <Input
@@ -2960,7 +2943,7 @@ export function PatientDetailsEditor({
                       </div>
                       {showAddMed && (
                         <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                          <div className="grid gap-2 sm:grid-cols-2">
+                          <div className={FIELD_GRID_2_CLASS}>
                             <div className="space-y-1.5">
                               <Label>Medication Name *</Label>
                               <Input
@@ -3022,7 +3005,7 @@ export function PatientDetailsEditor({
                             />
                             <Label className="text-xs">This is a chronic medication</Label>
                           </div>
-                          <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-border/40">
+                          <div className={FIELD_GRID_2_CLASS + " pt-2 border-t border-border/40"}>
                             <div className="space-y-1.5">
                               <Label className="text-xs">Take at</Label>
                               <Input
@@ -3176,7 +3159,7 @@ export function PatientDetailsEditor({
                       </div>
                       {showAddCondition && (
                         <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                          <div className="grid gap-2 sm:grid-cols-2">
+                          <div className={FIELD_GRID_2_CLASS}>
                             <div className="space-y-1.5">
                               <Label>Condition/Diagnosis *</Label>
                               <Input
@@ -3322,7 +3305,7 @@ export function PatientDetailsEditor({
                     </div>
                     {showAddSurgery && (
                       <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className={FIELD_GRID_2_CLASS}>
                           <div className="space-y-1.5">
                             <Label>Surgery Name *</Label>
                             <Input
@@ -3471,7 +3454,7 @@ export function PatientDetailsEditor({
                     </div>
                     {showAddFamily && (
                       <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
-                        <div className="grid gap-2 sm:grid-cols-2">
+                        <div className={FIELD_GRID_2_CLASS}>
                           <div className="space-y-1.5">
                             <Label>Relation *</Label>
                             <Input

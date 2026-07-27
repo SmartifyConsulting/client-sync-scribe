@@ -42,7 +42,7 @@ const adminNavItems = [
 
 export function BottomNav() {
   const { t } = useTranslation();
-  const { isPatient, loading } = useUserRole();
+  const { isPatient, isDoctor, loading } = useUserRole();
   const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const location = useLocation();
@@ -90,7 +90,7 @@ export function BottomNav() {
   }
 
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
-  const showPatientNav = isPatient || isOnPatientRoute;
+  const showPatientNav = !isDoctor && (isPatient || isOnPatientRoute);
 
   if (!showPatientNav) {
     return (
