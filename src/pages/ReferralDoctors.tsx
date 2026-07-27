@@ -165,7 +165,46 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [profileSearch]);
+  }, [profileSearch, user?.id]);
+
+  // Directory matches for the sidebar filters — surfaces colleagues who are on
+  // the platform but not yet in the saved referral list.
+  const [directoryMatches, setDirectoryMatches] = useState<DoctorProfileSuggestion[]>([]);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    const hasSpecialty = specialtyFilter !== "any";
+    if (q.length < 2 && !hasSpecialty) {
+      setDirectoryMatches([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const { data, error } = await supabase.rpc("search_doctor_profiles", {
+        _name: q || null,
+        _specialty: hasSpecialty ? specialtyFilter : null,
+      });
+      if (error) {
+        console.error("Directory search error:", error);
+        setDirectoryMatches([]);
+        return;
+      }
+      setDirectoryMatches(
+        ((data as any[]) || [])
+          .filter((p) => p.id !== user?.id)
+          .slice(0, 8)
+          .map((p) => ({
+            id: p.id,
+            full_name: p.full_name,
+            specialty: p.specialty,
+            practice_number: p.practice_number,
+            mobile_number: p.mobile_number,
+          })),
+      );
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, specialtyFilter, user?.id]);
+
+
 
   const handleSelectProfile = (doc: DoctorProfileSuggestion) => {
     const fullName = doc.full_name || "";
