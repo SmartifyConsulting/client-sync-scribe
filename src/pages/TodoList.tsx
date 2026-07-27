@@ -332,6 +332,17 @@ export default function TodoList() {
     catch { toast({ title: "Error", variant: "destructive" }); }
   };
 
+  const clearAllCompleted = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from('todos').delete().eq('user_id', user.id).eq('status', 'completed');
+      setTodos((prev) => prev.filter((t) => !t.completed));
+      toast({ title: "Completed tasks cleared" });
+    } catch { toast({ title: "Error", variant: "destructive" }); }
+  };
+
+
   const startEditing = (todo: TodoItem) => { setEditingId(todo.id); setEditText(todo.title); };
   const saveEdit = async (id: string) => {
     if (!editText.trim()) return;
