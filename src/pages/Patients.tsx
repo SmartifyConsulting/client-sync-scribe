@@ -907,10 +907,11 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                     >
                       <td colSpan={5} className="px-4 py-1">
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[hsl(351,81%,49%)] text-white text-xs font-bold">
+                          <span className="text-base font-bold text-[hsl(351,81%,49%)]">
                             {letter}
                           </span>
                           <span className="text-xs text-muted-foreground">({groupedPatients[letter].length})</span>
+
                           <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground ml-auto transition-transform", expandedLetters.has(letter) && "rotate-180")} />
                         </div>
                       </td>
