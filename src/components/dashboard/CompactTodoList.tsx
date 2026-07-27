@@ -347,7 +347,20 @@ export function CompactTodoList() {
     }
   };
 
+  const clearAllCompleted = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("todos").delete().eq("user_id", user.id).eq("status", "completed");
+      setTodos((prev) => prev.filter((t) => !t.completed));
+      toast({ title: "Completed tasks cleared" });
+    } catch {
+      toast({ title: "Error", variant: "destructive" });
+    }
+  };
+
   const deleteTask = async (id: string) => {
+
     try {
       await supabase.from("todos").delete().eq("id", id);
       setTodos(todos.filter((t) => t.id !== id));
