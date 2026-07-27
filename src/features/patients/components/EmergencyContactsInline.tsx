@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, ShieldAlert } from "lucide-react";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { SectionHeader, FIELD_GRID_2_CLASS } from "./PatientDetailsEditor";
+import { SectionHeader, FIELD_GRID_2_CLASS } from "./sectionStyles";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { isValidOptionalEmail } from "@/lib/validation";
