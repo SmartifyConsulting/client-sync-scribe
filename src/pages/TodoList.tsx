@@ -494,8 +494,44 @@ export default function TodoList() {
         }));
   const defaultOpenGroup = groups.length ? [groups[0].key] : [];
 
+  // Sub-group a bucket's tasks by patient (collapsed by default)
+  const patientSubGroups = (items: TodoItem[]) => {
+    const map = items.reduce<Record<string, TodoItem[]>>((acc, todo) => {
+      const key = todo.patient_name || getTodoDisplay(todo as any).patient || "Unassigned";
+      (acc[key] ||= []).push(todo);
+      return acc;
+    }, {});
+    return Object.keys(map)
+      .sort((a, b) => (a === "Unassigned" ? 1 : b === "Unassigned" ? -1 : a.localeCompare(b)))
+      .map((key) => ({ key, items: map[key] }));
+  };
+
+  const renderTodoRow = (todo: TodoItem) => (
+    <TodoRow insideGroup
+      key={todo.id}
+      todo={todo as any}
+      onToggle={toggleComplete}
+      onStartEdit={(t) => startEditing(t as any)}
+      onDelete={deleteTask}
+      onDuplicate={duplicateTask}
+      onSend={(t) => handleSendDoc(t as any)}
+      onPreview={(t) => handlePreviewDoc(t as any)}
+      onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+      onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+      onSetPriority={updatePriority}
+      isEditing={editingId === todo.id}
+      editText={editText}
+      setEditText={setEditText}
+      saveEdit={saveEdit}
+      cancelEdit={cancelEdit}
+      sending={sendingDocId === todo.document_id}
+      previewing={loadingPreview === todo.document_id}
+    />
+  );
+
   const completedCount = todos.filter((t) => t.completed).length;
   const activeCount = todos.filter((t) => !t.completed).length;
+
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
