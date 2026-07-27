@@ -261,7 +261,12 @@ export default function DoctorDocumentsTab() {
             name: selectedTemplate.name,
             description: selectedTemplate.description || "",
             content: selectedTemplate.content,
-            placeholders: selectedTemplate.placeholders,
+            placeholders: [
+              ...new Set(
+                (selectedTemplate.content.match(/\[([^\]]+)\]/g) || []).map((m) => m.slice(1, -1)),
+              ),
+            ],
+
             category: selectedTemplate.category || undefined,
           }}
           onClose={() => setSelectedTemplate(null)}
