@@ -124,28 +124,17 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       .replace(/\[DoctorName\]/g, profile?.full_name || "[DoctorName]")
       .replace(/\[Date\]/g, new Date().toLocaleDateString());
     
-    // Replace [DoctorSignature] with image tag if signature exists
-    const signatureUrl = (profile as any)?.signature_url;
-    if (signatureUrl) {
-      result = result.replace(/\[DoctorSignature\]/g, `<img src="${signatureUrl}" alt="Signature" style="max-height: 60px; display: inline-block;" />`);
+    // Replace [DoctorSignature] with the uploaded image or the typed signature
+    const signatureHtml = renderSignatureHtml(profile as any);
+    if (signatureHtml) {
+      result = result.replace(/\[(DoctorSignature|Signature)\]/g, signatureHtml);
     }
-    
+
     return result;
   };
 
-  const renderFormattedContent = (content: string) => {
-    const safeContent = content
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/&lt;b&gt;/g, '<b>')
-      .replace(/&lt;\/b&gt;/g, '</b>')
-      .replace(/&lt;i&gt;/g, '<i>')
-      .replace(/&lt;\/i&gt;/g, '</i>')
-      .replace(/&lt;u&gt;/g, '<u>')
-      .replace(/&lt;\/u&gt;/g, '</u>')
-      .replace(/\n/g, '<br/>');
-    return safeContent;
-  };
+  const renderFormattedContent = (content: string) => renderDocumentHtml(content);
+
 
   const renderSectionPreview = (section: SectionContent | undefined | null, placeholder?: string) => {
     const hasContent = section && (section.text || section.imageUrl);
