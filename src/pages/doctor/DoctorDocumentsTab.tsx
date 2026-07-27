@@ -1,9 +1,16 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Loader2, Search, User, Clock } from "lucide-react";
+import { FileText, Loader2, Search, User, Clock, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Accordion,
   AccordionContent,
@@ -11,7 +18,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  SECTION_TRIGGER_CLASS,
+  SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+  SECTION_CONTENT_CLASS,
   SECTION_FRAME_CLASS,
   SECTION_ITEM_CLASS,
   SectionCountPill,
@@ -20,12 +28,16 @@ import {
   type DateBucketKey,
 } from "@/components/ui/section-accordion";
 import { useDocuments } from "@/hooks/useDocuments";
+import { useTemplates } from "@/hooks/useTemplates";
+import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { format } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
+import { documentTypeBadgeClass } from "@/lib/documentTypeColors";
 import { cn } from "@/lib/utils";
 
 type DocRow = ReturnType<typeof useDocuments>["documents"][number];
+type GroupMode = "date" | "type" | "patient";
 
 function getSurname(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -62,7 +74,12 @@ function DocumentCard({ doc }: { doc: DocRow }) {
             </div>
           </div>
           {doc.template_name && (
-            <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 bg-muted text-muted-foreground max-w-[160px] truncate">
+            <span
+              className={cn(
+                "text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0 max-w-[160px] truncate",
+                documentTypeBadgeClass(doc.template_name),
+              )}
+            >
               {doc.template_name}
             </span>
           )}
@@ -74,8 +91,10 @@ function DocumentCard({ doc }: { doc: DocRow }) {
 
 export default function DoctorDocumentsTab() {
   const { documents, loading } = useDocuments();
+  const { templates } = useTemplates();
   const [q, setQ] = useState("");
-  const [groupMode, setGroupMode] = useState<"date" | "patient">("date");
+  const [groupMode, setGroupMode] = useState<GroupMode>("date");
+  const [selectedTemplate, setSelectedTemplate] = useState<(typeof templates)[number] | null>(null);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -111,12 +130,30 @@ export default function DoctorDocumentsTab() {
     );
   }, [filtered]);
 
-  const defaultOpen =
+  const groupedByType = useMemo(() => {
+    const map = new Map<string, DocRow[]>();
+    for (const d of filtered) {
+      const type = d.template_name || "Other";
+      if (!map.has(type)) map.set(type, []);
+      map.get(type)!.push(d);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
+  }, [filtered]);
+
+  const groups: { key: string; label: string; rows: DocRow[] }[] =
     groupMode === "date"
-      ? [(DATE_BUCKETS.find((b) => groupedByDate[b.key].length > 0) ?? DATE_BUCKETS[0]).key]
-      : groupedByPatient.length > 0
-        ? [groupedByPatient[0][0]]
-        : [];
+      ? DATE_BUCKETS.filter((b) => groupedByDate[b.key].length > 0).map((b) => ({
+          key: b.key,
+          label: b.label,
+          rows: groupedByDate[b.key],
+        }))
+      : (groupMode === "type" ? groupedByType : groupedByPatient).map(([name, rows]) => ({
+          key: name,
+          label: name,
+          rows,
+        }));
+
+  const defaultOpen = groups.length ? [groups[0].key] : [];
 
   if (loading) {
     return (
@@ -128,7 +165,7 @@ export default function DoctorDocumentsTab() {
 
   return (
     <div className="space-y-3 max-w-5xl">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -138,23 +175,53 @@ export default function DoctorDocumentsTab() {
             className="pl-8 text-xs"
           />
         </div>
-        <ToggleGroup
-          type="single"
-          value={groupMode}
-          onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
-          size="sm"
-          variant="outline"
-        >
-          <ToggleGroupItem value="date" className="text-xs px-3">
-            Date
-          </ToggleGroupItem>
-          <ToggleGroupItem value="patient" className="text-xs px-3">
-            Patient
-          </ToggleGroupItem>
-        </ToggleGroup>
+        <div className="flex items-center gap-2">
+          <ToggleGroup
+            type="single"
+            value={groupMode}
+            onValueChange={(v) => v && setGroupMode(v as GroupMode)}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="date" className="text-xs px-3">
+              Date
+            </ToggleGroupItem>
+            <ToggleGroupItem value="type" className="text-xs px-3">
+              Type
+            </ToggleGroupItem>
+            <ToggleGroupItem value="patient" className="text-xs px-3">
+              Patient
+            </ToggleGroupItem>
+          </ToggleGroup>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="gap-1.5 text-xs">
+                <Plus className="h-4 w-4" />
+                Add Document
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
+              {templates.length === 0 ? (
+                <DropdownMenuItem disabled className="text-xs">
+                  No templates available
+                </DropdownMenuItem>
+              ) : (
+                templates.map((t) => (
+                  <DropdownMenuItem
+                    key={t.id}
+                    className="text-xs"
+                    onSelect={() => setSelectedTemplate(t)}
+                  >
+                    {t.name}
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {groups.length === 0 ? (
         <div className="rounded-lg border border-dashed p-10 text-center text-xs text-muted-foreground">
           No documents yet.
         </div>
@@ -165,55 +232,46 @@ export default function DoctorDocumentsTab() {
           defaultValue={defaultOpen}
           className={SECTION_FRAME_CLASS}
         >
-          {groupMode === "date"
-            ? DATE_BUCKETS.map((b) => {
-                const rows = groupedByDate[b.key];
-                return (
-                  <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_CLASS}>
-                    <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                      <div className="flex items-center justify-between w-full pr-2">
-                        <span className="text-xs font-medium">{b.label}</span>
-                        <SectionCountPill count={rows.length} />
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-3 pt-3 pb-3">
-                      {rows.length === 0 ? (
-                        <p className="text-xs text-muted-foreground px-2 py-3">
-                          No documents in this period.
-                        </p>
-                      ) : (
-                        <ul className="space-y-2">
-                          {rows.map((d) => (
-                            <li key={d.id}>
-                              <DocumentCard doc={d} />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })
-            : groupedByPatient.map(([name, rows]) => (
-                <AccordionItem key={name} value={name} className={SECTION_ITEM_CLASS}>
-                  <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                    <div className="flex items-center justify-between w-full pr-2">
-                      <span className="text-xs font-medium">{name}</span>
-                      <SectionCountPill count={rows.length} />
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-3 pt-3 pb-3">
-                    <ul className="space-y-2">
-                      {rows.map((d) => (
-                        <li key={d.id}>
-                          <DocumentCard doc={d} />
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+          {groups.map((g) => (
+            <AccordionItem key={g.key} value={g.key} className={SECTION_ITEM_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+                <div className="flex items-center justify-between w-full pr-2">
+                  <span className="text-xs font-medium">{g.label}</span>
+                  <SectionCountPill count={g.rows.length} />
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
+                <ul className="space-y-2">
+                  {g.rows.map((d) => (
+                    <li key={d.id}>
+                      <DocumentCard doc={d} />
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
         </Accordion>
+      )}
+
+      {selectedTemplate && (
+        <DocumentEditor
+          template={{
+            id: selectedTemplate.id,
+            name: selectedTemplate.name,
+            description: selectedTemplate.description || "",
+            content: selectedTemplate.content,
+            placeholders: [
+              ...new Set(
+                (selectedTemplate.content.match(/\[([^\]]+)\]/g) || []).map((m) => m.slice(1, -1)),
+              ),
+            ],
+
+            category: selectedTemplate.category || undefined,
+          }}
+          onClose={() => setSelectedTemplate(null)}
+          onSave={() => setSelectedTemplate(null)}
+        />
       )}
     </div>
   );

@@ -18,12 +18,29 @@ export const SECTION_TRIGGER_CLASS = cn(
   "[&>svg]:group-data-[state=open]:!text-white",
 );
 
+/**
+ * Variant that stays green with white text in BOTH open and collapsed states.
+ * Used on My Sessions, My Tasks and Documents.
+ */
+export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
+  "group px-4 py-3 hover:no-underline border-0 rounded-none",
+  "!bg-primary hover:!bg-primary/90 !text-white",
+  "[&_*:not(.section-count-pill)]:!text-white",
+  "[&>svg]:!text-white",
+  "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-primary",
+);
+
+
+/** Padding for accordion content so sub-rows aren't flush against the header. */
+export const SECTION_CONTENT_CLASS = "px-3 pt-3 pb-3 space-y-2";
+
 /** Frame around a group of section accordion items. */
 export const SECTION_FRAME_CLASS =
   "rounded-lg border bg-card overflow-hidden divide-y";
 
 /** Item wrapper (no individual rounded border). */
 export const SECTION_ITEM_CLASS = "border-0 rounded-none bg-card";
+
 
 export function SectionCountPill({
   count,
@@ -35,9 +52,10 @@ export function SectionCountPill({
   return (
     <span
       className={cn(
-        "text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
+        "section-count-pill text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
         "bg-muted text-muted-foreground",
         "group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary",
+
         className,
       )}
     >

@@ -38,7 +38,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
+import { SECTION_TRIGGER_ALWAYS_GREEN_CLASS, SECTION_CONTENT_CLASS } from "@/components/ui/section-accordion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -123,7 +123,7 @@ const DATE_BUCKETS: { key: DateBucket; label: string }[] = [
   { key: "month", label: "This month" },
   { key: "older", label: "Older" },
 ];
-const TODO_TRIGGER_CLASS = SECTION_TRIGGER_CLASS;
+const TODO_TRIGGER_CLASS = SECTION_TRIGGER_ALWAYS_GREEN_CLASS;
 
 export default function TodoList() {
   const { t } = useTranslation();
@@ -502,7 +502,7 @@ export default function TodoList() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-3xl">
+    <div className="space-y-6 animate-fade-in max-w-5xl">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
@@ -648,7 +648,7 @@ export default function TodoList() {
                   </span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pt-2 pb-2">
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
                 {g.items.length === 0 ? (
                   <p className="text-xs text-muted-foreground px-4 py-3">No tasks in this group.</p>
                 ) : (

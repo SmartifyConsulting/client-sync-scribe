@@ -37,7 +37,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import {
   SECTION_FRAME_CLASS,
   SECTION_ITEM_CLASS,
-  SECTION_TRIGGER_CLASS,
+  SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+  SECTION_CONTENT_CLASS,
   SectionCountPill,
   DATE_BUCKETS,
   dateBucketFor,
@@ -498,14 +499,15 @@ export function CompactTodoList() {
                 <Accordion type="multiple" defaultValue={[buckets[0].key]} className={SECTION_FRAME_CLASS}>
                   {buckets.map((b) => (
                     <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_CLASS}>
-                      <AccordionTrigger className={cn(SECTION_TRIGGER_CLASS, "px-3 py-2")}>
+                      <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "px-3 py-2")}>
+
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
                           <span className="text-sm font-semibold truncate text-left">{b.label}</span>
                           <SectionCountPill count={grouped[b.key].length} className="ml-auto mr-1" />
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="pb-0">
+                      <AccordionContent className={SECTION_CONTENT_CLASS}>
                         <div className="divide-y divide-neutral-200">
                           {grouped[b.key].map((todo) => (
                         <TodoRow insideGroup

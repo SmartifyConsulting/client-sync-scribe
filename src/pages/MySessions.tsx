@@ -16,7 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Clock, User as UserIcon, Loader2, FileText, Plus } from "lucide-react";
 import { format, isToday, differenceInCalendarDays } from "date-fns";
 import { cn } from "@/lib/utils";
-import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
+import { SECTION_TRIGGER_ALWAYS_GREEN_CLASS, SECTION_CONTENT_CLASS } from "@/components/ui/section-accordion";
 
 interface SessionRow {
   id: string;
@@ -49,7 +49,7 @@ function getSurname(name: string) {
   return (parts[parts.length - 1] || "").toUpperCase();
 }
 
-const TRIGGER_CLASS = SECTION_TRIGGER_CLASS;
+const TRIGGER_CLASS = SECTION_TRIGGER_ALWAYS_GREEN_CLASS;
 
 function CountPill({ count }: { count: number }) {
   return (
@@ -245,7 +245,7 @@ export default function MySessions() {
                         <CountPill count={rows.length} />
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-3 pt-3 pb-3">
+                    <AccordionContent className={SECTION_CONTENT_CLASS}>
                       {rows.length === 0 ? (
                         <p className="text-xs text-muted-foreground px-2 py-3">
                           {t("mySessions.empty", "No sessions in this period.")}
@@ -275,7 +275,7 @@ export default function MySessions() {
                       <CountPill count={rows.length} />
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-3 pt-3 pb-3">
+                  <AccordionContent className={SECTION_CONTENT_CLASS}>
                     <ul className="space-y-2">
                       {rows.map((s) => (
                         <li key={s.id}>
