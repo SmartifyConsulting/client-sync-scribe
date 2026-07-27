@@ -219,15 +219,15 @@
   .font-size-preserve .text-xs { font-size: 10.5px; }
   .font-size-preserve .text-base { font-size: 14px; }
 
-  .patient-section-frame [data-radix-collapsible-content] {
+  .patient-section-frame .patient-section-trigger + [data-state] {
     padding: 1rem;
   }
 
-  .patient-section-frame [data-radix-collapsible-content] > * + * {
+  .patient-section-frame .patient-section-trigger + [data-state] > * + * {
     margin-top: 0.75rem;
   }
 
-  .patient-section-trigger + [data-radix-collapsible-content] {
+  .patient-section-trigger + [data-state] {
     border-top: 1px solid hsl(var(--background));
   }
 
