@@ -49,7 +49,10 @@ import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
+import {
+  SECTION_CONTENT_CLASS,
+  SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+} from "@/components/ui/section-accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -339,61 +342,25 @@ function MailboxSection({ userId }: { userId?: string }) {
 // ── About Me accordion (doctor pitch, max 600 words) ──
 function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string) => Promise<void> }) {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const [draft, setDraft] = useState(value);
   const [saving, setSaving] = useState(false);
-  const [generating, setGenerating] = useState(false);
   useEffect(() => { setDraft(value); }, [value]);
   const wordCount = draft.trim() ? draft.trim().split(/\s+/).length : 0;
   const overLimit = wordCount > 600;
   const dirty = draft !== value;
 
-  const handleGenerate = async () => {
-    setGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-about-me", {
-        body: { notes: draft.slice(0, 1000) },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      const text = (data as any)?.about_me?.trim();
-      if (!text) throw new Error("No text returned");
-      setDraft(text);
-      toast({ title: "Synopsis generated", description: "Review and edit before saving." });
-    } catch (e: any) {
-      const msg = String(e?.message || "");
-      toast({
-        variant: "destructive",
-        title: "Could not generate",
-        description: msg.includes("rate_limited")
-          ? "Too many requests — please try again shortly."
-          : msg.includes("credits_exhausted")
-            ? "AI credits exhausted. Please top up to continue."
-            : msg || "Please try again.",
-      });
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   return (
     <AccordionItem value="about-me" className="border-0">
-      <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+      <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
           <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="px-4 pb-4 space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-xs text-muted-foreground">
-            {t("myPractice.aboutMeHelper")}
-          </p>
-          <Button size="sm" variant="outline" className="shrink-0 text-xs" disabled={generating} onClick={handleGenerate}>
-            {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Sparkles className="h-3.5 w-3.5 mr-2" />}
-            {generating ? "Generating…" : "Generate with AI"}
-          </Button>
-        </div>
+      <AccordionContent className={SECTION_CONTENT_CLASS}>
+        <p className="text-xs text-muted-foreground">
+          {t("myPractice.aboutMeHelper")}
+        </p>
         <Textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
@@ -1261,20 +1228,20 @@ export default function MyPractice() {
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden">
-            <Accordion type="multiple" defaultValue={["about-me"]} className="divide-y divide-neutral-300">
+            <Accordion type="multiple" defaultValue={["about-me"]} className="divide-y divide-white">
               <AboutMeAccordion
                 value={(profile as any)?.about_me || ""}
                 onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
               />
               {/* Personal Information */}
               <AccordionItem value="personal" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Personal Information</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-4">
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label>First Name</Label>
@@ -1366,13 +1333,13 @@ export default function MyPractice() {
 
           {/* Practice Details Accordion */}
             <AccordionItem value="practice-details" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Practice Information</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-4">
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
             <p className="text-sm text-muted-foreground">
               This information appears on your document templates and letterheads.
             </p>
@@ -1776,13 +1743,13 @@ export default function MyPractice() {
 
           {/* Shared Practice Calendar Accordion */}
             <AccordionItem value="shared-calendar" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Shared Practice Calendar</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-4">
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
                 <p className="text-sm text-muted-foreground">
                   Share a single calendar across multiple doctors. Each doctor's appointments show in their assigned color.
                   Google Calendar sync stays personal — only your own appointments mirror.
@@ -1901,13 +1868,13 @@ export default function MyPractice() {
 
            {/* Service Offerings & Pricing Accordion */}
             <AccordionItem value="service-pricing" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Service Offerings & Pricing</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-4">
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
                 <p className="text-sm text-muted-foreground">Define your service types and default prices for invoicing.</p>
                 <div className="space-y-1.5">
                   <Label>Currency</Label>
@@ -2087,13 +2054,13 @@ export default function MyPractice() {
 
           {/* Digital Signature Accordion */}
             <AccordionItem value="signature" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Digital Signature</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-2">
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className="flex items-center gap-2 flex-wrap">
               <Select
                 value={sigFormData.signature_font}
@@ -2201,13 +2168,13 @@ export default function MyPractice() {
 
           {/* Voice Narration Settings Accordion */}
             <AccordionItem value="voice" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
                   <h3 className="text-base font-semibold text-primary-dark">Voice Narration Settings</h3>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 space-y-2">
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
             <p className="text-xs text-muted-foreground">Choose the voice used for your daily briefing narration.</p>
             <div className="space-y-1.5">
               <Label className="text-xs">Narration Voice</Label>

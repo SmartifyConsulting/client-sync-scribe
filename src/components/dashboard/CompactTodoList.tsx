@@ -476,7 +476,7 @@ export function CompactTodoList() {
           </div>
         )}
 
-        {/* Task list — grouped by date */}
+        {/* Task list — grouped by date, then patient */}
         <div className="max-h-96 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center py-4">
@@ -493,6 +493,52 @@ export function CompactTodoList() {
                 const key = dateBucketFor((todo as any).due_date || todo.created_at);
                 grouped[key].push(todo);
               });
+              const patientGroups = (items: TodoItem[]) => {
+                const map = new Map<string, TodoItem[]>();
+                for (const todo of items) {
+                  const display = getTodoDisplay(todo as any);
+                  const name = display.patient || "No patient";
+                  if (!map.has(name)) map.set(name, []);
+                  map.get(name)?.push(todo);
+                }
+                return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
+              };
+              const renderTodoRow = (todo: TodoItem) => (
+                <TodoRow
+                  insideGroup
+                  key={todo.id}
+                  compact
+                  todo={todo as any}
+                  onToggle={toggleComplete}
+                  onStartEdit={(t) => { setEditingId(t.id); setEditText(t.title); }}
+                  onDelete={deleteTask}
+                  onPreview={(t) => handlePreviewDoc(t as any)}
+                  onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+                  onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
+                  onSend={async (t) => {
+                    if (!t.document_id) return;
+                    setSendingDocId(t.document_id);
+                    try {
+                      const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', t.document_id).maybeSingle();
+                      if (!doc) return;
+                      const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
+                      const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
+                      if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: t.document_id, recipientEmail: email } });
+                      await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', t.document_id);
+                      await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', t.id);
+                      setTodos(prev => prev.map(x => x.id === t.id ? { ...x, completed: true } : x));
+                      toast({ title: "Document sent" });
+                    } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
+                  }}
+                  isEditing={editingId === todo.id}
+                  editText={editText}
+                  setEditText={setEditText}
+                  saveEdit={saveEdit}
+                  cancelEdit={() => { setEditingId(null); setEditText(""); }}
+                  sending={sendingDocId === todo.document_id}
+                  previewing={loadingPreview === todo.document_id}
+                />
+              );
               const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
               if (buckets.length === 0) return null;
               return (
@@ -508,43 +554,24 @@ export function CompactTodoList() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
-                        <div className="divide-y divide-neutral-200">
-                          {grouped[b.key].map((todo) => (
-                        <TodoRow insideGroup
-                          key={todo.id}
-                          compact
-                          todo={todo as any}
-                          onToggle={toggleComplete}
-                          onStartEdit={(t) => { setEditingId(t.id); setEditText(t.title); }}
-                          onDelete={deleteTask}
-                          onPreview={(t) => handlePreviewDoc(t as any)}
-                          onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
-                          onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
-                          onSend={async (t) => {
-                            if (!t.document_id) return;
-                            setSendingDocId(t.document_id);
-                            try {
-                              const { data: doc } = await (supabase.from('documents').select('*') as any).eq('id', t.document_id).maybeSingle();
-                              if (!doc) return;
-                              const { data: patient } = await supabase.from('patients').select('email, pharmacy_email').eq('id', doc.patient_id).maybeSingle();
-                              const email = doc.template_name?.toLowerCase().includes('prescription') ? patient?.pharmacy_email || patient?.email : patient?.email;
-                              if (email) await supabase.functions.invoke('send-document-email', { body: { documentId: t.document_id, recipientEmail: email } });
-                              await (supabase.from('documents').update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any).eq('id', t.document_id);
-                              await supabase.from('todos').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', t.id);
-                              setTodos(prev => prev.map(x => x.id === t.id ? { ...x, completed: true } : x));
-                              toast({ title: "Document sent" });
-                            } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
-                          }}
-                          isEditing={editingId === todo.id}
-                          editText={editText}
-                          setEditText={setEditText}
-                          saveEdit={saveEdit}
-                          cancelEdit={() => { setEditingId(null); setEditText(""); }}
-                          sending={sendingDocId === todo.document_id}
-                          previewing={loadingPreview === todo.document_id}
-                        />
+                        <Accordion type="multiple" className="rounded-md border border-neutral-300 bg-card overflow-hidden divide-y divide-neutral-200">
+                          {patientGroups(grouped[b.key]).map(([patientName, items]) => (
+                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border-0">
+                              <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-muted/50 text-foreground">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <UserIcon className="h-3.5 w-3.5 text-primary shrink-0" />
+                                  <span className="text-xs font-semibold truncate text-left">{patientName}</span>
+                                  <SectionCountPill count={items.length} className="ml-auto mr-1" />
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent className="px-3 pt-3 pb-3">
+                                <div className="divide-y divide-neutral-200">
+                                  {items.map(renderTodoRow)}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
                           ))}
-                        </div>
+                        </Accordion>
                       </AccordionContent>
                     </AccordionItem>
                   ))}

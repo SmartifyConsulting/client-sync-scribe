@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 
 const doctorNavItems = [
   { icon: LayoutDashboard, labelKey: "nav.home", to: "/doctor-dashboard" },
-  { icon: Users, labelKey: "bottomNav.patients", to: "/patients" },
+  { icon: User, labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Briefcase, labelKey: "bottomNav.practice", to: "/practice" },
   { icon: UserCog, labelKey: "nav.admin", to: "/admin" },
   { icon: Siren, labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
