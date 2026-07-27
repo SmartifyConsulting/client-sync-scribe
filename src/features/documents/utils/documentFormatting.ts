@@ -35,11 +35,40 @@ export const normalizeHeadingMarkup = (content: string): string => {
       continue;
     }
 
+    // Plain ALL-CAPS section heading (templates are stored as plain text —
+    // emphasis is applied here so users never see raw <u><b> markup).
+    if (isPlainCapsHeading(line)) {
+      out.push(`<u><b>${line.trim()}</b></u>`);
+      continue;
+    }
+
     out.push(line);
   }
 
   return out.join("\n");
 };
+
+/** A short, all-uppercase line with no placeholders — treated as a heading. */
+const isPlainCapsHeading = (line: string): boolean => {
+  const t = line.trim();
+  if (!t || t.length > 60) return false;
+  if (t.includes("[") || t.includes("<")) return false;
+  if (/[a-z]/.test(t)) return false;
+  if (!/[A-Z]/.test(t)) return false;
+  if (t.endsWith(":")) return false;
+  return /^[A-Z0-9 ()\-—–&,./']+$/.test(t);
+};
+
+/**
+ * Inverse of the heading emphasis: turns stored `<u><b>X</b></u>` (and the
+ * bold/underline swap) back into plain text so template editors never show
+ * raw HTML. Emphasis is re-applied at render time.
+ */
+export const stripHeadingMarkup = (content: string): string =>
+  (content || "")
+    .replace(/<u>\s*<b>([\s\S]*?)<\/b>\s*<\/u>/gi, "$1")
+    .replace(/<b>\s*<u>([\s\S]*?)<\/u>\s*<\/b>/gi, "$1");
+
 
 import DOMPurify from "dompurify";
 
