@@ -1,42 +1,46 @@
-## 1. To-Do List — restore patient sub-grouping
+## Plan
 
-In `src/pages/TodoList.tsx`, when grouping by **Date**, each bucket (Today / This week / This month / Older) currently renders a flat list. Restore the second level:
+1. **Dashboard To-Do grouping**
+   - Update the dashboard To-Do widget so date buckets contain nested patient groups:
+     ```text
+     This week
+       Sharon Kennedy
+         Review Invoice
+         Review Medical Certificate
+         Review Prescription
+     ```
+   - Keep the top date bucket expanded by default and green/white.
+   - Keep patient sub-groups collapsed by default inside each date bucket.
+   - Reuse the same task row rendering/actions already used in the dashboard list.
 
-- Inside each date bucket, group tasks by patient name (fallback "Unassigned").
-- Nested patient accordions, **all collapsed by default**, separated by a fine grey line.
-- Sub-header: patient name + count pill, lighter/smaller than the green top-level header.
-- Grouping by **Patient** stays single-level.
+2. **Recent Activity links**
+   - Change Recent Activity so the activity title/type, e.g. **Session completed**, **Document generated**, **Task completed**, is the clickable link.
+   - Render the patient/doctor name as plain text with the sample badge where applicable, not as the hyperlink.
 
-## 2. Documents → Templates tab
+3. **Patient alphabet strip**
+   - Reduce the A-Z letter strip font by one size.
+   - Darken the letter borders from the current light grey to a darker grey.
+   - Keep the letters unshaded by default and only shade on hover/active state.
 
-- Fix invisible hover text on the `All Documents` / `Templates` tab triggers (explicit hover text colour) in `src/pages/doctor/DoctorDocumentsPage.tsx`.
-- Rename the card action button **Use → View** in `src/pages/doctor/DoctorTemplatesTab.tsx`.
+4. **Universal accordion spacing and headers**
+   - Strengthen the shared accordion styling so there is clear padding between every green header row and its sub-text/content.
+   - Apply this consistently to dashboard To-Dos, My Tasks, My Sessions, Documents, My Practice, and Patient Personal/Medical Information.
+   - Make My Practice and Patient Personal/Medical Information accordion rows green with white text in both open and collapsed states.
+   - Separate green rows with thin white divider lines.
 
-## 3. About Me — AI synopsis
+5. **My Practice About Me AI**
+   - Remove the visible **Generate with AI** button from About Me.
+   - Keep the secure `generate-about-me` function as the generation backend.
+   - Auto-generate the About Me synopsis once for new doctors after sign-up / first profile setup when `about_me` is empty.
+   - Save the generated text to the profile so it does not regenerate again after that.
+   - Leave the About Me text area editable and saveable after generation.
 
-- Add a **Generate with AI** button beside Save in the About Me accordion (`src/pages/MyPractice.tsx`).
-- New edge function `generate-about-me` reads the doctor's own profile data (name, qualifications, specialty, years of experience, practice, services) and returns a warm patient-facing synopsis under 600 words.
-- Result fills the textarea as an editable draft; nothing saves until Save is pressed. Handle 429/402 with clear toasts.
+6. **Doctor nav: My Profile after Home**
+   - Add **My Profile** to the doctor desktop sidebar immediately after **Home**.
+   - Point it to the doctor’s own patient-profile view without requiring profile switching.
+   - Add the matching mobile bottom-nav entry if space/pattern allows, preserving SOS visibility.
 
-## 4. Unified field frames across profile sections
+## Technical notes
 
-Apply the patient **Personal Information** frame treatment to every section inside:
-- Patient Personal Information and Medical Information (`PatientDetailsEditor.tsx`)
-- All My Practice sections (`MyPractice.tsx`)
-
-Rules: one bordered frame per section with `divide-y` rows, no rounded sub-frames or gaps, same horizontal label/value layout and padding. **Field labels go up one size step** (`text-[10px]`→`text-xs`, `text-xs`→`text-sm`) and stay bold; values keep their current size.
-
-## 5. Doctors get their own patient profile in-place
-
-Doctors who are also patients should never need to switch accounts:
-
-- Add **My Profile** to the doctor sidebar nav (`src/components/layout/Sidebar.tsx`), pointing at the doctor's own patient record — the same "My Profile" screen patients see, rendered inside the doctor shell.
-- Resolve the doctor's own patient record from their `user_id`; if none exists, create/link it on first visit so the screen is never empty.
-- The doctor's teal/blue theming and sidebar stay intact — only the content area shows the patient profile.
-- In **Documents**, add a **My Documents** filter (alongside the existing Date / Patient / Type grouping) that narrows the list to documents belonging to the doctor's own patient record.
-
-### Technical notes
-- New file: `supabase/functions/generate-about-me/index.ts` using Lovable AI with in-code JWT validation.
-- No schema changes; About Me still saves to `profiles.about_me`.
-- Label sizing centralised in a shared class constant so all screens stay in sync.
-- Own-record lookup uses the existing hardened pattern: `.order("created_at").limit(1).maybeSingle()`.
+- Files to update include `CompactTodoList`, `RecentActivity`, shared accordion styling, `Patients`, `MyPractice`, `PatientDetailsEditor`, and the doctor navigation components.
+- I’ll verify the final UI on the dashboard and My Practice/Profile screens after implementation.
