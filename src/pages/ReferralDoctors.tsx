@@ -17,7 +17,9 @@ const SPECIALTIES = [
   "Allergist/Immunologist",
   "Anesthesiologist",
   "Cardiologist",
+  "Chiropractor",
   "Dermatologist",
+  "Dietitian",
   "Emergency Medicine Physician",
   "Endocrinologist",
   "Family Medicine Physician",
@@ -29,13 +31,16 @@ const SPECIALTIES = [
   "Nephrologist",
   "Neurologist",
   "Obstetrician/Gynecologist",
+  "Occupational Therapist",
   "Oncologist",
   "Ophthalmologist",
+  "Optometrist",
   "Orthopedic Surgeon",
   "Otolaryngologist (ENT)",
   "Pathologist",
   "Pediatrician",
   "Physiatrist",
+  "Physiotherapist",
   "Plastic Surgeon",
   "Podiatrist",
   "Psychiatrist",
@@ -48,6 +53,27 @@ const SPECIALTIES = [
   "Urologist",
   "Vascular Surgeon",
 ];
+
+/** Common wordings that should resolve to a canonical specialty above. */
+const SPECIALTY_ALIASES: Record<string, string> = {
+  physiotherapy: "Physiotherapist",
+  physio: "Physiotherapist",
+  physicaltherapist: "Physiotherapist",
+  physicaltherapy: "Physiotherapist",
+  occupationaltherapy: "Occupational Therapist",
+  dietetics: "Dietitian",
+  dietician: "Dietitian",
+  gp: "General Practitioner",
+  optometry: "Optometrist",
+  chiropractic: "Chiropractor",
+};
+
+const normalizeSpecialty = (value?: string | null): string => {
+  const raw = (value || "").trim().toLowerCase();
+  if (!raw) return "";
+  const key = raw.replace(/[^a-z]/g, "");
+  return (SPECIALTY_ALIASES[key] || raw).toLowerCase();
+};
 
 interface ReferralDoctor {
   id: string;
