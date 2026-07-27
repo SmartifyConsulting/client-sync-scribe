@@ -2,6 +2,9 @@
 // Replaces tokens like [PatientName], [Patient Name], [InvoiceNumber] (case-insensitive)
 // with real values from patient / profile / invoice / time. Unmatched tokens become "___".
 
+import { renderSignatureHtml } from "@/lib/signature";
+
+
 export interface FillPatient {
   name?: string | null;
   first_name?: string | null;
