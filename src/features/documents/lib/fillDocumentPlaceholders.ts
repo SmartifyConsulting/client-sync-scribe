@@ -224,6 +224,7 @@ export function fillDocumentPlaceholders(
   const { lookup, slotKeys } = buildReplacements(ctx);
   let replacedCount = 0;
   let hadPlaceholders = false;
+  const blank = ctx.plainText ? "___" : `<span style="color:#999;">___</span>`;
 
   // Match [Word] or [Two Words] etc. — letters, digits, spaces, underscore, hyphen.
   const resolved = content.replace(/\[([A-Za-z][A-Za-z0-9_ -]*)\]/g, (_full, token: string) => {
@@ -238,10 +239,10 @@ export function fillDocumentPlaceholders(
       // Indexed prescription slot with no data — render blank so unused rows disappear
       if (slotKeys.has(key)) return "";
       // Known token, no value — render as quiet underscore placeholder.
-      return `<span style="color:#999;">___</span>`;
+      return blank;
     }
     // Unknown token — same quiet placeholder so brackets never leak through.
-    return `<span style="color:#999;">___</span>`;
+    return blank;
   });
 
   return { content: resolved, replacedCount, hadPlaceholders };

@@ -170,6 +170,8 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
     const { content: updatedContent } = fillDocumentPlaceholders(template.content, {
       profile: (profile as any) ?? null,
       patient: (patient as any) ?? null,
+      // The editor is a raw textarea — keep signature/blank markup out of it.
+      plainText: true,
     });
 
     if (patient) {
