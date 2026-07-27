@@ -10,7 +10,7 @@ import {
   stripHeadingMarkup,
   renderFormattedContent as renderDocumentHtml,
 } from "@/features/documents/utils/documentFormatting";
-import { renderSignatureHtml } from "@/lib/signature";
+import { resolveTemplatePreviewTokens } from "@/features/documents/lib/resolveTemplatePreview";
 
 
 import {
@@ -121,22 +121,10 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     });
   };
 
-  const replacePlaceholders = (text: string) => {
-    let result = text
-      .replace(/\[PracticeNumber\]/g, profile?.practice_number || "[PracticeNumber]")
-      .replace(/\[DoctorNumber\]/g, profile?.doctor_number || "[DoctorNumber]")
-      .replace(/\[PracticeAddress\]/g, (profile as any)?.practice_address || "[PracticeAddress]")
-      .replace(/\[DoctorName\]/g, profile?.full_name || "[DoctorName]")
-      .replace(/\[Date\]/g, new Date().toLocaleDateString());
-    
-    // Replace [DoctorSignature] with the uploaded image or the typed signature
-    const signatureHtml = renderSignatureHtml(profile as any);
-    if (signatureHtml) {
-      result = result.replace(/\[(DoctorSignature|Signature)\]/g, signatureHtml);
-    }
-
-    return result;
-  };
+  // Previews show the signed-in doctor's real details; patient-scoped tokens
+  // fall back to the shared quiet "___" placeholder instead of raw brackets.
+  const replacePlaceholders = (text: string) =>
+    resolveTemplatePreviewTokens(text, profile as any);
 
   const renderFormattedContent = (content: string) => renderDocumentHtml(content);
 

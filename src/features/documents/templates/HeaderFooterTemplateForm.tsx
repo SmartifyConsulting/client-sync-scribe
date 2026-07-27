@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
+import { resolveTemplatePreviewTokens } from "@/features/documents/lib/resolveTemplatePreview";
+import { renderFormattedContent as renderDocumentHtml } from "@/features/documents/utils/documentFormatting";
 import {
   Select,
   SelectContent,
@@ -118,36 +120,12 @@ export function HeaderFooterTemplateForm({
     return FONT_OPTIONS.find(f => f.value === fontValue)?.preview || "font-sans";
   };
 
-  const replacePlaceholders = (text: string) => {
-    let result = text
-      .replace(/\[PracticeNumber\]/g, profile?.practice_number || "[PracticeNumber]")
-      .replace(/\[DoctorNumber\]/g, profile?.doctor_number || "[DoctorNumber]")
-      .replace(/\[PracticeAddress\]/g, (profile as any)?.practice_address || "[PracticeAddress]")
-      .replace(/\[DoctorName\]/g, profile?.full_name || "[DoctorName]")
-      .replace(/\[Date\]/g, new Date().toLocaleDateString());
-    
-    // Replace [DoctorSignature] with image tag if signature exists
-    const signatureUrl = (profile as any)?.signature_url;
-    if (signatureUrl) {
-      result = result.replace(/\[DoctorSignature\]/g, `<img src="${signatureUrl}" alt="Signature" style="max-height: 60px; display: inline-block;" />`);
-    }
-    
-    return result;
-  };
+  // Previews resolve the signed-in doctor's real details (name, numbers,
+  // signature). Tokens without context render as a quiet "___".
+  const replacePlaceholders = (text: string) =>
+    resolveTemplatePreviewTokens(text, profile as any);
 
-  const renderFormattedContent = (content: string) => {
-    const safeContent = content
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/&lt;b&gt;/g, '<b>')
-      .replace(/&lt;\/b&gt;/g, '</b>')
-      .replace(/&lt;i&gt;/g, '<i>')
-      .replace(/&lt;\/i&gt;/g, '</i>')
-      .replace(/&lt;u&gt;/g, '<u>')
-      .replace(/&lt;\/u&gt;/g, '</u>')
-      .replace(/\n/g, '<br/>');
-    return safeContent;
-  };
+  const renderFormattedContent = (content: string) => renderDocumentHtml(content);
 
   const renderSectionPreview = (section: SectionContent) => {
     return (
