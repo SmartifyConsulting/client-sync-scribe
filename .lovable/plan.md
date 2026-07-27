@@ -1,60 +1,41 @@
-## 1. Add Okili and Dr Buttons to the profile switcher
+## 1. "Couldn't build DISC profile — Failed to send a request to the Edge Function"
 
-`src/components/layout/testProfiles.ts` gains two entries:
-- **Samuel Okoli (Okili)** — Patient. Confirmed in the database: patient record `samuel 0koli`, phone `+234 8167581572`, email `ifeanyi.okoli@greenoriagroup.com` (a duplicate row with the same phone and no email also exists). The switcher works by email through the existing admin impersonation function, so the entry uses that email. If that login account has no email on file, switching will fail and I'll report back rather than guess.
-- **Dr Gianna Buttons** — Doctor, `dr.buttons@smartify.co.za` (profile `Gianna Buttons` confirmed present).
+That message is the client failing to reach the function at all (not a 4xx/5xx from inside it). The backend has no log entries whatsoever for `analyze-patient-disc`, meaning it has never actually run — the function exists in the codebase and in config, but is not live.
 
-Passwords are not stored in code; switching uses the existing admin impersonation path.
+Fix: redeploy `analyze-patient-disc`, then invoke it against a real patient to confirm it returns a profile (and surface the real backend message in the toast instead of the generic transport error).
 
-## 2. Emergency Contact accordion row
+## 2. Templates showing raw HTML code
 
-`EmergencyContactsInline.tsx` currently draws `rounded-xl border border-neutral-400` when not in `flat` mode. Remove that rounded grey frame so the row matches the other flat accordion rows.
+Default template bodies are stored with literal markup, e.g. `<u><b>PRESCRIPTION</b></u>`, which shows as code in the template editor and anywhere the body is displayed as plain text.
 
-## 3. Personal Information top row layout
+Fix:
+- Rewrite the default template bodies (`useTemplates.ts`) to plain text headings — no `<u>`, `<b>` tags. Heading emphasis moves to the renderer, not the stored text.
+- Add a small sanitiser used when a template body is loaded into the editor so **existing saved templates** with tags are cleaned on display/save, rather than leaving old content broken.
+- Document generation/preview keeps producing the same visual result (bold, underlined section headings) because the renderer applies the styling.
 
-The top accordion row's content switches from the stacked grid to a **horizontal inline layout**: label and value on one line, labels **bold** and one font size smaller than now, values also one size smaller, wrapping responsively on narrow screens.
+## 3. Doctor's signature never appears on previews/documents
 
-## 4. Consistent document editor footers
+The signature is configured as *typed text* (font, colour, size — e.g. Great Vibes / Navy / 42px on `profiles.signature_font`, `signature_color`, `signature_font_size`, `signature_bold`, `signature_italic`). But both placeholder resolvers only handle `profiles.signature_url` (an uploaded image). With no image uploaded, `[DoctorSignature]` resolves to a blank line — which is exactly the `___` seen on the prescription.
 
-**Every document editor that opens after the session recording stops** — Prescription, Medical Certificate, Invoice, Referral Letter, General Letter, Hospital Admission — gets the same footer: **Cancel · Preview · Send · Save**.
-- Send uses each document's existing delivery path (pharmacy, employer, claims/insurance, referred doctor, patient).
-- Save persists without closing on Send.
-- The **Review Invoice** dialog's **Skip** button is removed.
+Fix in `fillDocumentPlaceholders.ts` and `resolveDocumentPreviewContent.ts`:
+- If `signature_url` exists → keep the current inline image.
+- Otherwise, render the doctor's name in the stored signature font/colour/size/weight/style (self-hosted signature fonts already in the app), so previews, invoices, prescriptions, certificates and exports all show the same signature the doctor sees in My Practice.
+- Also apply to `[Signature]` and keep `[SignatureDate]` behaviour unchanged.
 
-## 5. Sent-state for generated documents
+## 4. All Documents (doctor) — group by Patient / Date, styled like My Sessions
 
-- The "AI detected documents from this session" chip bar gets a per-document **SENT** state: once emailed, the chip shows a tiny red `SENT` badge.
-- Sent state comes from the document record's delivery status so it survives refresh.
-- **Sent invoices are removed from the To-Do list.** The to-do query and the post-session completion step treat "sent" as done, so a sent invoice never appears as an outstanding "Review Invoice" task. Same rule for any document with a recorded sent state.
+`DoctorDocumentsTab` is currently a flat, full-width list with its own row format.
 
-## 6. Doctor check-in: one button, meaningful note, patient reply
+Fix: rebuild it using the same shared pieces My Sessions and My Tasks use:
+- Date / Patient toggle top-right (default **Date**), search kept above.
+- Date buckets: Today · This week · This month · Older; Patient mode grouped by surname.
+- Same frame and rows: `SECTION_FRAME_CLASS`, `SECTION_ITEM_CLASS`, `SECTION_TRIGGER_CLASS`, count pills, `max-w-5xl` container width, and the same 12px row typography as My Sessions.
+- Keep existing behaviour: click-through to the patient's document, sample-patient badges, pagination.
 
-- **Remove the duplicate check-in button** in `src/pages/PatientProfile.tsx` (the one calling `award_doctor_checkin` directly). Only the `EmoticonSender` "Check In" control remains and it takes over the Vula award.
-- After the doctor picks an emoticon, the popover expands to a field labelled **"Check-In Message"** with a Send action — the emoticon alone can no longer be sent.
-- The message goes through an AI genuineness check (server-side edge function) that judges whether it is a substantive, patient-specific check-in rather than points farming. Existing anti-gaming signals (profile viewed in 24h, daily frequency) feed the same decision.
-  - Genuine → sent, Vulas awarded.
-  - Not genuine → still sent, flagged, **no Vulas**, with the reason shown to the doctor.
-- The check-in lands in the **patient's notification box** with emoticon and message, and the patient can **reply** from the notification; replies notify the doctor.
-- Small migration: message body + reply linkage on `emoticon_messages`, with grants/RLS so each side can read and reply to their own threads.
+## 5. My Sessions top row not green/white by default
 
-## 7. Font sizing in the session panel
-
-In `src/pages/Sessions.tsx`, the Live AI hint block and the live Transcript lines both drop to `text-[10px]` with matching leading.
-
-## 8. AI Consult is manual only
-
-- Add an **AI Consult** button next to Record/Stop in the session sidebar. It can be pressed at any point during a session (while there is transcript text) and opens the AI Clinician modal with the full assessment.
-- **Continue** simply closes the modal; recording keeps running.
-- **Remove the automatic AI Clinical Assessment that currently fires when the session stops.** After Stop, the flow goes straight transcription → document review. The assessment only ever appears when the doctor presses AI Consult.
-
-## 9. AI Clinician modal redesign
-
-`SessionDiagnosticsModal.tsx`:
-- Remove the **Edit Findings** button.
-- Render each parsed section inside its own bordered, rounded card.
-- Shade cards by section type using theme tokens (history/presentation, assessment, differentials, red flags, plan), keeping current text sizes and the non-binding warning.
+Verify in the running app why the first row doesn't open with the green/white treatment (the accordion's `defaultValue` is `["today"]`, but the mount order relative to data loading, or an empty "Today" bucket, may be defeating it). Fix so that on load — and on every toggle between Date and Patient — the **top row is expanded, green background, white text**, and any other row clicked takes on the same treatment. Confirm with a browser check rather than assuming.
 
 ## Technical notes
-
-- Files touched: `testProfiles.ts`, `EmergencyContactsInline.tsx`, `PatientDetailsEditor.tsx`, `PatientProfile.tsx`, `EmoticonSender.tsx`, `Notifications.tsx`, the six editors in `features/sessions/components/`, `TranscriptionReviewDialogs.tsx`, `pages/Sessions.tsx`, `components/sessions/SessionDiagnosticsModal.tsx`, plus the to-do query and a new check-in validation edge function.
-- Migrations needed: check-in message + reply support; a sent timestamp on documents/invoices if one does not already exist.
+- Files: `supabase/functions/analyze-patient-disc/index.ts` (redeploy), `src/features/patients/components/DiscPersonalityCard.tsx` (error surfacing), `src/hooks/useTemplates.ts`, `src/features/documents/templates/*`, `src/features/documents/lib/fillDocumentPlaceholders.ts`, `src/features/documents/lib/resolveDocumentPreviewContent.ts`, `src/pages/doctor/DoctorDocumentsTab.tsx`, `src/pages/MySessions.tsx`.
+- No schema changes required; no colour-token changes.

@@ -67,7 +67,21 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
       const { data, error } = await supabase.functions.invoke("analyze-patient-disc", {
         body: { patient_id: patientId },
       });
-      if (error) throw error;
+      if (error) {
+        // Surface the function's own message instead of the generic
+        // "Failed to send a request to the Edge Function".
+        let detail = error.message;
+        const res = (error as any)?.context;
+        if (res && typeof res.json === "function") {
+          try {
+            const j = await res.json();
+            if (j?.error) detail = j.error;
+          } catch {
+            /* ignore */
+          }
+        }
+        throw new Error(detail);
+      }
       if (data?.error) throw new Error(data.error);
       setProfile(data.profile as DiscProfile);
       toast({ title: "DISC profile updated" });
@@ -81,6 +95,7 @@ export function DiscPersonalityCard({ patientId, hasSessions }: Props) {
       setGenerating(false);
     }
   };
+
 
   if (roleLoading || !isDoctor) return null;
 

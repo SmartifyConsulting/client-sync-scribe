@@ -2,6 +2,9 @@
 // Replaces tokens like [PatientName], [Patient Name], [InvoiceNumber] (case-insensitive)
 // with real values from patient / profile / invoice / time. Unmatched tokens become "___".
 
+import { renderSignatureHtml } from "@/lib/signature";
+
+
 export interface FillPatient {
   name?: string | null;
   first_name?: string | null;
@@ -28,7 +31,13 @@ export interface FillProfile {
   practice_address?: string | null;
   specialty?: string | null;
   signature_url?: string | null;
+  signature_font?: string | null;
+  signature_color?: string | null;
+  signature_font_size?: number | null;
+  signature_bold?: boolean | null;
+  signature_italic?: boolean | null;
   logo_url?: string | null;
+
   // Bank details aren't a real column today — accept any to be future-proof.
   bank_account_details?: string | null;
   bank_details?: string | null;
@@ -138,13 +147,11 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     ReferralDate: todayLong,
     AdmissionDate: todayLong,
 
-    // Signature — rendered as inline image when available
-    DoctorSignature: profile?.signature_url
-      ? `<img src="${profile.signature_url}" alt="Signature" style="max-height:60px;display:inline-block;" />`
-      : "",
-    Signature: profile?.signature_url
-      ? `<img src="${profile.signature_url}" alt="Signature" style="max-height:60px;display:inline-block;" />`
-      : "",
+    // Signature — uploaded image when present, otherwise the typed signature
+    // (font / colour / size configured in My Practice).
+    DoctorSignature: renderSignatureHtml(profile),
+    Signature: renderSignatureHtml(profile),
+
 
 
     // Invoice (optional)

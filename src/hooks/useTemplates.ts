@@ -36,7 +36,7 @@ const defaultTemplates: Omit<Template, "id" | "user_id">[] = [
     name: "Medical Certificate",
     description: "Certificate for patients to substantiate absence from work",
     category: "Certificate",
-    content: `<u><b>MEDICAL CERTIFICATE</b></u>
+    content: `MEDICAL CERTIFICATE
 
 Practice Number: [PracticeNumber]
 
@@ -85,7 +85,7 @@ Date: [SignatureDate]`,
     name: "Referral Letter",
     description: "Letter for referring patients to specialists",
     category: "Letter",
-    content: `<u><b>REFERRAL LETTER</b></u>
+    content: `REFERRAL LETTER
 
 Date: [ReferralDate]
 
@@ -103,7 +103,7 @@ Patient Details:
 
 I am writing to refer the above-named patient for your expert opinion and management.
 
-<u><b>PRESENTING COMPLAINT</b></u>
+PRESENTING COMPLAINT
 [PresentingComplaint]
 
 I would be grateful if you could see this patient at your earliest convenience. Please do not hesitate to contact me if you require any further information.
@@ -125,11 +125,11 @@ Tel: [PracticePhone]`,
     name: "Prescription",
     description: "Template for medication prescriptions",
     category: "Prescription",
-    content: `<u><b>PRESCRIPTION</b></u>
+    content: `PRESCRIPTION
 
 Date: [PrescriptionDate]
 
-<u><b>PATIENT DETAILS</b></u>
+PATIENT DETAILS
 
 Name: [PatientName]
 
@@ -186,7 +186,7 @@ Date: [SignatureDate]`,
     name: "General Letterhead",
     description: "Blank letterhead template for custom documents",
     category: "General",
-    content: `<u><b>[DOCUMENT TITLE]</b></u>
+    content: `[DOCUMENT TITLE]
 
 Practice Number: [PracticeNumber]
 
@@ -213,7 +213,7 @@ Date: [SignatureDate]`,
     name: "Invoice",
     description: "Billing invoice for patient services",
     category: "Invoice",
-    content: `<u><b>INVOICE</b></u>
+    content: `INVOICE
 
 TAX Invoice Number: INV-[InvoiceNumber]
 
@@ -258,7 +258,7 @@ Thank you.
     name: "Hospital Admission Form",
     description: "Form for requesting hospital admission for a patient",
     category: "Admission",
-    content: `<u><b>HOSPITAL ADMISSION FORM</b></u>
+    content: `HOSPITAL ADMISSION FORM
 
 Practice Address: [PracticeAddress]
 Practice No: [PracticeNumber]
@@ -266,7 +266,7 @@ Registration No: [DoctorNumber]
 
 ─────────────────────────────────────
 
-<u><b>ADMISSION DETAILS</b></u>
+ADMISSION DETAILS
 
 Admitting Doctor: [DoctorName]
 Practice Number: [PracticeNumber]
@@ -275,13 +275,13 @@ Date of Admission: [AdmissionDate]
 
 ─────────────────────────────────────
 
-<u><b>DIAGNOSIS DETAILS — ICD-10 CODES</b></u>
+DIAGNOSIS DETAILS — ICD-10 CODES
 
 [ICD10Codes]
 
 ─────────────────────────────────────
 
-<u><b>PROCEDURE DETAILS</b></u>
+PROCEDURE DETAILS
 
 Date of Procedure: [ProcedureDate]
 Procedure Description: [ProcedureDescription]
@@ -290,7 +290,7 @@ Procedure Description: [ProcedureDescription]
 
 ─────────────────────────────────────
 
-<u><b>PATIENT SPECIAL INSTRUCTIONS</b></u>
+PATIENT SPECIAL INSTRUCTIONS
 
 [SpecialInstructions]
 

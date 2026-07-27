@@ -15,6 +15,8 @@
 //      version so subsequent prints/emails are already correct.
 
 import { supabase } from "@/integrations/supabase/client";
+import { renderSignatureHtml } from "@/lib/signature";
+
 import {
   fillDocumentPlaceholders,
   type FillContext,
@@ -131,14 +133,13 @@ export async function resolveDocumentPreviewContent(
 
   let content = filled.content;
 
-  // Inline the doctor's signature image (rendered, not a [Token]).
+  // Inline the doctor's signature (uploaded image or typed signature).
   const signatureUrl = (profile as any)?.signature_url || undefined;
-  if (signatureUrl) {
-    content = content.replace(
-      /\[DoctorSignature\]/g,
-      `<img src="${signatureUrl}" alt="Signature" style="max-height: 60px;" />`,
-    );
+  const signatureHtml = renderSignatureHtml(profile as any);
+  if (signatureHtml) {
+    content = content.replace(/\[(DoctorSignature|Signature)\]/g, signatureHtml);
   }
+
 
   const didChange = content !== original;
 

@@ -169,12 +169,15 @@ export default function MySessions() {
     );
   }, [sessions, t]);
 
+  // Open (and highlight) the first bucket that actually has sessions, so the
+  // top visible row is never an empty "Today".
   const defaultOpen =
     groupMode === "date"
-      ? ["today"]
+      ? [(BUCKETS.find((b) => groupedByDate[b.key].length > 0) ?? BUCKETS[0]).key]
       : groupedByPatient.length > 0
         ? [groupedByPatient[0][0]]
         : [];
+
 
   return (
     <div className="container mx-auto p-4 max-w-5xl">
