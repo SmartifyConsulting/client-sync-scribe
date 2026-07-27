@@ -1,45 +1,42 @@
-## 1. Accordion breathing room
+## 1. To-Do List — restore patient sub-grouping
 
-In `src/components/ui/section-accordion.tsx`, add a shared content-padding class (top padding + inner row spacing) and apply it wherever `SECTION_FRAME_CLASS` accordions render their `AccordionContent`: My Practice, My Sessions, My Tasks, Documents, the dashboard To-Do list and Personal / Medical Information. Result: a clear gap between the green header row and the first sub-row, and consistent spacing between sub-rows.
+In `src/pages/TodoList.tsx`, when grouping by **Date**, each bucket (Today / This week / This month / Older) currently renders a flat list. Restore the second level:
 
-## 2. All-green accordion headers
+- Inside each date bucket, group tasks by patient name (fallback "Unassigned").
+- Nested patient accordions, **all collapsed by default**, separated by a fine grey line.
+- Sub-header: patient name + count pill, lighter/smaller than the green top-level header.
+- Grouping by **Patient** stays single-level.
 
-Add a `SECTION_TRIGGER_ALWAYS_GREEN_CLASS` variant that keeps the primary/green background with white text in both open and collapsed states (chevron and count pill included). Apply it so that **every** accordion heading row is green with white text at all times on:
-- **My Sessions**
-- **My Tasks** (and the dashboard To-Do card)
-- **Documents** (all grouping modes)
+## 2. Documents → Templates tab
 
-On each of these screens the **top row is expanded by default** and all other rows start collapsed. Other screens (My Practice, Personal / Medical Information) keep the existing behaviour: green only when expanded.
+- Fix invisible hover text on the `All Documents` / `Templates` tab triggers (explicit hover text colour) in `src/pages/doctor/DoctorDocumentsPage.tsx`.
+- Rename the card action button **Use → View** in `src/pages/doctor/DoctorTemplatesTab.tsx`.
 
-## 3. My Tasks frame width
+## 3. About Me — AI synopsis
 
-Change `src/pages/TodoList.tsx` from `max-w-3xl` to the same `max-w-5xl` container used by My Sessions and Documents, so the three screens line up.
+- Add a **Generate with AI** button beside Save in the About Me accordion (`src/pages/MyPractice.tsx`).
+- New edge function `generate-about-me` reads the doctor's own profile data (name, qualifications, specialty, years of experience, practice, services) and returns a warm patient-facing synopsis under 600 words.
+- Result fills the textarea as an editable draft; nothing saves until Save is pressed. Handle 429/402 with clear toasts.
 
-## 4. Alphabet letter buttons (Patients)
+## 4. Unified field frames across profile sections
 
-In `src/pages/Patients.tsx`, restyle the A–Z strip: transparent background with a thin grey border, normal foreground text, no fill. On hover, fill with a light muted/primary tint. The selected letter and "All" keep the solid green fill. Letters with no patients stay disabled with a lighter border and muted text.
+Apply the patient **Personal Information** frame treatment to every section inside:
+- Patient Personal Information and Medical Information (`PatientDetailsEditor.tsx`)
+- All My Practice sections (`MyPractice.tsx`)
 
-## 5. Add Document button (doctor's Documents screen)
+Rules: one bordered frame per section with `divide-y` rows, no rounded sub-frames or gaps, same horizontal label/value layout and padding. **Field labels go up one size step** (`text-[10px]`→`text-xs`, `text-xs`→`text-sm`) and stay bold; values keep their current size.
 
-On `src/pages/doctor/DoctorDocumentsTab.tsx`, add an **Add Document** button top-right next to the grouping toggle, with a dropdown listing document types from `useTemplates` (Medical Certificate, Referral Letter, Prescription, General Letterhead, Invoice, Hospital Admission Form, plus custom templates). Choosing one opens the existing `DocumentEditor` with that template loaded, reusing the current save flow so the new document appears in the list.
+## 5. Doctors get their own patient profile in-place
 
-## 6. Colour-coded document type badges
+Doctors who are also patients should never need to switch accounts:
 
-A shared helper maps a document/template name to a colour pair (background tint + matching text) — certificate, referral, prescription, invoice, admission, letter, neutral fallback — applied to the badge in `DocumentCard`. Colours come from existing semantic tokens; no new palette values, no hardcoded hex.
+- Add **My Profile** to the doctor sidebar nav (`src/components/layout/Sidebar.tsx`), pointing at the doctor's own patient record — the same "My Profile" screen patients see, rendered inside the doctor shell.
+- Resolve the doctor's own patient record from their `user_id`; if none exists, create/link it on first visit so the screen is never empty.
+- The doctor's teal/blue theming and sidebar stay intact — only the content area shows the patient profile.
+- In **Documents**, add a **My Documents** filter (alongside the existing Date / Patient / Type grouping) that narrows the list to documents belonging to the doctor's own patient record.
 
-## 7. Group by Document type
-
-Add a third grouping option: **Date · Type · Patient** (Date default). Type mode buckets by `template_name` (fallback "Other"), sorted alphabetically, using the same frame, count pills and green headers.
-
-## 8. Templates tab under Documents
-
-Make the doctor's Documents page a two-tab screen:
-- **All Documents** — the grouped document list (items 5–7).
-- **Templates** — the existing template manager (`src/pages/Documents.tsx` rendered with its header hidden), covering content templates and header/footer templates.
-
-Tabs use the standard green `TabsList` with white active styling.
-
-## Technical notes
-
-- Files: `src/components/ui/section-accordion.tsx`, `src/pages/Patients.tsx`, `src/pages/doctor/DoctorDocumentsPage.tsx`, `src/pages/doctor/DoctorDocumentsTab.tsx`, `src/pages/MySessions.tsx`, `src/pages/TodoList.tsx`, `src/components/dashboard/CompactTodoList.tsx`, `src/pages/MyPractice.tsx`, `src/components/patients/PatientDetailsEditor.tsx`, plus a new `src/lib/documentTypeColors.ts`.
-- No schema changes; document creation uses the existing `useDocuments.createDocument` path.
+### Technical notes
+- New file: `supabase/functions/generate-about-me/index.ts` using Lovable AI with in-code JWT validation.
+- No schema changes; About Me still saves to `profiles.about_me`.
+- Label sizing centralised in a shared class constant so all screens stay in sync.
+- Own-record lookup uses the existing hardened pattern: `.order("created_at").limit(1).maybeSingle()`.
