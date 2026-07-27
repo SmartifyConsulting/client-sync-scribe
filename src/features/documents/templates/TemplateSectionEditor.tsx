@@ -1,8 +1,14 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Upload, X, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +28,30 @@ interface TemplateSectionEditorProps {
   compact?: boolean;
 }
 
+const FONT_FAMILIES = [
+  { label: "Sora", value: "Sora, sans-serif" },
+  { label: "Manrope", value: "Manrope, sans-serif" },
+  { label: "Arial", value: "Arial, Helvetica, sans-serif" },
+  { label: "Times New Roman", value: "'Times New Roman', Times, serif" },
+  { label: "Georgia", value: "Georgia, serif" },
+  { label: "Courier New", value: "'Courier New', Courier, monospace" },
+];
+
+const FONT_SIZES = ["10", "11", "12", "14", "16", "18", "20", "24"];
+
+/** True when the stored value is legacy plain text rather than HTML. */
+const looksLikeHtml = (text: string) => /<[a-z][\s\S]*>/i.test(text);
+
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** Convert whatever is stored into HTML suitable for the editable surface. */
+const toEditorHtml = (text: string) => {
+  if (!text) return "";
+  if (looksLikeHtml(text)) return text;
+  return escapeHtml(text).replace(/\n/g, "<br>");
+};
+
 export function TemplateSectionEditor({
   value,
   onChange,
@@ -32,41 +62,89 @@ export function TemplateSectionEditor({
 }: TemplateSectionEditorProps) {
   const { toast } = useToast();
   const { user } = useAuth();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  // Keep the editable surface in sync with external value changes without
+  // clobbering the caret while the user is typing.
+  useEffect(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    if (document.activeElement === el) return;
+    const html = toEditorHtml(value.text || "");
+    if (el.innerHTML !== html) el.innerHTML = html;
+  }, [value.text]);
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = value.text.substring(start, end);
-    
-    if (start === end) return;
+  const emit = useCallback(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    onChange({ ...value, text: el.innerHTML });
+  }, [onChange, value]);
 
-    let wrappedText = '';
-    switch (format) {
-      case 'bold':
-        wrappedText = `<b>${selectedText}</b>`;
-        break;
-      case 'italic':
-        wrappedText = `<i>${selectedText}</i>`;
-        break;
-      case 'underline':
-        wrappedText = `<u>${selectedText}</u>`;
-        break;
+  const runCommand = (command: string, arg?: string) => {
+    const el = editorRef.current;
+    if (!el) return;
+    el.focus();
+    try {
+      document.execCommand("styleWithCSS", false, "true");
+    } catch {
+      /* not supported everywhere — safe to ignore */
     }
+    document.execCommand(command, false, arg);
+    emit();
+  };
 
-    const newText = value.text.substring(0, start) + wrappedText + value.text.substring(end);
-    onChange({ ...value, text: newText });
+  /** Select the whole editor when nothing is selected, so toolbar always applies. */
+  const ensureSelection = () => {
+    const el = editorRef.current;
+    if (!el) return;
+    const selection = window.getSelection();
+    const hasSelectionInside =
+      selection &&
+      selection.rangeCount > 0 &&
+      !selection.isCollapsed &&
+      el.contains(selection.anchorNode);
+    if (hasSelectionInside) return;
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  };
 
-    setTimeout(() => {
-      textarea.focus();
-      const newCursorPos = start + wrappedText.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }, 0);
+  const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
+    ensureSelection();
+    runCommand(format);
+  };
+
+  const applyFontFamily = (family: string) => {
+    ensureSelection();
+    runCommand("fontName", family);
+  };
+
+  const applyFontSize = (size: string) => {
+    const el = editorRef.current;
+    if (!el) return;
+    ensureSelection();
+    el.focus();
+    // execCommand only supports sizes 1-7, so tag the selection then rewrite
+    // the generated markup with the exact pt size we want.
+    document.execCommand("fontSize", false, "7");
+    el.querySelectorAll('font[size="7"]').forEach((node) => {
+      const span = document.createElement("span");
+      span.style.fontSize = `${size}pt`;
+      span.innerHTML = (node as HTMLElement).innerHTML;
+      node.replaceWith(span);
+    });
+    emit();
+  };
+
+  const insertToken = (token: string) => {
+    const el = editorRef.current;
+    if (!el) return;
+    el.focus();
+    document.execCommand("insertText", false, token);
+    emit();
   };
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -90,21 +168,6 @@ export function TemplateSectionEditor({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
-    // Placeholder token drag (text/plain) - insert at cursor
-    const token = e.dataTransfer.getData("text/plain");
-    if (token && token.startsWith("[") && token.endsWith("]")) {
-      const textarea = textareaRef.current;
-      const pos = textarea?.selectionStart ?? value.text.length;
-      const next = value.text.slice(0, pos) + token + value.text.slice(pos);
-      onChange({ ...value, text: next });
-      setTimeout(() => {
-        textarea?.focus();
-        const newPos = pos + token.length;
-        textarea?.setSelectionRange(newPos, newPos);
-      }, 0);
-      return;
-    }
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
@@ -180,14 +243,44 @@ export function TemplateSectionEditor({
   };
 
   const inputId = `section-image-${Math.random().toString(36).substr(2, 9)}`;
+  const minHeight = Math.max(rows, 3) * 24;
 
   return (
     <div className="space-y-2">
       {/* Toolbar */}
       <div className={`flex items-center gap-1 p-1 border border-border rounded-md bg-muted/30 ${compact ? 'flex-wrap' : ''}`}>
+        <Select onValueChange={applyFontFamily}>
+          <SelectTrigger className="h-7 w-[130px] text-xs" aria-label="Font">
+            <SelectValue placeholder="Font" />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_FAMILIES.map((font) => (
+              <SelectItem key={font.value} value={font.value} className="text-xs">
+                <span style={{ fontFamily: font.value }}>{font.label}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select onValueChange={applyFontSize}>
+          <SelectTrigger className="h-7 w-[72px] text-xs" aria-label="Font size">
+            <SelectValue placeholder="Size" />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_SIZES.map((size) => (
+              <SelectItem key={size} value={size} className="text-xs">
+                {size} pt
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <div className="w-px h-5 bg-border mx-1" />
+
         <Toggle
           size="sm"
           aria-label="Bold"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => applyFormatting('bold')}
           className="h-7 w-7 p-0"
         >
@@ -196,6 +289,7 @@ export function TemplateSectionEditor({
         <Toggle
           size="sm"
           aria-label="Italic"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => applyFormatting('italic')}
           className="h-7 w-7 p-0"
         >
@@ -204,6 +298,7 @@ export function TemplateSectionEditor({
         <Toggle
           size="sm"
           aria-label="Underline"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => applyFormatting('underline')}
           className="h-7 w-7 p-0"
         >
@@ -309,15 +404,25 @@ export function TemplateSectionEditor({
         </div>
       )}
 
-      {/* Text Area */}
-      <Textarea
-        ref={textareaRef}
-        value={value.text}
-        onChange={(e) => onChange({ ...value, text: e.target.value })}
-        placeholder={placeholder}
-        rows={rows}
-        className="text-sm resize-none"
-        style={{ textAlign: value.alignment }}
+      {/* WYSIWYG editable surface — formatting renders visually, never as tags */}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        role="textbox"
+        aria-multiline="true"
+        data-placeholder={placeholder}
+        onInput={emit}
+        onBlur={emit}
+        onPaste={(e) => {
+          // Paste as plain text so external markup never leaks in.
+          e.preventDefault();
+          const text = e.clipboardData.getData("text/plain");
+          document.execCommand("insertText", false, text);
+          emit();
+        }}
+        className="template-wysiwyg w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 overflow-y-auto whitespace-pre-wrap"
+        style={{ textAlign: value.alignment, minHeight }}
         onDragOver={(e) => {
           if (e.dataTransfer.types.includes("text/plain")) e.preventDefault();
         }}
@@ -325,15 +430,7 @@ export function TemplateSectionEditor({
           const token = e.dataTransfer.getData("text/plain");
           if (!token || !token.startsWith("[") || !token.endsWith("]")) return;
           e.preventDefault();
-          const ta = textareaRef.current;
-          const pos = ta?.selectionStart ?? value.text.length;
-          const next = value.text.slice(0, pos) + token + value.text.slice(pos);
-          onChange({ ...value, text: next });
-          setTimeout(() => {
-            ta?.focus();
-            const newPos = pos + token.length;
-            ta?.setSelectionRange(newPos, newPos);
-          }, 0);
+          insertToken(token);
         }}
       />
     </div>

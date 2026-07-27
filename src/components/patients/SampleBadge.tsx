@@ -1,7 +1,9 @@
+import { TestTube } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const CRIMSON = "#DC143C";
+/** Bold orange — used for every dummy/sample data marker. */
+const SAMPLE_ORANGE = "#EA6A00";
 
 interface SampleBadgeProps {
   size?: "sm" | "md";
@@ -9,8 +11,8 @@ interface SampleBadgeProps {
 }
 
 /**
- * Crimson pill badge with white uppercase text marking a record as
- * sample/demo data — not a real person.
+ * Bold orange test-tube icon marking a record as sample/demo data —
+ * not a real person. Rendered as a prefix next to the name.
  */
 export function SampleBadge({ size = "sm", className }: SampleBadgeProps) {
   return (
@@ -20,14 +22,13 @@ export function SampleBadge({ size = "sm", className }: SampleBadgeProps) {
           <span
             role="img"
             aria-label="Sample data — not a real patient"
-            className={cn(
-              "inline-flex items-center justify-center rounded-full align-middle font-semibold uppercase tracking-wide text-white select-none whitespace-nowrap leading-none",
-              size === "md" ? "text-[10px] px-2 py-[3px]" : "text-[9px] px-1.5 py-[2px]",
-              className,
-            )}
-            style={{ backgroundColor: CRIMSON, color: "#fff" }}
+            className={cn("inline-flex shrink-0 items-center align-middle leading-none", className)}
           >
-            Sample data
+            <TestTube
+              className={size === "md" ? "h-4 w-4" : "h-3.5 w-3.5"}
+              strokeWidth={2.75}
+              style={{ color: SAMPLE_ORANGE }}
+            />
           </span>
         </TooltipTrigger>
         <TooltipContent>Sample data — not a real patient</TooltipContent>

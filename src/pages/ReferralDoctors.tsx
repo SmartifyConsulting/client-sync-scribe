@@ -17,7 +17,9 @@ const SPECIALTIES = [
   "Allergist/Immunologist",
   "Anesthesiologist",
   "Cardiologist",
+  "Chiropractor",
   "Dermatologist",
+  "Dietitian",
   "Emergency Medicine Physician",
   "Endocrinologist",
   "Family Medicine Physician",
@@ -29,13 +31,16 @@ const SPECIALTIES = [
   "Nephrologist",
   "Neurologist",
   "Obstetrician/Gynecologist",
+  "Occupational Therapist",
   "Oncologist",
   "Ophthalmologist",
+  "Optometrist",
   "Orthopedic Surgeon",
   "Otolaryngologist (ENT)",
   "Pathologist",
   "Pediatrician",
   "Physiatrist",
+  "Physiotherapist",
   "Plastic Surgeon",
   "Podiatrist",
   "Psychiatrist",
@@ -48,6 +53,27 @@ const SPECIALTIES = [
   "Urologist",
   "Vascular Surgeon",
 ];
+
+/** Common wordings that should resolve to a canonical specialty above. */
+const SPECIALTY_ALIASES: Record<string, string> = {
+  physiotherapy: "Physiotherapist",
+  physio: "Physiotherapist",
+  physicaltherapist: "Physiotherapist",
+  physicaltherapy: "Physiotherapist",
+  occupationaltherapy: "Occupational Therapist",
+  dietetics: "Dietitian",
+  dietician: "Dietitian",
+  gp: "General Practitioner",
+  optometry: "Optometrist",
+  chiropractic: "Chiropractor",
+};
+
+const normalizeSpecialty = (value?: string | null): string => {
+  const raw = (value || "").trim().toLowerCase();
+  if (!raw) return "";
+  const key = raw.replace(/[^a-z]/g, "");
+  return (SPECIALTY_ALIASES[key] || raw).toLowerCase();
+};
 
 interface ReferralDoctor {
   id: string;
@@ -114,20 +140,22 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     const timer = setTimeout(async () => {
       setSearchingProfiles(true);
       try {
-        // Doctor role can live in either `profiles.role` or the separate
-        // `user_roles` table depending on when the account was created, so
-        // check both and match on either to avoid missing real doctors.
-        const [{ data: roleRows }, { data: matchingProfiles, error }] = await Promise.all([
-          supabase.from("user_roles").select("user_id").eq("role", "doctor"),
-          supabase
-            .from("profiles")
-            .select("id, full_name, specialty, practice_number, mobile_number, role")
-            .or(`full_name.ilike.%${profileSearch}%,practice_number.ilike.%${profileSearch}%,doctor_number.ilike.%${profileSearch}%`)
-            .limit(20),
-        ]);
+        // RLS blocks doctors from reading other doctors' profile rows, so go
+        // through the security-definer directory search instead.
+        const { data, error } = await supabase.rpc("search_doctor_profiles", {
+          _name: profileSearch,
+        });
         if (error) throw error;
-        const doctorIds = new Set((roleRows || []).map((r: any) => r.user_id));
-        const doctors = (matchingProfiles || []).filter((p: any) => p.role === "doctor" || doctorIds.has(p.id)).slice(0, 5);
+        const doctors = ((data as any[]) || [])
+          .filter((p) => p.id !== user?.id)
+          .slice(0, 5)
+          .map((p) => ({
+            id: p.id,
+            full_name: p.full_name,
+            specialty: p.specialty,
+            practice_number: p.practice_number,
+            mobile_number: p.mobile_number,
+          }));
         setProfileSuggestions(doctors);
         setShowProfileSuggestions(true);
       } catch (e) {
@@ -137,7 +165,46 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [profileSearch]);
+  }, [profileSearch, user?.id]);
+
+  // Directory matches for the sidebar filters — surfaces colleagues who are on
+  // the platform but not yet in the saved referral list.
+  const [directoryMatches, setDirectoryMatches] = useState<DoctorProfileSuggestion[]>([]);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    const hasSpecialty = specialtyFilter !== "any";
+    if (q.length < 2 && !hasSpecialty) {
+      setDirectoryMatches([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const { data, error } = await supabase.rpc("search_doctor_profiles", {
+        _name: q || null,
+        _specialty: hasSpecialty ? specialtyFilter : null,
+      });
+      if (error) {
+        console.error("Directory search error:", error);
+        setDirectoryMatches([]);
+        return;
+      }
+      setDirectoryMatches(
+        ((data as any[]) || [])
+          .filter((p) => p.id !== user?.id)
+          .slice(0, 8)
+          .map((p) => ({
+            id: p.id,
+            full_name: p.full_name,
+            specialty: p.specialty,
+            practice_number: p.practice_number,
+            mobile_number: p.mobile_number,
+          })),
+      );
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, specialtyFilter, user?.id]);
+
+
 
   const handleSelectProfile = (doc: DoctorProfileSuggestion) => {
     const fullName = doc.full_name || "";
@@ -255,10 +322,24 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     }
   };
 
-  const filtered = doctors.filter(d =>
-    `${d.first_name} ${d.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (specialtyFilter === "any" || d.specialty === specialtyFilter)
-  );
+  const filtered = doctors.filter((d) => {
+    const q = searchQuery.trim().toLowerCase();
+    const haystack = [
+      `${d.first_name} ${d.last_name}`,
+      d.specialty,
+      d.practice_number,
+      d.email,
+      d.phone,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesQuery = !q || haystack.includes(q);
+    const matchesSpecialty =
+      specialtyFilter === "any" ||
+      normalizeSpecialty(d.specialty) === normalizeSpecialty(specialtyFilter);
+    return matchesQuery && matchesSpecialty;
+  });
 
   const noSearchResults = profileSearch.length >= 3 && !searchingProfiles && profileSuggestions.length === 0;
 
@@ -471,7 +552,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         <div className="space-y-2">
           {loading ? (
             <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
-          ) : filtered.length === 0 ? (
+          ) : filtered.length === 0 && directoryMatches.length === 0 ? (
             <div className="p-10 text-center text-muted-foreground rounded-xl border border-primary bg-card">No referral doctors found</div>
           ) : (
             filtered.map((doc) => (
@@ -497,6 +578,32 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                 </div>
               </div>
             ))
+          )}
+
+          {/* Doctors on Holarc Health who aren't in the saved list yet */}
+          {!loading && directoryMatches.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <p className="text-xs font-medium text-muted-foreground">On Holarc Health</p>
+              {directoryMatches.map((doc) => (
+                <div key={`dir-${doc.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-primary/50 bg-card p-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium">
+                      {(doc.full_name || "DR").trim().slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-foreground truncate">{doc.full_name}</span>
+                      <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
+                        {doc.specialty && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">{doc.specialty}</span>}
+                        {doc.practice_number && <span>PR#: {doc.practice_number}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={() => { handleSelectProfile(doc); setShowForm(true); }}>
+                    <Plus className="h-3.5 w-3.5" /> Add
+                  </Button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

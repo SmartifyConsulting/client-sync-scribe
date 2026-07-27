@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePatients } from "@/hooks/usePatients";
 import { useProfile } from "@/hooks/useProfile";
 import { useDocuments } from "@/hooks/useDocuments";
+import { fillDocumentPlaceholders } from "@/features/documents/lib/fillDocumentPlaceholders";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -157,48 +158,29 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
     template.name?.toLowerCase().includes("admission") ||
     template.category?.toLowerCase().includes("admission");
 
-  // Auto-fill placeholders when patient or profile changes
+  // Auto-fill placeholders from the signed-in doctor + selected patient using
+  // the shared filler, so doctor-scoped tokens (name, numbers, [DoctorSignature])
+  // always resolve even before a patient is chosen.
   useEffect(() => {
-    let updatedContent = template.content;
-    
-    if (profile) {
-      updatedContent = updatedContent
-        .replace(/\[PracticeNumber\]/g, profile.practice_number || "[PracticeNumber]")
-        .replace(/\[DoctorNumber\]/g, profile.doctor_number || "[DoctorNumber]")
-        .replace(/\[DoctorName\]/g, profile.full_name || "[DoctorName]")
-        .replace(/\[PracticeAddress\]/g, profile.practice_address || "[PracticeAddress]");
-    }
+    const patient =
+      selectedPatientId && selectedPatientId !== "none"
+        ? patients.find((p) => p.id === selectedPatientId)
+        : undefined;
 
-    if (selectedPatientId && selectedPatientId !== "none") {
-      const patient = patients.find(p => p.id === selectedPatientId);
-      if (patient) {
-        updatedContent = updatedContent
-          .replace(/\[PatientName\]/g, patient.name || "[PatientName]")
-          .replace(/\[ClientName\]/g, patient.name || "[ClientName]")
-          .replace(/\[PatientAddress\]/g, patient.physical_address || patient.address || "[PatientAddress]")
-          .replace(/\[PatientDOB\]/g, patient.dob ? new Date(patient.dob).toLocaleDateString() : "[PatientDOB]")
-          .replace(/\[PatientContact\]/g, patient.phone || patient.email || "[PatientContact]")
-          .replace(/\[MedicalAid\]/g, patient.medical_aid || "[MedicalAid]")
-          .replace(/\[MedicalAidNumber\]/g, patient.medical_aid_number || "[MedicalAidNumber]");
-        
-        setDocumentName(`${template.name} - ${patient.name} - ${new Date().toLocaleDateString()}`);
-      }
-    }
+    const { content: updatedContent } = fillDocumentPlaceholders(template.content, {
+      profile: (profile as any) ?? null,
+      patient: (patient as any) ?? null,
+      // The editor is a raw textarea — keep signature/blank markup out of it.
+      plainText: true,
+    });
 
-    const today = new Date().toLocaleDateString();
-    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    updatedContent = updatedContent
-      .replace(/\[Date\]/g, today)
-      .replace(/\[SessionDate\]/g, today)
-      .replace(/\[ConsultationDate\]/g, today)
-      .replace(/\[ReferralDate\]/g, today)
-      .replace(/\[PrescriptionDate\]/g, today)
-      .replace(/\[SignatureDate\]/g, today)
-      .replace(/\[InvoiceDate\]/g, today)
-      .replace(/\[ConsultationTime\]/g, now);
+    if (patient) {
+      setDocumentName(`${template.name} - ${patient.name} - ${new Date().toLocaleDateString()}`);
+    }
 
     setContent(updatedContent);
-  }, [selectedPatientId, profile, patients, template.content]);
+  }, [selectedPatientId, profile, patients, template.content, template.name]);
+
 
   const handleProcedureSelect = (procedure: ProcedureSuggestion) => {
     setContent((prev) =>

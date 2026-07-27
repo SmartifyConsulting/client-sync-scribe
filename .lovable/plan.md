@@ -1,45 +1,51 @@
-## 1. Doctor "My Profile" swaps the whole menu (bug)
+## 1. SOS nav item — white font by default
 
-`src/components/layout/Sidebar.tsx` picks nav items with `(isPatient || isOnPatientRoute) ? patientNavItems : doctorNavItems`. The doctor's "My Profile" link points at `/patient/details?section=health`, so opening it flips the sidebar (and `BottomNav.tsx`, `TopBarIcons.tsx`, which use the same `isOnPatientRoute` check) into patient mode — the doctor menu disappears and it looks like you were logged into a patient profile.
+`src/components/layout/Sidebar.tsx`: `danger` items render red text on transparent when inactive. Change the inactive state to a solid red background with white text (darker red on hover) so SOS / Hospital Portal / ER Portal always read white.
 
-Fix: when `role === "doctor"`, always render `doctorNavItems` (plus the Admin entry for admins) regardless of path. Same guard in `BottomNav.tsx` and `TopBarIcons.tsx`.
+## 2. To-Do List patient groups — remove inner rounded frames
 
-## 2. Field label/typography bump + horizontal layouts
+`src/components/dashboard/CompactTodoList.tsx`: drop `rounded-md border border-neutral-300 bg-card overflow-hidden` from the nested patient `<Accordion>` so patient rows sit flush inside the date-bucket frame, keeping only the `divide-y` separators.
 
-Only "Personal Information" currently uses the compact horizontal row style (inline utility string at line 2443 of `PatientDetailsEditor.tsx` with `[&_label]:text-[11px]`).
+## 3. Dummy data marker — bold orange test tube
 
-- Extract it into one exported constant (`FIELD_GRID_CLASS`).
-- Increase labels one step: `text-[11px]` → `text-xs`, keep bold. Inputs/selects stay `h-8 text-xs`.
-- Apply to **Addresses**, **Employer**, **Emergency Contacts**, **Next of Kin**, and the **Medical Information** tab sections (Vitals, Current Medications, Conditions/Diagnoses, Surgeries, Family History, Insurance, Pharmacies) — edit mode and the read-only `ViewField` variant.
-- `ViewField` becomes label-left / value-right so view mode matches.
+Replace the "SAMPLE" text badge with a bold orange `TestTube` icon prefix before the name everywhere `isSamplePatient()` is used (patient list, patient header/profile, pickers). Add a shared `SampleMarker` component (orange icon + "Sample data" tooltip) so every surface matches.
 
-## 3. Addresses side by side
+## 4. Dr Buttons missing from referral doctor search
 
-Two-column grid: Physical Address left, Postal Address right, with the "same as physical" checkbox under the physical column. When ticked, the postal column shows a disabled mirrored value instead of collapsing so the layout doesn't jump. Single column on mobile.
+Verified cause: `profiles` has no policy letting one doctor read another doctor's row — SELECT policies cover only own profile, admins, patients of connected doctors, and access requests. The search therefore returns nothing for unconnected doctors, including Dr. Buttons.
 
-## 4. Emergency Contacts header white when collapsed
+Fix: add security-definer `public.search_doctor_profiles(_q text)` returning id, full_name, specialty, practice_number, doctor_number for doctor-role users matched on name/practice/doctor number, limit 10, execute granted to `authenticated`. `src/pages/ReferralDoctors.tsx` calls the RPC instead of querying `profiles` + `user_roles`.
 
-`EmergencyContactsInline.tsx` defines its own trigger that only turns green with `data-[state=open]`. Every other section uses the shared always-green `SectionHeader`. Fix: export `SectionHeader` and use it there (`ShieldAlert` icon) so the header is green/white collapsed and expanded.
+## 5. Referrals sidebar filters don't work
 
-## 5. Patient list group headers (Patients page)
+Verified: `filtered` only matches `first_name last_name` against the query and requires an exact `specialty ===` match on saved referral rows.
 
-In `src/pages/Patients.tsx`:
-- Increase the A–Z group header name font by two steps (currently `text-xs` → `text-base`), keeping the count badge subdued.
-- Remove the per-group rounded frame/border so the groups read as one continuous list inside the outer card (drop `rounded-xl`/border wrappers on each group block; keep a single divider line between rows).
+Fix: match the search text case-insensitively across name, specialty, practice number, email and phone; make the specialty comparison case-insensitive with an alias map. Also surface directory matches from the new RPC when no saved referral matches, so a doctor like Dr. Buttons can be found and added straight from the filter results.
 
-## 6. SAMPLE badge never appears
+## 6. Physiotherapy specialty missing
 
-Verified: the `patients` table has **no `metadata` column** and `is_sample` is `false` for all 187 rows. So `isSamplePatient()` only ever matches its hardcoded name hints ("sharon kennedy", "john sample", …) — "John Smith" and the other seeded demo patients don't match, which is why no badge shows anywhere.
+Verified: Gianna Buttons' specialty is `Physiotherapist`, but `SPECIALTIES` in `ReferralDoctors.tsx` has no such entry (only `Physiatrist`). Add `Physiotherapist`, `Occupational Therapist`, `Dietitian`, `Chiropractor`, `Optometrist`, with "Physiotherapy" aliased to "Physiotherapist".
 
-Fix:
-- Drop the dead `metadata.source` check from `src/lib/samplePatients.ts`.
-- Mark the seeded demo patient rows with `is_sample = true` (data update) so the badge is driven by real data instead of name guessing, and extend the name-hint list as a fallback for the remaining known demo names (John Smith etc.).
-- Badge then renders in the patients list and anywhere else `isSamplePatient` is used.
+## 7. Hospital search bar — remove green frame
 
-## 7. Dr Buttons has no doctor profile view
+`src/components/doctor/HospitalAffiliations.tsx`: remove the primary focus ring on `CommandInput` (`focus-visible:ring-0 focus-visible:ring-offset-0 border-0`) so only the divider under the search row shows.
 
-Verified: `dr.buttons@smartify.co.za` has the `doctor` role but an empty `profiles` row (`full_name`, `specialty`, `practice_number`, `doctor_number`, `about_me` all null), so the profile screen renders blank. Seed demo details on that row — name "Dr. Buttons", a specialty, demo practice/doctor numbers and a short About Me.
+## 8. Template editor — highlighting still inserts raw HTML tags, no font controls
 
-### Technical notes
-- Files: `PatientDetailsEditor.tsx`, `EmergencyContactsInline.tsx`, `Sidebar.tsx`, `BottomNav.tsx`, `TopBarIcons.tsx`, `pages/Patients.tsx`, `lib/samplePatients.ts`, plus two data updates (sample flags, Dr Buttons profile).
-- No schema changes and no colour-token changes — sizing/layout only.
+Verified: `TemplateSectionEditor` is a plain `<textarea>`; `applyFormatting` literally wraps the selection in `<b>`/`<i>`/`<u>` strings, and the toolbar only has bold/italic/underline/align/image — there is no font family or font size control anywhere.
+
+Fix: convert the section editor to a `contentEditable` WYSIWYG surface that renders formatting visually (bold/italic/underline/alignment applied to the rendered text, HTML kept in state but never shown to the user), and add two toolbar dropdowns:
+- Font family: the app's existing document fonts (Sora, Manrope, Arial, Times New Roman, Georgia, Courier New).
+- Font size: 10–24 pt steps.
+Both apply to the current selection, and to the whole section when nothing is selected. Existing templates containing raw tags render correctly since the same HTML is reused.
+
+## 9. Template previews should show real values, not raw tokens
+
+Verified: template previews render stored content as-is, so `[DoctorName]`, `[DoctorNumber]`, `[DoctorSignature]` appear literally, while resolution logic already exists in `fillDocumentPlaceholders` / `resolveDocumentPreviewContent` and is applied only to saved documents.
+
+Fix: run the same resolution in every template preview surface (`TemplateForm`, `TemplateSectionEditor`, `HeaderFooterTemplateForm`, templates tab) using the signed-in doctor's profile — name, registration/practice number, practice details, and the stored signature via `renderSignatureHtml`. Patient-scoped tokens without context fall back to the existing quiet underscore placeholder instead of raw brackets.
+
+## Technical notes
+
+- One migration for `search_doctor_profiles` (SECURITY DEFINER, `set search_path = public`, execute granted to `authenticated`). No table or RLS changes.
+- Everything else is presentation-layer only.

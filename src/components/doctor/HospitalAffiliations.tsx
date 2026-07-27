@@ -176,6 +176,7 @@ export default function HospitalAffiliations() {
                   placeholder="Search hospitals…"
                   value={search}
                   onValueChange={setSearch}
+                  className="border-0 shadow-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
                 <CommandList className="max-h-64">
                   <CommandEmpty>

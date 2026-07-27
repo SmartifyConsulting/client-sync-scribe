@@ -76,6 +76,8 @@ export interface FillContext {
   invoice?: FillInvoice | null;
   prescription?: FillPrescription | null;
   today?: Date;
+  /** Render results for a raw text surface: no HTML markup for signatures or blanks. */
+  plainText?: boolean;
 }
 
 const CURRENCY_SYMBOL: Record<string, string> = {
@@ -98,7 +100,7 @@ function fmtAmount(amount: number | string | null | undefined, currency = "ZAR")
 }
 
 function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; slotKeys: Set<string> } {
-  const { patient, profile, invoice, prescription } = ctx;
+  const { patient, profile, invoice, prescription, plainText } = ctx;
   const today = ctx.today || new Date();
   const todayLong = fmtDateLong(today);
 
@@ -148,9 +150,10 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     AdmissionDate: todayLong,
 
     // Signature — uploaded image when present, otherwise the typed signature
-    // (font / colour / size configured in My Practice).
-    DoctorSignature: renderSignatureHtml(profile),
-    Signature: renderSignatureHtml(profile),
+    // (font / colour / size configured in My Practice). Plain-text callers
+    // (raw textarea editors) get the doctor's name instead of signature markup.
+    DoctorSignature: plainText ? profile?.full_name || "" : renderSignatureHtml(profile),
+    Signature: plainText ? profile?.full_name || "" : renderSignatureHtml(profile),
 
 
 
@@ -221,6 +224,7 @@ export function fillDocumentPlaceholders(
   const { lookup, slotKeys } = buildReplacements(ctx);
   let replacedCount = 0;
   let hadPlaceholders = false;
+  const blank = ctx.plainText ? "___" : `<span style="color:#999;">___</span>`;
 
   // Match [Word] or [Two Words] etc. — letters, digits, spaces, underscore, hyphen.
   const resolved = content.replace(/\[([A-Za-z][A-Za-z0-9_ -]*)\]/g, (_full, token: string) => {
@@ -235,10 +239,10 @@ export function fillDocumentPlaceholders(
       // Indexed prescription slot with no data — render blank so unused rows disappear
       if (slotKeys.has(key)) return "";
       // Known token, no value — render as quiet underscore placeholder.
-      return `<span style="color:#999;">___</span>`;
+      return blank;
     }
     // Unknown token — same quiet placeholder so brackets never leak through.
-    return `<span style="color:#999;">___</span>`;
+    return blank;
   });
 
   return { content: resolved, replacedCount, hadPlaceholders };
