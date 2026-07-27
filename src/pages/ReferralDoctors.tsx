@@ -552,7 +552,7 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         <div className="space-y-2">
           {loading ? (
             <div className="p-10 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
-          ) : filtered.length === 0 ? (
+          ) : filtered.length === 0 && directoryMatches.length === 0 ? (
             <div className="p-10 text-center text-muted-foreground rounded-xl border border-primary bg-card">No referral doctors found</div>
           ) : (
             filtered.map((doc) => (
@@ -578,6 +578,32 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                 </div>
               </div>
             ))
+          )}
+
+          {/* Doctors on Holarc Health who aren't in the saved list yet */}
+          {!loading && directoryMatches.length > 0 && (
+            <div className="space-y-2 pt-2">
+              <p className="text-xs font-medium text-muted-foreground">On Holarc Health</p>
+              {directoryMatches.map((doc) => (
+                <div key={`dir-${doc.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-primary/50 bg-card p-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium">
+                      {(doc.full_name || "DR").trim().slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-foreground truncate">{doc.full_name}</span>
+                      <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
+                        {doc.specialty && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">{doc.specialty}</span>}
+                        {doc.practice_number && <span>PR#: {doc.practice_number}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={() => { handleSelectProfile(doc); setShowForm(true); }}>
+                    <Plus className="h-3.5 w-3.5" /> Add
+                  </Button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
