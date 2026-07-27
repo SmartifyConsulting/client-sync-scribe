@@ -143,7 +143,7 @@ export const renderFormattedContent = (content: string): string => {
       "table", "thead", "tbody", "tr", "td", "th",
       "ul", "ol", "li", "img",
     ],
-    ALLOWED_ATTR: ["src", "alt", "width", "height", "colspan", "rowspan", "align"],
+    ALLOWED_ATTR: ["src", "alt", "width", "height", "colspan", "rowspan", "align", "style"],
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|data:image\/)/i,
   });
 };
