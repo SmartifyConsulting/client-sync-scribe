@@ -31,7 +31,29 @@ import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewConte
 import { TodoRow } from "@/components/todos/TodoRow";
 import { getTodoDisplay } from "@/lib/todoDisplay";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronRight, User as UserIcon } from "lucide-react";
+import { ChevronRight, User as UserIcon, CalendarDays } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  SECTION_FRAME_CLASS,
+  SECTION_ITEM_CLASS,
+  SECTION_TRIGGER_CLASS,
+  SectionCountPill,
+  DATE_BUCKETS,
+  dateBucketFor,
+} from "@/components/ui/section-accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 import { useTranslation } from "react-i18next";
 
 interface TodoItem {
