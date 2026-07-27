@@ -232,6 +232,14 @@
   }
 
 
+  /* Template WYSIWYG editor placeholder */
+  .template-wysiwyg:empty::before {
+    content: attr(data-placeholder);
+    @apply text-muted-foreground;
+    white-space: pre-wrap;
+    pointer-events: none;
+  }
+
   /* Smooth focus states */
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
