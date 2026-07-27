@@ -283,10 +283,24 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
     }
   };
 
-  const filtered = doctors.filter(d =>
-    `${d.first_name} ${d.last_name}`.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    (specialtyFilter === "any" || d.specialty === specialtyFilter)
-  );
+  const filtered = doctors.filter((d) => {
+    const q = searchQuery.trim().toLowerCase();
+    const haystack = [
+      `${d.first_name} ${d.last_name}`,
+      d.specialty,
+      d.practice_number,
+      d.email,
+      d.phone,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const matchesQuery = !q || haystack.includes(q);
+    const matchesSpecialty =
+      specialtyFilter === "any" ||
+      normalizeSpecialty(d.specialty) === normalizeSpecialty(specialtyFilter);
+    return matchesQuery && matchesSpecialty;
+  });
 
   const noSearchResults = profileSearch.length >= 3 && !searchingProfiles && profileSuggestions.length === 0;
 
