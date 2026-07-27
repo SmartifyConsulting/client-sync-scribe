@@ -68,8 +68,11 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   });
 
   const [body, setBody] = useState<SectionContent>(
-    initialData?.body || { text: initialData?.content || "", alignment: "left" }
+    initialData?.body
+      ? { ...initialData.body, text: stripHeadingMarkup(initialData.body.text || "") }
+      : { text: stripHeadingMarkup(initialData?.content || ""), alignment: "left" }
   );
+
 
   const selectedHeaderFooter = headerFooterTemplates.find(t => t.id === selectedHeaderFooterId);
 
