@@ -414,8 +414,34 @@ export function CompactTodoList() {
           </TabsList>
         </Tabs>
 
-        {/* Task list — grouped by patient */}
-        <div className="max-h-96 overflow-y-auto divide-y divide-neutral-300 rounded-md border border-neutral-300">
+        {/* Clear all (Done view only) */}
+        {filter === "completed" && completedCount > 0 && (
+          <div className="flex justify-end">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs">
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear all
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear all completed tasks?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This permanently deletes your {completedCount} completed task{completedCount === 1 ? "" : "s"}. Active tasks are not affected.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={clearAllCompleted}>Clear all</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
+
+        {/* Task list — grouped by date */}
+        <div className="max-h-96 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -426,23 +452,27 @@ export function CompactTodoList() {
             </p>
           ) : (
             (() => {
-              const grouped = filteredTodos.reduce<Record<string, TodoItem[]>>((acc, t) => {
-                const key = (t as any).patient_name || getTodoDisplay(t as any).patient || "Unassigned";
-                (acc[key] ||= []).push(t);
-                return acc;
-              }, {});
-              const keys = Object.keys(grouped).sort((a, b) => a.localeCompare(b));
-              return keys.map((k) => (
-                <Collapsible key={k} defaultOpen={false}>
-                  <CollapsibleTrigger className="group flex items-center gap-2 w-full px-3 py-2 hover:bg-muted/40 transition-colors data-[state=open]:bg-muted/30">
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-data-[state=open]:rotate-90" />
-                    <UserIcon className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-sm font-semibold text-foreground truncate flex-1 text-left">{k}</span>
-                    <Badge variant="outline" className="text-xs">{grouped[k].length}</Badge>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="divide-y divide-neutral-200">
-                      {grouped[k].map((todo) => (
+              const grouped: Record<string, TodoItem[]> = { today: [], week: [], month: [], older: [] };
+              filteredTodos.forEach((todo) => {
+                const key = dateBucketFor((todo as any).due_date || todo.created_at);
+                grouped[key].push(todo);
+              });
+              const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
+              if (buckets.length === 0) return null;
+              return (
+                <Accordion type="multiple" defaultValue={[buckets[0].key]} className={SECTION_FRAME_CLASS}>
+                  {buckets.map((b) => (
+                    <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_CLASS}>
+                      <AccordionTrigger className={cn(SECTION_TRIGGER_CLASS, "px-3 py-2")}>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
+                          <span className="text-sm font-semibold truncate text-left">{b.label}</span>
+                          <SectionCountPill count={grouped[b.key].length} className="ml-auto mr-1" />
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-0">
+                        <div className="divide-y divide-neutral-200">
+                          {grouped[b.key].map((todo) => (
                         <TodoRow insideGroup
                           key={todo.id}
                           compact
@@ -476,14 +506,17 @@ export function CompactTodoList() {
                           sending={sendingDocId === todo.document_id}
                           previewing={loadingPreview === todo.document_id}
                         />
-                      ))}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              ));
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              );
             })()
           )}
         </div>
+
       </div>
 
       {/* Document Preview Modal */}
