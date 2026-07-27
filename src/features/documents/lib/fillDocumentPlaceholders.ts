@@ -144,13 +144,11 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     ReferralDate: todayLong,
     AdmissionDate: todayLong,
 
-    // Signature — rendered as inline image when available
-    DoctorSignature: profile?.signature_url
-      ? `<img src="${profile.signature_url}" alt="Signature" style="max-height:60px;display:inline-block;" />`
-      : "",
-    Signature: profile?.signature_url
-      ? `<img src="${profile.signature_url}" alt="Signature" style="max-height:60px;display:inline-block;" />`
-      : "",
+    // Signature — uploaded image when present, otherwise the typed signature
+    // (font / colour / size configured in My Practice).
+    DoctorSignature: renderSignatureHtml(profile),
+    Signature: renderSignatureHtml(profile),
+
 
 
     // Invoice (optional)
