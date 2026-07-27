@@ -46,6 +46,38 @@ import DOMPurify from "dompurify";
 /**
  * Strip dangerous attributes (event handlers, javascript: URLs) from a tag string.
  */
+const SAFE_STYLE_PROPS = new Set([
+  "font-family",
+  "font-size",
+  "font-weight",
+  "font-style",
+  "color",
+  "line-height",
+  "display",
+  "text-align",
+  "max-height",
+  "max-width",
+  "height",
+  "width",
+  "margin",
+  "padding",
+]);
+
+/** Keep only a whitelist of harmless presentation properties. */
+const sanitizeStyleValue = (declarations: string): string =>
+  declarations
+    .split(";")
+    .map((d) => d.trim())
+    .filter(Boolean)
+    .filter((d) => {
+      const [prop, ...rest] = d.split(":");
+      const value = rest.join(":").toLowerCase();
+      if (!prop || !value) return false;
+      if (/url\(|expression\(|javascript:|@import/.test(value)) return false;
+      return SAFE_STYLE_PROPS.has(prop.trim().toLowerCase());
+    })
+    .join(";");
+
 const sanitizeTagAttributes = (tag: string): string => {
   // Remove all on* event handler attributes (onerror, onclick, etc.)
   let cleaned = tag.replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
@@ -54,10 +86,15 @@ const sanitizeTagAttributes = (tag: string): string => {
     /\s+(href|src|action|formaction|xlink:href)\s*=\s*("|')\s*(javascript|vbscript|data:text\/html)[^"']*\2/gi,
     "",
   );
-  // Remove style attributes (can carry expression()/url(javascript:))
-  cleaned = cleaned.replace(/\s+style\s*=\s*("[^"]*"|'[^']*')/gi, "");
+  // Keep style attributes but strip everything that isn't plain presentation
+  // (needed so typed doctor signatures keep their font/colour/size).
+  cleaned = cleaned.replace(/\s+style\s*=\s*("([^"]*)"|'([^']*)')/gi, (_m, _q, dq, sq) => {
+    const safe = sanitizeStyleValue(dq ?? sq ?? "");
+    return safe ? ` style="${safe}"` : "";
+  });
   return cleaned;
 };
+
 
 export const renderFormattedContent = (content: string): string => {
   if (!content) return "";
