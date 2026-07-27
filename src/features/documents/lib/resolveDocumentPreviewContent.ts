@@ -15,6 +15,8 @@
 //      version so subsequent prints/emails are already correct.
 
 import { supabase } from "@/integrations/supabase/client";
+import { renderSignatureHtml } from "@/lib/signature";
+
 import {
   fillDocumentPlaceholders,
   type FillContext,
