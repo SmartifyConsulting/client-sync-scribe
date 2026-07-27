@@ -2569,9 +2569,9 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={MapPin} label="Addresses" />
               <CollapsibleContent className="p-3">
-                <div className="space-y-3">
+                <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label htmlFor="physical_address">Physical Address</Label>
+                    <Label htmlFor="physical_address" className="text-xs font-bold">Physical Address</Label>
                     <AddressAutocomplete
                       id="physical_address"
                       value={formData.physical_address}
@@ -2579,18 +2579,28 @@ export function PatientDetailsEditor({
                       placeholder="Start typing to search address..."
                       rows={2}
                     />
+                    <div className="flex items-center gap-2 pt-1">
+                      <Checkbox
+                        id="same_as_physical"
+                        checked={formData.same_as_physical}
+                        onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })}
+                      />
+                      <Label htmlFor="same_as_physical" className="text-xs font-bold">
+                        Postal address same as physical address
+                      </Label>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="same_as_physical"
-                      checked={formData.same_as_physical}
-                      onCheckedChange={(checked) => updateFormData({ same_as_physical: checked as boolean })}
-                    />
-                    <Label htmlFor="same_as_physical">Postal address same as physical address</Label>
-                  </div>
-                  {!formData.same_as_physical && (
-                    <div className="space-y-1.5">
-                      <Label htmlFor="postal_address">Postal Address</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="postal_address" className="text-xs font-bold">Postal Address</Label>
+                    {formData.same_as_physical ? (
+                      <Textarea
+                        id="postal_address"
+                        value={formData.physical_address}
+                        disabled
+                        rows={2}
+                        className="bg-muted/50 text-sm"
+                      />
+                    ) : (
                       <AddressAutocomplete
                         id="postal_address"
                         value={formData.postal_address}
@@ -2598,10 +2608,11 @@ export function PatientDetailsEditor({
                         placeholder="Start typing to search address..."
                         rows={2}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </CollapsibleContent>
+
             </Collapsible>
 
             {/* Next of Kin (multiple) */}
