@@ -245,7 +245,11 @@ export function fillDocumentPlaceholders(
     return blank;
   });
 
-  return { content: resolved, replacedCount, hadPlaceholders };
+  // Legacy templates hardcode an "INV-" prefix before [InvoiceNumber], while the
+  // generated number already carries it. Collapse any duplicated prefix.
+  const deduped = resolved.replace(/\bINV-(?:INV-)+/gi, "INV-");
+
+  return { content: deduped, replacedCount, hadPlaceholders };
 }
 
 /**
