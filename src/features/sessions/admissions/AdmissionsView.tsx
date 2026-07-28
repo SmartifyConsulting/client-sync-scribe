@@ -27,10 +27,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   Hospital, FileText, Plus, Activity, Pill, FlaskConical, Scan, Loader2, ExternalLink,
   Stethoscope, UserCog, Clock3, Users, Phone, DoorOpen, NotebookPen, UtensilsCrossed, Check, X as XIcon, Search,
+  ChevronDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import QRCode from "qrcode";
 import { AddVitalsDialog } from "./AddVitalsDialog";
 import { AddMedicationDialog } from "./AddMedicationDialog";
 import { AddLabResultDialog } from "./AddLabResultDialog";
@@ -47,12 +49,31 @@ interface Props {
 }
 
 interface PatientContact {
+  patientName: string | null;
+  allergies: string | null;
   nextOfKinName: string | null;
   nextOfKinPhone: string | null;
   nextOfKinRelationship: string | null;
   emergencyContactName: string | null;
   emergencyContactPhone: string | null;
   emergencyContactRelationship: string | null;
+}
+
+/** Wristband QR — deliberately minimal: only what's safe to print and wear. */
+function useWristbandQr(admission: HospitalAdmission, patientName: string | null, allergies: string | null, doctorName: string | null | undefined) {
+  return useQuery({
+    queryKey: ["admission-wristband-qr", admission.id, patientName, allergies, doctorName],
+    queryFn: async () => {
+      const lines = [
+        `Name: ${patientName || "Unknown"}`,
+        `Allergies: ${allergies || "None recorded"}`,
+        `Procedure: ${admission.procedure_description || admission.diagnosis || "Not specified"}`,
+        `Doctor: ${doctorName || "Not assigned"}`,
+        `Admitted: ${format(new Date(admission.admission_date), "dd MMM yyyy")}`,
+      ];
+      return QRCode.toDataURL(lines.join("\n"), { width: 160, margin: 1 });
+    },
+  });
 }
 
 const DIET_PRESETS = ["Regular", "Liquid Diet", "Soft Diet", "Diabetic", "Low Sodium", "NPO (Nil by Mouth)"];
@@ -191,6 +212,9 @@ function AdmissionDetail({
   const startShift = useStartNurseShift(admission.id);
   const logMeal = useLogMeal(admission.id);
 
+  const { data: wristbandQr } = useWristbandQr(admission, contact.patientName, contact.allergies, admittingDoctorName);
+
+  const [expanded, setExpanded] = useState(true);
   const [showVitals, setShowVitals] = useState(false);
   const [showMeds, setShowMeds] = useState(false);
   const [showLabs, setShowLabs] = useState(false);
@@ -261,15 +285,36 @@ function AdmissionDetail({
               </p>
             </div>
           </div>
-          <Badge
-            variant={admission.status === "admitted" ? "default" : "secondary"}
-            className="shrink-0 uppercase tracking-wide text-xs"
-          >
-            ● {admission.status}
-          </Badge>
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant={admission.status === "admitted" ? "default" : "secondary"}
+                className="uppercase tracking-wide text-xs"
+              >
+                ● {admission.status}
+              </Badge>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setExpanded((v) => !v)}
+                aria-label={expanded ? "Collapse admission" : "Expand admission"}
+              >
+                <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "" : "-rotate-90"}`} />
+              </Button>
+            </div>
+            {wristbandQr && (
+              <img
+                src={wristbandQr}
+                alt="Wristband QR — Name, allergies, procedure, doctor, admission date"
+                title="Scan for wristband details: Name, Allergies, Procedure, Doctor, Admission Date"
+                style={{ width: "1.6cm", height: "1.6cm" }}
+              />
+            )}
+          </div>
         </div>
 
-        {doc && (
+        {expanded && doc && (
           <Button variant="outline" size="sm" asChild>
             <a href={doc.media_url || `#doc-${doc.id}`} target="_blank" rel="noreferrer">
               <FileText className="h-4 w-4 mr-1" /> View Admission Form
@@ -277,6 +322,8 @@ function AdmissionDetail({
           </Button>
         )}
 
+        {expanded && (
+        <>
         {/* Care team row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 border-t border-primary/10">
           <div className="flex items-start gap-2 pt-2">
@@ -357,9 +404,12 @@ function AdmissionDetail({
             </p>
           )}
         </div>
+        </>
+        )}
       </div>
 
       {/* === Clinical sections === */}
+      {expanded && (
       <div className="p-4">
         <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
           <Collapsible defaultOpen className="bg-white overflow-hidden">
@@ -550,6 +600,7 @@ function AdmissionDetail({
           </Collapsible>
         </div>
       </div>
+      )}
 
       <AddVitalsDialog open={showVitals} onOpenChange={setShowVitals} admissionId={admission.id} hospitalId={admission.hospital_provider_id} defaultHeight={defaultHeight} defaultWeight={defaultWeight} />
       <AddMedicationDialog open={showMeds} onOpenChange={setShowMeds} admissionId={admission.id} hospitalId={admission.hospital_provider_id} />
@@ -565,12 +616,14 @@ function usePatientContact(patientId: string) {
     queryFn: async () => {
       const { data } = await supabase
         .from("patients")
-        .select("next_of_kin_name, next_of_kin_phone, next_of_kin_relationship, emergency_contacts" as any)
+        .select("name, allergies, next_of_kin_name, next_of_kin_phone, next_of_kin_relationship, emergency_contacts" as any)
         .eq("id", patientId)
         .maybeSingle();
       const ecs = (Array.isArray((data as any)?.emergency_contacts) ? (data as any).emergency_contacts : []) as any[];
       const firstEc = ecs[0];
       const contact: PatientContact = {
+        patientName: (data as any)?.name || null,
+        allergies: (data as any)?.allergies || null,
         nextOfKinName: (data as any)?.next_of_kin_name || null,
         nextOfKinPhone: (data as any)?.next_of_kin_phone || null,
         nextOfKinRelationship: (data as any)?.next_of_kin_relationship || null,
@@ -653,6 +706,7 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
             defaultHeight={patientHeight}
             defaultWeight={patientWeight}
             contact={contact || {
+              patientName: null, allergies: null,
               nextOfKinName: null, nextOfKinPhone: null, nextOfKinRelationship: null,
               emergencyContactName: null, emergencyContactPhone: null, emergencyContactRelationship: null,
             }}

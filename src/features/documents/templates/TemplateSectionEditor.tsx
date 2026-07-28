@@ -140,6 +140,13 @@ export function TemplateSectionEditor({
       const span = document.createElement("span");
       span.style.fontSize = `${size}pt`;
       span.innerHTML = (node as HTMLElement).innerHTML;
+      // Strip any font-size the selection already carried (e.g. from a
+      // previous size change or pasted content) — otherwise that more
+      // deeply-nested inline style keeps winning and the new size never
+      // visibly applies.
+      span.querySelectorAll<HTMLElement>('[style*="font-size"]').forEach((child) => {
+        child.style.fontSize = "";
+      });
       node.replaceWith(span);
     });
     emit();
