@@ -149,15 +149,17 @@ export function ListGroupToolbar<T>({
           {groups.map(([label, entries]) => (
             <AccordionItem key={label} value={label} className={SECTION_ITEM_CLASS}>
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
-                <span className="flex items-center gap-2 text-sm font-semibold">
-                  {label}
+                <span className="flex w-full items-center justify-between gap-2 pr-2 text-sm font-semibold">
+                  <span>{label}</span>
                   <SectionCountPill count={entries.length} />
                 </span>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                {entries.map((e, idx) => (
-                  <React.Fragment key={idx}>{renderItem(e.item)}</React.Fragment>
-                ))}
+                <div className="space-y-3 py-1">
+                  {entries.map((e, idx) => (
+                    <React.Fragment key={idx}>{renderItem(e.item)}</React.Fragment>
+                  ))}
+                </div>
               </AccordionContent>
             </AccordionItem>
           ))}
