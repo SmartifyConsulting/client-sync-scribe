@@ -1,62 +1,70 @@
-## 1. Profile switcher — remove Dean Allie (Patient)
+## 1. Preferred Hospitals tab (My Holarchy)
 
-`src/components/layout/testProfiles.ts` lists Dean Allie twice (doctor + patient). Remove the patient entry only.
+- Add a **Hospitals** tab alongside My Holarc Team / Insurance / Pharmacies in the patient profile, with the frame heading **Preferred Hospitals**.
+- Patients add hospitals by searching the registered hospital directory — no free-text entries. Each row shows name, city/address, phone, and a remove action.
+- Storage: new `preferred_hospitals` JSONB column on `patients` (hospital id + cached name/address).
 
-## 2. To-Do rows — no indent, no coloured bullets
+## 2. Phone number fields
 
-`src/components/todos/TodoRow.tsx`: drop the `insideGroup ? "pl-6"` indent variant and remove the `PRIORITY_DOT` coloured dot span.
+- Drop the country-code dropdown: the field shows only the local number and uses the full available width.
+- The dial code already stored on the record is preserved silently on save.
 
-## 3. Accordion name frames
+## 3. Accordions collapsed by default
 
-Give the patient/name accordion a fine green outline (1px `border-primary/40`, rounded) in `section-accordion.tsx` / `CompactTodoList.tsx`, keeping the spacing between frames.
+- Personal Information, Medical Information and My Practice sections all start collapsed.
 
-## 4. Why the to-do accordions have odd names ("Georgia Adams. Note", "No patient")
+## 4. Search filters cleanup
 
-Confirmed cause in `src/lib/todoDisplay.ts`. Todos usually have no `patient_name`, so the grouping falls back to `extractPatient(title)`, which guesses a name out of the task title with this regex:
+- Remove the left-hand "Filters" side panel from Referrals, My Holarc Team, and Preferred Hospitals; keep a single inline search box above each list.
+- Each search queries only its own entity: doctor searches return doctors, hospital searches return hospitals, team search returns connected providers.
 
-```text
-/\bfor\s+([A-Z][\p{L}'.-]+(?:\s+[A-Z][\p{L}'.-]+)+)/u
-```
+## 5. Renaming
 
-The character class includes a full stop, so a title like "Review letter for Georgia Adams. Note follow-up" captures **"Georgia Adams. Note"** — the sentence-ending period plus the next capitalised word get swallowed into the name. When no pattern matches at all, `CompactTodoList.tsx:502` labels the group the literal `"No patient"`.
+| Old | New |
+| --- | --- |
+| My History (profile tab) | Sessions |
+| My Sessions (nav) | Sessions |
+| My Tasks (nav) | Tasks |
+| All Documents (nav) | Documents |
+| My Round Tables (nav) | Round Tables |
 
-Fix:
-- Resolve the group name from the todo's `patient_id` (join to the patients record) first, then `patient_name`, and only then fall back to title parsing.
-- Tighten `extractPatient`: stop at sentence punctuation, don't allow `.` inside a name token, cap at 3 words, and reject known non-name words ("Note", "Invoice", "Follow", etc.).
-- Rename the fallback label from "No patient" to "General tasks".
+## 6. New Admissions nav item
 
-## 5. Invoice numbers duplicated (`INV-INV-202607-88811`)
+- New sidebar entry **Admissions** directly under My Patients, with its own route and page.
+- Default view: admissions for roster patients where the signed-in doctor is the attending/admitting practitioner.
+- A toggle switches to admissions of those patients where another doctor is attending/admitting.
+- Rows show patient, hospital, ward/bed, admit date, status, attending doctor; clicking opens the existing admission detail view.
 
-Confirmed: numbers are generated already prefixed — `INV-${year}${month}-${random}` in `Invoices.tsx`, `InvoiceEditor.tsx`, `useSessions.ts`, `Sessions.tsx` and the `process-todo-actions` function — but the default invoice template in `src/hooks/useTemplates.ts:218` hardcodes another prefix:
+## 7. "Mine only" filters
 
-```text
-TAX Invoice Number: INV-[InvoiceNumber]
-```
+- Sessions, Tasks, Documents and Round Tables each get a Mine / All filter control.
 
-Fix: drop the literal `INV-` from the template line so the placeholder supplies the whole number, and add a defensive strip of a leading `INV-` when filling `[InvoiceNumber]` so existing saved templates render correctly too.
+## 8. Accordion polish
 
-## 6. Missing translation keys on patient details save
+- Add vertical padding/spacing between accordion group names and their child rows.
+- Remove divider lines between accordion records; rely on spacing.
+- Fix count pills that render blank — always show the real count, and hide the pill entirely when the group is empty.
 
-The toast in `src/pages/patient/MyDetails.tsx:149` uses `common.saved` and `patient.myDetails.detailsUpdated`; the `patient.myDetails` block does not exist in `src/i18n/locales/en.json`, so the raw keys render (the screenshot). Fix: add the missing keys to `en.json` (and the other locale files) and audit `MyDetails.tsx` for any other unresolved keys.
+## 9. Documents tabs and button standardisation
 
-## 7. Session recording fixes (`src/pages/Sessions.tsx`, `src/hooks/useAudioRecording.ts`)
+- Fix the broken Documents tab strip (pill overlapping the label, unreadable second tab).
+- Standardise all buttons on the "Add Document" format (height, padding, radius, font size/weight, icon size) via shared button variants.
+- Reduce home page button font size by one step.
 
-**a) No live transcription — also breaks AI Consult and the Live AI hint.** The Web Speech recognizer only scans results for "end session" phrases and never accumulates text; `transcript` is set once, after Whisper returns. So `handleAiConsult` hits its "Nothing to analyse yet" guard mid-session. Fix: accumulate final Web Speech results (plus current interim) into a `liveTranscript` the hook exposes; render it in the Transcript panel, feed it to the live hint and to AI Consult. Whisper still replaces it as the authoritative transcript on stop.
+## 10. Profile switcher
 
-**b) Follow-up and Vula dialogs twice.** Two paths call `handleSessionComplete` for one stop: `onEndSessionDetected` schedules it on a 2s timer *and* `onTranscriptionComplete` calls it because `pendingCompletionRef` is still true. Fix: one-shot `completionStartedRef` guard and remove the redundant timer path.
+- Remove the lingering "Dean Allie (Patient)" entry from the avatar profile switcher, including from the impersonation seed list that re-adds it.
 
-**c) Wrong modal order.** `startDocumentReview()` runs via `setTimeout(..., 0)` with a stale closure where all four extracted-document states are still null, so it falls straight through to the follow-up dialog. Fix: pass the freshly extracted docs as arguments, restoring: Med Cert → Prescription → Invoice → Referral → Follow-up → Vula.
+## 11. To-Do list: hide already-handled document tasks
 
-**d) Send button on every modal.** Add an explicit Send action to each review dialog, routed through the existing `DocumentDeliveryProgress` / `sendDeliveryDocument` path.
-
-**e) Button overlap.** Record / Pause / AI Consult sit in one fixed `flex items-center gap-3` row in the narrow sidebar card. Make it `flex-wrap justify-center` and collapse the Pause / AI Consult labels to icons on narrow widths.
-
-## 8. Document email handle
-
-- `Sidebar.tsx` already renders `<alias>@docs.holarchealth.com` under the profile name but truncates it — switch to wrapping/`break-all` so the full handle shows.
-- Show the patient's own intake address on the **patient record** (patient profile header), reusing the copyable `MailboxIntakeAddress` component, so the patient sees where to email documents.
-- Make that same address visible to every provider connected to the patient. I will verify the patient `mailbox_alias` column is readable by connected providers before wiring the UI, and add a read policy only if it is not.
+- Document review tasks are suppressed from the To-Do list when the doctor already reviewed and sent that document during the session.
+- On send, the linked review task is marked complete so it never appears as outstanding work; tasks for documents still in draft or unsent remain visible.
 
 ## Technical notes
 
-Files: `testProfiles.ts`, `TodoRow.tsx`, `todoDisplay.ts`, `CompactTodoList.tsx`, `section-accordion.tsx`, `useTemplates.ts` (+ invoice placeholder fill), `en.json` and sibling locales, `useAudioRecording.ts`, `Sessions.tsx`, the four session review dialogs, `Sidebar.tsx`, patient profile header. A migration is only needed if the provider read of the patient mailbox alias turns out to be blocked.
+- One migration: add `preferred_hospitals` JSONB (default `[]`) to `public.patients`; existing patient RLS covers it.
+- Hospital search reads approved hospitals from the existing hospitals table.
+- Nav/route changes in `Sidebar.tsx` and the router; new doctor Admissions page.
+- Accordion spacing/pill fixes centralised in `section-accordion.tsx` and the group components.
+- Button standardisation in the shared button variants rather than per-page overrides.
+- To-Do suppression handled where session documents are sent, plus a filter in the To-Do query for tasks whose linked document is already sent.
