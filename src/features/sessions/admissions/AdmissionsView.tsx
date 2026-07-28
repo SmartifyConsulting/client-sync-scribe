@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useHospitalAdmissions, useAdmissionVitals, useAdmissionMedications, useAdmissionLabResults, useAdmissionImaging, type HospitalAdmission } from "@/hooks/useHospitalAdmissions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { SectionCountPill } from "@/components/ui/section-accordion";
+import { SectionHeader } from "@/features/patients/components/sectionStyles";
 import { Badge } from "@/components/ui/badge";
 import { Hospital, FileText, Plus, Activity, Pill, FlaskConical, Scan, Loader2, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
@@ -75,10 +77,10 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
         </Button>
       )}
 
-      <Accordion type="multiple" className="w-full" defaultValue={["vitals"]}>
-        <AccordionItem value="vitals">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Activity className="h-4 w-4" /> Vitals ({vitals.length})</span></AccordionTrigger>
-          <AccordionContent>
+      <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
+        <Collapsible defaultOpen className="bg-white overflow-hidden">
+          <SectionHeader icon={Activity} label="Vitals" extra={<SectionCountPill count={vitals.length} />} />
+          <CollapsibleContent className="p-3">
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowVitals(true)}><Plus className="h-4 w-4 mr-1" /> Add Vitals</Button>}
             <div className="space-y-2">
               {vitals.map((v: any) => (
@@ -99,12 +101,12 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 </div>
               ))}
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </CollapsibleContent>
+        </Collapsible>
 
-        <AccordionItem value="meds">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Pill className="h-4 w-4" /> Active Medications ({meds.length})</span></AccordionTrigger>
-          <AccordionContent>
+        <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <SectionHeader icon={Pill} label="Active Medications" extra={<SectionCountPill count={meds.length} />} />
+          <CollapsibleContent className="p-3">
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowMeds(true)}><Plus className="h-4 w-4 mr-1" /> Add Medication</Button>}
             <div className="space-y-2">
               {meds.map((m: any) => (
@@ -116,12 +118,12 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 </div>
               ))}
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </CollapsibleContent>
+        </Collapsible>
 
-        <AccordionItem value="labs">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><FlaskConical className="h-4 w-4" /> Lab Results ({labs.length})</span></AccordionTrigger>
-          <AccordionContent>
+        <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <SectionHeader icon={FlaskConical} label="Lab Results" extra={<SectionCountPill count={labs.length} />} />
+          <CollapsibleContent className="p-3">
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowLabs(true)}><Plus className="h-4 w-4 mr-1" /> Add Lab Result</Button>}
             <div className="space-y-2">
               {labs.map((l: any) => (
@@ -137,12 +139,12 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 </div>
               ))}
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </CollapsibleContent>
+        </Collapsible>
 
-        <AccordionItem value="imaging">
-          <AccordionTrigger className="text-xs"><span className="flex items-center gap-2"><Scan className="h-4 w-4" /> Imaging ({imaging.length})</span></AccordionTrigger>
-          <AccordionContent>
+        <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+          <SectionHeader icon={Scan} label="Imaging" extra={<SectionCountPill count={imaging.length} />} />
+          <CollapsibleContent className="p-3">
             {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowImaging(true)}><Plus className="h-4 w-4 mr-1" /> Add Imaging</Button>}
             <div className="space-y-2">
               {imaging.map((i: any) => (
@@ -159,9 +161,9 @@ function AdmissionDetail({ admission, canEdit, defaultHeight, defaultWeight }: {
                 </div>
               ))}
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
 
       <AddVitalsDialog open={showVitals} onOpenChange={setShowVitals} admissionId={admission.id} hospitalId={admission.hospital_provider_id} defaultHeight={defaultHeight} defaultWeight={defaultWeight} />
       <AddMedicationDialog open={showMeds} onOpenChange={setShowMeds} admissionId={admission.id} hospitalId={admission.hospital_provider_id} />
