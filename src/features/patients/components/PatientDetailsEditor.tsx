@@ -63,6 +63,7 @@ import {
 } from "./sectionStyles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PreferredHospitals, type PreferredHospital } from "./PreferredHospitals";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -1601,6 +1602,7 @@ export function PatientDetailsEditor({
                   <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
                   <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
                   <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
+                  <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Hospitals</TabsTrigger>
                 </TabsList>
 
             {/* === INSURANCE SUB-TAB (view) === */}
@@ -1664,6 +1666,14 @@ export function PatientDetailsEditor({
             </TabsContent>
 
 
+            {/* === HOSPITALS SUB-TAB === */}
+            <TabsContent value="hospitals" className="mt-4">
+              <PreferredHospitals
+                value={((patient as any).preferred_hospitals as PreferredHospital[]) || []}
+                onChange={(next) => onSave({ preferred_hospitals: next } as any)}
+              />
+            </TabsContent>
+
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
@@ -1696,7 +1706,7 @@ export function PatientDetailsEditor({
               </div>
 
               <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-              <Collapsible defaultOpen className="bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
 
                 <SectionHeader icon={User} label="Personal Details" />
                 <CollapsibleContent className="p-3">
@@ -1837,7 +1847,7 @@ export function PatientDetailsEditor({
               <div className="space-y-3">
                 <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
                   {/* General Information */}
-                  <Collapsible defaultOpen className="bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={Activity} label="General Information" />
                     <CollapsibleContent className="px-3 pb-3">
                       <div className={FIELD_GRID_4_CLASS}>
@@ -2408,7 +2418,7 @@ export function PatientDetailsEditor({
             </div>
 
             <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-            <Collapsible defaultOpen className="bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 {/* Horizontal label/field rows: bold, one size smaller labels */}
@@ -2848,7 +2858,7 @@ export function PatientDetailsEditor({
             <div className="space-y-3">
               <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
                 {/* General Information */}
-                <Collapsible defaultOpen className="bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <SectionHeader icon={Activity} label="General Information" />
                   <CollapsibleContent className="px-3 pb-3">
                     <div className={FIELD_GRID_4_CLASS}>
