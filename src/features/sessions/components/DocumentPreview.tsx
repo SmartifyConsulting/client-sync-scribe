@@ -59,6 +59,9 @@ interface DocumentPreviewProps {
   headerFooter?: HeaderFooterTemplate | null;
   onClose: () => void;
   closeLabel?: string;
+  /** Optional extra footer action(s) rendered next to Share / Print. */
+  extraActions?: React.ReactNode;
+
 }
 
 export function DocumentPreview({
