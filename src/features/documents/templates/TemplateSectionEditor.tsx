@@ -215,10 +215,16 @@ export function TemplateSectionEditor({
       });
 
     try {
-      if (user?.id) {
+      // Storage policies key off the *authenticated session* id, which can differ
+      // from the app-level user (profile switching / impersonation). Always build
+      // the upload path from the live session.
+      const { data: authData } = await supabase.auth.getUser();
+      const authUserId = authData?.user?.id;
+
+      if (authUserId) {
         const rawExt = (file.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         const fileExt = rawExt || 'png';
-        const fileName = `${user.id}/template-section-${Date.now()}.${fileExt}`;
+        const fileName = `${authUserId}/template-section-${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('logos')
@@ -238,9 +244,15 @@ export function TemplateSectionEditor({
         const { data } = supabase.storage.from('logos').getPublicUrl(fileName);
         onChange({ ...value, imageUrl: data.publicUrl });
       } else {
-        // Not signed in yet — embed as a data URL
+        // No active session — embed as a data URL
         await embedLocally();
+        toast({
+          title: "Image added (not stored)",
+          description: "You are not signed in, so the image was embedded locally.",
+        });
+        return;
       }
+
 
       toast({ title: "Image uploaded", description: "Image added to section" });
     } catch (error: any) {

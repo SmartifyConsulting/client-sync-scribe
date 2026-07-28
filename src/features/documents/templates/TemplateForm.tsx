@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -292,8 +292,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       {/* Dynamic Fields Info */}
       <div className="p-3 rounded-lg bg-muted/50 border border-border">
         <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
-        <p className="text-xs text-muted-foreground mb-2">
-          Drag a placeholder into the content area, or click to copy. They are replaced with real data when documents are created.
+        <p className="text-xs text-foreground mb-2">
+          <span className="font-semibold">Tip:</span> click and drag a field below straight into the content area
+          where you want it — or click it to copy. Fields are replaced with real data when a document is created.
         </p>
         <div className="flex flex-wrap gap-2">
           {[
@@ -308,13 +309,15 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 e.dataTransfer.effectAllowed = "copy";
               }}
               onClick={() => { navigator.clipboard?.writeText(token); }}
-              className="text-xs bg-primary/10 text-primary px-2 py-1 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
-              title="Drag into content or click to copy"
+              className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
+              title="Drag into the content area, or click to copy"
             >
+              <GripVertical className="h-3 w-3 opacity-70" />
               {token}
             </code>
           ))}
         </div>
+
       </div>
 
       {/* CONTENT SECTION */}

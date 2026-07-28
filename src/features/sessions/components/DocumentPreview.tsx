@@ -59,6 +59,9 @@ interface DocumentPreviewProps {
   headerFooter?: HeaderFooterTemplate | null;
   onClose: () => void;
   closeLabel?: string;
+  /** Optional extra footer action(s) rendered next to Share / Print. */
+  extraActions?: React.ReactNode;
+
 }
 
 export function DocumentPreview({
@@ -70,6 +73,8 @@ export function DocumentPreview({
   headerFooter,
   onClose,
   closeLabel = "Close",
+  extraActions,
+
 }: DocumentPreviewProps) {
   const { toast } = useToast();
   const [showEmailDialog, setShowEmailDialog] = useState(false);
@@ -227,7 +232,9 @@ export function DocumentPreview({
               <Printer className="h-4 w-4" />
               Print
             </Button>
+            {extraActions}
           </div>
+
         </div>
       </div>
 

@@ -138,14 +138,30 @@ export async function resolveDocumentPreviewContent(
   const signatureHtml = renderSignatureHtml(profile as any);
   if (signatureHtml) {
     content = content.replace(/\[(DoctorSignature|Signature)\]/g, signatureHtml);
-  }
 
+    // Legacy documents were saved with the signature slot already flattened to a
+    // blank "___" line (the quiet placeholder). Restore the real signature there
+    // so To-Do / list previews match the editor preview.
+    if (!content.includes(signatureHtml)) {
+      content = content.replace(
+        /(Registration Number:[^\n]*\n+)\s*_{2,}\s*(?=\n)/,
+        `$1${signatureHtml}`,
+      );
+      const todayLong = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      content = content.replace(/(\n\s*Date:\s*)_{2,}\s*(?=\n|$)/, `$1${todayLong}`);
+    }
+  }
 
   const didChange = content !== original;
 
   // Auto-heal stored documents that still contain raw placeholders so future
-  // previews/prints/emails skip resolution entirely.
-  if (filled.hadPlaceholders && didChange) {
+  // previews/prints/emails skip resolution entirely. Skip persisting when the
+  // signature could not be resolved, so it is retried on the next preview.
+  if (filled.hadPlaceholders && didChange && signatureHtml) {
     try {
       await supabase.from("documents").update({ content }).eq("id", doc.id);
     } catch (err) {
@@ -153,6 +169,7 @@ export async function resolveDocumentPreviewContent(
       console.error("[resolveDocumentPreviewContent] auto-heal failed", err);
     }
   }
+
 
   return {
     resolvedContent: content,
