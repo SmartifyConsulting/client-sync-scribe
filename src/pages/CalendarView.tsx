@@ -601,6 +601,24 @@ export default function CalendarView() {
               ))}
             </div>
           )}
+          <div className="relative w-[200px]">
+            <Input
+              value={eventQuery}
+              onChange={(e) => setEventQuery(e.target.value)}
+              placeholder={t("calendar.searchPlaceholder", "Search appointments...")}
+              className="h-8 text-xs pr-7"
+            />
+            {eventQuery && (
+              <button
+                type="button"
+                onClick={() => setEventQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-label="Clear search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
           {practice && scope === 'practice' && members.length > 0 && (
             <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
               <SelectTrigger className="h-8 w-[200px] text-xs">
