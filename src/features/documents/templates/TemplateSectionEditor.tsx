@@ -203,34 +203,51 @@ export function TemplateSectionEditor({
 
     setIsUploading(true);
 
+    const embedLocally = () =>
+      new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          onChange({ ...value, imageUrl: e.target?.result as string });
+          resolve();
+        };
+        reader.onerror = () => resolve();
+        reader.readAsDataURL(file);
+      });
+
     try {
-      if (user) {
-        const fileExt = file.name.split('.').pop();
+      if (user?.id) {
+        const rawExt = (file.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const fileExt = rawExt || 'png';
         const fileName = `${user.id}/template-section-${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('logos')
-          .upload(fileName, file, { upsert: true });
+          .upload(fileName, file, { upsert: true, contentType: file.type || undefined });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Storage upload error:', uploadError);
+          // Storage refused it — still let the user place the image inline.
+          await embedLocally();
+          toast({
+            title: "Image added (not stored)",
+            description: uploadError.message || "Storage upload failed; the image was embedded locally.",
+          });
+          return;
+        }
 
         const { data } = supabase.storage.from('logos').getPublicUrl(fileName);
         onChange({ ...value, imageUrl: data.publicUrl });
       } else {
-        // For non-authenticated preview, use data URL
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          onChange({ ...value, imageUrl: e.target?.result as string });
-        };
-        reader.readAsDataURL(file);
+        // Not signed in yet — embed as a data URL
+        await embedLocally();
       }
 
       toast({ title: "Image uploaded", description: "Image added to section" });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to upload image",
+        description: error?.message || "Failed to upload image",
         variant: "destructive",
       });
     } finally {

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useTemplates, Template } from "./useTemplates";
 import { useHeaderFooterTemplates, HeaderFooterTemplate } from "./useHeaderFooterTemplates";
 import { useProfile } from "./useProfile";
+import { fillDocumentPlaceholders } from "@/features/documents/lib/fillDocumentPlaceholders";
 
 interface CombinedTemplate {
   template: Template | null;
@@ -61,19 +62,13 @@ export function useTemplateWithHeaderFooter(templateName: string): CombinedTempl
       formattedContent += template.content;
     }
 
-    // Replace profile placeholders
-    if (profile) {
-      formattedContent = formattedContent
-        .replace(/\[PracticeNumber\]/g, profile.practice_number || "[PracticeNumber]")
-        .replace(/\[DoctorNumber\]/g, profile.doctor_number || "[DoctorNumber]")
-        .replace(/\[DoctorName\]/g, profile.full_name || "[DoctorName]")
-        .replace(/\[PracticeAddress\]/g, profile.practice_address || "[PracticeAddress]");
-      
-      // Replace signature placeholder with image tag if signature exists
-      const signatureUrl = (profile as any)?.signature_url;
-      if (signatureUrl) {
-        formattedContent = formattedContent.replace(/\[DoctorSignature\]/g, `<img src="${signatureUrl}" alt="Signature" style="max-height: 60px;" />`);
-      }
+    // Resolve every known token (doctor name/number, practice number & address,
+    // dates, signature — typed or uploaded) through the shared filler so previews
+    // show real values by default instead of raw [Brackets].
+    if (formattedContent) {
+      formattedContent = fillDocumentPlaceholders(formattedContent, {
+        profile: (profile ?? null) as any,
+      }).content;
     }
 
     return {

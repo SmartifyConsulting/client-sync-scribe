@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { isSampleName } from "@/lib/samplePatients";
+import { SampleBadge } from "@/components/patients/SampleBadge";
 import { Plus, Trash2, Pencil, Loader2, Search, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -394,7 +396,10 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                         className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
                         onClick={() => handleSelectProfile(doc)}
                       >
-                        <p className="font-medium text-foreground text-sm">{doc.full_name}</p>
+                        <p className="font-medium text-foreground text-sm flex items-center gap-1.5">
+                          {isSampleName(doc.full_name) && <SampleBadge />}
+                          {doc.full_name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {doc.specialty && `${doc.specialty} · `}
                           {doc.practice_number && `PR: ${doc.practice_number}`}
@@ -591,7 +596,10 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                       {(doc.full_name || "DR").trim().slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-foreground truncate">{doc.full_name}</span>
+                      <span className="font-medium text-foreground truncate flex items-center gap-1.5">
+                        {isSampleName(doc.full_name) && <SampleBadge />}
+                        {doc.full_name}
+                      </span>
                       <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
                         {doc.specialty && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">{doc.specialty}</span>}
                         {doc.practice_number && <span>PR#: {doc.practice_number}</span>}
