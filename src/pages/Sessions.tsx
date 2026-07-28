@@ -142,6 +142,9 @@ export default function Sessions() {
   const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
   const pendingCompletionRef = useRef(false);
+  // Guarantees the post-session chain (documents → follow-up → Vula) runs exactly once
+  // per session, no matter how many paths (voice cue, transcription, manual stop) fire.
+  const completionRanRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
@@ -301,8 +304,9 @@ export default function Sessions() {
 
   // Manual AI Clinician consult — can be triggered at any point during a session.
   const handleAiConsult = async () => {
-    const liveTranscript = latestTranscriptRef.current || transcript || notes || "";
-    if (!liveTranscript.trim()) {
+    const consultText =
+      latestTranscriptRef.current || transcript || liveTranscript || notes || "";
+    if (!consultText.trim()) {
       toast({
         title: "Nothing to analyse yet",
         description: "Record or type some session content first.",
@@ -310,7 +314,7 @@ export default function Sessions() {
       return;
     }
     setShowDiagnosticsModal(true);
-    await generateAIDiagnosis({ summary: summary || liveTranscript, transcript: liveTranscript });
+    await generateAIDiagnosis({ summary: summary || consultText, transcript: consultText });
   };
 
 
@@ -377,6 +381,11 @@ export default function Sessions() {
 
   // Callback to handle session completion after transcription
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
+    if (completionRanRef.current) {
+      console.log("handleSessionComplete skipped — already ran for this session");
+      return;
+    }
+    completionRanRef.current = true;
     console.log("=== handleSessionComplete START ===");
     setSessionState("processing");
     
@@ -480,6 +489,7 @@ export default function Sessions() {
     isTranscribing, 
     isSavingAudio,
     transcript,
+    liveTranscript,
     audioUrl,
     savedAudioUrl,
     startRecording,
@@ -534,7 +544,7 @@ export default function Sessions() {
   // Live AI diagnostic hint while doctor is recording (before they conclude)
   const { hint: liveHint, isLoading: liveHintLoading } = useLiveDiagnosticHint({
     enabled: isRecording && !isPaused,
-    transcript,
+    transcript: liveTranscript || transcript,
     patientAge: (currentPatient as any)?.dob
       ? Math.max(0, Math.floor((Date.now() - new Date((currentPatient as any).dob).getTime()) / 31557600000))
       : ((currentPatient as any)?.age ?? null),
@@ -775,6 +785,7 @@ export default function Sessions() {
     clearTranscript();
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
+    completionRanRef.current = false;
     // Auto-start recording when session begins
     startRecording();
   };
