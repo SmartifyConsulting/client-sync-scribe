@@ -73,6 +73,8 @@ export function DocumentPreview({
   headerFooter,
   onClose,
   closeLabel = "Close",
+  extraActions,
+
 }: DocumentPreviewProps) {
   const { toast } = useToast();
   const [showEmailDialog, setShowEmailDialog] = useState(false);
