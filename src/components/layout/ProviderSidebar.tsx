@@ -25,6 +25,9 @@ import {
   Radar,
   AlertTriangle,
   Zap,
+  LayoutDashboard,
+  CalendarClock,
+  Clock,
 } from "lucide-react";
 
 import { useProfile } from "@/hooks/useProfile";
