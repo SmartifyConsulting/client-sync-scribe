@@ -93,12 +93,15 @@ export function useUserRole() {
                   ? 'admin'
                   : null);
 
+        roleCache.set(user.id, { role: effectiveRole, availableRoles: normalized });
         setAvailableRoles(normalized);
         setRole(effectiveRole);
       } catch (error) {
         console.error('Error fetching user role:', error);
-        setAvailableRoles([]);
-        setRole(null);
+        if (!roleCache.has(user.id)) {
+          setAvailableRoles([]);
+          setRole(null);
+        }
       } finally {
         setLoading(false);
       }
