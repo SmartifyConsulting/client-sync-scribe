@@ -528,29 +528,22 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
-        {/* Sidebar filters */}
-        <div className="rounded-xl border border-primary bg-card shadow-sm p-4 space-y-4 h-fit">
-          <h3 className="text-xs font-medium text-primary-dark">Filters</h3>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Search</Label>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-8 h-9 text-sm" />
-            </div>
+      <div className="space-y-3">
+        {/* Inline search + specialty filter */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search doctors..." className="pl-8 h-9 text-sm" />
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Specialty</Label>
-            <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
-              <SelectContent className="max-h-72">
-                <SelectItem value="any">All Specialties</SelectItem>
-                {SPECIALTIES.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+            <SelectTrigger className="h-9 w-[200px] text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
+            <SelectContent className="max-h-72">
+              <SelectItem value="any">All Specialties</SelectItem>
+              {SPECIALTIES.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Referral doctor list */}
