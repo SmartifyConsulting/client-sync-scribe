@@ -1,30 +1,42 @@
-I checked the current code and found why you still see the wrong UI:
+## My Biolog — port of Personal Bestie's tracking + correlation engine
 
-- **Hospitals is only present in the read-only My Holarchy tab list** (`PatientDetailsEditor.tsx`), but it is missing from the **edit-mode** My Holarchy tab list, which only has My Holarc Team, Insurance, Pharmacies. So in editable/self-service mode, no Hospitals tab appears next to Pharmacies.
-- **The tab label is still hardcoded as “My History”** in `PatientDetailsEditor.tsx`. The doctor sidebar was renamed to "Sessions", but this patient-profile tab label was never touched.
-- The patient sidebar (`Sidebar.tsx`) currently has: My Profile → My Calendar → My Tasks → My Documents → My Rewards → SOS. There is no My Admissions item.
+Bring across only the functionality (programme administration, daily tracking, correlations). None of the Personal Bestie visual design — everything uses Holarc's existing tokens, `SectionAccordion`, teal/blue role colours, Sora/Manrope type, and the standard button/tab formats.
 
-Plan:
+### Navigation
+- New nav entry placed **after Test Results and before Tasks** in both menus: **My Biolog** for patients, **Biolog** alongside the doctor's **Test Results** entry. Route `/biolog`.
+- Sub-tabs inside the page: **Today** (check-in) · **History** · **Insights** · **Programmes** · **Customise**.
 
-1. **Add Hospitals next to Pharmacies in My Holarchy edit mode**
-   - Add a `Hospitals` tab trigger immediately after `Pharmacies` in the edit-mode My Holarchy tabs.
-   - Render the same `PreferredHospitals` content used in view mode so both modes match.
+### 1. Customisable trackables (per user)
+Every user configures their own biolog:
+- **Wellbeing sections** — good/neutral/bad + 1–10 intensity, grouped Physical / Mental. Seeded with standard ones (sleep, energy, pain, allergies, state of mind, focus, motivation) but each can be renamed, disabled, reordered, or replaced with custom ones.
+- **Foods** — personal food list by category, used for meal logging (breakfast/lunch/dinner/snack).
+- **Exercises** — categories + items, with intensity, quantity/duration and performance rating.
+- **Medications / supplements** — label, dose amount and unit; ticked off with quantity at check-in.
+- **Section order** — user-defined order of the check-in blocks.
 
-2. **Rename My History to My Sessions in the patient profile**
-   - Change the hardcoded `My History` tab label to `My Sessions`.
-   - Keep the internal tab value `history` so routing/state doesn't break.
-   - Update the helper copy under that tab from "History of your consultations…" to session wording.
+### 2. Daily check-in (tracking)
+One screen per day: wellbeing rows, meals, exercise, medication. Supports editing a past entry from History. Includes **voice check-in**: record, transcribe, and let AI pre-fill the sliders, foods, exercises and medications — you review before saving. History groups entries by Today / This Month / Year, matching the grouping pattern already used in Sessions.
 
-3. **Remove the Admissions sub-tab from My History / My Sessions**
-   - Drop the `Admissions` sub-tab trigger and its content panel from that tab, so it only shows sessions.
-   - Admissions now lives in its own nav item (step 4), so nothing is lost.
+### 3. Correlations (insights)
+- Averages chart per variable with day / week / month periods and period-vs-period comparison.
+- Correlation cards grouped by category (Diet & Physical, Mental & Cognitive, Exercise & Result, plus user-created groups), each computing "X is N% higher/lower with Y" over a chosen date range (all time / this week / last week / this month / custom).
+- Users toggle which correlations show, add custom ones (pick outcome variables + input variable + group), and get AI-suggested correlations based on what they actually track.
 
-4. **Add My Admissions to the patient nav menu under My Profile**
-   - Insert a `My Admissions` item in the patient nav in `Sidebar.tsx`, directly after `My Profile` and before `My Calendar`.
-   - Route it to a patient admissions view showing that patient's hospital admissions (reusing the existing admissions data/components already built for doctors/hospitals, scoped to the signed-in patient).
-   - Add the matching nav label key so it is translatable.
+### 4. Programmes
+- A programme is a named plan (diet, exercise, or mixed) with a description, duration, target trackables, and optional daily targets.
+- **Doctors** create programmes and assign them to a patient from the patient record; **patients** can create their own.
+- Active programmes surface on the check-in screen as the day's focus, and the Insights view can be filtered to a programme's window so before/during comparison is possible.
+- Programme list shows status (active / completed / cancelled), assigning practitioner, and adherence (days checked in vs days elapsed).
 
-5. **Validate in the preview**
-   - Patient My Holarchy sub-tabs show: My Holarc Team, Insurance, Pharmacies, Hospitals — in both view and edit modes.
-   - Top-level patient profile tab reads `My Sessions` with no Admissions sub-tab.
-   - Patient sidebar order: My Profile → My Admissions → My Calendar → My Tasks → My Documents → My Rewards → SOS.
+### 5. Doctor visibility
+Read-only **Biolog** tab in the patient record showing that patient's entries, adherence and correlations — gated by the existing patient consent / profile-share scopes (a new `biolog` scope is added to the granular "can view" sub-selections already in place).
+
+### Technical notes
+- New tables (all RLS'd to the owning user, with grants): `biolog_sections`, `biolog_section_order`, `biolog_foods`, `biolog_exercises`, `biolog_medications`, `biolog_correlations`, `biolog_entries` (JSONB payload per day), `biolog_programmes`, `biolog_programme_assignments`. Doctor read access via the existing `doctor_patient_access` / `patient_profile_shares` helpers; `biolog` added to the share-scope list.
+- Ported logic lives in `src/features/biolog/` — `lib/correlations.ts` (built-in definitions + `computeInsight`), hooks for entries/sections/programmes, and components for check-in, history, insights, programmes and customise.
+- No localStorage fallback: entries are written straight to the database (Personal Bestie's local-first storage layer is dropped).
+- Two edge functions: `biolog-voice-checkin` (transcribe + parse into the user's own trackables) and `biolog-suggest-correlations`, both on Lovable AI.
+- i18n keys added to `en.json` for nav and all new labels.
+
+### Out of scope
+Personal Bestie's fans/followers, tasks, invitations, public profiles, billing and its visual theme are not imported.

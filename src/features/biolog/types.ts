@@ -1,0 +1,132 @@
+export type BiologGroup = "physical" | "mental";
+
+export interface BiologSection {
+  id: string;
+  user_id: string;
+  key: string;
+  label: string;
+  group_name: BiologGroup | string;
+  enabled: boolean;
+  sort_order: number;
+  is_custom: boolean;
+}
+
+export interface BiologFood {
+  id: string;
+  user_id: string;
+  name: string;
+  category: string;
+}
+
+export interface BiologExercise {
+  id: string;
+  user_id: string;
+  name: string;
+  category: string;
+  unit: string;
+}
+
+export interface BiologMedication {
+  id: string;
+  user_id: string;
+  label: string;
+  dose_amount: number | null;
+  dose_unit: string | null;
+}
+
+export type MealSlot = "breakfast" | "lunch" | "dinner" | "snack";
+
+export interface EntryMeal {
+  slot: MealSlot;
+  foods: string[];
+}
+
+export interface EntryExercise {
+  name: string;
+  duration?: number | null;
+  performance?: number | null;
+}
+
+export interface EntryMedication {
+  label: string;
+  taken: boolean;
+}
+
+/** Everything captured in a single day of the biolog. */
+export interface BiologPayload {
+  /** section key -> 1..10 rating */
+  ratings: Record<string, number>;
+  meals: EntryMeal[];
+  exercises: EntryExercise[];
+  medications: EntryMedication[];
+}
+
+export interface BiologEntry {
+  id: string;
+  user_id: string;
+  entry_date: string;
+  payload: BiologPayload;
+  note: string | null;
+}
+
+export interface BiologCorrelationRow {
+  id: string;
+  user_id: string;
+  title: string;
+  group_name: string;
+  input_variable: string;
+  outcome_variables: string[];
+  enabled: boolean;
+  is_custom: boolean;
+}
+
+export interface BiologProgramme {
+  id: string;
+  created_by: string;
+  name: string;
+  description: string | null;
+  kind: "diet" | "exercise" | "mixed" | string;
+  duration_days: number;
+  targets: { label: string; detail?: string }[];
+}
+
+export interface BiologProgrammeAssignment {
+  id: string;
+  programme_id: string;
+  patient_user_id: string;
+  assigned_by: string;
+  start_date: string;
+  end_date: string | null;
+  status: string;
+  programme?: BiologProgramme;
+}
+
+export const DEFAULT_SECTIONS: {
+  key: string;
+  label: string;
+  group_name: BiologGroup;
+}[] = [
+  { key: "energy", label: "Energy", group_name: "physical" },
+  { key: "sleep", label: "Sleep quality", group_name: "physical" },
+  { key: "joints", label: "Pain", group_name: "physical" },
+  { key: "appetite", label: "Appetite", group_name: "physical" },
+  { key: "allergies", label: "Allergy / reaction", group_name: "physical" },
+  { key: "stateofmind", label: "State of mind", group_name: "mental" },
+  { key: "focus", label: "Focus", group_name: "mental" },
+  { key: "motivation", label: "Motivation", group_name: "mental" },
+  { key: "stress", label: "Stress", group_name: "mental" },
+];
+
+export const EMPTY_PAYLOAD: BiologPayload = {
+  ratings: {},
+  meals: [],
+  exercises: [],
+  medications: [],
+};
+
+export const MEAL_SLOTS: { slot: MealSlot; label: string }[] = [
+  { slot: "breakfast", label: "Breakfast" },
+  { slot: "lunch", label: "Lunch" },
+  { slot: "dinner", label: "Dinner" },
+  { slot: "snack", label: "Snacks" },
+];
