@@ -43,6 +43,8 @@ import { useNavigate } from "react-router-dom";
 import { useMyRewards, useMyStreaks, useMyChronicPatientId } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { MonthlyAdherenceSummary } from "@/components/rewards/MonthlyAdherenceSummary";
 import { TodaysMedicationsCard } from "@/components/rewards/TodaysMedicationsCard";
