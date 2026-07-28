@@ -1,44 +1,51 @@
-## What I found
+## Goal
 
-Two separate problems — the second is the real blocker.
+Replace the planned Cloudflare Email Worker with **Resend Inbound** so that mail sent to `<alias>@holarc.com` lands in the recipient's "My Documents". Everything already built (the `attachments` column, the private `email-attachments` bucket and its policies, the alias lookup, the `MailboxIntakeAddress` component) is reused unchanged.
 
-1. **The address was misspelled.** Samuel's mailbox alias in the database is `samuel-0koli`, so his intake address is `samuel-0koli@holarc.com`. The mail was sent to `samule-0koli@holarc.com`, which matches no profile.
+## Yes — Resend can do this
 
-2. **Nothing is routing mail into the app at all.** The app has an intake endpoint that turns an incoming email into a document, but no mail service is currently delivering to it — there is no email domain configured for the project, and the documents table contains zero email-created documents, ever. So even with the correct spelling the message would never have arrived.
+Resend supports receiving email: you point MX for a domain at Resend, and Resend POSTs an `email.received` webhook to an endpoint you choose. Two important details from their docs that shape the design:
 
-Note: the app's outbound/auth email system does not receive mail. Inbound has to be handled by a mail provider — per your choice, Cloudflare Email Routing.
+- The webhook payload contains **metadata only** (from / to / subject / attachment names + ids). The body and the attachment bytes must be fetched afterwards from Resend's Received-email and Attachments APIs using the `email_id`.
+- Webhooks are signed (Svix-style `svix-id` / `svix-timestamp` / `svix-signature` headers) with a webhook secret, so the endpoint can be public but still verified.
 
-## Plan
+### One caution about the root-domain choice
 
-### 1. Inbound pipeline (Cloudflare Email Routing)
+You chose `name@holarc.com` (root). Resend will then receive **all** mail for `holarc.com` — every address, not just the intake aliases. If any human mailbox currently lives on `holarc.com` (Google Workspace, Microsoft 365, cPanel), adding Resend's MX record will break it. Step 1 below checks this first; if existing MX records are found, I'll flag it and recommend `docs.holarc.com` before any DNS change is made.
 
-- Harden the existing intake endpoint (`receive-email-document`) so it can be safely called from the internet:
-  - require a shared secret header; reject anything else with 401
-  - validate the payload shape before processing
-  - normalise the recipient (lowercase, strip `+tags`) and match the alias case-insensitively
-  - if the alias is unknown, log it and return a clear "unknown mailbox" response instead of a silent failure
-- Add a Cloudflare Email Worker script to the repo (under `cloudflare/email-worker/`) that parses the raw MIME message, extracts sender, subject, body text/HTML and attachments, and POSTs them to the intake endpoint with the shared secret.
-- You then do the one-time Cloudflare setup: enable Email Routing on `holarc.com`, add the MX/TXT records it gives you, deploy the worker, and set a catch-all rule to send all mail to the worker. I'll give you the exact endpoint URL and steps; I can't touch your DNS.
+## Steps
 
-### 2. Attachments stored as real files
+### 1. Domain and DNS (your action, guided)
+- Check the current MX records for `holarc.com` and report what's there.
+- In Resend: Emails → Receiving → add `holarc.com` as a receiving domain, then add the single MX record it gives you at your DNS provider.
+- Register a webhook for event `email.received` pointing at the intake endpoint URL (given in step 3), and copy the webhook signing secret.
 
-- Create a private `email-attachments` storage bucket with access rules so a user can only read files under their own folder.
-- The worker forwards attachments as base64; the intake endpoint decodes each one, uploads to `email-attachments/{user_id}/{document_id}/{filename}`, and records name, size and path.
-- Store the attachment list on the document record so My Documents can render download links (signed URLs, since the bucket is private).
-- Guard rails: skip files over 10 MB, cap total per email, sanitise filenames, and note any skipped file in the document body.
+### 2. Secrets
+- `RESEND_WEBHOOK_SECRET` — the signing secret from Resend's webhook page (requested via the secure form).
+- Resend API access reuses the existing Resend connection already linked to this project; no new key needed.
 
-### 3. Surfacing it in the UI
+### 3. Rework the intake function
+`supabase/functions/receive-email-document/index.ts` currently expects a Cloudflare worker to POST a full parsed email with a shared secret. It gets restructured to:
+- Verify the Svix signature against `RESEND_WEBHOOK_SECRET`; reject unsigned/invalid requests with 401. Keep the old `x-intake-secret` path only as a manual-test fallback.
+- Ignore any event whose `type` is not `email.received`.
+- Resolve the recipient: for each address in `to` / `received_for`, normalise it (strip display name and `+tag`), take the local part, and match it against `profiles.mailbox_alias`. Unknown alias → 200 with `{ ignored: true }` so Resend doesn't retry forever.
+- Fetch the body via Resend's received-email API using `email_id`, and each attachment via the attachments API.
+- Enforce the existing limits (10 MB per file, 25 MB per email), sanitise filenames, upload to `email-attachments/<user_id>/<email_id>/<filename>`, and insert one `documents` row (title from subject, content from the text/HTML body, `attachments` jsonb holding filename / path / size / content type).
+- `verify_jwt` stays false for this function so Resend can call it.
 
-- Show attachment chips with download links on email-sourced documents in My Documents.
-- Show the user's own intake address on their profile/documents page with a copy button, so the exact alias can't be mistyped again.
+### 4. Drop the Cloudflare piece
+No `cloudflare/` worker directory is created; that part of the previous plan is removed.
 
-### 4. Verify
+### 5. UI (small)
+- `MailboxIntakeAddress` keeps showing `<alias>@holarc.com` (unchanged for the root-domain choice), surfaced on My Documents.
+- Document rows with attachments get download links via short-lived signed URLs from the private bucket.
 
-- Send a test email with an attachment to `samuel-0koli@holarc.com` after Cloudflare is live, then confirm the document and the stored file appear in his My Documents.
+### 6. Verify
+- Send a real email with a PDF to `samuel-0koli@holarc.com` (note the digit zero in `0koli` — the earlier test used the misspelled `samule-0koli`, which is why nothing arrived).
+- Confirm the webhook delivery is green in Resend, the row appears in `documents`, and the attachment downloads from My Documents.
 
 ## Technical notes
 
-- Intake function: `supabase/functions/receive-email-document/index.ts` — keeps the existing `{alias}@holarc.com` and legacy `docs-{mailbox_id}@` matching, gains secret auth, attachment upload and better logging.
-- New shared secret stored as a backend secret and set as a Worker variable on the Cloudflare side (same value both places).
-- Migration adds an `attachments jsonb` column to `documents` (default `[]`), plus the storage bucket and its policies.
-- Worker uses `postal-mime` for MIME parsing; deployed with `wrangler` from your Cloudflare account.
+- Attachment bytes never pass through the webhook body, so serverless payload limits are not a concern.
+- Resend stores received emails even if the endpoint is down and retries the webhook, so a deploy during testing won't lose mail; events can also be replayed from their dashboard.
+- Inserts use the service role inside the edge function; existing owner-scoped RLS on `documents` and on the `email-attachments` bucket governs all reads.

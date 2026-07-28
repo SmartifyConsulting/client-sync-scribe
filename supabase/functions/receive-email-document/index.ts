@@ -4,26 +4,33 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-intake-secret",
+    "authorization, x-client-info, apikey, content-type, x-intake-secret, svix-id, svix-timestamp, svix-signature",
 };
 
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 MB per file
 const MAX_TOTAL_ATTACHMENT_BYTES = 25 * 1024 * 1024; // 25 MB per email
 const BUCKET = "email-attachments";
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
-interface IncomingAttachment {
+interface ResendAttachmentMeta {
+  id?: string;
   filename?: string;
-  content?: string; // base64
-  contentType?: string;
+  size?: number;
+  content_type?: string;
+  content_disposition?: string;
+  download_url?: string;
 }
 
-interface EmailPayload {
+interface ReceivedEmail {
+  id?: string;
+  email_id?: string;
   from?: string;
-  to?: string;
+  to?: string[] | string;
+  received_for?: string[] | string;
   subject?: string;
   text?: string;
   html?: string;
-  attachments?: IncomingAttachment[];
+  attachments?: ResendAttachmentMeta[];
 }
 
 function json(body: unknown, status = 200) {
@@ -35,13 +42,21 @@ function json(body: unknown, status = 200) {
 
 /** Lowercase, strip display name and `+tag`, keep `local@domain`. */
 function normaliseAddress(raw: string): string {
-  let addr = raw.trim().toLowerCase();
+  let addr = String(raw || "").trim().toLowerCase();
   const angle = addr.match(/<([^>]+)>/);
   if (angle) addr = angle[1].trim();
   const at = addr.lastIndexOf("@");
   if (at === -1) return addr;
   const local = addr.slice(0, at).split("+")[0];
   return `${local}@${addr.slice(at + 1)}`;
+}
+
+function toAddressList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map((v) => normaliseAddress(String(v)));
+  if (typeof value === "string") {
+    return value.split(",").map((v) => normaliseAddress(v)).filter(Boolean);
+  }
+  return [];
 }
 
 function safeFileName(name: string, index: number): string {
@@ -61,84 +76,171 @@ function base64ToBytes(b64: string): Uint8Array {
   return bytes;
 }
 
+function bytesToBase64(bytes: Uint8Array): string {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+/**
+ * Verify a Svix-style webhook signature (used by Resend).
+ * Signed content is `${svix-id}.${svix-timestamp}.${rawBody}`.
+ */
+async function verifySvixSignature(
+  secret: string,
+  headers: Headers,
+  rawBody: string,
+): Promise<boolean> {
+  const id = headers.get("svix-id") || headers.get("webhook-id");
+  const timestamp = headers.get("svix-timestamp") || headers.get("webhook-timestamp");
+  const signatureHeader = headers.get("svix-signature") || headers.get("webhook-signature");
+  if (!id || !timestamp || !signatureHeader) return false;
+
+  // Reject replays older than 5 minutes.
+  const ts = Number(timestamp);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return false;
+
+  const keyBytes = base64ToBytes(secret.replace(/^whsec_/, ""));
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyBytes,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signed = new TextEncoder().encode(`${id}.${timestamp}.${rawBody}`);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, signed));
+  const expected = bytesToBase64(mac);
+
+  return signatureHeader
+    .split(" ")
+    .map((part) => part.split(",").pop() || "")
+    .some((candidate) => timingSafeEqual(candidate, expected));
+}
+
+async function resendGet(path: string): Promise<Response> {
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  if (!lovableKey || !resendKey) {
+    throw new Error("Resend connection is not configured");
+  }
+  return await fetch(`${GATEWAY_URL}${path}`, {
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": resendKey,
+    },
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // --- Shared-secret auth (called from the Cloudflare Email Worker) ---
-    const expectedSecret = Deno.env.get("EMAIL_INTAKE_SECRET");
-    if (!expectedSecret) {
-      console.error("EMAIL_INTAKE_SECRET is not configured");
-      return json({ error: "Intake not configured" }, 500);
+    const rawBody = await req.text();
+
+    // --- Authentication: Resend (Svix) signature, or manual-test shared secret ---
+    const webhookSecret = Deno.env.get("RESEND_WEBHOOK_SECRET");
+    const intakeSecret = Deno.env.get("EMAIL_INTAKE_SECRET");
+    const providedIntakeSecret = req.headers.get("x-intake-secret") || "";
+
+    let authorised = false;
+    if (webhookSecret && (await verifySvixSignature(webhookSecret, req.headers, rawBody))) {
+      authorised = true;
+    } else if (intakeSecret && providedIntakeSecret && providedIntakeSecret === intakeSecret) {
+      authorised = true; // manual testing path
     }
-    const providedSecret = req.headers.get("x-intake-secret") || "";
-    if (providedSecret !== expectedSecret) {
-      console.warn("Rejected intake request with invalid secret");
+    if (!authorised) {
+      console.warn("Rejected intake request: signature/secret verification failed");
       return json({ error: "Unauthorized" }, 401);
     }
+
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return json({ error: "Invalid JSON body" }, 400);
+    }
+
+    const eventType = typeof payload.type === "string" ? payload.type : "";
+    if (eventType && eventType !== "email.received") {
+      return json({ ignored: true, reason: `unhandled event ${eventType}` });
+    }
+
+    // Webhook data carries metadata only; the body/attachments are fetched below.
+    const eventData = (payload.data ?? payload) as ReceivedEmail;
+    const emailId = eventData.email_id || eventData.id || (payload.email_id as string | undefined);
+
+    let email: ReceivedEmail = eventData;
+    if (emailId && webhookSecret) {
+      const res = await resendGet(`/emails/receiving/${emailId}`);
+      if (!res.ok) {
+        const details = await res.text();
+        console.error(`Resend receive fetch failed [${res.status}]: ${details}`);
+        return json({ error: "Failed to fetch received email", status: res.status, details }, 502);
+      }
+      email = { ...eventData, ...(await res.json()) };
+    }
+
+    const recipients = [
+      ...toAddressList(email.received_for),
+      ...toAddressList(email.to),
+    ].filter(Boolean);
+    if (recipients.length === 0) {
+      return json({ error: "Missing recipient address" }, 400);
+    }
+
+    const sender = normaliseAddress(String(email.from || "")) || "unknown sender";
+    const subject = typeof email.subject === "string" ? email.subject.slice(0, 300) : "";
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // --- Payload validation ---
-    let payload: EmailPayload;
-    try {
-      payload = await req.json();
-    } catch {
-      return json({ error: "Invalid JSON body" }, 400);
-    }
+    console.log("Inbound email", { emailId, recipients, from: sender, subject });
 
-    if (!payload || typeof payload !== "object" || typeof payload.to !== "string") {
-      return json({ error: "Missing recipient address" }, 400);
-    }
-    if (payload.attachments && !Array.isArray(payload.attachments)) {
-      return json({ error: "attachments must be an array" }, 400);
-    }
-
-    const recipient = normaliseAddress(payload.to);
-    const sender = typeof payload.from === "string" ? payload.from.slice(0, 320) : "unknown sender";
-    const subject = typeof payload.subject === "string" ? payload.subject.slice(0, 300) : "";
-
-    console.log("Inbound email", {
-      to: recipient,
-      from: sender,
-      subject,
-      attachments: payload.attachments?.length || 0,
-    });
-
-    // --- Resolve the mailbox owner ---
+    // --- Resolve the mailbox owner from any recipient alias ---
     let profile: { id: string; full_name: string | null } | null = null;
+    let matchedRecipient = recipients[0];
 
-    const aliasMatch = recipient.match(/^([a-z0-9._-]+)@holarc\.com$/);
-    if (aliasMatch) {
-      const alias = aliasMatch[1];
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .ilike("mailbox_alias", alias)
-        .maybeSingle();
-      profile = data;
-    } else {
-      const mailboxMatch = recipient.match(/^docs-([a-f0-9-]+)@/);
-      if (!mailboxMatch) {
-        console.warn("Unrecognised recipient format:", recipient);
-        return json({ error: "unknown_mailbox", recipient }, 404);
+    for (const recipient of recipients) {
+      const at = recipient.lastIndexOf("@");
+      if (at === -1) continue;
+      const local = recipient.slice(0, at);
+
+      const legacy = local.match(/^docs-([a-f0-9-]+)$/);
+      const { data } = legacy
+        ? await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .ilike("mailbox_id", `${legacy[1]}%`)
+          .maybeSingle()
+        : await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .ilike("mailbox_alias", local)
+          .maybeSingle();
+
+      if (data) {
+        profile = data;
+        matchedRecipient = recipient;
+        break;
       }
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name")
-        .ilike("mailbox_id", `${mailboxMatch[1]}%`)
-        .maybeSingle();
-      profile = data;
     }
 
     if (!profile) {
-      console.warn("No profile matches mailbox:", recipient);
-      return json({ error: "unknown_mailbox", recipient }, 404);
+      // 200 so Resend does not retry an address we will never accept.
+      console.warn("No profile matches inbound recipients:", recipients.join(", "));
+      return json({ ignored: true, reason: "unknown_mailbox", recipients });
     }
 
     console.log("Matched mailbox to user", profile.id);
@@ -154,13 +256,14 @@ serve(async (req) => {
       .maybeSingle();
 
     // --- Build document body ---
-    const bodyText = payload.text || payload.html || "No content";
+    const bodyText = email.text || email.html || "No content";
     const skipped: string[] = [];
 
     const documentContent = [
       "# Document Received via Email",
       "",
       `**From:** ${sender}`,
+      `**To:** ${matchedRecipient}`,
       `**Date:** ${new Date().toISOString()}`,
       `**Subject:** ${subject || "No Subject"}`,
       "",
@@ -187,23 +290,47 @@ serve(async (req) => {
       return json({ error: "Failed to create document" }, 500);
     }
 
+    // --- Collect attachment metadata (download URLs come from Resend) ---
+    let attachmentMeta: ResendAttachmentMeta[] = Array.isArray(email.attachments)
+      ? email.attachments
+      : [];
+    if (emailId && webhookSecret && !attachmentMeta.some((a) => a.download_url)) {
+      const res = await resendGet(`/emails/receiving/${emailId}/attachments`);
+      if (res.ok) {
+        const list = await res.json();
+        if (Array.isArray(list?.data)) attachmentMeta = list.data;
+      } else {
+        console.error(`Attachment list failed [${res.status}]: ${await res.text()}`);
+      }
+    }
+
     // --- Store attachments ---
-    const stored: {
-      name: string;
-      path: string;
-      size: number;
-      contentType: string;
-    }[] = [];
+    const stored: { name: string; path: string; size: number; contentType: string }[] = [];
     let totalBytes = 0;
 
-    for (const [index, att] of (payload.attachments || []).entries()) {
-      if (!att?.content) continue;
+    for (const [index, att] of attachmentMeta.entries()) {
       const name = safeFileName(att.filename || "", index);
+      const contentType = att.content_type || "application/octet-stream";
+
+      if (typeof att.size === "number" && att.size > MAX_ATTACHMENT_BYTES) {
+        skipped.push(`${name} (too large)`);
+        continue;
+      }
+
       let bytes: Uint8Array;
       try {
-        bytes = base64ToBytes(att.content);
+        if (att.download_url) {
+          const fileRes = await fetch(att.download_url);
+          if (!fileRes.ok) throw new Error(`download ${fileRes.status}`);
+          bytes = new Uint8Array(await fileRes.arrayBuffer());
+        } else if (typeof (att as { content?: string }).content === "string") {
+          bytes = base64ToBytes((att as { content: string }).content);
+        } else {
+          skipped.push(`${name} (no content)`);
+          continue;
+        }
       } catch (e) {
-        console.error("Could not decode attachment", name, e);
+        console.error("Could not fetch attachment", name, e);
         skipped.push(`${name} (unreadable)`);
         continue;
       }
@@ -220,10 +347,7 @@ serve(async (req) => {
       const path = `${profile.id}/${document.id}/${name}`;
       const { error: uploadError } = await supabase.storage
         .from(BUCKET)
-        .upload(path, bytes, {
-          contentType: att.contentType || "application/octet-stream",
-          upsert: true,
-        });
+        .upload(path, bytes, { contentType, upsert: true });
 
       if (uploadError) {
         console.error("Attachment upload failed", name, uploadError.message);
@@ -232,12 +356,7 @@ serve(async (req) => {
       }
 
       totalBytes += bytes.byteLength;
-      stored.push({
-        name,
-        path,
-        size: bytes.byteLength,
-        contentType: att.contentType || "application/octet-stream",
-      });
+      stored.push({ name, path, size: bytes.byteLength, contentType });
     }
 
     if (stored.length || skipped.length) {
@@ -253,10 +372,7 @@ serve(async (req) => {
 
       await supabase
         .from("documents")
-        .update({
-          attachments: stored,
-          content: `${documentContent}\n${notes}`,
-        })
+        .update({ attachments: stored, content: `${documentContent}\n${notes}` })
         .eq("id", document.id);
     }
 
