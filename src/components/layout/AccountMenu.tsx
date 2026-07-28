@@ -49,7 +49,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
               onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
               className={cn(
                 "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
-                !isOnPatientRoute ? "bg-primary/10" : "hover:bg-muted"
+                "bg-primary/10"
               )}
             >
               <Stethoscope className="h-3.5 w-3.5 text-primary" />
@@ -58,21 +58,9 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                 <p className="text-xs text-muted-foreground">{t("topbar.doctor")}</p>
               </div>
             </button>
-            <button
-              onClick={() => navigate("/patient/details")}
-              className={cn(
-                "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
-                isOnPatientRoute ? "bg-primary/10" : "hover:bg-muted"
-              )}
-            >
-              <HeartPulse className="h-3.5 w-3.5 text-primary" />
-              <div className="text-left">
-                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{t("topbar.patient")}</p>
-              </div>
-            </button>
           </div>
         )}
+
         {!isDoctor && (() => {
           const path = location.pathname;
           const roleLabel = path.startsWith("/provider/ambulance")
