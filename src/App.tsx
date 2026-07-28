@@ -46,6 +46,7 @@ import HealthAlbum from "./pages/patient/HealthAlbum";
 import MyDoctors from "./pages/patient/MyDoctors";
 import PatientTasks from "./pages/patient/PatientTasks";
 import PatientAdmissions from "./pages/patient/PatientAdmissions";
+import Biolog from "./pages/Biolog";
 import PatientDocuments from "./pages/patient/PatientDocuments";
 import PatientRoundTable from "./pages/patient/PatientRoundTable";
 import MyDetails from "./pages/patient/MyDetails";
@@ -212,6 +213,7 @@ const App = () => (
             <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
             <Route path="/patient/tasks" element={<PatientTasks />} />
             <Route path="/patient/admissions" element={<PatientAdmissions />} />
+            <Route path="/biolog" element={<Biolog />} />
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
@@ -239,6 +241,7 @@ const App = () => (
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/:id" element={<PatientProfile />} />
             <Route path="/admissions" element={<DoctorAdmissions />} />
+            <Route path="/biolog" element={<Biolog />} />
             <Route path="/doctor/sessions" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
