@@ -7,11 +7,16 @@ type ResolvedRole = Exclude<UserRole, null>;
 type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank';
 const EMERGENCY_RAW: RawRole[] = ['hospital_staff', 'ambulance_staff', 'blood_bank'];
 
+// Module-level cache so navigating across layout groups (which remounts the
+// sidebar) doesn't restart from role=null and briefly render the wrong nav.
+const roleCache = new Map<string, { role: UserRole; availableRoles: ResolvedRole[] }>();
+
 export function useUserRole() {
   const { user } = useAuth();
-  const [role, setRole] = useState<UserRole>(null);
-  const [availableRoles, setAvailableRoles] = useState<ResolvedRole[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cached = user ? roleCache.get(user.id) : undefined;
+  const [role, setRole] = useState<UserRole>(cached?.role ?? null);
+  const [availableRoles, setAvailableRoles] = useState<ResolvedRole[]>(cached?.availableRoles ?? []);
+  const [loading, setLoading] = useState(!cached);
 
   useEffect(() => {
     async function fetchRole() {
