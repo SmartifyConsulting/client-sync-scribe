@@ -82,10 +82,26 @@ interface VulaTransfer {
   vula_partner_apps?: { name: string; logo_url: string | null };
 }
 
-export default function MyRewards() {
+export default function MyRewards({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { isDoctor } = useUserRole();
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
+
+  const { data: doctorVulas = 0 } = useQuery({
+    queryKey: ["doctor-vulas-profile", user?.id],
+    enabled: !!user?.id && isDoctor,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctor_rewards")
+        .select("vulas_count")
+        .eq("doctor_id", user!.id);
+      if (error || !data) return 0;
+      return data.reduce((sum, r) => sum + (r.vulas_count || 0), 0);
+    },
+  });
+  const combinedVulas = doctorVulas + lollipopCount;
   const [activeTab, setActiveTabRaw] = useState<string>(() => {
     try {
       return localStorage.getItem("rewards_last_tab_v1") || "overview";
