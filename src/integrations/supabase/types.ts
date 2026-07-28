@@ -6341,6 +6341,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      current_verified_email: { Args: never; Returns: string }
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
@@ -6649,6 +6650,10 @@ export type Database = {
       seed_default_header_footer_template: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      storage_object_path: {
+        Args: { _bucket: string; _url: string }
+        Returns: string
       }
       user_can_access_patient_rt: {
         Args: { _patient_id: string }
