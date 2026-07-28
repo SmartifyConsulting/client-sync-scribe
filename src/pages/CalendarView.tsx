@@ -121,7 +121,23 @@ export default function CalendarView() {
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedEvent, setEditedEvent] = useState<CalendarEvent | null>(null);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [allEvents, setEvents] = useState<CalendarEvent[]>([]);
+  const [eventQuery, setEventQuery] = useState("");
+  const [debouncedEventQuery, setDebouncedEventQuery] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedEventQuery(eventQuery.trim().toLowerCase()), 200);
+    return () => clearTimeout(id);
+  }, [eventQuery]);
+  const events = useMemo(() => {
+    if (!debouncedEventQuery) return allEvents;
+    return allEvents.filter((e) =>
+      [e.title, e.type, e.notes, e.location, e.ownerName, patients.find((p) => p.id === e.patientId)?.name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(debouncedEventQuery),
+    );
+  }, [allEvents, debouncedEventQuery, patients]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [serviceColors, setServiceColors] = useState<ServicePriceColor[]>([]);
   const [newAppointment, setNewAppointment] = useState({
