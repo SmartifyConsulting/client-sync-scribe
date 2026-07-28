@@ -154,11 +154,6 @@ export function TodoRow({
           />
         )}
 
-        {/* Priority dot */}
-        <span
-          className={cn("h-2 w-2 rounded-full shrink-0", PRIORITY_DOT[todo.priority])}
-          aria-label={`Priority: ${todo.priority}`}
-        />
 
         {/* Kind icon */}
         <Icon className="h-4 w-4 text-primary shrink-0" />
