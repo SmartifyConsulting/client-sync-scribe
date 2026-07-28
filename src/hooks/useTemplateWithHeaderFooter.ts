@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useTemplates, Template } from "./useTemplates";
 import { useHeaderFooterTemplates, HeaderFooterTemplate } from "./useHeaderFooterTemplates";
 import { useProfile } from "./useProfile";
+import { fillDocumentPlaceholders } from "@/features/documents/lib/fillDocumentPlaceholders";
 
 interface CombinedTemplate {
   template: Template | null;
