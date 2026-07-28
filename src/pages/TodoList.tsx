@@ -458,13 +458,24 @@ export default function TodoList() {
   const [groupMode, setGroupMode] = useState<"date" | "patient">("date");
   const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
   const [showAddTask, setShowAddTask] = useState(false);
+  const [taskQuery, setTaskQuery] = useState("");
+
+  const normalizedQuery = taskQuery.trim().toLowerCase();
 
   const filteredTodos = todos.filter((todo) => {
     if (ownerFilter === "mine" && (todo as any).user_id !== currentUserId) return false;
-    if (filter === "active") return !todo.completed;
-    if (filter === "completed") return todo.completed;
+    if (filter === "active" && todo.completed) return false;
+    if (filter === "completed" && !todo.completed) return false;
+    if (normalizedQuery) {
+      const haystack = [todo.title, (todo as any).description, todo.patient_name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(normalizedQuery)) return false;
+    }
     return true;
   });
+
 
   // Group by patient
   const groupedByPatient = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
