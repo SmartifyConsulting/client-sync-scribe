@@ -113,12 +113,12 @@ function SessionCard({ s, t }: { s: SessionRow; t: any }) {
 export default function MySessions() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { isDoctor } = useUserRole();
+  const { isDoctor, role } = useUserRole();
+  const isHospitalUser = role === "emergency";
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
-  const [groupModeState, setGroupMode] = useState<"date" | "patient">("date");
   const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
-  const groupMode = isDoctor ? groupModeState : "date";
+
 
   useEffect(() => {
     if (!user) return;
