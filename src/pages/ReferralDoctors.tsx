@@ -394,7 +394,10 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                         className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
                         onClick={() => handleSelectProfile(doc)}
                       >
-                        <p className="font-medium text-foreground text-sm">{doc.full_name}</p>
+                        <p className="font-medium text-foreground text-sm flex items-center gap-1.5">
+                          {isSampleName(doc.full_name) && <SampleBadge />}
+                          {doc.full_name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {doc.specialty && `${doc.specialty} · `}
                           {doc.practice_number && `PR: ${doc.practice_number}`}
