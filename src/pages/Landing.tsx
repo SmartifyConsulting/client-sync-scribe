@@ -154,7 +154,7 @@ export default function Landing() {
               >
                 {t("landing.nav.login")}
               </Button>
-              <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-base">
+              <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-sm">
                 {t("landing.nav.getStarted")}
               </Button>
             </div>
@@ -342,7 +342,7 @@ export default function Landing() {
                 <Button
                   size="lg"
                   onClick={() => setShowRoleDialog(true)}
-                  className="btn-pill text-base px-7 py-6 shadow-lg hover:shadow-xl transition-shadow w-full sm:w-auto"
+                  className="btn-pill text-sm px-7 py-6 shadow-lg hover:shadow-xl transition-shadow w-full sm:w-auto"
                 >
                   {t("landing.hero.cta")}
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -352,7 +352,7 @@ export default function Landing() {
                     size="lg"
                     variant="outline"
                     onClick={() => navigate("/auth?mode=login&role=doctor")}
-                    className="btn-pill flex-1 sm:flex-initial"
+                    className="btn-pill flex-1 sm:flex-initial text-sm"
                   >
                     <Stethoscope className="mr-2 h-5 w-5" />
                     {t("landing.hero.doctorsButton")}
@@ -361,7 +361,7 @@ export default function Landing() {
                     size="lg"
                     variant="outline"
                     onClick={() => navigate("/auth?mode=login&role=patient")}
-                    className="btn-pill flex-1 sm:flex-initial"
+                    className="btn-pill flex-1 sm:flex-initial text-sm"
                   >
                     <UserCircle className="mr-2 h-5 w-5" />
                     {t("landing.hero.patientsButton")}
@@ -561,7 +561,7 @@ export default function Landing() {
             <p className="text-lg text-muted-foreground mb-8">
               {t("landing.cta.description")}
             </p>
-            <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-lg px-8 py-6">
+            <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-base px-8 py-6">
               {t("landing.cta.button")}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>

@@ -13,6 +13,7 @@ import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import PatientProfile from "./pages/PatientProfile";
+import DoctorAdmissions from "./pages/doctor/DoctorAdmissions";
 import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
@@ -235,6 +236,7 @@ const App = () => (
             {/* Doctor routes */}
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/:id" element={<PatientProfile />} />
+            <Route path="/admissions" element={<DoctorAdmissions />} />
             <Route path="/doctor/sessions" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />

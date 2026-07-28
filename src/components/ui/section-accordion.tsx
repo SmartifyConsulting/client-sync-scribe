@@ -36,7 +36,7 @@ export const SECTION_CONTENT_CLASS = "px-4 pt-4 pb-4 space-y-3";
 
 /** Frame around a group of section accordion items. */
 export const SECTION_FRAME_CLASS =
-  "rounded-lg border bg-card overflow-hidden divide-y divide-white";
+  "rounded-lg border bg-card overflow-hidden space-y-1";
 
 /** Item wrapper (no individual rounded border). */
 export const SECTION_ITEM_CLASS = "border-0 rounded-none bg-card";
@@ -49,6 +49,7 @@ export function SectionCountPill({
   count: number;
   className?: string;
 }) {
+  if (!count) return null;
   return (
     <span
       className={cn(
@@ -59,7 +60,7 @@ export function SectionCountPill({
         className,
       )}
     >
-      {count}
+      {Number.isFinite(count) ? count : 0}
     </span>
   );
 }

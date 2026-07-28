@@ -91,7 +91,8 @@ function DocumentCard({ doc }: { doc: DocRow }) {
 }
 
 export default function DoctorDocumentsTab() {
-  const { documents, loading } = useDocuments();
+  const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
+  const { documents, loading } = useDocuments(undefined, { allOwners: ownerFilter === "all" });
   const { templates } = useTemplates();
   const [q, setQ] = useState("");
   const [groupMode, setGroupMode] = useState<GroupMode>("date");
@@ -178,6 +179,16 @@ export default function DoctorDocumentsTab() {
           />
         </div>
         <div className="flex items-center gap-2">
+          <ToggleGroup
+            type="single"
+            value={ownerFilter}
+            onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
+            <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
+          </ToggleGroup>
           <ToggleGroup
             type="single"
             value={groupMode}

@@ -115,6 +115,7 @@ export default function MySessions() {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [groupModeState, setGroupMode] = useState<"date" | "patient">("date");
+  const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
   const groupMode = isDoctor ? groupModeState : "date";
 
   useEffect(() => {
@@ -130,7 +131,7 @@ export default function MySessions() {
 
       let q = supabase
         .from("sessions")
-        .select("id, title, status, started_at, duration_minutes, patient:patients(id, name)")
+        .select("id, title, status, started_at, duration_minutes, user_id, patient:patients(id, name)")
         .order("started_at", { ascending: false })
         .limit(500);
       q = patientIds.length
@@ -151,15 +152,23 @@ export default function MySessions() {
     };
   }, [user]);
 
+  const visibleSessions = useMemo(
+    () =>
+      ownerFilter === "mine"
+        ? sessions.filter((s: any) => s.user_id === user?.id)
+        : sessions,
+    [sessions, ownerFilter, user?.id],
+  );
+
   const groupedByDate = useMemo(() => {
     const out: Record<Bucket, SessionRow[]> = { today: [], week: [], month: [], older: [] };
-    for (const s of sessions) out[bucketFor(new Date(s.started_at))].push(s);
+    for (const s of visibleSessions) out[bucketFor(new Date(s.started_at))].push(s);
     return out;
-  }, [sessions]);
+  }, [visibleSessions]);
 
   const groupedByPatient = useMemo(() => {
     const map = new Map<string, SessionRow[]>();
-    for (const s of sessions) {
+    for (const s of visibleSessions) {
       const name = s.patient?.name || t("mySessions.noPatient", "No patient");
       if (!map.has(name)) map.set(name, []);
       map.get(name)!.push(s);
@@ -167,7 +176,7 @@ export default function MySessions() {
     return Array.from(map.entries()).sort(([a], [b]) =>
       getSurname(a).localeCompare(getSurname(b)),
     );
-  }, [sessions, t]);
+  }, [visibleSessions, t]);
 
   // Open (and highlight) the first bucket that actually has sessions, so the
   // top visible row is never an empty "Today".
@@ -184,13 +193,25 @@ export default function MySessions() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-foreground">
-            {t("nav.mySessions", "My Sessions")}
+            {t("nav.mySessions", "Sessions")}
           </h1>
           <p className="text-muted-foreground text-xs">
             {t("mySessions.subtitle", "Browse your consultation sessions grouped by date.")}
           </p>
         </div>
         <div className="flex items-center gap-2">
+        {isDoctor && (
+          <ToggleGroup
+            type="single"
+            value={ownerFilter}
+            onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
+            <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
+          </ToggleGroup>
+        )}
         {isDoctor && (
           <ToggleGroup
             type="single"

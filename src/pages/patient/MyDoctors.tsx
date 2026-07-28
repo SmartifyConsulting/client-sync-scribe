@@ -592,71 +592,24 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-[240px,1fr] gap-4">
-          {/* Sidebar filters */}
-          <Card className="h-fit">
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-medium text-primary-dark">Filters</h3>
-                <button type="button" className="text-xs text-muted-foreground hover:text-foreground underline" onClick={clearFilters}>
-                  Clear all
-                </button>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Search</Label>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    className="pl-8 h-9 text-sm"
-                    placeholder="Search providers..."
-                    value={filterSearch}
-                    onChange={(e) => setFilterSearch(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Specialty</Label>
-                <Select value={filterSpecialty} onValueChange={setFilterSpecialty}>
-                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Specialties" /></SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    <SelectItem value="any">All Specialties</SelectItem>
-                    {COMMON_SPECIALTIES.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Language</Label>
-                <Select value={filterLanguage} onValueChange={setFilterLanguage}>
-                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Languages" /></SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    <SelectItem value="any">All Languages</SelectItem>
-                    {LANGUAGES.map((l) => (
-                      <SelectItem key={l.code} value={l.code}>{l.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Access Level</Label>
-                <Select value={filterAccessLevel} onValueChange={setFilterAccessLevel}>
-                  <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="All Access Levels" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">All Access Levels</SelectItem>
-                    <SelectItem value="full">Full access</SelectItem>
-                    <SelectItem value="limited">Limited</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button className="w-full" onClick={applyFilters}>Apply Filters</Button>
-            </CardContent>
-          </Card>
-
+        <div className="space-y-3">
           {/* Provider list */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-foreground">Healthcare Providers</h2>
+              <div className="flex items-center gap-2">
+              <div className="relative w-56">
+                <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-8 h-9 text-sm"
+                  placeholder="Search providers..."
+                  value={filterSearch}
+                  onChange={(e) => {
+                    setFilterSearch(e.target.value);
+                    setAppliedFilters((prev) => ({ ...prev, search: e.target.value }));
+                  }}
+                />
+              </div>
               <Select value={sortBy} onValueChange={(v) => setSortBy(v as "name-asc" | "name-desc")}>
                 <SelectTrigger className="h-9 w-[160px] text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -664,6 +617,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
                   <SelectItem value="name-desc">Name (Z-A)</SelectItem>
                 </SelectContent>
               </Select>
+              </div>
             </div>
             <Tabs defaultValue="active" className="w-full">
               <TabsList>

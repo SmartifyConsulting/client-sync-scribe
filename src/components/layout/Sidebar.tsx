@@ -21,6 +21,7 @@ import {
   ListChecks,
   Users2,
   Mic,
+  BedDouble,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -44,11 +45,12 @@ const doctorNavItems: (NavItem & { tour?: string })[] = [
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
   { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+  { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-  { icon: Mic, label: "My Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
-  { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
-  { icon: FolderOpen, label: "All Documents", labelKey: "nav.allDocuments", to: "/documents" },
-  { icon: Users2, label: "My Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
+  { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
+  { icon: ListChecks, label: "Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
+  { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
+  { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];

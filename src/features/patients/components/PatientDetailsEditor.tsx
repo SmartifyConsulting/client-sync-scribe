@@ -63,6 +63,7 @@ import {
 } from "./sectionStyles";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PreferredHospitals, type PreferredHospital } from "./PreferredHospitals";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -224,30 +225,23 @@ const PhoneInput = ({
 
   return (
     <div className="flex gap-1">
-      <Select value={countryCode} onValueChange={(v) => handleChange(v, number)}>
-        <SelectTrigger className="w-[105px] text-xs shrink-0 [&>span]:line-clamp-none">
-          <SelectValue>
-            <span className="whitespace-nowrap">
-              {COUNTRY_CODES.find((cc) => cc.code === countryCode)?.label}
-            </span>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {COUNTRY_CODES.map((cc) => (
-            <SelectItem key={cc.code} value={cc.code}>
-              {cc.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Input
-        className="text-sm flex-1"
+        className="text-sm w-full"
         value={number}
         onChange={(e) => handleChange(countryCode, e.target.value)}
         placeholder={placeholder}
       />
     </div>
   );
+};
+
+// Displays a phone number without its dialling code
+export const stripDialCode = (phone?: string | null) => {
+  if (!phone) return phone ?? "";
+  for (const cc of COUNTRY_CODES) {
+    if (phone.startsWith(cc.code)) return phone.slice(cc.code.length).trim();
+  }
+  return phone;
 };
 
 // Relationship select with "Other" option
@@ -1601,6 +1595,7 @@ export function PatientDetailsEditor({
                   <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
                   <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
                   <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
+                  <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Hospitals</TabsTrigger>
                 </TabsList>
 
             {/* === INSURANCE SUB-TAB (view) === */}
@@ -1664,6 +1659,14 @@ export function PatientDetailsEditor({
             </TabsContent>
 
 
+            {/* === HOSPITALS SUB-TAB === */}
+            <TabsContent value="hospitals" className="mt-4">
+              <PreferredHospitals
+                value={((patient as any).preferred_hospitals as PreferredHospital[]) || []}
+                onChange={(next) => onSave({ preferred_hospitals: next } as any)}
+              />
+            </TabsContent>
+
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
@@ -1696,7 +1699,7 @@ export function PatientDetailsEditor({
               </div>
 
               <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-              <Collapsible defaultOpen className="bg-white overflow-hidden">
+              <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
 
                 <SectionHeader icon={User} label="Personal Details" />
                 <CollapsibleContent className="p-3">
@@ -1710,7 +1713,7 @@ export function PatientDetailsEditor({
                       value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null}
                     />
                     <ViewField label="Email" value={patient.email} />
-                    <ViewField label="Phone" value={patient.phone} />
+                    <ViewField label="Phone" value={stripDialCode(patient.phone)} />
                     <ViewField label="Marital Status" value={patient.marital_status} />
                     <ViewField label="Language" value={LANGUAGES.find(l => l.code === (patient as any).preferred_language)?.name || (patient as any).preferred_language || "—"} />
                     <ViewField label="Referred By" value={patient.referred_by} />
@@ -1779,7 +1782,7 @@ export function PatientDetailsEditor({
                     <div className={FIELD_GRID_4_CLASS}>
                       <ViewField label="Name" value={patient.next_of_kin_name} />
                       <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
-                      <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                      <ViewField label="Phone" value={stripDialCode(patient.next_of_kin_phone)} />
                       <ViewField label="Email" value={patient.next_of_kin_email} />
                     </div>
                   )}
@@ -1837,7 +1840,7 @@ export function PatientDetailsEditor({
               <div className="space-y-3">
                 <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
                   {/* General Information */}
-                  <Collapsible defaultOpen className="bg-white overflow-hidden">
+                  <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                     <SectionHeader icon={Activity} label="General Information" />
                     <CollapsibleContent className="px-3 pb-3">
                       <div className={FIELD_GRID_4_CLASS}>
@@ -2408,7 +2411,7 @@ export function PatientDetailsEditor({
             </div>
 
             <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-            <Collapsible defaultOpen className="bg-white overflow-hidden">
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 {/* Horizontal label/field rows: bold, one size smaller labels */}
@@ -2848,7 +2851,7 @@ export function PatientDetailsEditor({
             <div className="space-y-3">
               <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
                 {/* General Information */}
-                <Collapsible defaultOpen className="bg-white overflow-hidden">
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                   <SectionHeader icon={Activity} label="General Information" />
                   <CollapsibleContent className="px-3 pb-3">
                     <div className={FIELD_GRID_4_CLASS}>
