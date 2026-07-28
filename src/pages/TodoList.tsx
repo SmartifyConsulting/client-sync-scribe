@@ -452,9 +452,11 @@ export default function TodoList() {
   };
 
   const [groupMode, setGroupMode] = useState<"date" | "patient">("date");
+  const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
   const [showAddTask, setShowAddTask] = useState(false);
 
   const filteredTodos = todos.filter((todo) => {
+    if (ownerFilter === "mine" && (todo as any).user_id !== user?.id) return false;
     if (filter === "active") return !todo.completed;
     if (filter === "completed") return todo.completed;
     return true;
@@ -551,10 +553,20 @@ export default function TodoList() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-base font-semibold text-foreground">{t("nav.myTasks", "To-Do List")}</h1>
+          <h1 className="text-base font-semibold text-foreground">{t("nav.myTasks", "Tasks")}</h1>
           <p className="mt-1 text-muted-foreground text-xs">Manage your tasks with voice or text input — AI can auto-execute actions</p>
         </div>
         <div className="flex items-center gap-2">
+          <ToggleGroup
+            type="single"
+            value={ownerFilter}
+            onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
+            <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
+          </ToggleGroup>
           <ToggleGroup
             type="single"
             value={groupMode}
