@@ -657,7 +657,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           <div>
             <h1 className="text-3xl font-bold text-foreground">My Documents</h1>
             <p className="text-muted-foreground text-sm md:text-sm">
-              All your prescriptions, invoices, certificates and uploaded files.
+              All your prescriptions, invoices, certificates and uploaded files — including X-rays, blood test results and other lab reports (upload as a file or photo below).
             </p>
           </div>
         ) : <div />}
@@ -709,7 +709,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             className="h-8 w-8 rounded-full"
             onClick={() => fileInputRef.current?.click()}
             disabled={isRecording || isSaving}
-            title="Upload File"
+            title="Upload File (X-rays, blood test results, lab reports, scans, etc.)"
           >
             <Upload className="h-3.5 w-3.5" />
           </Button>

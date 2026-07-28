@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react"
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
-import { PatientTestResults } from "@/features/patients/components/PatientTestResults";
 import { EmergencyContactsInline } from "@/features/patients/components/EmergencyContactsInline";
 import { DailyMedsInline } from "@/features/patients/components/DailyMedsInline";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -377,7 +376,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["personal", "medical", "overview", "history", "testresults", "roundtable"],
+  health: ["personal", "medical", "overview", "history", "roundtable"],
   admin: ["calendar", "tasks", "documents"],
 };
 
@@ -1470,11 +1469,6 @@ export function PatientDetailsEditor({
               My Sessions
             </TabsTrigger>
           )}
-          {show("testresults") && (
-            <TabsTrigger value="testresults" className={triggerClass}>
-              Test Results
-            </TabsTrigger>
-          )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
               {t("patientProfile.tabRoundTable")}
@@ -2079,12 +2073,6 @@ export function PatientDetailsEditor({
                   <p className="text-xs text-muted-foreground">Your consultation sessions. Record sessions with doctors not on the platform.</p>
                 </div>
                 <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
-              </TabsContent>
-            )}
-
-            {isSelfService && (
-              <TabsContent value="testresults" className="mt-4">
-                <PatientTestResults patientId={patient.id} />
               </TabsContent>
             )}
 
@@ -3718,12 +3706,6 @@ export function PatientDetailsEditor({
               >
                 <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
               </Suspense>
-            </TabsContent>
-          )}
-
-          {isSelfService && (
-            <TabsContent value="testresults" className="mt-4">
-              <PatientTestResults patientId={patient.id} />
             </TabsContent>
           )}
 
