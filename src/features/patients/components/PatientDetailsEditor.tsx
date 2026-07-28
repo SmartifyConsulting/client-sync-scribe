@@ -225,30 +225,23 @@ const PhoneInput = ({
 
   return (
     <div className="flex gap-1">
-      <Select value={countryCode} onValueChange={(v) => handleChange(v, number)}>
-        <SelectTrigger className="w-[105px] text-xs shrink-0 [&>span]:line-clamp-none">
-          <SelectValue>
-            <span className="whitespace-nowrap">
-              {COUNTRY_CODES.find((cc) => cc.code === countryCode)?.label}
-            </span>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {COUNTRY_CODES.map((cc) => (
-            <SelectItem key={cc.code} value={cc.code}>
-              {cc.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Input
-        className="text-sm flex-1"
+        className="text-sm w-full"
         value={number}
         onChange={(e) => handleChange(countryCode, e.target.value)}
         placeholder={placeholder}
       />
     </div>
   );
+};
+
+// Displays a phone number without its dialling code
+export const stripDialCode = (phone?: string | null) => {
+  if (!phone) return phone ?? "";
+  for (const cc of COUNTRY_CODES) {
+    if (phone.startsWith(cc.code)) return phone.slice(cc.code.length).trim();
+  }
+  return phone;
 };
 
 // Relationship select with "Other" option
@@ -1720,7 +1713,7 @@ export function PatientDetailsEditor({
                       value={patient.dob ? format(new Date(patient.dob), "MMMM d, yyyy") : null}
                     />
                     <ViewField label="Email" value={patient.email} />
-                    <ViewField label="Phone" value={patient.phone} />
+                    <ViewField label="Phone" value={stripDialCode(patient.phone)} />
                     <ViewField label="Marital Status" value={patient.marital_status} />
                     <ViewField label="Language" value={LANGUAGES.find(l => l.code === (patient as any).preferred_language)?.name || (patient as any).preferred_language || "—"} />
                     <ViewField label="Referred By" value={patient.referred_by} />
@@ -1789,7 +1782,7 @@ export function PatientDetailsEditor({
                     <div className={FIELD_GRID_4_CLASS}>
                       <ViewField label="Name" value={patient.next_of_kin_name} />
                       <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
-                      <ViewField label="Phone" value={patient.next_of_kin_phone} />
+                      <ViewField label="Phone" value={stripDialCode(patient.next_of_kin_phone)} />
                       <ViewField label="Email" value={patient.next_of_kin_email} />
                     </div>
                   )}
