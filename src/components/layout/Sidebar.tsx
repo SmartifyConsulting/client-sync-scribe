@@ -228,8 +228,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     <>
                       <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("nav.myProfile", "My Profile")}</p>
                       {mailboxAddress && (
-                        <p className="text-[11px] text-muted-foreground truncate">{mailboxAddress}</p>
+                        <p
+                          className="text-[11px] text-muted-foreground break-all leading-tight"
+                          title={mailboxAddress}
+                        >
+                          {mailboxAddress}
+                        </p>
                       )}
+
                     </>
                   )}
                 </div>
