@@ -48,6 +48,8 @@ import { renderFormattedContent } from "@/utils/documentFormatting";
 import { supabase } from "@/integrations/supabase/client";
 import { fillDocumentPlaceholders } from "@/lib/fillDocumentPlaceholders";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
+import { resolveTemplatePreviewTokens, resolveHeaderFooterTokens } from "@/features/documents/lib/resolveTemplatePreview";
+
 import {
   Dialog,
   DialogContent,
