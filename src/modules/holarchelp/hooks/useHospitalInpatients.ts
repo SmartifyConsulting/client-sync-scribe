@@ -61,7 +61,7 @@ export function useHospitalInpatients(hospitalId: string | null, includeDischarg
     if (!includeDischarged) query = query.neq("status", "discharged");
 
     const { data: admissions } = await query;
-    const list = ((admissions ?? []) as Inpatient[]) ?? [];
+    const list = (admissions ?? []) as Inpatient[];
     const ids = list.map((a) => a.id);
 
     let doctors: AttendingDoctor[] = [];
