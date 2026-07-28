@@ -32,3 +32,14 @@ export function isSamplePatient(patient: SamplePatientLike | null | undefined): 
   if (!name) return false;
   return SAMPLE_NAME_HINTS.some((hint) => name.includes(hint));
 }
+
+/**
+ * Generic name-based sample check for records that aren't patients
+ * (doctors in the referral directory, demo SOS incidents, demo fleet vehicles).
+ * Only matches explicit sample/demo/test naming so real records are never flagged.
+ */
+export function isSampleName(name: string | null | undefined): boolean {
+  const n = (name || "").trim().toLowerCase();
+  if (!n) return false;
+  return /\b(sample|demo|dummy|test)\b/.test(n);
+}
