@@ -43,7 +43,23 @@ export default function PatientCalendar() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [allAppointments, setAppointments] = useState<Appointment[]>([]);
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 200);
+    return () => clearTimeout(id);
+  }, [query]);
+  const appointments = useMemo(() => {
+    if (!debouncedQuery) return allAppointments;
+    return allAppointments.filter((a) =>
+      [a.title, a.type, a.location, a.description, a.doctor_name, a.service_name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(debouncedQuery),
+    );
+  }, [allAppointments, debouncedQuery]);
   const [loading, setLoading] = useState(true);
   const [bookDialogOpen, setBookDialogOpen] = useState(false);
   const [calendarView, setCalendarView] = useState<CalendarViewMode>("month");
