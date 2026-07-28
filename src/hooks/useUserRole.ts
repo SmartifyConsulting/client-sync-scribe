@@ -27,7 +27,8 @@ export function useUserRole() {
         return;
       }
 
-      setLoading(true);
+      // Keep the cached role visible while we revalidate — avoids a null flash.
+      if (!roleCache.has(user.id)) setLoading(true);
 
       try {
         const [
