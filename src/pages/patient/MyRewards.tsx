@@ -315,13 +315,16 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
   const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <VulaExplainerDialog open={showVulaExplainer} onOpenChange={setShowVulaExplainer} />
+      {!embedded && (
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/patient/details")} className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          {!isDoctor && (
+            <Button variant="ghost" size="icon" onClick={() => navigate("/patient/details")} className="h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
@@ -346,6 +349,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
           </Button>
         )}
       </div>
+      )}
 
       {/* Transfer Dialog */}
       <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
