@@ -871,100 +871,35 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Content Template Preview Dialog */}
-      <Dialog open={!!previewTemplate} onOpenChange={(open) => !open && setPreviewTemplate(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{previewTemplate?.name}</DialogTitle>
-            <DialogDescription>{previewTemplate?.description || "Template preview"}</DialogDescription>
-          </DialogHeader>
-          {previewTemplate && (
-            <div className="space-y-4">
-              <div className="border border-border rounded-lg p-6 bg-white">
-                {/* Header Section - Show linked header/footer if exists */}
-                {(() => {
-                  const linkedHF = headerFooterTemplates.find(
-                    (hf) => hf.id === previewTemplate.header_footer_template_id,
-                  );
-                  if (linkedHF) {
-                    const header = linkedHF.header as {
-                      left?: { text: string; alignment: string; imageUrl?: string };
-                      center?: { text: string; alignment: string; imageUrl?: string };
-                      right?: { text: string; alignment: string; imageUrl?: string };
-                    };
-                    return (
-                      <div className="pb-4 border-b border-gray-200 mb-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>{header?.left && renderHFSectionPreview(header.left)}</div>
-                          <div>{header?.center && renderHFSectionPreview(header.center)}</div>
-                          <div>{header?.right && renderHFSectionPreview(header.right)}</div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-
-                {/* Body Content */}
-                <div
-                  className="whitespace-pre-wrap text-sm text-foreground min-h-[100px]"
-                  dangerouslySetInnerHTML={{ __html: renderFormattedContent(previewTemplate.content) }}
-                />
-
-                {/* Footer Section - Show linked header/footer if exists */}
-                {(() => {
-                  const linkedHF = headerFooterTemplates.find(
-                    (hf) => hf.id === previewTemplate.header_footer_template_id,
-                  );
-                  if (linkedHF) {
-                    const footer = linkedHF.footer as {
-                      left?: { text: string; alignment: string; imageUrl?: string };
-                      center?: { text: string; alignment: string; imageUrl?: string };
-                      right?: { text: string; alignment: string; imageUrl?: string };
-                    };
-                    return (
-                      <div className="pt-4 border-t border-gray-200 mt-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>{footer?.left && renderHFSectionPreview(footer.left)}</div>
-                          <div>{footer?.center && renderHFSectionPreview(footer.center)}</div>
-                          <div>{footer?.right && renderHFSectionPreview(footer.right)}</div>
-                        </div>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-              </div>
-
-              {/* Show which header/footer is linked */}
-              {previewTemplate.header_footer_template_id && (
-                <p className="text-xs text-muted-foreground">
-                  Using header/footer:{" "}
-                  <span className="font-medium">
-                    {headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id)?.name ||
-                      "Unknown"}
-                  </span>
-                </p>
-              )}
-
-              <div className="flex gap-3 pt-4 border-t border-border">
-                <Button variant="outline" onClick={() => setPreviewTemplate(null)} className="flex-1">
-                  Close
-                </Button>
-                <Button
-                  onClick={() => {
-                    handleSelectTemplate(previewTemplate);
-                    setPreviewTemplate(null);
-                  }}
-                  className="flex-1"
-                >
-                  Use Template
-                </Button>
-              </div>
-            </div>
+      {/* Content Template Preview Dialog — uses the same surface as document previews */}
+      {previewTemplate && (
+        <DocumentPreview
+          title={previewTemplate.name}
+          subtitle={previewTemplate.description || "Template preview"}
+          content={resolveTemplatePreviewTokens(previewTemplate.content, profile as any)}
+          logoUrl={profile?.logo_url || undefined}
+          fontFamily={
+            headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id)?.font_family ||
+            undefined
+          }
+          headerFooter={resolveHeaderFooterTokens(
+            headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id) || null,
+            profile as any,
           )}
-        </DialogContent>
-      </Dialog>
+          onClose={() => setPreviewTemplate(null)}
+          extraActions={
+            <Button
+              onClick={() => {
+                handleSelectTemplate(previewTemplate);
+                setPreviewTemplate(null);
+              }}
+            >
+              Use Template
+            </Button>
+          }
+        />
+      )}
+
 
       {/* Header/Footer Template Preview Dialog */}
       <Dialog open={!!previewHFTemplate} onOpenChange={(open) => !open && setPreviewHFTemplate(null)}>
