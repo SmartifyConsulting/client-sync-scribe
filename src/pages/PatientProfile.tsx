@@ -159,6 +159,20 @@ export default function PatientProfile() {
   const [docToDelete, setDocToDelete] = useState<DocumentRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Deep link: /patients/:id?tab=documents&doc=<id> opens the document preview
+  const deepLinkDocId = searchParams.get("doc");
+  useEffect(() => {
+    if (!deepLinkDocId || documentsLoading) return;
+    const match = documents.find((d) => d.id === deepLinkDocId);
+    if (match) setPreviewDoc(match);
+    const next = new URLSearchParams(searchParams);
+    next.delete("doc");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkDocId, documentsLoading, documents]);
+
+
+
   // Check if current doctor has access to all sessions
   useEffect(() => {
     const checkPermissions = async () => {
