@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Calendar as CalendarIcon, Clock, MapPin, Loader2, Plus, User, DollarSign, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { format, addDays, addMonths, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, startOfYear, endOfYear, getDaysInMonth } from "date-fns";
 import { cn } from "@/lib/utils";
