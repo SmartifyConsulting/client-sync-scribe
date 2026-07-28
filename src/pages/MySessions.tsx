@@ -160,33 +160,17 @@ export default function MySessions() {
     [sessions, ownerFilter, user?.id],
   );
 
-  const groupedByDate = useMemo(() => {
-    const out: Record<Bucket, SessionRow[]> = { today: [], week: [], month: [], older: [] };
-    for (const s of visibleSessions) out[bucketFor(new Date(s.started_at))].push(s);
-    return out;
-  }, [visibleSessions]);
-
-  const groupedByPatient = useMemo(() => {
-    const map = new Map<string, SessionRow[]>();
-    for (const s of visibleSessions) {
-      const name = s.patient?.name || t("mySessions.noPatient", "No patient");
-      if (!map.has(name)) map.set(name, []);
-      map.get(name)!.push(s);
-    }
-    return Array.from(map.entries()).sort(([a], [b]) =>
-      getSurname(a).localeCompare(getSurname(b)),
-    );
-  }, [visibleSessions, t]);
-
-  // Open (and highlight) the first bucket that actually has sessions, so the
-  // top visible row is never an empty "Today".
-  const defaultOpen =
-    groupMode === "date"
-      ? [(BUCKETS.find((b) => groupedByDate[b.key].length > 0) ?? BUCKETS[0]).key]
-      : groupedByPatient.length > 0
-        ? [groupedByPatient[0][0]]
-        : [];
-
+  const items = useMemo(
+    () =>
+      visibleSessions.map((s) => ({
+        item: s,
+        date: s.started_at,
+        patient: s.patient?.name || t("mySessions.noPatient", "No patient"),
+        hospital: (s as any).hospital || null,
+        search: [s.title, s.patient?.name, s.status].filter(Boolean).join(" "),
+      })),
+    [visibleSessions, t],
+  );
 
   return (
     <div className="container mx-auto p-4 max-w-5xl">
@@ -200,42 +184,26 @@ export default function MySessions() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-        {isDoctor && (
-          <ToggleGroup
-            type="single"
-            value={ownerFilter}
-            onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
-            size="sm"
-            variant="outline"
-          >
-            <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
-            <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
-          </ToggleGroup>
-        )}
-        {isDoctor && (
-          <ToggleGroup
-            type="single"
-            value={groupMode}
-            onValueChange={(v) => v && setGroupMode(v as "date" | "patient")}
-            size="sm"
-            variant="outline"
-          >
-            <ToggleGroupItem value="date" className="text-xs px-3">
-              {t("mySessions.groupByDate", "Date")}
-            </ToggleGroupItem>
-            <ToggleGroupItem value="patient" className="text-xs px-3">
-              {t("mySessions.groupByPatient", "Patient")}
-            </ToggleGroupItem>
-          </ToggleGroup>
-        )}
-        {isDoctor && (
-          <Button asChild size="sm" className="gap-2">
-            <Link to="/sessions">
-              <Plus className="h-4 w-4" />
-              {t("mySessions.addSession", "Add Session")}
-            </Link>
-          </Button>
-        )}
+          {isDoctor && (
+            <ToggleGroup
+              type="single"
+              value={ownerFilter}
+              onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
+              size="sm"
+              variant="outline"
+            >
+              <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
+              <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
+            </ToggleGroup>
+          )}
+          {isDoctor && (
+            <Button asChild size="sm" className="gap-2">
+              <Link to="/sessions">
+                <Plus className="h-4 w-4" />
+                {t("mySessions.addSession", "Add Session")}
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -245,70 +213,16 @@ export default function MySessions() {
           {t("common.loading", "Loading…")}
         </div>
       ) : (
-        <Accordion
-          key={groupMode}
-          type="multiple"
-          defaultValue={defaultOpen}
-          className="rounded-lg border bg-card overflow-hidden divide-y"
-        >
-          {groupMode === "date"
-            ? BUCKETS.map((b) => {
-                const rows = groupedByDate[b.key];
-                return (
-                  <AccordionItem
-                    key={b.key}
-                    value={b.key}
-                    className="border-0 rounded-none bg-card"
-                  >
-                    <AccordionTrigger className={TRIGGER_CLASS}>
-                      <div className="flex items-center justify-between w-full pr-2">
-                        <span className="text-xs font-medium">{t(b.labelKey, b.fallback)}</span>
-                        <CountPill count={rows.length} />
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className={SECTION_CONTENT_CLASS}>
-                      {rows.length === 0 ? (
-                        <p className="text-xs text-muted-foreground px-2 py-3">
-                          {t("mySessions.empty", "No sessions in this period.")}
-                        </p>
-                      ) : (
-                        <ul className="space-y-2">
-                          {rows.map((s) => (
-                            <li key={s.id}>
-                              <SessionCard s={s} t={t} />
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })
-            : groupedByPatient.map(([name, rows], idx) => (
-                <AccordionItem
-                  key={name}
-                  value={name}
-                  className="border-0 rounded-none bg-card"
-                >
-                  <AccordionTrigger className={TRIGGER_CLASS}>
-                    <div className="flex items-center justify-between w-full pr-2">
-                      <span className="text-xs font-medium">{name}</span>
-                      <CountPill count={rows.length} />
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className={SECTION_CONTENT_CLASS}>
-                    <ul className="space-y-2">
-                      {rows.map((s) => (
-                        <li key={s.id}>
-                          <SessionCard s={s} t={t} />
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-        </Accordion>
+        <ListGroupToolbar
+          storageKey="sessions"
+          items={items}
+          allowHospital={isHospitalUser}
+          searchPlaceholder={t("mySessions.search", "Search sessions...")}
+          emptyLabel={t("mySessions.empty", "No sessions in this period.")}
+          renderItem={(s: SessionRow) => <SessionCard s={s} t={t} />}
+        />
       )}
     </div>
   );
 }
+
