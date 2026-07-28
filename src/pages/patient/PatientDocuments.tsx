@@ -15,7 +15,6 @@ import {
   ArrowUpCircle,
   Mic,
   Video,
-  Upload,
   Square,
   Loader2,
   Trash2,
@@ -32,6 +31,9 @@ import {
   GitCompare,
   Eye,
   Search,
+  FlaskConical,
+  Scan,
+  Plus,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -77,6 +79,8 @@ type DocType =
   | "referral_letter"
   | "general_letter"
   | "hospital_admission"
+  | "lab_result"
+  | "radiology_report"
   | "audio"
   | "video"
   | "image"
@@ -140,6 +144,18 @@ const DOC_TYPE_CONFIG: Record<
     borderColor: "border-rose-400",
     icon: FileText,
   },
+  lab_result: {
+    label: "Lab Result",
+    color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+    borderColor: "border-red-400",
+    icon: FlaskConical,
+  },
+  radiology_report: {
+    label: "Radiology Report",
+    color: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400",
+    borderColor: "border-indigo-400",
+    icon: Scan,
+  },
   audio: {
     label: "Audio",
     color: "bg-muted text-muted-foreground",
@@ -174,6 +190,8 @@ const FILTER_OPTIONS: { value: DocType | "all"; label: string }[] = [
   { value: "referral_letter", label: "Referrals" },
   { value: "general_letter", label: "Letters" },
   { value: "hospital_admission", label: "Admissions" },
+  { value: "lab_result", label: "Lab Results" },
+  { value: "radiology_report", label: "Radiology Reports" },
   { value: "image", label: "Images" },
   { value: "audio", label: "Audio" },
   { value: "video", label: "Video" },
@@ -192,6 +210,10 @@ function deriveDocType(
   if (lower.includes("hospital admission")) return "hospital_admission";
   if (lower.includes("medical certificate") || lower.includes("certificate"))
     return "medical_certificate";
+  if (lower.includes("lab") || lower.includes("blood") || lower.includes("pathology") || lower.includes("test result"))
+    return "lab_result";
+  if (lower.includes("radiology") || lower.includes("x-ray") || lower.includes("xray") || lower.includes("scan") || lower.includes("mri") || lower.includes("ct "))
+    return "radiology_report";
   if (lower.includes("referral")) return "referral_letter";
   if (lower.includes("letter")) return "general_letter";
   if (templateName) return "general_letter";
@@ -656,22 +678,13 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         {!hideHeader ? (
           <div>
             <h1 className="text-3xl font-bold text-foreground">My Documents</h1>
-            <p className="text-muted-foreground text-sm md:text-sm">
+            <p className="text-muted-foreground text-xs">
               All your prescriptions, invoices, certificates and uploaded files — including X-rays, blood test results and other lab reports (upload as a file or photo below).
             </p>
           </div>
         ) : <div />}
 
         <div className="flex items-center gap-1.5 flex-wrap">
-          <div className="relative w-full sm:w-48">
-            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={docSearch}
-              onChange={(e) => setDocSearch(e.target.value)}
-              placeholder="Search documents..."
-              className="h-8 pl-8 text-xs"
-            />
-          </div>
           <ToggleGroup
             type="single"
             value={docGroupBy}
@@ -702,16 +715,6 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             title="Record Video"
           >
             <Video className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isRecording || isSaving}
-            title="Upload File (X-rays, blood test results, lab reports, scans, etc.)"
-          >
-            <Upload className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="outline"
@@ -851,7 +854,16 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
       {/* Filter Dropdown */}
       <MailboxIntakeAddress />
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={docSearch}
+            onChange={(e) => setDocSearch(e.target.value)}
+            placeholder="Search documents..."
+            className="h-9 pl-8 text-xs"
+          />
+        </div>
         <Select value={filter} onValueChange={(v) => setFilter(v as DocType | "all")}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter by type" />
@@ -876,6 +888,14 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
             })}
           </SelectContent>
         </Select>
+        <Button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isRecording || isSaving}
+          className="gap-1.5"
+        >
+          <Plus className="h-4 w-4" />
+          Add
+        </Button>
       </div>
 
       {/* Documents List */}
