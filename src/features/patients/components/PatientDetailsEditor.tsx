@@ -2169,7 +2169,16 @@ export function PatientDetailsEditor({
                 <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
                 <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
                 <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
+                <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Hospitals</TabsTrigger>
               </TabsList>
+
+          {/* === HOSPITALS SUB-TAB (EDIT) === */}
+          <TabsContent value="hospitals" className="mt-4">
+            <PreferredHospitals
+              value={((patient as any).preferred_hospitals as PreferredHospital[]) || []}
+              onChange={(next) => onSave({ preferred_hospitals: next } as any)}
+            />
+          </TabsContent>
 
           {/* === INSURANCE SUB-TAB (EDIT) === */}
           <TabsContent value="insurance" className="mt-4">
