@@ -1,13 +1,26 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Loader2, BedDouble, Search } from "lucide-react";
+import { Loader2, BedDouble, Plus, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { ListGroupToolbar } from "@/components/common/ListGroupToolbar";
 
 type Row = {
   id: string;
@@ -22,10 +35,43 @@ type Row = {
   doctor_name?: string;
 };
 
+type FormState = {
+  id?: string;
+  patient_id: string;
+  hospital: string;
+  admission_date: string;
+  discharge_date: string;
+  diagnosis: string;
+  status: string;
+};
+
+const emptyForm = (): FormState => ({
+  patient_id: "",
+  hospital: "",
+  admission_date: new Date().toISOString().slice(0, 10),
+  discharge_date: "",
+  diagnosis: "",
+  status: "admitted",
+});
+
 export default function DoctorAdmissions() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const qc = useQueryClient();
   const [scope, setScope] = useState<"mine" | "others">("mine");
-  const [search, setSearch] = useState("");
+  const [form, setForm] = useState<FormState | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const { data: patients = [] } = useQuery({
+    queryKey: ["doctor-admissions-patients"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [] as { id: string; name: string }[];
+      const { data } = await supabase.from("patients").select("id, name").eq("user_id", user.id).order("name");
+      return (data || []) as { id: string; name: string }[];
+    },
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["doctor-admissions"],
@@ -71,19 +117,70 @@ export default function DoctorAdmissions() {
     queryFn: async () => (await supabase.auth.getUser()).data.user?.id ?? null,
   });
 
-  const rows = useMemo(() => {
-    const list = (data || []).filter((r) =>
-      scope === "mine" ? r.doctor_id === currentUserId : r.doctor_id !== currentUserId,
-    );
-    const q = search.trim().toLowerCase();
-    if (!q) return list;
-    return list.filter(
-      (r) =>
-        (r.patient_name || "").toLowerCase().includes(q) ||
-        (r.hospital || "").toLowerCase().includes(q) ||
-        (r.diagnosis || "").toLowerCase().includes(q),
-    );
-  }, [data, scope, search, currentUserId]);
+  const rows = useMemo(
+    () =>
+      (data || []).filter((r) =>
+        scope === "mine" ? r.doctor_id === currentUserId : r.doctor_id !== currentUserId,
+      ),
+    [data, scope, currentUserId],
+  );
+
+  const items = useMemo(
+    () =>
+      rows.map((r) => ({
+        item: r,
+        date: r.admission_date,
+        patient: r.patient_name,
+        hospital: r.hospital,
+        search: [r.patient_name, r.hospital, r.diagnosis, r.doctor_name, r.status].filter(Boolean).join(" "),
+      })),
+    [rows],
+  );
+
+  const save = async () => {
+    if (!form) return;
+    if (!form.patient_id) {
+      toast({ title: "Select a patient", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
+    const payload: any = {
+      patient_id: form.patient_id,
+      hospital: form.hospital.trim() || null,
+      admission_date: form.admission_date,
+      discharge_date: form.discharge_date || null,
+      diagnosis: form.diagnosis.trim() || null,
+      status: form.status,
+    };
+    let error;
+    if (form.id) {
+      ({ error } = await supabase.from("hospital_admissions").update(payload).eq("id", form.id));
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      payload.doctor_id = user?.id;
+      ({ error } = await supabase.from("hospital_admissions").insert(payload));
+    }
+    setSaving(false);
+    if (error) {
+      toast({ title: "Could not save admission", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: form.id ? "Admission updated" : "Admission added" });
+    setForm(null);
+    qc.invalidateQueries({ queryKey: ["doctor-admissions"] });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase.from("hospital_admissions").delete().eq("id", deleteId);
+    setDeleteId(null);
+    if (error) {
+      toast({ title: "Could not delete", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Admission deleted" });
+    qc.invalidateQueries({ queryKey: ["doctor-admissions"] });
+  };
 
   return (
     <div className="space-y-4">
@@ -92,55 +189,48 @@ export default function DoctorAdmissions() {
         <p className="text-xs text-muted-foreground">Hospital admissions for your patients</p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <ToggleGroup
-          type="single"
-          value={scope}
-          onValueChange={(v) => v && setScope(v as "mine" | "others")}
-          className="rounded-lg border border-border p-0.5"
-        >
-          <ToggleGroupItem value="mine" className="h-8 px-3 text-xs">
-            Admitted by me
-          </ToggleGroupItem>
-          <ToggleGroupItem value="others" className="h-8 px-3 text-xs">
-            Other doctors
-          </ToggleGroupItem>
-        </ToggleGroup>
-
-        <div className="relative flex-1 min-w-[14rem] max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search admissions..."
-            className="pl-8 h-9 text-sm"
-          />
-        </div>
-      </div>
+      <ToggleGroup
+        type="single"
+        value={scope}
+        onValueChange={(v) => v && setScope(v as "mine" | "others")}
+        className="rounded-lg border border-border p-0.5"
+      >
+        <ToggleGroupItem value="mine" className="h-8 px-3 text-xs">
+          Admitted by me
+        </ToggleGroupItem>
+        <ToggleGroupItem value="others" className="h-8 px-3 text-xs">
+          Other doctors
+        </ToggleGroupItem>
+      </ToggleGroup>
 
       {isLoading ? (
         <div className="flex h-40 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
-      ) : rows.length === 0 ? (
-        <Card className="p-8 text-center text-sm text-muted-foreground">
-          No admissions to show.
-        </Card>
       ) : (
-        <Card className="divide-y overflow-hidden">
-          {rows.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => navigate(`/patients/${r.patient_id}`)}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
-            >
+        <ListGroupToolbar
+          storageKey="admissions"
+          items={items}
+          allowHospital
+          searchPlaceholder="Search admissions..."
+          emptyLabel="No admissions to show."
+          actions={
+            <Button onClick={() => setForm(emptyForm())} className="h-9">
+              <Plus className="mr-2 h-4 w-4" /> Add Admission
+            </Button>
+          }
+          renderItem={(r: Row) => (
+            <div className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
               <BedDouble className="h-4 w-4 shrink-0 text-primary" />
-              <div className="min-w-0 flex-1">
+              <button
+                onClick={() => navigate(`/patients/${r.patient_id}`)}
+                className="min-w-0 flex-1 text-left"
+              >
                 <p className="truncate text-sm font-semibold text-foreground">{r.patient_name}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {[r.hospital, r.diagnosis].filter(Boolean).join(" · ") || "No details"}
                 </p>
-              </div>
+              </button>
               <div className="hidden shrink-0 text-right sm:block">
                 <p className="text-xs text-muted-foreground">
                   {r.admission_date ? format(new Date(r.admission_date), "d MMM yyyy") : "—"}
@@ -150,10 +240,129 @@ export default function DoctorAdmissions() {
               <Badge variant={r.discharge_date ? "secondary" : "default"} className="shrink-0 text-[10px]">
                 {r.discharge_date ? "Discharged" : r.status || "Admitted"}
               </Badge>
-            </button>
-          ))}
-        </Card>
+              {r.doctor_id === currentUserId && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() =>
+                      setForm({
+                        id: r.id,
+                        patient_id: r.patient_id,
+                        hospital: r.hospital || "",
+                        admission_date: (r.admission_date || "").slice(0, 10),
+                        discharge_date: (r.discharge_date || "").slice(0, 10),
+                        diagnosis: r.diagnosis || "",
+                        status: r.status || "admitted",
+                      })
+                    }
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDeleteId(r.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+        />
       )}
+
+      <Dialog open={!!form} onOpenChange={(v) => !v && setForm(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{form?.id ? "Edit Admission" : "Add Admission"}</DialogTitle>
+          </DialogHeader>
+          {form && (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold">Patient</Label>
+                <Select
+                  value={form.patient_id}
+                  onValueChange={(v) => setForm({ ...form, patient_id: v })}
+                  disabled={!!form.id}
+                >
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Select patient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {patients.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold">Hospital</Label>
+                <Input
+                  value={form.hospital}
+                  onChange={(e) => setForm({ ...form, hospital: e.target.value })}
+                  className="h-9 text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Admission date</Label>
+                  <Input
+                    type="date"
+                    value={form.admission_date}
+                    onChange={(e) => setForm({ ...form, admission_date: e.target.value })}
+                    className="h-9 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold">Discharge date</Label>
+                  <Input
+                    type="date"
+                    value={form.discharge_date}
+                    onChange={(e) => setForm({ ...form, discharge_date: e.target.value })}
+                    className="h-9 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold">Diagnosis</Label>
+                <Textarea
+                  value={form.diagnosis}
+                  onChange={(e) => setForm({ ...form, diagnosis: e.target.value })}
+                  className="text-sm"
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setForm(null)}>
+              Cancel
+            </Button>
+            <Button onClick={save} disabled={saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete admission?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">This cannot be undone.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

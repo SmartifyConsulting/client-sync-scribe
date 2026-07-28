@@ -6,6 +6,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
+import { ListGroupToolbar } from "@/components/common/ListGroupToolbar";
+
 
 interface RoundTableEntry {
   patientId: string;
@@ -108,63 +110,60 @@ export function DoctorRoundTables() {
 
   const visible = ownerFilter === "mine" ? entries.filter((e) => e.myNotes > 0) : entries;
 
-  const filterBar = (
-    <div className="flex justify-end">
-      <ToggleGroup
-        type="single"
-        value={ownerFilter}
-        onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
-        size="sm"
-        variant="outline"
-      >
-        <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
-        <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
-      </ToggleGroup>
+  const items = visible.map((entry) => ({
+    item: entry,
+    date: entry.latestNoteDate,
+    patient: entry.patientName,
+    search: entry.patientName,
+  }));
+
+  const renderEntry = (entry: RoundTableEntry) => (
+    <div
+      onClick={() => navigate(`/patients/${entry.patientId}?tab=roundtable`)}
+      className={`mb-2 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-colors hover:bg-muted/50 ${
+        entry.unreadCount > 0 ? "border-primary/50 bg-primary/5" : "border-border bg-card"
+      }`}
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+        <Users className="h-5 w-5 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-sm text-foreground truncate">{entry.patientName}</p>
+          {entry.unreadCount > 0 && (
+            <Badge variant="destructive" className="text-xs h-5 px-1.5">
+              {entry.unreadCount} new
+            </Badge>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {entry.totalNotes} note{entry.totalNotes !== 1 ? "s" : ""} · Last activity {format(new Date(entry.latestNoteDate), "MMM d, yyyy")}
+        </p>
+      </div>
+      <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
     </div>
   );
-
-  if (visible.length === 0) {
-    return (
-      <div className="space-y-3">
-        {filterBar}
-        <div className="rounded-xl border border-dashed border-border p-12 text-center">
-          <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-          <p className="text-xs text-muted-foreground">No round table contributions yet</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-3">
-      {filterBar}
-      {visible.map((entry) => (
-        <div
-          key={entry.patientId}
-          onClick={() => navigate(`/patients/${entry.patientId}?tab=roundtable`)}
-          className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-colors hover:bg-muted/50 ${
-            entry.unreadCount > 0 ? "border-primary/50 bg-primary/5" : "border-border bg-card"
-          }`}
+    <ListGroupToolbar
+      storageKey="round-tables"
+      items={items}
+      searchPlaceholder="Search round tables..."
+      emptyLabel="No round table contributions yet"
+      renderItem={renderEntry}
+      actions={
+        <ToggleGroup
+          type="single"
+          value={ownerFilter}
+          onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
+          size="sm"
+          variant="outline"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <Users className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <p className="font-medium text-sm text-foreground truncate">{entry.patientName}</p>
-              {entry.unreadCount > 0 && (
-                <Badge variant="destructive" className="text-xs h-5 px-1.5">
-                  {entry.unreadCount} new
-                </Badge>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {entry.totalNotes} note{entry.totalNotes !== 1 ? "s" : ""} · Last activity {format(new Date(entry.latestNoteDate), "MMM d, yyyy")}
-            </p>
-          </div>
-          <MessageSquare className="h-4 w-4 text-muted-foreground shrink-0" />
-        </div>
-      ))}
-    </div>
+          <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
+          <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
+        </ToggleGroup>
+      }
+    />
   );
 }
+

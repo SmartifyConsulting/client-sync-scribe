@@ -23,6 +23,7 @@ import {
   FileText,
   Eye,
   Save,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -458,13 +459,24 @@ export default function TodoList() {
   const [groupMode, setGroupMode] = useState<"date" | "patient">("date");
   const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
   const [showAddTask, setShowAddTask] = useState(false);
+  const [taskQuery, setTaskQuery] = useState("");
+
+  const normalizedQuery = taskQuery.trim().toLowerCase();
 
   const filteredTodos = todos.filter((todo) => {
     if (ownerFilter === "mine" && (todo as any).user_id !== currentUserId) return false;
-    if (filter === "active") return !todo.completed;
-    if (filter === "completed") return todo.completed;
+    if (filter === "active" && todo.completed) return false;
+    if (filter === "completed" && !todo.completed) return false;
+    if (normalizedQuery) {
+      const haystack = [todo.title, (todo as any).description, todo.patient_name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(normalizedQuery)) return false;
+    }
     return true;
   });
+
 
   // Group by patient
   const groupedByPatient = filteredTodos.reduce<Record<string, TodoItem[]>>((groups, todo) => {
@@ -560,7 +572,17 @@ export default function TodoList() {
           <h1 className="text-base font-semibold text-foreground">{t("nav.myTasks", "Tasks")}</h1>
           <p className="mt-1 text-muted-foreground text-xs">Manage your tasks with voice or text input — AI can auto-execute actions</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative min-w-[200px]">
+            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={taskQuery}
+              onChange={(e) => setTaskQuery(e.target.value)}
+              placeholder={t("todo.searchTasks", "Search tasks...")}
+              className="h-9 pl-8 text-xs"
+            />
+          </div>
+
           <ToggleGroup
             type="single"
             value={ownerFilter}

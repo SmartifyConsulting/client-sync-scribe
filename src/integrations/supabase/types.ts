@@ -4272,6 +4272,7 @@ export type Database = {
           shared_with_username: string | null
           source: string
           updated_at: string
+          view_scopes: Json
         }
         Insert: {
           can_view_live_tracking?: boolean
@@ -4288,6 +4289,7 @@ export type Database = {
           shared_with_username?: string | null
           source?: string
           updated_at?: string
+          view_scopes?: Json
         }
         Update: {
           can_view_live_tracking?: boolean
@@ -4304,6 +4306,7 @@ export type Database = {
           shared_with_username?: string | null
           source?: string
           updated_at?: string
+          view_scopes?: Json
         }
         Relationships: []
       }
