@@ -1220,7 +1220,7 @@ export default function Sessions() {
             )}
 
             {/* Live Transcript Preview - Collapsible */}
-            {(transcript || isTranscribing) && (
+            {(transcript || liveTranscript || isTranscribing) && (
               <div className="border-t p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
@@ -1230,12 +1230,17 @@ export default function Sessions() {
                   {transcript && !isTranscribing && (
                     <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
                   )}
+                  {!transcript && isRecording && (
+                    <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Live</span>
+                  )}
                   {isTranscribing && (
                     <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   )}
                 </div>
                 <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
-                  {transcript ? (
+                  {!transcript && liveTranscript ? (
+                    <p className="text-[10px] text-foreground leading-relaxed">{liveTranscript}</p>
+                  ) : transcript ? (
                     <div className="space-y-0.5">
                       {transcript.split('\n').map((line, index) => {
                         const colonIndex = line.indexOf(':');
