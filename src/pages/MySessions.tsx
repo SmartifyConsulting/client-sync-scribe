@@ -17,6 +17,8 @@ import { Clock, User as UserIcon, Loader2, FileText, Plus } from "lucide-react";
 import { format, isToday, differenceInCalendarDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { SECTION_TRIGGER_ALWAYS_GREEN_CLASS, SECTION_CONTENT_CLASS } from "@/components/ui/section-accordion";
+import { ListGroupToolbar } from "@/components/common/ListGroupToolbar";
+
 
 interface SessionRow {
   id: string;
