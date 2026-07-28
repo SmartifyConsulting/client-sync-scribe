@@ -29,6 +29,8 @@
   "nav": {
     "home": "Home",
     "myPatients": "My Patients",
+    "admissions": "Admissions",
+    "allDocuments": "Documents",
     "mySessions": "Sessions",
     "myPractice": "My Practice",
     "myCalendar": "My Calendar",
