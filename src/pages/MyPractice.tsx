@@ -1216,7 +1216,7 @@ export default function MyPractice() {
             value="certificates"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
-            {t("myPractice.tabCredentials")}{totalCpdPoints > 0 ? ` (${totalCpdPoints})` : ""}
+            {t("myPractice.tabCredentials")}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
