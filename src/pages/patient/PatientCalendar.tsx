@@ -379,6 +379,12 @@ export default function PatientCalendar() {
           <p className="text-muted-foreground text-xs">View and manage your appointments</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search appointments..."
+            className="h-8 w-[200px] text-xs"
+          />
           <ViewToggle />
           <Button onClick={() => setBookDialogOpen(true)} size="sm" className="gap-1 text-xs">
             <Plus className="h-3.5 w-3.5" />
