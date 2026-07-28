@@ -20,6 +20,10 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isSavingAudio, setIsSavingAudio] = useState(false);
   const [transcript, setTranscript] = useState('');
+  // Rolling text captured by the Web Speech API while the mic is open. Lets features
+  // such as AI Consult work mid-session, before the final transcription runs.
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const liveTranscriptRef = useRef('');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [savedAudioUrl, setSavedAudioUrl] = useState<string | null>(null);
   
@@ -151,6 +155,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       mediaRecorder.start(1000);
       setIsRecording(true);
       endSessionDetectedRef.current = false;
+      liveTranscriptRef.current = '';
+      setLiveTranscript('');
       
       // Start Web Speech API for real-time "End Session" detection
       try {
@@ -164,8 +170,15 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
           
           recognition.onresult = (event: SpeechRecognitionEvent) => {
-            if (endSessionDetectedRef.current) return;
             const last = event.results[event.results.length - 1];
+            if (last.isFinal) {
+              const finalText = last[0].transcript.trim();
+              if (finalText) {
+                liveTranscriptRef.current = `${liveTranscriptRef.current} ${finalText}`.trim();
+                setLiveTranscript(liveTranscriptRef.current);
+              }
+            }
+            if (endSessionDetectedRef.current) return;
             const text = last[0].transcript.toLowerCase().trim();
             if (endPhrases.some(phrase => text.includes(phrase))) {
               endSessionDetectedRef.current = true;
@@ -253,6 +266,14 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.lang = 'en-US';
+            recognition.onresult = (event: SpeechRecognitionEvent) => {
+              const last = event.results[event.results.length - 1];
+              if (!last.isFinal) return;
+              const finalText = last[0].transcript.trim();
+              if (!finalText) return;
+              liveTranscriptRef.current = `${liveTranscriptRef.current} ${finalText}`.trim();
+              setLiveTranscript(liveTranscriptRef.current);
+            };
             recognition.start();
             speechRecognitionRef.current = recognition;
           }
@@ -342,6 +363,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
 
   const clearTranscript = useCallback(() => {
     setTranscript('');
+    liveTranscriptRef.current = '';
+    setLiveTranscript('');
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
@@ -355,6 +378,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     isTranscribing,
     isSavingAudio,
     transcript,
+    liveTranscript,
     audioUrl,
     savedAudioUrl,
     startRecording,

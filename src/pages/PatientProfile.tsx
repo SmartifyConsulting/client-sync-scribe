@@ -118,6 +118,22 @@ export default function PatientProfile() {
       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
       : "";
 
+  // This patient's own document intake address — readable by every provider in their
+  // holarchy via a security-definer lookup, so the care team can share it with labs.
+  const [patientDocEmail, setPatientDocEmail] = useState<string>("");
+  useEffect(() => {
+    if (!id) return;
+    let active = true;
+    (supabase.rpc as any)("get_patient_document_alias", { _patient_id: id }).then(
+      ({ data }: { data: string | null }) => {
+        if (active && data) setPatientDocEmail(`${data}@${INTAKE_EMAIL_DOMAIN}`);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
   const [canViewAllSessions, setCanViewAllSessions] = useState(true);
@@ -497,19 +513,24 @@ export default function PatientProfile() {
         </TabsContent>
 
         <TabsContent value="documents" className="space-y-4">
-          {/* Document Mailbox Info Banner - only show on ME record */}
-          {patient.email?.toLowerCase() === user?.email?.toLowerCase() && displayEmail && (
+          {/* Document intake address — own record uses your alias, otherwise the patient's */}
+          {(() => {
+            const isOwnRecord =
+              patient.email?.toLowerCase() === user?.email?.toLowerCase();
+            const intakeEmail = isOwnRecord ? displayEmail : patientDocEmail;
+            if (!intakeEmail) return null;
+            return (
             <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 flex items-start gap-3">
               <FileText className="h-5 w-5 text-primary mt-0.5 shrink-0" />
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground">
-                  Documents can be emailed to your documents tab by external parties (e.g., radiologists, labs) to{" "}
-                  <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground">
-                    {displayEmail}
+                  Documents can be emailed by external parties (e.g. radiologists, labs) to{" "}
+                  <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded text-foreground break-all">
+                    {intakeEmail}
                   </code>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(displayEmail);
+                      navigator.clipboard.writeText(intakeEmail);
                       toast({ title: "Copied!", description: "Email address copied to clipboard." });
                     }}
                     className="inline-flex items-center ml-1.5 text-primary hover:text-primary/80"
@@ -517,11 +538,12 @@ export default function PatientProfile() {
                   >
                     <Copy className="h-3.5 w-3.5" />
                   </button>
-                  , and they will be saved under your Documents.
+                  , and they will be saved under {isOwnRecord ? "your" : `${patient.name}'s`} Documents.
                 </p>
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {/* Quick action icon buttons */}
           <div className="flex items-center gap-3 justify-center">

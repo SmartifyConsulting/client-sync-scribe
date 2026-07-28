@@ -1,83 +1,62 @@
-## Goal
+## 1. Profile switcher — remove Dean Allie (Patient)
 
-Build out the Hospital profile into a full inpatient management portal: a dashboard matching the reference layout, plus wards, ward-based admissions with bed numbers and transfers, attending doctors, attending nurses with clock-in/clock-out, staff shift schedules, and an automatic patient activity log.
+`src/components/layout/testProfiles.ts` lists Dean Allie twice (doctor + patient). Remove the patient entry only.
 
-## What exists today
+## 2. To-Do rows — no indent, no coloured bullets
 
-- `holarchelp_hospitals` — hospital record, with total bed and ICU capacity only (no wards).
-- `hospital_admissions` — a doctor-entered clinical history record (free-text hospital name, diagnosis, dates). No wards, beds, occupancy or live status. This stays untouched.
-- `hospital_nurses`, `hospital_doctor_affiliations`, `doctor_hospital_affiliations` — staff linked to a hospital.
-- `paramedic_shifts` — ambulance-crew only; not reusable for ward staff.
-- Hospital portal at `/provider/hospital` with Emergency Queue, Admissions (currently an ER incident list), Dispatch, Fleet Live, Admin.
+`src/components/todos/TodoRow.tsx`: drop the `insideGroup ? "pl-6"` indent variant and remove the `PRIORITY_DOT` coloured dot span.
 
-## New data model
+## 3. Accordion name frames
 
-**Wards** — one hospital to many wards: name/number, ward type (General, ICU, Maternity, Paediatric, Surgical, Other), bed capacity, notes. Current occupancy is derived from live admissions, never stored stale.
+Give the patient/name accordion a fine green outline (1px `border-primary/40`, rounded) in `section-accordion.tsx` / `CompactTodoList.tsx`, keeping the spacing between frames.
 
-**Beds** — optional per-ward bed register (bed number, status). Bed numbers can also be free text on an admission so a hospital can start using wards without registering every bed.
+## 4. Why the to-do accordions have odd names ("Georgia Adams. Note", "No patient")
 
-**Inpatient admissions** — new records, separate from the existing clinical history: hospital, patient, ward, bed number, admission date/time, discharge date/time, status (Admitted / Discharged / Transferred), reason, source (walk-in, ER incident, ambulance), and a link to the originating emergency incident when one exists.
+Confirmed cause in `src/lib/todoDisplay.ts`. Todos usually have no `patient_name`, so the grouping falls back to `extractPatient(title)`, which guesses a name out of the task title with this regex:
 
-**Ward transfers** — one timestamped row per move: from ward/bed, to ward/bed, who moved them, reason.
+```text
+/\bfor\s+([A-Z][\p{L}'.-]+(?:\s+[A-Z][\p{L}'.-]+)+)/u
+```
 
-**Attending doctors** — many doctors per admission, one flagged as Primary Attending, the rest consulting; each with assigned and unassigned timestamps.
+The character class includes a full stop, so a title like "Review letter for Georgia Adams. Note follow-up" captures **"Georgia Adams. Note"** — the sentence-ending period plus the next capitalised word get swallowed into the name. When no pattern matches at all, `CompactTodoList.tsx:502` labels the group the literal `"No patient"`.
 
-**Attending nurses** — nurses assigned to an admitted patient for a given shift: the nurse, the admission/patient, the shift it belongs to, care role (Primary Nurse, Support, Specialist), assignment window, and the care tasks they are responsible for (e.g. vitals rounds, medication administration, wound care, observation). Multiple nurses can attend one patient; one nurse attends many patients per shift.
+Fix:
+- Resolve the group name from the todo's `patient_id` (join to the patients record) first, then `patient_name`, and only then fall back to title parsing.
+- Tighten `extractPatient`: stop at sentence punctuation, don't allow `.` inside a name token, cap at 3 words, and reject known non-name words ("Note", "Invoice", "Follow", etc.).
+- Rename the fallback label from "No patient" to "General tasks".
 
-**Shift clock-in / clock-out** — every doctor and nurse shift records scheduled start/end plus actual clocked-in and clocked-out timestamps and a live status (Scheduled, On shift, Completed, Missed). Staff clock in and out from their own screen; the hospital sees who is actually on the floor right now versus merely rostered.
+## 5. Invoice numbers duplicated (`INV-INV-202607-88811`)
 
-**Staff shifts** — staff member (doctor profile or hospital nurse), role, shift type (Day / Night / On-Call), start and end time, assigned ward.
+Confirmed: numbers are generated already prefixed — `INV-${year}${month}-${random}` in `Invoices.tsx`, `InvoiceEditor.tsx`, `useSessions.ts`, `Sessions.tsx` and the `process-todo-actions` function — but the default invoice template in `src/hooks/useTemplates.ts:218` hardcodes another prefix:
 
-**Patient activity log** — timestamped entries against the patient: staff member name + role, action type (Vitals Check, Medication Administered, Doctor Consultation, Nursing Care, Admission, Ward Transfer, Ambulance Pickup, Ambulance Drop-off, Discharge, Note), and details.
+```text
+TAX Invoice Number: INV-[InvoiceNumber]
+```
 
-Access rules: hospital staff and admins can manage records for their own hospital; the patient can read their own admission and activity log; a doctor linked to the patient, or a doctor/nurse attending on the admission, can read and add log entries.
+Fix: drop the literal `INV-` from the template line so the placeholder supplies the whole number, and add a defensive strip of a leading `INV-` when filling `[InvoiceNumber]` so existing saved templates render correctly too.
 
-## Automatic activity logging
+## 6. Missing translation keys on patient details save
 
-Database triggers write log entries so nothing is entered twice:
-- New inpatient admission → "Admitted to {ward}, bed {n}".
-- Ward transfer → "Transferred from {ward A} to {ward B}".
-- Attending doctor added or changed → "Dr {name} assigned as primary/consulting".
-- Attending nurse assigned or released → "Nurse {name} assigned for {care task} this shift".
-- Nurse or doctor clocks in or out → shift event recorded against the ward (and against each patient they attend on that shift).
-- Discharge → "Discharged".
-- Emergency incident reaching the hospital → "Ambulance drop-off at ER" (hooked into the existing incident status flow).
-Manual entries (vitals, medication, consultation and nursing notes) are added from the patient record by on-shift staff.
+The toast in `src/pages/patient/MyDetails.tsx:149` uses `common.saved` and `patient.myDetails.detailsUpdated`; the `patient.myDetails` block does not exist in `src/i18n/locales/en.json`, so the raw keys render (the screenshot). Fix: add the missing keys to `en.json` (and the other locale files) and audit `MyDetails.tsx` for any other unresolved keys.
 
-## Screens
+## 7. Session recording fixes (`src/pages/Sessions.tsx`, `src/hooks/useAudioRecording.ts`)
 
-**Hospital Dashboard** (new landing page for the hospital portal, matching the reference)
-- Top stat cards: bed occupancy %, admitted patients, ambulances available, staff clocked in now.
-- Ward occupancy panel: one coloured progress bar per ward with `used / capacity`.
-- Ambulance status panel: each vehicle with an Available / Dispatched / Maintenance pill.
-- Recent patient activity feed: latest activity-log entries with time, staff member and action.
-- Live-updating via realtime subscriptions, in the existing card/typography style.
+**a) No live transcription — also breaks AI Consult and the Live AI hint.** The Web Speech recognizer only scans results for "end session" phrases and never accumulates text; `transcript` is set once, after Whisper returns. So `handleAiConsult` hits its "Nothing to analyse yet" guard mid-session. Fix: accumulate final Web Speech results (plus current interim) into a `liveTranscript` the hook exposes; render it in the Transcript panel, feed it to the live hint and to AI Consult. Whisper still replaces it as the authoritative transcript on stop.
 
-**Wards** — list of wards with occupancy; open a ward to see its bed grid, admitted patients with bed numbers, and the doctors and nurses currently clocked in for it. Add, edit and archive wards.
+**b) Follow-up and Vula dialogs twice.** Two paths call `handleSessionComplete` for one stop: `onEndSessionDetected` schedules it on a 2s timer *and* `onTranscriptionComplete` calls it because `pendingCompletionRef` is still true. Fix: one-shot `completionStartedRef` guard and remove the redundant timer path.
 
-**Admissions** — the current ER-incident view becomes a tabbed screen: *Inpatients* (ward-based admissions, with Admit, Transfer, Assign nurse and Discharge actions) alongside the existing *ER / Incidents* list.
+**c) Wrong modal order.** `startDocumentReview()` runs via `setTimeout(..., 0)` with a stale closure where all four extracted-document states are still null, so it falls straight through to the follow-up dialog. Fix: pass the freshly extracted docs as arguments, restoring: Med Cert → Prescription → Invoice → Referral → Follow-up → Vula.
 
-**Shifts** — weekly schedule grid for doctors and nurses, filterable by ward and role, with an "On shift now" summary showing clocked-in versus rostered. Add and edit shifts.
+**d) Send button on every modal.** Add an explicit Send action to each review dialog, routed through the existing `DocumentDeliveryProgress` / `sendDeliveryDocument` path.
 
-**My Shift** (nurse and doctor view) — the staff member's current and upcoming shifts with a Clock In / Clock Out button, and, once on shift, the list of patients they are attending with each patient's assigned care tasks and a one-tap way to log a completed task (which writes to that patient's activity log).
+**e) Button overlap.** Record / Pause / AI Consult sit in one fixed `flex items-center gap-3` row in the narrow sidebar card. Make it `flex-wrap justify-center` and collapse the Pause / AI Consult labels to icons on narrow widths.
 
-**Patient profile** — new "Hospital stay" section showing current ward, bed and admission date, all attending doctors with the primary flagged, attending nurses for the current shift with their care responsibilities, transfer history, and a chronological Activity Log timeline.
+## 8. Document email handle
 
-**Doctor profile** — specialty plus a list of currently assigned inpatients (ward and bed).
-
-**Nurse profile** — current shift and clock status, ward assignment, and the patients they are attending with care tasks.
-
-**Navigation** — hospital sidebar becomes: Dashboard → Emergency Queue → Admissions → Wards → Shifts → Dispatch Dashboard → Fleet Live → Admin.
-
-## Demo data
-
-Seed the existing demo hospital with sample wards (ICU, General Ward A, Maternity, Paediatric), admitted sample patients in beds, attending doctor assignments, attending nurses with care tasks, a week of doctor and nurse shifts including some already clocked in, and a set of activity-log entries so the dashboard and timelines are populated on first load. All seeded patients keep the existing sample marker so it is visibly not real data.
+- `Sidebar.tsx` already renders `<alias>@docs.holarchealth.com` under the profile name but truncates it — switch to wrapping/`break-all` so the full handle shows.
+- Show the patient's own intake address on the **patient record** (patient profile header), reusing the copyable `MailboxIntakeAddress` component, so the patient sees where to email documents.
+- Make that same address visible to every provider connected to the patient. I will verify the patient `mailbox_alias` column is readable by connected providers before wiring the UI, and add a read policy only if it is not.
 
 ## Technical notes
 
-- Occupancy is always computed from active admissions joined to wards, so capacity numbers can't drift.
-- Activity logs are append-only and written by `SECURITY DEFINER` triggers, so an entry is created even when the acting user can't write to the log table directly.
-- Shifts reference either a doctor profile or a `hospital_nurses` row, with a constraint ensuring exactly one is set; clock-in/out is guarded so a staff member cannot hold two open shifts at once.
-- Nurse assignments hang off both the admission and the shift, so "who was caring for this patient at 03:00" is answerable from history.
-- New tables get explicit grants and row-level security policies in the same migration; all UI reads go through the existing Supabase client with realtime channels.
-- The build runs in stages: schema first, then dashboard and wards, then admissions/transfers and attending doctors, then shifts with clock-in/out and nurse assignments, then activity log surfaces and demo seed.
+Files: `testProfiles.ts`, `TodoRow.tsx`, `todoDisplay.ts`, `CompactTodoList.tsx`, `section-accordion.tsx`, `useTemplates.ts` (+ invoice placeholder fill), `en.json` and sibling locales, `useAudioRecording.ts`, `Sessions.tsx`, the four session review dialogs, `Sidebar.tsx`, patient profile header. A migration is only needed if the provider read of the patient mailbox alias turns out to be blocked.

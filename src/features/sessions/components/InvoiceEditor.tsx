@@ -186,7 +186,9 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
         .replace(/\[INVOICE_CONTENT\]/g, invoiceBody)
         .replace(/\[InvoiceNumber\]/g, generateInvoiceNumber())
         .replace(/\[DueDate\]/g, new Date(dueDate).toLocaleDateString())
-        .replace(/\[TotalAmount\]/g, `${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`);
+        .replace(/\[TotalAmount\]/g, `${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`)
+        // Legacy templates hardcode "INV-" before [InvoiceNumber]; the number already has it.
+        .replace(/\bINV-(?:INV-)+/gi, "INV-");
     }
 
     return invoiceBody;

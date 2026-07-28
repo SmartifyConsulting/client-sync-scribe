@@ -215,7 +215,7 @@ Date: [SignatureDate]`,
     category: "Invoice",
     content: `INVOICE
 
-TAX Invoice Number: INV-[InvoiceNumber]
+TAX Invoice Number: [InvoiceNumber]
 
 Date: [InvoiceDate]
 

@@ -68,6 +68,8 @@ interface TodoItem {
   is_auto_executed?: boolean;
   document_id?: string | null;
   task_type?: string;
+  patient_id?: string | null;
+  patient_name?: string | null;
 }
 
 const priorityColors = {
@@ -161,6 +163,19 @@ export function CompactTodoList() {
 
       if (error) throw error;
 
+      // Resolve the real patient names so grouping never has to guess from the title.
+      const patientIds = Array.from(
+        new Set((data || []).map((t: any) => t.patient_id).filter(Boolean)),
+      ) as string[];
+      const nameById = new Map<string, string>();
+      if (patientIds.length > 0) {
+        const { data: patientRows } = await supabase
+          .from("patients")
+          .select("id, name")
+          .in("id", patientIds);
+        (patientRows || []).forEach((p: any) => nameById.set(p.id, p.name));
+      }
+
       setTodos(
         (data || []).map((todo: any) => ({
           ...todo,
@@ -169,6 +184,7 @@ export function CompactTodoList() {
           is_auto_executed: todo.is_auto_executed || false,
           document_id: todo.document_id || null,
           task_type: todo.task_type || 'standard',
+          patient_name: (todo.patient_id && nameById.get(todo.patient_id)) || null,
         }))
       );
     } catch (error) {
@@ -499,7 +515,7 @@ export function CompactTodoList() {
                 const map = new Map<string, TodoItem[]>();
                 for (const todo of items) {
                   const display = getTodoDisplay(todo as any);
-                  const name = display.patient || "No patient";
+                  const name = display.patient || "General tasks";
                   if (!map.has(name)) map.set(name, []);
                   map.get(name)?.push(todo);
                 }
@@ -558,12 +574,12 @@ export function CompactTodoList() {
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
                         <Accordion type="multiple" className="space-y-2">
                           {patientGroups(grouped[b.key]).map(([patientName, items]) => (
-                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border-0">
+                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border border-primary/40 rounded-lg overflow-hidden bg-background">
                               <AccordionTrigger className="px-3 py-2.5 hover:no-underline hover:bg-muted/50 text-foreground">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <UserIcon className="h-3.5 w-3.5 text-primary shrink-0" />
+                                  <UserIcon className="h-4 w-4 text-primary shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}
-                                  <span className="text-sm font-semibold truncate text-left">{patientName}</span>
+                                  <span className="text-base font-semibold truncate text-left">{patientName}</span>
                                   <SectionCountPill count={items.length} className="ml-auto mr-1" />
                                 </div>
                               </AccordionTrigger>
