@@ -23,13 +23,13 @@
     "name": "Name",
     "role": "Role",
     "status": "Status",
-    "actions": "Actions"
+    "actions": "Actions",
+    "saved": "Saved"
   },
   "nav": {
     "home": "Home",
     "myPatients": "My Patients",
     "mySessions": "My Sessions",
-
     "myPractice": "My Practice",
     "myCalendar": "My Calendar",
     "myTasks": "My Tasks",
@@ -2143,6 +2143,14 @@
         "cta": "Learn more about Vulas",
         "footerTagline": "Made with care, for our community"
       }
+    }
+  },
+  "patient": {
+    "myDetails": {
+      "errorInitializeTitle": "Could not load your record",
+      "errorSaveTitle": "Could not save your details",
+      "detailsUpdated": "Your details have been updated",
+      "recordSetupMessage": "We are setting up your patient record. Please check back in a moment."
     }
   }
 }
