@@ -1229,7 +1229,7 @@ export default function MyPractice() {
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden">
-            <Accordion type="multiple" defaultValue={["about-me"]} className="divide-y divide-white">
+            <Accordion type="multiple" className="divide-y divide-white">
               <AboutMeAccordion
                 value={(profile as any)?.about_me || ""}
                 onSave={async (v) => { await updateProfile({ about_me: v } as any); }}
