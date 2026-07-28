@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { isSampleName } from "@/lib/samplePatients";
+import { SampleBadge } from "@/components/patients/SampleBadge";
 import { Plus, Trash2, Pencil, Loader2, Search, Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
