@@ -1466,7 +1466,7 @@ export function PatientDetailsEditor({
           )}
           {show("history") && (
             <TabsTrigger value="history" className={triggerClass}>
-              My History
+              My Sessions
             </TabsTrigger>
           )}
           {show("roundtable") && (
@@ -2077,38 +2077,11 @@ export function PatientDetailsEditor({
 
             {isSelfService && (
               <TabsContent value="history" className="mt-4">
-                <Tabs defaultValue="sessions">
-                  <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                    <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Sessions</TabsTrigger>
-                    <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="sessions" className="mt-3">
-                    <div className="mb-3 flex items-center justify-between gap-2">
-                      <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-3">History of your consultations. Record sessions with doctors not on the platform.</p>
-                    <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
-                  </TabsContent>
-
-                  <TabsContent value="admissions" className="mt-3">
-                    <Tabs defaultValue="admissions_view">
-                      <TabsList className="bg-primary">
-                        <TabsTrigger value="admissions_view" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Hospital Admissions</TabsTrigger>
-                        <TabsTrigger value="incidents" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Emergency Incidents</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="admissions_view" className="mt-3">
-                        <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
-                          <AdmissionsViewLazy patientId={patient.id} canEdit />
-                        </Suspense>
-                      </TabsContent>
-                      <TabsContent value="incidents" className="mt-3">
-                        <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
-                          <PatientIncidentHistoryLazy userId={patient.patient_user_id ?? null} />
-                        </Suspense>
-                      </TabsContent>
-                    </Tabs>
-                  </TabsContent>
-                </Tabs>
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">Your consultation sessions. Record sessions with doctors not on the platform.</p>
+                <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
               </TabsContent>
             )}
 
@@ -2196,7 +2169,16 @@ export function PatientDetailsEditor({
                 <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
                 <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
                 <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
+                <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Hospitals</TabsTrigger>
               </TabsList>
+
+          {/* === HOSPITALS SUB-TAB (EDIT) === */}
+          <TabsContent value="hospitals" className="mt-4">
+            <PreferredHospitals
+              value={((patient as any).preferred_hospitals as PreferredHospital[]) || []}
+              onChange={(next) => onSave({ preferred_hospitals: next } as any)}
+            />
+          </TabsContent>
 
           {/* === INSURANCE SUB-TAB (EDIT) === */}
           <TabsContent value="insurance" className="mt-4">
@@ -3722,33 +3704,20 @@ export function PatientDetailsEditor({
 
           {isSelfService && (
             <TabsContent value="history" className="mt-4">
-              <Tabs defaultValue="sessions">
-                <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Sessions</TabsTrigger>
-                  <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
-                </TabsList>
-                <TabsContent value="sessions" className="mt-3">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">History of your consultations</p>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">Your consultation sessions</p>
 
-                  <Suspense
-                    fallback={
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                      </div>
-                    }
-                  >
-                    <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
-                  </Suspense>
-                </TabsContent>
-                <TabsContent value="admissions" className="mt-3">
-                  <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
-                    <AdmissionsViewLazy patientId={patient.id} canEdit />
-                  </Suspense>
-                </TabsContent>
-              </Tabs>
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                }
+              >
+                <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+              </Suspense>
             </TabsContent>
           )}
 

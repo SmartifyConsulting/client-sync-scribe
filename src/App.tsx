@@ -45,6 +45,7 @@ import MyRewards from "./pages/patient/MyRewards";
 import HealthAlbum from "./pages/patient/HealthAlbum";
 import MyDoctors from "./pages/patient/MyDoctors";
 import PatientTasks from "./pages/patient/PatientTasks";
+import PatientAdmissions from "./pages/patient/PatientAdmissions";
 import PatientDocuments from "./pages/patient/PatientDocuments";
 import PatientRoundTable from "./pages/patient/PatientRoundTable";
 import MyDetails from "./pages/patient/MyDetails";
@@ -210,6 +211,7 @@ const App = () => (
             <Route path="/patient/rewards" element={<MyRewards />} />
             <Route path="/patient/health-album" element={<Navigate to="/dashboard" replace />} />
             <Route path="/patient/tasks" element={<PatientTasks />} />
+            <Route path="/patient/admissions" element={<PatientAdmissions />} />
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
