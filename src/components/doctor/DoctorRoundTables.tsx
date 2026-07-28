@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, Loader2, Bell, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
@@ -12,6 +13,7 @@ interface RoundTableEntry {
   latestNoteDate: string;
   totalNotes: number;
   unreadCount: number;
+  myNotes: number;
 }
 
 export function DoctorRoundTables() {
@@ -19,6 +21,7 @@ export function DoctorRoundTables() {
   const navigate = useNavigate();
   const [entries, setEntries] = useState<RoundTableEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
 
   useEffect(() => {
     if (user) fetchRoundTables();
@@ -34,7 +37,17 @@ export function DoctorRoundTables() {
 
       if (!myNotes?.length) { setLoading(false); return; }
 
-      const patientIds = [...new Set(myNotes.map(n => n.patient_id))];
+      const { data: rosterPatients } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("user_id", user!.id);
+
+      const patientIds = [
+        ...new Set([
+          ...myNotes.map((n) => n.patient_id),
+          ...(rosterPatients || []).map((p: any) => p.id),
+        ]),
+      ];
 
       // Get all notes for those patients
       const { data: allNotes } = await supabase
@@ -71,10 +84,12 @@ export function DoctorRoundTables() {
             latestNoteDate: note.created_at,
             totalNotes: 1,
             unreadCount: isUnread ? 1 : 0,
+            myNotes: note.doctor_id === user!.id ? 1 : 0,
           });
         } else {
           existing.totalNotes++;
           if (isUnread) existing.unreadCount++;
+          if (note.doctor_id === user!.id) existing.myNotes++;
         }
       }
 
@@ -92,18 +107,39 @@ export function DoctorRoundTables() {
     return <div className="flex h-32 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>;
   }
 
-  if (entries.length === 0) {
+  const visible = ownerFilter === "mine" ? entries.filter((e) => e.myNotes > 0) : entries;
+
+  const filterBar = (
+    <div className="flex justify-end">
+      <ToggleGroup
+        type="single"
+        value={ownerFilter}
+        onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
+        size="sm"
+        variant="outline"
+      >
+        <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
+        <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
+      </ToggleGroup>
+    </div>
+  );
+
+  if (visible.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-12 text-center">
-        <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-        <p className="text-xs text-muted-foreground">No round table contributions yet</p>
+      <div className="space-y-3">
+        {filterBar}
+        <div className="rounded-xl border border-dashed border-border p-12 text-center">
+          <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+          <p className="text-xs text-muted-foreground">No round table contributions yet</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {entries.map((entry) => (
+      {filterBar}
+      {visible.map((entry) => (
         <div
           key={entry.patientId}
           onClick={() => navigate(`/patients/${entry.patientId}?tab=roundtable`)}
