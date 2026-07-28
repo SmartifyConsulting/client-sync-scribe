@@ -31,6 +31,7 @@ import {
   RotateCw,
   GitCompare,
   Eye,
+  Search,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -223,6 +224,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
 
   // AI Analysis state
   const [docGroupBy, setDocGroupBy] = useState<"date" | "type">("date");
+  const [docSearch, setDocSearch] = useState("");
   const [analyzingDocId, setAnalyzingDocId] = useState<string | null>(null);
   const [analysisDialog, setAnalysisDialog] = useState<UnifiedDocument | null>(null);
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
@@ -336,8 +338,12 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     setLoading(false);
   }
 
-  const filteredDocs =
-    filter === "all" ? documents : documents.filter((d) => d.type === filter);
+  const filteredDocs = (() => {
+    const byType = filter === "all" ? documents : documents.filter((d) => d.type === filter);
+    const q = docSearch.trim().toLowerCase();
+    if (!q) return byType;
+    return byType.filter((d) => [d.name, d.content].filter(Boolean).join(" ").toLowerCase().includes(q));
+  })();
 
   const DOC_PAGE_SIZE = 10;
   const [visibleDocCount, setVisibleDocCount] = useState(DOC_PAGE_SIZE);
@@ -657,6 +663,15 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         ) : <div />}
 
         <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="relative w-full sm:w-48">
+            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={docSearch}
+              onChange={(e) => setDocSearch(e.target.value)}
+              placeholder="Search documents..."
+              className="h-8 pl-8 text-xs"
+            />
+          </div>
           <ToggleGroup
             type="single"
             value={docGroupBy}

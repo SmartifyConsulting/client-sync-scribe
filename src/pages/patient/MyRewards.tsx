@@ -506,7 +506,7 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-primary flex w-full flex-nowrap overflow-x-auto justify-start">
+        <TabsList className="bg-neutral-700 flex w-full flex-nowrap overflow-x-auto justify-start">
           <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">
             Overview
           </TabsTrigger>

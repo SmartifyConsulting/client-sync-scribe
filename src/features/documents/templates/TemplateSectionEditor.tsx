@@ -35,6 +35,12 @@ const FONT_FAMILIES = [
   { label: "Times New Roman", value: "'Times New Roman', Times, serif" },
   { label: "Georgia", value: "Georgia, serif" },
   { label: "Courier New", value: "'Courier New', Courier, monospace" },
+  { label: "Verdana", value: "Verdana, Geneva, sans-serif" },
+  { label: "Tahoma", value: "Tahoma, Geneva, sans-serif" },
+  { label: "Trebuchet MS", value: "'Trebuchet MS', sans-serif" },
+  { label: "Garamond", value: "Garamond, Baskerville, serif" },
+  { label: "Calibri", value: "Calibri, Candara, sans-serif" },
+  { label: "Helvetica", value: "Helvetica, Arial, sans-serif" },
 ];
 
 const FONT_SIZES = ["10", "11", "12", "14", "16", "18", "20", "24"];

@@ -12,6 +12,7 @@ import {
   type FillPatient,
   type FillProfile,
 } from "@/lib/fillDocumentPlaceholders";
+import { renderSignatureHtml } from "@/lib/signature";
 
 export interface BuildInvoiceArgs {
   invoice: {
@@ -136,6 +137,12 @@ function buildFallbackInvoiceBody(args: BuildInvoiceArgs): string {
       </tr>
     </tfoot>
   </table>
+
+  ${renderSignatureHtml(profile) ? `
+  <div style="margin-top:32px;">
+    <div>${renderSignatureHtml(profile)}</div>
+    <div style="border-top:1px solid #999;margin-top:4px;padding-top:4px;font-size:11px;color:#666;">${profile?.full_name || ""}</div>
+  </div>` : ""}
 </div>`.trim();
 }
 

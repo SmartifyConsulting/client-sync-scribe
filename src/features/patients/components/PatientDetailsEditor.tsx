@@ -1591,18 +1591,15 @@ export function PatientDetailsEditor({
             {/* === MY HOLARCHY TAB (overview) === */}
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
-                <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
-                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
-                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
-                  <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Hospitals</TabsTrigger>
+                <TabsList className="bg-neutral-700 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
+                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
+                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
+                  <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
                 </TabsList>
 
             {/* === INSURANCE SUB-TAB (view) === */}
             <TabsContent value="insurance" className="mt-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-foreground">Insurance</h3>
-              </div>
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
                 <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
                 <CollapsibleContent className="p-3">
@@ -1619,9 +1616,6 @@ export function PatientDetailsEditor({
 
             {/* === PHARMACIES SUB-TAB (view) === */}
             <TabsContent value="pharmacies" className="mt-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-foreground">Pharmacies</h3>
-              </div>
               <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
                 <SectionHeader icon={Store} label="Pharmacies" />
                 <CollapsibleContent className="p-3">
@@ -1703,7 +1697,7 @@ export function PatientDetailsEditor({
 
                 <SectionHeader icon={User} label="Personal Details" />
                 <CollapsibleContent className="p-3">
-                  <div className={FIELD_GRID_CLASS}>
+                  <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="First Name(s)" value={patient.first_name || splitName(patient.name).first} />
                     <ViewField label="Last Name" value={patient.last_name || splitName(patient.name).last} />
                     <ViewField label="ID/Passport Number" value={patient.id_passport_number} />
@@ -1809,7 +1803,7 @@ export function PatientDetailsEditor({
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={Briefcase} label="Employer" />
                 <CollapsibleContent className="p-3">
-                  <div className={FIELD_GRID_CLASS}>
+                  <div className={FIELD_GRID_2_CLASS}>
                     <ViewField label="Employer" value={patient.employer} />
                     <ViewField label="Occupation" value={patient.occupation} />
                     <ViewField label="Reporting To Email (Optional)" value={patient.reporting_to_email} />
@@ -1820,7 +1814,7 @@ export function PatientDetailsEditor({
               <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
                 <SectionHeader icon={StickyNote} label="General Notes" />
                 <CollapsibleContent className="p-3">
-                  <p className="text-sm text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
+                  <p className="text-xs text-foreground whitespace-pre-wrap">{patient.notes || "No notes recorded"}</p>
                 </CollapsibleContent>
               </Collapsible>
               </div>
@@ -2074,10 +2068,10 @@ export function PatientDetailsEditor({
 
             {isSelfService && (
               <TabsContent value="history" className="mt-4">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
+                <div className="mb-4">
+                  <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
+                  <p className="text-xs text-muted-foreground">Your consultation sessions. Record sessions with doctors not on the platform.</p>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">Your consultation sessions. Record sessions with doctors not on the platform.</p>
                 <PatientSessionRecorder patientId={patient.id} patientName={patient.name} />
               </TabsContent>
             )}
@@ -2162,11 +2156,11 @@ export function PatientDetailsEditor({
           {/* === MY HOLARCHY TAB (EDIT, overview) === */}
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
-              <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">My Holarc Team</TabsTrigger>
-                <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Insurance</TabsTrigger>
-                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Pharmacies</TabsTrigger>
-                <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Hospitals</TabsTrigger>
+              <TabsList className="bg-neutral-700 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
+                <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
+                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
+                <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
               </TabsList>
 
           {/* === HOSPITALS SUB-TAB (EDIT) === */}
@@ -2394,7 +2388,7 @@ export function PatientDetailsEditor({
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 {/* Horizontal label/field rows: bold, one size smaller labels */}
-                <div className={FIELD_GRID_CLASS}>
+                <div className={FIELD_GRID_2_CLASS}>
 
                   <div className="space-y-1.5">
                     <Label htmlFor="first_name">First Name(s) *</Label>
@@ -2543,7 +2537,7 @@ export function PatientDetailsEditor({
                         value={formData.physical_address}
                         disabled
                         rows={2}
-                        className="bg-muted/50 text-sm"
+                        className="bg-muted/50 text-xs"
                       />
                     ) : (
                       <AddressAutocomplete
@@ -2715,7 +2709,7 @@ export function PatientDetailsEditor({
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 border-t border-border/40">
-                          <label className="flex items-center gap-2 text-sm">
+                          <label className="flex items-center gap-2 text-xs">
                             <Switch
                               checked={!!nok.can_view_profile}
                               onCheckedChange={(v) => {
@@ -2727,7 +2721,7 @@ export function PatientDetailsEditor({
                             />
                             Can view profile
                           </label>
-                          <label className="flex items-center gap-2 text-sm">
+                          <label className="flex items-center gap-2 text-xs">
                             <Switch
                               checked={!!nok.can_view_live_tracking}
                               onCheckedChange={(v) => {
@@ -2766,7 +2760,7 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={Briefcase} label="Employer" />
               <CollapsibleContent className="p-3">
-                <div className={FIELD_GRID_CLASS}>
+                <div className={FIELD_GRID_2_CLASS}>
                   <div className="space-y-1.5">
                     <Label htmlFor="employer">Employer</Label>
                     <Input
@@ -2811,7 +2805,7 @@ export function PatientDetailsEditor({
                   onChange={(e) => updateFormData({ notes: e.target.value })}
                   placeholder="General notes about this patient..."
                   rows={4}
-                  className="text-sm"
+                  className="text-xs"
                 />
               </CollapsibleContent>
             </Collapsible>
@@ -3698,10 +3692,10 @@ export function PatientDetailsEditor({
 
           {isSelfService && (
             <TabsContent value="history" className="mt-4">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
+              <div className="mb-4">
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Sessions</h2>
+                <p className="text-xs text-muted-foreground">Your consultation sessions</p>
               </div>
-              <p className="text-xs text-muted-foreground mb-3">Your consultation sessions</p>
 
               <Suspense
                 fallback={

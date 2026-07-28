@@ -23,6 +23,10 @@ export default {
         roboto: ["Roboto", "sans-serif"],
         "source-serif": ["Source Serif 4", "serif"],
         rockwell: ["Rockwell", "Georgia", "serif"],
+        poppins: ["Poppins", "sans-serif"],
+        montserrat: ["Montserrat", "sans-serif"],
+        nunito: ["Nunito", "sans-serif"],
+        raleway: ["Raleway", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

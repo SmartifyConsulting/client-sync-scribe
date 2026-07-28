@@ -288,7 +288,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
     const accessLevel = getAccessLevel(permissions);
 
     return (
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3">
+      <div className="flex items-center justify-between gap-3 p-3">
         <div className="flex items-center gap-3 min-w-0">
           <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src={doctor.avatar_url || undefined} />
@@ -297,7 +297,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="font-medium text-foreground truncate">{doctor.full_name || "Unknown Doctor"}</span>
+            <span className="font-medium text-sm text-foreground truncate">{doctor.full_name || "Unknown Doctor"}</span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {doctor.specialty && (
                 <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
@@ -620,35 +620,39 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               </div>
             </div>
             <Tabs defaultValue="active" className="w-full">
-              <TabsList>
-                <TabsTrigger value="active">Active ({doctors.length})</TabsTrigger>
-                <TabsTrigger value="hidden">Hidden ({hiddenDoctors.length})</TabsTrigger>
+              <TabsList className="bg-neutral-700">
+                <TabsTrigger value="active" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Active ({doctors.length})</TabsTrigger>
+                <TabsTrigger value="hidden" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Hidden ({hiddenDoctors.length})</TabsTrigger>
               </TabsList>
-              <TabsContent value="active" className="space-y-2 mt-3">
-                {doctors.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
-                ) : sortAccess(doctors).filter(matchesFilters).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
-                ) : (
-                  sortAccess(doctors).filter(matchesFilters).map((access) =>
-                    access.doctor ? (
-                      <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="active" />
-                    ) : null
-                  )
-                )}
+              <TabsContent value="active" className="mt-3">
+                <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-border">
+                  {doctors.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">No active providers. Check the Hidden tab to restore one.</p>
+                  ) : sortAccess(doctors).filter(matchesFilters).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
+                  ) : (
+                    sortAccess(doctors).filter(matchesFilters).map((access) =>
+                      access.doctor ? (
+                        <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="active" />
+                      ) : null
+                    )
+                  )}
+                </div>
               </TabsContent>
-              <TabsContent value="hidden" className="space-y-2 mt-3">
-                {hiddenDoctors.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
-                ) : sortAccess(hiddenDoctors).filter(matchesFilters).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
-                ) : (
-                  sortAccess(hiddenDoctors).filter(matchesFilters).map((access) =>
-                    access.doctor ? (
-                      <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="hidden" />
-                    ) : null
-                  )
-                )}
+              <TabsContent value="hidden" className="mt-3">
+                <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-border">
+                  {hiddenDoctors.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">No hidden or deactivated providers. Historic records always remain visible elsewhere.</p>
+                  ) : sortAccess(hiddenDoctors).filter(matchesFilters).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">No providers match your filters.</p>
+                  ) : (
+                    sortAccess(hiddenDoctors).filter(matchesFilters).map((access) =>
+                      access.doctor ? (
+                        <DoctorRow key={access.id} access={access} doctor={access.doctor} permissions={access.permissions} mode="hidden" />
+                      ) : null
+                    )
+                  )}
+                </div>
               </TabsContent>
             </Tabs>
           </div>

@@ -4,6 +4,7 @@ import { logger } from '@/services/logger';
 import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 import { fillDocumentPlaceholders } from '@/lib/fillDocumentPlaceholders';
+import { renderSignatureHtml } from '@/lib/signature';
 
 export interface Session {
   id: string;
@@ -763,7 +764,7 @@ const completeSession = async (
               .select('name, physical_address, address, medical_aid, medical_aid_number, id_passport_number, dob, phone, email')
               .eq('id', patientId).maybeSingle(),
             supabase.from('profiles')
-              .select('full_name, practice_number, doctor_number, practice_address, specialty')
+              .select('full_name, practice_number, doctor_number, practice_address, specialty, signature_url, signature_font, signature_color, signature_font_size, signature_bold, signature_italic')
               .eq('id', user.id).maybeSingle(),
             supabase.from('templates').select('id, name, content').eq('user_id', user.id),
             supabase.from('service_prices')
@@ -890,6 +891,8 @@ const completeSession = async (
               (docProfile as any)?.bank_details ||
               '',
             InvoiceNumber: generatedInvoiceNumber,
+            Signature: renderSignatureHtml(docProfile),
+            DoctorSignature: renderSignatureHtml(docProfile),
           };
 
           let invoiceContent: string;
@@ -899,6 +902,7 @@ const completeSession = async (
               invoiceContent = invoiceContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
           } else {
+            const sessionSignature = renderSignatureHtml(docProfile);
             invoiceContent = `<h2>Invoice ${generatedInvoiceNumber}</h2>
 <p><strong>Date:</strong> ${todayLong}</p>
 <p><strong>Due Date:</strong> ${dueDateLong}</p>
@@ -907,7 +911,8 @@ const completeSession = async (
 <p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
 <br/>
 <p><strong>Services:</strong><br/>${servicesLine}</p>
-<p><strong>Total:</strong> ${formattedTotal}</p>`;
+<p><strong>Total:</strong> ${formattedTotal}</p>
+${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:1px solid #999;margin-top:4px;padding-top:4px;font-size:11px;color:#666;">${docProfile?.full_name || ''}</div>` : ''}`;
           }
           // Generic fallback for any unmatched [Token]
           invoiceContent = invoiceContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');

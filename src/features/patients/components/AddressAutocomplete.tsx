@@ -70,7 +70,7 @@ export function AddressAutocomplete({ value, onChange, placeholder, id, rows = 2
       <div className="relative">
         <Textarea
           id={id}
-          className="text-sm"
+          className="text-xs"
           value={value}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={placeholder}

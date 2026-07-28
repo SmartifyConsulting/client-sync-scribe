@@ -48,6 +48,10 @@ const FONT_OPTIONS = [
   { value: "playfair", label: "Playfair Display", preview: "font-playfair" },
   { value: "source-serif", label: "Source Serif", preview: "font-source-serif" },
   { value: "rockwell", label: "Rockwell", preview: "font-rockwell" },
+  { value: "poppins", label: "Poppins", preview: "font-poppins" },
+  { value: "montserrat", label: "Montserrat", preview: "font-montserrat" },
+  { value: "nunito", label: "Nunito", preview: "font-nunito" },
+  { value: "raleway", label: "Raleway", preview: "font-raleway" },
 ];
 
 const defaultSectionContent = (): SectionContent => ({

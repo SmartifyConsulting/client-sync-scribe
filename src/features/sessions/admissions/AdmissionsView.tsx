@@ -26,7 +26,7 @@ import { SectionHeader } from "@/features/patients/components/sectionStyles";
 import { Badge } from "@/components/ui/badge";
 import {
   Hospital, FileText, Plus, Activity, Pill, FlaskConical, Scan, Loader2, ExternalLink,
-  Stethoscope, UserCog, Clock3, Users, Phone, DoorOpen, NotebookPen, UtensilsCrossed, Check, X as XIcon,
+  Stethoscope, UserCog, Clock3, Users, Phone, DoorOpen, NotebookPen, UtensilsCrossed, Check, X as XIcon, Search,
 } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,7 +36,6 @@ import { AddMedicationDialog } from "./AddMedicationDialog";
 import { AddLabResultDialog } from "./AddLabResultDialog";
 import { AddImagingDialog } from "./AddImagingDialog";
 import { UploadAdmissionDialog } from "./UploadAdmissionDialog";
-import { ManualLogAdmissionDialog } from "./ManualLogAdmissionDialog";
 import { Upload } from "lucide-react";
 import { RateNurseControl } from "@/components/admissions/RateNurseControl";
 
@@ -588,7 +587,25 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
   const { data: admissions = [], isLoading } = useHospitalAdmissions(patientId);
   const { data: contact } = usePatientContact(patientId);
   const [showUpload, setShowUpload] = useState(false);
-  const [showManual, setShowManual] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredAdmissions = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return admissions;
+    return admissions.filter((a) =>
+      [
+        a.hospital,
+        a.diagnosis,
+        a.procedure_description,
+        (a as any).title,
+        format(new Date(a.admission_date), "dd MMM yyyy"),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [admissions, search]);
 
   if (isLoading) {
     return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -596,19 +613,26 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <h3 className="text-sm font-semibold text-foreground">Hospital Admissions</h3>
         {canEdit && (
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => setShowManual(true)} className="gap-1">
-              <Plus className="h-4 w-4" /> Log Admission
-            </Button>
-            <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
-              <Upload className="h-4 w-4" /> Upload Admission Form
-            </Button>
-          </div>
+          <Button size="sm" onClick={() => setShowUpload(true)} className="gap-1">
+            <Upload className="h-4 w-4" /> Upload Admission Form
+          </Button>
         )}
       </div>
+
+      {admissions.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by date, hospital, or reason for admission..."
+            className="h-9 pl-8 text-xs"
+          />
+        </div>
+      )}
 
       {admissions.length === 0 ? (
         <Card className="p-8 text-center">
@@ -618,8 +642,10 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
             Entries are created automatically when a doctor saves a Hospital Admission Form, or you can upload one yourself.
           </p>
         </Card>
+      ) : filteredAdmissions.length === 0 ? (
+        <p className="text-xs text-muted-foreground px-1 py-6 text-center">No admissions match your search.</p>
       ) : (
-        admissions.map((a) => (
+        filteredAdmissions.map((a) => (
           <AdmissionDetail
             key={a.id}
             admission={a}
@@ -635,7 +661,6 @@ export function AdmissionsView({ patientId, patientHeight, patientWeight, canEdi
       )}
 
       <UploadAdmissionDialog open={showUpload} onOpenChange={setShowUpload} patientId={patientId} />
-      <ManualLogAdmissionDialog open={showManual} onOpenChange={setShowManual} patientId={patientId} />
     </div>
   );
 }

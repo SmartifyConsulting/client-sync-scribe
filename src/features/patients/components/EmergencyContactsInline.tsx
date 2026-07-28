@@ -157,11 +157,11 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
 
                 </div>
                 <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <label className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 text-xs">
                     <Switch checked={!!c.can_view_profile} onCheckedChange={(v) => updateContact(c.id, { can_view_profile: v })} />
                     Can view profile
                   </label>
-                  <label className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 text-xs">
                     <Switch checked={c.can_view_live_tracking !== false} onCheckedChange={(v) => updateContact(c.id, { can_view_live_tracking: v })} />
                     Live tracking
                   </label>

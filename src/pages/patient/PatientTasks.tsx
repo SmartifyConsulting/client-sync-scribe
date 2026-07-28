@@ -1,12 +1,13 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Pill, Square, Play, Mic, MicOff, Send } from "lucide-react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { CheckSquare, Loader2, Clock, CheckCircle2, Video, Check, Pill, Square, Play, Mic, MicOff, Send, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { SectionCountPill } from "@/components/ui/section-accordion";
+import { SectionCountPill, DATE_BUCKETS, dateBucketFor } from "@/components/ui/section-accordion";
 import { SectionHeader } from "@/features/patients/components/sectionStyles";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,23 +44,21 @@ export default function PatientTasks() {
 
   const fetchTodos = async () => {
     try {
-      const { data: patients } = await supabase
-        .from("patients")
-        .select("id")
-        .eq("patient_user_id", user!.id);
+      // Single round trip: filter todos via the embedded patients relation
+      // instead of waiting on a separate patient-id lookup first. The plain
+      // patient-id query still runs (in parallel) since it's needed for
+      // "add task" even when there are zero todos yet.
+      const [todosRes, patientsRes] = await Promise.all([
+        (supabase.from("todos") as any)
+          .select("*, patients!inner(id)")
+          .eq("patients.patient_user_id", user!.id)
+          .order("created_at", { ascending: false }),
+        supabase.from("patients").select("id").eq("patient_user_id", user!.id),
+      ]);
 
-      if (!patients?.length) { setLoading(false); return; }
-
-      const ids = patients.map(p => p.id);
-      setPatientIds(ids);
-      const { data, error } = await supabase
-        .from("todos")
-        .select("*")
-        .in("patient_id", ids)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setTodos(data || []);
+      if (todosRes.error) throw todosRes.error;
+      setTodos(todosRes.data || []);
+      setPatientIds((patientsRes.data || []).map((p: any) => p.id));
     } catch (error: any) {
       console.error("Error fetching tasks:", error);
     } finally {
@@ -67,8 +66,25 @@ export default function PatientTasks() {
     }
   };
 
-  const pendingTodos = todos.filter(t => t.status === "pending");
-  const completedTodos = todos.filter(t => t.status === "completed");
+  const [groupBy, setGroupBy] = useState<"date" | "status">("date");
+  const [search, setSearch] = useState("");
+
+  const filteredTodos = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return todos;
+    return todos.filter((t) =>
+      [t.title, t.description].filter(Boolean).join(" ").toLowerCase().includes(q),
+    );
+  }, [todos, search]);
+
+  const pendingTodos = filteredTodos.filter(t => t.status === "pending");
+  const completedTodos = filteredTodos.filter(t => t.status === "completed");
+
+  const dateGroups = useMemo(() => {
+    const buckets: Record<string, PatientTodo[]> = { today: [], week: [], month: [], older: [] };
+    for (const todo of filteredTodos) buckets[dateBucketFor(todo.due_date || todo.created_at)].push(todo);
+    return DATE_BUCKETS.map((b) => ({ key: b.key, label: b.label, items: buckets[b.key] })).filter((g) => g.items.length > 0);
+  }, [filteredTodos]);
 
   // --- Task input state (must be before early returns) ---
   const [taskText, setTaskText] = useState("");
@@ -160,9 +176,9 @@ export default function PatientTasks() {
     <div className="space-y-6 p-4 md:p-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">
-          My To-Do List
+          My Tasks
         </h1>
-        <p className="text-muted-foreground text-sm">Tasks assigned to you by your healthcare providers</p>
+        <p className="text-muted-foreground text-xs">Tasks assigned to you by your healthcare providers</p>
       </div>
 
       {/* Task Input Area */}
@@ -205,33 +221,70 @@ export default function PatientTasks() {
           <p className="text-sm text-muted-foreground">No tasks assigned yet</p>
         </div>
       ) : (
-        <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-          {pendingTodos.length > 0 && (
-            <Collapsible defaultOpen className="bg-white overflow-hidden">
-              <SectionHeader icon={Clock} label="Pending" extra={<SectionCountPill count={pendingTodos.length} />} />
-              <CollapsibleContent className="p-3">
-                <div className="divide-y divide-border">
-                  {pendingTodos.map((todo) => (
-                    <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          )}
+        <>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search tasks..."
+                className="h-9 pl-8 text-xs"
+              />
+            </div>
+            <ToggleGroup type="single" value={groupBy} onValueChange={(v) => v && setGroupBy(v as "date" | "status")} size="sm" variant="outline">
+              <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
+              <ToggleGroupItem value="status" className="text-xs px-3">Status</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
 
-          {completedTodos.length > 0 && (
-            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-              <SectionHeader icon={CheckCircle2} label="Completed" extra={<SectionCountPill count={completedTodos.length} />} />
-              <CollapsibleContent className="p-3">
-                <div className="divide-y divide-border">
-                  {completedTodos.map((todo) => (
-                    <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
-                  ))}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+          {filteredTodos.length === 0 ? (
+            <p className="text-xs text-muted-foreground px-1 py-6 text-center">No tasks match your search.</p>
+          ) : groupBy === "date" ? (
+            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
+              {dateGroups.map((group, idx) => (
+                <Collapsible key={group.key} defaultOpen={idx === 0} className="bg-white overflow-hidden">
+                  <SectionHeader icon={Clock} label={group.label} extra={<SectionCountPill count={group.items.length} />} />
+                  <CollapsibleContent className="p-3">
+                    <div className="divide-y divide-border">
+                      {group.items.map((todo) => (
+                        <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              ))}
+            </div>
+          ) : (
+            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
+              {pendingTodos.length > 0 && (
+                <Collapsible defaultOpen className="bg-white overflow-hidden">
+                  <SectionHeader icon={Clock} label="Pending" extra={<SectionCountPill count={pendingTodos.length} />} />
+                  <CollapsibleContent className="p-3">
+                    <div className="divide-y divide-border">
+                      {pendingTodos.map((todo) => (
+                        <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+
+              {completedTodos.length > 0 && (
+                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+                  <SectionHeader icon={CheckCircle2} label="Completed" extra={<SectionCountPill count={completedTodos.length} />} />
+                  <CollapsibleContent className="p-3">
+                    <div className="divide-y divide-border">
+                      {completedTodos.map((todo) => (
+                        <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                      ))}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

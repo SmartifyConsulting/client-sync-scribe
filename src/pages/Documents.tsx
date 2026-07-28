@@ -367,7 +367,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
       {/* Tabs for Template Types */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-primary">
+        <TabsList className="bg-neutral-700">
           <TabsTrigger
             value="content"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
