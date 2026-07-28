@@ -33,11 +33,11 @@ export const SectionHeader = ({
   <CollapsibleTrigger className="patient-section-trigger flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary hover:bg-primary/90 text-white border-b border-white [&_*]:!text-white">
     <h3
       className={cn(
-        "text-sm font-semibold tracking-wide flex items-center gap-2 text-left text-white",
+        "text-xs font-semibold tracking-wide flex items-center gap-2 text-left text-white",
         titleClassName
       )}
     >
-      <Icon className="h-4 w-4 text-white" /> {label}
+      <Icon className="h-3.5 w-3.5 text-white" /> {label}
     </h3>
     <div className="flex items-center gap-2">
       {extra}
