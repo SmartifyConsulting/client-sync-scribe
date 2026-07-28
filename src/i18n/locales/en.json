@@ -1254,7 +1254,7 @@
       "title": "Document Mailbox",
       "description": "External parties can email documents to this address.",
       "aliasPlaceholder": "your-name",
-      "aliasDomain": "@holarc.com"
+      "aliasDomain": "@docs.holarchealth.com"
     },
     "button": {
       "save": "Save",

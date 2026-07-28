@@ -260,7 +260,7 @@ function MailboxSection({ userId }: { userId?: string }) {
     if (error) {
       toast({
         title: error.code === "23505" ? "Alias taken" : "Error",
-        description: error.code === "23505" ? `"${cleanAlias}@holarc.com" is already in use` : "Failed to save",
+        description: error.code === "23505" ? `"${cleanAlias}@${INTAKE_EMAIL_DOMAIN}" is already in use` : "Failed to save",
         variant: "destructive",
       });
     } else {
