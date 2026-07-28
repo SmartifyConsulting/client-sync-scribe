@@ -142,7 +142,7 @@ export async function resolveDocumentPreviewContent(
     // Legacy documents were saved with the signature slot already flattened to a
     // blank "___" line (the quiet placeholder). Restore the real signature there
     // so To-Do / list previews match the editor preview.
-    if (!content.includes("holarc-signature")) {
+    if (!content.includes(signatureHtml)) {
       content = content.replace(
         /(Registration Number:[^\n]*\n+)\s*_{2,}\s*(?=\n)/,
         `$1${signatureHtml}`,
