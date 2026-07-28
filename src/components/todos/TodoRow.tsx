@@ -139,7 +139,7 @@ export function TodoRow({
       <div
         className={cn(
           "flex items-center gap-3 rounded-md pr-2 hover:bg-muted/40 group text-sm",
-          insideGroup ? "pl-6" : "pl-2",
+          "pl-2",
           compact ? "py-1.5" : "py-2",
           todo.completed && "bg-muted/20"
         )}
