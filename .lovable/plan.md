@@ -1,45 +1,50 @@
-## 1. Search + grouping on list screens
+## 1. Clicking a document opens the patient profile instead of the document
 
-Add one shared toolbar component (`src/components/common/ListGroupToolbar.tsx`) used by Sessions, Tasks, Documents, Round Tables and Admissions:
+Confirmed cause: document rows link to `/patients/:id?tab=documents&doc=:docId` (`src/pages/doctor/DoctorDocumentsTab.tsx`), but `src/pages/PatientProfile.tsx` renders `<Tabs defaultValue="details">` and never reads the URL — so both `tab` and `doc` are ignored and you land on Details → Personal Information.
 
-- Search box (debounced, filters on title/patient/doctor/content depending on screen).
-- Group-by selector: **Date (default)**, **Patient**, and **Hospital** (Hospital option only rendered for hospital-role users).
-- Rendered as collapsible group accordions matching the existing green/white `section-accordion` styling, with count pills.
+Fix:
+- Make the profile tabs controlled from `?tab=` (falling back to `details`), writing the tab back to the URL on change.
+- On load, if `?doc=` is present, open that document in the existing preview dialog, then clear the param.
+- Same handling on the patient-side documents entry point.
 
-Date grouping buckets: **Today**, current month (e.g. "July 2026"), then earlier months, then years. Applies to patient Sessions view too.
+## 2. Organ Donor accordion not green
 
-Screens updated: `src/pages/MySessions.tsx` + `src/pages/doctor/Sessions.tsx`, `src/pages/TodoList.tsx`, `src/pages/Documents.tsx` / `DoctorDocumentsPage.tsx`, `DoctorRoundTablesPage.tsx`, `src/pages/doctor/DoctorAdmissions.tsx`.
+Both Organ Donor blocks in `PatientDetailsEditor.tsx` use hand-rolled `Collapsible` triggers that are only green when open. Switch them to the shared `SECTION_TRIGGER_ALWAYS_GREEN_CLASS` treatment, and sweep the file for any other trigger still not using it.
 
-## 2. Admissions CRUD for doctors
+## 3. Accordion row fonts one size smaller
 
-On the doctor Admissions screen, allow create / edit / delete of admissions inline (reusing `ManualLogAdmissionDialog` and `AdmissionsView` with `canEdit`), plus the same search/grouping toolbar.
+For Personal Information and Medical Information rows only: `text-sm` → `text-xs`, icons `h-4` → `h-3.5`, applied through the shared `SectionHeader` helper.
 
-## 3. Documents tabs styling
+## 4. Search in Calendar
 
-Change the Documents page `TabsList` (line ~370) to the standard app tab format used on My Profile: green `bg-primary` bar, white labels, white active pill with dark text, horizontally scrollable.
+Add a debounced search box to `src/pages/CalendarView.tsx` (beside the existing doctor filter) filtering events by title, patient and type across month/week/day views; mirror it in `src/pages/patient/PatientCalendar.tsx`.
 
-## 4. Patient profile fixes (`PatientDetailsEditor.tsx`)
+## 5. Sessions list spacing + count position
 
-- Rename the "My History" tab to **My Sessions** and remove the Admissions sub-tab from it (admissions stay reachable via the dedicated Admissions screen).
-- Reduce accordion row label font by one step in **Personal Information** only.
-- Fix the **Organ Donor** accordion so its expanded header is green with white text (convert it to the shared `SectionAccordion` used by the other rows).
-- **Next of Kin**: prefill the phone field with the user's default country dial code; once a NOK is added, render the full record (name, relationship, phone, email, address) in the view list rather than a summary line.
-- **Preferred Hospitals**: the Hospitals sub-tab exists in view mode but is missing from the edit-mode "My Holarchy" sub-tabs (line ~2196) — add it there so it is always visible.
+In `ListGroupToolbar` (Sessions, Round Tables, Admissions): add real vertical gap between rows, and move the count pill to the far right of the accordion header, matching Documents.
 
-## 5. Granular "Can view profile" permissions
+## 6. Remove count next to Credentials tab
 
-Currently `patient_profile_shares` has only `can_view_profile` / `can_view_live_tracking` booleans.
+In `src/pages/MyPractice.tsx` the Credentials tab label appends the CPD total (`Credentials (24)`). Render the label alone; the CPD total stays visible inside the tab body.
 
-- Migration: add a `view_scopes jsonb not null default '[]'` column.
-- In `ProfileSharesSection.tsx`, when "Can view profile" is on, reveal a checkbox group: Medication, Sessions, Round Tables, Documents, Tasks, Calendar, Admissions, Insurance, Pharmacies, Hospitals.
-- Shared-profile read paths filter sections by these scopes.
+## 7. My Rewards full width on desktop
 
-## 6. Legal Documents
+`DoctorRewards.tsx` clamps to `max-w-3xl` when not embedded, and the rewards page sits in a narrow container. Remove the clamp so My Rewards uses the full content width on desktop (stat cards stretch to a 4-across grid as in the patient screenshot), keeping comfortable padding.
 
-New tab placed after Round Tables in the patient profile, backed by the existing documents/storage stack with a `legal` category and sub-type: **Organ Donor Document**, **Will**, **Do Not Resuscitate authorisation**, **Other**. Upload, view/preview, download and delete; visible to the patient and to providers holding the Documents scope.
+## 8. Merge Patient and Doctor rewards into one screen
+
+Today there are two divergent implementations: patient tabs are Overview / Chronic Meds / Wins and Streaks / Redeem, doctor tabs are Overview / Milestones / Streaks / History / Redeem, with different Redeem UIs.
+
+Plan:
+- Make the patient version (`src/pages/patient/MyRewards.tsx`) the single shared rewards screen, including its Redeem tab, which is the correct one.
+- Route the doctor rewards entry point (and the embedded "Rewards" tab in My Practice) to this shared screen instead of `DoctorRewards.tsx`.
+- Role differences, and only these:
+  - Doctors additionally see the **Doctor Vulas** and **Combined** stat cards alongside Patient Vulas / Vula Vault; patients see the patient-only set.
+  - The **Chronic Meds** tab remains patient-only (already conditional).
+- Doctor-only content worth keeping (milestones/history views) is folded into the shared Overview/Wins-and-Streaks tabs rather than kept as separate tabs, so both roles see the same tab set.
+- `DoctorRewards.tsx` is reduced to a thin re-export/wrapper (or deleted once no imports remain) to avoid a second drifting copy.
 
 ## Technical notes
 
-- One migration only (share scopes column); everything else is frontend.
-- Grouping/search state stored in component state, group-by preference persisted to localStorage per screen.
-- Hospital grouping keys off `hospital` / `hospital_provider_id` on admissions and off the session/document's linked facility where available.
+- Files touched: `src/pages/PatientProfile.tsx`, `src/pages/patient/PatientDocuments.tsx`, `src/features/patients/components/PatientDetailsEditor.tsx`, `src/components/common/ListGroupToolbar.tsx`, `src/pages/CalendarView.tsx`, `src/pages/patient/PatientCalendar.tsx`, `src/pages/MyPractice.tsx`, `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`, plus route wiring in `src/App.tsx`.
+- No database changes; existing rewards hooks (`usePatientRewards`, doctor Vula queries) are reused as-is.
