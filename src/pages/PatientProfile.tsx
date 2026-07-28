@@ -383,7 +383,7 @@ export default function PatientProfile() {
       )}
 
       {/* Tabs */}
-      <Tabs defaultValue="details" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="bg-primary p-1.5 rounded-xl h-auto flex-wrap">
           <TabsTrigger
             value="details"
