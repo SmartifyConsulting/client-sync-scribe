@@ -1466,7 +1466,7 @@ export function PatientDetailsEditor({
           )}
           {show("history") && (
             <TabsTrigger value="history" className={triggerClass}>
-              My History
+              My Sessions
             </TabsTrigger>
           )}
           {show("roundtable") && (
