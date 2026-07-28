@@ -2006,17 +2006,14 @@ export function PatientDetailsEditor({
 
                   {/* Organ Donor — collapsible with inline Yes/No */}
                   <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                    <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary text-white hover:bg-primary/90 [&_*]:!text-white">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between transition-colors px-4 py-3 group bg-primary text-white hover:bg-primary/90 [&_*:not(.organ-donor-pill)]:!text-white">
                       <h3 className="text-xs font-semibold tracking-wide flex items-center gap-2 text-left !text-white">
                         <Heart className="h-3.5 w-3.5 !text-white" /> Organ Donor
                       </h3>
                       <div className="flex items-center gap-2">
                         <span
                           className={cn(
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold !bg-white !text-primary",
-                            patient.organ_donor
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-muted-foreground",
+                            "organ-donor-pill inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold !bg-white !text-primary",
                           )}
                         >
                           {patient.organ_donor ? "Yes" : "No"}

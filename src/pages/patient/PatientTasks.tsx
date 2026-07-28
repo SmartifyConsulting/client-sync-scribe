@@ -5,6 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { SectionCountPill } from "@/components/ui/section-accordion";
+import { SectionHeader } from "@/features/patients/components/sectionStyles";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -202,29 +205,31 @@ export default function PatientTasks() {
           <p className="text-sm text-muted-foreground">No tasks assigned yet</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
           {pendingTodos.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <Clock className="h-4 w-4 text-amber-500" />
-                Pending ({pendingTodos.length})
-              </h2>
-              {pendingTodos.map((todo) => (
-                <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
-              ))}
-            </div>
+            <Collapsible defaultOpen className="bg-white overflow-hidden">
+              <SectionHeader icon={Clock} label="Pending" extra={<SectionCountPill count={pendingTodos.length} />} />
+              <CollapsibleContent className="p-3">
+                <div className="divide-y divide-border">
+                  {pendingTodos.map((todo) => (
+                    <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
           {completedTodos.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                Completed ({completedTodos.length})
-              </h2>
-              {completedTodos.map((todo) => (
-                <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
-              ))}
-            </div>
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <SectionHeader icon={CheckCircle2} label="Completed" extra={<SectionCountPill count={completedTodos.length} />} />
+              <CollapsibleContent className="p-3">
+                <div className="divide-y divide-border">
+                  {completedTodos.map((todo) => (
+                    <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           )}
         </div>
       )}
@@ -483,48 +488,39 @@ function TaskCard({ todo, onComplete }: { todo: PatientTodo; onComplete: () => v
 
   return (
     <>
-      <div className={`rounded-xl border p-4 ${isCompleted ? "border-border bg-muted/30 opacity-70" : "border-primary/30 bg-card shadow-sm"}`}>
-        <div className="flex items-start gap-3">
-          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isCompleted ? "bg-green-100 dark:bg-green-900/30" : "bg-primary/10"}`}>
-            {isCompleted ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <CheckSquare className="h-4 w-4 text-primary" />}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className={`text-sm font-medium ${isCompleted ? "line-through text-muted-foreground" : "text-foreground"}`}>{todo.title}</p>
-            {todo.description && <p className="text-xs text-muted-foreground mt-0.5">{todo.description}</p>}
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <Badge variant="outline" className={`text-xs ${priorityColors[todo.priority] || ""}`}>
-                {todo.priority}
-              </Badge>
-              {todo.due_date && (
-                <span className="text-xs text-muted-foreground">
-                  Due {format(new Date(todo.due_date), "MMM d, yyyy")}
-                </span>
-              )}
-              {todo.vulas_reward > 0 && (
-                <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                  🪙 {todo.vulas_reward} Vulas
-                </Badge>
-              )}
-            </div>
-
-            {!isCompleted && (
-              <div className="flex items-center gap-2 mt-3">
-                {hasVulasReward && (
-                  <Button size="sm" onClick={() => setShowRecordDialog(true)} className="gap-1.5 text-xs h-8">
-                    <Video className="h-3.5 w-3.5" />
-                    Record Proof
-                  </Button>
-                )}
-                {isMedicationType && (
-                  <Button size="sm" variant="outline" onClick={() => navigate("/patient/rewards?tab=chronic-meds")} className="gap-1.5 text-xs h-8">
-                    <Pill className="h-3.5 w-3.5" />
-                    Chronic Meds
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+      <div className={`flex items-center gap-2 px-1 py-2 ${isCompleted ? "opacity-60" : ""}`}>
+        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isCompleted ? "bg-green-100 dark:bg-green-900/30" : "bg-primary/10"}`}>
+          {isCompleted ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600" /> : <CheckSquare className="h-3.5 w-3.5 text-primary" />}
         </div>
+        <span
+          className={`flex-1 min-w-0 truncate text-sm font-medium ${isCompleted ? "line-through text-muted-foreground" : "text-foreground"}`}
+          title={todo.description || todo.title}
+        >
+          {todo.title}
+        </span>
+        <Badge variant="outline" className={`text-xs shrink-0 ${priorityColors[todo.priority] || ""}`}>
+          {todo.priority}
+        </Badge>
+        {todo.due_date && (
+          <span className="hidden sm:inline text-xs text-muted-foreground shrink-0 whitespace-nowrap">
+            Due {format(new Date(todo.due_date), "MMM d, yyyy")}
+          </span>
+        )}
+        {todo.vulas_reward > 0 && (
+          <Badge variant="outline" className="text-xs shrink-0 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+            🪙 {todo.vulas_reward}
+          </Badge>
+        )}
+        {!isCompleted && hasVulasReward && (
+          <Button size="icon" variant="ghost" onClick={() => setShowRecordDialog(true)} className="h-7 w-7 shrink-0" title="Record Proof">
+            <Video className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        {!isCompleted && isMedicationType && (
+          <Button size="icon" variant="ghost" onClick={() => navigate("/patient/rewards?tab=chronic-meds")} className="h-7 w-7 shrink-0" title="Chronic Meds">
+            <Pill className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
 
       {/* Video Recording Dialog */}

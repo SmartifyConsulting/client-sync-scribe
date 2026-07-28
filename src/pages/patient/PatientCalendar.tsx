@@ -252,7 +252,7 @@ export default function PatientCalendar() {
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
                 className={cn(
-                  "flex flex-col items-center p-2 md:p-3 rounded-lg transition-colors",
+                  "flex flex-col items-center p-1 md:p-1.5 rounded-lg transition-colors",
                   isSelected ? "bg-primary text-primary-foreground" : isToday(day) ? "bg-primary/10 text-primary" : "hover:bg-muted"
                 )}
               >
@@ -289,7 +289,7 @@ export default function PatientCalendar() {
         </div>
         <div className="grid grid-cols-7 gap-0 md:gap-1">
           {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, i) => (
-            <div key={`empty-${i}`} className="aspect-[1/0.85] md:aspect-square p-0.5 md:p-1" />
+            <div key={`empty-${i}`} className="aspect-[2/1] p-0.5 md:p-1" />
           ))}
           {Array.from({ length: daysInCurrentMonth }).map((_, i) => {
             const day = i + 1;
@@ -302,7 +302,7 @@ export default function PatientCalendar() {
                 key={day}
                 onClick={() => setSelectedDate(dayDate)}
                 className={cn(
-                  "aspect-[1/0.85] md:aspect-square p-0.5 md:p-1 rounded-lg transition-colors flex flex-col items-center justify-start",
+                  "aspect-[2/1] p-0.5 md:p-1 rounded-lg transition-colors flex flex-col items-center justify-start",
                   isSelected ? "bg-primary/20 ring-1 ring-primary" : isTodayDay ? "bg-primary/10" : "hover:bg-muted"
                 )}
               >

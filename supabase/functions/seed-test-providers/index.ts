@@ -29,6 +29,18 @@ const SEEDS: Seed[] = [
     latitude: -26.1076, longitude: 28.0567,
   },
   {
+    email: "milpark@netcare.co.za", password: "Password123",
+    type: "hospital", name: "Netcare Milpark Hospital",
+    city: "Johannesburg", country: "South Africa",
+    latitude: -26.1858, longitude: 28.0197,
+  },
+  {
+    email: "admin@grooteschuur.gov.za", password: "Password123",
+    type: "hospital", name: "Groote Schuur Hospital",
+    city: "Cape Town", country: "South Africa",
+    latitude: -33.9425, longitude: 18.4635,
+  },
+  {
     email: "EmergencyER@jhn.co.za", password: "Password123",
     type: "ambulance", name: "Emergency ER (JHN)",
     city: "Johannesburg", country: "South Africa",

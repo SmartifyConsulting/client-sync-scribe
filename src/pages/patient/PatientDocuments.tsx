@@ -58,16 +58,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ImageComparisonDialog } from "@/components/documents/ImageComparisonDialog";
 import { renderFormattedContent } from "@/utils/documentFormatting";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
-  SECTION_TRIGGER_CLASS,
-  SECTION_FRAME_CLASS,
-  SECTION_ITEM_CLASS,
   SectionCountPill,
   DATE_BUCKETS,
   dateBucketFor,
 } from "@/components/ui/section-accordion";
+import { SectionHeader } from "@/features/patients/components/sectionStyles";
 
 const STORAGE_LIMIT_MB = 100;
 
@@ -883,18 +881,13 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           </CardContent>
         </Card>
       ) : (
-        <Accordion key={docGroupBy} type="multiple" defaultValue={defaultOpenDocGroup} className={SECTION_FRAME_CLASS}>
+        <div key={docGroupBy} className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
           {patientDocGroups.map((group) => (
-            <AccordionItem key={group.key} value={group.key} className={SECTION_ITEM_CLASS}>
-              <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                <div className="flex items-center justify-between w-full pr-2">
-                  <span className="text-xs font-medium">{group.label}</span>
-                  <SectionCountPill count={group.items.length} />
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-0 pb-0">
+            <Collapsible key={group.key} defaultOpen={defaultOpenDocGroup.includes(group.key)} className="bg-white overflow-hidden">
+              <SectionHeader icon={FileText} label={group.label} extra={<SectionCountPill count={group.items.length} />} />
+              <CollapsibleContent className="p-3">
                 {group.items.length === 0 ? (
-                  <p className="text-xs text-muted-foreground px-4 py-3">No documents in this group.</p>
+                  <p className="text-xs text-muted-foreground px-1 py-2">No documents in this group.</p>
                 ) : (
                   <ul className="divide-y">
                     {group.items.map((doc) => {
@@ -998,10 +991,10 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                     })}
                   </ul>
                 )}
-              </AccordionContent>
-            </AccordionItem>
+              </CollapsibleContent>
+            </Collapsible>
           ))}
-        </Accordion>
+        </div>
       )}
       {visibleDocCount < filteredDocs.length && (
         <div className="flex justify-center mt-3">
