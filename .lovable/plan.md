@@ -1,50 +1,30 @@
-## 1. Clicking a document opens the patient profile instead of the document
+I checked the current code and found why you still see the wrong UI:
 
-Confirmed cause: document rows link to `/patients/:id?tab=documents&doc=:docId` (`src/pages/doctor/DoctorDocumentsTab.tsx`), but `src/pages/PatientProfile.tsx` renders `<Tabs defaultValue="details">` and never reads the URL — so both `tab` and `doc` are ignored and you land on Details → Personal Information.
-
-Fix:
-- Make the profile tabs controlled from `?tab=` (falling back to `details`), writing the tab back to the URL on change.
-- On load, if `?doc=` is present, open that document in the existing preview dialog, then clear the param.
-- Same handling on the patient-side documents entry point.
-
-## 2. Organ Donor accordion not green
-
-Both Organ Donor blocks in `PatientDetailsEditor.tsx` use hand-rolled `Collapsible` triggers that are only green when open. Switch them to the shared `SECTION_TRIGGER_ALWAYS_GREEN_CLASS` treatment, and sweep the file for any other trigger still not using it.
-
-## 3. Accordion row fonts one size smaller
-
-For Personal Information and Medical Information rows only: `text-sm` → `text-xs`, icons `h-4` → `h-3.5`, applied through the shared `SectionHeader` helper.
-
-## 4. Search in Calendar
-
-Add a debounced search box to `src/pages/CalendarView.tsx` (beside the existing doctor filter) filtering events by title, patient and type across month/week/day views; mirror it in `src/pages/patient/PatientCalendar.tsx`.
-
-## 5. Sessions list spacing + count position
-
-In `ListGroupToolbar` (Sessions, Round Tables, Admissions): add real vertical gap between rows, and move the count pill to the far right of the accordion header, matching Documents.
-
-## 6. Remove count next to Credentials tab
-
-In `src/pages/MyPractice.tsx` the Credentials tab label appends the CPD total (`Credentials (24)`). Render the label alone; the CPD total stays visible inside the tab body.
-
-## 7. My Rewards full width on desktop
-
-`DoctorRewards.tsx` clamps to `max-w-3xl` when not embedded, and the rewards page sits in a narrow container. Remove the clamp so My Rewards uses the full content width on desktop (stat cards stretch to a 4-across grid as in the patient screenshot), keeping comfortable padding.
-
-## 8. Merge Patient and Doctor rewards into one screen
-
-Today there are two divergent implementations: patient tabs are Overview / Chronic Meds / Wins and Streaks / Redeem, doctor tabs are Overview / Milestones / Streaks / History / Redeem, with different Redeem UIs.
+- **Hospitals is only present in the read-only My Holarchy tab list** (`PatientDetailsEditor.tsx`), but it is missing from the **edit-mode** My Holarchy tab list, which only has My Holarc Team, Insurance, Pharmacies. So in editable/self-service mode, no Hospitals tab appears next to Pharmacies.
+- **The tab label is still hardcoded as “My History”** in `PatientDetailsEditor.tsx`. The doctor sidebar was renamed to "Sessions", but this patient-profile tab label was never touched.
+- The patient sidebar (`Sidebar.tsx`) currently has: My Profile → My Calendar → My Tasks → My Documents → My Rewards → SOS. There is no My Admissions item.
 
 Plan:
-- Make the patient version (`src/pages/patient/MyRewards.tsx`) the single shared rewards screen, including its Redeem tab, which is the correct one.
-- Route the doctor rewards entry point (and the embedded "Rewards" tab in My Practice) to this shared screen instead of `DoctorRewards.tsx`.
-- Role differences, and only these:
-  - Doctors additionally see the **Doctor Vulas** and **Combined** stat cards alongside Patient Vulas / Vula Vault; patients see the patient-only set.
-  - The **Chronic Meds** tab remains patient-only (already conditional).
-- Doctor-only content worth keeping (milestones/history views) is folded into the shared Overview/Wins-and-Streaks tabs rather than kept as separate tabs, so both roles see the same tab set.
-- `DoctorRewards.tsx` is reduced to a thin re-export/wrapper (or deleted once no imports remain) to avoid a second drifting copy.
 
-## Technical notes
+1. **Add Hospitals next to Pharmacies in My Holarchy edit mode**
+   - Add a `Hospitals` tab trigger immediately after `Pharmacies` in the edit-mode My Holarchy tabs.
+   - Render the same `PreferredHospitals` content used in view mode so both modes match.
 
-- Files touched: `src/pages/PatientProfile.tsx`, `src/pages/patient/PatientDocuments.tsx`, `src/features/patients/components/PatientDetailsEditor.tsx`, `src/components/common/ListGroupToolbar.tsx`, `src/pages/CalendarView.tsx`, `src/pages/patient/PatientCalendar.tsx`, `src/pages/MyPractice.tsx`, `src/pages/patient/MyRewards.tsx`, `src/pages/doctor/DoctorRewards.tsx`, plus route wiring in `src/App.tsx`.
-- No database changes; existing rewards hooks (`usePatientRewards`, doctor Vula queries) are reused as-is.
+2. **Rename My History to My Sessions in the patient profile**
+   - Change the hardcoded `My History` tab label to `My Sessions`.
+   - Keep the internal tab value `history` so routing/state doesn't break.
+   - Update the helper copy under that tab from "History of your consultations…" to session wording.
+
+3. **Remove the Admissions sub-tab from My History / My Sessions**
+   - Drop the `Admissions` sub-tab trigger and its content panel from that tab, so it only shows sessions.
+   - Admissions now lives in its own nav item (step 4), so nothing is lost.
+
+4. **Add My Admissions to the patient nav menu under My Profile**
+   - Insert a `My Admissions` item in the patient nav in `Sidebar.tsx`, directly after `My Profile` and before `My Calendar`.
+   - Route it to a patient admissions view showing that patient's hospital admissions (reusing the existing admissions data/components already built for doctors/hospitals, scoped to the signed-in patient).
+   - Add the matching nav label key so it is translatable.
+
+5. **Validate in the preview**
+   - Patient My Holarchy sub-tabs show: My Holarc Team, Insurance, Pharmacies, Hospitals — in both view and edit modes.
+   - Top-level patient profile tab reads `My Sessions` with no Admissions sub-tab.
+   - Patient sidebar order: My Profile → My Admissions → My Calendar → My Tasks → My Documents → My Rewards → SOS.
