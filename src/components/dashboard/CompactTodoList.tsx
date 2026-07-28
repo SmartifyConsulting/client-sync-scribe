@@ -68,6 +68,8 @@ interface TodoItem {
   is_auto_executed?: boolean;
   document_id?: string | null;
   task_type?: string;
+  patient_id?: string | null;
+  patient_name?: string | null;
 }
 
 const priorityColors = {
@@ -161,6 +163,19 @@ export function CompactTodoList() {
 
       if (error) throw error;
 
+      // Resolve the real patient names so grouping never has to guess from the title.
+      const patientIds = Array.from(
+        new Set((data || []).map((t: any) => t.patient_id).filter(Boolean)),
+      ) as string[];
+      const nameById = new Map<string, string>();
+      if (patientIds.length > 0) {
+        const { data: patientRows } = await supabase
+          .from("patients")
+          .select("id, name")
+          .in("id", patientIds);
+        (patientRows || []).forEach((p: any) => nameById.set(p.id, p.name));
+      }
+
       setTodos(
         (data || []).map((todo: any) => ({
           ...todo,
@@ -169,6 +184,7 @@ export function CompactTodoList() {
           is_auto_executed: todo.is_auto_executed || false,
           document_id: todo.document_id || null,
           task_type: todo.task_type || 'standard',
+          patient_name: (todo.patient_id && nameById.get(todo.patient_id)) || null,
         }))
       );
     } catch (error) {
@@ -499,7 +515,7 @@ export function CompactTodoList() {
                 const map = new Map<string, TodoItem[]>();
                 for (const todo of items) {
                   const display = getTodoDisplay(todo as any);
-                  const name = display.patient || "No patient";
+                  const name = display.patient || "General tasks";
                   if (!map.has(name)) map.set(name, []);
                   map.get(name)?.push(todo);
                 }
