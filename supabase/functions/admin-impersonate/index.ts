@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
       "er.test@holarchealth.com",
       "ifeanyi.okoli@greenoriagroup.com",
       "dr.buttons@smartify.co.za",
+      "2348167581572@phone.holarc.local",
     ]);
     const callerIsSeeded = SEEDED_EMAILS.has(callerEmail);
     const targetIsSeeded = SEEDED_EMAILS.has(email);

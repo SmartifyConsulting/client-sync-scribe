@@ -20,4 +20,5 @@ export const TEST_PROFILES: TestProfile[] = [
   { email: "er.test@holarchealth.com", name: "ER Provider (Test)", role: "ER Provider", icon: Ambulance },
   { email: "ifeanyi.okoli@greenoriagroup.com", name: "Samuel Okoli (Okili)", role: "Patient", icon: HeartPulse },
   { email: "dr.buttons@smartify.co.za", name: "Dr Gianna Buttons", role: "Doctor", icon: Stethoscope },
+  { email: "2348167581572@phone.holarc.local", name: "Samuel Okoli (Phone)", role: "Patient", icon: HeartPulse },
 ];
