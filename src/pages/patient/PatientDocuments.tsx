@@ -3,6 +3,11 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
+import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
+import {
+  EmailAttachmentList,
+  type DocumentAttachment,
+} from "@/components/documents/EmailAttachmentList";
 import { cn } from "@/lib/utils";
 import {
   FileText,
@@ -93,6 +98,7 @@ interface UnifiedDocument {
   patientId?: string | null;
   userId?: string | null;
   templateName?: string | null;
+  attachments?: DocumentAttachment[];
 }
 
 const DOC_TYPE_CONFIG: Record<
@@ -252,7 +258,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     const [docsRes, rxRes, invRes] = await Promise.all([
       supabase
         .from("documents")
-        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id")
+        .select("id, name, content, template_name, created_at, media_type, media_url, ai_analysis, ai_analyzed_at, email_sent_at, patient_id, user_id, attachments")
         .in("patient_id", ids)
         .order("created_at", { ascending: false }),
       supabase
@@ -286,6 +292,9 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         patientId: (doc as any).patient_id,
         userId: (doc as any).user_id,
         templateName: doc.template_name,
+        attachments: Array.isArray((doc as any).attachments)
+          ? ((doc as any).attachments as DocumentAttachment[])
+          : [],
       });
     }
 
@@ -827,6 +836,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
       </Card>
 
       {/* Filter Dropdown */}
+      <MailboxIntakeAddress />
+
       <div className="flex items-center gap-2">
         <Select value={filter} onValueChange={(v) => setFilter(v as DocType | "all")}>
           <SelectTrigger className="w-[200px]">
@@ -894,8 +905,10 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                       return (
               <li
                 key={`${doc.source}-${doc.id}`}
-                className={`flex items-center gap-3 px-3 py-2 border-l-4 ${config.borderColor} hover:bg-accent/40 transition-colors`}
+                className={`border-l-4 ${config.borderColor} hover:bg-accent/40 transition-colors`}
               >
+                <div className="flex items-center gap-3 px-3 py-2">
+
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
                   {isImageDoc ? (
                     <img src={doc.mediaUrl} alt={doc.name} className="h-7 w-7 rounded-md object-cover" />
@@ -977,7 +990,10 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
                     {(doc.sizeBytes / 1024).toFixed(1)} KB
                   </span>
                 </div>
+                </div>
+                <EmailAttachmentList attachments={doc.attachments || []} />
               </li>
+
                       );
                     })}
                   </ul>

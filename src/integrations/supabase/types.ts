@@ -1318,6 +1318,7 @@ export type Database = {
         Row: {
           ai_analysis: string | null
           ai_analyzed_at: string | null
+          attachments: Json
           content: string
           created_at: string
           email_sent_at: string | null
@@ -1337,6 +1338,7 @@ export type Database = {
         Insert: {
           ai_analysis?: string | null
           ai_analyzed_at?: string | null
+          attachments?: Json
           content: string
           created_at?: string
           email_sent_at?: string | null
@@ -1356,6 +1358,7 @@ export type Database = {
         Update: {
           ai_analysis?: string | null
           ai_analyzed_at?: string | null
+          attachments?: Json
           content?: string
           created_at?: string
           email_sent_at?: string | null

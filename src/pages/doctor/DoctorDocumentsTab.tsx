@@ -30,6 +30,7 @@ import {
 import { useDocuments } from "@/hooks/useDocuments";
 import { useTemplates } from "@/hooks/useTemplates";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
 import { format } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
@@ -165,6 +166,7 @@ export default function DoctorDocumentsTab() {
 
   return (
     <div className="space-y-3 max-w-5xl">
+      <MailboxIntakeAddress />
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
