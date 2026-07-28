@@ -3007,6 +3007,91 @@ export type Database = {
           },
         ]
       }
+      hospital_attending_doctors: {
+        Row: {
+          admission_id: string
+          assigned_at: string
+          created_at: string
+          doctor_id: string | null
+          doctor_name: string
+          id: string
+          is_primary: boolean
+          specialty: string | null
+          unassigned_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          assigned_at?: string
+          created_at?: string
+          doctor_id?: string | null
+          doctor_name: string
+          id?: string
+          is_primary?: boolean
+          specialty?: string | null
+          unassigned_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          assigned_at?: string
+          created_at?: string
+          doctor_id?: string | null
+          doctor_name?: string
+          id?: string
+          is_primary?: boolean
+          specialty?: string | null
+          unassigned_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_attending_doctors_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_inpatient_admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_beds: {
+        Row: {
+          bed_number: string
+          created_at: string
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string
+          ward_id: string
+        }
+        Insert: {
+          bed_number: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          ward_id: string
+        }
+        Update: {
+          bed_number?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          ward_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_beds_ward_id_fkey"
+            columns: ["ward_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_wards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospital_doctor_affiliations: {
         Row: {
           created_at: string
@@ -3058,6 +3143,159 @@ export type Database = {
             columns: ["hospital_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_inpatient_admissions: {
+        Row: {
+          admitted_at: string
+          bed_number: string | null
+          created_at: string
+          created_by: string | null
+          discharged_at: string | null
+          hospital_id: string
+          id: string
+          incident_id: string | null
+          is_sample: boolean
+          patient_id: string | null
+          patient_name: string
+          patient_user_id: string | null
+          reason: string | null
+          source: string
+          status: string
+          updated_at: string
+          ward_id: string | null
+        }
+        Insert: {
+          admitted_at?: string
+          bed_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          discharged_at?: string | null
+          hospital_id: string
+          id?: string
+          incident_id?: string | null
+          is_sample?: boolean
+          patient_id?: string | null
+          patient_name: string
+          patient_user_id?: string | null
+          reason?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          ward_id?: string | null
+        }
+        Update: {
+          admitted_at?: string
+          bed_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          discharged_at?: string | null
+          hospital_id?: string
+          id?: string
+          incident_id?: string | null
+          is_sample?: boolean
+          patient_id?: string | null
+          patient_name?: string
+          patient_user_id?: string | null
+          reason?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          ward_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_inpatient_admissions_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_inpatient_admissions_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_inpatient_admissions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_inpatient_admissions_ward_id_fkey"
+            columns: ["ward_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_wards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_nurse_assignments: {
+        Row: {
+          admission_id: string
+          assigned_at: string
+          care_role: string
+          care_tasks: Json
+          created_at: string
+          id: string
+          nurse_id: string | null
+          nurse_name: string
+          released_at: string | null
+          shift_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admission_id: string
+          assigned_at?: string
+          care_role?: string
+          care_tasks?: Json
+          created_at?: string
+          id?: string
+          nurse_id?: string | null
+          nurse_name: string
+          released_at?: string | null
+          shift_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admission_id?: string
+          assigned_at?: string
+          care_role?: string
+          care_tasks?: Json
+          created_at?: string
+          id?: string
+          nurse_id?: string | null
+          nurse_name?: string
+          released_at?: string | null
+          shift_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_nurse_assignments_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_inpatient_admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_nurse_assignments_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_nurse_assignments_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_staff_shifts"
             referencedColumns: ["id"]
           },
         ]
@@ -3128,6 +3366,207 @@ export type Database = {
             columns: ["linked_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_staff_shifts: {
+        Row: {
+          clocked_in_at: string | null
+          clocked_out_at: string | null
+          created_at: string
+          doctor_id: string | null
+          ends_at: string
+          hospital_id: string
+          id: string
+          is_sample: boolean
+          nurse_id: string | null
+          shift_type: string
+          staff_name: string
+          staff_role: string
+          starts_at: string
+          status: string
+          updated_at: string
+          ward_id: string | null
+        }
+        Insert: {
+          clocked_in_at?: string | null
+          clocked_out_at?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          ends_at: string
+          hospital_id: string
+          id?: string
+          is_sample?: boolean
+          nurse_id?: string | null
+          shift_type?: string
+          staff_name: string
+          staff_role: string
+          starts_at: string
+          status?: string
+          updated_at?: string
+          ward_id?: string | null
+        }
+        Update: {
+          clocked_in_at?: string | null
+          clocked_out_at?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          ends_at?: string
+          hospital_id?: string
+          id?: string
+          is_sample?: boolean
+          nurse_id?: string | null
+          shift_type?: string
+          staff_name?: string
+          staff_role?: string
+          starts_at?: string
+          status?: string
+          updated_at?: string
+          ward_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_staff_shifts_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_staff_shifts_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_staff_shifts_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_staff_shifts_ward_id_fkey"
+            columns: ["ward_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_wards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_ward_transfers: {
+        Row: {
+          admission_id: string
+          created_at: string
+          from_bed_number: string | null
+          from_ward_id: string | null
+          id: string
+          moved_by: string | null
+          moved_by_name: string | null
+          reason: string | null
+          to_bed_number: string | null
+          to_ward_id: string | null
+        }
+        Insert: {
+          admission_id: string
+          created_at?: string
+          from_bed_number?: string | null
+          from_ward_id?: string | null
+          id?: string
+          moved_by?: string | null
+          moved_by_name?: string | null
+          reason?: string | null
+          to_bed_number?: string | null
+          to_ward_id?: string | null
+        }
+        Update: {
+          admission_id?: string
+          created_at?: string
+          from_bed_number?: string | null
+          from_ward_id?: string | null
+          id?: string
+          moved_by?: string | null
+          moved_by_name?: string | null
+          reason?: string | null
+          to_bed_number?: string | null
+          to_ward_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_ward_transfers_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_inpatient_admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_ward_transfers_from_ward_id_fkey"
+            columns: ["from_ward_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_wards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_ward_transfers_to_ward_id_fkey"
+            columns: ["to_ward_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_wards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hospital_wards: {
+        Row: {
+          bed_capacity: number
+          created_at: string
+          hospital_id: string
+          id: string
+          is_active: boolean
+          is_sample: boolean
+          name: string
+          notes: string | null
+          updated_at: string
+          ward_type: string
+        }
+        Insert: {
+          bed_capacity?: number
+          created_at?: string
+          hospital_id: string
+          id?: string
+          is_active?: boolean
+          is_sample?: boolean
+          name: string
+          notes?: string | null
+          updated_at?: string
+          ward_type?: string
+        }
+        Update: {
+          bed_capacity?: number
+          created_at?: string
+          hospital_id?: string
+          id?: string
+          is_active?: boolean
+          is_sample?: boolean
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          ward_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_wards_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_wards_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
             referencedColumns: ["id"]
           },
         ]
@@ -3596,6 +4035,90 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "holarchelp_ambulance_providers_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_activity_logs: {
+        Row: {
+          action_type: string
+          admission_id: string | null
+          created_at: string
+          details: string | null
+          hospital_id: string | null
+          id: string
+          occurred_at: string
+          patient_id: string | null
+          patient_user_id: string | null
+          staff_name: string | null
+          staff_role: string | null
+          staff_user_id: string | null
+          ward_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admission_id?: string | null
+          created_at?: string
+          details?: string | null
+          hospital_id?: string | null
+          id?: string
+          occurred_at?: string
+          patient_id?: string | null
+          patient_user_id?: string | null
+          staff_name?: string | null
+          staff_role?: string | null
+          staff_user_id?: string | null
+          ward_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admission_id?: string | null
+          created_at?: string
+          details?: string | null
+          hospital_id?: string | null
+          id?: string
+          occurred_at?: string
+          patient_id?: string | null
+          patient_user_id?: string | null
+          staff_name?: string | null
+          staff_role?: string | null
+          staff_user_id?: string | null
+          ward_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_activity_logs_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_inpatient_admissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_activity_logs_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_activity_logs_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "holarchelp_hospitals_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_activity_logs_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_activity_logs_ward_id_fkey"
+            columns: ["ward_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_wards"
             referencedColumns: ["id"]
           },
         ]
@@ -5790,8 +6313,16 @@ export type Database = {
         Returns: boolean
       }
       can_edit_admission: { Args: { _admission_id: string }; Returns: boolean }
+      can_log_patient_activity: {
+        Args: { _hospital_id: string; _patient_id: string }
+        Returns: boolean
+      }
       can_upload_holarchelp_incident: {
         Args: { _incident_id: string }
+        Returns: boolean
+      }
+      can_view_inpatient_admission: {
+        Args: { _admission_id: string }
         Returns: boolean
       }
       check_provider_duplicate: {
@@ -6020,6 +6551,20 @@ export type Database = {
         Returns: undefined
       }
       holarchelp_user_enabled: { Args: { _uid: string }; Returns: boolean }
+      hospital_of_ward: { Args: { _ward_id: string }; Returns: string }
+      hospital_shift_clock: {
+        Args: { _action: string; _shift_id: string }
+        Returns: Json
+      }
+      hospital_transfer_patient: {
+        Args: {
+          _admission_id: string
+          _reason?: string
+          _to_bed: string
+          _to_ward_id: string
+        }
+        Returns: Json
+      }
       is_ambulance_admin: {
         Args: { _provider_id: string; _user_id: string }
         Returns: boolean
