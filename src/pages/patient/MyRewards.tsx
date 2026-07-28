@@ -416,7 +416,33 @@ export default function MyRewards({ embedded = false }: { embedded?: boolean } =
       </Dialog>
 
       {/* Hero Stats — compact on mobile */}
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4">
+      <div className={cn("grid grid-cols-2 gap-2 md:gap-4", isDoctor ? "md:grid-cols-6" : "md:grid-cols-4")}>
+        {isDoctor && (
+          <>
+            <Card className="bg-gradient-to-br from-emerald-500 to-teal-400 dark:from-emerald-700/40 dark:to-teal-700/30 border-emerald-400 dark:border-emerald-600/40">
+              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-emerald-100">Doctor Vulas</p>
+                    <p className="text-2xl md:text-4xl font-bold text-white">{doctorVulas}</p>
+                  </div>
+                  <Star className="h-8 w-8 text-white/90 shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-purple-500 to-indigo-400 dark:from-purple-700/40 dark:to-indigo-700/30 border-purple-400 dark:border-purple-600/40">
+              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-purple-100">Combined Vulas</p>
+                    <p className="text-2xl md:text-4xl font-bold text-white">{combinedVulas}</p>
+                  </div>
+                  <Trophy className="h-8 w-8 text-white/90 shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
         <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 dark:from-blue-700/40 dark:to-cyan-700/30 border-blue-400 dark:border-blue-600/40">
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">
