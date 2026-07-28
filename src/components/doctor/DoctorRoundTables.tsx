@@ -35,8 +35,6 @@ export function DoctorRoundTables() {
         .select("patient_id")
         .eq("doctor_id", user!.id);
 
-      if (!myNotes?.length) { setLoading(false); return; }
-
       const { data: rosterPatients } = await supabase
         .from("patients")
         .select("id")
@@ -44,10 +42,11 @@ export function DoctorRoundTables() {
 
       const patientIds = [
         ...new Set([
-          ...myNotes.map((n) => n.patient_id),
+          ...(myNotes || []).map((n) => n.patient_id),
           ...(rosterPatients || []).map((p: any) => p.id),
         ]),
       ];
+      if (patientIds.length === 0) { setLoading(false); return; }
 
       // Get all notes for those patients
       const { data: allNotes } = await supabase
