@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { translateTodoTitle } from "@/lib/translateTodoTitle";
+import { isSamplePatient } from "@/lib/samplePatients";
+import { SampleBadge } from "@/components/patients/SampleBadge";
 import {
   Mic,
   MicOff,
