@@ -879,6 +879,287 @@ export type Database = {
         }
         Relationships: []
       }
+      biolog_correlations: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          group_name: string
+          id: string
+          input_variable: string
+          is_custom: boolean
+          outcome_variables: string[]
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          group_name?: string
+          id?: string
+          input_variable: string
+          is_custom?: boolean
+          outcome_variables?: string[]
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          group_name?: string
+          id?: string
+          input_variable?: string
+          is_custom?: boolean
+          outcome_variables?: string[]
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      biolog_entries: {
+        Row: {
+          created_at: string
+          entry_date: string
+          id: string
+          note: string | null
+          payload: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          note?: string | null
+          payload?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          note?: string | null
+          payload?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      biolog_exercises: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          unit: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          name: string
+          unit?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          unit?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      biolog_foods: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      biolog_medications: {
+        Row: {
+          created_at: string
+          dose_amount: number | null
+          dose_unit: string | null
+          id: string
+          label: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dose_amount?: number | null
+          dose_unit?: string | null
+          id?: string
+          label: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dose_amount?: number | null
+          dose_unit?: string | null
+          id?: string
+          label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      biolog_programme_assignments: {
+        Row: {
+          assigned_by: string
+          created_at: string
+          end_date: string | null
+          id: string
+          patient_user_id: string
+          programme_id: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          patient_user_id: string
+          programme_id: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          patient_user_id?: string
+          programme_id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biolog_programme_assignments_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "biolog_programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      biolog_programmes: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_days: number
+          id: string
+          kind: string
+          name: string
+          targets: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          kind?: string
+          name: string
+          targets?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_days?: number
+          id?: string
+          kind?: string
+          name?: string
+          targets?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      biolog_section_order: {
+        Row: {
+          block_order: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          block_order?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          block_order?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      biolog_sections: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          group_name: string
+          id: string
+          is_custom: boolean
+          key: string
+          label: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          group_name?: string
+          id?: string
+          is_custom?: boolean
+          key: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          group_name?: string
+          id?: string
+          is_custom?: boolean
+          key?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       blood_bank_providers: {
         Row: {
           address: string | null
@@ -6310,6 +6591,7 @@ export type Database = {
         Args: { _note?: string; _patient_user_id: string }
         Returns: Json
       }
+      biolog_can_view: { Args: { _owner: string }; Returns: boolean }
       can_access_admission: {
         Args: { _admission_id: string }
         Returns: boolean

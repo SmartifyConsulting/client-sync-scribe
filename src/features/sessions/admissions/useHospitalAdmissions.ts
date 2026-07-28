@@ -97,7 +97,7 @@ export function useAdmissionNurseShifts(admissionId?: string) {
     queryKey: ["admission-nurse-shifts", admissionId],
     enabled: !!admissionId,
     queryFn: async () => {
-      const { data, error } = await (supabase.from("admission_nurse_shifts") as any)
+      const { data, error } = await (supabase as any).from("admission_nurse_shifts")
         .select("*")
         .eq("admission_id", admissionId!)
         .order("shift_start", { ascending: false });
@@ -117,7 +117,7 @@ export function useStartNurseShift(admissionId?: string) {
 
       const now = new Date().toISOString();
 
-      const { data: openShift } = await (supabase.from("admission_nurse_shifts") as any)
+      const { data: openShift } = await (supabase as any).from("admission_nurse_shifts")
         .select("id")
         .eq("admission_id", admissionId!)
         .is("shift_end", null)
@@ -126,12 +126,12 @@ export function useStartNurseShift(admissionId?: string) {
         .maybeSingle();
 
       if (openShift) {
-        await (supabase.from("admission_nurse_shifts") as any)
+        await (supabase as any).from("admission_nurse_shifts")
           .update({ shift_end: now })
           .eq("id", openShift.id);
       }
 
-      const { error } = await (supabase.from("admission_nurse_shifts") as any).insert({
+      const { error } = await (supabase as any).from("admission_nurse_shifts").insert({
         admission_id: admissionId,
         nurse_user_id: input.nurseUserId ?? null,
         nurse_name_snapshot: input.nurseName,
@@ -152,7 +152,7 @@ export function useAdmissionMealLog(admissionId?: string) {
     queryKey: ["admission-meal-log", admissionId],
     enabled: !!admissionId,
     queryFn: async () => {
-      const { data, error } = await (supabase.from("admission_meal_log") as any)
+      const { data, error } = await (supabase as any).from("admission_meal_log")
         .select("*")
         .eq("admission_id", admissionId!)
         .order("meal_date", { ascending: false })
@@ -170,7 +170,7 @@ export function useLogMeal(admissionId?: string) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { error } = await (supabase.from("admission_meal_log") as any).insert({
+      const { error } = await (supabase as any).from("admission_meal_log").insert({
         admission_id: admissionId,
         meal_date: input.mealDate ?? new Date().toISOString().slice(0, 10),
         meal_slot: input.mealSlot,

@@ -22,6 +22,7 @@ import {
   Users2,
   Mic,
   BedDouble,
+  Activity,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -48,6 +49,7 @@ const doctorNavItems: (NavItem & { tour?: string })[] = [
   { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
   { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
+  { icon: Activity, label: "Biolog", labelKey: "nav.biolog", to: "/biolog" },
   { icon: ListChecks, label: "Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
   { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
   { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
@@ -59,6 +61,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
+  { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
