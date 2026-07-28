@@ -596,7 +596,10 @@ export default function ReferralDoctors({ hideHeader = false }: ReferralDoctorsP
                       {(doc.full_name || "DR").trim().slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-foreground truncate">{doc.full_name}</span>
+                      <span className="font-medium text-foreground truncate flex items-center gap-1.5">
+                        {isSampleName(doc.full_name) && <SampleBadge />}
+                        {doc.full_name}
+                      </span>
                       <div className="flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
                         {doc.specialty && <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 font-medium">{doc.specialty}</span>}
                         {doc.practice_number && <span>PR#: {doc.practice_number}</span>}
