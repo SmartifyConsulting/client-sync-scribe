@@ -1228,7 +1228,7 @@ export default function MyPractice() {
 
         {/* === PRACTICE TAB (Personal + Practice merged) === */}
         <TabsContent value="practice" className="mt-4 space-y-4 my-practice-tab-body">
-          <div className="rounded-xl border border-neutral-400 bg-card shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-neutral-400 bg-white shadow-sm overflow-hidden">
             <Accordion type="multiple" className="divide-y divide-white">
               <AboutMeAccordion
                 value={(profile as any)?.about_me || ""}

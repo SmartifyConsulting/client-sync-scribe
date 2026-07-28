@@ -34,9 +34,9 @@ export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
 /** Padding for accordion content so sub-rows aren't flush against the header. */
 export const SECTION_CONTENT_CLASS = "px-4 pt-4 pb-4 space-y-3";
 
-/** Frame around a group of section accordion items. */
+/** Frame around a group of section accordion items — thin white line between items. */
 export const SECTION_FRAME_CLASS =
-  "rounded-lg border bg-card overflow-hidden space-y-1";
+  "rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white";
 
 /** Item wrapper (no individual rounded border). */
 export const SECTION_ITEM_CLASS = "border-0 rounded-none bg-card";
