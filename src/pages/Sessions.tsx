@@ -1149,7 +1149,7 @@ export default function Sessions() {
                     title={isPaused ? "Resume recording" : "Pause recording"}
                   >
                     {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
-                    <span>{isPaused ? "Resume recording" : "Pause recording"}</span>
+                    <span className="hidden sm:inline whitespace-nowrap">{isPaused ? "Resume" : "Pause"}</span>
                   </button>
                 )}
 
@@ -1170,7 +1170,7 @@ export default function Sessions() {
                   ) : (
                     <Sparkles className="h-5 w-5" />
                   )}
-                  <span>AI Consult</span>
+                  <span className="hidden sm:inline whitespace-nowrap">AI Consult</span>
                 </button>
               </div>
 
