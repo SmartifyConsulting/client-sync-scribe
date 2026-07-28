@@ -29,6 +29,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AccountMenu } from "@/components/layout/AccountMenu";
+import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
 interface NavItem {
   icon: LucideIcon;
@@ -87,7 +88,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const mailboxAlias = (profile as any)?.mailbox_alias as string | null | undefined;
   const mailboxId = (profile as any)?.mailbox_id as string | null | undefined;
   const mailboxAddress = mailboxAlias
-    ? `${mailboxAlias}@holarc.com`
+    ? `${mailboxAlias}@${INTAKE_EMAIL_DOMAIN}`
     : mailboxId
       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
       : "";

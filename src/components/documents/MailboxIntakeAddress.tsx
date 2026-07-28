@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
 /**
  * Shows the signed-in user's personal document intake address so they know
@@ -33,7 +34,7 @@ export function MailboxIntakeAddress({ className }: { className?: string }) {
 
   if (!alias) return null;
 
-  const address = `${alias}@holarc.com`;
+  const address = `${alias}@${INTAKE_EMAIL_DOMAIN}`;
 
   const copy = async () => {
     try {
