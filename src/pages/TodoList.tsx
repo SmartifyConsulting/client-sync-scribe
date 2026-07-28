@@ -142,6 +142,10 @@ export default function TodoList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "completed">("active");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+  }, []);
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string; userId?: string; templateName?: string } | null>(null);
@@ -456,7 +460,7 @@ export default function TodoList() {
   const [showAddTask, setShowAddTask] = useState(false);
 
   const filteredTodos = todos.filter((todo) => {
-    if (ownerFilter === "mine" && (todo as any).user_id !== user?.id) return false;
+    if (ownerFilter === "mine" && (todo as any).user_id !== currentUserId) return false;
     if (filter === "active") return !todo.completed;
     if (filter === "completed") return todo.completed;
     return true;
