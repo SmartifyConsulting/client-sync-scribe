@@ -1,7 +1,0 @@
-name = "holarc-email-intake"
-main = "src/worker.js"
-compatibility_date = "2024-11-01"
-
-# INTAKE_URL and INTAKE_SECRET are set as secrets, not committed here:
-#   wrangler secret put INTAKE_URL
-#   wrangler secret put INTAKE_SECRET
