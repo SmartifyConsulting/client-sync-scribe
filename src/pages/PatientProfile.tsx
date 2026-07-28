@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -82,6 +82,15 @@ export default function PatientProfile() {
   const [mailboxAlias, setMailboxAlias] = useState<string | null>(null);
   const [mailboxId, setMailboxId] = useState<string | null>(null);
   const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "details";
+  const handleTabChange = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("tab", value);
+    setSearchParams(next, { replace: true });
+  };
+
+
 
   useEffect(() => {
     if (!user?.id) return;
@@ -149,6 +158,20 @@ export default function PatientProfile() {
   const [analysisDialog, setAnalysisDialog] = useState<DocumentRecord | null>(null);
   const [docToDelete, setDocToDelete] = useState<DocumentRecord | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Deep link: /patients/:id?tab=documents&doc=<id> opens the document preview
+  const deepLinkDocId = searchParams.get("doc");
+  useEffect(() => {
+    if (!deepLinkDocId || documentsLoading) return;
+    const match = documents.find((d) => d.id === deepLinkDocId);
+    if (match) setPreviewDoc(match);
+    const next = new URLSearchParams(searchParams);
+    next.delete("doc");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkDocId, documentsLoading, documents]);
+
+
 
   // Check if current doctor has access to all sessions
   useEffect(() => {
@@ -374,7 +397,7 @@ export default function PatientProfile() {
       )}
 
       {/* Tabs */}
-      <Tabs defaultValue="details" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
         <TabsList className="bg-primary p-1.5 rounded-xl h-auto flex-wrap">
           <TabsTrigger
             value="details"

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Calendar as CalendarIcon, Clock, MapPin, Loader2, Plus, User, DollarSign, ArrowLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { format, addDays, addMonths, subMonths, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, startOfYear, endOfYear, getDaysInMonth } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -43,7 +44,23 @@ export default function PatientCalendar() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [allAppointments, setAppointments] = useState<Appointment[]>([]);
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedQuery(query.trim().toLowerCase()), 200);
+    return () => clearTimeout(id);
+  }, [query]);
+  const appointments = useMemo(() => {
+    if (!debouncedQuery) return allAppointments;
+    return allAppointments.filter((a) =>
+      [a.title, a.type, a.location, a.description, a.doctor_name, a.service_name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(debouncedQuery),
+    );
+  }, [allAppointments, debouncedQuery]);
   const [loading, setLoading] = useState(true);
   const [bookDialogOpen, setBookDialogOpen] = useState(false);
   const [calendarView, setCalendarView] = useState<CalendarViewMode>("month");
@@ -363,6 +380,12 @@ export default function PatientCalendar() {
           <p className="text-muted-foreground text-xs">View and manage your appointments</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search appointments..."
+            className="h-8 w-[200px] text-xs"
+          />
           <ViewToggle />
           <Button onClick={() => setBookDialogOpen(true)} size="sm" className="gap-1 text-xs">
             <Plus className="h-3.5 w-3.5" />

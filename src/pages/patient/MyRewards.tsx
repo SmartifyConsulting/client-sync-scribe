@@ -43,6 +43,9 @@ import { useNavigate } from "react-router-dom";
 import { useMyRewards, useMyStreaks, useMyChronicPatientId } from "@/hooks/usePatientRewards";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { cn } from "@/lib/utils";
 import { MedicationAdherenceTab } from "@/components/rewards/MedicationAdherenceTab";
 import { MonthlyAdherenceSummary } from "@/components/rewards/MonthlyAdherenceSummary";
 import { TodaysMedicationsCard } from "@/components/rewards/TodaysMedicationsCard";
@@ -82,10 +85,26 @@ interface VulaTransfer {
   vula_partner_apps?: { name: string; logo_url: string | null };
 }
 
-export default function MyRewards() {
+export default function MyRewards({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { isDoctor } = useUserRole();
   const { rewards, lollipopCount, loading: rewardsLoading } = useMyRewards();
   const { streaks, loading: streaksLoading } = useMyStreaks();
+
+  const { data: doctorVulas = 0 } = useQuery({
+    queryKey: ["doctor-vulas-profile", user?.id],
+    enabled: !!user?.id && isDoctor,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("doctor_rewards")
+        .select("vulas_count")
+        .eq("doctor_id", user!.id);
+      if (error || !data) return 0;
+      return data.reduce((sum, r) => sum + (r.vulas_count || 0), 0);
+    },
+  });
+  const combinedVulas = doctorVulas + lollipopCount;
   const [activeTab, setActiveTabRaw] = useState<string>(() => {
     try {
       return localStorage.getItem("rewards_last_tab_v1") || "overview";
@@ -297,13 +316,16 @@ export default function MyRewards() {
   const totalTransferred = transfers.reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="w-full space-y-6">
       <VulaExplainerDialog open={showVulaExplainer} onOpenChange={setShowVulaExplainer} />
+      {!embedded && (
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/patient/details")} className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          {!isDoctor && (
+            <Button variant="ghost" size="icon" onClick={() => navigate("/patient/details")} className="h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          )}
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold text-foreground">My Rewards</h1>
@@ -328,6 +350,7 @@ export default function MyRewards() {
           </Button>
         )}
       </div>
+      )}
 
       {/* Transfer Dialog */}
       <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
@@ -394,7 +417,33 @@ export default function MyRewards() {
       </Dialog>
 
       {/* Hero Stats — compact on mobile */}
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4">
+      <div className={cn("grid grid-cols-2 gap-2 md:gap-4", isDoctor ? "md:grid-cols-6" : "md:grid-cols-4")}>
+        {isDoctor && (
+          <>
+            <Card className="bg-gradient-to-br from-emerald-500 to-teal-400 dark:from-emerald-700/40 dark:to-teal-700/30 border-emerald-400 dark:border-emerald-600/40">
+              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-emerald-100">Doctor Vulas</p>
+                    <p className="text-2xl md:text-4xl font-bold text-white">{doctorVulas}</p>
+                  </div>
+                  <Star className="h-8 w-8 text-white/90 shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gradient-to-br from-purple-500 to-indigo-400 dark:from-purple-700/40 dark:to-indigo-700/30 border-purple-400 dark:border-purple-600/40">
+              <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-purple-100">Combined Vulas</p>
+                    <p className="text-2xl md:text-4xl font-bold text-white">{combinedVulas}</p>
+                  </div>
+                  <Trophy className="h-8 w-8 text-white/90 shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
         <Card className="bg-gradient-to-br from-blue-500 to-cyan-400 dark:from-blue-700/40 dark:to-cyan-700/30 border-blue-400 dark:border-blue-600/40">
           <CardContent className="pt-4 md:pt-6 px-3 md:px-6">
             <div className="flex items-center justify-between">

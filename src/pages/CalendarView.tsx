@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Clock, User, Calendar as CalendarIcon, MapPin, Video, Play, Trash2, Pencil, Link, X } from "lucide-react";
@@ -121,7 +121,23 @@ export default function CalendarView() {
   const [isEventDetailOpen, setIsEventDetailOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedEvent, setEditedEvent] = useState<CalendarEvent | null>(null);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [allEvents, setEvents] = useState<CalendarEvent[]>([]);
+  const [eventQuery, setEventQuery] = useState("");
+  const [debouncedEventQuery, setDebouncedEventQuery] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedEventQuery(eventQuery.trim().toLowerCase()), 200);
+    return () => clearTimeout(id);
+  }, [eventQuery]);
+  const events = useMemo(() => {
+    if (!debouncedEventQuery) return allEvents;
+    return allEvents.filter((e) =>
+      [e.title, e.type, e.notes, e.location, e.ownerName, patients.find((p) => p.id === e.patientId)?.name]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(debouncedEventQuery),
+    );
+  }, [allEvents, debouncedEventQuery, patients]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [serviceColors, setServiceColors] = useState<ServicePriceColor[]>([]);
   const [newAppointment, setNewAppointment] = useState({
@@ -585,6 +601,24 @@ export default function CalendarView() {
               ))}
             </div>
           )}
+          <div className="relative w-[200px]">
+            <Input
+              value={eventQuery}
+              onChange={(e) => setEventQuery(e.target.value)}
+              placeholder={t("calendar.searchPlaceholder", "Search appointments...")}
+              className="h-8 text-xs pr-7"
+            />
+            {eventQuery && (
+              <button
+                type="button"
+                onClick={() => setEventQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                aria-label="Clear search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
           {practice && scope === 'practice' && members.length > 0 && (
             <Select value={selectedDoctorId} onValueChange={setSelectedDoctorId}>
               <SelectTrigger className="h-8 w-[200px] text-xs">
