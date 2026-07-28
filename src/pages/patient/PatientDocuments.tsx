@@ -685,17 +685,6 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
         ) : <div />}
 
         <div className="flex items-center gap-1.5 flex-wrap">
-          <ToggleGroup
-            type="single"
-            value={docGroupBy}
-            onValueChange={(v) => v && setDocGroupBy(v as typeof docGroupBy)}
-            size="sm"
-            variant="outline"
-            className="mr-1"
-          >
-            <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
-            <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
-          </ToggleGroup>
           <Button
             variant="outline"
             size="icon"
@@ -852,7 +841,20 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
       </Card>
 
       {/* Filter Dropdown */}
-      <MailboxIntakeAddress />
+      <div className="flex items-center gap-2">
+        <MailboxIntakeAddress compact className="flex-1 min-w-0" />
+        <ToggleGroup
+          type="single"
+          value={docGroupBy}
+          onValueChange={(v) => v && setDocGroupBy(v as typeof docGroupBy)}
+          size="sm"
+          variant="outline"
+          className="shrink-0"
+        >
+          <ToggleGroupItem value="date" className="text-xs px-3">Date</ToggleGroupItem>
+          <ToggleGroupItem value="type" className="text-xs px-3">Type</ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
       <div className="flex items-center gap-2 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
