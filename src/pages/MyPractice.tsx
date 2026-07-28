@@ -127,6 +127,7 @@ const CURRENCIES = [
 ];
 
 import { LANGUAGES } from "@/lib/languages";
+import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
 const COUNTRY_CODE_TO_LANGUAGE: Record<string, string> = {
   "+27": "en",
@@ -228,7 +229,7 @@ function MailboxSection({ userId }: { userId?: string }) {
   }, [userId]);
 
   const displayEmail = mailboxAlias
-    ? `${mailboxAlias}@holarc.com`
+    ? `${mailboxAlias}@${INTAKE_EMAIL_DOMAIN}`
     : mailboxId
       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
       : null;
@@ -265,7 +266,7 @@ function MailboxSection({ userId }: { userId?: string }) {
     } else {
       setMailboxAlias(cleanAlias);
       setEditingAlias(false);
-      toast({ title: "Alias saved", description: `${cleanAlias}@holarc.com` });
+      toast({ title: "Alias saved", description: `${cleanAlias}@${INTAKE_EMAIL_DOMAIN}` });
     }
   };
 
@@ -306,7 +307,7 @@ function MailboxSection({ userId }: { userId?: string }) {
                         className="rounded-r-none max-w-[160px] h-8 text-sm"
                       />
                       <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">
-                        @holarc.com
+                        @{INTAKE_EMAIL_DOMAIN}
                       </span>
                     </div>
                     <Button size="sm" className="h-8" onClick={handleSaveAlias} disabled={isSavingAlias}>

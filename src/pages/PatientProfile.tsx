@@ -66,6 +66,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // DrawingPad hidden for later phase
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
 export default function PatientProfile() {
   const { t } = useTranslation();
@@ -112,7 +113,7 @@ export default function PatientProfile() {
   }, [user?.id, id]);
 
   const displayEmail = mailboxAlias
-    ? `${mailboxAlias}@holarc.com`
+    ? `${mailboxAlias}@${INTAKE_EMAIL_DOMAIN}`
     : mailboxId
       ? `docs-${mailboxId.slice(0, 8)}@inbox.holarc.health`
       : "";
