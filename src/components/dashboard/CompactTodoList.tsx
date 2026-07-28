@@ -176,8 +176,17 @@ export function CompactTodoList() {
         (patientRows || []).forEach((p: any) => nameById.set(p.id, p.name));
       }
 
+      const docIds2 = Array.from(new Set((data || []).map((t: any) => t.document_id).filter(Boolean))) as string[];
+      const sentDocs = new Set<string>();
+      if (docIds2.length > 0) {
+        const { data: docRows } = await (supabase.from("documents").select("id, email_sent_at") as any).in("id", docIds2);
+        (docRows || []).forEach((d: any) => { if (d.email_sent_at) sentDocs.add(d.id); });
+      }
+
       setTodos(
-        (data || []).map((todo: any) => ({
+        (data || [])
+          .filter((todo: any) => !(todo.document_id && sentDocs.has(todo.document_id)))
+          .map((todo: any) => ({
           ...todo,
           completed: todo.status === "completed",
           priority: todo.priority as "low" | "medium" | "high",
@@ -574,8 +583,8 @@ export function CompactTodoList() {
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
                         <Accordion type="multiple" className="space-y-2">
                           {patientGroups(grouped[b.key]).map(([patientName, items]) => (
-                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border border-primary/40 rounded-lg overflow-hidden bg-background">
-                              <AccordionTrigger className="px-3 py-2.5 hover:no-underline hover:bg-muted/50 text-foreground">
+                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border border-primary/40 rounded-lg overflow-hidden bg-background mb-2">
+                              <AccordionTrigger className="px-3 py-3 hover:no-underline hover:bg-muted/50 text-foreground">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   <UserIcon className="h-4 w-4 text-primary shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}
