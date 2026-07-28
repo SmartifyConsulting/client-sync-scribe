@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 
 import ReferralDoctors from "@/pages/ReferralDoctors";
-import DoctorRewards from "@/pages/doctor/DoctorRewards";
+import MyRewards from "@/pages/patient/MyRewards";
 
 import Patients from "@/pages/Patients";
 import DoctorInvoices from "@/pages/doctor/Invoices";
@@ -2483,7 +2483,7 @@ export default function MyPractice() {
 
         {/* === REWARDS TAB === */}
         <TabsContent value="rewards" className="mt-4 my-practice-tab-body">
-          <DoctorRewards embedded />
+          <MyRewards embedded />
         </TabsContent>
 
       </Tabs>
