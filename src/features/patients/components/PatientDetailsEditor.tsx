@@ -3695,33 +3695,20 @@ export function PatientDetailsEditor({
 
           {isSelfService && (
             <TabsContent value="history" className="mt-4">
-              <Tabs defaultValue="sessions">
-                <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="sessions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Sessions</TabsTrigger>
-                  <TabsTrigger value="admissions" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-primary-dark">Admissions</TabsTrigger>
-                </TabsList>
-                <TabsContent value="sessions" className="mt-3">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">History of your consultations</p>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-foreground">My Sessions</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">Your consultation sessions</p>
 
-                  <Suspense
-                    fallback={
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                      </div>
-                    }
-                  >
-                    <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
-                  </Suspense>
-                </TabsContent>
-                <TabsContent value="admissions" className="mt-3">
-                  <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>}>
-                    <AdmissionsViewLazy patientId={patient.id} canEdit />
-                  </Suspense>
-                </TabsContent>
-              </Tabs>
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                }
+              >
+                <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+              </Suspense>
             </TabsContent>
           )}
 
