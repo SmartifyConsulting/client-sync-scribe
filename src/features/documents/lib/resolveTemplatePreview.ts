@@ -14,3 +14,35 @@ export function resolveTemplatePreviewTokens(
   if (!text) return "";
   return fillDocumentPlaceholders(text, { profile: profile ?? null }).content;
 }
+
+type HFCell = { text?: string; alignment?: string; imageUrl?: string } | null | undefined;
+type HFSection = { left?: HFCell; center?: HFCell; right?: HFCell } | null | undefined;
+
+/**
+ * Resolve [Tokens] inside a linked header/footer template so letterhead details
+ * render the same way in template previews as they do on saved documents.
+ */
+export function resolveHeaderFooterTokens<T extends { header?: any; footer?: any } | null | undefined>(
+  hf: T,
+  profile: FillProfile | null | undefined,
+): T {
+  if (!hf) return hf;
+
+  const resolveSection = (section: HFSection) => {
+    if (!section) return section;
+    const resolveCell = (cell: HFCell) =>
+      cell ? { ...cell, text: resolveTemplatePreviewTokens(cell.text || "", profile) } : cell;
+    return {
+      ...section,
+      left: resolveCell(section.left),
+      center: resolveCell(section.center),
+      right: resolveCell(section.right),
+    };
+  };
+
+  return {
+    ...(hf as any),
+    header: resolveSection((hf as any).header),
+    footer: resolveSection((hf as any).footer),
+  } as T;
+}
