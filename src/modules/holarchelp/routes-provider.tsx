@@ -7,6 +7,11 @@ import ProviderProfile from "./pages/provider/ProviderProfile";
 import HospitalOpsLayout from "./pages/provider/hospital/HospitalOpsLayout";
 import EmergencyHubScreen from "./pages/provider/hospital/EmergencyHubScreen";
 import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
+import HospitalDashboardScreen from "./pages/provider/hospital/HospitalDashboardScreen";
+import WardsScreen from "./pages/provider/hospital/WardsScreen";
+import InpatientsScreen from "./pages/provider/hospital/InpatientsScreen";
+import ShiftsScreen from "./pages/provider/hospital/ShiftsScreen";
+import MyShiftScreen from "./pages/provider/hospital/MyShiftScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
 import ProvidersScreen from "./pages/provider/hospital/ProvidersScreen";
 import HospitalIncidentConsole from "./pages/provider/HospitalIncidentConsole";
@@ -76,7 +81,12 @@ export default function ProviderRoutes() {
         <Route index element={<EmergencyHubScreen />} />
         <Route path="incoming" element={<Navigate to="/provider/hospital" replace />} />
         <Route path="triage" element={<Navigate to="/provider/hospital" replace />} />
+        <Route path="dashboard" element={<HospitalDashboardScreen />} />
         <Route path="admissions" element={<AdmissionsScreen />} />
+        <Route path="wards" element={<WardsScreen />} />
+        <Route path="inpatients" element={<InpatientsScreen />} />
+        <Route path="shifts" element={<ShiftsScreen />} />
+        <Route path="my-shift" element={<MyShiftScreen />} />
         <Route path="capacity" element={<Navigate to="/provider/hospital" replace />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
         <Route path="providers" element={<ProvidersScreen />} />
