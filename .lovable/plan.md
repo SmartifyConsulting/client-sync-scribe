@@ -1,32 +1,45 @@
-## 1. Template "Preview" (eye) shows raw placeholders
+## 1. Search + grouping on list screens
 
-Confirmed: in `Documents.tsx` the template preview dialog renders `previewTemplate.content` straight through `renderFormattedContent` with no token resolution, while Edit → Show Preview runs the same content through the template token resolver (which is why the signature appears there).
+Add one shared toolbar component (`src/components/common/ListGroupToolbar.tsx`) used by Sessions, Tasks, Documents, Round Tables and Admissions:
 
-Fix: run the template content — and its linked header/footer sections — through the same resolver used by the editor preview, so doctor name, practice/registration number, date and `[DoctorSignature]` populate identically.
+- Search box (debounced, filters on title/patient/doctor/content depending on screen).
+- Group-by selector: **Date (default)**, **Patient**, and **Hospital** (Hospital option only rendered for hospital-role users).
+- Rendered as collapsible group accordions matching the existing green/white `section-accordion` styling, with count pills.
 
-## 2. To-Do list preview (eye icon) missing signature
+Date grouping buckets: **Today**, current month (e.g. "July 2026"), then earlier months, then years. Applies to patient Sessions view too.
 
-The To-Do preview already calls the shared document resolver, which only inlines the signature when the document's owning doctor profile loads and has signature settings. Root cause not yet confirmed (candidates: missing owner id on the document row, or content previously auto-healed with the signature stripped).
+Screens updated: `src/pages/MySessions.tsx` + `src/pages/doctor/Sessions.tsx`, `src/pages/TodoList.tsx`, `src/pages/Documents.tsx` / `DoctorDocumentsPage.tsx`, `DoctorRoundTablesPage.tsx`, `src/pages/doctor/DoctorAdmissions.tsx`.
 
-Plan: inspect the actual document rows behind a failing preview first, then fix accordingly — fall back to the signed-in doctor's signature when the owner profile is missing, and stop persisting an auto-healed copy when the signature could not be resolved so it is retried next time.
+## 2. Admissions CRUD for doctors
 
-## 3. Template preview and To-Do preview look formatted differently
+On the doctor Admissions screen, allow create / edit / delete of admissions inline (reusing `ManualLogAdmissionDialog` and `AdmissionsView` with `canEdit`), plus the same search/grouping toolbar.
 
-The two previews use different render paths and wrappers (dialog markup, page width, font/logo handling), so the same document renders with different type sizes, spacing and letterhead layout.
+## 3. Documents tabs styling
 
-Fix: render both through one shared document-preview surface — same page frame, width, font family, letterhead/header-footer layout, and body typography — so a template preview and a document preview are visually identical. Also fix the visible date/address run-together in the prescription body (`Date: [PrescriptionDate]` resolving without a line break before the practice address).
+Change the Documents page `TabsList` (line ~370) to the standard app tab format used on My Profile: green `bg-primary` bar, white labels, white active pill with dark text, horizontally scrollable.
 
-## 4. Image upload to prescription fails with a security-policy error
+## 4. Patient profile fixes (`PatientDetailsEditor.tsx`)
 
-Storage rules for the image bucket allow an upload only when the first folder of the path equals the signed-in user's id. The uploader builds that folder from the app-level user object, which can differ from the actual authenticated session (profile switching / impersonation), producing "new row violates row-level security policy".
+- Rename the "My History" tab to **My Sessions** and remove the Admissions sub-tab from it (admissions stay reachable via the dedicated Admissions screen).
+- Reduce accordion row label font by one step in **Personal Information** only.
+- Fix the **Organ Donor** accordion so its expanded header is green with white text (convert it to the shared `SectionAccordion` used by the other rows).
+- **Next of Kin**: prefill the phone field with the user's default country dial code; once a NOK is added, render the full record (name, relationship, phone, email, address) in the view list rather than a summary line.
+- **Preferred Hospitals**: the Hospitals sub-tab exists in view mode but is missing from the edit-mode "My Holarchy" sub-tabs (line ~2196) — add it there so it is always visible.
 
-Fix: build the upload path from the live authenticated session id fetched at upload time, with a clearer message when there is no active session. Keep the local-embed fallback so the image still appears.
+## 5. Granular "Can view profile" permissions
 
-## 5. Communicate that placeholder fields are draggable
+Currently `patient_profile_shares` has only `can_view_profile` / `can_view_live_tracking` booleans.
 
-Add a visible hint in the template editor placeholder panel ("Drag a field into the text, or click to insert"), plus drag affordances (grab cursor, drag-handle icon) and tooltips on each placeholder chip.
+- Migration: add a `view_scopes jsonb not null default '[]'` column.
+- In `ProfileSharesSection.tsx`, when "Can view profile" is on, reveal a checkbox group: Medication, Sessions, Round Tables, Documents, Tasks, Calendar, Admissions, Insurance, Pharmacies, Hospitals.
+- Shared-profile read paths filter sections by these scopes.
+
+## 6. Legal Documents
+
+New tab placed after Round Tables in the patient profile, backed by the existing documents/storage stack with a `legal` category and sub-type: **Organ Donor Document**, **Will**, **Do Not Resuscitate authorisation**, **Other**. Upload, view/preview, download and delete; visible to the patient and to providers holding the Documents scope.
 
 ## Technical notes
 
-- Files: `src/pages/Documents.tsx` (preview dialog), `src/features/documents/lib/resolveTemplatePreview.ts`, `src/features/documents/lib/resolveDocumentPreviewContent.ts`, the shared document preview component used by the To-Do previews, `src/features/documents/templates/TemplateSectionEditor.tsx` (upload path), and the placeholder chip list in the templates feature.
-- No database or storage-policy changes; the upload fix is client-side path correctness.
+- One migration only (share scopes column); everything else is frontend.
+- Grouping/search state stored in component state, group-by preference persisted to localStorage per screen.
+- Hospital grouping keys off `hospital` / `hospital_provider_id` on admissions and off the session/document's linked facility where available.
