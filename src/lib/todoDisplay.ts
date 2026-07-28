@@ -117,13 +117,38 @@ function detectKind(input: TodoDisplayInput): TodoKind {
   return "task";
 }
 
+// Words that look like names (capitalised) but never are — keeps titles such as
+// "Review letter for Georgia Adams. Note follow-up" from producing "Georgia Adams. Note".
+const NON_NAME_WORDS = new Set([
+  "note", "notes", "invoice", "invoices", "prescription", "referral", "letter",
+  "follow", "followup", "appointment", "session", "review", "report", "certificate",
+  "lab", "laboratory", "payment", "claim", "reminder", "urgent", "task", "today",
+  "tomorrow", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+]);
+
+function cleanName(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  // Stop at sentence punctuation and keep at most 3 name words.
+  const words = raw
+    .split(/[.,;:!?]/)[0]
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 3)
+    .filter((w) => !NON_NAME_WORDS.has(w.toLowerCase().replace(/[^\p{L}]/gu, "")));
+  if (words.length < 2) return undefined;
+  return words.join(" ");
+}
+
 function extractPatient(title: string): string | undefined {
   // "... — Sharon Kennedy" | "... - Sharon Kennedy" | "... with Sarah Johnson" | "... for Sharon Kennedy"
+  // Name tokens intentionally exclude "." so a sentence break never merges words.
+  const NAME = "[A-Z][\\p{L}'-]+(?:\\s+[A-Z][\\p{L}'-]+)+";
   const m =
-    title.match(/[—-]\s+([A-Z][\p{L}'.-]+(?:\s+[A-Z][\p{L}'.-]+)+)\s*$/u) ||
-    title.match(/\bwith\s+([A-Z][\p{L}'.-]+(?:\s+[A-Z][\p{L}'.-]+)+)/u) ||
-    title.match(/\bfor\s+([A-Z][\p{L}'.-]+(?:\s+[A-Z][\p{L}'.-]+)+)/u);
-  return m?.[1]?.trim();
+    title.match(new RegExp(`[—-]\\s+(${NAME})\\s*$`, "u")) ||
+    title.match(new RegExp(`\\bwith\\s+(${NAME})`, "u")) ||
+    title.match(new RegExp(`\\bfor\\s+(${NAME})`, "u"));
+  return cleanName(m?.[1]?.trim());
 }
 
 function extractDateTime(input: TodoDisplayInput): {
