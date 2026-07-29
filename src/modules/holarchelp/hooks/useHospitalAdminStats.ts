@@ -88,6 +88,8 @@ export function useHospitalAdminStats(
   const [admissions, setAdmissions] = useState<AdmissionLite[]>([]);
   const [shifts, setShifts] = useState<ShiftLite[]>([]);
   const [erQueue, setErQueue] = useState<ErIncidentLite[]>([]);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
+
   const [pendingScripts, setPendingScripts] = useState(0);
   const [criticalLast24h, setCriticalLast24h] = useState(0);
   const [loading, setLoading] = useState(true);
