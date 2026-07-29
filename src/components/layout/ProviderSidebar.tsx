@@ -45,6 +45,7 @@ interface NavItem {
 
 const hospitalNav: NavItem[] = [
   { icon: LayoutDashboard, labelKey: "nav.hospitalDashboard", to: "/provider/hospital/dashboard" },
+  { icon: Activity, labelKey: "nav.hospitalAdminDashboard", to: "/provider/hospital/admin-dashboard" },
   { icon: Siren, labelKey: "nav.emergencyQueue", to: "/provider/hospital", end: true, danger: true },
   { icon: ClipboardList, labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
   { icon: BedDouble, labelKey: "nav.wards", to: "/provider/hospital/wards" },

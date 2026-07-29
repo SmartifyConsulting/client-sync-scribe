@@ -65,6 +65,7 @@
     "triage": "Triage",
     "admissions": "Admissions",
     "hospitalDashboard": "Dashboard",
+    "hospitalAdminDashboard": "Admin Dashboard",
     "wards": "Wards",
     "inpatients": "Inpatients",
     "shifts": "Shift Schedule",
