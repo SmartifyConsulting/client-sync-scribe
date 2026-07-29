@@ -275,6 +275,66 @@ export default function HospitalAdminDashboard() {
           </div>
         </Panel>
       </div>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Panel icon={Siren} title="ER queue">
+          <div className="divide-y">
+            {stats.erQueue.slice(0, 4).map((i) => {
+              const level = triageLevel(i);
+              return (
+                <div key={i.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {i.incident_number ?? `#${i.id.slice(0, 8)}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{i.status.replace(/_/g, " ")}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className={cn("rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase", triageTone[level])}>
+                      {level}
+                    </span>
+                    <span className="w-14 text-right text-xs font-semibold tabular-nums text-muted-foreground">
+                      {waitedFor(i.created_at)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            {!stats.erQueue.length && (
+              <p className="py-6 text-center text-xs text-muted-foreground">No patients waiting in ER.</p>
+            )}
+          </div>
+          <div className="border-t px-4 py-2.5">
+            <Button asChild variant="outline" size="sm" className="w-full rounded-xl">
+              <Link to="/provider/hospital">View full queue</Link>
+            </Button>
+          </div>
+        </Panel>
+
+        <Panel icon={Activity} title="Recent activity">
+          <ol className="divide-y">
+            {stats.activity.slice(0, 5).map((e) => {
+              const Icon = activityIcon[e.kind];
+              return (
+                <li key={e.id} className="flex items-start gap-3 px-4 py-2.5">
+                  <span className="mt-0.5 rounded-lg bg-muted p-1.5">
+                    <Icon className="h-3.5 w-3.5 text-primary" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{e.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{e.detail}</p>
+                  </div>
+                  <span className="shrink-0 text-xs font-medium text-muted-foreground">{timeAgo(e.at)}</span>
+                </li>
+              );
+            })}
+            {!stats.activity.length && (
+              <li className="py-6 text-center text-xs text-muted-foreground">No activity recorded yet.</li>
+            )}
+          </ol>
+        </Panel>
+      </div>
     </div>
   );
 }
+
