@@ -83,6 +83,8 @@
     "dispatchManagement": "Dispatch Management",
     "incidentManagement": "Incident Management",
     "emergencyDashboard": "Dispatch Dashboard",
+    "erOpsDashboard": "Ops Dashboard",
+
     "hospitalNetwork": "Hospital Network",
     "fleetOperations": "Fleet Operations",
     "realTimeMonitoring": "Fleet Live",
