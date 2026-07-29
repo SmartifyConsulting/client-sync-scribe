@@ -309,6 +309,8 @@ export function useHospitalAdminStats(
     admissions: scopedAdmissions,
     shifts: scopedShifts,
     erQueue,
+    activity: wardId ? activity.filter((e) => !e.ward_id || e.ward_id === wardId) : activity,
+
     pendingScripts,
     criticalLast24h,
     beds: {
