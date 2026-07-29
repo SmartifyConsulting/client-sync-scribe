@@ -81,6 +81,8 @@ export function useErOpsStats(providerId: string | null, refreshMs = 10_000): Er
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const busy = useRef(false);
+  const responseRef = useRef<number[]>([]);
+
 
   const load = useCallback(async () => {
     if (!providerId || busy.current) return;
