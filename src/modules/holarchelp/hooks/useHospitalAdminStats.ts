@@ -187,17 +187,92 @@ export function useHospitalAdminStats(
 
     // Pharmacy queue: scripts raised in the last 2 hours for currently-admitted patients.
     const patientIds = Array.from(new Set(adm.map((a) => a.patient_id).filter(Boolean))) as string[];
+    let scriptRows: { id: string; medication: string | null; created_at: string; patient_id: string }[] = [];
     if (patientIds.length) {
-      const { count } = await supabase
-        .from("prescriptions")
-        .select("id", { count: "exact", head: true })
-        .in("patient_id", patientIds)
-        .eq("status", "active")
-        .gte("created_at", twoHoursAgo);
+      const [{ count }, { data: recentScripts }] = await Promise.all([
+        supabase
+          .from("prescriptions")
+          .select("id", { count: "exact", head: true })
+          .in("patient_id", patientIds)
+          .eq("status", "active")
+          .gte("created_at", twoHoursAgo),
+        supabase
+          .from("prescriptions")
+          .select("id, medication, created_at, patient_id")
+          .in("patient_id", patientIds)
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
       setPendingScripts(count ?? 0);
+      scriptRows = (recentScripts ?? []) as typeof scriptRows;
     } else {
       setPendingScripts(0);
     }
+
+    // ---- Recent activity timeline (merged, newest first) ----
+    const nameById = new Map(adm.map((a) => [a.patient_id ?? "", a.patient_name] as const));
+    const wardById = new Map(adm.map((a) => [a.patient_id ?? "", a.ward_id] as const));
+    const wardNameById = new Map(wards.map((w) => [w.id, w.name] as const));
+    const events: ActivityEvent[] = [];
+
+    for (const a of adm.slice(0, 6)) {
+      events.push({
+        id: `adm-${a.id}`,
+        kind: "admission",
+        title: `${a.patient_name} admitted`,
+        detail: a.ward_id ? (wardNameById.get(a.ward_id) ?? "Ward") : (a.reason ?? "Awaiting bed"),
+        at: a.admitted_at || a.created_at,
+        ward_id: a.ward_id,
+      });
+    }
+
+    for (const d of ((dischargedRes.data ?? []) as { id: string; ward_id: string | null; patient_name: string; discharged_at: string }[])) {
+      events.push({
+        id: `dis-${d.id}`,
+        kind: "discharge",
+        title: `${d.patient_name} discharged`,
+        detail: d.ward_id ? (wardNameById.get(d.ward_id) ?? "Ward") : "Discharged",
+        at: d.discharged_at,
+        ward_id: d.ward_id,
+      });
+    }
+
+    for (const s of scriptRows) {
+      events.push({
+        id: `rx-${s.id}`,
+        kind: "prescription",
+        title: `Prescription issued${s.medication ? ` — ${s.medication}` : ""}`,
+        detail: nameById.get(s.patient_id) ?? "Inpatient",
+        at: s.created_at,
+        ward_id: wardById.get(s.patient_id) ?? null,
+      });
+    }
+
+    for (const s of ((shiftRes.data ?? []) as ShiftLite[]).filter((s) => s.clocked_in_at).slice(0, 6)) {
+      events.push({
+        id: `shift-${s.id}`,
+        kind: "shift",
+        title: s.clocked_out_at ? `${s.staff_name} handed over` : `${s.staff_name} clocked in`,
+        detail: `${s.staff_role}${s.ward_id ? ` · ${wardNameById.get(s.ward_id) ?? "Ward"}` : ""}`,
+        at: (s.clocked_out_at || s.clocked_in_at) as string,
+        ward_id: s.ward_id,
+      });
+    }
+
+    for (const i of ((recentIncRes.data ?? []) as ErIncidentLite[])) {
+      events.push({
+        id: `inc-${i.id}`,
+        kind: "incident",
+        title: `Emergency ${i.incident_number ?? i.id.slice(0, 8)}`,
+        detail: `${i.severity ?? "unknown"} · ${i.status.replace(/_/g, " ")}`,
+        at: i.created_at,
+        ward_id: null,
+      });
+    }
+
+    events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+    setActivity(events);
+
 
     setLoading(false);
     setLastUpdated(Date.now());
