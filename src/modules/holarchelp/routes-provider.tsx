@@ -136,6 +136,8 @@ export default function ProviderRoutes() {
       <Route path="ambulance" element={<ProviderShell><AmbulanceOpsLayout /></ProviderShell>}>
         {/* Consolidated Emergency Response Dashboard */}
         <Route index element={<EmergencyDashboardScreen />} />
+        <Route path="ops-dashboard" element={<ErOpsDashboard />} />
+
 
         {/* Navigation Tool */}
         <Route path="navigation" element={<NavigationScreen />} />
