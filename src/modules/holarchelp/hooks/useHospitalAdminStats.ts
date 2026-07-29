@@ -104,7 +104,7 @@ export function useHospitalAdminStats(
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const [wardRes, admRes, shiftRes, erRes, critRes] = await Promise.all([
+    const [wardRes, admRes, shiftRes, erRes, critRes, dischargedRes, recentIncRes] = await Promise.all([
       supabase
         .from("hospital_wards")
         .select("id, name, ward_type, bed_capacity")
