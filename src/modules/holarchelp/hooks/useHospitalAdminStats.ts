@@ -125,7 +125,7 @@ export function useHospitalAdminStats(
         .lte("starts_at", new Date(todayStart.getTime() + 864e5).toISOString()),
       supabase
         .from("holarchelp_incidents")
-        .select("id, incident_number, status, severity, created_at")
+        .select("id, incident_number, status, severity, triage_priority, created_at")
         .eq("destination_hospital_id", hospitalId)
         .in("status", ER_OPEN_STATUSES)
         .order("created_at", { ascending: true }),
@@ -135,7 +135,22 @@ export function useHospitalAdminStats(
         .eq("destination_hospital_id", hospitalId)
         .eq("severity", "critical")
         .gte("created_at", dayAgo),
+      supabase
+        .from("hospital_inpatient_admissions")
+        .select("id, ward_id, patient_name, discharged_at")
+        .eq("hospital_id", hospitalId)
+        .not("discharged_at", "is", null)
+        .order("discharged_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("holarchelp_incidents")
+        .select("id, incident_number, severity, status, created_at")
+        .eq("destination_hospital_id", hospitalId)
+        .gte("created_at", dayAgo)
+        .order("created_at", { ascending: false })
+        .limit(5),
     ]);
+
 
     const wards = (wardRes.data ?? []) as Omit<AdminWard, "beds" | "occupied">[];
     const wardIds = wards.map((w) => w.id);
