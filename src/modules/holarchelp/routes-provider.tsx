@@ -83,6 +83,7 @@ export default function ProviderRoutes() {
         <Route path="incoming" element={<Navigate to="/provider/hospital" replace />} />
         <Route path="triage" element={<Navigate to="/provider/hospital" replace />} />
         <Route path="dashboard" element={<HospitalDashboardScreen />} />
+        <Route path="admin-dashboard" element={<HospitalAdminDashboard />} />
         <Route path="admissions" element={<AdmissionsScreen />} />
         <Route path="wards" element={<WardsScreen />} />
         <Route path="inpatients" element={<InpatientsScreen />} />
