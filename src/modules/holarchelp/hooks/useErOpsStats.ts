@@ -268,7 +268,6 @@ export function useErOpsStats(providerId: string | null, refreshMs = 10_000): Er
     busy.current = false;
   }, [providerId]);
 
-  const responseRef = useRef<number[]>([]);
 
   useEffect(() => {
     load();
