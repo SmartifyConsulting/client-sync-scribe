@@ -168,6 +168,32 @@ export function useErOpsStats(providerId: string | null, refreshMs = 10_000): Er
       status: string;
     }[];
 
+    // Rostered crew per vehicle (from the fleet crew assignments)
+    const crewByVehicle = new Map<string, string[]>();
+    if (vehRows.length) {
+      const { data: assigns } = await supabase
+        .from("ambulance_crew_assignments")
+        .select("ambulance_id, member_id")
+        .in("ambulance_id", vehRows.map((v) => v.id));
+      const rows = (assigns ?? []) as { ambulance_id: string; member_id: string }[];
+      const memberIds = Array.from(new Set(rows.map((r) => r.member_id)));
+      const nameByMember = new Map<string, string>();
+      if (memberIds.length) {
+        const { data: members } = await supabase
+          .from("holarchelp_ambulance_members")
+          .select("id, invited_name, invited_email")
+          .in("id", memberIds);
+        for (const m of ((members ?? []) as { id: string; invited_name: string | null; invited_email: string | null }[])) {
+          nameByMember.set(m.id, m.invited_name || m.invited_email || "Crew");
+        }
+      }
+      for (const r of rows) {
+        const list = crewByVehicle.get(r.ambulance_id) ?? [];
+        list.push(nameByMember.get(r.member_id) ?? "Crew");
+        crewByVehicle.set(r.ambulance_id, list);
+      }
+    }
+
     const pingByVehicle = new Map<string, string>();
     if (vehRows.length) {
       const { data: pings } = await supabase
@@ -180,6 +206,7 @@ export function useErOpsStats(providerId: string | null, refreshMs = 10_000): Er
         if (p.vehicle_id && !pingByVehicle.has(p.vehicle_id)) pingByVehicle.set(p.vehicle_id, p.recorded_at);
       }
     }
+
 
     const incidentByVehicle = new Map<string, string>();
     for (const i of mine) if (i.assigned_ambulance_id) incidentByVehicle.set(i.assigned_ambulance_id, i.id);
