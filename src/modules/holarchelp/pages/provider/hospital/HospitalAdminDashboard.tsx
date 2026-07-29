@@ -1,16 +1,26 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useProviderAccess } from "../../../components/ProviderGate";
-import { useHospitalAdminStats, useWardOptions } from "../../../hooks/useHospitalAdminStats";
+import {
+  useHospitalAdminStats,
+  useWardOptions,
+  type ActivityEvent,
+  type ErIncidentLite,
+} from "../../../hooks/useHospitalAdminStats";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
+  Activity,
   AlertTriangle,
+  Ambulance,
   BedDouble,
   CheckCircle2,
   ClipboardCheck,
+  LogOut,
   Pill,
   RefreshCw,
+  Siren,
   Timer,
   UserCog,
   Users,
@@ -18,9 +28,48 @@ import {
 
 const ALL = "all";
 
+const triageTone = {
+  critical: "border-destructive/50 bg-destructive/10 text-destructive",
+  urgent: "border-warning/50 bg-warning/10 text-warning",
+  routine: "border-success/50 bg-success/10 text-success",
+} as const;
+
+const activityIcon = {
+  admission: BedDouble,
+  discharge: LogOut,
+  prescription: Pill,
+  shift: UserCog,
+  incident: Ambulance,
+} as const satisfies Record<ActivityEvent["kind"], typeof BedDouble>;
+
+function triageLevel(i: ErIncidentLite): keyof typeof triageTone {
+  const v = (i.triage_priority || i.severity || "").toLowerCase();
+  if (v === "critical" || v === "immediate" || v === "red") return "critical";
+  if (v === "high" || v === "urgent" || v === "amber" || v === "orange") return "urgent";
+  return "routine";
+}
+
+function waitedFor(iso: string) {
+  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 60) return `${mins} min`;
+  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+}
+
+function timeAgo(iso: string) {
+  const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+  if (s < 60) return `${s} seconds ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m} minute${m === 1 ? "" : "s"} ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} hour${h === 1 ? "" : "s"} ago`;
+  const d = Math.floor(h / 24);
+  return `${d} day${d === 1 ? "" : "s"} ago`;
+}
+
 function relativeSeconds(ts: number) {
   return Math.max(0, Math.round((Date.now() - ts) / 1000));
 }
+
 
 function KpiCard({
   icon: Icon,
