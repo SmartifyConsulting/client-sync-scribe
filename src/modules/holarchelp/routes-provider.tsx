@@ -35,6 +35,8 @@ import VehicleProfileScreen from "./pages/provider/ambulance/VehicleProfileScree
 
 // Consolidated Screens (Option A: Aggressive Consolidation)
 import EmergencyDashboardScreen from "./pages/provider/ambulance/EmergencyDashboardScreen";
+import ErOpsDashboard from "./pages/provider/ambulance/ErOpsDashboard";
+
 import FleetOperationsScreen from "./pages/provider/ambulance/FleetOperationsScreen";
 import HospitalNetworkScreen from "./pages/provider/ambulance/HospitalNetworkScreen";
 import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitoringScreen";
@@ -134,6 +136,8 @@ export default function ProviderRoutes() {
       <Route path="ambulance" element={<ProviderShell><AmbulanceOpsLayout /></ProviderShell>}>
         {/* Consolidated Emergency Response Dashboard */}
         <Route index element={<EmergencyDashboardScreen />} />
+        <Route path="ops-dashboard" element={<ErOpsDashboard />} />
+
 
         {/* Navigation Tool */}
         <Route path="navigation" element={<NavigationScreen />} />

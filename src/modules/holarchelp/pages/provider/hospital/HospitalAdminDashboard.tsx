@@ -1,16 +1,26 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useProviderAccess } from "../../../components/ProviderGate";
-import { useHospitalAdminStats, useWardOptions } from "../../../hooks/useHospitalAdminStats";
+import {
+  useHospitalAdminStats,
+  useWardOptions,
+  type ActivityEvent,
+  type ErIncidentLite,
+} from "../../../hooks/useHospitalAdminStats";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
+  Activity,
   AlertTriangle,
+  Ambulance,
   BedDouble,
   CheckCircle2,
   ClipboardCheck,
+  LogOut,
   Pill,
   RefreshCw,
+  Siren,
   Timer,
   UserCog,
   Users,
@@ -18,9 +28,48 @@ import {
 
 const ALL = "all";
 
+const triageTone = {
+  critical: "border-destructive/50 bg-destructive/10 text-destructive",
+  urgent: "border-warning/50 bg-warning/10 text-warning",
+  routine: "border-success/50 bg-success/10 text-success",
+} as const;
+
+const activityIcon = {
+  admission: BedDouble,
+  discharge: LogOut,
+  prescription: Pill,
+  shift: UserCog,
+  incident: Ambulance,
+} as const satisfies Record<ActivityEvent["kind"], typeof BedDouble>;
+
+function triageLevel(i: ErIncidentLite): keyof typeof triageTone {
+  const v = (i.triage_priority || i.severity || "").toLowerCase();
+  if (v === "critical" || v === "immediate" || v === "red") return "critical";
+  if (v === "high" || v === "urgent" || v === "amber" || v === "orange") return "urgent";
+  return "routine";
+}
+
+function waitedFor(iso: string) {
+  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 60) return `${mins} min`;
+  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+}
+
+function timeAgo(iso: string) {
+  const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+  if (s < 60) return `${s} seconds ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m} minute${m === 1 ? "" : "s"} ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} hour${h === 1 ? "" : "s"} ago`;
+  const d = Math.floor(h / 24);
+  return `${d} day${d === 1 ? "" : "s"} ago`;
+}
+
 function relativeSeconds(ts: number) {
   return Math.max(0, Math.round((Date.now() - ts) / 1000));
 }
+
 
 function KpiCard({
   icon: Icon,
@@ -275,6 +324,66 @@ export default function HospitalAdminDashboard() {
           </div>
         </Panel>
       </div>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Panel icon={Siren} title="ER queue">
+          <div className="divide-y">
+            {stats.erQueue.slice(0, 4).map((i) => {
+              const level = triageLevel(i);
+              return (
+                <div key={i.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {i.incident_number ?? `#${i.id.slice(0, 8)}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{i.status.replace(/_/g, " ")}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className={cn("rounded-full border px-2 py-0.5 text-[11px] font-bold uppercase", triageTone[level])}>
+                      {level}
+                    </span>
+                    <span className="w-14 text-right text-xs font-semibold tabular-nums text-muted-foreground">
+                      {waitedFor(i.created_at)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            {!stats.erQueue.length && (
+              <p className="py-6 text-center text-xs text-muted-foreground">No patients waiting in ER.</p>
+            )}
+          </div>
+          <div className="border-t px-4 py-2.5">
+            <Button asChild variant="outline" size="sm" className="w-full rounded-xl">
+              <Link to="/provider/hospital">View full queue</Link>
+            </Button>
+          </div>
+        </Panel>
+
+        <Panel icon={Activity} title="Recent activity">
+          <ol className="divide-y">
+            {stats.activity.slice(0, 5).map((e) => {
+              const Icon = activityIcon[e.kind];
+              return (
+                <li key={e.id} className="flex items-start gap-3 px-4 py-2.5">
+                  <span className="mt-0.5 rounded-lg bg-muted p-1.5">
+                    <Icon className="h-3.5 w-3.5 text-primary" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{e.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{e.detail}</p>
+                  </div>
+                  <span className="shrink-0 text-xs font-medium text-muted-foreground">{timeAgo(e.at)}</span>
+                </li>
+              );
+            })}
+            {!stats.activity.length && (
+              <li className="py-6 text-center text-xs text-muted-foreground">No activity recorded yet.</li>
+            )}
+          </ol>
+        </Panel>
+      </div>
     </div>
   );
 }
+

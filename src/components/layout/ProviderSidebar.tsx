@@ -60,6 +60,8 @@ const hospitalNav: NavItem[] = [
 const ambulanceNav: NavItem[] = [
   // Active missions are now drill-downs from the Dispatcher Console inside Dispatch Dashboard.
   { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
+  { icon: Activity, labelKey: "nav.erOpsDashboard", to: "/provider/ambulance/ops-dashboard" },
+
   // MONITORING (Fleet Live)
   { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
   // ADMIN — Users, Crew, Fleet Admin, Hospitals

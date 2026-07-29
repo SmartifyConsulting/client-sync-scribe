@@ -38,7 +38,17 @@ export type ErIncidentLite = {
   incident_number: string | null;
   status: string;
   severity: string | null;
+  triage_priority: string | null;
   created_at: string;
+};
+
+export type ActivityEvent = {
+  id: string;
+  kind: "admission" | "discharge" | "prescription" | "shift" | "incident";
+  title: string;
+  detail: string;
+  at: string;
+  ward_id: string | null;
 };
 
 export type HospitalAdminStats = {
@@ -46,6 +56,7 @@ export type HospitalAdminStats = {
   admissions: AdmissionLite[];
   shifts: ShiftLite[];
   erQueue: ErIncidentLite[];
+  activity: ActivityEvent[];
   pendingScripts: number;
   criticalLast24h: number;
   beds: { total: number; occupied: number; pct: number };
@@ -56,6 +67,7 @@ export type HospitalAdminStats = {
   lastUpdated: number;
   refresh: () => void;
 };
+
 
 const ER_OPEN_STATUSES = [
   "pending",
@@ -76,6 +88,8 @@ export function useHospitalAdminStats(
   const [admissions, setAdmissions] = useState<AdmissionLite[]>([]);
   const [shifts, setShifts] = useState<ShiftLite[]>([]);
   const [erQueue, setErQueue] = useState<ErIncidentLite[]>([]);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
+
   const [pendingScripts, setPendingScripts] = useState(0);
   const [criticalLast24h, setCriticalLast24h] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -90,7 +104,7 @@ export function useHospitalAdminStats(
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const [wardRes, admRes, shiftRes, erRes, critRes] = await Promise.all([
+    const [wardRes, admRes, shiftRes, erRes, critRes, dischargedRes, recentIncRes] = await Promise.all([
       supabase
         .from("hospital_wards")
         .select("id, name, ward_type, bed_capacity")
@@ -111,7 +125,7 @@ export function useHospitalAdminStats(
         .lte("starts_at", new Date(todayStart.getTime() + 864e5).toISOString()),
       supabase
         .from("holarchelp_incidents")
-        .select("id, incident_number, status, severity, created_at")
+        .select("id, incident_number, status, severity, triage_priority, created_at")
         .eq("destination_hospital_id", hospitalId)
         .in("status", ER_OPEN_STATUSES)
         .order("created_at", { ascending: true }),
@@ -121,7 +135,22 @@ export function useHospitalAdminStats(
         .eq("destination_hospital_id", hospitalId)
         .eq("severity", "critical")
         .gte("created_at", dayAgo),
+      supabase
+        .from("hospital_inpatient_admissions")
+        .select("id, ward_id, patient_name, discharged_at")
+        .eq("hospital_id", hospitalId)
+        .not("discharged_at", "is", null)
+        .order("discharged_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("holarchelp_incidents")
+        .select("id, incident_number, severity, status, created_at")
+        .eq("destination_hospital_id", hospitalId)
+        .gte("created_at", dayAgo)
+        .order("created_at", { ascending: false })
+        .limit(5),
     ]);
+
 
     const wards = (wardRes.data ?? []) as Omit<AdminWard, "beds" | "occupied">[];
     const wardIds = wards.map((w) => w.id);
@@ -158,17 +187,92 @@ export function useHospitalAdminStats(
 
     // Pharmacy queue: scripts raised in the last 2 hours for currently-admitted patients.
     const patientIds = Array.from(new Set(adm.map((a) => a.patient_id).filter(Boolean))) as string[];
+    let scriptRows: { id: string; medication: string | null; created_at: string; patient_id: string }[] = [];
     if (patientIds.length) {
-      const { count } = await supabase
-        .from("prescriptions")
-        .select("id", { count: "exact", head: true })
-        .in("patient_id", patientIds)
-        .eq("status", "active")
-        .gte("created_at", twoHoursAgo);
+      const [{ count }, { data: recentScripts }] = await Promise.all([
+        supabase
+          .from("prescriptions")
+          .select("id", { count: "exact", head: true })
+          .in("patient_id", patientIds)
+          .eq("status", "active")
+          .gte("created_at", twoHoursAgo),
+        supabase
+          .from("prescriptions")
+          .select("id, medication, created_at, patient_id")
+          .in("patient_id", patientIds)
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
       setPendingScripts(count ?? 0);
+      scriptRows = (recentScripts ?? []) as typeof scriptRows;
     } else {
       setPendingScripts(0);
     }
+
+    // ---- Recent activity timeline (merged, newest first) ----
+    const nameById = new Map(adm.map((a) => [a.patient_id ?? "", a.patient_name] as const));
+    const wardById = new Map(adm.map((a) => [a.patient_id ?? "", a.ward_id] as const));
+    const wardNameById = new Map(wards.map((w) => [w.id, w.name] as const));
+    const events: ActivityEvent[] = [];
+
+    for (const a of adm.slice(0, 6)) {
+      events.push({
+        id: `adm-${a.id}`,
+        kind: "admission",
+        title: `${a.patient_name} admitted`,
+        detail: a.ward_id ? (wardNameById.get(a.ward_id) ?? "Ward") : (a.reason ?? "Awaiting bed"),
+        at: a.admitted_at || a.created_at,
+        ward_id: a.ward_id,
+      });
+    }
+
+    for (const d of ((dischargedRes.data ?? []) as { id: string; ward_id: string | null; patient_name: string; discharged_at: string }[])) {
+      events.push({
+        id: `dis-${d.id}`,
+        kind: "discharge",
+        title: `${d.patient_name} discharged`,
+        detail: d.ward_id ? (wardNameById.get(d.ward_id) ?? "Ward") : "Discharged",
+        at: d.discharged_at,
+        ward_id: d.ward_id,
+      });
+    }
+
+    for (const s of scriptRows) {
+      events.push({
+        id: `rx-${s.id}`,
+        kind: "prescription",
+        title: `Prescription issued${s.medication ? ` — ${s.medication}` : ""}`,
+        detail: nameById.get(s.patient_id) ?? "Inpatient",
+        at: s.created_at,
+        ward_id: wardById.get(s.patient_id) ?? null,
+      });
+    }
+
+    for (const s of ((shiftRes.data ?? []) as ShiftLite[]).filter((s) => s.clocked_in_at).slice(0, 6)) {
+      events.push({
+        id: `shift-${s.id}`,
+        kind: "shift",
+        title: s.clocked_out_at ? `${s.staff_name} handed over` : `${s.staff_name} clocked in`,
+        detail: `${s.staff_role}${s.ward_id ? ` · ${wardNameById.get(s.ward_id) ?? "Ward"}` : ""}`,
+        at: (s.clocked_out_at || s.clocked_in_at) as string,
+        ward_id: s.ward_id,
+      });
+    }
+
+    for (const i of ((recentIncRes.data ?? []) as ErIncidentLite[])) {
+      events.push({
+        id: `inc-${i.id}`,
+        kind: "incident",
+        title: `Emergency ${i.incident_number ?? i.id.slice(0, 8)}`,
+        detail: `${i.severity ?? "unknown"} · ${i.status.replace(/_/g, " ")}`,
+        at: i.created_at,
+        ward_id: null,
+      });
+    }
+
+    events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+    setActivity(events);
+
 
     setLoading(false);
     setLastUpdated(Date.now());
@@ -205,6 +309,8 @@ export function useHospitalAdminStats(
     admissions: scopedAdmissions,
     shifts: scopedShifts,
     erQueue,
+    activity: wardId ? activity.filter((e) => !e.ward_id || e.ward_id === wardId) : activity,
+
     pendingScripts,
     criticalLast24h,
     beds: {
