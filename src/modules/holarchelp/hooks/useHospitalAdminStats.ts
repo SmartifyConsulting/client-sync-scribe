@@ -38,7 +38,17 @@ export type ErIncidentLite = {
   incident_number: string | null;
   status: string;
   severity: string | null;
+  triage_priority: string | null;
   created_at: string;
+};
+
+export type ActivityEvent = {
+  id: string;
+  kind: "admission" | "discharge" | "prescription" | "shift" | "incident";
+  title: string;
+  detail: string;
+  at: string;
+  ward_id: string | null;
 };
 
 export type HospitalAdminStats = {
@@ -46,6 +56,7 @@ export type HospitalAdminStats = {
   admissions: AdmissionLite[];
   shifts: ShiftLite[];
   erQueue: ErIncidentLite[];
+  activity: ActivityEvent[];
   pendingScripts: number;
   criticalLast24h: number;
   beds: { total: number; occupied: number; pct: number };
@@ -56,6 +67,7 @@ export type HospitalAdminStats = {
   lastUpdated: number;
   refresh: () => void;
 };
+
 
 const ER_OPEN_STATUSES = [
   "pending",
