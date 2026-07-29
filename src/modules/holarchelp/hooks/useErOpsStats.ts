@@ -214,7 +214,13 @@ export function useErOpsStats(providerId: string | null, refreshMs = 10_000): Er
     setVehicles(
       vehRows.map((v) => ({
         ...v,
-        crew: shifts.filter((s) => s.ambulance_id === v.id).map((s) => nameByUser.get(s.user_id) ?? "Crew"),
+        crew: Array.from(
+          new Set([
+            ...shifts.filter((s) => s.ambulance_id === v.id).map((s) => nameByUser.get(s.user_id) ?? "Crew"),
+            ...(crewByVehicle.get(v.id) ?? []),
+          ]),
+        ),
+
         lastPingAt: pingByVehicle.get(v.id) ?? null,
         incidentId: incidentByVehicle.get(v.id) ?? null,
       })),
