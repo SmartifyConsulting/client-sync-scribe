@@ -1,42 +1,42 @@
-## My Biolog — port of Personal Bestie's tracking + correlation engine
+## Goal
 
-Bring across only the functionality (programme administration, daily tracking, correlations). None of the Personal Bestie visual design — everything uses Holarc's existing tokens, `SectionAccordion`, teal/blue role colours, Sora/Manrope type, and the standard button/tab formats.
+Add a **new** Hospital Admin Dashboard alongside the existing one (nothing removed). Phase 1 = KPI row + Bed status by ward + Active alerts, live from the database, ward filter, 10s auto-refresh.
 
-### Navigation
-- New nav entry placed **after Test Results and before Tasks** in both menus: **My Biolog** for patients, **Biolog** alongside the doctor's **Test Results** entry. Route `/biolog`.
-- Sub-tabs inside the page: **Today** (check-in) · **History** · **Insights** · **Programmes** · **Customise**.
+## What I verified first
 
-### 1. Customisable trackables (per user)
-Every user configures their own biolog:
-- **Wellbeing sections** — good/neutral/bad + 1–10 intensity, grouped Physical / Mental. Seeded with standard ones (sleep, energy, pain, allergies, state of mind, focus, motivation) but each can be renamed, disabled, reordered, or replaced with custom ones.
-- **Foods** — personal food list by category, used for meal logging (breakfast/lunch/dinner/snack).
-- **Exercises** — categories + items, with intensity, quantity/duration and performance rating.
-- **Medications / supplements** — label, dose amount and unit; ticked off with quantity at check-in.
-- **Section order** — user-defined order of the check-in blocks.
+- Tables exist: `hospital_wards`, `hospital_beds`, `hospital_inpatient_admissions`, `hospital_staff_shifts`, `prescriptions`, `holarchelp_incidents`.
+- **All of `hospital_wards`, `hospital_beds`, `hospital_inpatient_admissions`, `hospital_staff_shifts` currently have 0 rows** — so the dashboard would render blank without seed data. Seeding is part of this plan.
+- `prescriptions.status` today only has `active` / `cancelled` (no `pending`), and shifts have no `sick_leave` status yet — those will be introduced via the seeded demo rows and treated as valid status values.
 
-### 2. Daily check-in (tracking)
-One screen per day: wellbeing rows, meals, exercise, medication. Supports editing a past entry from History. Includes **voice check-in**: record, transcribe, and let AI pre-fill the sliders, foods, exercises and medications — you review before saving. History groups entries by Today / This Month / Year, matching the grouping pattern already used in Sessions.
+## Data mapping
 
-### 3. Correlations (insights)
-- Averages chart per variable with day / week / month periods and period-vs-period comparison.
-- Correlation cards grouped by category (Diet & Physical, Mental & Cognitive, Exercise & Result, plus user-created groups), each computing "X is N% higher/lower with Y" over a chosen date range (all time / this week / last week / this month / custom).
-- Users toggle which correlations show, add custom ones (pick outcome variables + input variable + group), and get AI-suggested correlations based on what they actually track.
+| KPI | Source |
+| --- | --- |
+| Bed occupancy | active `hospital_inpatient_admissions` (status `admitted`) ÷ count of `hospital_beds` for the hospital's wards (falls back to ward `bed_capacity` if no bed rows) |
+| ER wait time | `holarchelp_incidents` heading to this hospital not yet `at_hospital` — average minutes since `created_at` + count |
+| Ready for discharge | inpatient admissions with status `discharge_pending` |
+| Staff on duty | today's `hospital_staff_shifts` clocked in vs. rostered, plus count with status `sick_leave` |
 
-### 4. Programmes
-- A programme is a named plan (diet, exercise, or mixed) with a description, duration, target trackables, and optional daily targets.
-- **Doctors** create programmes and assign them to a patient from the patient record; **patients** can create their own.
-- Active programmes surface on the check-in screen as the day's focus, and the Insights view can be filtered to a programme's window so before/during comparison is possible.
-- Programme list shows status (active / completed / cancelled), assigning practitioner, and adherence (days checked in vs days elapsed).
+## Build steps
 
-### 5. Doctor visibility
-Read-only **Biolog** tab in the patient record showing that patient's entries, adherence and correlations — gated by the existing patient consent / profile-share scopes (a new `biolog` scope is added to the granular "can view" sub-selections already in place).
+1. **Seed demo data** (migration-free, via data insert) for one hospital — **Netcare Milpark Hospital** unless you name another:
+   - 5 wards (ICU, General A, General B, Maternity, Paediatrics) with capacities totalling ~128 beds, plus `hospital_beds` rows.
+   - 8 inpatient admissions linked to existing patient records — mix of `admitted` and `discharge_pending` (2 of them created >6h ago to trigger the high-priority alert).
+   - ~12 staff shifts today: mostly clocked in, 3 with status `sick_leave`.
+   - A few `prescriptions` rows with status `pending` created within the last 2 hours.
+2. **New hook** `useHospitalAdminStats(hospitalId, wardId)` — one batched fetch of wards, beds, admissions, shifts, prescriptions, ER incidents; recomputes derived KPIs; refetch every 10s and exposes `lastUpdated`.
+3. **New screen** `HospitalAdminDashboard.tsx`:
+   - Header: title, ward filter (tabs on desktop / select on mobile, "All wards" default), "Last updated: Xs ago" + manual refresh.
+   - KPI row: 4 cards in the existing `StatCard` style (percentage + raw counts).
+   - Left column: per-ward progress bars `Ward A (ICU) — 18/20`, bar red >85%, amber 70–85%, green <70% (semantic tokens `destructive` / `warning` / `success`).
+   - Right column: 4 alert cards — long-waiting discharge_pending, sick-leave staffing, pending pharmacy scripts, and a green "no critical incidents in 24h" card.
+4. **Route + nav**: `/provider/hospital/admin-dashboard`, added to the hospital sidebar as "Admin Dashboard" beneath the existing Dashboard entry. The existing `HospitalDashboardScreen` stays exactly as is.
+5. i18n keys added to `en.json` for all new labels.
 
-### Technical notes
-- New tables (all RLS'd to the owning user, with grants): `biolog_sections`, `biolog_section_order`, `biolog_foods`, `biolog_exercises`, `biolog_medications`, `biolog_correlations`, `biolog_entries` (JSONB payload per day), `biolog_programmes`, `biolog_programme_assignments`. Doctor read access via the existing `doctor_patient_access` / `patient_profile_shares` helpers; `biolog` added to the share-scope list.
-- Ported logic lives in `src/features/biolog/` — `lib/correlations.ts` (built-in definitions + `computeInsight`), hooks for entries/sections/programmes, and components for check-in, history, insights, programmes and customise.
-- No localStorage fallback: entries are written straight to the database (Personal Bestie's local-first storage layer is dropped).
-- Two edge functions: `biolog-voice-checkin` (transcribe + parse into the user's own trackables) and `biolog-suggest-correlations`, both on Lovable AI.
-- i18n keys added to `en.json` for nav and all new labels.
+## Deferred to your next go-ahead
 
-### Out of scope
-Personal Bestie's fans/followers, tasks, invitations, public profiles, billing and its visual theme are not imported.
+ER queue panel, recent-activity timeline, and the ER Dashboard redesign.
+
+## Technical notes
+
+Styling reuses existing card/panel patterns and semantic color tokens only (no hardcoded colors). Hospital id comes from `useProviderAccess()`. Refresh uses a single interval cleaned up on unmount; no realtime subscriptions added in Phase 1.
