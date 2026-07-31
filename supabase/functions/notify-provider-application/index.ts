@@ -132,15 +132,15 @@ serve(async (req) => {
         </td></tr>
         <tr><td style="padding:20px 28px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.55">
-            <tr><td style="padding:4px 0;color:#64748b;width:160px">Organisation</td><td><strong>${esc(body.orgName)}</strong></td></tr>
+            <tr><td style="padding:4px 0;color:#64748b;width:160px">Organisation</td><td><strong>${esc(verified.orgName)}</strong></td></tr>
             <tr><td style="padding:4px 0;color:#64748b">Type</td><td>${esc(kindLabel)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Registration #</td><td>${esc(body.registrationNumber)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Address</td><td>${esc(body.address)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Org email</td><td>${esc(body.orgEmail)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Org phone</td><td>${esc(body.orgPhone)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Administrator</td><td>${esc(body.adminName)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Admin email</td><td>${esc(body.adminEmail)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Admin phone</td><td>${esc(body.adminPhone)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Registration #</td><td>${esc(verified.registrationNumber)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Address</td><td>${esc(verified.address)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Org email</td><td>${esc(verified.orgEmail)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Org phone</td><td>${esc(verified.orgPhone)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Administrator</td><td>${esc(verified.adminName)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Admin email</td><td>${esc(verified.adminEmail)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Admin phone</td><td>${esc(verified.adminPhone)}</td></tr>
           </table>
         </td></tr>
         <tr><td align="center" style="padding:8px 28px 28px">
@@ -155,9 +155,9 @@ serve(async (req) => {
   </table>
 </body></html>`;
 
-    const text = `New ${kindLabel} application: ${body.orgName}
-Administrator: ${body.adminName} <${body.adminEmail}>
-Registration #: ${body.registrationNumber ?? ""}
+    const text = `New ${kindLabel} application: ${verified.orgName}
+Administrator: ${verified.adminName} <${verified.adminEmail}>
+Registration #: ${verified.registrationNumber ?? ""}
 
 Approve: ${approveUrl}
 Reject:  ${rejectUrl}`;
@@ -167,7 +167,7 @@ Reject:  ${rejectUrl}`;
       subject,
       html,
       text,
-      replyTo: body.adminEmail,
+      replyTo: verified.adminEmail ?? undefined,
     });
 
     if (!result.ok) {
