@@ -15,6 +15,8 @@ import {
   DEFAULT_SECTIONS,
   EMPTY_PAYLOAD,
 } from "./types";
+import { DEFAULT_FOODS } from "./defaultFoods";
+import { DEFAULT_EXERCISES } from "./defaultExercises";
 
 const db = supabase as any;
 
@@ -60,6 +62,26 @@ export function useBiologSections(ownerUserId?: string) {
       qc.invalidateQueries({ queryKey: ["biolog-sections", owner] });
     })();
   }, [isOwn, owner, query.isLoading, query.data?.length, qc]);
+
+  // Backfill any newly-added default trackables (e.g. Weight) for users who were
+  // already seeded before that default existed.
+  useEffect(() => {
+    if (!isOwn || !owner || query.isLoading || !query.data) return;
+    const existingKeys = new Set(query.data.map((s) => s.key));
+    const missing = DEFAULT_SECTIONS.filter((s) => !existingKeys.has(s.key));
+    if (missing.length === 0) return;
+    (async () => {
+      const rows = missing.map((s, i) => ({
+        user_id: owner,
+        key: s.key,
+        label: s.label,
+        group_name: s.group_name,
+        sort_order: (query.data?.length ?? 0) + i,
+      }));
+      await db.from("biolog_sections").upsert(rows, { onConflict: "user_id,key" });
+      qc.invalidateQueries({ queryKey: ["biolog-sections", owner] });
+    })();
+  }, [isOwn, owner, query.isLoading, query.data, qc]);
 
   return query;
 }
@@ -116,10 +138,58 @@ function useSimpleList<T>(table: string, key: string, ownerUserId?: string, orde
   });
 }
 
-export const useBiologFoods = (owner?: string) =>
-  useSimpleList<BiologFood>("biolog_foods", "biolog-foods", owner);
-export const useBiologExercises = (owner?: string) =>
-  useSimpleList<BiologExercise>("biolog_exercises", "biolog-exercises", owner);
+const seededFoodOwners = new Set<string>();
+
+export function useBiologFoods(ownerUserId?: string) {
+  const { owner, isOwn } = useBiologOwner(ownerUserId);
+  const qc = useQueryClient();
+  const query = useSimpleList<BiologFood>("biolog_foods", "biolog-foods", ownerUserId);
+
+  // Seed a starter food library (with kJ/kcal) the first time someone opens their own biolog.
+  useEffect(() => {
+    if (!isOwn || !owner || query.isLoading || (query.data?.length ?? 0) > 0) return;
+    if (seededFoodOwners.has(owner)) return;
+    seededFoodOwners.add(owner);
+    (async () => {
+      const rows = DEFAULT_FOODS.map((f) => ({ ...f, user_id: owner }));
+      const { error } = await db.from("biolog_foods").upsert(rows, { onConflict: "user_id,name" });
+      if (error) {
+        seededFoodOwners.delete(owner);
+        return;
+      }
+      qc.invalidateQueries({ queryKey: ["biolog-foods", owner] });
+    })();
+  }, [isOwn, owner, query.isLoading, query.data?.length, qc]);
+
+  return query;
+}
+
+const seededExerciseOwners = new Set<string>();
+
+export function useBiologExercises(ownerUserId?: string) {
+  const { owner, isOwn } = useBiologOwner(ownerUserId);
+  const qc = useQueryClient();
+  const query = useSimpleList<BiologExercise>("biolog_exercises", "biolog-exercises", ownerUserId);
+
+  // Seed a starter exercise library the first time someone opens their own biolog.
+  useEffect(() => {
+    if (!isOwn || !owner || query.isLoading || (query.data?.length ?? 0) > 0) return;
+    if (seededExerciseOwners.has(owner)) return;
+    seededExerciseOwners.add(owner);
+    (async () => {
+      const rows = DEFAULT_EXERCISES.map((e) => ({ ...e, user_id: owner }));
+      const { error } = await db.from("biolog_exercises").upsert(rows, { onConflict: "user_id,name" });
+      if (error) {
+        seededExerciseOwners.delete(owner);
+        return;
+      }
+      qc.invalidateQueries({ queryKey: ["biolog-exercises", owner] });
+    })();
+  }, [isOwn, owner, query.isLoading, query.data?.length, qc]);
+
+  return query;
+}
+
 export const useBiologMedications = (owner?: string) =>
   useSimpleList<BiologMedication>("biolog_medications", "biolog-medications", owner, "label");
 
@@ -149,6 +219,22 @@ export function useRemoveLibraryItem(
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await db.from(table).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [queryKey, owner] }),
+  });
+}
+
+export function useUpdateLibraryItem(
+  table: "biolog_foods" | "biolog_exercises" | "biolog_medications",
+  queryKey: string,
+  ownerUserId?: string,
+) {
+  const { owner } = useBiologOwner(ownerUserId);
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, values }: { id: string; values: Record<string, unknown> }) => {
+      const { error } = await db.from(table).update(values).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: [queryKey, owner] }),
@@ -205,6 +291,7 @@ export function useSaveEntry(ownerUserId?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: { date: string; payload: BiologPayload; note?: string | null }) => {
+      if (!owner) return;
       const { error } = await db.from("biolog_entries").upsert(
         {
           user_id: owner,

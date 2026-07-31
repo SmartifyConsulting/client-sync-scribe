@@ -7,11 +7,14 @@ export default function DoctorDocumentsPage() {
   const { t } = useTranslation();
   return (
     <div className="space-y-3">
-      <h1 className="text-3xl font-bold text-foreground">{t("documents.title")}</h1>
+      <div>
+        <h1 className="text-3xl font-bold text-foreground">{t("documents.title")}</h1>
+        <p className="mt-1 text-muted-foreground text-xs">Manage patient documents and reusable templates.</p>
+      </div>
       <Tabs defaultValue="all" className="space-y-3">
-        <TabsList className="inline-flex h-auto w-auto flex-wrap gap-1 p-1">
-          <TabsTrigger value="all" className="text-xs whitespace-nowrap px-3 py-1.5 hover:text-foreground data-[state=active]:text-primary-foreground">All Documents</TabsTrigger>
-          <TabsTrigger value="templates" className="text-xs whitespace-nowrap px-3 py-1.5 hover:text-foreground data-[state=active]:text-primary-foreground">Templates</TabsTrigger>
+        <TabsList className="bg-neutral-600">
+          <TabsTrigger value="all" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-black text-white">All Documents</TabsTrigger>
+          <TabsTrigger value="templates" className="text-xs whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-black text-white">Templates</TabsTrigger>
         </TabsList>
         <TabsContent value="all">
           <DoctorDocumentsTab />

@@ -620,7 +620,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               </div>
             </div>
             <Tabs defaultValue="active" className="w-full">
-              <TabsList className="bg-neutral-700">
+              <TabsList className="bg-neutral-600">
                 <TabsTrigger value="active" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Active ({doctors.length})</TabsTrigger>
                 <TabsTrigger value="hidden" className="text-white data-[state=active]:bg-white data-[state=active]:text-black">Hidden ({hiddenDoctors.length})</TabsTrigger>
               </TabsList>

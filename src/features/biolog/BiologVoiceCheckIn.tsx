@@ -139,8 +139,9 @@ export function BiologVoiceCheckIn({
   return (
     <Button
       type="button"
-      variant={recording ? "destructive" : "outline"}
+      variant={recording ? "destructive" : "default"}
       size="sm"
+      className={recording ? undefined : "bg-primary text-white hover:bg-primary/90"}
       onClick={recording ? stop : start}
       disabled={busy}
     >

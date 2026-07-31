@@ -467,11 +467,11 @@ export function CompactTodoList() {
 
         {/* Tabs */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
-          <TabsList className="h-7 w-full bg-neutral-700 p-0.5">
-            <TabsTrigger value="active" className="text-sm h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+          <TabsList className="h-9 w-full bg-neutral-600 p-1">
+            <TabsTrigger value="active" className="text-sm h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               {t("doctorDashboard.active")} ({activeCount})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="text-sm h-6 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger value="completed" className="text-sm h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               {t("doctorDashboard.done")} ({completedCount})
             </TabsTrigger>
           </TabsList>
@@ -569,7 +569,7 @@ export function CompactTodoList() {
               const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
               if (buckets.length === 0) return null;
               return (
-                <Accordion type="multiple" defaultValue={[buckets[0].key]} className={SECTION_FRAME_CLASS}>
+                <Accordion type="multiple" defaultValue={[buckets[0].key]} className={cn(SECTION_FRAME_CLASS, "border-neutral-200")}>
                   {buckets.map((b) => (
                     <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_CLASS}>
                       <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "px-3 py-2")}>
@@ -583,7 +583,7 @@ export function CompactTodoList() {
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
                         <Accordion type="multiple" className="space-y-2">
                           {patientGroups(grouped[b.key]).map(([patientName, items]) => (
-                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border border-primary/40 rounded-lg overflow-hidden bg-background mb-2">
+                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border border-neutral-200 rounded-lg overflow-hidden bg-background mb-2">
                               <AccordionTrigger className="px-3 py-3 hover:no-underline hover:bg-muted/50 text-foreground">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   <UserIcon className="h-4 w-4 text-primary shrink-0" />

@@ -119,8 +119,41 @@ export function TemplateSectionEditor({
   };
 
   const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
+    const el = editorRef.current;
+    if (!el) return;
     ensureSelection();
-    runCommand(format);
+    el.focus();
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return;
+
+    // Toggle based on whether the selection is already wrapped in this exact tag —
+    // not execCommand's queryCommandState, which goes by computed CSS font-weight
+    // and can see text as "already bold" (e.g. inherited from a heading) and strip
+    // it instead of adding emphasis.
+    const tagName = format === "bold" ? "STRONG" : format === "italic" ? "EM" : "U";
+    const ancestor = range.commonAncestorContainer;
+    const ancestorEl = (ancestor.nodeType === Node.TEXT_NODE ? ancestor.parentElement : (ancestor as Element)) ?? undefined;
+    const existingTag = ancestorEl?.closest(tagName.toLowerCase());
+
+    if (existingTag && el.contains(existingTag)) {
+      const parent = existingTag.parentNode;
+      while (existingTag.firstChild) parent?.insertBefore(existingTag.firstChild, existingTag);
+      parent?.removeChild(existingTag);
+    } else {
+      const fragment = range.extractContents();
+      const wrapper = document.createElement(tagName);
+      wrapper.appendChild(fragment);
+      range.insertNode(wrapper);
+
+      const newRange = document.createRange();
+      newRange.selectNodeContents(wrapper);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+    }
+
+    emit();
   };
 
   const applyFontFamily = (family: string) => {
@@ -133,22 +166,30 @@ export function TemplateSectionEditor({
     if (!el) return;
     ensureSelection();
     el.focus();
-    // execCommand only supports sizes 1-7, so tag the selection then rewrite
-    // the generated markup with the exact pt size we want.
-    document.execCommand("fontSize", false, "7");
-    el.querySelectorAll('font[size="7"]').forEach((node) => {
-      const span = document.createElement("span");
-      span.style.fontSize = `${size}pt`;
-      span.innerHTML = (node as HTMLElement).innerHTML;
-      // Strip any font-size the selection already carried (e.g. from a
-      // previous size change or pasted content) — otherwise that more
-      // deeply-nested inline style keeps winning and the new size never
-      // visibly applies.
-      span.querySelectorAll<HTMLElement>('[style*="font-size"]').forEach((child) => {
-        child.style.fontSize = "";
-      });
-      node.replaceWith(span);
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return;
+
+    // Extract the selection, strip any font-size it already carries (e.g. from a
+    // previous size change or pasted content — otherwise that inline style keeps
+    // winning and the new size never visibly applies), then wrap it in a single
+    // span carrying the exact pt size we want. This avoids execCommand("fontSize"),
+    // which only supports sizes 1-7 and can leave stray <font> fragments behind.
+    const fragment = range.extractContents();
+    const span = document.createElement("span");
+    span.appendChild(fragment);
+    span.querySelectorAll<HTMLElement>('[style*="font-size"]').forEach((node) => {
+      node.style.fontSize = "";
     });
+    span.style.fontSize = `${size}pt`;
+    range.insertNode(span);
+
+    const newRange = document.createRange();
+    newRange.selectNodeContents(span);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
     emit();
   };
 
@@ -427,10 +468,10 @@ export function TemplateSectionEditor({
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           className={`
-            border border-dashed rounded p-2 text-center transition-colors cursor-pointer text-xs
-            ${isDragging 
-              ? 'border-primary bg-primary/5' 
-              : 'border-border/50 hover:border-primary/50'
+            border-2 border-dashed rounded-lg p-3 text-center transition-colors cursor-pointer text-xs
+            ${isDragging
+              ? 'border-primary bg-primary/10'
+              : 'border-primary/50 bg-primary/5 hover:border-primary hover:bg-primary/10'
             }
           `}
           onClick={() => document.getElementById(inputId)?.click()}
@@ -438,9 +479,9 @@ export function TemplateSectionEditor({
           {isUploading ? (
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mx-auto" />
           ) : (
-            <span className="text-muted-foreground flex items-center justify-center gap-1">
-              <Upload className="h-4 w-4" />
-              Drop image
+            <span className="text-primary font-medium flex items-center justify-center gap-1.5">
+              <Image className="h-4 w-4" />
+              Drop image or click to upload
             </span>
           )}
         </div>

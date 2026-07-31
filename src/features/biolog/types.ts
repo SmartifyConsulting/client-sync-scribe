@@ -16,6 +16,9 @@ export interface BiologFood {
   user_id: string;
   name: string;
   category: string;
+  serving_size: string | null;
+  kilojoules: number | null;
+  calories: number | null;
 }
 
 export interface BiologExercise {
@@ -39,6 +42,8 @@ export type MealSlot = "breakfast" | "lunch" | "dinner" | "snack";
 export interface EntryMeal {
   slot: MealSlot;
   foods: string[];
+  /** Time of day the meal was eaten, e.g. "08:30" — useful for intermittent-fasting tracking. */
+  time?: string | null;
 }
 
 export interface EntryExercise {
@@ -50,6 +55,7 @@ export interface EntryExercise {
 export interface EntryMedication {
   label: string;
   taken: boolean;
+  quantity?: number;
 }
 
 /** Everything captured in a single day of the biolog. */
@@ -59,6 +65,8 @@ export interface BiologPayload {
   meals: EntryMeal[];
   exercises: EntryExercise[];
   medications: EntryMedication[];
+  /** Body weight in kg. */
+  weight?: number | null;
 }
 
 export interface BiologEntry {
@@ -106,6 +114,7 @@ export const DEFAULT_SECTIONS: {
   label: string;
   group_name: BiologGroup;
 }[] = [
+  { key: "weight", label: "Weight", group_name: "physical" },
   { key: "energy", label: "Energy", group_name: "physical" },
   { key: "sleep", label: "Sleep quality", group_name: "physical" },
   { key: "joints", label: "Pain", group_name: "physical" },

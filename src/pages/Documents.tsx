@@ -206,6 +206,90 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   })();
   const defaultOpenDocGroup = documentGroups.length ? [documentGroups[0].key] : [];
 
+  /** Sub-groups a date bucket's documents by patient, so the Date view reads the same as Patient view within each bucket. */
+  const patientGroups = (items: Document[]): [string, Document[]][] => {
+    const map = new Map<string, Document[]>();
+    for (const doc of items) {
+      const key = doc.patient_name || "No patient";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(doc);
+    }
+    return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  };
+
+  const renderDocRow = (doc: Document) => (
+    <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+        <FileText className="h-5 w-5 text-accent-foreground" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
+        <p className="text-sm text-muted-foreground">
+          {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
+          <span className="text-primary/70">{doc.template_name || "Custom"}</span>
+        </p>
+      </div>
+      <div className="flex gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => setPreviewDocument(doc)}
+          title="Preview"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            setEditingDocument(doc);
+            setEditDocName(doc.name);
+            setEditDocContent(doc.content);
+          }}
+          title="Edit"
+        >
+          <Edit3 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => setShareDocument(doc)}
+          title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
+        >
+          {(doc as any).email_sent_at ? (
+            <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+          ) : (
+            <Send className="h-4 w-4 text-green-600" />
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => {
+            exportToPDF({ title: doc.name, content: doc.content });
+            toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
+          }}
+          title="Download PDF"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:text-destructive"
+          onClick={() => setDocumentToDelete(doc)}
+          title="Delete"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   const handleSelectTemplate = (template: DisplayTemplate) => {
     setSelectedTemplate(template);
   };
@@ -367,7 +451,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
       {/* Tabs for Template Types */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-neutral-700">
+        <TabsList className="bg-neutral-600">
           <TabsTrigger
             value="content"
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
@@ -397,7 +481,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   New Header/Footer
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Header & Footer Template</DialogTitle>
                   <DialogDescription>Design a reusable header and footer layout for your documents</DialogDescription>
@@ -504,7 +588,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   {t("documents.newContent")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Content Template</DialogTitle>
                   <DialogDescription>Create a reusable document content template</DialogDescription>
@@ -677,80 +761,27 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   <AccordionContent className="pt-0 pb-0">
                     {group.items.length === 0 ? (
                       <p className="text-xs text-muted-foreground px-4 py-3">No documents in this group.</p>
+                    ) : groupBy === "date" ? (
+                      <Accordion type="multiple" className="divide-y divide-border">
+                        {patientGroups(group.items).map(([patientName, items]) => (
+                          <AccordionItem key={patientName} value={patientName} className="border-0">
+                            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30">
+                              <div className="flex items-center justify-between w-full pr-2">
+                                <span className="text-sm font-semibold">{patientName}</span>
+                                <SectionCountPill count={items.length} />
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pt-0 pb-0">
+                              <div className="divide-y divide-border">
+                                {items.map((doc) => renderDocRow(doc))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))}
+                      </Accordion>
                     ) : (
                       <div className="divide-y divide-border">
-                        {group.items.map((doc) => (
-                        <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
-                          <FileText className="h-5 w-5 text-accent-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {doc.patient_name || "No patient"} · {formatDate(doc.created_at)} ·{" "}
-                            <span className="text-primary/70">{doc.template_name || "Custom"}</span>
-                          </p>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setPreviewDocument(doc)}
-                            title="Preview"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => {
-                              setEditingDocument(doc);
-                              setEditDocName(doc.name);
-                              setEditDocContent(doc.content);
-                            }}
-                            title="Edit"
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setShareDocument(doc)}
-                            title={(doc as any).email_sent_at ? "Already sent" : "Share via Email"}
-                          >
-                            {(doc as any).email_sent_at ? (
-                              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <Send className="h-4 w-4 text-green-600" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => {
-                              exportToPDF({ title: doc.name, content: doc.content });
-                              toast({ title: "PDF Downloaded", description: `"${doc.name}" downloaded` });
-                            }}
-                            title="Download PDF"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => setDocumentToDelete(doc)}
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        </div>
-                        ))}
+                        {group.items.map((doc) => renderDocRow(doc))}
                       </div>
                     )}
                   </AccordionContent>
@@ -789,7 +820,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
       {/* Edit Content Template Dialog */}
       <Dialog open={!!editingTemplate} onOpenChange={(open) => !open && setEditingTemplate(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Content Template</DialogTitle>
             <DialogDescription>Modify this template's content</DialogDescription>
@@ -814,7 +845,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
       {/* Edit Header/Footer Template Dialog */}
       <Dialog open={!!editingHFTemplate} onOpenChange={(open) => !open && setEditingHFTemplate(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Header & Footer Template</DialogTitle>
             <DialogDescription>Modify this header and footer layout</DialogDescription>

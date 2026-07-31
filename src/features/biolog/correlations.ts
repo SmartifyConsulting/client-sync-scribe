@@ -17,11 +17,11 @@ export interface CorrelationDefinition {
 export const BUILT_IN_CORRELATIONS: CorrelationDefinition[] = [
   {
     id: "energy_pain_food",
-    title: "Energy & Pain vs Food",
+    title: "Energy vs Food",
     group: "Diet & physical state",
     inputVar: "food",
-    outcomeVars: ["energy", "joints"],
-    description: "How your stamina and discomfort track with what you ate.",
+    outcomeVars: ["energy"],
+    description: "How your stamina tracks with what you ate.",
   },
   {
     id: "allergies_food",
@@ -99,8 +99,12 @@ export function getValue(entry: BiologEntry, key: string): number | null {
   return typeof val === "number" ? val : null;
 }
 
-/** Was the "input" present on this day? */
+/** Was the "input" present on this day? Supports a comma-separated list of variables (matches if any are present). */
 export function hasInput(entry: BiologEntry, inputVar: string): boolean {
+  if (inputVar.includes(",")) {
+    return inputVar.split(",").some((v) => hasInput(entry, v.trim()));
+  }
+
   const payload = payloadOf(entry);
 
   if (inputVar === "food") {
@@ -151,6 +155,9 @@ const LABELS: Record<string, string> = {
 };
 
 export function friendlyLabel(key: string): string {
+  if (key.includes(",")) {
+    return key.split(",").map((k) => friendlyLabel(k.trim())).join(" or ");
+  }
   if (key.includes(":")) {
     const [prefix, value] = key.split(":");
     return `${value} (${LABELS[prefix] ?? prefix})`;

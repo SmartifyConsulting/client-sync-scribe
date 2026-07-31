@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Pill, Send, Share2, ChevronDown, Users } from "lucide-react";
+import { Search, Plus, Filter, MoreVertical, Mail, Phone, Loader2, Edit3, Trash2, Clock, X, CalendarIcon, Upload, Send, Share2, ChevronDown, Users } from "lucide-react";
+import chronicIcon from "@/assets/chronic-icon.png";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -945,8 +946,8 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <span className="inline-flex items-center rounded-full bg-terracotta/10 px-1.5 py-0.5 text-xs font-bold text-terracotta">
-                                      <Pill className="h-2.5 w-2.5" />
+                                    <span className="inline-flex items-center justify-center rounded-full bg-red-600 h-4 w-4 p-0.5">
+                                      <img src={chronicIcon} alt="Chronic patient" className="h-full w-full object-contain" />
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent>Chronic Patient</TooltipContent>

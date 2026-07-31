@@ -54,6 +54,17 @@ const FONT_OPTIONS = [
   { value: "raleway", label: "Raleway", preview: "font-raleway" },
 ];
 
+/** Most common inline font-size found across the template's section text, for the "written in" indicator. */
+function detectFontSize(sections: SectionContent[]): string | null {
+  const counts = new Map<string, number>();
+  for (const section of sections) {
+    const matches = section.text?.matchAll(/font-size:\s*(\d+)pt/gi) ?? [];
+    for (const m of matches) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
+  }
+  if (counts.size === 0) return null;
+  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
+
 const defaultSectionContent = (): SectionContent => ({
   text: "",
   alignment: "left",
@@ -214,7 +225,26 @@ export function HeaderFooterTemplateForm({
 
       {/* Font Selection */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Document Font</label>
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-foreground">Document Font</label>
+          {(() => {
+            const detectedSize = detectFontSize([
+              header.left, header.center, header.right,
+              footer.left, footer.center, footer.right,
+            ]);
+            const fontLabel = FONT_OPTIONS.find((f) => f.value === selectedFont)?.label ?? selectedFont;
+            return (
+              <span className="text-xs text-muted-foreground">
+                Written in <span className="font-medium text-foreground">{fontLabel}</span>
+                {detectedSize && (
+                  <>
+                    {" "}· <span className="font-medium text-foreground">{detectedSize}pt</span>
+                  </>
+                )}
+              </span>
+            );
+          })()}
+        </div>
         <Select value={selectedFont} onValueChange={setSelectedFont}>
           <SelectTrigger>
             <SelectValue placeholder="Select a font" />

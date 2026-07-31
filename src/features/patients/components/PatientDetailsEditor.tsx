@@ -1591,7 +1591,7 @@ export function PatientDetailsEditor({
             {/* === MY HOLARCHY TAB (overview) === */}
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
-                <TabsList className="bg-neutral-700 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+                <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
                   <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
                   <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                   <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
@@ -2156,7 +2156,7 @@ export function PatientDetailsEditor({
           {/* === MY HOLARCHY TAB (EDIT, overview) === */}
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
-              <TabsList className="bg-neutral-700 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
+              <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
                 <TabsTrigger value="team" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
                 <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                 <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-2.5 py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>

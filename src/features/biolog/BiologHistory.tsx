@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isToday, isWithinInterval, subDays } from "date-fns";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -17,15 +17,12 @@ interface Props {
   ownerUserId?: string;
 }
 
-/** Groups check-ins by Today, then This month, then Month Year buckets. */
+/** Groups check-ins into Today, Last week, then a flat "Month Year" bucket per older month. */
 function bucketOf(dateStr: string) {
   const d = parseISO(dateStr);
-  const now = new Date();
-  const isToday = dateStr === now.toISOString().slice(0, 10);
-  if (isToday) return "Today";
-  if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) {
-    return "This month";
-  }
+  if (isToday(d)) return "Today";
+  const weekAgo = subDays(new Date(), 7);
+  if (isWithinInterval(d, { start: weekAgo, end: new Date() })) return "Last week";
   return format(d, "MMMM yyyy");
 }
 
@@ -72,8 +69,14 @@ export function BiologHistory({ ownerUserId }: Props) {
         <p className="text-xs text-muted-foreground">No check-ins logged yet.</p>
       )}
 
-      {groups.map(([label, groupEntries]) => (
-        <Accordion key={label} type="single" collapsible className={SECTION_FRAME_CLASS}>
+      {groups.map(([label, groupEntries], idx) => (
+        <Accordion
+          key={label}
+          type="single"
+          collapsible
+          defaultValue={idx === 0 ? label : undefined}
+          className={SECTION_FRAME_CLASS}
+        >
           <AccordionItem value={label} className={SECTION_ITEM_CLASS}>
             <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
               <div className="flex w-full items-center justify-between pr-2">
@@ -86,18 +89,24 @@ export function BiologHistory({ ownerUserId }: Props) {
                 const foods = (entry.payload.meals ?? []).flatMap((m) => m.foods);
                 const exercises = entry.payload.exercises ?? [];
                 const meds = (entry.payload.medications ?? []).filter((m) => m.taken);
+                const weight = (entry.payload as any)?.weight;
                 return (
                   <div
                     key={entry.id}
-                    className="rounded-lg border border-neutral-300 bg-card p-3 space-y-2"
+                    className="rounded-lg border border-neutral-200 bg-card p-3 space-y-2"
                   >
                     <div className="text-xs font-bold text-foreground">
                       {format(parseISO(entry.entry_date), "EEE d MMM yyyy")}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
+                      {weight != null && (
+                        <Badge variant="secondary" className="text-[10px]">
+                          Weight {weight}kg
+                        </Badge>
+                      )}
                       {Object.entries(entry.payload.ratings ?? {}).map(([key, value]) => (
                         <Badge key={key} variant="secondary" className="text-[10px]">
-                          {labelFor(key)}: {value}
+                          {labelFor(key)} {value}
                         </Badge>
                       ))}
                     </div>

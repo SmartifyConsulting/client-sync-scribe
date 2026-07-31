@@ -192,7 +192,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Preview Toggle */}
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium text-foreground">Content Template Editor</h4>
@@ -245,58 +245,69 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         </div>
       )}
 
-      {/* Template Name */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Template Name *</label>
-        <Input
-          placeholder="e.g., Medical Certificate, Referral Letter"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        />
-      </div>
-
-      {/* Description */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Description</label>
-        <Input
-          placeholder="Brief description of when to use this template"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        />
+      {/* Template Name, Description & Header/Footer — compact single-row layout */}
+      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-foreground shrink-0 w-20">Name *</label>
+          <Input
+            placeholder="e.g., Medical Certificate"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="h-9 flex-1"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-foreground shrink-0 w-20">Description</label>
+          <Input
+            placeholder="When to use this template"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="h-9 flex-1"
+          />
+        </div>
+        {(() => {
+          const match = [...(body.text?.matchAll(/font-size:\s*(\d+)pt/gi) ?? [])];
+          if (match.length === 0) return null;
+          const counts = new Map<string, number>();
+          for (const m of match) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
+          const detectedSize = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+          return (
+            <span className="flex items-center whitespace-nowrap text-xs text-muted-foreground">
+              Written in <span className="ml-1 font-medium text-foreground">{detectedSize}pt</span>
+            </span>
+          );
+        })()}
       </div>
 
       {/* Header/Footer Template Selector */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Header & Footer Template</label>
-        <Select 
-          value={selectedHeaderFooterId || "none"} 
-          onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a header/footer template" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            {headerFooterTemplates.map((template) => (
-              <SelectItem key={template.id} value={template.id}>
-                {template.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-muted-foreground">
-          This header and footer will be used when creating documents with this template.
-        </p>
+      <div className="flex items-center gap-2">
+        <label className="text-xs font-medium text-foreground shrink-0 w-20">Letterhead</label>
+        <div className="flex-1">
+          <Select
+            value={selectedHeaderFooterId || "none"}
+            onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder="Select a header/footer template" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">None</SelectItem>
+              {headerFooterTemplates.map((template) => (
+                <SelectItem key={template.id} value={template.id}>
+                  {template.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Dynamic Fields Info */}
-      <div className="p-3 rounded-lg bg-muted/50 border border-border">
-        <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
-        <p className="text-xs text-foreground mb-2">
-          <span className="font-semibold">Tip:</span> click and drag a field below straight into the content area
-          where you want it — or click it to copy. Fields are replaced with real data when a document is created.
+      <div className="px-3 py-2 rounded-lg bg-muted/50 border border-border">
+        <p className="text-xs font-medium text-foreground mb-1.5">
+          Dynamic fields <span className="font-normal text-muted-foreground">— click or drag into the content below</span>
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {[
             "[PatientName]","[DoctorName]","[DoctorSignature]","[PracticeNumber]",
             "[DoctorNumber]","[PracticeAddress]","[Date]","[PatientAddress]","[PatientDOB]",
