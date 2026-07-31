@@ -115,7 +115,7 @@ serve(async (req) => {
     const subject = `New ${kindLabel} application — ${verified.orgName}`;
 
 
-    const esc = (s: string | undefined) =>
+    const esc = (s: string | null | undefined) =>
       String(s ?? "").replace(/[&<>"']/g, (c) =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
       );
