@@ -196,19 +196,9 @@ export default function ProviderSignup() {
       if (newProviderId) {
         try {
           await supabase.functions.invoke("notify-provider-application", {
-            body: {
-              kind,
-              providerId: newProviderId,
-              orgName: vetting.org_name.trim(),
-              adminName: vetting.admin_full_name.trim(),
-              adminEmail: vetting.admin_email.trim(),
-              adminPhone: vetting.admin_phone.trim(),
-              registrationNumber: vetting.license_number.trim(),
-              address: vetting.address.trim(),
-              orgEmail: vetting.org_email.trim(),
-              orgPhone: vetting.org_phone.trim(),
-            },
+            body: { kind, providerId: newProviderId },
           });
+
         } catch (notifyErr) {
           console.warn("Admin notification failed (non-fatal)", notifyErr);
         }

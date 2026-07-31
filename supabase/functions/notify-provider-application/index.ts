@@ -19,28 +19,29 @@ const KIND_LABEL: Record<string, string> = {
 interface Payload {
   kind: "hospital" | "esp" | "insurance" | "pharmacy";
   providerId: string;
-  orgName: string;
-  adminName: string;
-  adminEmail: string;
-  adminPhone?: string;
-  registrationNumber?: string;
-  address?: string;
-  orgEmail?: string;
-  orgPhone?: string;
 }
+
+const KIND_TABLE: Record<string, { table: string; nameCol: string; addressCol: string }> = {
+  hospital: { table: "holarchelp_hospitals", nameCol: "name", addressCol: "address" },
+  esp: { table: "holarchelp_ambulance_providers", nameCol: "company_name", addressCol: "base_address" },
+  insurance: { table: "holarchelp_insurance_providers", nameCol: "company_name", addressCol: "base_address" },
+  pharmacy: { table: "holarchelp_pharmacies", nameCol: "name", addressCol: "address" },
+};
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const body = (await req.json()) as Payload;
-    if (!body?.kind || !body?.providerId || !body?.orgName || !body?.adminEmail) {
+    if (!body?.kind || !body?.providerId || !UUID_RE.test(body.providerId)) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!KIND_LABEL[body.kind]) {
+    if (!KIND_LABEL[body.kind] || !KIND_TABLE[body.kind]) {
       return new Response(JSON.stringify({ error: "Invalid kind" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -51,6 +52,48 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // --- Authentication: caller must be signed in ---
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const jwt = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: userData, error: userErr } = jwt
+      ? await supabase.auth.getUser(jwt)
+      : { data: { user: null }, error: new Error("missing token") } as any;
+    const caller = userData?.user;
+    if (userErr || !caller) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // --- Authorization: caller must own the referenced provider record ---
+    const cfg = KIND_TABLE[body.kind];
+    const { data: provider, error: provErr } = await supabase
+      .from(cfg.table)
+      .select("*")
+      .eq("id", body.providerId)
+      .maybeSingle();
+
+    if (provErr) throw provErr;
+    if (!provider || (provider as any).owner_id !== caller.id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // All display values come from the verified DB row, never from the client.
+    const verified = {
+      orgName: (provider as any)[cfg.nameCol] as string,
+      address: (provider as any)[cfg.addressCol] as string | null,
+      registrationNumber: (provider as any).registration_number as string | null,
+      orgEmail: (provider as any).contact_email as string | null,
+      orgPhone: (provider as any).contact_phone as string | null,
+      adminName: (provider as any).admin_full_name as string | null,
+      adminEmail: (provider as any).admin_email as string | null,
+      adminPhone: (provider as any).admin_phone as string | null,
+    };
 
     // Create approval token
     const { data: tokenRow, error: tokenErr } = await supabase
@@ -69,9 +112,10 @@ serve(async (req) => {
     const rejectUrl = `${origin}/admin/provider-approval?token=${token}&action=reject`;
 
     const kindLabel = KIND_LABEL[body.kind];
-    const subject = `New ${kindLabel} application — ${body.orgName}`;
+    const subject = `New ${kindLabel} application — ${verified.orgName}`;
 
-    const esc = (s: string | undefined) =>
+
+    const esc = (s: string | null | undefined) =>
       String(s ?? "").replace(/[&<>"']/g, (c) =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
       );
@@ -87,15 +131,15 @@ serve(async (req) => {
         </td></tr>
         <tr><td style="padding:20px 28px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.55">
-            <tr><td style="padding:4px 0;color:#64748b;width:160px">Organisation</td><td><strong>${esc(body.orgName)}</strong></td></tr>
+            <tr><td style="padding:4px 0;color:#64748b;width:160px">Organisation</td><td><strong>${esc(verified.orgName)}</strong></td></tr>
             <tr><td style="padding:4px 0;color:#64748b">Type</td><td>${esc(kindLabel)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Registration #</td><td>${esc(body.registrationNumber)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Address</td><td>${esc(body.address)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Org email</td><td>${esc(body.orgEmail)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Org phone</td><td>${esc(body.orgPhone)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Administrator</td><td>${esc(body.adminName)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Admin email</td><td>${esc(body.adminEmail)}</td></tr>
-            <tr><td style="padding:4px 0;color:#64748b">Admin phone</td><td>${esc(body.adminPhone)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Registration #</td><td>${esc(verified.registrationNumber)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Address</td><td>${esc(verified.address)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Org email</td><td>${esc(verified.orgEmail)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Org phone</td><td>${esc(verified.orgPhone)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Administrator</td><td>${esc(verified.adminName)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Admin email</td><td>${esc(verified.adminEmail)}</td></tr>
+            <tr><td style="padding:4px 0;color:#64748b">Admin phone</td><td>${esc(verified.adminPhone)}</td></tr>
           </table>
         </td></tr>
         <tr><td align="center" style="padding:8px 28px 28px">
@@ -110,9 +154,9 @@ serve(async (req) => {
   </table>
 </body></html>`;
 
-    const text = `New ${kindLabel} application: ${body.orgName}
-Administrator: ${body.adminName} <${body.adminEmail}>
-Registration #: ${body.registrationNumber ?? ""}
+    const text = `New ${kindLabel} application: ${verified.orgName}
+Administrator: ${verified.adminName} <${verified.adminEmail}>
+Registration #: ${verified.registrationNumber ?? ""}
 
 Approve: ${approveUrl}
 Reject:  ${rejectUrl}`;
@@ -122,7 +166,7 @@ Reject:  ${rejectUrl}`;
       subject,
       html,
       text,
-      replyTo: body.adminEmail,
+      replyTo: verified.adminEmail ?? undefined,
     });
 
     if (!result.ok) {
