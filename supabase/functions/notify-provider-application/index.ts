@@ -95,7 +95,6 @@ serve(async (req) => {
       adminPhone: (provider as any).admin_phone as string | null,
     };
 
-    // Reuse an existing unused token instead of allowing unbounded token creation
     // Create approval token
     const { data: tokenRow, error: tokenErr } = await supabase
       .from("provider_approval_tokens")
