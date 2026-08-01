@@ -10,6 +10,7 @@ import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
 import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
+import { VulaExplainerContent } from "@/features/rewards/components/VulaExplainerDialog";
 
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -284,7 +285,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 md:space-y-8 animate-fade-in">
       {/* Header with Profile */}
-      <div className="flex items-start justify-between pb-2">
+      <div className="flex items-start justify-between gap-4 pb-2">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             {greeting}{displayName ? `, ${displayName}` : ''}
@@ -294,6 +295,11 @@ export default function Dashboard() {
             <span className="block md:inline"> {formattedDate}</span>
           </p>
         </div>
+        {isDoctor && (
+          <div className="hidden lg:block w-72 shrink-0 rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+            <VulaExplainerContent onCta={() => navigate("/doctor/rewards")} />
+          </div>
+        )}
       </div>
 
       {doctorIncomplete && (
