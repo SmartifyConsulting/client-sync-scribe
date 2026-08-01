@@ -246,7 +246,7 @@ export default function DoctorDocumentsTab() {
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
                 {groupMode === "date" ? (
-                  <Accordion type="multiple" className="space-y-2">
+                  <Accordion type="multiple" className="divide-y divide-border">
                     {Array.from(
                       g.rows.reduce((map, d) => {
                         const name = d.patient_name || "No patient";
@@ -257,24 +257,24 @@ export default function DoctorDocumentsTab() {
                     )
                       .sort(([a], [b]) => getSurname(a).localeCompare(getSurname(b)))
                       .map(([patientName, rows]) => (
-                        <AccordionItem key={patientName} value={patientName} className="border rounded-lg">
-                          <AccordionTrigger className="px-3 py-2 hover:no-underline">
+                        <AccordionItem key={patientName} value={patientName} className="border-0">
+                          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30">
                             <div className="flex items-center justify-between w-full pr-2">
-                              <span className="text-xs font-medium flex items-center gap-1.5">
+                              <span className="text-sm font-semibold flex items-center gap-1.5">
                                 <User className="h-3.5 w-3.5 text-primary" />
                                 {patientName}
                               </span>
                               <SectionCountPill count={rows.length} />
                             </div>
                           </AccordionTrigger>
-                          <AccordionContent className="px-3 pb-3">
-                            <ul className="space-y-2">
+                          <AccordionContent className="pt-0 pb-0">
+                            <div className="divide-y divide-border">
                               {rows.map((d) => (
-                                <li key={d.id}>
+                                <div key={d.id} className="px-4 py-3">
                                   <DocumentCard doc={d} />
-                                </li>
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </AccordionContent>
                         </AccordionItem>
                       ))}

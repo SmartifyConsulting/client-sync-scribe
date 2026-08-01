@@ -175,23 +175,14 @@ export function HeaderFooterTemplateForm({
         </div>
       )}
 
-      {/* Name, Description & Font — one compact row */}
-      <div className="grid gap-2 sm:grid-cols-3">
+      {/* Name & Font — one compact row */}
+      <div className="grid gap-2 sm:grid-cols-2">
         <div className="flex items-center gap-1.5">
           <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
           <Input
             placeholder="e.g., Practice Letterhead"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="h-8 flex-1 text-sm"
-          />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs font-medium text-foreground shrink-0 w-14">Desc.</label>
-          <Input
-            placeholder="Brief description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             className="h-8 flex-1 text-sm"
           />
         </div>
@@ -225,12 +216,13 @@ export function HeaderFooterTemplateForm({
         </div>
       </div>
 
-      {/* HEADER CARD — saved together with the Footer Card below as one Letterhead;
-          both are applied by default whenever a content template selects this Letterhead. */}
+      {/* HEADER TEMPLATE CARD — saved together with the Footer Template Card below as
+          one Letterhead; both are applied by default whenever a content template
+          selects this Letterhead. */}
       <Card className="border-border">
         <CardHeader className="py-2 px-3">
           <CardTitle className="text-xs font-semibold text-foreground">
-            Header <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
+            Header Template <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-2 px-3 pb-3">
@@ -267,11 +259,11 @@ export function HeaderFooterTemplateForm({
         </CardContent>
       </Card>
 
-      {/* FOOTER CARD */}
+      {/* FOOTER TEMPLATE CARD */}
       <Card className="border-border">
         <CardHeader className="py-2 px-3">
           <CardTitle className="text-xs font-semibold text-foreground">
-            Footer <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
+            Footer Template <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-3 gap-2 px-3 pb-3">

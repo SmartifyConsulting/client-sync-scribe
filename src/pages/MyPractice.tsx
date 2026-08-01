@@ -296,40 +296,39 @@ function MailboxSection({ userId }: { userId?: string }) {
                   {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
                 </Button>
               </div>
-              {!mailboxAlias &&
-                (editingAlias ? (
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-0 flex-1">
-                      <Input
-                        value={aliasInput}
-                        onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                        placeholder="your-name"
-                        className="rounded-r-none max-w-[160px] h-8 text-sm"
-                      />
-                      <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">
-                        @{INTAKE_EMAIL_DOMAIN}
-                      </span>
-                    </div>
-                    <Button size="sm" className="h-8" onClick={handleSaveAlias} disabled={isSavingAlias}>
-                      {isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("myPractice.save")}
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingAlias(false)}>
-                      Cancel
-                    </Button>
+              {editingAlias ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0 flex-1">
+                    <Input
+                      value={aliasInput}
+                      onChange={(e) => setAliasInput(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                      placeholder="your-name"
+                      className="rounded-r-none max-w-[160px] h-8 text-sm"
+                    />
+                    <span className="px-2 py-1.5 border border-l-0 border-border rounded-r-lg bg-muted text-xs text-muted-foreground">
+                      @{INTAKE_EMAIL_DOMAIN}
+                    </span>
                   </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => {
-                      setEditingAlias(true);
-                      setAliasInput("");
-                    }}
-                  >
-                    Set custom alias
+                  <Button size="sm" className="h-8" onClick={handleSaveAlias} disabled={isSavingAlias}>
+                    {isSavingAlias ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : t("myPractice.save")}
                   </Button>
-                ))}
+                  <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingAlias(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => {
+                    setEditingAlias(true);
+                    setAliasInput(mailboxAlias || "");
+                  }}
+                >
+                  {mailboxAlias ? "Change alias" : "Set custom alias"}
+                </Button>
+              )}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground mt-1">Loading...</p>
@@ -494,14 +493,15 @@ export default function MyPractice() {
     let cancelled = false;
     setSearchingPartners(true);
     const handle = setTimeout(async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name, doctor_number, mobile_number")
-        .or(`full_name.ilike.%${q}%,doctor_number.ilike.%${q}%`)
-        .neq("id", user?.id || "")
-        .limit(8);
+      // RLS blocks reading other doctors' profile rows directly, so search
+      // through the security-definer directory function instead.
+      const { data, error } = await supabase.rpc("search_doctor_profiles", { _name: q });
+      if (error) console.error("Partner search error:", error);
       if (!cancelled) {
-        setPartnerSearchResults((data as any) || []);
+        const results = ((data as any[]) || [])
+          .filter((p) => p.id !== user?.id)
+          .slice(0, 8);
+        setPartnerSearchResults(results);
         setSearchingPartners(false);
       }
     }, 250);
@@ -1588,10 +1588,10 @@ export default function MyPractice() {
                   <div className="space-y-3">
 
                   <Tabs defaultValue="existing">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="existing">Select existing</TabsTrigger>
-                      <TabsTrigger value="invite">Invite by email</TabsTrigger>
-                      <TabsTrigger value="share">Share app link</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-3 bg-neutral-600">
+                      <TabsTrigger value="existing" className="text-xs data-[state=active]:bg-white data-[state=active]:text-black text-white">Select existing</TabsTrigger>
+                      <TabsTrigger value="invite" className="text-xs data-[state=active]:bg-white data-[state=active]:text-black text-white">Invite by email</TabsTrigger>
+                      <TabsTrigger value="share" className="text-xs data-[state=active]:bg-white data-[state=active]:text-black text-white">Share app link</TabsTrigger>
                     </TabsList>
 
                     {/* ── Existing user ── */}

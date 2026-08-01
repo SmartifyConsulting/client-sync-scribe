@@ -196,23 +196,14 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       <div className="grid gap-3 lg:grid-cols-2 items-start">
         {/* LEFT: Design */}
         <div className="space-y-2 min-w-0">
-          {/* Name, Description & Letterhead — one compact row */}
-          <div className="grid gap-2 sm:grid-cols-3">
+          {/* Name & Letterhead — one compact row */}
+          <div className="grid gap-2 sm:grid-cols-2">
             <div className="flex items-center gap-1.5">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
               <Input
                 placeholder="e.g., Medical Certificate"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="h-8 flex-1 text-sm"
-              />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <label className="text-xs font-medium text-foreground shrink-0 w-14">Desc.</label>
-              <Input
-                placeholder="When to use this template"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="h-8 flex-1 text-sm"
               />
             </div>
@@ -296,6 +287,7 @@ This is to certify that [PatientName] was examined at our practice on [Date].
 Yours faithfully,
 [DoctorName]"
                 rows={8}
+                showImageUpload={false}
               />
             </div>
           </div>
