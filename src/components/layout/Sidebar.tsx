@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  Settings2,
   Loader2,
   User,
   LucideIcon,
@@ -27,6 +28,7 @@ import {
   Eye,
   EyeOff,
   RotateCcw,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -46,11 +48,15 @@ interface NavItem {
   labelKey: string;
   to: string;
   danger?: boolean;
+  /** This row carries the switch that flips between practice/profile mode. */
+  modeSwitch?: "practice" | "profile";
 }
 
-/** Doctors flip between two flat menus with a toggle, rather than seeing everything nested at once. */
+/** Doctors flip between two flat menus with a switch embedded on the My Practice /
+ *  My Profile row, rather than seeing everything nested at once. */
 const PRACTICE_MODE_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard", tour: "doctor-home" },
+  { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
+  { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings", modeSwitch: "profile" },
   { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
   { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
   { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
@@ -61,7 +67,7 @@ const PRACTICE_MODE_ITEMS: (NavItem & { tour?: string })[] = [
 ];
 
 const PROFILE_MODE_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health", modeSwitch: "practice" },
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
@@ -236,6 +242,23 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
+        {item.modeSwitch && (
+          <button
+            type="button"
+            title={item.modeSwitch === "profile" ? "Switch to My Profile" : "Switch to My Practice"}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              switchMode(item.modeSwitch!);
+            }}
+            className={cn(
+              "flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors",
+              isItemActive ? "hover:bg-white/20" : "hover:bg-muted",
+            )}
+          >
+            <ArrowLeftRight className="h-3.5 w-3.5" />
+          </button>
+        )}
       </NavLink>
     );
   };
@@ -274,36 +297,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           <img src={holarcLogo} alt="Holarc Health" className="h-[82px] w-auto object-contain" />
         </div>
 
-        {/* Practice / Profile toggle — doctors only */}
-        {!loading && !isPatientMenu && !isOnAdminRoute && (
-          <div className="px-4 pt-2">
-            <div className="flex rounded-xl bg-neutral-600 p-1">
-              <button
-                type="button"
-                onClick={() => switchMode("practice")}
-                className={cn(
-                  "flex-1 rounded-lg py-1.5 text-xs font-semibold transition-colors",
-                  mode === "practice" ? "bg-white text-black" : "text-white hover:text-white/80",
-                )}
-              >
-                My Practice
-              </button>
-              <button
-                type="button"
-                onClick={() => switchMode("profile")}
-                className={cn(
-                  "flex-1 rounded-lg py-1.5 text-xs font-semibold transition-colors",
-                  mode === "profile" ? "bg-white text-black" : "text-white hover:text-white/80",
-                )}
-              >
-                My Profile
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Navigation */}
-        <nav className="flex-1 px-4 pt-4 py-1 space-y-1.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -326,7 +321,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               <PopoverContent side="top" align="start" className="w-72 max-h-[70vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-foreground">
-                    Customise {mode === "practice" ? "My Practice" : "My Profile"}
+                    Customise {mode === "practice" ? "Dashboard" : "My Profile"}
                   </p>
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={restoreAll}>
                     <RotateCcw className="h-3 w-3" /> Restore all

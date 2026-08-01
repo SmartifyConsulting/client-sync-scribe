@@ -10,7 +10,6 @@ import { DoctorAccessRequests } from "@/components/doctor/DoctorAccessRequests";
 import { DoctorRoundTables } from "@/components/doctor/DoctorRoundTables";
 import { useProfile } from "@/hooks/useProfile";
 import { ProfileCompletionBanner } from "@/components/profile/ProfileCompletionBanner";
-import { VulaExplainerContent } from "@/features/rewards/components/VulaExplainerDialog";
 
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -285,21 +284,14 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 md:space-y-8 animate-fade-in">
       {/* Header with Profile */}
-      <div className="flex items-start justify-between gap-4 pb-2">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            {greeting}{displayName ? `, ${displayName}` : ''}
-          </h1>
-          <p className="mt-2 text-muted-foreground text-xs">
-            {t("doctorDashboard.subtitle")}
-            <span className="block md:inline"> {formattedDate}</span>
-          </p>
-        </div>
-        {isDoctor && (
-          <div className="hidden lg:block w-72 shrink-0 rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
-            <VulaExplainerContent onCta={() => navigate("/doctor/rewards")} />
-          </div>
-        )}
+      <div className="pb-2">
+        <h1 className="text-3xl font-bold text-foreground">
+          {greeting}{displayName ? `, ${displayName}` : ''}
+        </h1>
+        <p className="mt-2 text-muted-foreground text-xs">
+          {t("doctorDashboard.subtitle")}
+          <span className="block md:inline"> {formattedDate}</span>
+        </p>
       </div>
 
       {doctorIncomplete && (
@@ -343,6 +335,22 @@ export default function Dashboard() {
             iconSize="large"
             href="/doctor/rewards"
           />
+        )}
+        {isDoctor && (
+          <Link
+            to="/doctor/rewards"
+            className="col-span-2 flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-primary bg-white p-2 md:p-3 min-h-[80px] md:min-h-[100px] text-center shadow-card hover:shadow-card-hover transition-all duration-300"
+          >
+            <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-auto md:h-10 object-contain shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm md:text-base font-bold text-foreground leading-tight">
+                Vulas reward you for doing and being better.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Track your progress and redeem vouchers
+              </p>
+            </div>
+          </Link>
         )}
       </div>
 
