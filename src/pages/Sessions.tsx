@@ -141,6 +141,9 @@ export default function Sessions() {
   const completionRanRef = useRef(false);
   const latestTranscriptRef = useRef<string>("");
   const currentSessionIdRef = useRef<string | null>(null);
+  const [isPreparingSession, setIsPreparingSession] = useState(false);
+  const [preparingMessage, setPreparingMessage] = useState("");
+  const micPreWarmedRef = useRef(false);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
   const [findingsNote, setFindingsNote] = useState("");
@@ -202,6 +205,17 @@ export default function Sessions() {
   useEffect(() => {
     fetchActivePrescriptions();
   }, [fetchActivePrescriptions]);
+
+  // Pre-warm the mic permission as soon as a patient is selected (idle screen), so the
+  // browser has already granted access by the time the doctor clicks "Start Session" —
+  // the permission prompt is usually what makes that click feel slow.
+  useEffect(() => {
+    if (!currentPatient || sessionState !== "idle" || micPreWarmedRef.current) return;
+    micPreWarmedRef.current = true;
+    navigator.mediaDevices?.getUserMedia?.({ audio: true })
+      .then((stream) => stream.getTracks().forEach((t) => t.stop()))
+      .catch(() => { micPreWarmedRef.current = false; });
+  }, [currentPatient, sessionState]);
 
   // Listen for cross-component medication updates
   useEffect(() => {
@@ -701,6 +715,14 @@ export default function Sessions() {
     language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
 
+  // Recording has actually started — drop the "preparing" state so the UI stops guessing.
+  useEffect(() => {
+    if (isRecording) {
+      setIsPreparingSession(false);
+      setPreparingMessage("");
+    }
+  }, [isRecording]);
+
   // Session timer - only counts when recording
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -774,6 +796,24 @@ export default function Sessions() {
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
+
+    // Give immediate feedback — the mic permission / setup gap is otherwise silent.
+    setIsPreparingSession(true);
+    setPreparingMessage("Setting up your session...");
+    toast({
+      title: "Starting session",
+      description: "Requesting microphone access, then recording and transcription will begin automatically.",
+    });
+
+    setTimeout(() => setPreparingMessage("Requesting microphone access..."), 400);
+    // Safety net — if mic access fails/is denied, don't leave the UI stuck "preparing".
+    setTimeout(() => setIsPreparingSession(false), 8000);
+
+    toast({
+      title: "About this recording",
+      description: "This session recording is only shared between you and your patient. It's automatically deleted from our servers within 7 days — download it beforehand if either of you wants to keep a copy.",
+    });
+
     // Auto-start recording when session begins
     startRecording();
   };
@@ -1077,16 +1117,16 @@ export default function Sessions() {
 
                 <button
                   onClick={toggleRecording}
-                  disabled={isTranscribing}
+                  disabled={isTranscribing || isPreparingSession}
                   className={cn(
                     "flex h-16 w-16 items-center justify-center rounded-full transition-all duration-300",
-                    isTranscribing && "opacity-50 cursor-not-allowed",
+                    (isTranscribing || isPreparingSession) && "opacity-50 cursor-not-allowed",
                     isRecording
                       ? "bg-destructive text-destructive-foreground animate-pulse-soft shadow-lg"
                       : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow"
                   )}
                 >
-                  {isTranscribing ? (
+                  {isTranscribing || isPreparingSession ? (
                     <Loader2 className="h-7 w-7 animate-spin" />
                   ) : isRecording ? (
                     <Square className="h-7 w-7" />
@@ -1136,16 +1176,21 @@ export default function Sessions() {
 
               
               <p className="text-xs text-muted-foreground text-center">
-                {isTranscribing 
-                  ? "Transcribing..." 
-                  : isRecording 
-                    ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
-                    : "Tap to record"}
+                {isPreparingSession
+                  ? preparingMessage || "Setting up your session..."
+                  : isTranscribing
+                    ? "Transcribing..."
+                    : isRecording
+                      ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
+                      : "Tap to record"}
               </p>
               <p className="text-xs text-muted-foreground/70 text-center mt-1">
                 💡 Say "End Session" to automatically stop recording
               </p>
-              
+              <p className="text-[11px] text-muted-foreground/60 text-center mt-1 px-2 leading-snug">
+                🔒 Only shared between you and the patient — auto-deleted from our servers within 7 days. Download it beforehand to keep a copy.
+              </p>
+
               {/* Compact Waveform */}
               {(isRecording || isTranscribing) && (
                 <div className="w-full">
@@ -1198,11 +1243,19 @@ export default function Sessions() {
                     <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   )}
                 </div>
-                <div className="max-h-[120px] overflow-y-auto bg-muted/30 rounded p-2">
+                <div className="max-h-[180px] overflow-y-auto bg-muted/30 rounded p-2.5">
                   {!transcript && liveTranscript ? (
-                    <p className="text-[10px] text-foreground leading-relaxed">{liveTranscript}</p>
+                    <div className="space-y-2">
+                      {/* Break the running live transcript into sentence-level paragraphs so it doesn't read as one dense block */}
+                      {(liveTranscript.match(/[^.!?]+[.!?]*/g) || [liveTranscript])
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .map((sentence, index) => (
+                          <p key={index} className="text-xs text-foreground leading-relaxed">{sentence}</p>
+                        ))}
+                    </div>
                   ) : transcript ? (
-                    <div className="space-y-0.5">
+                    <div className="space-y-2">
                       {transcript.split('\n').map((line, index) => {
                         const colonIndex = line.indexOf(':');
                         if (colonIndex > 0 && colonIndex < 50) {
@@ -1211,16 +1264,16 @@ export default function Sessions() {
                           const speakerLower = speaker.toLowerCase().trim();
                           const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                           return (
-                            <p key={index} className={`text-[10px] leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                               <span className="font-bold">{speaker}</span>:{text}
                             </p>
                           );
                         }
-                        return line.trim() ? <p key={index} className="text-[10px] text-foreground leading-relaxed">{line}</p> : null;
+                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
                       })}
                     </div>
                   ) : (
-                    <p className="text-[10px] text-muted-foreground italic">Transcribing...</p>
+                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
                   )}
                 </div>
               </div>
