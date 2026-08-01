@@ -182,6 +182,20 @@ export default function Sessions() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const currentPatient = patients.find(p => p.id === patientId);
+  // Arriving from a patient profile's "Start Session" link — suppress the
+  // patient-selector idle screen entirely while the session auto-starts.
+  const [autoStartTimedOut, setAutoStartTimedOut] = useState(false);
+  const isAutoStarting = searchParams.get("autoStart") === "true" && !autoStartTimedOut;
+
+  // Safety net — if the patient never resolves (stale link, load failure), don't
+  // trap the doctor on "Starting session..." forever; fall back to manual selection.
+  useEffect(() => {
+    if (searchParams.get("autoStart") !== "true") return;
+    const timer = setTimeout(() => {
+      if (!currentPatient) setAutoStartTimedOut(true);
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [searchParams, currentPatient]);
 
   // Handle patient selection
   const handlePatientSelect = (value: string) => {
@@ -942,7 +956,21 @@ export default function Sessions() {
       </div>
 
       {/* Session States */}
-      {sessionState === "idle" && (
+      {sessionState === "idle" && isAutoStarting && (
+        // Arriving from a patient's profile "Start Session" link — never show the
+        // patient-selector widget, it's confusing when a patient is already chosen.
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
+            <Loader2 className="h-6 w-6 text-accent-foreground animate-spin" />
+          </div>
+          <h2 className="text-lg font-semibold text-foreground mb-1">Starting session...</h2>
+          <p className="text-muted-foreground max-w-md text-sm">
+            {currentPatient?.name ? `Getting ready to record for ${currentPatient.name}.` : "Loading patient details..."}
+          </p>
+        </div>
+      )}
+
+      {sessionState === "idle" && !isAutoStarting && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent mb-3">
             {currentPatient ? (
@@ -955,11 +983,11 @@ export default function Sessions() {
             {currentPatient ? "Ready to Start" : "Select a Patient"}
           </h2>
           <p className="text-muted-foreground mb-4 max-w-md text-sm">
-            {currentPatient 
+            {currentPatient
               ? "Begin a consultation to capture notes, record audio, and generate AI summaries."
               : "Choose a patient to start a new consultation session."}
           </p>
-          
+
           {/* Patient Selector with Search */}
           {!currentPatient && (
             <div className="w-full max-w-xs mb-4">

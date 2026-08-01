@@ -54,17 +54,6 @@ const FONT_OPTIONS = [
   { value: "raleway", label: "Raleway", preview: "font-raleway" },
 ];
 
-/** Most common inline font-size found across the template's section text, for the "written in" indicator. */
-function detectFontSize(sections: SectionContent[]): string | null {
-  const counts = new Map<string, number>();
-  for (const section of sections) {
-    const matches = section.text?.matchAll(/font-size:\s*(\d+)pt/gi) ?? [];
-    for (const m of matches) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
-  }
-  if (counts.size === 0) return null;
-  return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
-}
-
 const defaultSectionContent = (): SectionContent => ({
   text: "",
   alignment: "left",
@@ -159,17 +148,17 @@ export function HeaderFooterTemplateForm({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {/* Preview Toggle */}
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-foreground">Header & Footer Template</h4>
+        <h4 className="text-xs font-medium text-foreground">Header & Footer Template</h4>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setShowPreview(!showPreview)}
-          className="gap-2"
+          className="gap-1.5 h-7 text-xs"
         >
-          {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {showPreview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           {showPreview ? "Hide Preview" : "Show Preview"}
         </Button>
       </div>
@@ -177,24 +166,24 @@ export function HeaderFooterTemplateForm({
       {/* Live Preview Panel */}
       {showPreview && (
         <div className="border border-border rounded-lg overflow-hidden bg-white">
-          <div className="bg-muted/50 px-4 py-2 border-b border-border">
-            <span className="text-sm font-medium text-foreground">Live Preview</span>
+          <div className="bg-muted/50 px-3 py-1.5 border-b border-border">
+            <span className="text-xs font-medium text-foreground">Live Preview</span>
           </div>
-          <div className={`p-6 min-h-[300px] ${getFontClass(selectedFont)}`}>
+          <div className={`p-3 min-h-[160px] ${getFontClass(selectedFont)}`}>
             {/* Header Preview */}
-            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
+            <div className="grid grid-cols-3 gap-2 pb-2 border-b border-gray-200 mb-2">
               <div>{renderSectionPreview(header.left)}</div>
               <div>{renderSectionPreview(header.center)}</div>
               <div>{renderSectionPreview(header.right)}</div>
             </div>
-            
+
             {/* Content Placeholder */}
-            <div className="min-h-[100px] py-4 flex items-center justify-center">
-              <p className="text-gray-400 italic text-sm">Document content will appear here...</p>
+            <div className="min-h-[60px] py-2 flex items-center justify-center">
+              <p className="text-gray-400 italic text-xs">Document content will appear here...</p>
             </div>
-            
+
             {/* Footer Preview */}
-            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200 mt-2">
               <div>{renderSectionPreview(footer.left)}</div>
               <div>{renderSectionPreview(footer.center)}</div>
               <div>{renderSectionPreview(footer.right)}</div>
@@ -203,87 +192,62 @@ export function HeaderFooterTemplateForm({
         </div>
       )}
 
-      {/* Template Name */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Template Name *</label>
-        <Input
-          placeholder="e.g., Practice Letterhead, Official Header"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-        />
-      </div>
-
-      {/* Description */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Description</label>
-        <Input
-          placeholder="Brief description of this header/footer style"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        />
-      </div>
-
-      {/* Font Selection */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-foreground">Document Font</label>
-          {(() => {
-            const detectedSize = detectFontSize([
-              header.left, header.center, header.right,
-              footer.left, footer.center, footer.right,
-            ]);
-            const fontLabel = FONT_OPTIONS.find((f) => f.value === selectedFont)?.label ?? selectedFont;
-            return (
-              <span className="text-xs text-muted-foreground">
-                Written in <span className="font-medium text-foreground">{fontLabel}</span>
-                {detectedSize && (
-                  <>
-                    {" "}· <span className="font-medium text-foreground">{detectedSize}pt</span>
-                  </>
-                )}
-              </span>
-            );
-          })()}
+      {/* Name, Description & Font — one compact row */}
+      <div className="grid gap-2 sm:grid-cols-3">
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
+          <Input
+            placeholder="e.g., Practice Letterhead"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="h-8 flex-1 text-sm"
+          />
         </div>
-        <Select value={selectedFont} onValueChange={setSelectedFont}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a font" />
-          </SelectTrigger>
-          <SelectContent>
-            {FONT_OPTIONS.map((font) => (
-              <SelectItem key={font.value} value={font.value}>
-                <span className={font.preview}>{font.label}</span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-foreground shrink-0 w-14">Desc.</label>
+          <Input
+            placeholder="Brief description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="h-8 flex-1 text-sm"
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs font-medium text-foreground shrink-0 w-14">Font</label>
+          <Select value={selectedFont} onValueChange={setSelectedFont}>
+            <SelectTrigger className="h-8 flex-1 text-sm">
+              <SelectValue placeholder="Select a font" />
+            </SelectTrigger>
+            <SelectContent>
+              {FONT_OPTIONS.map((font) => (
+                <SelectItem key={font.value} value={font.value}>
+                  <span className={font.preview}>{font.label}</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Dynamic Fields Info */}
-      <div className="p-3 rounded-lg bg-muted/50 border border-border">
-        <p className="text-sm font-medium text-foreground mb-2">Available Dynamic Fields</p>
-        <p className="text-xs text-muted-foreground mb-2">
-          Use these placeholders - they will be replaced with actual data when creating documents.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorName]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorSignature]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeNumber]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[DoctorNumber]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[PracticeAddress]</code>
-          <code className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">[Date]</code>
+      <div className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border">
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="text-[10px] font-medium text-muted-foreground mr-0.5">Fields:</span>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[DoctorName]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[DoctorSignature]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[PracticeNumber]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[DoctorNumber]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[PracticeAddress]</code>
+          <code className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded">[Date]</code>
         </div>
       </div>
 
       {/* HEADER SECTION */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-foreground">Header</h4>
-          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
-        </div>
-        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
+      <div className="space-y-1">
+        <h4 className="text-xs font-semibold text-foreground">Header <span className="font-normal text-muted-foreground">(Left, Center, Right)</span></h4>
+        <div className="grid grid-cols-3 gap-2 p-2 border border-border rounded-lg bg-card">
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
+            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Left</label>
             <TemplateSectionEditor
               value={header.left}
               onChange={(v) => setHeader({ ...header, left: v })}
@@ -293,7 +257,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
+            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Center</label>
             <TemplateSectionEditor
               value={header.center}
               onChange={(v) => setHeader({ ...header, center: v })}
@@ -303,7 +267,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
+            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Right</label>
             <TemplateSectionEditor
               value={header.right}
               onChange={(v) => setHeader({ ...header, right: v })}
@@ -316,14 +280,11 @@ export function HeaderFooterTemplateForm({
       </div>
 
       {/* FOOTER SECTION */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-foreground">Footer</h4>
-          <span className="text-xs text-muted-foreground">(3 columns: Left, Center, Right)</span>
-        </div>
-        <div className="grid grid-cols-3 gap-3 p-4 border border-border rounded-lg bg-card">
+      <div className="space-y-1">
+        <h4 className="text-xs font-semibold text-foreground">Footer <span className="font-normal text-muted-foreground">(Left, Center, Right)</span></h4>
+        <div className="grid grid-cols-3 gap-2 p-2 border border-border rounded-lg bg-card">
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Left</label>
+            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Left</label>
             <TemplateSectionEditor
               value={footer.left}
               onChange={(v) => setFooter({ ...footer, left: v })}
@@ -333,7 +294,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Center</label>
+            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Center</label>
             <TemplateSectionEditor
               value={footer.center}
               onChange={(v) => setFooter({ ...footer, center: v })}
@@ -343,7 +304,7 @@ export function HeaderFooterTemplateForm({
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Right</label>
+            <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Right</label>
             <TemplateSectionEditor
               value={footer.right}
               onChange={(v) => setFooter({ ...footer, right: v })}
@@ -356,11 +317,11 @@ export function HeaderFooterTemplateForm({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-2">
-        <Button variant="outline" onClick={onCancel} className="flex-1">
+      <div className="flex gap-2 pt-1">
+        <Button variant="outline" onClick={onCancel} className="flex-1 h-8">
           Cancel
         </Button>
-        <Button onClick={handleSubmit} className="flex-1">
+        <Button onClick={handleSubmit} className="flex-1 h-8">
           {mode === "edit" ? "Save Changes" : "Save Template"}
         </Button>
       </div>

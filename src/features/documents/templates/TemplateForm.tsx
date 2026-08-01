@@ -191,56 +191,38 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   };
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-medium text-foreground">Content Template Editor</h4>
-
-      <div className="grid gap-4 lg:grid-cols-2 items-start">
+    <div className="space-y-2">
+      <div className="grid gap-3 lg:grid-cols-2 items-start">
         {/* LEFT: Design */}
-        <div className="space-y-3 min-w-0">
-          {/* Template Name, Description & Header/Footer — compact single-row layout */}
-          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-medium text-foreground shrink-0 w-20">Name *</label>
+        <div className="space-y-2 min-w-0">
+          {/* Name, Description & Letterhead — one compact row */}
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
               <Input
                 placeholder="e.g., Medical Certificate"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="h-9 flex-1"
+                className="h-8 flex-1 text-sm"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-xs font-medium text-foreground shrink-0 w-20">Description</label>
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-medium text-foreground shrink-0 w-14">Desc.</label>
               <Input
                 placeholder="When to use this template"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="h-9 flex-1"
+                className="h-8 flex-1 text-sm"
               />
             </div>
-            {(() => {
-              const match = [...(body.text?.matchAll(/font-size:\s*(\d+)pt/gi) ?? [])];
-              if (match.length === 0) return null;
-              const counts = new Map<string, number>();
-              for (const m of match) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
-              const detectedSize = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
-              return (
-                <span className="flex items-center whitespace-nowrap text-xs text-muted-foreground">
-                  Written in <span className="ml-1 font-medium text-foreground">{detectedSize}pt</span>
-                </span>
-              );
-            })()}
-          </div>
-
-          {/* Header/Footer Template Selector */}
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-medium text-foreground shrink-0 w-20">Letterhead</label>
-            <div className="flex-1">
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs font-medium text-foreground shrink-0 w-14">Letter.</label>
               <Select
                 value={selectedHeaderFooterId || "none"}
                 onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
               >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Select a header/footer template" />
+                <SelectTrigger className="h-8 flex-1 text-sm">
+                  <SelectValue placeholder="None" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
@@ -255,11 +237,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
           </div>
 
           {/* Dynamic Fields Info */}
-          <div className="px-3 py-2 rounded-lg bg-muted/50 border border-border">
-            <p className="text-xs font-medium text-foreground mb-1.5">
-              Dynamic fields <span className="font-normal text-muted-foreground">— click or drag into the content below</span>
-            </p>
-            <div className="flex flex-wrap gap-1.5">
+          <div className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border">
+            <div className="flex flex-wrap items-center gap-1">
+              <span className="text-[10px] font-medium text-muted-foreground mr-0.5">Fields:</span>
               {[
                 "[PatientName]","[DoctorName]","[DoctorSignature]","[PracticeNumber]",
                 "[DoctorNumber]","[PracticeAddress]","[Date]","[PatientAddress]","[PatientDOB]",
@@ -272,24 +252,34 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                     e.dataTransfer.effectAllowed = "copy";
                   }}
                   onClick={() => { navigator.clipboard?.writeText(token); }}
-                  className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
+                  className="inline-flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
                   title="Drag into the content area, or click to copy"
                 >
-                  <GripVertical className="h-3 w-3 opacity-70" />
+                  <GripVertical className="h-2.5 w-2.5 opacity-70" />
                   {token}
                 </code>
               ))}
             </div>
-
           </div>
 
           {/* CONTENT SECTION */}
-          <div className="space-y-3">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-semibold text-foreground">Content</h4>
-              <span className="text-xs text-muted-foreground">(Main body of the document)</span>
+              <h4 className="text-xs font-semibold text-foreground">Content</h4>
+              {(() => {
+                const match = [...(body.text?.matchAll(/font-size:\s*(\d+)pt/gi) ?? [])];
+                if (match.length === 0) return null;
+                const counts = new Map<string, number>();
+                for (const m of match) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
+                const detectedSize = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+                return (
+                  <span className="text-[10px] text-muted-foreground">
+                    Written in <span className="font-medium text-foreground">{detectedSize}pt</span>
+                  </span>
+                );
+              })()}
             </div>
-            <div className="p-4 border border-border rounded-lg bg-card">
+            <div className="p-2 border border-border rounded-lg bg-card">
               <TemplateSectionEditor
                 value={body}
                 onChange={setBody}
@@ -304,41 +294,41 @@ This is to certify that [PatientName] was examined at our practice on [Date].
 
 Yours faithfully,
 [DoctorName]"
-                rows={12}
+                rows={8}
               />
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-2">
-            <Button variant="outline" onClick={onCancel} className="flex-1">
+          <div className="flex gap-2 pt-1">
+            <Button variant="outline" onClick={onCancel} className="flex-1 h-8">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} className="flex-1">
+            <Button onClick={handleSubmit} className="flex-1 h-8">
               {mode === "edit" ? "Save Changes" : "Save Template"}
             </Button>
           </div>
         </div>
 
         {/* RIGHT: Live Preview */}
-        <div className="lg:sticky lg:top-3 min-w-0">
+        <div className="lg:sticky lg:top-2 min-w-0">
           <div className="border border-border rounded-lg overflow-hidden bg-white">
-            <div className="bg-muted/50 px-4 py-2 border-b border-border">
-              <span className="text-sm font-medium text-foreground">Content Preview</span>
+            <div className="bg-muted/50 px-3 py-1.5 border-b border-border">
+              <span className="text-xs font-medium text-foreground">Content Preview</span>
             </div>
-            <div className="p-6 min-h-[300px]">
+            <div className="p-3 min-h-[200px] max-h-[380px] overflow-y-auto">
               {/* Header Preview */}
-              <div className="pb-4 border-b border-gray-200 mb-4">
+              <div className="pb-2 border-b border-gray-200 mb-2">
                 {renderHeaderFooterPreview('header')}
                 {!selectedHeaderFooter && (
-                  <p className="text-gray-400 italic text-xs text-center mt-2">Select a Header/Footer template</p>
+                  <p className="text-gray-400 italic text-[10px] text-center mt-1">Select a Header/Footer template</p>
                 )}
               </div>
 
               {/* Body Preview */}
-              <div className="min-h-[150px] py-4" style={{ textAlign: body.alignment }}>
+              <div className="min-h-[100px] py-2 text-sm" style={{ textAlign: body.alignment }}>
                 {body.imageUrl && (
-                  <img src={body.imageUrl} alt="" className="max-h-16 inline-block mb-2" />
+                  <img src={body.imageUrl} alt="" className="max-h-12 inline-block mb-1.5" />
                 )}
                 {body.text ? (
                   <div
@@ -351,7 +341,7 @@ Yours faithfully,
               </div>
 
               {/* Footer Preview */}
-              <div className="pt-4 border-t border-gray-200 mt-4">
+              <div className="pt-2 border-t border-gray-200 mt-2">
                 {renderHeaderFooterPreview('footer')}
               </div>
             </div>
