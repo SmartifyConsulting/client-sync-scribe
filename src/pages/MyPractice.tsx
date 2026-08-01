@@ -52,6 +52,9 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import {
   SECTION_CONTENT_CLASS,
   SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+  SECTION_FRAME_CLASS,
+  SECTION_ITEM_CLASS,
+  SECTION_TRIGGER_CLASS,
 } from "@/components/ui/section-accordion";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -287,15 +290,7 @@ function MailboxSection({ userId }: { userId?: string }) {
           </div>
           {displayEmail ? (
 
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center gap-2">
-                <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-foreground border border-border truncate">
-                  {displayEmail}
-                </code>
-                <Button variant="ghost" size="icon" onClick={handleCopy} className="h-7 w-7 shrink-0">
-                  {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
-                </Button>
-              </div>
+            <div className="mt-2">
               {editingAlias ? (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-0 flex-1">
@@ -317,17 +312,26 @@ function MailboxSection({ userId }: { userId?: string }) {
                   </Button>
                 </div>
               ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  onClick={() => {
-                    setEditingAlias(true);
-                    setAliasInput(mailboxAlias || "");
-                  }}
-                >
-                  {mailboxAlias ? "Change alias" : "Set custom alias"}
-                </Button>
+                <div className="flex items-center gap-1">
+                  <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-foreground border border-border truncate">
+                    {displayEmail}
+                  </code>
+                  <Button variant="ghost" size="icon" onClick={handleCopy} className="h-7 w-7 shrink-0" title="Copy address">
+                    {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
+                    title={mailboxAlias ? "Change alias" : "Set custom alias"}
+                    onClick={() => {
+                      setEditingAlias(true);
+                      setAliasInput(mailboxAlias || "");
+                    }}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               )}
             </div>
           ) : (
@@ -1344,36 +1348,80 @@ export default function MyPractice() {
             <p className="text-sm text-muted-foreground">
               This information appears on your document templates and letterheads.
             </p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label>Practice Number</Label>
-                <Input
-                  value={formData.practice_number}
-                  onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })}
-                  placeholder="e.g., PR123456"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Registration Number</Label>
-                <Input
-                  value={formData.doctor_number}
-                  onChange={(e) => setFormData({ ...formData, doctor_number: e.target.value })}
-                  placeholder="e.g., MP123456"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Address of Doctor's Rooms</Label>
-              <Textarea
-                value={formData.practice_address}
-                onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })}
-                placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town"
-                rows={2}
-              />
-            </div>
+            <Accordion type="multiple" className={SECTION_FRAME_CLASS}>
+              {/* Practice Details */}
+              <AccordionItem value="practice-basic-details" className={SECTION_ITEM_CLASS}>
+                <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                  <h4 className="text-sm font-semibold">Practice Details</h4>
+                </AccordionTrigger>
+                <AccordionContent className={SECTION_CONTENT_CLASS}>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label>Practice Number</Label>
+                      <Input
+                        value={formData.practice_number}
+                        onChange={(e) => setFormData({ ...formData, practice_number: e.target.value })}
+                        placeholder="e.g., PR123456"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Registration Number</Label>
+                      <Input
+                        value={formData.doctor_number}
+                        onChange={(e) => setFormData({ ...formData, doctor_number: e.target.value })}
+                        placeholder="e.g., MP123456"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Address of Doctor's Rooms</Label>
+                    <Textarea
+                      value={formData.practice_address}
+                      onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })}
+                      placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town"
+                      rows={2}
+                    />
+                  </div>
 
-            <HospitalAffiliations />
+                  {/* Logo */}
+                  <div className="space-y-1.5">
+                    <Label>Practice Logo</Label>
+                    <div className="flex items-center gap-3">
+                      {profile?.logo_url && (
+                        <img
+                          src={profile.logo_url}
+                          alt="Practice logo"
+                          className="h-12 w-auto object-contain rounded border border-border p-1"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                        id="logo-upload-practice"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById("logo-upload-practice")?.click()}
+                        disabled={isUploadingLogo}
+                        className="gap-1.5"
+                      >
+                        <Upload className="h-3.5 w-3.5" />
+                        {isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change" : "Upload"}
+                      </Button>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
 
+              {/* Partners */}
+              <AccordionItem value="partners" className={SECTION_ITEM_CLASS}>
+                <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                  <h4 className="text-sm font-semibold">Partners</h4>
+                </AccordionTrigger>
+                <AccordionContent className={SECTION_CONTENT_CLASS}>
             {/* Calendar color (used on shared practice calendar) */}
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5">
@@ -1405,38 +1453,6 @@ export default function MyPractice() {
               </p>
             </div>
 
-            {/* Logo */}
-            <div className="space-y-1.5">
-              <Label>Practice Logo</Label>
-              <div className="flex items-center gap-3">
-                {profile?.logo_url && (
-                  <img
-                    src={profile.logo_url}
-                    alt="Practice logo"
-                    className="h-12 w-auto object-contain rounded border border-border p-1"
-                  />
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                  id="logo-upload-practice"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById("logo-upload-practice")?.click()}
-                  disabled={isUploadingLogo}
-                  className="gap-1.5"
-                >
-                  <Upload className="h-3.5 w-3.5" />
-                  {isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change" : "Upload"}
-                </Button>
-              </div>
-            </div>
-
-            {/* Partners Section */}
             <Separator className="my-4" />
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -1737,8 +1753,20 @@ export default function MyPractice() {
                 </DialogContent>
               </Dialog>
 
-
             </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Hospital Affiliations */}
+              <AccordionItem value="hospital-affiliations" className={SECTION_ITEM_CLASS}>
+                <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                  <h4 className="text-sm font-semibold">Hospital Affiliations</h4>
+                </AccordionTrigger>
+                <AccordionContent className={SECTION_CONTENT_CLASS}>
+                  <HospitalAffiliations />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
               </AccordionContent>
             </AccordionItem>
 
