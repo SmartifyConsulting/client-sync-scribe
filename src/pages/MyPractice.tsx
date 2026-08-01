@@ -1351,12 +1351,12 @@ export default function MyPractice() {
             <Accordion type="multiple" className={SECTION_FRAME_CLASS}>
               {/* Practice Details */}
               <AccordionItem value="practice-basic-details" className={SECTION_ITEM_CLASS}>
-                <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none !bg-neutral-400 hover:!bg-neutral-400/90 !text-white [&_*:not(.section-count-pill)]:!text-white [&>svg]:!text-white">
                   <h4 className="text-sm font-semibold">Practice Details</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1.5">
+                  <div className="flex flex-wrap items-end gap-4">
+                    <div className="space-y-1.5 w-40">
                       <Label>Practice Number</Label>
                       <Input
                         value={formData.practice_number}
@@ -1364,7 +1364,7 @@ export default function MyPractice() {
                         placeholder="e.g., PR123456"
                       />
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 w-40">
                       <Label>Registration Number</Label>
                       <Input
                         value={formData.doctor_number}
@@ -1372,45 +1372,42 @@ export default function MyPractice() {
                         placeholder="e.g., MP123456"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Address of Doctor's Rooms</Label>
-                    <Textarea
-                      value={formData.practice_address}
-                      onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })}
-                      placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town"
-                      rows={2}
-                    />
-                  </div>
-
-                  {/* Logo */}
-                  <div className="space-y-1.5">
-                    <Label>Practice Logo</Label>
-                    <div className="flex items-center gap-3">
-                      {profile?.logo_url && (
-                        <img
-                          src={profile.logo_url}
-                          alt="Practice logo"
-                          className="h-12 w-auto object-contain rounded border border-border p-1"
-                        />
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                        id="logo-upload-practice"
+                    <div className="space-y-1.5 w-64">
+                      <Label>Address of Doctor's Rooms</Label>
+                      <Input
+                        value={formData.practice_address}
+                        onChange={(e) => setFormData({ ...formData, practice_address: e.target.value })}
+                        placeholder="e.g., 123 Medical Centre, Suite 4, Cape Town"
                       />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => document.getElementById("logo-upload-practice")?.click()}
-                        disabled={isUploadingLogo}
-                        className="gap-1.5"
-                      >
-                        <Upload className="h-3.5 w-3.5" />
-                        {isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change" : "Upload"}
-                      </Button>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Practice Logo</Label>
+                      <div className="flex items-center gap-3">
+                        {profile?.logo_url && (
+                          <img
+                            src={profile.logo_url}
+                            alt="Practice logo"
+                            className="h-9 w-auto object-contain rounded border border-border p-1"
+                          />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                          id="logo-upload-practice"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById("logo-upload-practice")?.click()}
+                          disabled={isUploadingLogo}
+                          className="gap-1.5"
+                        >
+                          <Upload className="h-3.5 w-3.5" />
+                          {isUploadingLogo ? "Uploading..." : profile?.logo_url ? "Change" : "Upload"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </AccordionContent>
@@ -1767,131 +1764,6 @@ export default function MyPractice() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-              </AccordionContent>
-            </AccordionItem>
-
-          {/* Shared Practice Calendar Accordion */}
-            <AccordionItem value="shared-calendar" className="border-0">
-              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold text-primary-dark">Shared Practice Calendar</h3>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <p className="text-sm text-muted-foreground">
-                  Share a single calendar across multiple doctors. Each doctor's appointments show in their assigned color.
-                  Google Calendar sync stays personal — only your own appointments mirror.
-                </p>
-
-                {pendingInvites.length > 0 && (
-                  <div className="space-y-2">
-                    {pendingInvites.map((inv) => (
-                      <div key={inv.id} className="flex items-center justify-between gap-3 p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-950/20">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-foreground truncate">
-                            Invitation to join <strong>{inv.practice_name || "a practice"}</strong>
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">From {inv.inviter_name || inv.invited_by}</p>
-                        </div>
-                        <div className="flex gap-1.5 shrink-0">
-                          <Button size="sm" onClick={() => acceptInvitation(inv)} className="h-7 text-sm">Accept</Button>
-                          <Button size="sm" variant="outline" onClick={() => declineInvitation(inv)} className="h-7 text-sm">Decline</Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {!practice ? (
-                  <div className="space-y-3 p-3 border border-dashed border-border rounded-lg">
-                    <Label className="text-sm">Create a Practice Calendar</Label>
-                    <div className="flex gap-2">
-                      <Input value={newPracticeName} onChange={(e) => setNewPracticeName(e.target.value)} placeholder="e.g., Cape Town Medical Centre" className="flex-1" />
-                      <Button size="sm" onClick={async () => {
-                        if (!newPracticeName.trim()) { toast({ title: "Name required", variant: "destructive" }); return; }
-                        const res = await createPractice(newPracticeName.trim());
-                        if (!res.error) setNewPracticeName("");
-                      }} className="gap-1.5"><Plus className="h-3.5 w-3.5" />Create</Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{practice.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {isPracticeOwner ? "You are the owner" : "You are a member"} · {members.length} member{members.length === 1 ? "" : "s"}
-                        </p>
-                      </div>
-                      {isPracticeOwner ? (
-                        <Button variant="ghost" size="icon" onClick={async () => { if (confirm("Delete this practice calendar?")) await deletePractice(); }} className="h-7 w-7 text-destructive" title="Delete practice">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" size="sm" onClick={async () => { if (confirm("Leave this practice?")) await leavePractice(); }} className="h-7 text-sm text-destructive">Leave</Button>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm">Members</Label>
-                      {members.map((m) => {
-                        const initials = (m.full_name || "?").split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
-                        return (
-                          <div key={m.id} className="flex items-center justify-between p-2.5 bg-muted/20 rounded-lg border border-border">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <Avatar className="h-7 w-7">
-                                {m.avatar_url ? <AvatarImage src={m.avatar_url} /> : null}
-                                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                              </Avatar>
-                              <span className="inline-block h-3 w-3 rounded-full border border-border shrink-0" style={{ backgroundColor: m.practice_color || "#0EA5E9" }} />
-                              <div className="min-w-0">
-                                <p className="text-sm font-medium text-foreground truncate">{m.full_name || "Unnamed"}</p>
-                                <p className="text-xs text-muted-foreground capitalize">{m.role}</p>
-                              </div>
-                            </div>
-                            {isPracticeOwner && m.role !== "owner" && (
-                              <Button variant="ghost" size="icon" onClick={() => removeMember(m.id)} className="h-7 w-7 text-destructive" title="Remove">
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {isPracticeOwner && (
-                      <div className="space-y-2">
-                        <Label className="text-sm">Invite a doctor by email</Label>
-                        <div className="flex gap-2">
-                          <Input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="colleague@example.com" className="flex-1" />
-                          <Button size="sm" onClick={async () => {
-                            if (!inviteEmail.trim()) { toast({ title: "Email required", variant: "destructive" }); return; }
-                            const res = await inviteMember(inviteEmail.trim());
-                            if (!res.error) setInviteEmail("");
-                          }} className="gap-1.5"><UserPlus className="h-3.5 w-3.5" />Invite</Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {isPracticeOwner && invitations.filter((i) => i.status === "pending").length > 0 && (
-                      <div className="space-y-2">
-                        <Label className="text-sm">Pending invitations</Label>
-                        {invitations.filter((i) => i.status === "pending").map((inv) => (
-                          <div key={inv.id} className="flex items-center justify-between p-2 bg-muted/20 rounded-lg border border-border">
-                            <div className="min-w-0">
-                              <p className="text-sm truncate">{inv.invited_email}</p>
-                              <p className="text-xs text-muted-foreground">Sent {format(new Date(inv.created_at), "MMM d")}</p>
-                            </div>
-                            <Button variant="ghost" size="icon" onClick={() => revokeInvitation(inv.id)} className="h-7 w-7 text-destructive" title="Revoke">
-                              <X className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
               </AccordionContent>
             </AccordionItem>
 

@@ -71,6 +71,11 @@ export function TemplateSectionEditor({
   const editorRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  // Shown selected in the toolbar and applied as the editor's base style, so the
+  // content weight/size is obvious up front instead of silently falling back to
+  // the browser default (which often looks lighter/heavier than the preview).
+  const [currentFont, setCurrentFont] = useState(FONT_FAMILIES[0].value);
+  const [currentSize, setCurrentSize] = useState(FONT_SIZES[2]);
 
   // Keep the editable surface in sync with external value changes without
   // clobbering the caret while the user is typing.
@@ -157,11 +162,13 @@ export function TemplateSectionEditor({
   };
 
   const applyFontFamily = (family: string) => {
+    setCurrentFont(family);
     ensureSelection();
     runCommand("fontName", family);
   };
 
   const applyFontSize = (size: string) => {
+    setCurrentSize(size);
     const el = editorRef.current;
     if (!el) return;
     ensureSelection();
@@ -332,7 +339,7 @@ export function TemplateSectionEditor({
     <div className="space-y-2">
       {/* Toolbar */}
       <div className={`flex items-center gap-1 p-1 border border-border rounded-md bg-muted/30 ${compact ? 'flex-wrap' : ''}`}>
-        <Select onValueChange={applyFontFamily}>
+        <Select value={currentFont} onValueChange={applyFontFamily}>
           <SelectTrigger className="h-7 w-[130px] text-xs" aria-label="Font">
             <SelectValue placeholder="Font" />
           </SelectTrigger>
@@ -345,7 +352,7 @@ export function TemplateSectionEditor({
           </SelectContent>
         </Select>
 
-        <Select onValueChange={applyFontSize}>
+        <Select value={currentSize} onValueChange={applyFontSize}>
           <SelectTrigger className="h-7 w-[72px] text-xs" aria-label="Font size">
             <SelectValue placeholder="Size" />
           </SelectTrigger>
@@ -504,8 +511,8 @@ export function TemplateSectionEditor({
           document.execCommand("insertText", false, text);
           emit();
         }}
-        className="template-wysiwyg w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 overflow-y-auto whitespace-pre-wrap"
-        style={{ textAlign: value.alignment, minHeight }}
+        className="template-wysiwyg w-full rounded-md border border-input bg-background px-3 py-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 overflow-y-auto whitespace-pre-wrap"
+        style={{ textAlign: value.alignment, minHeight, fontFamily: currentFont, fontSize: `${currentSize}pt` }}
         onDragOver={(e) => {
           if (e.dataTransfer.types.includes("text/plain")) e.preventDefault();
         }}
