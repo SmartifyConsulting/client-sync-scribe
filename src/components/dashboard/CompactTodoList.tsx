@@ -153,7 +153,8 @@ export function CompactTodoList() {
 
   const fetchTodos = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) { setLoading(false); return; }
       const { data, error } = await supabase
         .from("todos")
@@ -524,7 +525,7 @@ export function CompactTodoList() {
                 const map = new Map<string, TodoItem[]>();
                 for (const todo of items) {
                   const display = getTodoDisplay(todo as any);
-                  const name = display.patient || "General tasks";
+                  const name = display.patient || "General Tasks";
                   if (!map.has(name)) map.set(name, []);
                   map.get(name)?.push(todo);
                 }
@@ -569,7 +570,7 @@ export function CompactTodoList() {
               const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
               if (buckets.length === 0) return null;
               return (
-                <Accordion type="multiple" defaultValue={[buckets[0].key]} className={cn(SECTION_FRAME_CLASS, "border-neutral-200")}>
+                <Accordion type="multiple" defaultValue={[buckets[0].key]} className="divide-y divide-neutral-200">
                   {buckets.map((b) => (
                     <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_CLASS}>
                       <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "px-3 py-2")}>

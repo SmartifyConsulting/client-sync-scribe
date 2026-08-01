@@ -161,7 +161,7 @@ export function VisitCategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[720px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span className="text-2xl">Ⓜ️</span>
@@ -171,33 +171,33 @@ export function VisitCategoryDialog({
             Select all visit types that apply to award {patientName || "the patient"} vula. Multiple selections allowed.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-3 py-2 max-h-[350px] overflow-y-auto">
+
+        <div className="space-y-3 py-2">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            displayCategories.map((cat) => (
-              <label
-                key={cat.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:bg-accent/50 cursor-pointer transition-colors"
-              >
-                <Checkbox
-                  checked={selectedCategories.has(cat.visit_category)}
-                  onCheckedChange={() => toggleCategory(cat.visit_category)}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{cat.visit_category}</p>
-                  {cat.description && (
-                    <p className="text-xs text-muted-foreground">{cat.description}</p>
-                  )}
-                </div>
-                <span className="text-xs font-medium text-primary shrink-0">
-                  +{cat.lollipops_awarded} Ⓜ️
-                </span>
-              </label>
-            ))
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              {displayCategories.map((cat) => (
+                <label
+                  key={cat.id}
+                  className="flex items-start gap-2 p-2.5 rounded-lg border border-border hover:bg-accent/50 cursor-pointer transition-colors"
+                >
+                  <Checkbox
+                    checked={selectedCategories.has(cat.visit_category)}
+                    onCheckedChange={() => toggleCategory(cat.visit_category)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground leading-tight">{cat.visit_category}</p>
+                    <span className="text-[11px] font-medium text-primary">
+                      +{cat.lollipops_awarded} Ⓜ️
+                    </span>
+                  </div>
+                </label>
+              ))}
+            </div>
           )}
 
           <div className="pt-2 border-t border-border">

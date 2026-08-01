@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, GripVertical } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -51,7 +51,6 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const { toast } = useToast();
   const { profile } = useProfile();
   const { templates: headerFooterTemplates } = useHeaderFooterTemplates();
-  const [showPreview, setShowPreview] = useState(false);
   const [selectedHeaderFooterId, setSelectedHeaderFooterId] = useState<string>(
     initialData?.headerFooterTemplateId || ""
   );
@@ -193,155 +192,108 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
 
   return (
     <div className="space-y-3">
-      {/* Preview Toggle */}
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-foreground">Content Template Editor</h4>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowPreview(!showPreview)}
-          className="gap-2"
-        >
-          {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          {showPreview ? "Hide Preview" : "Show Preview"}
-        </Button>
-      </div>
+      <h4 className="text-sm font-medium text-foreground">Content Template Editor</h4>
 
-      {/* Live Preview Panel */}
-      {showPreview && (
-        <div className="border border-border rounded-lg overflow-hidden bg-white">
-          <div className="bg-muted/50 px-4 py-2 border-b border-border">
-            <span className="text-sm font-medium text-foreground">Content Preview</span>
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
+        {/* LEFT: Design */}
+        <div className="space-y-3 min-w-0">
+          {/* Template Name, Description & Header/Footer — compact single-row layout */}
+          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-foreground shrink-0 w-20">Name *</label>
+              <Input
+                placeholder="e.g., Medical Certificate"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="h-9 flex-1"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-medium text-foreground shrink-0 w-20">Description</label>
+              <Input
+                placeholder="When to use this template"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="h-9 flex-1"
+              />
+            </div>
+            {(() => {
+              const match = [...(body.text?.matchAll(/font-size:\s*(\d+)pt/gi) ?? [])];
+              if (match.length === 0) return null;
+              const counts = new Map<string, number>();
+              for (const m of match) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
+              const detectedSize = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+              return (
+                <span className="flex items-center whitespace-nowrap text-xs text-muted-foreground">
+                  Written in <span className="ml-1 font-medium text-foreground">{detectedSize}pt</span>
+                </span>
+              );
+            })()}
           </div>
-          <div className="p-6 min-h-[300px]">
-            {/* Header Preview */}
-            <div className="pb-4 border-b border-gray-200 mb-4">
-              {renderHeaderFooterPreview('header')}
-              {!selectedHeaderFooter && (
-                <p className="text-gray-400 italic text-xs text-center mt-2">Select a Header/Footer template below</p>
-              )}
-            </div>
-            
-            {/* Body Preview */}
-            <div className="min-h-[150px] py-4" style={{ textAlign: body.alignment }}>
-              {body.imageUrl && (
-                <img src={body.imageUrl} alt="" className="max-h-16 inline-block mb-2" />
-              )}
-              {body.text ? (
-                <div 
-                  className="whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(body.text)) }}
-                />
-              ) : (
-                <p className="text-gray-400 italic text-center">Main content will appear here...</p>
-              )}
-            </div>
-            
-            {/* Footer Preview */}
-            <div className="pt-4 border-t border-gray-200 mt-4">
-              {renderHeaderFooterPreview('footer')}
+
+          {/* Header/Footer Template Selector */}
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium text-foreground shrink-0 w-20">Letterhead</label>
+            <div className="flex-1">
+              <Select
+                value={selectedHeaderFooterId || "none"}
+                onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Select a header/footer template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {headerFooterTemplates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Template Name, Description & Header/Footer — compact single-row layout */}
-      <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-medium text-foreground shrink-0 w-20">Name *</label>
-          <Input
-            placeholder="e.g., Medical Certificate"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="h-9 flex-1"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-medium text-foreground shrink-0 w-20">Description</label>
-          <Input
-            placeholder="When to use this template"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="h-9 flex-1"
-          />
-        </div>
-        {(() => {
-          const match = [...(body.text?.matchAll(/font-size:\s*(\d+)pt/gi) ?? [])];
-          if (match.length === 0) return null;
-          const counts = new Map<string, number>();
-          for (const m of match) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
-          const detectedSize = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
-          return (
-            <span className="flex items-center whitespace-nowrap text-xs text-muted-foreground">
-              Written in <span className="ml-1 font-medium text-foreground">{detectedSize}pt</span>
-            </span>
-          );
-        })()}
-      </div>
-
-      {/* Header/Footer Template Selector */}
-      <div className="flex items-center gap-2">
-        <label className="text-xs font-medium text-foreground shrink-0 w-20">Letterhead</label>
-        <div className="flex-1">
-          <Select
-            value={selectedHeaderFooterId || "none"}
-            onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
-          >
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="Select a header/footer template" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">None</SelectItem>
-              {headerFooterTemplates.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  {template.name}
-                </SelectItem>
+          {/* Dynamic Fields Info */}
+          <div className="px-3 py-2 rounded-lg bg-muted/50 border border-border">
+            <p className="text-xs font-medium text-foreground mb-1.5">
+              Dynamic fields <span className="font-normal text-muted-foreground">— click or drag into the content below</span>
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                "[PatientName]","[DoctorName]","[DoctorSignature]","[PracticeNumber]",
+                "[DoctorNumber]","[PracticeAddress]","[Date]","[PatientAddress]","[PatientDOB]",
+              ].map((token) => (
+                <code
+                  key={token}
+                  draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData("text/plain", token);
+                    e.dataTransfer.effectAllowed = "copy";
+                  }}
+                  onClick={() => { navigator.clipboard?.writeText(token); }}
+                  className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
+                  title="Drag into the content area, or click to copy"
+                >
+                  <GripVertical className="h-3 w-3 opacity-70" />
+                  {token}
+                </code>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+            </div>
 
-      {/* Dynamic Fields Info */}
-      <div className="px-3 py-2 rounded-lg bg-muted/50 border border-border">
-        <p className="text-xs font-medium text-foreground mb-1.5">
-          Dynamic fields <span className="font-normal text-muted-foreground">— click or drag into the content below</span>
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {[
-            "[PatientName]","[DoctorName]","[DoctorSignature]","[PracticeNumber]",
-            "[DoctorNumber]","[PracticeAddress]","[Date]","[PatientAddress]","[PatientDOB]",
-          ].map((token) => (
-            <code
-              key={token}
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("text/plain", token);
-                e.dataTransfer.effectAllowed = "copy";
-              }}
-              onClick={() => { navigator.clipboard?.writeText(token); }}
-              className="inline-flex items-center gap-1 text-xs bg-primary/10 text-primary px-2 py-1 rounded cursor-grab active:cursor-grabbing select-none hover:bg-primary/20"
-              title="Drag into the content area, or click to copy"
-            >
-              <GripVertical className="h-3 w-3 opacity-70" />
-              {token}
-            </code>
-          ))}
-        </div>
+          </div>
 
-      </div>
-
-      {/* CONTENT SECTION */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h4 className="text-sm font-semibold text-foreground">Content</h4>
-          <span className="text-xs text-muted-foreground">(Main body of the document)</span>
-        </div>
-        <div className="p-4 border border-border rounded-lg bg-card">
-          <TemplateSectionEditor
-            value={body}
-            onChange={setBody}
-            placeholder="Enter the main content of your template here...
+          {/* CONTENT SECTION */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-foreground">Content</h4>
+              <span className="text-xs text-muted-foreground">(Main body of the document)</span>
+            </div>
+            <div className="p-4 border border-border rounded-lg bg-card">
+              <TemplateSectionEditor
+                value={body}
+                onChange={setBody}
+                placeholder="Enter the main content of your template here...
 
 Example:
 To Whom It May Concern,
@@ -352,19 +304,59 @@ This is to certify that [PatientName] was examined at our practice on [Date].
 
 Yours faithfully,
 [DoctorName]"
-            rows={12}
-          />
-        </div>
-      </div>
+                rows={12}
+              />
+            </div>
+          </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3 pt-2">
-        <Button variant="outline" onClick={onCancel} className="flex-1">
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} className="flex-1">
-          {mode === "edit" ? "Save Changes" : "Save Template"}
-        </Button>
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-2">
+            <Button variant="outline" onClick={onCancel} className="flex-1">
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} className="flex-1">
+              {mode === "edit" ? "Save Changes" : "Save Template"}
+            </Button>
+          </div>
+        </div>
+
+        {/* RIGHT: Live Preview */}
+        <div className="lg:sticky lg:top-3 min-w-0">
+          <div className="border border-border rounded-lg overflow-hidden bg-white">
+            <div className="bg-muted/50 px-4 py-2 border-b border-border">
+              <span className="text-sm font-medium text-foreground">Content Preview</span>
+            </div>
+            <div className="p-6 min-h-[300px]">
+              {/* Header Preview */}
+              <div className="pb-4 border-b border-gray-200 mb-4">
+                {renderHeaderFooterPreview('header')}
+                {!selectedHeaderFooter && (
+                  <p className="text-gray-400 italic text-xs text-center mt-2">Select a Header/Footer template</p>
+                )}
+              </div>
+
+              {/* Body Preview */}
+              <div className="min-h-[150px] py-4" style={{ textAlign: body.alignment }}>
+                {body.imageUrl && (
+                  <img src={body.imageUrl} alt="" className="max-h-16 inline-block mb-2" />
+                )}
+                {body.text ? (
+                  <div
+                    className="whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(body.text)) }}
+                  />
+                ) : (
+                  <p className="text-gray-400 italic text-center">Main content will appear here...</p>
+                )}
+              </div>
+
+              {/* Footer Preview */}
+              <div className="pt-4 border-t border-gray-200 mt-4">
+                {renderHeaderFooterPreview('footer')}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

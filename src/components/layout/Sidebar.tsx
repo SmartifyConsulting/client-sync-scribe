@@ -60,6 +60,8 @@ const PRACTICE_MODE_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
   { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
   { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
+  { icon: Calendar, label: "Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
+  { icon: ListChecks, label: "Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
   { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
   { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
@@ -75,7 +77,7 @@ const PROFILE_MODE_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
-const PROFILE_ROUTE_PREFIXES = ["/patient/details", "/biolog", "/todos", "/calendar"];
+const PROFILE_ROUTE_PREFIXES = ["/patient/details", "/biolog"];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },

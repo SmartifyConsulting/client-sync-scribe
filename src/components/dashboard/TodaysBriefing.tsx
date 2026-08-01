@@ -60,7 +60,8 @@ export function TodaysBriefing() {
     if (appointments.length === 0) return;
     const translateBriefingContent = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
         if (!user) return;
         const { data: profileData } = await supabase
           .from('profiles')
@@ -75,7 +76,6 @@ export function TodaysBriefing() {
         }
 
         setIsTranslating(true);
-        const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) return;
 
         const translateText = async (text: string): Promise<string> => {
@@ -162,7 +162,8 @@ export function TodaysBriefing() {
   const fetchAppointmentsForDate = async (date: Date) => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
 
       const dayStart = new Date(date);
@@ -461,7 +462,7 @@ export function TodaysBriefing() {
       const { data: profileData } = await supabase
         .from('profiles')
         .select('narration_voice, preferred_language')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id || '')
+        .eq('id', (await supabase.auth.getSession()).data.session?.user?.id || '')
         .single();
       const selectedVoice = (profileData as any)?.narration_voice || 'shimmer';
       const preferredLang = (profileData as any)?.preferred_language || 'English';

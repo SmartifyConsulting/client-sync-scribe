@@ -45,16 +45,10 @@ import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmission
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
-import { DocumentDeliveryProgress, type DocumentDeliveryTarget } from "@/components/sessions/DocumentDeliveryProgress";
 
 import { DrawingPad } from "@/components/drawings/DrawingPad";
-import {
-  MedCertReviewDialog,
-  PrescriptionReviewDialog,
-  InvoiceReviewDialog,
-  ReferralReviewDialog,
-} from "@/components/sessions/TranscriptionReviewDialogs";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
+import { GeneratedDocumentsDialog, type GeneratedDoc } from "@/features/sessions/components/GeneratedDocumentsDialog";
 import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -157,21 +151,14 @@ export default function Sessions() {
   const notesRef = useRef<string>("");
   const sessionStartTimeRef = useRef<Date | null>(null);
 
-  // Per-document generate → send progress state
-  const [delivery, setDelivery] = useState<DocumentDeliveryTarget | null>(null);
-  const deliveryNextRef = useRef<(() => void) | null>(null);
-
-
-  // AI-extracted document review state
-  const [showMedCertReview, setShowMedCertReview] = useState(false);
-  const [showPrescriptionReview, setShowPrescriptionReview] = useState(false);
-  const [showInvoiceReview, setShowInvoiceReview] = useState(false);
-  const [showReferralReview, setShowReferralReview] = useState(false);
+  // AI-extracted document state
   const [extractedMedCert, setExtractedMedCert] = useState<MedCertData | null>(null);
   const [extractedPrescription, setExtractedPrescription] = useState<PrescriptionData | null>(null);
   const [extractedInvoice, setExtractedInvoice] = useState<InvoiceData | null>(null);
   const [extractedReferral, setExtractedReferral] = useState<ReferralData | null>(null);
-  const [reviewLoading, setReviewLoading] = useState(false);
+  // Single summary dialog for all documents generated from this session
+  const [showGeneratedDocsDialog, setShowGeneratedDocsDialog] = useState(false);
+  const [generatedDocs, setGeneratedDocs] = useState<GeneratedDoc[]>([]);
   const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
   const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
   const doctorIdRef = useRef<string | null>(null);
@@ -366,14 +353,170 @@ export default function Sessions() {
     }
   }, [aiDiagnosis]);
 
-  // Begin the sequential document review chain
-  const startDocumentReview = useCallback(() => {
-    if (extractedMedCert) setShowMedCertReview(true);
-    else if (extractedPrescription) setShowPrescriptionReview(true);
-    else if (extractedInvoice) setShowInvoiceReview(true);
-    else if (extractedReferral) setShowReferralReview(true);
-    else setTimeout(() => advanceToFollowUp(), 300);
-  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, advanceToFollowUp]);
+  // --- Silent document creation (no per-document review dialog) ---
+  const createMedCertDocument = async (data: MedCertData): Promise<GeneratedDoc | null> => {
+    if (!patientId) return null;
+    try {
+      const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data: doc } = await supabase.from('documents').insert({
+        user_id: user.id,
+        patient_id: patientId,
+        patient_name: currentPatient?.name || null,
+        name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
+        content,
+        template_name: 'Medical Certificate',
+      }).select('id').single();
+      return {
+        key: 'medcert',
+        label: 'Medical Certificate',
+        documentId: doc?.id || null,
+        content,
+        recipientEmail: (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      };
+    } catch (e) { console.error(e); return null; }
+  };
+
+  const createPrescriptionDocument = async (data: PrescriptionData): Promise<GeneratedDoc | null> => {
+    if (!patientId || !currentSessionIdRef.current) return null;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      for (const med of data.medications) {
+        await supabase.from('prescriptions').insert({
+          patient_id: patientId,
+          doctor_id: user.id,
+          session_id: currentSessionIdRef.current,
+          medication: med.medication,
+          dosage: med.dosage,
+          frequency: med.frequency,
+          instructions: [med.duration, med.instructions].filter(Boolean).join('. ') || null,
+        });
+      }
+      const content = `<b>PRESCRIPTION</b>\n\nPatient: ${currentPatient?.name || ''}\n\n${data.medications.map(m => `• ${m.medication} — ${m.dosage}, ${m.frequency}${m.duration ? ` (${m.duration})` : ''}${m.instructions ? `\n  ${m.instructions}` : ''}`).join('\n')}`;
+      const { data: doc } = await supabase.from('documents').insert({
+        user_id: user.id,
+        patient_id: patientId,
+        patient_name: currentPatient?.name || null,
+        name: `Prescription - ${new Date().toLocaleDateString()}`,
+        content,
+        template_name: 'Prescription',
+      }).select('id').single();
+      return {
+        key: 'prescription',
+        label: 'Prescription',
+        documentId: doc?.id || null,
+        content,
+        recipientEmail: (currentPatient as any)?.pharmacy_email || (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      };
+    } catch (e) { console.error(e); return null; }
+  };
+
+  const createInvoiceDocument = async (data: InvoiceData): Promise<GeneratedDoc | null> => {
+    if (!patientId || !currentSessionIdRef.current) return null;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
+      const description = data.items.map(i => `${i.description}: R${i.amount}`).join('; ');
+      const total = data.total || data.items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
+      const { data: inv } = await supabase.from('invoices').insert({
+        patient_id: patientId,
+        doctor_id: user.id,
+        session_id: currentSessionIdRef.current,
+        invoice_number: invoiceNumber,
+        description,
+        amount: total,
+        due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+      }).select().single();
+      if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
+      const content = `<b>INVOICE ${invoiceNumber}</b>\n\nPatient: ${currentPatient?.name || ''}\n\n${data.items.map(i => `• ${i.description} — R${i.amount}`).join('\n')}\n\nTotal: R${total}`;
+      const { data: doc } = await supabase.from('documents').insert({
+        user_id: user.id,
+        patient_id: patientId,
+        patient_name: currentPatient?.name || null,
+        name: `Invoice ${invoiceNumber}`,
+        content,
+        template_name: 'Invoice',
+      }).select('id').single();
+      return {
+        key: 'invoice',
+        label: 'Invoice',
+        documentId: doc?.id || null,
+        content,
+        recipientEmail: (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      };
+    } catch (e) { console.error(e); return null; }
+  };
+
+  const createReferralDocument = async (data: ReferralData): Promise<GeneratedDoc | null> => {
+    if (!patientId) return null;
+    try {
+      const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const { data: doc } = await supabase.from('documents').insert({
+        user_id: user.id,
+        patient_id: patientId,
+        patient_name: currentPatient?.name || null,
+        name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
+        content,
+        template_name: 'Referral Letter',
+      }).select('id').single();
+      if (data.doctor_name) {
+        const { data: refDoc } = await supabase.from('referral_doctors')
+          .select('id, referral_count')
+          .eq('user_id', user.id)
+          .ilike('last_name', `%${data.doctor_name.split(' ').pop()}%`)
+          .maybeSingle();
+        if (refDoc) {
+          await supabase.from('referral_doctors')
+            .update({ referral_count: (refDoc.referral_count || 0) + 1 })
+            .eq('id', refDoc.id);
+        }
+      }
+      return {
+        key: 'referral',
+        label: 'Referral Letter',
+        documentId: doc?.id || null,
+        content,
+        recipientEmail: (currentPatient as any)?.email || null,
+        recipientName: currentPatient?.name || null,
+      };
+    } catch (e) { console.error(e); return null; }
+  };
+
+  // Silently generate every AI-detected document, then show ONE summary dialog
+  // instead of chaining separate popups together.
+  const generateAllDocuments = useCallback(async () => {
+    const results: GeneratedDoc[] = [];
+    if (extractedMedCert) {
+      const d = await createMedCertDocument(extractedMedCert);
+      if (d) results.push(d);
+    }
+    if (extractedPrescription) {
+      const d = await createPrescriptionDocument(extractedPrescription);
+      if (d) results.push(d);
+    }
+    if (extractedInvoice) {
+      const d = await createInvoiceDocument(extractedInvoice);
+      if (d) results.push(d);
+    }
+    if (extractedReferral) {
+      const d = await createReferralDocument(extractedReferral);
+      if (d) results.push(d);
+    }
+    if (results.length > 0) {
+      setGeneratedDocs(results);
+      setShowGeneratedDocsDialog(true);
+    } else {
+      advanceToFollowUp();
+    }
+  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, advanceToFollowUp, patientId, currentPatient]);
 
   const handleFollowUpDone = useCallback(() => {
     setShowVisitCategoryDialog(true);
@@ -457,8 +600,8 @@ export default function Sessions() {
           setExtractedReferral(docs.referral);
           if (!hasDocs) { hasDocs = true; }
         }
-        // Go straight into the sequential document review.
-        setTimeout(() => startDocumentReview(), 0);
+        // Silently create every detected document, then show one summary dialog.
+        setTimeout(() => generateAllDocuments(), 0);
       } else {
         setSummary("Session completed. No content was recorded or noted.");
         setActionPoints([]);
@@ -471,7 +614,7 @@ export default function Sessions() {
 
     setSessionState("completed");
     pendingCompletionRef.current = false;
-  }, [completeSession, patientId, advanceToFollowUp, startDocumentReview]);
+  }, [completeSession, patientId, advanceToFollowUp, generateAllDocuments]);
 
   // Visit-category dialog now runs at the END of the post-session chain (Vula award)
   const handleVisitCategoryConfirm = async (categories: string[] | null) => {
@@ -590,13 +733,7 @@ export default function Sessions() {
     } catch (e) { console.error(e); }
   };
 
-  // Show the generate → send progress for a document, then continue the chain
-  const runDelivery = (target: DocumentDeliveryTarget, next: () => void) => {
-    deliveryNextRef.current = next;
-    setDelivery(target);
-  };
-
-  const sendDeliveryDocument = async (target: DocumentDeliveryTarget) => {
+  const sendDeliveryDocument = async (target: { documentId: string | null; recipientEmail?: string | null }) => {
     try {
       const { error } = await supabase.functions.invoke('send-document-email', {
         body: { documentId: target.documentId, recipientEmail: target.recipientEmail },
@@ -609,155 +746,6 @@ export default function Sessions() {
       return false;
     }
   };
-
-  const nextAfterMedCert = () => {
-    if (extractedPrescription) setShowPrescriptionReview(true);
-    else if (extractedInvoice) setShowInvoiceReview(true);
-    else if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
-  };
-  const nextAfterPrescription = () => {
-    if (extractedInvoice) setShowInvoiceReview(true);
-    else if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
-  };
-  const nextAfterInvoice = () => {
-    if (extractedReferral) setShowReferralReview(true);
-    else advanceToFollowUp();
-  };
-
-  // Handlers for AI-extracted document approvals
-  const handleApproveMedCert = async (data: MedCertData) => {
-    if (!patientId || !currentSessionId) return;
-    setReviewLoading(true);
-    let docId: string | null = null;
-    try {
-      const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: doc } = await supabase.from('documents').insert({
-          user_id: user.id,
-          patient_id: patientId,
-          patient_name: currentPatient?.name || null,
-          name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
-          content,
-          template_name: 'Medical Certificate',
-        }).select('id').single();
-        docId = doc?.id || null;
-      }
-    } catch (e) { console.error(e); }
-    setReviewLoading(false);
-    setShowMedCertReview(false);
-    runDelivery(
-      {
-        label: 'Medical Certificate',
-        documentId: docId,
-        recipientEmail: (currentPatient as any)?.email || null,
-        recipientName: currentPatient?.name || null,
-      },
-      nextAfterMedCert,
-    );
-
-  };
-
-  const handleApprovePrescription = async (data: PrescriptionData) => {
-    if (!patientId || !currentSessionId) return;
-    setReviewLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        for (const med of data.medications) {
-          await supabase.from('prescriptions').insert({
-            patient_id: patientId,
-            doctor_id: user.id,
-            session_id: currentSessionId,
-            medication: med.medication,
-            dosage: med.dosage,
-            frequency: med.frequency,
-            instructions: [med.duration, med.instructions].filter(Boolean).join('. ') || null,
-          });
-        }
-      }
-    } catch (e) { console.error(e); }
-    setReviewLoading(false);
-    setShowPrescriptionReview(false);
-    runDelivery({ label: 'Prescription' }, nextAfterPrescription);
-
-  };
-
-  const handleApproveInvoice = async (data: InvoiceData) => {
-    if (!patientId || !currentSessionId) return;
-    setReviewLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
-        const description = data.items.map(i => `${i.description}: R${i.amount}`).join('; ');
-        const total = data.total || data.items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
-        const { data: inv } = await supabase.from('invoices').insert({
-          patient_id: patientId,
-          doctor_id: user.id,
-          session_id: currentSessionId,
-          invoice_number: invoiceNumber,
-          description,
-          amount: total,
-          due_date: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
-        }).select().single();
-        if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
-      }
-    } catch (e) { console.error(e); }
-    setReviewLoading(false);
-    setShowInvoiceReview(false);
-    runDelivery({ label: 'Invoice' }, nextAfterInvoice);
-
-  };
-
-  const handleApproveReferral = async (data: ReferralData) => {
-    if (!patientId) return;
-    setReviewLoading(true);
-    let docId: string | null = null;
-    try {
-      const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: doc } = await supabase.from('documents').insert({
-          user_id: user.id,
-          patient_id: patientId,
-          patient_name: currentPatient?.name || null,
-          name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
-          content,
-          template_name: 'Referral Letter',
-        }).select('id').single();
-        docId = doc?.id || null;
-        // Increment referral count if doctor exists in referral_doctors
-        if (data.doctor_name) {
-          const { data: refDoc } = await supabase.from('referral_doctors')
-            .select('id, referral_count')
-            .eq('user_id', user.id)
-            .ilike('last_name', `%${data.doctor_name.split(' ').pop()}%`)
-            .maybeSingle();
-          if (refDoc) {
-            await supabase.from('referral_doctors')
-              .update({ referral_count: (refDoc.referral_count || 0) + 1 })
-              .eq('id', refDoc.id);
-          }
-        }
-      }
-    } catch (e) { console.error(e); }
-    setReviewLoading(false);
-    setShowReferralReview(false);
-    runDelivery(
-      {
-        label: 'Referral Letter',
-        documentId: docId,
-        recipientEmail: (currentPatient as any)?.email || null,
-        recipientName: currentPatient?.name || null,
-      },
-      advanceToFollowUp,
-    );
-  };
-
-
 
   // Auto-start when arriving from a patient profile ("Start Session")
   const autoStartedRef = useRef(false);
@@ -841,20 +829,31 @@ export default function Sessions() {
 
 
 
-      {/* Per-document generate → send progress */}
-      <DocumentDeliveryProgress
-        target={delivery}
-        onSend={sendDeliveryDocument}
-        onFinish={async (sent) => {
-          const label = delivery?.label;
-          setDelivery(null);
-          if (sent && label) await completeSessionTodo(label);
-          const next = deliveryNextRef.current;
-          deliveryNextRef.current = null;
-          setTimeout(() => next?.(), 200);
+      {/* Documents Generated — single summary dialog with View → Edit/Send/Save per document */}
+      <GeneratedDocumentsDialog
+        open={showGeneratedDocsDialog}
+        onOpenChange={setShowGeneratedDocsDialog}
+        documents={generatedDocs}
+        onSend={async (doc) => {
+          const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
+          if (ok) {
+            await completeSessionTodo(doc.label);
+            setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
+            toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the patient'}.` });
+          }
+        }}
+        onSaveEdit={async (doc, newContent) => {
+          if (doc.documentId) {
+            await supabase.from('documents').update({ content: newContent } as any).eq('id', doc.documentId);
+          }
+          setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, content: newContent } : d)));
+          toast({ title: 'Saved' });
+        }}
+        onContinue={() => {
+          setShowGeneratedDocsDialog(false);
+          advanceToFollowUp();
         }}
       />
-
 
       {/* Visit Category Dialog */}
       <VisitCategoryDialog
@@ -881,45 +880,6 @@ export default function Sessions() {
         />
       )}
 
-
-      {/* AI-Extracted Document Review Dialogs */}
-      {extractedMedCert && (
-        <MedCertReviewDialog
-          open={showMedCertReview}
-          onOpenChange={setShowMedCertReview}
-          data={extractedMedCert}
-          patientName={currentPatient?.name || ""}
-          onApprove={handleApproveMedCert}
-          loading={reviewLoading}
-        />
-      )}
-      {extractedPrescription && (
-        <PrescriptionReviewDialog
-          open={showPrescriptionReview}
-          onOpenChange={setShowPrescriptionReview}
-          data={extractedPrescription}
-          onApprove={handleApprovePrescription}
-          loading={reviewLoading}
-        />
-      )}
-      {extractedInvoice && (
-        <InvoiceReviewDialog
-          open={showInvoiceReview}
-          onOpenChange={setShowInvoiceReview}
-          data={extractedInvoice}
-          onApprove={handleApproveInvoice}
-          loading={reviewLoading}
-        />
-      )}
-      {extractedReferral && (
-        <ReferralReviewDialog
-          open={showReferralReview}
-          onOpenChange={setShowReferralReview}
-          data={extractedReferral}
-          onApprove={handleApproveReferral}
-          loading={reviewLoading}
-        />
-      )}
 
       {/* Header with Back Link */}
       <div className="flex items-center gap-4">
@@ -1313,31 +1273,16 @@ export default function Sessions() {
             </div>
           </div>
 
-          {/* AI-Detected Documents Banner */}
-          {(extractedMedCert || extractedPrescription || extractedInvoice || extractedReferral) && (
+          {/* Generated Documents Banner — reopens the single summary dialog */}
+          {generatedDocs.length > 0 && (
             <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
               <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium text-foreground">AI detected documents from this session:</span>
-              {extractedMedCert && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowMedCertReview(true)}>
-                  <FileTextIcon className="h-4 w-4" /> Medical Certificate
-                </Button>
-              )}
-              {extractedPrescription && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowPrescriptionReview(true)}>
-                  <Pill className="h-4 w-4" /> Prescription
-                </Button>
-              )}
-              {extractedInvoice && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowInvoiceReview(true)}>
-                  <Receipt className="h-4 w-4" /> Invoice
-                </Button>
-              )}
-              {extractedReferral && (
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowReferralReview(true)}>
-                  <Users className="h-4 w-4" /> Referral Letter
-                </Button>
-              )}
+              <span className="text-sm font-medium text-foreground">
+                {generatedDocs.length} document{generatedDocs.length === 1 ? '' : 's'} generated from this session.
+              </span>
+              <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowGeneratedDocsDialog(true)}>
+                <FileTextIcon className="h-4 w-4" /> View Documents
+              </Button>
             </div>
           )}
 

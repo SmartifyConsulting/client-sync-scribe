@@ -37,7 +37,8 @@ export default function Dashboard() {
   const { data: unreadNotifCount = 0 } = useQuery({
     queryKey: ["unread-notifications-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -57,7 +58,8 @@ export default function Dashboard() {
   const { data: recentNotifications = [] } = useQuery({
     queryKey: ["recent-notifications-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -96,7 +98,8 @@ export default function Dashboard() {
   const { data: unreadMessagesCount = 0 } = useQuery({
     queryKey: ["unread-messages-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -115,7 +118,8 @@ export default function Dashboard() {
   const { data: pendingTodosCount = 0 } = useQuery({
     queryKey: ["pending-todos-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return 0;
 
       const { count, error } = await supabase
@@ -134,7 +138,8 @@ export default function Dashboard() {
   const { data: totalCpdPoints = 0 } = useQuery({
     queryKey: ["cpd-points-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return 0;
 
       const { data, error } = await supabase
@@ -152,7 +157,8 @@ export default function Dashboard() {
   const { data: ratingData = { avg: 0, communication: 0, expertise: 0, professionalism: 0, count: 0 } } = useQuery({
     queryKey: ["doctor-rating-breakdown"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return { avg: 0, communication: 0, expertise: 0, professionalism: 0, count: 0 };
       const { data, error } = await supabase
         .from("visit_ratings")
@@ -178,7 +184,8 @@ export default function Dashboard() {
   const { data: doctorVulas = 0 } = useQuery({
     queryKey: ["doctor-vulas-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return 0;
       const { data, error } = await supabase
         .from("doctor_rewards")
@@ -194,7 +201,8 @@ export default function Dashboard() {
   const { data: patientVulas = 0 } = useQuery({
     queryKey: ["patient-vulas-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return 0;
       // Find patient record linked to this user
       const { data: patient } = await supabase
@@ -217,7 +225,8 @@ export default function Dashboard() {
   const { data: patientsList = [] } = useQuery({
     queryKey: ["patients-list-dashboard"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return [];
       const { data, error } = await supabase
         .from("patients")
