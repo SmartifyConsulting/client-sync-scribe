@@ -7,6 +7,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
 import { resolveTemplatePreviewTokens } from "@/features/documents/lib/resolveTemplatePreview";
 import { renderFormattedContent as renderDocumentHtml } from "@/features/documents/utils/documentFormatting";
+import { FONT_OPTIONS, getFontClass } from "./fontOptions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -38,21 +40,6 @@ interface HeaderFooterTemplateFormProps {
   onCancel: () => void;
   mode?: "create" | "edit";
 }
-
-const FONT_OPTIONS = [
-  { value: "sans", label: "DM Sans (Default)", preview: "font-sans" },
-  { value: "roboto", label: "Roboto", preview: "font-roboto" },
-  { value: "open-sans", label: "Open Sans", preview: "font-open-sans" },
-  { value: "lora", label: "Lora", preview: "font-lora" },
-  { value: "merriweather", label: "Merriweather", preview: "font-merriweather" },
-  { value: "playfair", label: "Playfair Display", preview: "font-playfair" },
-  { value: "source-serif", label: "Source Serif", preview: "font-source-serif" },
-  { value: "rockwell", label: "Rockwell", preview: "font-rockwell" },
-  { value: "poppins", label: "Poppins", preview: "font-poppins" },
-  { value: "montserrat", label: "Montserrat", preview: "font-montserrat" },
-  { value: "nunito", label: "Nunito", preview: "font-nunito" },
-  { value: "raleway", label: "Raleway", preview: "font-raleway" },
-];
 
 const defaultSectionContent = (): SectionContent => ({
   text: "",
@@ -118,10 +105,6 @@ export function HeaderFooterTemplateForm({
       header,
       footer,
     });
-  };
-
-  const getFontClass = (fontValue: string) => {
-    return FONT_OPTIONS.find(f => f.value === fontValue)?.preview || "font-sans";
   };
 
   // Previews resolve the signed-in doctor's real details (name, numbers,
@@ -242,10 +225,15 @@ export function HeaderFooterTemplateForm({
         </div>
       </div>
 
-      {/* HEADER SECTION */}
-      <div className="space-y-1">
-        <h4 className="text-xs font-semibold text-foreground">Header <span className="font-normal text-muted-foreground">(Left, Center, Right)</span></h4>
-        <div className="grid grid-cols-3 gap-2 p-2 border border-border rounded-lg bg-card">
+      {/* HEADER CARD — saved together with the Footer Card below as one Letterhead;
+          both are applied by default whenever a content template selects this Letterhead. */}
+      <Card className="border-border">
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="text-xs font-semibold text-foreground">
+            Header <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-3 gap-2 px-3 pb-3">
           <div>
             <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Left</label>
             <TemplateSectionEditor
@@ -276,13 +264,17 @@ export function HeaderFooterTemplateForm({
               compact
             />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* FOOTER SECTION */}
-      <div className="space-y-1">
-        <h4 className="text-xs font-semibold text-foreground">Footer <span className="font-normal text-muted-foreground">(Left, Center, Right)</span></h4>
-        <div className="grid grid-cols-3 gap-2 p-2 border border-border rounded-lg bg-card">
+      {/* FOOTER CARD */}
+      <Card className="border-border">
+        <CardHeader className="py-2 px-3">
+          <CardTitle className="text-xs font-semibold text-foreground">
+            Footer <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-3 gap-2 px-3 pb-3">
           <div>
             <label className="text-[10px] font-medium text-muted-foreground mb-0.5 block">Left</label>
             <TemplateSectionEditor
@@ -313,8 +305,11 @@ export function HeaderFooterTemplateForm({
               compact
             />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+      <p className="text-[10px] text-muted-foreground -mt-1">
+        Saving this Letterhead applies both the Header Card and Footer Card together by default wherever it's selected.
+      </p>
 
       {/* Action Buttons */}
       <div className="flex gap-2 pt-1">

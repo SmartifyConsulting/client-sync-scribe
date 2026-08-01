@@ -481,7 +481,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   New Header/Footer
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Header & Footer Template</DialogTitle>
                   <DialogDescription>Design a reusable header and footer layout for your documents</DialogDescription>
@@ -588,7 +588,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   {t("documents.newContent")}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Create Content Template</DialogTitle>
                   <DialogDescription>Create a reusable document content template</DialogDescription>
@@ -820,7 +820,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
       {/* Edit Content Template Dialog */}
       <Dialog open={!!editingTemplate} onOpenChange={(open) => !open && setEditingTemplate(null)}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Content Template</DialogTitle>
             <DialogDescription>Modify this template's content</DialogDescription>
@@ -845,7 +845,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
 
       {/* Edit Header/Footer Template Dialog */}
       <Dialog open={!!editingHFTemplate} onOpenChange={(open) => !open && setEditingHFTemplate(null)}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Header & Footer Template</DialogTitle>
             <DialogDescription>Modify this header and footer layout</DialogDescription>

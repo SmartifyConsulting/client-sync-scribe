@@ -11,6 +11,7 @@ import {
   renderFormattedContent as renderDocumentHtml,
 } from "@/features/documents/utils/documentFormatting";
 import { resolveTemplatePreviewTokens } from "@/features/documents/lib/resolveTemplatePreview";
+import { getFontClass } from "./fontOptions";
 
 
 import {
@@ -316,7 +317,7 @@ Yours faithfully,
             <div className="bg-muted/50 px-3 py-1.5 border-b border-border">
               <span className="text-xs font-medium text-foreground">Content Preview</span>
             </div>
-            <div className="p-3 min-h-[200px] max-h-[380px] overflow-y-auto">
+            <div className={`p-3 min-h-[200px] ${getFontClass(selectedHeaderFooter?.font_family)}`}>
               {/* Header Preview */}
               <div className="pb-2 border-b border-gray-200 mb-2">
                 {renderHeaderFooterPreview('header')}
