@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { SosLiveMap } from "../../../components/SosLiveMap";
 import { EtaCountdown } from "../../../components/EtaCountdown";
+import { HospitalAcceptancePanel } from "../../../components/HospitalAcceptance";
 import { Badge } from "@/components/ui/badge";
 import { Ambulance, MapPin, AlertTriangle, ChevronRight, Handshake } from "lucide-react";
 
@@ -13,7 +14,13 @@ type Row = {
   assigned_provider_id: string | null; created_at: string;
   pre_arrival_notes?: string | null;
   incident_number?: string | null;
+  hospital_acceptance_status?: string | null;
+  assigned_trauma_bay?: string | null;
+  assigned_doctor_name?: string | null;
+  trauma_team_prepared?: boolean | null;
+  handover_status?: string | null;
 };
+
 
 
 export default function IncomingAmbulancesScreen() {
