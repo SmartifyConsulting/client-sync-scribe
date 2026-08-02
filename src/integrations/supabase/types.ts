@@ -974,24 +974,33 @@ export type Database = {
       }
       biolog_foods: {
         Row: {
+          calories: number | null
           category: string
           created_at: string
           id: string
+          kilojoules: number | null
           name: string
+          serving_size: string | null
           user_id: string
         }
         Insert: {
+          calories?: number | null
           category?: string
           created_at?: string
           id?: string
+          kilojoules?: number | null
           name: string
+          serving_size?: string | null
           user_id: string
         }
         Update: {
+          calories?: number | null
           category?: string
           created_at?: string
           id?: string
+          kilojoules?: number | null
           name?: string
+          serving_size?: string | null
           user_id?: string
         }
         Relationships: []
@@ -5848,6 +5857,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sidebar_preferences: {
+        Row: {
+          hidden_items: string[]
+          item_order: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          hidden_items?: string[]
+          item_order?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          hidden_items?: string[]
+          item_order?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       streak_config: {
         Row: {
