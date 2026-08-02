@@ -43,17 +43,17 @@ function AmbulanceStatsStrip() {
   };
 
   const statusTone =
-    !shift ? "border-border bg-card text-muted-foreground"
-    : shift.status === "busy" ? "border-destructive/40 bg-destructive/10 text-destructive"
-    : "border-success/40 bg-success/10 text-success";
+    !shift ? "bg-card text-muted-foreground"
+    : shift.status === "busy" ? "bg-destructive/10 text-destructive"
+    : "bg-success/10 text-success";
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-card/60 p-2">
+    <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-card/60 p-2">
       {/* 1. Action: Start / End Shift FIRST */}
       {!shift ? (
         <button
           onClick={() => setStartOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/15"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/15"
         >
           <PlayCircle className="h-3.5 w-3.5" /> {t("provider.startShift")}
         </button>
@@ -62,7 +62,7 @@ function AmbulanceStatsStrip() {
           onClick={onEnd}
           disabled={ending || shift.status === "busy"}
           title={shift.status === "busy" ? t("provider.finishActiveIncidentFirst") : ""}
-          className="inline-flex items-center gap-1.5 rounded-xl border bg-card px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-card px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted disabled:opacity-50"
         >
           {ending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StopCircle className="h-3.5 w-3.5" />}
           {t("provider.endShift")}
@@ -71,7 +71,7 @@ function AmbulanceStatsStrip() {
 
       {/* 2. Status badge */}
       <span className={cn(
-        "inline-flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
+        "inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
         statusTone,
       )}>
         <Truck className="h-3.5 w-3.5" />
@@ -82,7 +82,7 @@ function AmbulanceStatsStrip() {
       {stats.currentIncidentId && (
         <Link
           to={`/provider/ambulance/incident/${stats.currentIncidentId}`}
-          className="inline-flex items-center gap-2 rounded-xl border border-sos/40 bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
+          className="inline-flex items-center gap-2 rounded-xl bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
         >
           <Siren className="h-3.5 w-3.5" />
           <span className="text-xs font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>

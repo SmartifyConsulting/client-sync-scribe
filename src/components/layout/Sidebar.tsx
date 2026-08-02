@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
@@ -28,7 +27,6 @@ import {
   Eye,
   EyeOff,
   RotateCcw,
-  ArrowLeftRight,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -48,36 +46,56 @@ interface NavItem {
   labelKey: string;
   to: string;
   danger?: boolean;
-  /** This row carries the switch that flips between practice/profile mode. */
-  modeSwitch?: "practice" | "profile";
 }
 
-/** Doctors flip between two flat menus with a switch embedded on the My Practice /
- *  My Profile row, rather than seeing everything nested at once. */
-const PRACTICE_MODE_ITEMS: (NavItem & { tour?: string })[] = [
+interface NavSection {
+  title: string;
+  items: (NavItem & { tour?: string })[];
+}
+
+/** Doctors see one combined menu grouped under headings — "My Holarprac" for
+ *  practice-facing tools, "My Holarchy" for their own profile — with SOS
+ *  standalone above/below both, matching the heading pattern already used
+ *  for hospital/ER provider sidebars. */
+const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
-  { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings", modeSwitch: "profile" },
-  { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
-  { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
-  { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
-  { icon: Calendar, label: "Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-  { icon: ListChecks, label: "Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
-  { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
-  { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
-  { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
+];
+
+const DOCTOR_SECTIONS: NavSection[] = [
+  {
+    title: "My Holarprac",
+    items: [
+      { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
+      { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
+      { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
+      { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
+      { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
+      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
+      { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
+      { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
+    ],
+  },
+  {
+    title: "My Holarchy",
+    items: [
+      { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+      { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
+      { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
+    ],
+  },
+];
+
+const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
-const PROFILE_MODE_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health", modeSwitch: "practice" },
-  { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
-  { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
-  { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-  { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
-  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
+/** Flat view of the doctor menu, used for preference-based reordering/hiding
+ *  and the "Customise menu" popover, which don't need to know about sections. */
+const doctorModeItems: (NavItem & { tour?: string })[] = [
+  ...DOCTOR_TOP_ITEMS,
+  ...DOCTOR_SECTIONS.flatMap((s) => s.items),
+  ...DOCTOR_BOTTOM_ITEMS,
 ];
-
-const PROFILE_ROUTE_PREFIXES = ["/patient/details", "/biolog"];
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
@@ -130,7 +148,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
-  const navigate = useNavigate();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
   const isOnAdminRoute = location.pathname.startsWith("/admin");
 
@@ -150,17 +167,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
   const isPatientMenu = !isDoctor && (isPatient || routeSaysPatient);
 
-  const [mode, setMode] = useState<"practice" | "profile">(() =>
-    PROFILE_ROUTE_PREFIXES.some((p) => location.pathname.startsWith(p)) ? "profile" : "practice",
-  );
-
-  const switchMode = (next: "practice" | "profile") => {
-    setMode(next);
-    navigate(next === "practice" ? "/doctor-dashboard" : "/patient/details?section=health");
-    onNavigate?.();
-  };
-
-  const doctorModeItems = mode === "practice" ? PRACTICE_MODE_ITEMS : PROFILE_MODE_ITEMS;
+  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !(isAdmin && isOnAdminRoute);
 
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems
@@ -244,23 +251,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-        {item.modeSwitch && (
-          <button
-            type="button"
-            title={item.modeSwitch === "profile" ? "Switch to My Profile" : "Switch to My Practice"}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              switchMode(item.modeSwitch!);
-            }}
-            className={cn(
-              "flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors",
-              isItemActive ? "hover:bg-white/20" : "hover:bg-muted",
-            )}
-          >
-            <ArrowLeftRight className="h-3.5 w-3.5" />
-          </button>
-        )}
       </NavLink>
     );
   };
@@ -300,17 +290,42 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-4 overflow-y-auto font-size-preserve">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
+          ) : isDoctorMenu ? (
+            <>
+              <div className="space-y-1.5">
+                {applyItemPreferences(DOCTOR_TOP_ITEMS, preferences.item_order, preferences.hidden_items).map((item) =>
+                  renderNavLink(item),
+                )}
+              </div>
+              {DOCTOR_SECTIONS.map((section) => {
+                const sectionItems = applyItemPreferences(section.items, preferences.item_order, preferences.hidden_items);
+                if (sectionItems.length === 0) return null;
+                return (
+                  <div key={section.title} className="space-y-1.5">
+                    <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                      {section.title}
+                    </p>
+                    {sectionItems.map((item) => renderNavLink(item))}
+                  </div>
+                );
+              })}
+              <div className="space-y-1.5">
+                {applyItemPreferences(DOCTOR_BOTTOM_ITEMS, preferences.item_order, preferences.hidden_items).map((item) =>
+                  renderNavLink(item),
+                )}
+              </div>
+            </>
           ) : (
-            visibleItems.map((item) => renderNavLink(item))
+            <div className="space-y-1.5">{visibleItems.map((item) => renderNavLink(item))}</div>
           )}
         </nav>
 
-        {/* Customise menu — doctors only, scoped to whichever mode is active */}
+        {/* Customise menu — doctors only */}
         {!loading && !isPatientMenu && !isOnAdminRoute && (
           <div className="px-4 pb-1">
             <Popover>
@@ -322,9 +337,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               </PopoverTrigger>
               <PopoverContent side="top" align="start" className="w-72 max-h-[70vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-foreground">
-                    Customise {mode === "practice" ? "Dashboard" : "My Profile"}
-                  </p>
+                  <p className="text-xs font-semibold text-foreground">Customise menu</p>
                   <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={restoreAll}>
                     <RotateCcw className="h-3 w-3" /> Restore all
                   </Button>

@@ -2,7 +2,6 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
-import holarcHelpLogo from "@/assets/holarc-help-logo.png";
 import { cn } from "@/lib/utils";
 import {
   Settings,
@@ -103,14 +102,12 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const location = useLocation();
   const sections = portal === "hospital" ? hospitalSections : ambulanceSections;
   const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
-  const logo = portal === "ambulance" ? holarcHelpLogo : holarcLogo;
-  const logoAlt = portal === "ambulance" ? "Holarc Help" : "Holarc Health";
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar border-r border-sidebar-border">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
-          <img src={logo} alt={logoAlt} className="h-[82px] w-auto object-contain" />
+          <img src={holarcLogo} alt="Holarc Health" className="h-[82px] w-auto object-contain" />
         </div>
 
         {isAdmin && (
@@ -123,7 +120,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
           </NavLink>
         )}
 
-        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
+        <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-4 overflow-y-auto font-size-preserve">
           {sections.map((section) => (
             <div key={section.title || "main"} className="space-y-1.5">
               {section.title && (
@@ -163,9 +160,9 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
 
         <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
           <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-            <Avatar className="h-8 w-8 border-2 border-primary">
+            <Avatar className="h-[3.2rem] w-[3.2rem] border-2 border-primary">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || t("profileMenu.user")} />
-              <AvatarFallback className="bg-primary/20 text-primary text-sm">
+              <AvatarFallback className="bg-primary/20 text-primary text-base">
                 {profile?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
