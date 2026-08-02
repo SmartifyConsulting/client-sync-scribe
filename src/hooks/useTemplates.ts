@@ -362,6 +362,8 @@ export function useTemplates() {
       const parsedTemplates = data.map((t) => ({
         ...t,
         logo_position: t.logo_position as { x: number; y: number } | null,
+        header_template_id: (t as any).header_template_id ?? null,
+        footer_template_id: (t as any).footer_template_id ?? null,
       }));
 
       // Check for missing default templates and seed them
@@ -375,6 +377,8 @@ export function useTemplates() {
           const newParsed = newData.map(t => ({
             ...t,
             logo_position: t.logo_position as { x: number; y: number } | null,
+            header_template_id: (t as any).header_template_id ?? null,
+            footer_template_id: (t as any).footer_template_id ?? null,
           }));
           setTemplates([...parsedTemplates, ...newParsed]);
           return;
@@ -403,7 +407,12 @@ export function useTemplates() {
               .select()
               .single();
             return upd
-              ? { ...upd, logo_position: upd.logo_position as { x: number; y: number } | null }
+              ? {
+                  ...upd,
+                  logo_position: upd.logo_position as { x: number; y: number } | null,
+                  header_template_id: (upd as any).header_template_id ?? null,
+                  footer_template_id: (upd as any).footer_template_id ?? null,
+                }
               : t;
           }),
         );
@@ -442,6 +451,8 @@ export function useTemplates() {
       const parsedTemplates = data.map((t) => ({
         ...t,
         logo_position: t.logo_position as { x: number; y: number } | null,
+        header_template_id: (t as any).header_template_id ?? null,
+        footer_template_id: (t as any).footer_template_id ?? null,
       }));
       setTemplates(parsedTemplates);
     }
@@ -485,9 +496,11 @@ export function useTemplates() {
       return null;
     }
 
-    const newTemplate = {
+    const newTemplate: Template = {
       ...data,
       logo_position: data.logo_position as { x: number; y: number } | null,
+      header_template_id: (data as any).header_template_id ?? null,
+      footer_template_id: (data as any).footer_template_id ?? null,
     };
     setTemplates([...templates, newTemplate]);
     toast({
@@ -521,9 +534,11 @@ export function useTemplates() {
       return false;
     }
 
-    const updatedTemplate = {
+    const updatedTemplate: Template = {
       ...data,
       logo_position: data.logo_position as { x: number; y: number } | null,
+      header_template_id: (data as any).header_template_id ?? null,
+      footer_template_id: (data as any).footer_template_id ?? null,
     };
     setTemplates(templates.map((t) => (t.id === id ? updatedTemplate : t)));
     toast({
