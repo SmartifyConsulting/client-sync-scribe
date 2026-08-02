@@ -63,7 +63,6 @@
     "incomingSos": "Incoming SOS",
     "incomingEr": "Incoming ER",
     "triage": "Triage",
-    "admissions": "Admissions",
     "hospitalDashboard": "Dashboard",
     "hospitalAdminDashboard": "Admin Dashboard",
     "wards": "Wards",
@@ -84,11 +83,17 @@
     "incidentManagement": "Incident Management",
     "emergencyDashboard": "Dispatch Dashboard",
     "erOpsDashboard": "Ops Dashboard",
-
     "hospitalNetwork": "Hospital Network",
     "fleetOperations": "Fleet Operations",
     "realTimeMonitoring": "Fleet Live",
-    "driverManagement": "Driver Management"
+    "driverManagement": "Driver Management",
+    "dispatchConsole": "Dispatch Console",
+    "incidents": "Incidents",
+    "fleetMap": "Fleet Map",
+    "operationsDashboard": "Operations Dashboard",
+    "vehicles": "Vehicles",
+    "crews": "Crews",
+    "reports": "Reports"
   },
   "topbar": {
     "reportBug": "Report Bug/Fix",
