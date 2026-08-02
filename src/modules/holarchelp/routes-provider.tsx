@@ -1,8 +1,16 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ProviderGate } from "./components/ProviderGate";
+import { useProviderCapabilities } from "./hooks/useProviderCapabilities";
 import { HospitalInboundListener } from "./components/HospitalInboundListener";
 import ProviderRedirect from "./pages/provider/ProviderRedirect";
 import ProviderProfile from "./pages/provider/ProviderProfile";
+
+import ErCoordinationScreen from "./pages/provider/hospital/ErCoordinationScreen";
+import IncomingAmbulancesScreen from "./pages/provider/hospital/IncomingAmbulancesScreen";
+import TriageScreen from "./pages/provider/hospital/TriageScreen";
+import TraumaBaysScreen from "./pages/provider/hospital/TraumaBaysScreen";
+import DischargesScreen from "./pages/provider/hospital/DischargesScreen";
+
 
 import HospitalOpsLayout from "./pages/provider/hospital/HospitalOpsLayout";
 import EmergencyHubScreen from "./pages/provider/hospital/EmergencyHubScreen";
