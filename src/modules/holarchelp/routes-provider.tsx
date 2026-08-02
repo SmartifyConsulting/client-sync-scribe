@@ -86,6 +86,36 @@ function ProviderShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Renders children only when the provider capability is enabled. */
+function CapabilityRoute({
+  check,
+  children,
+}: {
+  check: (caps: ReturnType<typeof useProviderCapabilities>["capabilities"]) => boolean;
+  children: React.ReactNode;
+}) {
+  const { capabilities, loading } = useProviderCapabilities();
+  if (loading) {
+    return (
+      <div className="flex h-[40vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+      </div>
+    );
+  }
+  if (!check(capabilities)) return <Navigate to="/provider/hospital/dashboard" replace />;
+  return <>{children}</>;
+}
+
+const EmergencyCapability = ({ children }: { children: React.ReactNode }) => (
+  <CapabilityRoute check={(c) => c.hasEmergencyDepartment}>{children}</CapabilityRoute>
+);
+
+const FleetCapability = ({ children }: { children: React.ReactNode }) => (
+  <CapabilityRoute check={(c) => c.operatesOwnAmbulanceFleet}>{children}</CapabilityRoute>
+);
+
+
+
 export default function ProviderRoutes() {
   return (
     <Routes>
