@@ -29,7 +29,7 @@ interface Template {
   name: string;
   description: string;
   content: string;
-  placeholders: string[];
+  placeholders?: string[];
   logoUrl?: string;
   logoPosition?: { x: number; y: number };
   fontFamily?: string;
@@ -212,8 +212,11 @@ export function DocumentEditor({ template, preSelectedPatientId, onClose, onSave
     }
   };
 
-  const unfilledPlaceholders = template.placeholders.filter(p => 
-    content.includes(`[${p}]`)
+  // Derived directly from the live content rather than `template.placeholders`
+  // (never populated by real templates — relying on it here left every
+  // generated document with an empty content pane and a hard crash).
+  const unfilledPlaceholders = Array.from(
+    new Set(Array.from(content.matchAll(/\[([A-Za-z0-9_]+)\]/g), (m) => m[1])),
   );
 
   return (

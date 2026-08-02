@@ -14,7 +14,8 @@ export interface Template {
   logo_position: { x: number; y: number } | null;
   font_family: string | null;
   is_default: boolean;
-  header_footer_template_id: string | null;
+  header_template_id: string | null;
+  footer_template_id: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -27,7 +28,8 @@ export interface TemplateInput {
   logo_url?: string;
   logo_position?: { x: number; y: number };
   font_family?: string;
-  header_footer_template_id?: string;
+  header_template_id?: string;
+  footer_template_id?: string;
 }
 
 // Default templates that come with the app
@@ -79,7 +81,8 @@ Date: [SignatureDate]`,
     logo_position: null,
     font_family: "sans",
     is_default: true,
-    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
   },
   {
     name: "Referral Letter",
@@ -119,7 +122,8 @@ Tel: [PracticePhone]`,
     logo_position: null,
     font_family: "sans",
     is_default: true,
-    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
   },
   {
     name: "Prescription",
@@ -180,7 +184,8 @@ Date: [SignatureDate]`,
     logo_position: null,
     font_family: "sans",
     is_default: true,
-    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
   },
   {
     name: "General Letterhead",
@@ -207,7 +212,8 @@ Date: [SignatureDate]`,
     logo_position: null,
     font_family: "sans",
     is_default: true,
-    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
   },
   {
     name: "Invoice",
@@ -252,7 +258,8 @@ Thank you.
     logo_position: null,
     font_family: "sans",
     is_default: true,
-    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
   },
   {
     name: "Hospital Admission Form",
@@ -305,7 +312,8 @@ Patient: [PatientName]
     logo_position: null,
     font_family: "sans",
     is_default: true,
-    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
   },
 ];
 
@@ -461,7 +469,8 @@ export function useTemplates() {
         logo_position: input.logo_position || null,
         font_family: input.font_family || "sans",
         is_default: false,
-        header_footer_template_id: input.header_footer_template_id || null,
+        header_template_id: input.header_template_id || null,
+        footer_template_id: input.footer_template_id || null,
       })
       .select()
       .single();

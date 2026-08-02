@@ -14,15 +14,21 @@ interface DocumentHeaderFooterResult {
   isLoading: boolean;
 }
 
+const emptySection = { left: { text: "", alignment: "left" }, center: { text: "", alignment: "center" }, right: { text: "", alignment: "right" } };
+
 /**
- * Resolves the letterhead (header/footer template) that should be applied
- * to a given document, using the DOCUMENT'S AUTHOR (`documents.user_id`)
- * — not the currently logged-in user.
+ * Resolves the letterhead (header template + footer template, each
+ * independent) that should be applied to a given document, using the
+ * DOCUMENT'S AUTHOR (`documents.user_id`) — not the currently logged-in user.
  *
- * Lookup order:
- *   1. Match `templates` by author + template_name → `header_footer_template_id`
+ * Lookup order per side:
+ *   1. Match `templates` by author + template_name → `header_template_id` / `footer_template_id`
  *   2. If found, fetch that header/footer template
  *   3. Fallback to the author's `is_default` header/footer template
+ *
+ * The result is combined into the same `HeaderFooterTemplate` shape used
+ * before the header/footer split, so consumers (DocumentPreview,
+ * printDocument, resolveTemplatePreview) don't need any changes.
  */
 export function useDocumentHeaderFooter(document: DocumentLike | null | undefined): DocumentHeaderFooterResult {
   const authorId = document?.user_id ?? null;
@@ -34,50 +40,50 @@ export function useDocumentHeaderFooter(document: DocumentLike | null | undefine
     queryFn: async (): Promise<{ hf: HeaderFooterTemplate | null; templateFontFamily: string | null }> => {
       if (!authorId) return { hf: null, templateFontFamily: null };
 
-      let linkedHfId: string | null = null;
+      let linkedHeaderId: string | null = null;
+      let linkedFooterId: string | null = null;
       let templateFontFamily: string | null = null;
 
       if (templateName) {
         const { data: tpl } = await supabase
           .from("templates")
-          .select("header_footer_template_id, font_family")
+          .select("header_template_id, footer_template_id, font_family")
           .eq("user_id", authorId)
           .eq("name", templateName)
           .maybeSingle();
-        linkedHfId = (tpl as any)?.header_footer_template_id ?? null;
+        linkedHeaderId = (tpl as any)?.header_template_id ?? null;
+        linkedFooterId = (tpl as any)?.footer_template_id ?? null;
         templateFontFamily = (tpl as any)?.font_family ?? null;
       }
 
-      if (linkedHfId) {
-        const { data: hf } = await supabase
-          .from("header_footer_templates")
-          .select("*")
-          .eq("id", linkedHfId)
-          .maybeSingle();
-        if (hf) return { hf: hf as unknown as HeaderFooterTemplate, templateFontFamily };
-      }
+      const [headerRow, footerRow] = await Promise.all([
+        linkedHeaderId
+          ? supabase.from("header_templates" as any).select("*").eq("id", linkedHeaderId).maybeSingle()
+          : supabase.from("header_templates" as any).select("*").eq("user_id", authorId).eq("is_default", true).maybeSingle(),
+        linkedFooterId
+          ? supabase.from("footer_templates" as any).select("*").eq("id", linkedFooterId).maybeSingle()
+          : supabase.from("footer_templates" as any).select("*").eq("user_id", authorId).eq("is_default", true).maybeSingle(),
+      ]);
 
-      // Fallback 1: author's default letterhead
-      const { data: defaultHf } = await supabase
-        .from("header_footer_templates")
-        .select("*")
-        .eq("user_id", authorId)
-        .eq("is_default", true)
-        .maybeSingle();
+      const header = (headerRow.data as any) ?? null;
+      const footer = (footerRow.data as any) ?? null;
 
-      if (defaultHf) return { hf: defaultHf as unknown as HeaderFooterTemplate, templateFontFamily };
+      if (!header && !footer) return { hf: null, templateFontFamily };
 
-      // Fallback 2 (last resort): any letterhead owned by the author.
-      const { data: anyHf } = await supabase
-        .from("header_footer_templates")
-        .select("*")
-        .eq("user_id", authorId)
-        .order("is_default", { ascending: false })
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
+      const hf: HeaderFooterTemplate = {
+        id: header?.id || footer?.id || "",
+        user_id: authorId,
+        name: header?.name || footer?.name || "",
+        description: header?.description ?? footer?.description ?? null,
+        header: header?.section || emptySection,
+        footer: footer?.section || emptySection,
+        font_family: header?.font_family || footer?.font_family || null,
+        is_default: !!(header?.is_default || footer?.is_default),
+        created_at: header?.created_at || footer?.created_at || "",
+        updated_at: header?.updated_at || footer?.updated_at || "",
+      };
 
-      return { hf: (anyHf as unknown as HeaderFooterTemplate) ?? null, templateFontFamily };
+      return { hf, templateFontFamily };
     },
   });
 
