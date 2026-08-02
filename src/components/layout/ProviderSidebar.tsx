@@ -57,17 +57,39 @@ const hospitalNav: NavItem[] = [
   { icon: UserCheck, labelKey: "nav.admin", to: "/provider/hospital/admins" },
 ];
 
-const ambulanceNav: NavItem[] = [
-  // Active missions are now drill-downs from the Dispatcher Console inside Dispatch Dashboard.
-  { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/ambulance", end: true, danger: true },
-  { icon: Activity, labelKey: "nav.erOpsDashboard", to: "/provider/ambulance/ops-dashboard" },
+interface NavSection {
+  title: string;
+  items: NavItem[];
+}
 
-  // MONITORING (Fleet Live)
-  { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/ambulance/monitoring" },
-  // ADMIN — Users, Crew, Fleet Admin, Hospitals
-  { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
+const ambulanceSections: NavSection[] = [
+  {
+    title: "Live Operations",
+    items: [
+      { icon: Siren, labelKey: "nav.dispatchConsole", to: "/provider/ambulance", end: true, danger: true },
+      { icon: AlertTriangle, labelKey: "nav.incidents", to: "/provider/ambulance/incidents" },
+      { icon: NavIcon, labelKey: "nav.fleetMap", to: "/provider/ambulance/monitoring" },
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      { icon: Activity, labelKey: "nav.operationsDashboard", to: "/provider/ambulance/ops-dashboard" },
+      { icon: Ambulance, labelKey: "nav.vehicles", to: "/provider/ambulance/vehicles" },
+      { icon: Users, labelKey: "nav.crews", to: "/provider/ambulance/crews" },
+      { icon: HeartPulse, labelKey: "nav.hospitals", to: "/provider/ambulance/hospitals" },
+      { icon: ClipboardList, labelKey: "nav.reports", to: "/provider/ambulance/reports" },
+    ],
+  },
+  {
+    title: "Administration",
+    items: [
+      { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
+    ],
+  },
 ];
 
+const hospitalSections: NavSection[] = [{ title: "", items: hospitalNav }];
 
 interface ProviderSidebarProps {
   portal: "hospital" | "ambulance";
@@ -79,7 +101,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const { isAdmin } = useIsAdmin();
   const { t } = useTranslation();
   const location = useLocation();
-  const nav = portal === "hospital" ? hospitalNav : ambulanceNav;
+  const sections = portal === "hospital" ? hospitalSections : ambulanceSections;
   const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
   const logo = portal === "ambulance" ? holarcHelpLogo : holarcLogo;
   const logoAlt = portal === "ambulance" ? "Holarc Help" : "Holarc Health";
@@ -102,32 +124,41 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
         )}
 
         <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
-          {nav.map((item) => {
-            const isActive = item.end
-              ? location.pathname === item.to
-              : location.pathname === item.to || location.pathname.startsWith(item.to + "/");
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={onNavigate}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-[13px] font-medium transition-all duration-200",
-                  isActive
-                    ? item.danger
-                      ? "bg-red-600 text-white shadow-sm"
-                      : "bg-primary text-primary-foreground shadow-sm"
-                    : item.danger
-                      ? "text-red-600 hover:bg-red-600/10"
-                      : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="flex-1">{t(item.labelKey)}</span>
-              </NavLink>
-            );
-          })}
+          {sections.map((section) => (
+            <div key={section.title || "main"} className="space-y-1.5">
+              {section.title && (
+                <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                  {section.title}
+                </p>
+              )}
+              {section.items.map((item) => {
+                const isActive = item.end
+                  ? location.pathname === item.to
+                  : location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    onClick={onNavigate}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-[13px] font-medium transition-all duration-200",
+                      isActive
+                        ? item.danger
+                          ? "bg-red-600 text-white shadow-sm"
+                          : "bg-primary text-primary-foreground shadow-sm"
+                        : item.danger
+                          ? "text-red-600 hover:bg-red-600/10"
+                          : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span className="flex-1">{t(item.labelKey)}</span>
+                  </NavLink>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
