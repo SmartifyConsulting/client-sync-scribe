@@ -49,10 +49,10 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
 
         <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
           {sections.map((section) => (
-            <div key={section.title || "main"} className="space-y-1.5">
+            <div key={section.id} className="space-y-1.5">
               {section.title && (
                 <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                  {section.title}
+                  {t(section.titleKey, { defaultValue: section.title })}
                 </p>
               )}
               {section.items.map((item) => {
@@ -77,7 +77,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                     )}
                   >
                     <item.icon className="h-5 w-5" />
-                    <span className="flex-1">{t(item.labelKey)}</span>
+                    <span className="flex-1">{t(item.labelKey, { defaultValue: item.label })}</span>
                   </NavLink>
                 );
               })}
