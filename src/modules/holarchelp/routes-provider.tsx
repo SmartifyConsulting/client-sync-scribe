@@ -37,6 +37,13 @@ import VehicleProfileScreen from "./pages/provider/ambulance/VehicleProfileScree
 import EmergencyDashboardScreen from "./pages/provider/ambulance/EmergencyDashboardScreen";
 import ErOpsDashboard from "./pages/provider/ambulance/ErOpsDashboard";
 
+// EMS workflow screens (Dispatch Console / Incidents / Vehicles / Crews / Hospitals)
+import DispatchConsoleScreen from "./pages/provider/ambulance/DispatchConsoleScreen";
+import IncidentsScreen from "./pages/provider/ambulance/IncidentsScreen";
+import VehiclesScreen from "./pages/provider/ambulance/VehiclesScreen";
+import CrewsScreen from "./pages/provider/ambulance/CrewsScreen";
+import AmbulanceHospitalsScreen from "./pages/provider/ambulance/HospitalsScreen";
+
 import FleetOperationsScreen from "./pages/provider/ambulance/FleetOperationsScreen";
 import HospitalNetworkScreen from "./pages/provider/ambulance/HospitalNetworkScreen";
 import RealTimeMonitoringScreen from "./pages/provider/ambulance/RealTimeMonitoringScreen";
@@ -135,8 +142,15 @@ export default function ProviderRoutes() {
 
       <Route path="ambulance" element={<ProviderShell><AmbulanceOpsLayout /></ProviderShell>}>
         {/* Consolidated Emergency Response Dashboard */}
-        <Route index element={<EmergencyDashboardScreen />} />
+        <Route index element={<DispatchConsoleScreen />} />
+        <Route path="console" element={<Navigate to="/provider/ambulance" replace />} />
+        <Route path="legacy-dashboard" element={<EmergencyDashboardScreen />} />
+        <Route path="incidents" element={<IncidentsScreen />} />
         <Route path="ops-dashboard" element={<ErOpsDashboard />} />
+        <Route path="vehicles" element={<VehiclesScreen />} />
+        <Route path="crews" element={<CrewsScreen />} />
+        <Route path="hospitals" element={<AmbulanceHospitalsScreen />} />
+        <Route path="reports" element={<ExecutiveDashboardScreen />} />
 
 
         {/* Navigation Tool */}
