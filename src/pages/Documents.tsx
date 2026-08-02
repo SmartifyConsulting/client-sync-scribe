@@ -36,13 +36,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm";
-import { HeaderTemplateForm, HeaderTemplateFormData } from "@/features/documents/templates/HeaderTemplateForm";
-import { FooterTemplateForm, FooterTemplateFormData } from "@/features/documents/templates/FooterTemplateForm";
+import { HeaderFooterTemplateForm, HeaderFooterTemplateData } from "@/components/templates/HeaderFooterTemplateForm";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplates, Template } from "@/hooks/useTemplates";
-import { useHeaderTemplates, HeaderTemplate } from "@/hooks/useHeaderTemplates";
-import { useFooterTemplates, FooterTemplate } from "@/hooks/useFooterTemplates";
-import type { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
+import { useHeaderFooterTemplates, HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 import { useDocuments, Document } from "@/hooks/useDocuments";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
@@ -117,19 +114,12 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
     deleteTemplate,
   } = useTemplates();
   const {
-    templates: headerTemplates,
-    isLoading: headerLoading,
-    createTemplate: createHeaderTemplateMutation,
-    updateTemplate: updateHeaderTemplateMutation,
-    deleteTemplate: deleteHeaderTemplateMutation,
-  } = useHeaderTemplates();
-  const {
-    templates: footerTemplates,
-    isLoading: footerLoading,
-    createTemplate: createFooterTemplateMutation,
-    updateTemplate: updateFooterTemplateMutation,
-    deleteTemplate: deleteFooterTemplateMutation,
-  } = useFooterTemplates();
+    templates: headerFooterTemplates,
+    isLoading: hfLoading,
+    createTemplate: createHFTemplate,
+    updateTemplate: updateHFTemplate,
+    deleteTemplate: deleteHFTemplate,
+  } = useHeaderFooterTemplates();
   const { documents, loading: documentsLoading, deleteDocument, updateDocument, fetchDocuments } = useDocuments();
   const { profile } = useProfile();
 
@@ -142,17 +132,13 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   useEffect(() => { setVisibleDocCount(DOC_PAGE_SIZE); }, [documentSearchQuery]);
   const [selectedTemplate, setSelectedTemplate] = useState<DisplayTemplate | null>(null);
   const [isNewTemplateOpen, setIsNewTemplateOpen] = useState(false);
-  const [isNewHeaderTemplateOpen, setIsNewHeaderTemplateOpen] = useState(false);
-  const [isNewFooterTemplateOpen, setIsNewFooterTemplateOpen] = useState(false);
+  const [isNewHFTemplateOpen, setIsNewHFTemplateOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<DisplayTemplate | null>(null);
-  const [editingHeaderTemplate, setEditingHeaderTemplate] = useState<HeaderTemplate | null>(null);
-  const [editingFooterTemplate, setEditingFooterTemplate] = useState<FooterTemplate | null>(null);
+  const [editingHFTemplate, setEditingHFTemplate] = useState<HeaderFooterTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<DisplayTemplate | null>(null);
-  const [headerTemplateToDelete, setHeaderTemplateToDelete] = useState<HeaderTemplate | null>(null);
-  const [footerTemplateToDelete, setFooterTemplateToDelete] = useState<FooterTemplate | null>(null);
+  const [hfTemplateToDelete, setHfTemplateToDelete] = useState<HeaderFooterTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<DisplayTemplate | null>(null);
-  const [previewHeaderTemplate, setPreviewHeaderTemplate] = useState<HeaderTemplate | null>(null);
-  const [previewFooterTemplate, setPreviewFooterTemplate] = useState<FooterTemplate | null>(null);
+  const [previewHFTemplate, setPreviewHFTemplate] = useState<HeaderFooterTemplate | null>(null);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
   const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
   const [shareDocument, setShareDocument] = useState<Document | null>(null);
@@ -188,10 +174,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
     template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()),
   );
 
-  const filteredHeaderTemplates = headerTemplates.filter((template) =>
-    template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()),
-  );
-  const filteredFooterTemplates = footerTemplates.filter((template) =>
+  const filteredHFTemplates = headerFooterTemplates.filter((template) =>
     template.name.toLowerCase().includes(templateSearchQuery.toLowerCase()),
   );
 
@@ -330,8 +313,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       description: template.description,
       category: template.category,
       content: template.content,
-      header_template_id: template.headerTemplateId,
-      footer_template_id: template.footerTemplateId,
+      header_footer_template_id: template.headerFooterTemplateId,
     });
 
     if (result) {
@@ -347,8 +329,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       description: template.description,
       category: template.category,
       content: template.content,
-      header_template_id: template.headerTemplateId,
-      footer_template_id: template.footerTemplateId,
+      header_footer_template_id: template.headerFooterTemplateId,
     });
 
     if (success) {
@@ -365,85 +346,36 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
     }
   };
 
-  const handleCreateHeaderTemplate = async (template: HeaderTemplateFormData) => {
-    await createHeaderTemplateMutation.mutateAsync({
+  const handleCreateHFTemplate = async (template: HeaderFooterTemplateData) => {
+    await createHFTemplate.mutateAsync({
       name: template.name,
       description: template.description,
-      section: template.section,
+      header: template.header,
+      footer: template.footer,
       font_family: template.fontFamily || "sans",
       is_default: false,
     });
-    setIsNewHeaderTemplateOpen(false);
+    setIsNewHFTemplateOpen(false);
   };
 
-  const handleEditHeaderTemplate = async (template: HeaderTemplateFormData) => {
+  const handleEditHFTemplate = async (template: HeaderFooterTemplateData) => {
     if (!template.id) return;
-    await updateHeaderTemplateMutation.mutateAsync({
+
+    await updateHFTemplate.mutateAsync({
       id: template.id,
       name: template.name,
       description: template.description,
-      section: template.section,
+      header: template.header,
+      footer: template.footer,
       font_family: template.fontFamily || "sans",
     });
-    setEditingHeaderTemplate(null);
+    setEditingHFTemplate(null);
   };
 
-  const handleDeleteHeaderTemplate = async () => {
-    if (!headerTemplateToDelete) return;
-    await deleteHeaderTemplateMutation.mutateAsync(headerTemplateToDelete.id);
-    setHeaderTemplateToDelete(null);
-  };
-
-  const handleCreateFooterTemplate = async (template: FooterTemplateFormData) => {
-    await createFooterTemplateMutation.mutateAsync({
-      name: template.name,
-      description: template.description,
-      section: template.section,
-      font_family: template.fontFamily || "sans",
-      is_default: false,
-    });
-    setIsNewFooterTemplateOpen(false);
-  };
-
-  const handleEditFooterTemplate = async (template: FooterTemplateFormData) => {
-    if (!template.id) return;
-    await updateFooterTemplateMutation.mutateAsync({
-      id: template.id,
-      name: template.name,
-      description: template.description,
-      section: template.section,
-      font_family: template.fontFamily || "sans",
-    });
-    setEditingFooterTemplate(null);
-  };
-
-  const handleDeleteFooterTemplate = async () => {
-    if (!footerTemplateToDelete) return;
-    await deleteFooterTemplateMutation.mutateAsync(footerTemplateToDelete.id);
-    setFooterTemplateToDelete(null);
-  };
-
-  // Builds the same combined shape the rendering pipeline (DocumentPreview,
-  // resolveHeaderFooterTokens) already expects, from two independently
-  // selected templates.
-  const combineHeaderFooter = (
-    header: HeaderTemplate | undefined,
-    footer: FooterTemplate | undefined,
-  ): HeaderFooterTemplate | null => {
-    if (!header && !footer) return null;
-    const emptySection = { left: { text: "", alignment: "left" }, center: { text: "", alignment: "center" }, right: { text: "", alignment: "right" } };
-    return {
-      id: header?.id || footer?.id || "",
-      user_id: header?.user_id || footer?.user_id || "",
-      name: header?.name || footer?.name || "",
-      description: header?.description ?? footer?.description ?? null,
-      header: (header?.section as any) || emptySection,
-      footer: (footer?.section as any) || emptySection,
-      font_family: header?.font_family || footer?.font_family || null,
-      is_default: !!(header?.is_default || footer?.is_default),
-      created_at: header?.created_at || footer?.created_at || "",
-      updated_at: header?.updated_at || footer?.updated_at || "",
-    };
+  const handleDeleteHFTemplate = async () => {
+    if (!hfTemplateToDelete) return;
+    await deleteHFTemplate.mutateAsync(hfTemplateToDelete.id);
+    setHfTemplateToDelete(null);
   };
 
   const handleSendDocumentEmail = async () => {
@@ -536,9 +468,34 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           </TabsTrigger>
         </TabsList>
 
-        {/* Header/Footer Templates Tab — two fully independent template types */}
-        <TabsContent value="header-footer" className="space-y-8">
-          {/* Search (shared) */}
+        {/* Header/Footer Templates Tab */}
+        <TabsContent value="header-footer" className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Create reusable header and footer layouts that apply to all your documents
+            </p>
+            <Dialog open={isNewHFTemplateOpen} onOpenChange={setIsNewHFTemplateOpen}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  New Header/Footer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create Header & Footer Template</DialogTitle>
+                  <DialogDescription>Design a reusable header and footer layout for your documents</DialogDescription>
+                </DialogHeader>
+                <HeaderFooterTemplateForm
+                  onSubmit={handleCreateHFTemplate}
+                  onCancel={() => setIsNewHFTemplateOpen(false)}
+                  mode="create"
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Search */}
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -549,183 +506,110 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             />
           </div>
 
-          {/* Header Templates */}
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Design reusable headers, managed independently from footers
-              </p>
-              <Dialog open={isNewHeaderTemplateOpen} onOpenChange={setIsNewHeaderTemplateOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    New Header
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Create Header Template</DialogTitle>
-                    <DialogDescription>Design a reusable header layout for your documents</DialogDescription>
-                  </DialogHeader>
-                  <HeaderTemplateForm
-                    onSubmit={handleCreateHeaderTemplate}
-                    onCancel={() => setIsNewHeaderTemplateOpen(false)}
-                    mode="create"
-                  />
-                </DialogContent>
-              </Dialog>
+          {/* Header/Footer Templates Grid — each saved Letterhead is shown as two
+              cards, Header and Footer, so it reads as two separate things even
+              though they're saved and edited together in one dialog. */}
+          {hfLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-
-            {headerLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredHeaderTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
-                        <LayoutTemplate className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 transition-opacity">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setPreviewHeaderTemplate(template)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Preview
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setEditingHeaderTemplate(template)}>
-                            <Edit3 className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => setHeaderTemplateToDelete(template)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <h3 className="text-sm font-semibold text-foreground mb-1">{template.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {template.description || "No description"}
-                    </p>
-                    <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
-                  </div>
-                ))}
-
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredHFTemplates.flatMap((template) => ([
                 <div
-                  onClick={() => setIsNewHeaderTemplateOpen(true)}
-                  className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer min-h-[160px]"
+                  key={`${template.id}-header`}
+                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
-                    <Plus className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
+                      <LayoutTemplate className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 transition-opacity">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setPreviewHFTemplate(template)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingHFTemplate(template)}>
+                          <Edit3 className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setHfTemplateToDelete(template)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <p className="text-sm font-medium text-muted-foreground">Create Header</p>
-                </div>
-              </div>
-            )}
-          </div>
+                  <h3 className="text-sm font-semibold text-foreground mb-1">Header</h3>
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                    {template.name}
+                  </p>
+                  <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
+                </div>,
+                <div
+                  key={`${template.id}-footer`}
+                  className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
+                      <LayoutTemplate className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 transition-opacity">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setPreviewHFTemplate(template)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingHFTemplate(template)}>
+                          <Edit3 className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setHfTemplateToDelete(template)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <h3 className="text-sm font-semibold text-foreground mb-1">Footer</h3>
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                    {template.name}
+                  </p>
+                  <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
+                </div>,
+              ]))}
 
-          {/* Footer Templates */}
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Design reusable footers, managed independently from headers
-              </p>
-              <Dialog open={isNewFooterTemplateOpen} onOpenChange={setIsNewFooterTemplateOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    New Footer
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Create Footer Template</DialogTitle>
-                    <DialogDescription>Design a reusable footer layout for your documents</DialogDescription>
-                  </DialogHeader>
-                  <FooterTemplateForm
-                    onSubmit={handleCreateFooterTemplate}
-                    onCancel={() => setIsNewFooterTemplateOpen(false)}
-                    mode="create"
-                  />
-                </DialogContent>
-              </Dialog>
+              {/* Add New Card */}
+              <div
+                onClick={() => setIsNewHFTemplateOpen(true)}
+                className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer min-h-[160px]"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
+                  <Plus className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-medium text-muted-foreground">Create Header/Footer</p>
+              </div>
             </div>
-
-            {footerLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredFooterTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent transition-colors group-hover:bg-primary/10">
-                        <LayoutTemplate className="h-5 w-5 text-accent-foreground group-hover:text-primary" />
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 transition-opacity">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setPreviewFooterTemplate(template)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Preview
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setEditingFooterTemplate(template)}>
-                            <Edit3 className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => setFooterTemplateToDelete(template)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <h3 className="text-sm font-semibold text-foreground mb-1">{template.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {template.description || "No description"}
-                    </p>
-                    <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
-                  </div>
-                ))}
-
-                <div
-                  onClick={() => setIsNewFooterTemplateOpen(true)}
-                  className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer min-h-[160px]"
-                >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
-                    <Plus className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground">Create Footer</p>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </TabsContent>
 
         {/* Content Templates Tab */}
@@ -825,21 +709,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                     <h3 className="text-sm font-semibold text-foreground mb-1">{template.name}</h3>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
                     {(() => {
-                      const linkedHeader = headerTemplates.find(
-                        (h) => h.id === (template as any).header_template_id,
-                      );
-                      const linkedFooter = footerTemplates.find(
-                        (f) => f.id === (template as any).footer_template_id,
+                      const linkedHf = headerFooterTemplates.find(
+                        (hf) => hf.id === template.header_footer_template_id,
                       );
                       return (
                         <p className="text-sm text-muted-foreground mb-2">
-                          Header:{" "}
+                          {t("documents.letterhead")}{" "}
                           <span className="font-medium text-foreground">
-                            {linkedHeader?.name ?? t("documents.letterheadDefault")}
-                          </span>
-                          {" · "}Footer:{" "}
-                          <span className="font-medium text-foreground">
-                            {linkedFooter?.name ?? t("documents.letterheadDefault")}
+                            {linkedHf?.name ?? t("documents.letterheadDefault")}
                           </span>
                         </p>
                       );
@@ -993,8 +870,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 description: editingTemplate.description || "",
                 category: editingTemplate.category || "",
                 content: editingTemplate.content,
-                headerTemplateId: (editingTemplate as any).header_template_id || "",
-                footerTemplateId: (editingTemplate as any).footer_template_id || "",
+                headerFooterTemplateId: editingTemplate.header_footer_template_id || "",
               }}
               onSubmit={handleEditTemplate}
               onCancel={() => setEditingTemplate(null)}
@@ -1004,48 +880,25 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         </DialogContent>
       </Dialog>
 
-      {/* Edit Header Template Dialog */}
-      <Dialog open={!!editingHeaderTemplate} onOpenChange={(open) => !open && setEditingHeaderTemplate(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      {/* Edit Header/Footer Template Dialog */}
+      <Dialog open={!!editingHFTemplate} onOpenChange={(open) => !open && setEditingHFTemplate(null)}>
+        <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Header Template</DialogTitle>
-            <DialogDescription>Modify this header layout</DialogDescription>
+            <DialogTitle>Edit Header & Footer Template</DialogTitle>
+            <DialogDescription>Modify this header and footer layout</DialogDescription>
           </DialogHeader>
-          {editingHeaderTemplate && (
-            <HeaderTemplateForm
+          {editingHFTemplate && (
+            <HeaderFooterTemplateForm
               initialData={{
-                id: editingHeaderTemplate.id,
-                name: editingHeaderTemplate.name,
-                description: editingHeaderTemplate.description || "",
-                fontFamily: editingHeaderTemplate.font_family || "sans",
-                section: editingHeaderTemplate.section as any,
+                id: editingHFTemplate.id,
+                name: editingHFTemplate.name,
+                description: editingHFTemplate.description || "",
+                fontFamily: editingHFTemplate.font_family || "sans",
+                header: editingHFTemplate.header as any,
+                footer: editingHFTemplate.footer as any,
               }}
-              onSubmit={handleEditHeaderTemplate}
-              onCancel={() => setEditingHeaderTemplate(null)}
-              mode="edit"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Footer Template Dialog */}
-      <Dialog open={!!editingFooterTemplate} onOpenChange={(open) => !open && setEditingFooterTemplate(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Footer Template</DialogTitle>
-            <DialogDescription>Modify this footer layout</DialogDescription>
-          </DialogHeader>
-          {editingFooterTemplate && (
-            <FooterTemplateForm
-              initialData={{
-                id: editingFooterTemplate.id,
-                name: editingFooterTemplate.name,
-                description: editingFooterTemplate.description || "",
-                fontFamily: editingFooterTemplate.font_family || "sans",
-                section: editingFooterTemplate.section as any,
-              }}
-              onSubmit={handleEditFooterTemplate}
-              onCancel={() => setEditingFooterTemplate(null)}
+              onSubmit={handleEditHFTemplate}
+              onCancel={() => setEditingHFTemplate(null)}
               mode="edit"
             />
           )}
@@ -1070,36 +923,18 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete Header Template Confirmation */}
-      <AlertDialog open={!!headerTemplateToDelete} onOpenChange={(open) => !open && setHeaderTemplateToDelete(null)}>
+      {/* Delete Header/Footer Template Confirmation */}
+      <AlertDialog open={!!hfTemplateToDelete} onOpenChange={(open) => !open && setHfTemplateToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Header Template</AlertDialogTitle>
+            <AlertDialogTitle>Delete Header/Footer Template</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{headerTemplateToDelete?.name}"? This action cannot be undone.
+              Are you sure you want to delete "{hfTemplateToDelete?.name}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteHeaderTemplate} className="bg-destructive hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Footer Template Confirmation */}
-      <AlertDialog open={!!footerTemplateToDelete} onOpenChange={(open) => !open && setFooterTemplateToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Footer Template</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{footerTemplateToDelete?.name}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteFooterTemplate} className="bg-destructive hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleDeleteHFTemplate} className="bg-destructive hover:bg-destructive/90">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -1114,15 +949,11 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           content={resolveTemplatePreviewTokens(previewTemplate.content, profile as any)}
           logoUrl={profile?.logo_url || undefined}
           fontFamily={
-            headerTemplates.find((h) => h.id === (previewTemplate as any).header_template_id)?.font_family ||
-            footerTemplates.find((f) => f.id === (previewTemplate as any).footer_template_id)?.font_family ||
+            headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id)?.font_family ||
             undefined
           }
           headerFooter={resolveHeaderFooterTokens(
-            combineHeaderFooter(
-              headerTemplates.find((h) => h.id === (previewTemplate as any).header_template_id),
-              footerTemplates.find((f) => f.id === (previewTemplate as any).footer_template_id),
-            ),
+            headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id) || null,
             profile as any,
           )}
           onClose={() => setPreviewTemplate(null)}
@@ -1140,73 +971,44 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       )}
 
 
-      {/* Header Template Preview Dialog */}
-      <Dialog open={!!previewHeaderTemplate} onOpenChange={(open) => !open && setPreviewHeaderTemplate(null)}>
+      {/* Header/Footer Template Preview Dialog */}
+      <Dialog open={!!previewHFTemplate} onOpenChange={(open) => !open && setPreviewHFTemplate(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{previewHeaderTemplate?.name}</DialogTitle>
-            <DialogDescription>{previewHeaderTemplate?.description || "Header preview"}</DialogDescription>
+            <DialogTitle>{previewHFTemplate?.name}</DialogTitle>
+            <DialogDescription>{previewHFTemplate?.description || "Header & Footer preview"}</DialogDescription>
           </DialogHeader>
-          {previewHeaderTemplate && (
+          {previewHFTemplate && (
             <div className="space-y-4">
               <div className="border border-border rounded-lg p-6 bg-white">
+                {/* Header Preview */}
                 <div className="grid grid-cols-3 gap-4 pb-4 border-b border-gray-200 mb-4">
-                  {renderHFSectionPreview(previewHeaderTemplate.section.left)}
-                  {renderHFSectionPreview(previewHeaderTemplate.section.center)}
-                  {renderHFSectionPreview(previewHeaderTemplate.section.right)}
+                  {renderHFSectionPreview(previewHFTemplate.header.left)}
+                  {renderHFSectionPreview(previewHFTemplate.header.center)}
+                  {renderHFSectionPreview(previewHFTemplate.header.right)}
                 </div>
-                <div className="min-h-[60px] py-4 flex items-center justify-center">
+
+                {/* Content Placeholder */}
+                <div className="min-h-[100px] py-4 flex items-center justify-center">
                   <p className="text-gray-400 italic text-sm">Document content appears here</p>
                 </div>
-              </div>
 
-              <div className="flex gap-3 pt-4 border-t border-border">
-                <Button variant="outline" onClick={() => setPreviewHeaderTemplate(null)} className="flex-1">
-                  Close
-                </Button>
-                <Button
-                  onClick={() => {
-                    setEditingHeaderTemplate(previewHeaderTemplate);
-                    setPreviewHeaderTemplate(null);
-                  }}
-                  className="flex-1"
-                >
-                  Edit Template
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Footer Template Preview Dialog */}
-      <Dialog open={!!previewFooterTemplate} onOpenChange={(open) => !open && setPreviewFooterTemplate(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{previewFooterTemplate?.name}</DialogTitle>
-            <DialogDescription>{previewFooterTemplate?.description || "Footer preview"}</DialogDescription>
-          </DialogHeader>
-          {previewFooterTemplate && (
-            <div className="space-y-4">
-              <div className="border border-border rounded-lg p-6 bg-white">
-                <div className="min-h-[60px] py-4 flex items-center justify-center">
-                  <p className="text-gray-400 italic text-sm">Document content appears here</p>
-                </div>
+                {/* Footer Preview */}
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 mt-4">
-                  {renderHFSectionPreview(previewFooterTemplate.section.left)}
-                  {renderHFSectionPreview(previewFooterTemplate.section.center)}
-                  {renderHFSectionPreview(previewFooterTemplate.section.right)}
+                  {renderHFSectionPreview(previewHFTemplate.footer.left)}
+                  {renderHFSectionPreview(previewHFTemplate.footer.center)}
+                  {renderHFSectionPreview(previewHFTemplate.footer.right)}
                 </div>
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-border">
-                <Button variant="outline" onClick={() => setPreviewFooterTemplate(null)} className="flex-1">
+                <Button variant="outline" onClick={() => setPreviewHFTemplate(null)} className="flex-1">
                   Close
                 </Button>
                 <Button
                   onClick={() => {
-                    setEditingFooterTemplate(previewFooterTemplate);
-                    setPreviewFooterTemplate(null);
+                    setEditingHFTemplate(previewHFTemplate);
+                    setPreviewHFTemplate(null);
                   }}
                   className="flex-1"
                 >

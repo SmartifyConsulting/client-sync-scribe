@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
-import { useHeaderTemplates } from "@/hooks/useHeaderTemplates";
-import { useFooterTemplates } from "@/hooks/useFooterTemplates";
+import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
 import {
   stripHeadingMarkup,
@@ -33,8 +32,7 @@ export interface TemplateData {
   logoPosition?: { x: number; y: number };
   fontFamily?: string;
   body?: SectionContent;
-  headerTemplateId?: string;
-  footerTemplateId?: string;
+  headerFooterTemplateId?: string;
 }
 
 interface TemplateFormProps {
@@ -53,34 +51,24 @@ const defaultSectionContent = (): SectionContent => ({
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
-  const { templates: headerTemplates } = useHeaderTemplates();
-  const { templates: footerTemplates } = useFooterTemplates();
-  const [selectedHeaderId, setSelectedHeaderId] = useState<string>(
-    initialData?.headerTemplateId || ""
-  );
-  const [selectedFooterId, setSelectedFooterId] = useState<string>(
-    initialData?.footerTemplateId || ""
+  const { templates: headerFooterTemplates } = useHeaderFooterTemplates();
+  const [selectedHeaderFooterId, setSelectedHeaderFooterId] = useState<string>(
+    initialData?.headerFooterTemplateId || ""
   );
 
-  // Auto-default to the user's `is_default` header/footer (or first available)
-  // when none is linked yet, so doctors get a sensible pre-selection rather
-  // than "None" on both sides.
+  // Auto-default to the user's `is_default` letterhead (or first available) when
+  // none is linked yet. This way doctors with multiple letterheads still get
+  // a sensible pre-selection rather than "None".
   useEffect(() => {
-    if (selectedHeaderId) return;
-    if (initialData?.headerTemplateId) return;
-    if (headerTemplates.length === 0) return;
-    const preferred = headerTemplates.find((t) => t.is_default) ?? headerTemplates[0];
-    if (preferred) setSelectedHeaderId(preferred.id);
-  }, [headerTemplates, initialData?.headerTemplateId, selectedHeaderId]);
-
-  useEffect(() => {
-    if (selectedFooterId) return;
-    if (initialData?.footerTemplateId) return;
-    if (footerTemplates.length === 0) return;
-    const preferred = footerTemplates.find((t) => t.is_default) ?? footerTemplates[0];
-    if (preferred) setSelectedFooterId(preferred.id);
-  }, [footerTemplates, initialData?.footerTemplateId, selectedFooterId]);
-
+    if (selectedHeaderFooterId) return;
+    if (initialData?.headerFooterTemplateId) return;
+    if (headerFooterTemplates.length === 0) return;
+    const preferred =
+      headerFooterTemplates.find((t) => (t as any).is_default) ??
+      headerFooterTemplates[0];
+    if (preferred) setSelectedHeaderFooterId(preferred.id);
+  }, [headerFooterTemplates, initialData?.headerFooterTemplateId, selectedHeaderFooterId]);
+  
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
@@ -93,8 +81,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   );
 
 
-  const selectedHeader = headerTemplates.find(t => t.id === selectedHeaderId);
-  const selectedFooter = footerTemplates.find(t => t.id === selectedFooterId);
+  const selectedHeaderFooter = headerFooterTemplates.find(t => t.id === selectedHeaderFooterId);
 
   useEffect(() => {
     if (initialData) {
@@ -102,9 +89,8 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
         name: initialData.name || "",
         description: initialData.description || "",
       });
-      setSelectedHeaderId(initialData.headerTemplateId || "");
-      setSelectedFooterId(initialData.footerTemplateId || "");
-
+      setSelectedHeaderFooterId(initialData.headerFooterTemplateId || "");
+      
       if (initialData.body) {
         setBody({ ...initialData.body, text: stripHeadingMarkup(initialData.body.text || "") });
       } else if (initialData.content) {
@@ -131,8 +117,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       category: "",
       content: body.text,
       body,
-      headerTemplateId: selectedHeaderId || undefined,
-      footerTemplateId: selectedFooterId || undefined,
+      headerFooterTemplateId: selectedHeaderFooterId || undefined,
     });
   };
 
@@ -147,20 +132,20 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const renderSectionPreview = (section: SectionContent | undefined | null, placeholder?: string) => {
     const hasContent = section && (section.text || section.imageUrl);
     const alignment = section?.alignment || 'left';
-
+    
     return (
       <div className="min-h-[24px]" style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>
         {hasContent ? (
           <>
             {section?.imageUrl && (
-              <img
-                src={section.imageUrl}
-                alt=""
+              <img 
+                src={section.imageUrl} 
+                alt="" 
                 className="max-h-12 inline-block mb-1"
               />
             )}
             {section?.text && (
-              <div
+              <div 
                 className="whitespace-pre-wrap text-sm"
                 dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(section.text)) }}
               />
@@ -175,9 +160,8 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
 
   const renderHeaderFooterPreview = (type: 'header' | 'footer') => {
     const placeholders = ['Left', 'Center', 'Right'];
-    const selected = type === 'header' ? selectedHeader : selectedFooter;
-
-    if (!selected) {
+    
+    if (!selectedHeaderFooter) {
       return (
         <div className="grid grid-cols-3 gap-4">
           {placeholders.map((label) => (
@@ -189,11 +173,13 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       );
     }
 
-    const sectionData = selected.section;
-
+    const sectionData = type === 'header' 
+      ? selectedHeaderFooter.header 
+      : selectedHeaderFooter.footer;
+    
     // Handle both direct object and JSON parsed object
-    const section = typeof sectionData === 'string'
-      ? JSON.parse(sectionData)
+    const section = typeof sectionData === 'string' 
+      ? JSON.parse(sectionData) 
       : sectionData as { left?: SectionContent; center?: SectionContent; right?: SectionContent } | null;
 
     return (
@@ -210,8 +196,8 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       <div className="grid gap-3 lg:grid-cols-2 items-start">
         {/* LEFT: Design */}
         <div className="space-y-2 min-w-0">
-          {/* Name, Header & Footer — one compact row */}
-          <div className="grid gap-2 sm:grid-cols-3">
+          {/* Name & Letterhead — one compact row */}
+          <div className="grid gap-2 sm:grid-cols-2">
             <div className="flex items-center gap-1.5">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
               <Input
@@ -222,36 +208,17 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
               />
             </div>
             <div className="flex items-center gap-1.5">
-              <label className="text-xs font-medium text-foreground shrink-0 w-14">Header</label>
+              <label className="text-xs font-medium text-foreground shrink-0 w-14">Letter.</label>
               <Select
-                value={selectedHeaderId || "none"}
-                onValueChange={(val) => setSelectedHeaderId(val === "none" ? "" : val)}
+                value={selectedHeaderFooterId || "none"}
+                onValueChange={(val) => setSelectedHeaderFooterId(val === "none" ? "" : val)}
               >
                 <SelectTrigger className="h-8 flex-1 text-sm">
                   <SelectValue placeholder="None" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {headerTemplates.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <label className="text-xs font-medium text-foreground shrink-0 w-14">Footer</label>
-              <Select
-                value={selectedFooterId || "none"}
-                onValueChange={(val) => setSelectedFooterId(val === "none" ? "" : val)}
-              >
-                <SelectTrigger className="h-8 flex-1 text-sm">
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {footerTemplates.map((template) => (
+                  {headerFooterTemplates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
                     </SelectItem>
@@ -342,12 +309,12 @@ Yours faithfully,
             <div className="bg-muted/50 px-3 py-1.5 border-b border-border">
               <span className="text-xs font-medium text-foreground">Content Preview</span>
             </div>
-            <div className={`p-3 min-h-[200px] ${getFontClass(selectedHeader?.font_family || selectedFooter?.font_family)}`}>
+            <div className={`p-3 min-h-[200px] ${getFontClass(selectedHeaderFooter?.font_family)}`}>
               {/* Header Preview */}
               <div className="pb-2 border-b border-gray-200 mb-2">
                 {renderHeaderFooterPreview('header')}
-                {!selectedHeader && (
-                  <p className="text-gray-400 italic text-[10px] text-center mt-1">Select a Header template</p>
+                {!selectedHeaderFooter && (
+                  <p className="text-gray-400 italic text-[10px] text-center mt-1">Select a Header/Footer template</p>
                 )}
               </div>
 
@@ -369,9 +336,6 @@ Yours faithfully,
               {/* Footer Preview */}
               <div className="pt-2 border-t border-gray-200 mt-2">
                 {renderHeaderFooterPreview('footer')}
-                {!selectedFooter && (
-                  <p className="text-gray-400 italic text-[10px] text-center mt-1">Select a Footer template</p>
-                )}
               </div>
             </div>
           </div>

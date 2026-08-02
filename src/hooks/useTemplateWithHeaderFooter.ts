@@ -1,8 +1,6 @@
 import { useMemo } from "react";
 import { useTemplates, Template } from "./useTemplates";
-import { useHeaderTemplates } from "./useHeaderTemplates";
-import { useFooterTemplates } from "./useFooterTemplates";
-import { HeaderFooterTemplate } from "./useHeaderFooterTemplates";
+import { useHeaderFooterTemplates, HeaderFooterTemplate } from "./useHeaderFooterTemplates";
 import { useProfile } from "./useProfile";
 import { fillDocumentPlaceholders } from "@/features/documents/lib/fillDocumentPlaceholders";
 
@@ -13,10 +11,28 @@ interface CombinedTemplate {
   formattedContent: string;
 }
 
+// Helper to format header/footer section
+function formatSection(section: { text: string; alignment: string; imageUrl?: string }): string {
+  return section.text || "";
+}
+
+// Helper to create header line
+function formatHeaderFooterLine(
+  left: { text: string; alignment: string; imageUrl?: string },
+  center: { text: string; alignment: string; imageUrl?: string },
+  right: { text: string; alignment: string; imageUrl?: string }
+): string {
+  const leftText = formatSection(left);
+  const centerText = formatSection(center);
+  const rightText = formatSection(right);
+  
+  const parts = [leftText, centerText, rightText].filter(Boolean);
+  return parts.join("    ");
+}
+
 export function useTemplateWithHeaderFooter(templateName: string): CombinedTemplate {
   const { templates, loading: templatesLoading } = useTemplates();
-  const { templates: headerTemplates, isLoading: headerLoading } = useHeaderTemplates();
-  const { templates: footerTemplates, isLoading: footerLoading } = useFooterTemplates();
+  const { templates: headerFooterTemplates, isLoading: hfLoading } = useHeaderFooterTemplates();
   const { profile } = useProfile();
 
   const result = useMemo(() => {
@@ -25,35 +41,18 @@ export function useTemplateWithHeaderFooter(templateName: string): CombinedTempl
       t => t.name.toLowerCase().includes(templateName.toLowerCase())
     ) || null;
 
-    // Find the linked header/footer templates independently — falling back to
-    // each's own default when the content template hasn't picked one.
-    const header =
-      (template && (template as any).header_template_id
-        ? headerTemplates.find(h => h.id === (template as any).header_template_id)
-        : undefined) || headerTemplates.find(h => h.is_default) || null;
+    // Find the linked header/footer template
+    let headerFooter: HeaderFooterTemplate | null = null;
+    if (template?.header_footer_template_id) {
+      headerFooter = headerFooterTemplates.find(
+        hf => hf.id === template.header_footer_template_id
+      ) || null;
+    }
 
-    const footer =
-      (template && (template as any).footer_template_id
-        ? footerTemplates.find(f => f.id === (template as any).footer_template_id)
-        : undefined) || footerTemplates.find(f => f.is_default) || null;
-
-    // Combine into the same shape the rest of the app already renders
-    // (DocumentPreview, printDocument, resolveTemplatePreview) so nothing
-    // downstream needs to change now that header/footer are separate.
-    const headerFooter: HeaderFooterTemplate | null = header || footer
-      ? {
-          id: header?.id || footer?.id || "",
-          user_id: header?.user_id || footer?.user_id || "",
-          name: header?.name || footer?.name || "",
-          description: header?.description ?? footer?.description ?? null,
-          header: (header?.section as any) || { left: { text: "", alignment: "left" }, center: { text: "", alignment: "center" }, right: { text: "", alignment: "right" } },
-          footer: (footer?.section as any) || { left: { text: "", alignment: "left" }, center: { text: "", alignment: "center" }, right: { text: "", alignment: "right" } },
-          font_family: header?.font_family || footer?.font_family || null,
-          is_default: !!(header?.is_default || footer?.is_default),
-          created_at: header?.created_at || footer?.created_at || "",
-          updated_at: header?.updated_at || footer?.updated_at || "",
-        }
-      : null;
+    // If no specific header/footer linked, try to find the default one
+    if (!headerFooter) {
+      headerFooter = headerFooterTemplates.find(hf => hf.is_default) || null;
+    }
 
     // Build the formatted content — body only (header/footer rendered separately by DocumentPreview)
     let formattedContent = "";
@@ -77,10 +76,10 @@ export function useTemplateWithHeaderFooter(templateName: string): CombinedTempl
       headerFooter,
       formattedContent,
     };
-  }, [templates, headerTemplates, footerTemplates, templateName, profile]);
+  }, [templates, headerFooterTemplates, templateName, profile]);
 
   return {
     ...result,
-    isLoading: templatesLoading || headerLoading || footerLoading,
+    isLoading: templatesLoading || hfLoading,
   };
 }
