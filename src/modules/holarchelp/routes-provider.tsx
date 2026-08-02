@@ -88,17 +88,22 @@ export default function ProviderRoutes() {
       <Route path="er" element={<Navigate to="/provider/ambulance" replace />} />
       <Route path="er/*" element={<Navigate to="/provider/ambulance" replace />} />
       <Route path="hospital" element={<ProviderShell><HospitalOpsLayout /></ProviderShell>}>
+        {/* Emergency module */}
         <Route index element={<EmergencyHubScreen />} />
-        <Route path="incoming" element={<Navigate to="/provider/hospital" replace />} />
-        <Route path="triage" element={<Navigate to="/provider/hospital" replace />} />
+        <Route path="er" element={<EmergencyCapability><ErCoordinationScreen /></EmergencyCapability>} />
+        <Route path="incoming" element={<EmergencyCapability><IncomingAmbulancesScreen /></EmergencyCapability>} />
+        <Route path="triage" element={<EmergencyCapability><TriageScreen /></EmergencyCapability>} />
+        <Route path="trauma-bays" element={<EmergencyCapability><TraumaBaysScreen /></EmergencyCapability>} />
         <Route path="dashboard" element={<HospitalDashboardScreen />} />
         <Route path="admin-dashboard" element={<HospitalAdminDashboard />} />
+        <Route path="analytics" element={<ExecutiveDashboardScreen />} />
         <Route path="admissions" element={<AdmissionsScreen />} />
         <Route path="wards" element={<WardsScreen />} />
         <Route path="inpatients" element={<InpatientsScreen />} />
+        <Route path="discharges" element={<DischargesScreen />} />
         <Route path="shifts" element={<ShiftsScreen />} />
         <Route path="my-shift" element={<MyShiftScreen />} />
-        <Route path="capacity" element={<Navigate to="/provider/hospital" replace />} />
+        <Route path="capacity" element={<Navigate to="/provider/hospital/trauma-bays" replace />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
         <Route path="providers" element={<ProvidersScreen />} />
         <Route path="doctors" element={<Navigate to="/provider/hospital/providers?tab=doctors" replace />} />
@@ -108,17 +113,20 @@ export default function ProviderRoutes() {
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
 
-        {/* Dispatch Dashboard (unified) — reuses ER Provider's EmergencyDashboardScreen */}
-        <Route path="dispatch" element={<EmergencyDashboardScreen />} />
+        {/* Ambulance Services — only for hospitals that operate their own fleet */}
+        <Route path="dispatch" element={<FleetCapability><EmergencyDashboardScreen /></FleetCapability>} />
         <Route path="dispatch-queue" element={<Navigate to="/provider/hospital/dispatch" replace />} />
         <Route path="dispatch-board" element={<Navigate to="/provider/hospital/dispatch" replace />} />
-        <Route path="dispatch-reassign/:incidentId" element={<DispatchReassignmentScreen />} />
-        <Route path="manual-override" element={<ManualOverrideScreen />} />
+        <Route path="dispatch-history" element={<FleetCapability><IncidentsScreen /></FleetCapability>} />
+        <Route path="dispatch-reassign/:incidentId" element={<FleetCapability><DispatchReassignmentScreen /></FleetCapability>} />
+        <Route path="manual-override" element={<FleetCapability><ManualOverrideScreen /></FleetCapability>} />
+        <Route path="vehicles" element={<FleetCapability><VehiclesScreen /></FleetCapability>} />
+        <Route path="crews" element={<FleetCapability><CrewsScreen /></FleetCapability>} />
 
-        {/* Fleet Live (unified) — reuses ER Provider components */}
-        <Route path="monitoring" element={<RealTimeMonitoringScreen />} />
-        <Route path="fleet" element={<FleetOperationsScreen />} />
-        <Route path="fleet/vehicle/:id" element={<VehicleProfileScreen />} />
+        <Route path="monitoring" element={<FleetCapability><RealTimeMonitoringScreen /></FleetCapability>} />
+        <Route path="fleet" element={<FleetCapability><FleetOperationsScreen /></FleetCapability>} />
+        <Route path="fleet/vehicle/:id" element={<FleetCapability><VehicleProfileScreen /></FleetCapability>} />
+
         <Route path="navigation" element={<NavigationScreen />} />
         <Route path="navigation/:id" element={<NavigationScreen />} />
         <Route path="abuse" element={<VehicleAbuseScreen />} />
