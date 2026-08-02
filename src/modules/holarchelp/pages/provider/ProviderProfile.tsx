@@ -11,6 +11,7 @@ import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { toastError } from "@/lib/userMessage";
+import { invalidateProviderCapabilities } from "../../hooks/useProviderCapabilities";
 
 export default function ProviderProfile() {
   const { t } = useTranslation();
@@ -73,6 +74,9 @@ export default function ProviderProfile() {
           bed_capacity: Number(row.bed_capacity) || 0, beds_available: Number(row.beds_available) || 0,
           icu_capacity: Number(row.icu_capacity) || 0, icu_available: Number(row.icu_available) || 0,
           at_capacity: !!row.at_capacity,
+          has_emergency_department: !!row.has_emergency_department,
+          accepts_ambulance_transfers: !!row.accepts_ambulance_transfers,
+          operates_own_ambulance_fleet: !!row.operates_own_ambulance_fleet,
         }
       : {
           company_name: row.company_name, contact_email: row.contact_email, contact_phone: row.contact_phone,
