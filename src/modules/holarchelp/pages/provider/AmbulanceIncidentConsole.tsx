@@ -7,6 +7,7 @@ import { IncidentVoiceNoteRecorder } from "../../components/IncidentVoiceNoteRec
 import { EtaCountdown } from "../../components/EtaCountdown";
 import { IncidentPhotos } from "../../components/IncidentPhotos";
 import { EmergencyPatientContext } from "../../components/EmergencyPatientContext";
+import { AcceptanceStatusBanner } from "../../components/HospitalAcceptance";
 import { HospitalPicker } from "../../components/HospitalPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,6 +142,9 @@ export default function AmbulanceIncidentConsole() {
           <p className="font-semibold text-warning">{t("incidentConsole.locked")}</p>
         </div>
       )}
+
+      {incident.destination_hospital_id && <AcceptanceStatusBanner incident={incident} />}
+
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3">

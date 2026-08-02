@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { SosLiveMap } from "../../../components/SosLiveMap";
 import { EtaCountdown } from "../../../components/EtaCountdown";
+import { HospitalAcceptancePanel } from "../../../components/HospitalAcceptance";
 import { Badge } from "@/components/ui/badge";
 import { Ambulance, MapPin, AlertTriangle, ChevronRight, Handshake } from "lucide-react";
 
@@ -13,7 +14,13 @@ type Row = {
   assigned_provider_id: string | null; created_at: string;
   pre_arrival_notes?: string | null;
   incident_number?: string | null;
+  hospital_acceptance_status?: string | null;
+  assigned_trauma_bay?: string | null;
+  assigned_doctor_name?: string | null;
+  trauma_team_prepared?: boolean | null;
+  handover_status?: string | null;
 };
+
 
 
 export default function IncomingAmbulancesScreen() {
@@ -21,6 +28,7 @@ export default function IncomingAmbulancesScreen() {
   const [rows, setRows] = useState<Row[]>([]);
   const [crews, setCrews] = useState<Record<string,{name:string;phone?:string}>>({});
   const [partners, setPartners] = useState<Set<string>>(new Set());
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -54,17 +62,19 @@ export default function IncomingAmbulancesScreen() {
       .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents", filter: `destination_hospital_id=eq.${providerId}` }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [providerId]);
+  }, [providerId, tick]);
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-extrabold">Incoming ER Providers</h2>
+      <h2 className="text-2xl font-extrabold">Incoming Ambulances</h2>
+
 
       {!rows.length && (
         <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           <AlertTriangle className="mx-auto mb-2 h-5 w-5 opacity-50" />
-          No ER providers currently en route to your facility.
+          No ambulances currently en route to your facility.
         </div>
+
       )}
 
       <div className="grid gap-3 lg:grid-cols-2">
@@ -99,7 +109,9 @@ export default function IncomingAmbulancesScreen() {
                   <p className="mt-0.5 line-clamp-3">{r.pre_arrival_notes}</p>
                 </div>
               )}
+              <HospitalAcceptancePanel incident={r} onChanged={() => setTick((n) => n + 1)} />
               <div className="flex items-center justify-between gap-2 border-t px-3 py-2 text-xs">
+
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5" /> Live tracking
                 </span>

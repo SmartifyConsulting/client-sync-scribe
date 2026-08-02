@@ -490,8 +490,7 @@ export function useTemplates() {
     const newTemplate: Template = {
       ...data,
       logo_position: data.logo_position as { x: number; y: number } | null,
-      header_template_id: (data as any).header_template_id ?? null,
-      footer_template_id: (data as any).footer_template_id ?? null,
+      header_footer_template_id: (data as any).header_footer_template_id ?? null,
     };
     setTemplates([...templates, newTemplate]);
     toast({
@@ -528,8 +527,7 @@ export function useTemplates() {
     const updatedTemplate: Template = {
       ...data,
       logo_position: data.logo_position as { x: number; y: number } | null,
-      header_template_id: (data as any).header_template_id ?? null,
-      footer_template_id: (data as any).footer_template_id ?? null,
+      header_footer_template_id: (data as any).header_footer_template_id ?? null,
     };
     setTemplates(templates.map((t) => (t.id === id ? updatedTemplate : t)));
     toast({

@@ -4,92 +4,14 @@ import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import holarcHelpLogo from "@/assets/holarc-help-logo.png";
 import { cn } from "@/lib/utils";
-import {
-  Settings,
-  LogOut,
-  LucideIcon,
-  UserCog,
-  Siren,
-  Ambulance,
-  Stethoscope,
-  BedDouble,
-  Activity,
-  ClipboardList,
-  
-  Navigation as NavIcon,
-  History,
-  Users,
-  HeartPulse,
-  ArrowLeft,
-  UserCheck,
-  Radar,
-  AlertTriangle,
-  Zap,
-  LayoutDashboard,
-  CalendarClock,
-  Clock,
-} from "lucide-react";
+import { Settings, LogOut, UserCog, ArrowLeft } from "lucide-react";
 
 import { useProfile } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-
-interface NavItem {
-  icon: LucideIcon;
-  labelKey: string;
-  to: string;
-  end?: boolean;
-  danger?: boolean;
-}
-
-const hospitalNav: NavItem[] = [
-  { icon: LayoutDashboard, labelKey: "nav.hospitalDashboard", to: "/provider/hospital/dashboard" },
-  { icon: Activity, labelKey: "nav.hospitalAdminDashboard", to: "/provider/hospital/admin-dashboard" },
-  { icon: Siren, labelKey: "nav.emergencyQueue", to: "/provider/hospital", end: true, danger: true },
-  { icon: ClipboardList, labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
-  { icon: BedDouble, labelKey: "nav.wards", to: "/provider/hospital/wards" },
-  { icon: Users, labelKey: "nav.inpatients", to: "/provider/hospital/inpatients" },
-  { icon: CalendarClock, labelKey: "nav.shifts", to: "/provider/hospital/shifts" },
-  { icon: Clock, labelKey: "nav.myShift", to: "/provider/hospital/my-shift" },
-  { icon: Siren, labelKey: "nav.emergencyDashboard", to: "/provider/hospital/dispatch", danger: true },
-  { icon: Radar, labelKey: "nav.realTimeMonitoring", to: "/provider/hospital/monitoring" },
-  { icon: UserCheck, labelKey: "nav.admin", to: "/provider/hospital/admins" },
-];
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
-
-const ambulanceSections: NavSection[] = [
-  {
-    title: "Live Operations",
-    items: [
-      { icon: Siren, labelKey: "nav.dispatchConsole", to: "/provider/ambulance", end: true, danger: true },
-      { icon: AlertTriangle, labelKey: "nav.incidents", to: "/provider/ambulance/incidents" },
-      { icon: NavIcon, labelKey: "nav.fleetMap", to: "/provider/ambulance/monitoring" },
-    ],
-  },
-  {
-    title: "Operations",
-    items: [
-      { icon: Activity, labelKey: "nav.operationsDashboard", to: "/provider/ambulance/ops-dashboard" },
-      { icon: Ambulance, labelKey: "nav.vehicles", to: "/provider/ambulance/vehicles" },
-      { icon: Users, labelKey: "nav.crews", to: "/provider/ambulance/crews" },
-      { icon: HeartPulse, labelKey: "nav.hospitals", to: "/provider/ambulance/hospitals" },
-      { icon: ClipboardList, labelKey: "nav.reports", to: "/provider/ambulance/reports" },
-    ],
-  },
-  {
-    title: "Administration",
-    items: [
-      { icon: UserCheck, labelKey: "nav.admin", to: "/provider/ambulance/admins" },
-    ],
-  },
-];
-
-const hospitalSections: NavSection[] = [{ title: "", items: hospitalNav }];
+import { useProviderCapabilities } from "@/modules/holarchelp/hooks/useProviderCapabilities";
+import { getProviderModules } from "@/modules/holarchelp/nav/registry";
 
 interface ProviderSidebarProps {
   portal: "hospital" | "ambulance";
@@ -101,10 +23,12 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const { isAdmin } = useIsAdmin();
   const { t } = useTranslation();
   const location = useLocation();
-  const sections = portal === "hospital" ? hospitalSections : ambulanceSections;
+  const { capabilities } = useProviderCapabilities();
+  const sections = getProviderModules(portal, capabilities);
   const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
   const logo = portal === "ambulance" ? holarcHelpLogo : holarcLogo;
   const logoAlt = portal === "ambulance" ? "Holarc Help" : "Holarc Health";
+
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar border-r border-sidebar-border">
@@ -125,10 +49,10 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
 
         <nav className="flex-1 px-4 pt-[1.5cm] py-1 space-y-1.5 overflow-y-auto font-size-preserve">
           {sections.map((section) => (
-            <div key={section.title || "main"} className="space-y-1.5">
+            <div key={section.id} className="space-y-1.5">
               {section.title && (
                 <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                  {section.title}
+                  {t(section.titleKey, { defaultValue: section.title })}
                 </p>
               )}
               {section.items.map((item) => {
@@ -153,7 +77,7 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                     )}
                   >
                     <item.icon className="h-5 w-5" />
-                    <span className="flex-1">{t(item.labelKey)}</span>
+                    <span className="flex-1">{t(item.labelKey, { defaultValue: item.label })}</span>
                   </NavLink>
                 );
               })}
