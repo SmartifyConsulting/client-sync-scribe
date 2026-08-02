@@ -62,17 +62,19 @@ export default function IncomingAmbulancesScreen() {
       .on("postgres_changes", { event: "*", schema: "public", table: "holarchelp_incidents", filter: `destination_hospital_id=eq.${providerId}` }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [providerId]);
+  }, [providerId, tick]);
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-extrabold">Incoming ER Providers</h2>
+      <h2 className="text-2xl font-extrabold">Incoming Ambulances</h2>
+
 
       {!rows.length && (
         <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           <AlertTriangle className="mx-auto mb-2 h-5 w-5 opacity-50" />
-          No ER providers currently en route to your facility.
+          No ambulances currently en route to your facility.
         </div>
+
       )}
 
       <div className="grid gap-3 lg:grid-cols-2">
@@ -107,7 +109,9 @@ export default function IncomingAmbulancesScreen() {
                   <p className="mt-0.5 line-clamp-3">{r.pre_arrival_notes}</p>
                 </div>
               )}
+              <HospitalAcceptancePanel incident={r} onChanged={() => setTick((n) => n + 1)} />
               <div className="flex items-center justify-between gap-2 border-t px-3 py-2 text-xs">
+
                 <span className="inline-flex items-center gap-1 text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5" /> Live tracking
                 </span>
