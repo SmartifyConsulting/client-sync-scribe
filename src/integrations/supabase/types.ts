@@ -2152,6 +2152,7 @@ export type Database = {
       holarchelp_hospitals: {
         Row: {
           accepting_patients: boolean
+          accepts_ambulance_transfers: boolean
           address: string | null
           admin_email: string | null
           admin_full_name: string | null
@@ -2171,6 +2172,7 @@ export type Database = {
           dispatch_priority: number
           er_beds_available: number | null
           er_capacity_status: string
+          has_emergency_department: boolean
           icu_available: number | null
           icu_capacity: number | null
           id: string
@@ -2180,6 +2182,7 @@ export type Database = {
           license_file_size_bytes: number | null
           longitude: number | null
           name: string
+          operates_own_ambulance_fleet: boolean
           owner_id: string
           ownership: string
           registration_number: string | null
@@ -2193,6 +2196,7 @@ export type Database = {
         }
         Insert: {
           accepting_patients?: boolean
+          accepts_ambulance_transfers?: boolean
           address?: string | null
           admin_email?: string | null
           admin_full_name?: string | null
@@ -2212,6 +2216,7 @@ export type Database = {
           dispatch_priority?: number
           er_beds_available?: number | null
           er_capacity_status?: string
+          has_emergency_department?: boolean
           icu_available?: number | null
           icu_capacity?: number | null
           id?: string
@@ -2221,6 +2226,7 @@ export type Database = {
           license_file_size_bytes?: number | null
           longitude?: number | null
           name: string
+          operates_own_ambulance_fleet?: boolean
           owner_id: string
           ownership?: string
           registration_number?: string | null
@@ -2234,6 +2240,7 @@ export type Database = {
         }
         Update: {
           accepting_patients?: boolean
+          accepts_ambulance_transfers?: boolean
           address?: string | null
           admin_email?: string | null
           admin_full_name?: string | null
@@ -2253,6 +2260,7 @@ export type Database = {
           dispatch_priority?: number
           er_beds_available?: number | null
           er_capacity_status?: string
+          has_emergency_department?: boolean
           icu_available?: number | null
           icu_capacity?: number | null
           id?: string
@@ -2262,6 +2270,7 @@ export type Database = {
           license_file_size_bytes?: number | null
           longitude?: number | null
           name?: string
+          operates_own_ambulance_fleet?: boolean
           owner_id?: string
           ownership?: string
           registration_number?: string | null
@@ -2490,8 +2499,11 @@ export type Database = {
           ai_emergency_summary: string | null
           arrived_at: string | null
           assigned_ambulance_id: string | null
+          assigned_doctor_name: string | null
+          assigned_doctor_user_id: string | null
           assigned_paramedic_user_id: string | null
           assigned_provider_id: string | null
+          assigned_trauma_bay: string | null
           at_hospital_at: string | null
           at_risk: boolean
           breathing: boolean | null
@@ -2503,7 +2515,13 @@ export type Database = {
           en_route_at: string | null
           escalated_at: string | null
           eta_minutes: number | null
+          handover_at: string | null
+          handover_notes: string | null
+          handover_status: string
+          hospital_acceptance_status: string
+          hospital_accepted_by: string | null
           hospital_admission_status: string | null
+          hospital_decision_at: string | null
           id: string
           incident_number: string
           last_eta_update: string | null
@@ -2519,6 +2537,7 @@ export type Database = {
           severity: string
           status: string
           tracking_token: string
+          trauma_team_prepared: boolean
           triage_assigned_at: string | null
           triage_bay: string | null
           triage_nurse: string | null
@@ -2535,8 +2554,11 @@ export type Database = {
           ai_emergency_summary?: string | null
           arrived_at?: string | null
           assigned_ambulance_id?: string | null
+          assigned_doctor_name?: string | null
+          assigned_doctor_user_id?: string | null
           assigned_paramedic_user_id?: string | null
           assigned_provider_id?: string | null
+          assigned_trauma_bay?: string | null
           at_hospital_at?: string | null
           at_risk?: boolean
           breathing?: boolean | null
@@ -2548,7 +2570,13 @@ export type Database = {
           en_route_at?: string | null
           escalated_at?: string | null
           eta_minutes?: number | null
+          handover_at?: string | null
+          handover_notes?: string | null
+          handover_status?: string
+          hospital_acceptance_status?: string
+          hospital_accepted_by?: string | null
           hospital_admission_status?: string | null
+          hospital_decision_at?: string | null
           id?: string
           incident_number: string
           last_eta_update?: string | null
@@ -2564,6 +2592,7 @@ export type Database = {
           severity?: string
           status?: string
           tracking_token?: string
+          trauma_team_prepared?: boolean
           triage_assigned_at?: string | null
           triage_bay?: string | null
           triage_nurse?: string | null
@@ -2580,8 +2609,11 @@ export type Database = {
           ai_emergency_summary?: string | null
           arrived_at?: string | null
           assigned_ambulance_id?: string | null
+          assigned_doctor_name?: string | null
+          assigned_doctor_user_id?: string | null
           assigned_paramedic_user_id?: string | null
           assigned_provider_id?: string | null
+          assigned_trauma_bay?: string | null
           at_hospital_at?: string | null
           at_risk?: boolean
           breathing?: boolean | null
@@ -2593,7 +2625,13 @@ export type Database = {
           en_route_at?: string | null
           escalated_at?: string | null
           eta_minutes?: number | null
+          handover_at?: string | null
+          handover_notes?: string | null
+          handover_status?: string
+          hospital_acceptance_status?: string
+          hospital_accepted_by?: string | null
           hospital_admission_status?: string | null
+          hospital_decision_at?: string | null
           id?: string
           incident_number?: string
           last_eta_update?: string | null
@@ -2609,6 +2647,7 @@ export type Database = {
           severity?: string
           status?: string
           tracking_token?: string
+          trauma_team_prepared?: boolean
           triage_assigned_at?: string | null
           triage_bay?: string | null
           triage_nurse?: string | null

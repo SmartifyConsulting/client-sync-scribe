@@ -11,6 +11,7 @@ import { Loader2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { toastError } from "@/lib/userMessage";
+import { invalidateProviderCapabilities } from "../../hooks/useProviderCapabilities";
 
 export default function ProviderProfile() {
   const { t } = useTranslation();
@@ -73,6 +74,9 @@ export default function ProviderProfile() {
           bed_capacity: Number(row.bed_capacity) || 0, beds_available: Number(row.beds_available) || 0,
           icu_capacity: Number(row.icu_capacity) || 0, icu_available: Number(row.icu_available) || 0,
           at_capacity: !!row.at_capacity,
+          has_emergency_department: !!row.has_emergency_department,
+          accepts_ambulance_transfers: !!row.accepts_ambulance_transfers,
+          operates_own_ambulance_fleet: !!row.operates_own_ambulance_fleet,
         }
       : {
           company_name: row.company_name, contact_email: row.contact_email, contact_phone: row.contact_phone,
@@ -82,6 +86,7 @@ export default function ProviderProfile() {
         };
     const { error } = await supabase.from(table as any).update(patch as any).eq("id", providerId);
     if (error) return toastError(error, "We couldn't complete that. Please try again.");
+    invalidateProviderCapabilities(providerId);
     toast.success(t("providerProfile.saved"));
   };
 
@@ -159,6 +164,31 @@ export default function ProviderProfile() {
           <Field label={t("providerProfile.fleetSize")} type="number" value={String(row.fleet_size ?? 1)} onChange={(v) => setRow({ ...row, fleet_size: v })} />
         )}
 
+        {providerType === "hospital" && (
+          <div className="space-y-2 rounded-xl border p-3">
+            <p className="text-sm font-semibold">Emergency Services</p>
+            <p className="text-xs text-muted-foreground">
+              These settings control which modules appear in your navigation.
+            </p>
+            <CapabilityToggle
+              label="Has Emergency Department"
+              checked={row.has_emergency_department ?? true}
+              onChange={(v) => setRow({ ...row, has_emergency_department: v })}
+            />
+            <CapabilityToggle
+              label="Accepts Ambulance Transfers"
+              checked={row.accepts_ambulance_transfers ?? true}
+              onChange={(v) => setRow({ ...row, accepts_ambulance_transfers: v })}
+            />
+            <CapabilityToggle
+              label="Operates Own Ambulance Fleet"
+              checked={row.operates_own_ambulance_fleet ?? false}
+              onChange={(v) => setRow({ ...row, operates_own_ambulance_fleet: v })}
+            />
+          </div>
+        )}
+
+
         <div className="flex items-center justify-between rounded-xl border p-3">
           <div>
             <p className="text-sm font-semibold">{t("providerProfile.atCapacity")}</p>
@@ -172,6 +202,14 @@ export default function ProviderProfile() {
     </div>
   );
 }
+
+const CapabilityToggle = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
+  <div className="flex items-center justify-between gap-3 border-t pt-2">
+    <p className="text-sm">{label}</p>
+    <Switch checked={checked} onCheckedChange={onChange} />
+  </div>
+);
+
 
 const Field = ({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) => (
   <div className="grid gap-1.5">
