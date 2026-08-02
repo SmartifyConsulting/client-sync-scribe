@@ -82,11 +82,31 @@ CREATE TRIGGER update_footer_templates_updated_at
   BEFORE UPDATE ON public.footer_templates
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- 2. New FK columns on templates ----------------------------------------
+-- 2. New FK columns on templates (skipped gracefully if that table
+--    doesn't exist in this database — the header/footer tables above are
+--    still created either way). ------------------------------------------
 
-ALTER TABLE public.templates
-  ADD COLUMN IF NOT EXISTS header_template_id UUID REFERENCES public.header_templates(id) ON DELETE SET NULL,
-  ADD COLUMN IF NOT EXISTS footer_template_id UUID REFERENCES public.footer_templates(id) ON DELETE SET NULL;
+DO $$
+BEGIN
+  IF to_regclass('public.templates') IS NULL THEN
+    RAISE NOTICE 'Skipping templates.header_template_id/footer_template_id -- public.templates does not exist in this database.';
+    RETURN;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'templates' AND column_name = 'header_template_id'
+  ) THEN
+    ALTER TABLE public.templates ADD COLUMN header_template_id UUID REFERENCES public.header_templates(id) ON DELETE SET NULL;
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'templates' AND column_name = 'footer_template_id'
+  ) THEN
+    ALTER TABLE public.templates ADD COLUMN footer_template_id UUID REFERENCES public.footer_templates(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 -- 3. Split every existing combined letterhead into a header row + a
 --    footer row, and repoint any content template that referenced the
@@ -105,6 +125,11 @@ BEGIN
     RETURN;
   END IF;
 
+  -- Nothing to split if the old combined table isn't in this database.
+  IF to_regclass('public.header_footer_templates') IS NULL THEN
+    RETURN;
+  END IF;
+
   FOR hf IN SELECT * FROM public.header_footer_templates LOOP
     INSERT INTO public.header_templates (user_id, name, description, section, font_family, is_default)
     VALUES (hf.user_id, hf.name, hf.description, hf.header, hf.font_family, hf.is_default)
@@ -114,10 +139,12 @@ BEGIN
     VALUES (hf.user_id, hf.name, hf.description, hf.footer, hf.font_family, hf.is_default)
     RETURNING id INTO new_footer_id;
 
-    UPDATE public.templates
-    SET header_template_id = new_header_id,
-        footer_template_id = new_footer_id
-    WHERE header_footer_template_id = hf.id;
+    IF to_regclass('public.templates') IS NOT NULL THEN
+      UPDATE public.templates
+      SET header_template_id = new_header_id,
+          footer_template_id = new_footer_id
+      WHERE header_footer_template_id = hf.id;
+    END IF;
   END LOOP;
 END $$;
 
