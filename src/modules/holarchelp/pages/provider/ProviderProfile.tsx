@@ -203,6 +203,14 @@ export default function ProviderProfile() {
   );
 }
 
+const CapabilityToggle = ({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) => (
+  <div className="flex items-center justify-between gap-3 border-t pt-2">
+    <p className="text-sm">{label}</p>
+    <Switch checked={checked} onCheckedChange={onChange} />
+  </div>
+);
+
+
 const Field = ({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) => (
   <div className="grid gap-1.5">
     <Label className="text-xs">{label}</Label>
