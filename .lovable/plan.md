@@ -1,41 +1,78 @@
-## Goal
+# Emergency Provider (ER) Module — Workflow Refactor
 
-Finish the remaining two panels on the new Hospital Admin Dashboard, then add a new **ER Ops Dashboard** for ambulance/ER providers in the same style — without removing or changing any existing screens.
+Reorganise the ambulance provider portal around a real EMS dispatch-centre workflow. No branding, colour, typography, icon or component-style changes; no schema or API changes. Existing screens are reused and re-laid-out, not rewritten from scratch.
 
-## Step 1 — Complete the Hospital Admin Dashboard (bottom row)
+## 1. Grouped navigation
 
-Two columns added below the existing KPI / ward / alerts sections:
+`ProviderSidebar` gains optional section headers (small uppercase muted labels, same spacing language already used for the profile block). Ambulance nav becomes:
 
-- **ER queue (left)** — patients waiting in the ER: incident number or patient name, triage badge (critical = red, urgent = amber, routine = green), and time waiting. Shows up to 4, with a "View full queue" button linking to the existing Emergency Queue screen.
-- **Recent activity (right)** — last 5 events as a timeline with relative timestamps ("8 minutes ago"): admission to ward, prescription issued (with medication name), shift clock-in/handover, discharge, and inbound emergency/ambulance alerts. Merged from admissions, prescriptions, shifts and incidents, sorted newest first, respecting the ward filter where the event has a ward.
+```text
+LIVE OPERATIONS
+  Dispatch Console      /provider/ambulance            (was Emergency/Dispatch Dashboard)
+  Incidents             /provider/ambulance/incidents  (new)
+  Fleet Map             /provider/ambulance/monitoring (was Fleet Live)
+OPERATIONS
+  Operations Dashboard  /provider/ambulance/ops-dashboard
+  Vehicles              /provider/ambulance/vehicles   (new page from FleetOperationsScreen)
+  Crews                 /provider/ambulance/crews      (new page, from Admin → Crew)
+  Hospitals             /provider/ambulance/hospitals  (HospitalNetworkScreen)
+  Reports               /provider/ambulance/reports    (ExecutiveDashboard + Billing tabs)
+ADMINISTRATION
+  Users                 /provider/ambulance/admins?tab=users
+  Roles & Permissions   /provider/ambulance/admins?tab=roles
+  Fleet Configuration   /provider/ambulance/admins?tab=fleet
+  Organisation Settings /provider/ambulance/profile
+```
 
-## Step 2 — New ER Ops Dashboard
+Old routes stay as redirects so existing deep links keep working. Operational tabs (Crew, Hospitals) move out of Administration; Administration keeps configuration only.
 
-New route `/provider/ambulance/ops-dashboard` ("Ops Dashboard" added to the ER sidebar, existing Emergency Dashboard stays untouched).
+## 2. Dispatch Console (primary screen)
 
-**KPI row (4 cards, live):**
-- Active incidents: currently assigned/en-route/at-scene count
-- Average response time: from incident creation to crew arrival (last 24h)
-- Fleet availability: available vehicles / total fleet, as a percentage
-- Crew on shift: paramedics on active shift, plus count of vehicles without a crew
+Rebuild the layout of the current dispatch screen into a four-column left-to-right workflow with a sticky action bar, reusing the existing data loading, realtime subscriptions, assignment RPCs and dialogs:
 
-**Main row:**
-- **Live incident board (left)** — open + assigned incidents with incident number, severity colour, status chip, time since creation, and assigned vehicle/crew; unassigned ones highlighted.
-- **Fleet status (right)** — each vehicle with status (available / dispatched / at hospital / offline), current crew, and last telemetry ping age; colour-coded like the ward bars.
+```text
+SOS Queue (25%) | Incident Details (30%) | Ambulances (25%) | Hospitals (20%)
+------------------------------------------------------------------------
+[ Assign Ambulance ]  [ Notify Crew ]  [ Navigate ]  [ Notify Hospital ]
+```
 
-**Bottom row:**
-- **Destination hospitals** — affiliated hospitals with current inbound count and ER capacity where known.
-- **Recent activity** — last 5 dispatch events (SOS received, accepted, en route, patient collected, handover at hospital) with relative timestamps.
+- SOS Queue: severity-grouped (critical/high/moderate/low) cards with incident number, priority, waiting time, distance, caller and patient name. Selecting an incident drives the rest of the screen.
+- Incident Details: patient, caller, address, GPS, symptoms, priority, special requirements, timeline, estimated travel time, notes; Cancel / Hold / Assign buttons.
+- Ambulances: richer cards (vehicle, crew, distance, ETA, shift, equipment, fuel, availability), auto-sorted nearest → available → capability, with a "Recommended" badge on the top match.
+- Hospitals: ranked on selection by distance, trauma capability, capacity, type and current load; shows name, distance, ETA, capability, status, preferred flag. Replaces the "Select SOS First" placeholder with ranked recommendations once an incident is chosen (placeholder only when nothing is selected).
 
-## Shared behaviour
+## 3. Operations Dashboard
 
-- Ward filter equivalent for ER: filter by vehicle/base where relevant.
-- "Last updated: X seconds ago" header with 10-second auto-refresh, matching the hospital dashboard.
-- Existing app colours, cards, typography (Sora/Manrope) — no new palette.
-- If any panel has no live rows, a small amount of demo data will be seeded for the ER provider (Renken) so the dashboard reads realistically, consistent with the earlier hospital seed.
+Existing `ErOpsDashboard` is re-laid-out, not replaced: KPI row (open incidents, vehicles available, vehicles on mission, crews on shift, average response time, fleet utilisation), then a split Live Incident Board / Fleet Status, then an Operational Alerts strip (maintenance due, fuel warnings, offline GPS, safety events). Dispatch/assignment controls are removed from this page — it becomes read-only overview.
+
+## 4. Fleet Map
+
+Map grows to ~70% width; selecting a vehicle opens a 30% right-hand detail panel (ID, crew, status, current incident, destination, fuel, speed, mileage, equipment, maintenance, mission timeline). The stacked vehicle cards under the map are removed; the list becomes a compact selector inside the panel column.
+
+## 5. New pages (list + detail split, 70/30)
+
+- Incidents: list left, detail right (timeline, patient, caller, vehicle, hospital, outcome, audit trail, notes). Built from existing incident history/console data.
+- Vehicles: list + detail (registration, call sign, type, crew, equipment, maintenance, insurance, GPS, current assignment, mission history). Reuses `FleetOperationsScreen` and `VehicleProfileScreen` content.
+- Crews: roster by state (on shift, available, dispatched, at hospital, offline) plus per-member profile panel. Reuses the Admin → Crew data.
+- Hospitals: capabilities, trauma level, capacity, preferred destination flag, average offload time, GPS, contacts. Reuses `HospitalNetworkScreen` / affiliations data.
+
+## 6. Shared components
+
+Extract and reuse across all the above, in `src/modules/holarchelp/components/ems/`:
+`IncidentCard`, `VehicleCard`, `CrewCard`, `HospitalCard`, `KPIStat`, `StatusBadge`, `Timeline`, `AssignmentPanel`. Existing screens are migrated onto these to remove duplication.
 
 ## Technical notes
 
-- New hook `useErOpsStats.ts` mirroring `useHospitalAdminStats.ts` (single polling loop, derived KPIs, typed lite rows) reading `holarchelp_incidents`, `ambulances`, `ambulance_crew_assignments`, `paramedic_shifts`, `holarchelp_telematics_pings`, `ambulance_hospital_affiliations`.
-- Hospital bottom row extends the existing `useHospitalAdminStats` hook with a `recentActivity` merge and richer ER queue rows rather than adding a second fetcher.
-- New page component `ErOpsDashboard.tsx`, registered in `routes-provider.tsx` and `ProviderSidebar.tsx`; new i18n keys in `en.json`.
+- All new pages read from the existing `holarchelp_*` tables and hooks (`useErOpsStats`, `useActiveMissions`, `useShiftTelematics`, `useHospitalNetwork`, `useLiveProviderLocation`) — no new tables, no new edge functions.
+- Hospital ranking and ambulance recommendation are computed client-side from data already fetched (distance via the existing haversine helper, capability/capacity columns already present).
+- Existing realtime channels and RPCs (`holarchelp_auto_assign_incident`, `holarchelp_set_destination_hospital`) are preserved.
+- New labels are added to `src/i18n/locales/en.json` following the existing `nav.*` key pattern.
+- Hospital portal nav is untouched by this change.
+
+## Suggested order
+
+1. Shared components + grouped sidebar and routes/redirects.
+2. Dispatch Console relayout.
+3. Fleet Map relayout + Operations Dashboard cleanup.
+4. Incidents, Vehicles, Crews, Hospitals pages.
+5. Administration trimmed to configuration only.
