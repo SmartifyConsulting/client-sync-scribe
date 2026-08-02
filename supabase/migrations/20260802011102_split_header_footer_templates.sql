@@ -3,9 +3,23 @@
 -- table and its seed function are left in place (unused going forward)
 -- so this migration is additive and safe to roll back from.
 
+-- 0. Trigger helper — defined defensively in case this project's copy of
+--    update_updated_at_column() was never actually created (idempotent,
+--    safe to run even if it already exists with the same behavior).
+
+CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
 -- 1. New tables --------------------------------------------------------
 
-CREATE TABLE public.header_templates (
+CREATE TABLE IF NOT EXISTS public.header_templates (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
   name TEXT NOT NULL,
@@ -17,7 +31,7 @@ CREATE TABLE public.header_templates (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.footer_templates (
+CREATE TABLE IF NOT EXISTS public.footer_templates (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
   name TEXT NOT NULL,
@@ -32,6 +46,10 @@ CREATE TABLE public.footer_templates (
 ALTER TABLE public.header_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.footer_templates ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own header templates" ON public.header_templates;
+DROP POLICY IF EXISTS "Users can create their own header templates" ON public.header_templates;
+DROP POLICY IF EXISTS "Users can update their own header templates" ON public.header_templates;
+DROP POLICY IF EXISTS "Users can delete their own header templates" ON public.header_templates;
 CREATE POLICY "Users can view their own header templates"
   ON public.header_templates FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can create their own header templates"
@@ -41,6 +59,10 @@ CREATE POLICY "Users can update their own header templates"
 CREATE POLICY "Users can delete their own header templates"
   ON public.header_templates FOR DELETE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view their own footer templates" ON public.footer_templates;
+DROP POLICY IF EXISTS "Users can create their own footer templates" ON public.footer_templates;
+DROP POLICY IF EXISTS "Users can update their own footer templates" ON public.footer_templates;
+DROP POLICY IF EXISTS "Users can delete their own footer templates" ON public.footer_templates;
 CREATE POLICY "Users can view their own footer templates"
   ON public.footer_templates FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can create their own footer templates"
@@ -50,10 +72,12 @@ CREATE POLICY "Users can update their own footer templates"
 CREATE POLICY "Users can delete their own footer templates"
   ON public.footer_templates FOR DELETE USING (auth.uid() = user_id);
 
+DROP TRIGGER IF EXISTS update_header_templates_updated_at ON public.header_templates;
 CREATE TRIGGER update_header_templates_updated_at
   BEFORE UPDATE ON public.header_templates
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_footer_templates_updated_at ON public.footer_templates;
 CREATE TRIGGER update_footer_templates_updated_at
   BEFORE UPDATE ON public.footer_templates
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -61,8 +85,8 @@ CREATE TRIGGER update_footer_templates_updated_at
 -- 2. New FK columns on templates ----------------------------------------
 
 ALTER TABLE public.templates
-  ADD COLUMN header_template_id UUID REFERENCES public.header_templates(id) ON DELETE SET NULL,
-  ADD COLUMN footer_template_id UUID REFERENCES public.footer_templates(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS header_template_id UUID REFERENCES public.header_templates(id) ON DELETE SET NULL,
+  ADD COLUMN IF NOT EXISTS footer_template_id UUID REFERENCES public.footer_templates(id) ON DELETE SET NULL;
 
 -- 3. Split every existing combined letterhead into a header row + a
 --    footer row, and repoint any content template that referenced the
@@ -74,6 +98,13 @@ DECLARE
   new_header_id UUID;
   new_footer_id UUID;
 BEGIN
+  -- Guard against re-running this block twice (e.g. after fixing an
+  -- unrelated error further down and re-pasting the whole script) --
+  -- skip the split entirely once any header_templates row exists.
+  IF EXISTS (SELECT 1 FROM public.header_templates) THEN
+    RETURN;
+  END IF;
+
   FOR hf IN SELECT * FROM public.header_footer_templates LOOP
     INSERT INTO public.header_templates (user_id, name, description, section, font_family, is_default)
     VALUES (hf.user_id, hf.name, hf.description, hf.header, hf.font_family, hf.is_default)
