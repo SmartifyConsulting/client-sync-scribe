@@ -86,6 +86,7 @@ export default function ProviderProfile() {
         };
     const { error } = await supabase.from(table as any).update(patch as any).eq("id", providerId);
     if (error) return toastError(error, "We couldn't complete that. Please try again.");
+    invalidateProviderCapabilities(providerId);
     toast.success(t("providerProfile.saved"));
   };
 
@@ -162,6 +163,31 @@ export default function ProviderProfile() {
         ) : (
           <Field label={t("providerProfile.fleetSize")} type="number" value={String(row.fleet_size ?? 1)} onChange={(v) => setRow({ ...row, fleet_size: v })} />
         )}
+
+        {providerType === "hospital" && (
+          <div className="space-y-2 rounded-xl border p-3">
+            <p className="text-sm font-semibold">Emergency Services</p>
+            <p className="text-xs text-muted-foreground">
+              These settings control which modules appear in your navigation.
+            </p>
+            <CapabilityToggle
+              label="Has Emergency Department"
+              checked={row.has_emergency_department ?? true}
+              onChange={(v) => setRow({ ...row, has_emergency_department: v })}
+            />
+            <CapabilityToggle
+              label="Accepts Ambulance Transfers"
+              checked={row.accepts_ambulance_transfers ?? true}
+              onChange={(v) => setRow({ ...row, accepts_ambulance_transfers: v })}
+            />
+            <CapabilityToggle
+              label="Operates Own Ambulance Fleet"
+              checked={row.operates_own_ambulance_fleet ?? false}
+              onChange={(v) => setRow({ ...row, operates_own_ambulance_fleet: v })}
+            />
+          </div>
+        )}
+
 
         <div className="flex items-center justify-between rounded-xl border p-3">
           <div>
