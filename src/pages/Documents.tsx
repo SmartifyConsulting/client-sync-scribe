@@ -135,6 +135,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const [isNewHFTemplateOpen, setIsNewHFTemplateOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<DisplayTemplate | null>(null);
   const [editingHFTemplate, setEditingHFTemplate] = useState<HeaderFooterTemplate | null>(null);
+  const [editingHFMode, setEditingHFMode] = useState<"header-only" | "footer-only" | "edit">("edit");
   const [templateToDelete, setTemplateToDelete] = useState<DisplayTemplate | null>(null);
   const [hfTemplateToDelete, setHfTemplateToDelete] = useState<HeaderFooterTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<DisplayTemplate | null>(null);
@@ -575,9 +576,9 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setEditingHFTemplate(template)}>
+                        <DropdownMenuItem onClick={() => { setEditingHFTemplate(template); setEditingHFMode("footer-only"); }}>
                           <Edit3 className="h-4 w-4 mr-2" />
-                          Edit
+                          Edit Footer Template
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -884,8 +885,12 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       <Dialog open={!!editingHFTemplate} onOpenChange={(open) => !open && setEditingHFTemplate(null)}>
         <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Header & Footer Template</DialogTitle>
-            <DialogDescription>Modify this header and footer layout</DialogDescription>
+            <DialogTitle>
+              {editingHFMode === "header-only" ? "Edit Header Template" : editingHFMode === "footer-only" ? "Edit Footer Template" : "Edit Header & Footer Template"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingHFMode === "header-only" ? "Modify this header layout" : editingHFMode === "footer-only" ? "Modify this footer layout" : "Modify this header and footer layout"}
+            </DialogDescription>
           </DialogHeader>
           {editingHFTemplate && (
             <HeaderFooterTemplateForm
@@ -899,7 +904,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               }}
               onSubmit={handleEditHFTemplate}
               onCancel={() => setEditingHFTemplate(null)}
-              mode="edit"
+              mode={editingHFMode}
             />
           )}
         </DialogContent>

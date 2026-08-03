@@ -1348,9 +1348,9 @@ export default function MyPractice() {
             <p className="text-sm text-muted-foreground">
               This information appears on your document templates and letterheads.
             </p>
-            <Accordion type="multiple" className={SECTION_FRAME_CLASS}>
+            <Accordion type="multiple" className="rounded-xl border border-primary bg-white overflow-hidden divide-y divide-primary">
               {/* Practice Details */}
-              <AccordionItem value="practice-basic-details" className={SECTION_ITEM_CLASS}>
+              <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-white">
                 <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none !bg-neutral-400 hover:!bg-neutral-400/90 !text-white [&_*:not(.section-count-pill)]:!text-white [&>svg]:!text-white">
                   <h4 className="text-sm font-semibold">Practice Details</h4>
                 </AccordionTrigger>

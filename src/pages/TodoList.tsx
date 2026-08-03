@@ -719,10 +719,10 @@ export default function TodoList() {
           key={groupMode}
           type="multiple"
           defaultValue={defaultOpenGroup}
-          className="rounded-lg border bg-card overflow-hidden space-y-1"
+          className="space-y-3"
         >
           {groups.map((g) => (
-            <AccordionItem key={g.key} value={g.key} className="border-0 rounded-none bg-card">
+            <AccordionItem key={g.key} value={g.key} className="border-0 rounded-lg bg-card overflow-hidden shadow-sm">
               <AccordionTrigger className={TODO_TRIGGER_CLASS}>
                 <div className="flex items-center justify-between w-full pr-2">
                   <span className="text-xs font-medium">{g.label}</span>
@@ -736,7 +736,7 @@ export default function TodoList() {
                   <Accordion type="multiple" className="space-y-2">
                     {patientSubGroups(g.items).map((sub) => (
                       <AccordionItem key={sub.key} value={`${g.key}-${sub.key}`} className="border-0">
-                        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/50">
+                        <AccordionTrigger className="px-4 py-2 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                           <div className="flex items-center justify-between w-full pr-2">
                             <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
                               <User className="h-3.5 w-3.5 text-muted-foreground" />

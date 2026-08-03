@@ -38,7 +38,7 @@ interface HeaderFooterTemplateFormProps {
   initialData?: HeaderFooterTemplateData;
   onSubmit: (template: HeaderFooterTemplateData) => void;
   onCancel: () => void;
-  mode?: "create" | "edit";
+  mode?: "create" | "edit" | "edit-header-only" | "edit-footer-only";
 }
 
 const defaultSectionContent = (): SectionContent => ({
@@ -219,7 +219,7 @@ export function HeaderFooterTemplateForm({
       {/* HEADER TEMPLATE CARD — saved together with the Footer Template Card below as
           one Letterhead; both are applied by default whenever a content template
           selects this Letterhead. */}
-      <Card className="border-border">
+      {!mode?.includes("footer-only") && <Card className="border-border">
         <CardHeader className="py-2 px-3">
           <CardTitle className="text-xs font-semibold text-foreground">
             Header Template <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
@@ -257,10 +257,10 @@ export function HeaderFooterTemplateForm({
             />
           </div>
         </CardContent>
-      </Card>
+      </Card>}
 
       {/* FOOTER TEMPLATE CARD */}
-      <Card className="border-border">
+      {!mode?.includes("header-only") && <Card className="border-border">
         <CardHeader className="py-2 px-3">
           <CardTitle className="text-xs font-semibold text-foreground">
             Footer Template <span className="font-normal text-muted-foreground">(Left, Center, Right)</span>
@@ -298,10 +298,10 @@ export function HeaderFooterTemplateForm({
             />
           </div>
         </CardContent>
-      </Card>
-      <p className="text-[10px] text-muted-foreground -mt-1">
+      </Card>}
+      {!mode?.includes("-only") && <p className="text-[10px] text-muted-foreground -mt-1">
         Saving this Letterhead applies both the Header Card and Footer Card together by default wherever it's selected.
-      </p>
+      </p>}
 
       {/* Action Buttons */}
       <div className="flex gap-2 pt-1">
@@ -309,7 +309,7 @@ export function HeaderFooterTemplateForm({
           Cancel
         </Button>
         <Button onClick={handleSubmit} className="flex-1 h-8">
-          {mode === "edit" ? "Save Changes" : "Save Template"}
+          {mode?.includes("header-only") ? "Save Header" : mode?.includes("footer-only") ? "Save Footer" : mode === "edit" ? "Save Changes" : "Save Template"}
         </Button>
       </div>
     </div>
