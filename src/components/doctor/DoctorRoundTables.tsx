@@ -151,6 +151,7 @@ export function DoctorRoundTables() {
       searchPlaceholder="Search round tables..."
       emptyLabel="No round table contributions yet"
       renderItem={renderEntry}
+      defaultOpenFirst={false}
       actions={
         <ToggleGroup
           type="single"

@@ -307,7 +307,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 if (sectionItems.length === 0) return null;
                 return (
                   <div key={section.title} className="space-y-1.5">
-                    <p className="px-3 pt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                    <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
                       {section.title}
                     </p>
                     {sectionItems.map((item) => renderNavLink(item))}

@@ -54,6 +54,8 @@ interface Props<T> {
   emptyLabel?: string;
   /** Extra controls rendered to the right of the toolbar. */
   actions?: React.ReactNode;
+  /** Whether the first group is expanded by default (default true). */
+  defaultOpenFirst?: boolean;
 }
 
 export function ListGroupToolbar<T>({
@@ -64,6 +66,7 @@ export function ListGroupToolbar<T>({
   searchPlaceholder = "Search...",
   emptyLabel = "Nothing to show",
   actions,
+  defaultOpenFirst = true,
 }: Props<T>) {
   const prefKey = `listGroupBy:${storageKey}`;
   const [query, setQuery] = React.useState("");
@@ -143,7 +146,7 @@ export function ListGroupToolbar<T>({
       ) : (
         <Accordion
           type="multiple"
-          defaultValue={[groups[0][0]]}
+          defaultValue={defaultOpenFirst ? [groups[0][0]] : []}
           className={SECTION_FRAME_CLASS}
         >
           {groups.map(([label, entries]) => (

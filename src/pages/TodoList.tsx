@@ -733,10 +733,10 @@ export default function TodoList() {
                 {g.items.length === 0 ? (
                   <p className="text-xs text-muted-foreground px-4 py-3">No tasks in this group.</p>
                 ) : groupMode === "date" ? (
-                  <Accordion type="multiple" className="space-y-2">
+                  <Accordion type="multiple" className="space-y-3">
                     {patientSubGroups(g.items).map((sub) => (
-                      <AccordionItem key={sub.key} value={`${g.key}-${sub.key}`} className="border-0">
-                        <AccordionTrigger className="px-4 py-2 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+                      <AccordionItem key={sub.key} value={`${g.key}-${sub.key}`} className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden">
+                        <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                           <div className="flex items-center justify-between w-full pr-2">
                             <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
                               <User className="h-3.5 w-3.5 text-muted-foreground" />
