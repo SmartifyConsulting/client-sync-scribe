@@ -48,12 +48,12 @@ function AmbulanceStatsStrip() {
     : "bg-success/10 text-success";
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-card/60 p-2">
+    <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto rounded-2xl border border-border/50 bg-card/60 p-2 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {/* 1. Action: Start / End Shift FIRST */}
       {!shift ? (
         <button
           onClick={() => setStartOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-primary/10 px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/15"
+          className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-black/5 bg-primary/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm hover:bg-primary/15"
         >
           <PlayCircle className="h-3.5 w-3.5" /> {t("provider.startShift")}
         </button>
@@ -62,7 +62,7 @@ function AmbulanceStatsStrip() {
           onClick={onEnd}
           disabled={ending || shift.status === "busy"}
           title={shift.status === "busy" ? t("provider.finishActiveIncidentFirst") : ""}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-card px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted disabled:opacity-50"
+          className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-black/5 bg-card px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground shadow-sm hover:bg-muted disabled:opacity-50"
         >
           {ending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <StopCircle className="h-3.5 w-3.5" />}
           {t("provider.endShift")}
@@ -71,7 +71,7 @@ function AmbulanceStatsStrip() {
 
       {/* 2. Status badge */}
       <span className={cn(
-        "inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider",
+        "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-black/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm",
         statusTone,
       )}>
         <Truck className="h-3.5 w-3.5" />
@@ -82,15 +82,15 @@ function AmbulanceStatsStrip() {
       {stats.currentIncidentId && (
         <Link
           to={`/provider/ambulance/incident/${stats.currentIncidentId}`}
-          className="inline-flex items-center gap-2 rounded-xl bg-sos/10 px-2.5 py-1.5 text-sos transition hover:bg-sos/15"
+          className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-black/5 bg-sos/10 px-3 py-1.5 text-sos shadow-sm transition hover:bg-sos/15"
         >
           <Siren className="h-3.5 w-3.5" />
-          <span className="text-xs font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">{t("provider.activeMission")}</span>
           <span className="text-xs font-bold">#{stats.currentIncidentId.slice(0, 8)}</span>
         </Link>
       )}
 
-      <span className="ml-auto inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+      <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap pl-1 text-sm text-muted-foreground">
         <Wifi className={cn("h-3.5 w-3.5", online ? "text-success" : "text-destructive")} />
         {online ? t("provider.online") : t("provider.offline")}
       </span>

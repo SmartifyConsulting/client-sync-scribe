@@ -6009,7 +6009,9 @@ export type Database = {
           created_at: string
           description: string | null
           font_family: string | null
+          footer_template_id: string | null
           header_footer_template_id: string | null
+          header_template_id: string | null
           id: string
           is_default: boolean | null
           logo_position: Json | null
@@ -6024,7 +6026,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           font_family?: string | null
+          footer_template_id?: string | null
           header_footer_template_id?: string | null
+          header_template_id?: string | null
           id?: string
           is_default?: boolean | null
           logo_position?: Json | null
@@ -6039,7 +6043,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           font_family?: string | null
+          footer_template_id?: string | null
           header_footer_template_id?: string | null
+          header_template_id?: string | null
           id?: string
           is_default?: boolean | null
           logo_position?: Json | null
@@ -6052,6 +6058,20 @@ export type Database = {
           {
             foreignKeyName: "templates_header_footer_template_id_fkey"
             columns: ["header_footer_template_id"]
+            isOneToOne: false
+            referencedRelation: "header_footer_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "templates_header_template_id_fkey"
+            columns: ["header_template_id"]
+            isOneToOne: false
+            referencedRelation: "header_footer_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "templates_footer_template_id_fkey"
+            columns: ["footer_template_id"]
             isOneToOne: false
             referencedRelation: "header_footer_templates"
             referencedColumns: ["id"]

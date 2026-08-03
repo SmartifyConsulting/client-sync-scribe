@@ -7,8 +7,8 @@ import { useTranslation } from "react-i18next";
 
 function TopChip({ label, value, tone }: { label: string; value: React.ReactNode; tone: string }) {
   return (
-    <div className={cn("flex items-center gap-2 rounded-xl px-2.5 py-1.5", tone)}>
-      <span className="text-xs font-bold uppercase tracking-wider opacity-80">{label}</span>
+    <div className={cn("flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-black/5 px-3 py-1.5 shadow-sm", tone)}>
+      <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">{label}</span>
       <span className="text-sm font-extrabold tabular-nums">{value}</span>
     </div>
   );
@@ -28,9 +28,15 @@ function HospitalStatsStrip() {
         : "bg-success/10 text-success";
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-2xl bg-card/60 p-2">
+    <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto rounded-2xl border border-border/50 bg-card/60 p-2 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {role && (
-        <span className={cn("rounded-xl px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider", ROLE_TONE[role] ?? "bg-card text-foreground")}>
+        <span
+          title="Your role on this hospital account"
+          className={cn(
+            "flex shrink-0 items-center whitespace-nowrap rounded-full border border-black/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider shadow-sm",
+            ROLE_TONE[role] ?? "bg-card text-foreground",
+          )}
+        >
           {ROLE_LABEL[role] ?? role}
         </span>
       )}

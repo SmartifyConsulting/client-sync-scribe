@@ -39,7 +39,7 @@ import { TemplateForm, TemplateData } from "@/components/templates/TemplateForm"
 import { HeaderFooterTemplateForm, HeaderFooterTemplateData } from "@/components/templates/HeaderFooterTemplateForm";
 import { useToast } from "@/hooks/use-toast";
 import { useTemplates, Template } from "@/hooks/useTemplates";
-import { useHeaderFooterTemplates, HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
+import { useHeaderFooterTemplates, HeaderFooterTemplate, mergeHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 import { useDocuments, Document } from "@/hooks/useDocuments";
 import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
@@ -314,7 +314,8 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       description: template.description,
       category: template.category,
       content: template.content,
-      header_footer_template_id: template.headerFooterTemplateId,
+      header_template_id: template.headerTemplateId,
+      footer_template_id: template.footerTemplateId,
     });
 
     if (result) {
@@ -330,7 +331,8 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       description: template.description,
       category: template.category,
       content: template.content,
-      header_footer_template_id: template.headerFooterTemplateId,
+      header_template_id: template.headerTemplateId,
+      footer_template_id: template.footerTemplateId,
     });
 
     if (success) {
@@ -710,15 +712,17 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                     <h3 className="text-sm font-semibold text-foreground mb-1">{template.name}</h3>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
                     {(() => {
-                      const linkedHf = headerFooterTemplates.find(
-                        (hf) => hf.id === template.header_footer_template_id,
-                      );
+                      const headerId = (template as any).header_template_id || template.header_footer_template_id;
+                      const footerId = (template as any).footer_template_id || template.header_footer_template_id;
+                      const linkedHeader = headerFooterTemplates.find((hf) => hf.id === headerId);
+                      const linkedFooter = headerFooterTemplates.find((hf) => hf.id === footerId);
+                      const label = headerId === footerId || !linkedFooter
+                        ? linkedHeader?.name ?? t("documents.letterheadDefault")
+                        : `${linkedHeader?.name ?? t("documents.letterheadDefault")} / ${linkedFooter.name}`;
                       return (
                         <p className="text-sm text-muted-foreground mb-2">
                           {t("documents.letterhead")}{" "}
-                          <span className="font-medium text-foreground">
-                            {linkedHf?.name ?? t("documents.letterheadDefault")}
-                          </span>
+                          <span className="font-medium text-foreground">{label}</span>
                         </p>
                       );
                     })()}
@@ -871,7 +875,8 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 description: editingTemplate.description || "",
                 category: editingTemplate.category || "",
                 content: editingTemplate.content,
-                headerFooterTemplateId: editingTemplate.header_footer_template_id || "",
+                headerTemplateId: (editingTemplate as any).header_template_id || editingTemplate.header_footer_template_id || "",
+                footerTemplateId: (editingTemplate as any).footer_template_id || editingTemplate.header_footer_template_id || "",
               }}
               onSubmit={handleEditTemplate}
               onCancel={() => setEditingTemplate(null)}
@@ -904,7 +909,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               }}
               onSubmit={handleEditHFTemplate}
               onCancel={() => setEditingHFTemplate(null)}
-              mode={editingHFMode}
+              mode={editingHFMode === "header-only" ? "edit-header-only" : editingHFMode === "footer-only" ? "edit-footer-only" : "edit"}
             />
           )}
         </DialogContent>
@@ -954,11 +959,22 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           content={resolveTemplatePreviewTokens(previewTemplate.content, profile as any)}
           logoUrl={profile?.logo_url || undefined}
           fontFamily={
-            headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id)?.font_family ||
-            undefined
+            (() => {
+              const headerId = (previewTemplate as any).header_template_id || previewTemplate.header_footer_template_id;
+              const footerId = (previewTemplate as any).footer_template_id || previewTemplate.header_footer_template_id;
+              const linkedHeader = headerFooterTemplates.find((hf) => hf.id === headerId);
+              const linkedFooter = headerFooterTemplates.find((hf) => hf.id === footerId);
+              return linkedHeader?.font_family || linkedFooter?.font_family || undefined;
+            })()
           }
           headerFooter={resolveHeaderFooterTokens(
-            headerFooterTemplates.find((hf) => hf.id === previewTemplate.header_footer_template_id) || null,
+            (() => {
+              const headerId = (previewTemplate as any).header_template_id || previewTemplate.header_footer_template_id;
+              const footerId = (previewTemplate as any).footer_template_id || previewTemplate.header_footer_template_id;
+              const linkedHeader = headerFooterTemplates.find((hf) => hf.id === headerId) || null;
+              const linkedFooter = headerFooterTemplates.find((hf) => hf.id === footerId) || null;
+              return mergeHeaderFooterTemplates(linkedHeader, linkedFooter);
+            })(),
             profile as any,
           )}
           onClose={() => setPreviewTemplate(null)}

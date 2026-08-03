@@ -24,6 +24,26 @@ export interface HeaderFooterTemplate {
   updated_at: string;
 }
 
+/**
+ * Combines an independently-chosen header letterhead and footer letterhead
+ * into one displayable HeaderFooterTemplate — used wherever a content
+ * template links to a Header template and a Footer template separately
+ * rather than one shared letterhead.
+ */
+export function mergeHeaderFooterTemplates(
+  headerTpl: HeaderFooterTemplate | null | undefined,
+  footerTpl: HeaderFooterTemplate | null | undefined,
+): HeaderFooterTemplate | null {
+  if (!headerTpl && !footerTpl) return null;
+  const base = headerTpl ?? footerTpl!;
+  return {
+    ...base,
+    header: headerTpl?.header ?? base.header,
+    footer: footerTpl?.footer ?? base.footer,
+    font_family: headerTpl?.font_family ?? footerTpl?.font_family ?? null,
+  };
+}
+
 export function useHeaderFooterTemplates() {
   const { user } = useAuth();
   const { toast } = useToast();

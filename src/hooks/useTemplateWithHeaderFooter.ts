@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTemplates, Template } from "./useTemplates";
-import { useHeaderFooterTemplates, HeaderFooterTemplate } from "./useHeaderFooterTemplates";
+import { useHeaderFooterTemplates, HeaderFooterTemplate, mergeHeaderFooterTemplates } from "./useHeaderFooterTemplates";
 import { useProfile } from "./useProfile";
 import { fillDocumentPlaceholders } from "@/features/documents/lib/fillDocumentPlaceholders";
 
@@ -41,15 +41,16 @@ export function useTemplateWithHeaderFooter(templateName: string): CombinedTempl
       t => t.name.toLowerCase().includes(templateName.toLowerCase())
     ) || null;
 
-    // Find the linked header/footer template
-    let headerFooter: HeaderFooterTemplate | null = null;
-    if (template?.header_footer_template_id) {
-      headerFooter = headerFooterTemplates.find(
-        hf => hf.id === template.header_footer_template_id
-      ) || null;
-    }
+    // Find the linked header and footer templates (independently selected,
+    // falling back to the legacy combined letterhead id for older templates).
+    const headerId = template?.header_template_id ?? template?.header_footer_template_id ?? null;
+    const footerId = template?.footer_template_id ?? template?.header_footer_template_id ?? null;
+    const headerTpl = headerId ? headerFooterTemplates.find(hf => hf.id === headerId) ?? null : null;
+    const footerTpl = footerId ? headerFooterTemplates.find(hf => hf.id === footerId) ?? null : null;
 
-    // If no specific header/footer linked, try to find the default one
+    let headerFooter: HeaderFooterTemplate | null = mergeHeaderFooterTemplates(headerTpl, footerTpl);
+
+    // If neither header nor footer is linked, try to find the default one
     if (!headerFooter) {
       headerFooter = headerFooterTemplates.find(hf => hf.is_default) || null;
     }

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
+import { mergeHeaderFooterTemplates, type HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
 
 interface DocumentLike {
   id?: string;
@@ -34,27 +34,33 @@ export function useDocumentHeaderFooter(document: DocumentLike | null | undefine
     queryFn: async (): Promise<{ hf: HeaderFooterTemplate | null; templateFontFamily: string | null }> => {
       if (!authorId) return { hf: null, templateFontFamily: null };
 
-      let linkedHfId: string | null = null;
+      let linkedHeaderId: string | null = null;
+      let linkedFooterId: string | null = null;
       let templateFontFamily: string | null = null;
 
       if (templateName) {
         const { data: tpl } = await supabase
           .from("templates")
-          .select("header_footer_template_id, font_family")
+          .select("header_footer_template_id, header_template_id, footer_template_id, font_family")
           .eq("user_id", authorId)
           .eq("name", templateName)
           .maybeSingle();
-        linkedHfId = (tpl as any)?.header_footer_template_id ?? null;
+        const legacyId = (tpl as any)?.header_footer_template_id ?? null;
+        linkedHeaderId = (tpl as any)?.header_template_id ?? legacyId;
+        linkedFooterId = (tpl as any)?.footer_template_id ?? legacyId;
         templateFontFamily = (tpl as any)?.font_family ?? null;
       }
 
-      if (linkedHfId) {
-        const { data: hf } = await supabase
+      if (linkedHeaderId || linkedFooterId) {
+        const ids = [...new Set([linkedHeaderId, linkedFooterId].filter(Boolean))] as string[];
+        const { data: hfRows } = await supabase
           .from("header_footer_templates")
           .select("*")
-          .eq("id", linkedHfId)
-          .maybeSingle();
-        if (hf) return { hf: hf as unknown as HeaderFooterTemplate, templateFontFamily };
+          .in("id", ids);
+        const headerTpl = (hfRows || []).find((r) => r.id === linkedHeaderId) as unknown as HeaderFooterTemplate | undefined;
+        const footerTpl = (hfRows || []).find((r) => r.id === linkedFooterId) as unknown as HeaderFooterTemplate | undefined;
+        const merged = mergeHeaderFooterTemplates(headerTpl ?? null, footerTpl ?? null);
+        if (merged) return { hf: merged, templateFontFamily };
       }
 
       // Fallback 1: author's default letterhead
