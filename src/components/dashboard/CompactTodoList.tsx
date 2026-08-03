@@ -582,10 +582,10 @@ export function CompactTodoList() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
-                        <Accordion type="multiple" className="divide-y divide-neutral-200">
+                        <Accordion type="multiple" className="space-y-3">
                           {patientGroups(grouped[b.key]).map(([patientName, items]) => (
-                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border-0 bg-background">
-                              <AccordionTrigger className="px-3 py-3 hover:no-underline hover:bg-muted/50 text-foreground">
+                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden">
+                              <AccordionTrigger className="px-3 py-1.5 hover:no-underline hover:bg-muted/50 text-foreground">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   <UserIcon className="h-4 w-4 text-primary shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}

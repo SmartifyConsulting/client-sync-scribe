@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, Award, MessageSquare, Search } from "lucide-react";
+import { Users, Calendar, TrendingUp, Award, MessageSquare } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -16,7 +16,6 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +28,6 @@ export default function Dashboard() {
   const { isDoctor, isPatient, loading: roleLoading } = useUserRole();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [rtSearch, setRtSearch] = useState("");
 
   const shouldRedirectPatient = !roleLoading && isPatient;
 
@@ -221,28 +219,6 @@ export default function Dashboard() {
     refetchInterval: 60000,
   });
 
-  // Query for patients list (for round table starter)
-  const { data: patientsList = [] } = useQuery({
-    queryKey: ["patients-list-dashboard"],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from("patients")
-        .select("id, name")
-        .eq("user_id", user.id)
-        .order("name");
-      if (error) return [];
-      return data || [];
-    },
-    enabled: isDoctor,
-  });
-
-  const filteredPatients = rtSearch.trim()
-    ? patientsList.filter((p: any) => p.name.toLowerCase().includes(rtSearch.toLowerCase()))
-    : patientsList;
-
   const displayName = (() => {
     if (profileLoading || roleLoading) return '';
     if (!profile?.full_name) return isDoctor ? 'Doctor' : '';
@@ -381,32 +357,7 @@ export default function Dashboard() {
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder={t("doctorDashboard.searchRoundTable")}
-                      className="pl-9 h-8 text-xs"
-                      value={rtSearch}
-                      onChange={(e) => setRtSearch(e.target.value)}
-                    />
-                  </div>
-                  {rtSearch.trim() && filteredPatients.length > 0 && (
-                    <div className="max-h-32 overflow-y-auto space-y-1">
-                      {filteredPatients.slice(0, 5).map((p: any) => (
-                        <button
-                          key={p.id}
-                          onClick={() => { navigate(`/patients/${p.id}?tab=roundtable`); setRtSearch(""); }}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-xs font-medium text-foreground transition-colors"
-                        >
-                          {p.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {rtSearch.trim() && filteredPatients.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
-                  )}
-                  <DoctorRoundTables />
+                  <DoctorRoundTables compact />
                 </div>
               </div>
             </div>
@@ -422,32 +373,7 @@ export default function Dashboard() {
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
                 <div className="p-3 space-y-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder={t("doctorDashboard.searchRoundTable")}
-                      className="pl-9 h-8 text-xs"
-                      value={rtSearch}
-                      onChange={(e) => setRtSearch(e.target.value)}
-                    />
-                  </div>
-                  {rtSearch.trim() && filteredPatients.length > 0 && (
-                    <div className="max-h-32 overflow-y-auto space-y-1">
-                      {filteredPatients.slice(0, 5).map((p: any) => (
-                        <button
-                          key={p.id}
-                          onClick={() => { navigate(`/patients/${p.id}?tab=roundtable`); setRtSearch(""); }}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted text-xs font-medium text-foreground transition-colors"
-                        >
-                          {p.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {rtSearch.trim() && filteredPatients.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-2">{t("doctorDashboard.noPatientsFound")}</p>
-                  )}
-                  <DoctorRoundTables />
+                  <DoctorRoundTables compact />
                 </div>
               </div>
             </div>

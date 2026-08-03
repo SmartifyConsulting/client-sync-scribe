@@ -56,6 +56,8 @@ interface Props<T> {
   actions?: React.ReactNode;
   /** Whether the first group is expanded by default (default true). */
   defaultOpenFirst?: boolean;
+  /** Hide the search box, group-by select, and actions row entirely (default false). */
+  hideControls?: boolean;
 }
 
 export function ListGroupToolbar<T>({
@@ -67,6 +69,7 @@ export function ListGroupToolbar<T>({
   emptyLabel = "Nothing to show",
   actions,
   defaultOpenFirst = true,
+  hideControls = false,
 }: Props<T>) {
   const prefKey = `listGroupBy:${storageKey}`;
   const [query, setQuery] = React.useState("");
@@ -118,28 +121,30 @@ export function ListGroupToolbar<T>({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={searchPlaceholder}
-            className="h-9 pl-8 text-xs"
-          />
+      {!hideControls && (
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-[200px] flex-1">
+            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={searchPlaceholder}
+              className="h-9 pl-8 text-xs"
+            />
+          </div>
+          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupByKey)}>
+            <SelectTrigger className="h-9 w-[160px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">Group by date</SelectItem>
+              <SelectItem value="patient">Group by patient</SelectItem>
+              {allowHospital && <SelectItem value="hospital">Group by hospital</SelectItem>}
+            </SelectContent>
+          </Select>
+          {actions}
         </div>
-        <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupByKey)}>
-          <SelectTrigger className="h-9 w-[160px] text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date">Group by date</SelectItem>
-            <SelectItem value="patient">Group by patient</SelectItem>
-            {allowHospital && <SelectItem value="hospital">Group by hospital</SelectItem>}
-          </SelectContent>
-        </Select>
-        {actions}
-      </div>
+      )}
 
       {groups.length === 0 ? (
         <p className="px-1 py-6 text-center text-xs text-muted-foreground">{emptyLabel}</p>

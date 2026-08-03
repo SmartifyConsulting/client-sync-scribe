@@ -18,7 +18,7 @@ interface RoundTableEntry {
   myNotes: number;
 }
 
-export function DoctorRoundTables() {
+export function DoctorRoundTables({ compact = false }: { compact?: boolean } = {}) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [entries, setEntries] = useState<RoundTableEntry[]>([]);
@@ -152,17 +152,20 @@ export function DoctorRoundTables() {
       emptyLabel="No round table contributions yet"
       renderItem={renderEntry}
       defaultOpenFirst={false}
+      hideControls={compact}
       actions={
-        <ToggleGroup
-          type="single"
-          value={ownerFilter}
-          onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
-          size="sm"
-          variant="outline"
-        >
-          <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
-          <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
-        </ToggleGroup>
+        compact ? undefined : (
+          <ToggleGroup
+            type="single"
+            value={ownerFilter}
+            onValueChange={(v) => v && setOwnerFilter(v as "mine" | "all")}
+            size="sm"
+            variant="outline"
+          >
+            <ToggleGroupItem value="all" className="text-xs px-3">All</ToggleGroupItem>
+            <ToggleGroupItem value="mine" className="text-xs px-3">Mine</ToggleGroupItem>
+          </ToggleGroup>
+        )
       }
     />
   );
