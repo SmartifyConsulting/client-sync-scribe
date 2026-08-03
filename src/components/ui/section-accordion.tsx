@@ -23,7 +23,7 @@ export const SECTION_TRIGGER_CLASS = cn(
  * Used on My Sessions, My Tasks and Documents.
  */
 export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
-  "group px-4 py-2 hover:no-underline border-0 rounded-none",
+  "group px-4 py-3 hover:no-underline border-0 rounded-none",
   "!bg-primary hover:!bg-primary/90 !text-white",
   "[&_*:not(.section-count-pill)]:!text-white",
   "[&>svg]:!text-white",

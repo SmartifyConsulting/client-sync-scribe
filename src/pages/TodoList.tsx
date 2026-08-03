@@ -722,7 +722,7 @@ export default function TodoList() {
           className="space-y-3"
         >
           {groups.map((g) => (
-            <AccordionItem key={g.key} value={g.key} className="border-0 rounded-lg bg-card overflow-hidden">
+            <AccordionItem key={g.key} value={g.key} className="border-0 rounded-lg bg-card overflow-hidden shadow-sm">
               <AccordionTrigger className={TODO_TRIGGER_CLASS}>
                 <div className="flex items-center justify-between w-full pr-2">
                   <span className="text-xs font-medium">{g.label}</span>
