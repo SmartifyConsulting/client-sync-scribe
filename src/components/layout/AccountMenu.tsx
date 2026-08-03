@@ -26,6 +26,9 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
   const location = useLocation();
   const navigate = useNavigate();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
+  const isOnHospitalRoute = location.pathname.startsWith("/provider/hospital");
+  const isOnAmbulanceRoute = location.pathname.startsWith("/provider/ambulance");
+  const providerProfilePath = isOnHospitalRoute ? "/provider/hospital/profile" : "/provider/ambulance/profile";
   const { isAdmin } = useIsAdmin();
   const { impersonate, switching } = useImpersonate();
 
@@ -113,6 +116,11 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
               })}
             </div>
           </div>
+        )}
+        {(isOnHospitalRoute || isOnAmbulanceRoute) && (
+          <Link to={providerProfilePath} className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
+            <UserCog className="h-3.5 w-3.5" /> {t("nav.providerProfile")}
+          </Link>
         )}
         {isAdmin && (
           <Link to="/admin/users" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">

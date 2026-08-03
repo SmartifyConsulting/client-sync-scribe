@@ -3,12 +3,12 @@ import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { cn } from "@/lib/utils";
-import { Settings, LogOut, UserCog, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { useProfile } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
+import { AccountMenu } from "@/components/layout/AccountMenu";
 import { useProviderCapabilities } from "@/modules/holarchelp/hooks/useProviderCapabilities";
 import { getProviderModules } from "@/modules/holarchelp/nav/registry";
 
@@ -24,7 +24,6 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
   const location = useLocation();
   const { capabilities } = useProviderCapabilities();
   const sections = getProviderModules(portal, capabilities);
-  const profilePath = portal === "hospital" ? "/provider/hospital/profile" : "/provider/ambulance/profile";
 
 
   return (
@@ -82,63 +81,31 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
           ))}
         </nav>
 
-        <div className="border-t border-sidebar-border mt-auto bg-sidebar-accent/30">
-          <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-            <Avatar className="h-[3.2rem] w-[3.2rem] border-2 border-primary">
-              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || t("profileMenu.user")} />
-              <AvatarFallback className="bg-primary/20 text-primary text-base">
-                {profile?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-primary truncate">{profile?.full_name || t("common.provider")}</p>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground truncate">
-                {portal === "hospital" ? t("provider.hospitalOps") : t("provider.erProvider")}
-              </p>
-            </div>
-          </div>
-          <div className="px-3 pb-3 space-y-0.5">
-            <NavLink
-              to={profilePath}
-              onClick={onNavigate}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold transition-all duration-200",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                )
-              }
-            >
-              <UserCog className="h-4 w-4" />
-              {t("nav.providerProfile")}
-            </NavLink>
-            <NavLink
-              to="/settings"
-              onClick={onNavigate}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-semibold transition-all duration-200",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                )
-              }
-            >
-              <Settings className="h-4 w-4" />
-              {t("common.settings")}
-            </NavLink>
-            <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/auth";
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
-            >
-              <LogOut className="h-4 w-4" />
-              {t("common.signOut")}
-            </button>
-          </div>
+        <div className="mt-auto px-2 pb-2">
+          <AccountMenu
+            align="start"
+            alignOffset={0}
+            trigger={
+              <button className="flex w-full items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
+                <Avatar className="h-[3.2rem] w-[3.2rem] border-2 border-primary">
+                  <AvatarImage
+                    key={profile?.avatar_url}
+                    src={profile?.avatar_url || undefined}
+                    alt={profile?.full_name || "User"}
+                  />
+                  <AvatarFallback className="bg-muted text-foreground text-base">
+                    {profile?.full_name?.split(" ").map((n) => n[0]).join("").toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-semibold text-foreground truncate">{profile?.full_name || t("common.provider")}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {portal === "hospital" ? t("provider.hospitalOps") : t("provider.erProvider")}
+                  </p>
+                </div>
+              </button>
+            }
+          />
         </div>
       </div>
     </aside>
