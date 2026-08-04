@@ -1376,16 +1376,18 @@ export default function Sessions() {
                     </p>
                   </div>
                   <div className="flex-1 min-w-0">
-
-                <SessionNotepad
-                  patientId={patientId || ""}
-                  sessionId={currentSessionId}
-                  patientName={currentPatient?.name}
-                  notes={notes}
-                  onNotesChange={setNotes}
-                  isRecording={isRecording}
-                />
+                    <SessionNotepad
+                      patientId={patientId || ""}
+                      sessionId={currentSessionId}
+                      patientName={currentPatient?.name}
+                      notes={notes}
+                      onNotesChange={setNotes}
+                      isRecording={isRecording}
+                    />
+                  </div>
+                </div>
               </TabsContent>
+
               <TabsContent value="drawing" className="mt-0">
                 <DrawingPad
                   patientId={patientId || ""}
