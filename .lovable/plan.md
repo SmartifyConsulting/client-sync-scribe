@@ -38,10 +38,13 @@ In `src/pages/Sessions.tsx` (active session grid):
 - Add a new **Patient Overview** frame above Personal Notes in column 2, sized to span 1.5 rows (Personal Notes shrinks to the remaining space).
 - Content: a single AI-written paragraph summarising the patient's last 6 months, explicitly noting conditions, current medications, allergies and presenting symptoms.
 - Data sources already in the app: patient record (conditions/allergies), active prescriptions, recent sessions/summaries and tasks from the past 6 months.
-- The summary is generated once when the session opens (with a loading state and a graceful fallback to a plain structured list if generation fails), and is read-only.
+- Generated once when the session opens, with a loading state and a graceful fallback to a plain structured list; read-only.
+
+## 6. Patient Sessions history — larger summary text
+
+- On the patient profile's Sessions tab, increase the font size of the session summary text (and its supporting summary lines) by two steps, keeping existing spacing and colours.
 
 ## Technical notes
 - Presentation-only changes plus route query params; no schema or business-logic changes.
 - The existing 6-second auto-start safety timeout remains, so a stale link still falls back to manual selection.
-- The Patient Overview paragraph reuses the existing AI summarisation edge function pattern (Gemini via the AI gateway); no new tables.
-
+- The Patient Overview paragraph reuses the existing AI summarisation edge function pattern; no new tables.
