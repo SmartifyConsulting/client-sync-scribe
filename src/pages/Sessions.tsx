@@ -1365,6 +1365,18 @@ export default function Sessions() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="notes" className="mt-0">
+                <div className="flex gap-3">
+                  <div className="w-40 shrink-0 rounded-lg border border-border bg-muted/30 p-2.5">
+                    <p className="text-[11px] font-semibold text-foreground leading-snug">
+                      Private — not shared with the patient and only available for the duration of the session.
+                    </p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground leading-snug">
+                      Disclaimer: AI-generated clinical notes are decision support only. They may be incomplete or
+                      inaccurate and must be reviewed and confirmed by the treating clinician before any clinical use.
+                    </p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+
                 <SessionNotepad
                   patientId={patientId || ""}
                   sessionId={currentSessionId}
