@@ -37,7 +37,7 @@ export function useHospitalOpsStats(providerId: string | null) {
     setStats({
       activeEmergencies: list.length,
       incomingAmbulances: list.filter((r) => INCOMING_STATUSES.includes(r.status)).length,
-      icuAvailable: h?.icu_beds_available ?? null,
+      icuAvailable: h?.icu_available ?? null,
       erBedsAvailable: h?.er_beds_available ?? null,
       capacityStatus: h?.er_capacity_status ?? null,
       acceptingPatients: !!h?.accepting_patients,
