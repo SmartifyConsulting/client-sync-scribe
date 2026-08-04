@@ -431,11 +431,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const renderHFSectionPreview = (section: { text: string; alignment: string; imageUrl?: string }) => {
     return (
       <div style={{ textAlign: section.alignment as any }}>
-        {section.imageUrl && <img src={section.imageUrl} alt="" className="max-h-10 inline-block mb-1" />}
+        {section.imageUrl && <img src={section.imageUrl} alt="" className="max-h-14 inline-block mb-1" />}
         {section.text && (
           <div
-            className="whitespace-pre-wrap text-xs"
-            dangerouslySetInnerHTML={{ __html: renderFormattedContent(section.text) }}
+            className="whitespace-pre-wrap"
+            style={{ fontSize: "10.5pt", lineHeight: 1.4 }}
+            dangerouslySetInnerHTML={{
+              __html: renderFormattedContent(resolveTemplatePreviewTokens(section.text, profile as any)),
+            }}
           />
         )}
       </div>
