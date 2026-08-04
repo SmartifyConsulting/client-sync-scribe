@@ -1327,15 +1327,20 @@ export default function Sessions() {
                 Use the main Mic/Square button above — no duplicate End Session button here. */}
           </div>
 
-          {/* Column 2 — Personal Notes on top, AI Clinician Notes below. Both size
-              to their own content instead of being forced into a fixed split. */}
+          {/* Column 2 — Patient Overview (1.5 rows), then Personal Notes, then AI Clinician Notes. */}
           <div className="flex flex-col gap-4 order-2">
+            {/* Patient Overview — AI recap of the last 6 months, spans ~1.5 rows. */}
+            <div className="min-h-[210px] flex flex-col">
+              <SessionPatientOverview patient={currentPatient} currentMedications={currentMedications} />
+            </div>
+
             {/* Personal Notes — private to the doctor, not shared with the patient. */}
-            <div className="min-h-[140px] flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+            <div className="min-h-[140px] flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between p-3 border-b bg-primary/5">
                 <h3 className="text-sm font-semibold text-foreground">Personal Notes</h3>
                 <span className="text-[10px] text-muted-foreground">Private — not shared with the patient</span>
               </div>
+
               <div className="p-3">
                 <Textarea
                   value={personalNotes}
