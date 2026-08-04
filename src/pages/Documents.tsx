@@ -479,6 +479,22 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             <p className="text-sm text-muted-foreground">
               Create reusable header and footer layouts that apply to all your documents
             </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  New
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { setNewHFKind("header"); setIsNewHFTemplateOpen(true); }}>
+                  Header
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { setNewHFKind("footer"); setIsNewHFTemplateOpen(true); }}>
+                  Footer
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Dialog
               open={isNewHFTemplateOpen}
               onOpenChange={(open) => {
@@ -486,53 +502,20 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 if (!open) setNewHFKind(null);
               }}
             >
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  New
-                </Button>
-              </DialogTrigger>
-              <DialogContent className={newHFKind ? "max-w-[83rem] max-h-[90vh] overflow-y-auto" : "max-w-md"}>
-                {!newHFKind ? (
-                  <>
-                    <DialogHeader>
-                      <DialogTitle>What would you like to create?</DialogTitle>
-                      <DialogDescription>Choose whether this new template is a Header or a Footer layout.</DialogDescription>
-                    </DialogHeader>
-                    <div className="grid grid-cols-2 gap-3 py-2">
-                      <button
-                        onClick={() => setNewHFKind("header")}
-                        className="flex flex-col items-center gap-2 rounded-xl border border-border p-6 hover:border-primary hover:bg-primary/5 transition-colors"
-                      >
-                        <LayoutTemplate className="h-6 w-6 text-primary" />
-                        <span className="text-sm font-medium text-foreground">Header</span>
-                      </button>
-                      <button
-                        onClick={() => setNewHFKind("footer")}
-                        className="flex flex-col items-center gap-2 rounded-xl border border-border p-6 hover:border-primary hover:bg-primary/5 transition-colors"
-                      >
-                        <LayoutTemplate className="h-6 w-6 text-primary" />
-                        <span className="text-sm font-medium text-foreground">Footer</span>
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <DialogHeader>
-                      <DialogTitle>{newHFKind === "header" ? "Create Header" : "Create Footer"}</DialogTitle>
-                      <DialogDescription>
-                        {newHFKind === "header"
-                          ? "Design a reusable header layout for your documents"
-                          : "Design a reusable footer layout for your documents"}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <HeaderFooterTemplateForm
-                      onSubmit={handleCreateHFTemplate}
-                      onCancel={() => { setIsNewHFTemplateOpen(false); setNewHFKind(null); }}
-                      mode={newHFKind === "header" ? "create-header-only" : "create-footer-only"}
-                    />
-                  </>
-                )}
+              <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>{newHFKind === "header" ? "Create Header" : "Create Footer"}</DialogTitle>
+                  <DialogDescription>
+                    {newHFKind === "header"
+                      ? "Design a reusable header layout for your documents"
+                      : "Design a reusable footer layout for your documents"}
+                  </DialogDescription>
+                </DialogHeader>
+                <HeaderFooterTemplateForm
+                  onSubmit={handleCreateHFTemplate}
+                  onCancel={() => { setIsNewHFTemplateOpen(false); setNewHFKind(null); }}
+                  mode={newHFKind === "header" ? "create-header-only" : "create-footer-only"}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -641,15 +624,26 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               ]))}
 
               {/* Add New Card */}
-              <div
-                onClick={() => setIsNewHFTemplateOpen(true)}
-                className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer min-h-[160px]"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
-                  <Plus className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-medium text-muted-foreground">Create Header or Footer</p>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div
+                    className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 p-5 text-center transition-colors hover:bg-muted/30 cursor-pointer min-h-[160px]"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
+                      <Plus className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium text-muted-foreground">Create Header or Footer</p>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center">
+                  <DropdownMenuItem onClick={() => { setNewHFKind("header"); setIsNewHFTemplateOpen(true); }}>
+                    Header
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => { setNewHFKind("footer"); setIsNewHFTemplateOpen(true); }}>
+                    Footer
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </TabsContent>

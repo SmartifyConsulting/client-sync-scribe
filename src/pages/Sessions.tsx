@@ -16,6 +16,7 @@ import {
   User,
   Sparkles,
   CheckCircle,
+  Info,
   AlertCircle,
   Loader2,
   ArrowLeft,
@@ -725,6 +726,17 @@ export default function Sessions() {
     language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
 
+  // Write each new AI Clinician suggestion into the notes as it's generated,
+  // so AI Clinician Notes fills in live during the recording. The doctor can
+  // still freely edit/type in the same field.
+  const appendedHintsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!aiConsultEnabled || !liveHint?.suggestion) return;
+    if (appendedHintsRef.current.has(liveHint.suggestion)) return;
+    appendedHintsRef.current.add(liveHint.suggestion);
+    setNotes((prev) => (prev ? `${prev}\n\n${liveHint.suggestion}` : liveHint.suggestion));
+  }, [liveHint, aiConsultEnabled]);
+
   // Recording has actually started — drop the "preparing" state so the UI stops guessing.
   useEffect(() => {
     if (isRecording) {
@@ -793,6 +805,9 @@ export default function Sessions() {
   }, [searchParams, patientId, currentPatient]);
 
   const startSession = async () => {
+    // Guard against double-invocation (e.g. a stray duplicate click/effect)
+    // firing the About/AI-Consult prompts twice.
+    if (sessionState === "active" || showAboutRecordingDialog || showAiConsultPrompt) return;
     setSessionState("active");
     setNotes("");
     setSummary("");
@@ -803,6 +818,7 @@ export default function Sessions() {
     setAiDiagnosis(null);
     setCurrentSessionId(crypto.randomUUID());
     clearTranscript();
+    appendedHintsRef.current.clear();
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
@@ -878,38 +894,50 @@ export default function Sessions() {
         }}
       />
 
-      {/* About the Session Recording — shown centered every time a session starts */}
-      <Dialog open={showAboutRecordingDialog} onOpenChange={(open) => !open && handleAboutRecordingAck()}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>About the Session Recording</DialogTitle>
-            <DialogDescription>
-              This session recording is only shared between you and your patient. It's
-              automatically deleted from our servers within 7 days — download it beforehand
-              if either of you wants to keep a copy.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={handleAboutRecordingAck}>Got it</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* AI Consult — asked fresh at the start of every session instead of a manual button */}
-      <Dialog open={showAiConsultPrompt} onOpenChange={() => {}}>
-        <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()}>
-          <DialogHeader>
-            <DialogTitle>Run AI Consult in parallel?</DialogTitle>
-            <DialogDescription>
-              The AI Clinician can analyse the conversation as it happens and surface
-              differentials, red flags, and suggestions while you record. Would you like to
-              run it alongside this session?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => handleAiConsultChoice(false)}>Not this time</Button>
-            <Button onClick={() => handleAiConsultChoice(true)}>Yes, run AI Consult</Button>
-          </DialogFooter>
+      {/* Session start prompts — a SINGLE Dialog root that swaps its content between the
+          two steps (Session Recordings notice, then AI Consult opt-in). Using one Dialog
+          instead of two separate ones avoids Radix briefly double-mounting a dialog while
+          one closes and the other opens, which read as "the AI Consult box popping up
+          twice". Dismissible only via the buttons shown, never Escape/outside-click. */}
+      <Dialog open={showAboutRecordingDialog || showAiConsultPrompt} onOpenChange={() => {}}>
+        <DialogContent
+          className="max-w-md"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          {showAboutRecordingDialog ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-success shrink-0" />
+                  Session Recordings
+                </DialogTitle>
+                <DialogDescription className="text-base">
+                  This session recording is only shared between you and your patient. It's
+                  automatically deleted from our servers within 7 days — download it beforehand
+                  if either of you wants to keep a copy.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button onClick={handleAboutRecordingAck}>Got it</Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Run AI Consult in parallel?</DialogTitle>
+                <DialogDescription className="text-base">
+                  The AI Clinician can analyse the conversation as it happens and surface
+                  differentials, red flags, and suggestions while you record. Would you like to
+                  run it alongside this session?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => handleAiConsultChoice(false)}>Not this time</Button>
+                <Button onClick={() => handleAiConsultChoice(true)}>Yes, run AI Consult</Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -1228,6 +1256,60 @@ export default function Sessions() {
               </div>
             )}
 
+            {/* Speaker Notes — live/finalized transcript, captured in the recording frame */}
+            {(transcript || liveTranscript || isTranscribing) && (
+              <div className="border-t p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-primary" />
+                    <p className="text-xs font-medium text-primary-dark">Speaker Notes</p>
+                  </div>
+                  {transcript && !isTranscribing && (
+                    <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
+                  )}
+                  {!transcript && isRecording && (
+                    <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Live</span>
+                  )}
+                  {isTranscribing && (
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+                <div className="max-h-[220px] overflow-y-auto bg-muted/30 rounded p-2.5">
+                  {!transcript && liveTranscript ? (
+                    <div className="space-y-2">
+                      {/* Break the running live transcript into sentence-level paragraphs so it doesn't read as one dense block */}
+                      {(liveTranscript.match(/[^.!?]+[.!?]*/g) || [liveTranscript])
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .map((sentence, index) => (
+                          <p key={index} className="text-xs text-foreground leading-relaxed">{sentence}</p>
+                        ))}
+                    </div>
+                  ) : transcript ? (
+                    <div className="space-y-2">
+                      {transcript.split('\n').map((line, index) => {
+                        const colonIndex = line.indexOf(':');
+                        if (colonIndex > 0 && colonIndex < 50) {
+                          const speaker = line.substring(0, colonIndex);
+                          const text = line.substring(colonIndex + 1);
+                          const speakerLower = speaker.toLowerCase().trim();
+                          const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
+                          return (
+                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                              <span className="font-bold">{speaker}</span>:{text}
+                            </p>
+                          );
+                        }
+                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Audio Playback */}
             {audioUrl && !isRecording && (
               <div className="border-t p-3">
@@ -1245,106 +1327,53 @@ export default function Sessions() {
                 Use the main Mic/Square button above — no duplicate End Session button here. */}
           </div>
 
-          {/* Column 2 — Session Notes (rows 1-2) stacked above Personal Notes (row 3) */}
-          <div className="flex flex-col gap-4 min-h-[500px] order-2">
-            <div className="flex-[2] min-h-0">
-              <Tabs defaultValue="notes" className="h-full">
-                <TabsList className="mb-2">
-                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
-                    <FileText className="h-3.5 w-3.5" />
-                    Session Notes
-                  </TabsTrigger>
-                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
-                    <PenTool className="h-3.5 w-3.5" />
-                    Drawing Pad
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="notes" className="mt-0 space-y-3">
-                  {/* Session Note Transcriptions — live/finalized transcript, now shown with Session Notes */}
-                  {(transcript || liveTranscript || isTranscribing) && (
-                    <div className="rounded-xl border border-border bg-card shadow-sm p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-1.5">
-                          <FileText className="h-3.5 w-3.5 text-primary" />
-                          <p className="text-xs font-medium text-primary-dark">Transcript</p>
-                        </div>
-                        {transcript && !isTranscribing && (
-                          <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
-                        )}
-                        {!transcript && isRecording && (
-                          <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Live</span>
-                        )}
-                        {isTranscribing && (
-                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                        )}
-                      </div>
-                      <div className="max-h-[180px] overflow-y-auto bg-muted/30 rounded p-2.5">
-                        {!transcript && liveTranscript ? (
-                          <div className="space-y-2">
-                            {/* Break the running live transcript into sentence-level paragraphs so it doesn't read as one dense block */}
-                            {(liveTranscript.match(/[^.!?]+[.!?]*/g) || [liveTranscript])
-                              .map((s) => s.trim())
-                              .filter(Boolean)
-                              .map((sentence, index) => (
-                                <p key={index} className="text-xs text-foreground leading-relaxed">{sentence}</p>
-                              ))}
-                          </div>
-                        ) : transcript ? (
-                          <div className="space-y-2">
-                            {transcript.split('\n').map((line, index) => {
-                              const colonIndex = line.indexOf(':');
-                              if (colonIndex > 0 && colonIndex < 50) {
-                                const speaker = line.substring(0, colonIndex);
-                                const text = line.substring(colonIndex + 1);
-                                const speakerLower = speaker.toLowerCase().trim();
-                                const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
-                                return (
-                                  <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
-                                    <span className="font-bold">{speaker}</span>:{text}
-                                  </p>
-                                );
-                              }
-                              return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-muted-foreground italic">Transcribing...</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  <SessionNotepad
-                    patientId={patientId || ""}
-                    sessionId={currentSessionId}
-                    patientName={currentPatient?.name}
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    isRecording={isRecording}
-                  />
-                </TabsContent>
-                <TabsContent value="drawing" className="mt-0">
-                  <DrawingPad
-                    patientId={patientId || ""}
-                    sessionId={currentSessionId || undefined}
-                  />
-                </TabsContent>
-              </Tabs>
+          {/* Column 2 — Personal Notes on top, AI Clinician Notes below. Both size
+              to their own content instead of being forced into a fixed split. */}
+          <div className="flex flex-col gap-4 order-2">
+            {/* Personal Notes — private to the doctor, not shared with the patient. */}
+            <div className="min-h-[140px] flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+                <h3 className="text-sm font-semibold text-foreground">Personal Notes</h3>
+                <span className="text-[10px] text-muted-foreground">Private — not shared with the patient</span>
+              </div>
+              <div className="p-3">
+                <Textarea
+                  value={personalNotes}
+                  onChange={(e) => setPersonalNotes(e.target.value)}
+                  placeholder="Jot down private thoughts for yourself..."
+                  className="min-h-[100px] resize-y border-0 focus-visible:ring-0 p-2"
+                />
+              </div>
             </div>
 
-            {/* Personal Notes — column 2, row 3. Private to the doctor, not shared with the patient. */}
-            <div className="flex-1 min-h-[140px] flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-              <div className="flex items-center gap-1.5 px-3 py-2 border-b bg-muted/30">
-                <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                <p className="text-xs font-medium text-foreground">Personal Notes</p>
-                <span className="text-[10px] text-muted-foreground ml-auto">Private — not shared with the patient</span>
-              </div>
-              <Textarea
-                value={personalNotes}
-                onChange={(e) => setPersonalNotes(e.target.value)}
-                placeholder="Jot down private thoughts for yourself..."
-                className="flex-1 resize-none border-0 rounded-none focus-visible:ring-0 text-sm min-h-[100px]"
-              />
-            </div>
+            <Tabs defaultValue="notes">
+              <TabsList className="mb-2">
+                <TabsTrigger value="notes" className="gap-1.5 text-xs">
+                  <FileText className="h-3.5 w-3.5" />
+                  AI Clinician Notes
+                </TabsTrigger>
+                <TabsTrigger value="drawing" className="gap-1.5 text-xs">
+                  <PenTool className="h-3.5 w-3.5" />
+                  Drawing Pad
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="notes" className="mt-0">
+                <SessionNotepad
+                  patientId={patientId || ""}
+                  sessionId={currentSessionId}
+                  patientName={currentPatient?.name}
+                  notes={notes}
+                  onNotesChange={setNotes}
+                  isRecording={isRecording}
+                />
+              </TabsContent>
+              <TabsContent value="drawing" className="mt-0">
+                <DrawingPad
+                  patientId={patientId || ""}
+                  sessionId={currentSessionId || undefined}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       )}
@@ -1651,277 +1680,6 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* All Sessions List */}
-      <div className="rounded-xl border border-primary bg-card p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Calendar className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">{t("sessions.allSessions")}</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            {selectedRecordings.size > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                disabled={isDownloading}
-                onClick={async () => {
-                  setIsDownloading(true);
-                  const selectedSessions = sessions.filter(s => selectedRecordings.has(s.id) && s.audio_url);
-                  for (const s of selectedSessions) {
-                    try {
-                      const signedUrl = await getSignedAudioUrl(s.audio_url!);
-                      if (!signedUrl) continue;
-                      const link = document.createElement('a');
-                      link.href = signedUrl;
-                      link.download = `session-${format(new Date(s.started_at), 'yyyy-MM-dd')}.webm`;
-                      link.click();
-                      // Clear audio_url after download
-                      await supabase.from('sessions').update({ audio_url: null }).eq('id', s.id);
-                    } catch (e) { console.error('Download error:', e); }
-                  }
-                  setSelectedRecordings(new Set());
-                  setIsDownloading(false);
-                  toast({ title: "Downloads started", description: `${selectedSessions.length} recording(s) downloaded. They will be removed from servers.` });
-                }}
-              >
-                {isDownloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-                Download {selectedRecordings.size} Recording{selectedRecordings.size > 1 ? 's' : ''}
-              </Button>
-            )}
-            <Badge variant="secondary">{sessions.filter(s => s.status !== 'in_progress').length} sessions</Badge>
-          </div>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder={t("sessions.searchByPatient")}
-              value={sessionSearch}
-              onChange={(e) => setSessionSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="date"
-              value={sessionDateFrom}
-              onChange={(e) => setSessionDateFrom(e.target.value)}
-              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
-              placeholder="From"
-            />
-            <input
-              type="date"
-              value={sessionDateTo}
-              onChange={(e) => setSessionDateTo(e.target.value)}
-              className="px-2 py-1.5 text-xs rounded-lg border border-border bg-background"
-              placeholder="To"
-            />
-          </div>
-        </div>
-
-        <Alert className="mb-4 border-amber-500/30 bg-amber-500/5">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="text-xs text-amber-700">
-            Voice recordings and transcriptions are deleted after 7 days. Download them to keep. AI summaries remain permanently.
-          </AlertDescription>
-        </Alert>
-        
-        {sessionsLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : (() => {
-          const filteredSessions = sessions.filter(s => {
-            if (s.status === 'in_progress') return false;
-            if (sessionSearch) {
-              const patientName = (s.patient?.name || '').toLowerCase();
-              const title = (s.title || '').toLowerCase();
-              const q = sessionSearch.toLowerCase();
-              if (!patientName.includes(q) && !title.includes(q)) return false;
-            }
-            if (sessionDateFrom) {
-              const sessionDate = new Date(s.started_at).toISOString().split('T')[0];
-              if (sessionDate < sessionDateFrom) return false;
-            }
-            if (sessionDateTo) {
-              const sessionDate = new Date(s.started_at).toISOString().split('T')[0];
-              if (sessionDate > sessionDateTo) return false;
-            }
-            return true;
-          });
-          const now = new Date();
-          const weekStart = startOfWeek(now, { weekStartsOn: 1 });
-          const lastWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
-          const lastWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
-
-          const thisWeekSessions = filteredSessions.filter(s => {
-            const d = parseISO(s.started_at);
-            return d >= weekStart && d <= now;
-          });
-          const lastWeekSessions = filteredSessions.filter(s => {
-            const d = parseISO(s.started_at);
-            return isWithinInterval(d, { start: lastWeekStart, end: lastWeekEnd });
-          });
-          const olderSessions = filteredSessions.filter(s => {
-            const d = parseISO(s.started_at);
-            return d < lastWeekStart;
-          });
-
-          // Group older sessions by month
-          const monthGroups: Record<string, typeof olderSessions> = {};
-          olderSessions.forEach(s => {
-            const key = format(parseISO(s.started_at), 'MMMM yyyy');
-            if (!monthGroups[key]) monthGroups[key] = [];
-            monthGroups[key].push(s);
-          });
-
-          const renderSessionRow = (session: typeof filteredSessions[0]) => (
-            <div
-              key={session.id}
-              className="flex items-center justify-between p-3 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
-            >
-              {(() => {
-                const daysSinceCreation = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60 * 24));
-                const isExpired = daysSinceCreation > 7;
-                return (
-                  <div className="mr-3" onClick={(e) => e.stopPropagation()}>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Checkbox
-                              checked={selectedRecordings.has(session.id)}
-                              disabled={isExpired}
-                              className={isExpired ? "opacity-40" : ""}
-                              onCheckedChange={(checked) => {
-                                setSelectedRecordings(prev => {
-                                  const next = new Set(prev);
-                                  if (checked) next.add(session.id);
-                                  else next.delete(session.id);
-                                  return next;
-                                });
-                              }}
-                            />
-                          </span>
-                        </TooltipTrigger>
-                        {isExpired && <TooltipContent>Recording expired</TooltipContent>}
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                );
-              })()}
-              <div className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer" onClick={() => navigate(`/sessions/${session.id}`)}>
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 shrink-0">
-                  <User className="h-4 w-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {session.patient?.name || 'Unknown Patient'} — {format(new Date(session.started_at), 'MMMM d, yyyy')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                {session.audio_url && (
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      if (playingSessionId === session.id) {
-                        audioRef.current?.pause();
-                        audioRef.current = null;
-                        setPlayingSessionId(null);
-                      } else {
-                        audioRef.current?.pause();
-                        const signedUrl = await getSignedAudioUrl(session.audio_url!);
-                        if (!signedUrl) return;
-                        const audio = new Audio(signedUrl);
-                        audio.onended = () => setPlayingSessionId(null);
-                        audio.play();
-                        audioRef.current = audio;
-                        setPlayingSessionId(session.id);
-                      }
-                    }}
-                    className="text-primary hover:text-primary/80 transition-colors"
-                    title={playingSessionId === session.id ? "Stop recording" : "Play recording"}
-                  >
-                    {playingSessionId === session.id ? (
-                      <VolumeX className="h-4 w-4" />
-                    ) : (
-                      <Volume2 className="h-4 w-4" />
-                    )}
-                  </button>
-                )}
-                {session.duration_minutes && (
-                  <span className="text-sm text-muted-foreground">
-                    {session.duration_minutes} min
-                  </span>
-                )}
-                <Badge variant={session.status === 'completed' ? 'default' : session.status === 'in_progress' ? 'secondary' : 'outline'}>
-                  {session.status === 'completed' ? 'Completed' : session.status === 'in_progress' ? 'In Progress' : 'Cancelled'}
-                </Badge>
-              </div>
-            </div>
-          );
-
-          return (
-          <div className="space-y-4">
-            {/* This Week - always expanded, not collapsible */}
-            {thisWeekSessions.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-                  This Week <Badge variant="secondary" className="text-xs">{thisWeekSessions.length}</Badge>
-                </h3>
-                <div className="space-y-3">
-                  {thisWeekSessions.map(renderSessionRow)}
-                </div>
-              </div>
-            )}
-
-            {/* Last Week & Monthly groups - collapsible, default collapsed */}
-            {(lastWeekSessions.length > 0 || Object.keys(monthGroups).length > 0) && (
-              <Accordion type="multiple">
-                {lastWeekSessions.length > 0 && (
-                  <AccordionItem value="last-week">
-                    <AccordionTrigger className="group text-sm font-semibold px-3 py-2 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
-                      <span className="flex items-center gap-2">
-                        Last Week <Badge variant="secondary" className="text-xs">{lastWeekSessions.length}</Badge>
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3 pt-2">
-                        {lastWeekSessions.map(renderSessionRow)}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                )}
-                {Object.entries(monthGroups).map(([month, sessions]) => (
-                  <AccordionItem key={month} value={month}>
-                    <AccordionTrigger className="group text-sm font-semibold px-3 py-2 hover:no-underline border-0 rounded-none bg-transparent data-[state=open]:bg-primary data-[state=open]:text-white [&_svg]:group-data-[state=open]:text-white">
-                      <span className="flex items-center gap-2">
-                        {month} <Badge variant="secondary" className="text-xs">{sessions.length}</Badge>
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-3 pt-2">
-                        {sessions.map(renderSessionRow)}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            )}
-
-            {thisWeekSessions.length === 0 && lastWeekSessions.length === 0 && Object.keys(monthGroups).length === 0 && (
-              <p className="text-muted-foreground text-center py-8">No sessions match your search.</p>
-            )}
-          </div>
-          );
-        })()}
-      </div>
-      {/* Prescription Editor Modal */}
       {showPrescriptionEditor && currentPatient && patientId && (
         <PrescriptionEditor
           patientName={currentPatient.name}
