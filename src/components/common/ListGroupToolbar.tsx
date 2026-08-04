@@ -163,7 +163,7 @@ export function ListGroupToolbar<T>({
                 </span>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <div className="space-y-3 py-1">
+                <div className="space-y-4 py-1">
                   {entries.map((e, idx) => (
                     <React.Fragment key={idx}>{renderItem(e.item)}</React.Fragment>
                   ))}

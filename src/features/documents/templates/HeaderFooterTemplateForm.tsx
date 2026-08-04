@@ -38,7 +38,7 @@ interface HeaderFooterTemplateFormProps {
   initialData?: HeaderFooterTemplateData;
   onSubmit: (template: HeaderFooterTemplateData) => void;
   onCancel: () => void;
-  mode?: "create" | "edit" | "edit-header-only" | "edit-footer-only";
+  mode?: "create" | "edit" | "edit-header-only" | "edit-footer-only" | "create-header-only" | "create-footer-only";
 }
 
 const defaultSectionContent = (): SectionContent => ({
@@ -134,7 +134,9 @@ export function HeaderFooterTemplateForm({
     <div className="space-y-2">
       {/* Preview Toggle */}
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-medium text-foreground">Header & Footer Template</h4>
+        <h4 className="text-xs font-medium text-foreground">
+          {mode?.includes("header-only") ? "Header Template" : mode?.includes("footer-only") ? "Footer Template" : "Header & Footer Template"}
+        </h4>
         <Button
           variant="outline"
           size="sm"

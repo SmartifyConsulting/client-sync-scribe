@@ -671,7 +671,7 @@
     "tabTemplates": "Templates",
     "tabHeaderFooter": "Header & Footer",
     "tabContent": "Content Templates",
-    "contentHelper": "Create document content templates (header/footer will be applied from your selected layout)",
+    "contentHelper": "Create document content templates — the header and footer you choose are applied automatically",
     "newContent": "New Content Template",
     "searchContent": "Search content templates...",
     "createTemplate": "Create Template",

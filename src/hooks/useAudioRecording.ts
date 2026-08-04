@@ -206,10 +206,6 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         console.warn('Web Speech API not available:', err);
       }
       
-      toast({
-        title: "Recording Started",
-        description: "Speak clearly into your microphone",
-      });
     } catch (error) {
       console.error('Error starting recording:', error);
       toast({

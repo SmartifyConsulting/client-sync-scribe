@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Clock, User as UserIcon, Loader2, FileText, Plus } from "lucide-react";
+import { Loader2, FileText, Plus } from "lucide-react";
 import { format, isToday, differenceInCalendarDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { SECTION_TRIGGER_ALWAYS_GREEN_CLASS, SECTION_CONTENT_CLASS } from "@/components/ui/section-accordion";
@@ -72,38 +72,28 @@ function SessionCard({ s, t }: { s: SessionRow; t: any }) {
   return (
     <Link to={`/sessions/${s.id}`}>
       <Card className="p-3 hover:bg-accent/40 transition-colors">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-medium truncate flex items-center gap-1.5">
-              <FileText className="h-4 w-4 text-primary shrink-0" />
-              {s.title || s.patient?.name || t("mySessions.untitled", "Untitled session")}
-            </p>
-            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
-              {s.patient?.name && (
-                <span className="flex items-center gap-1">
-                  <UserIcon className="h-3 w-3" />
-                  {s.patient.name}
-                </span>
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-medium truncate flex items-center gap-1.5 min-w-0">
+            <FileText className="h-4 w-4 text-primary shrink-0" />
+            <span className="truncate">
+              {s.patient?.name || t("mySessions.noPatient", "No patient")} — {format(new Date(s.started_at), "MMMM d, yyyy")}
+            </span>
+          </p>
+          <div className="flex items-center gap-3 shrink-0">
+            {s.duration_minutes ? <span className="text-xs text-muted-foreground">{s.duration_minutes} min</span> : null}
+            <span
+              className={cn(
+                "text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0",
+                s.status === "completed"
+                  ? "bg-success/10 text-success"
+                  : s.status === "in_progress"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground",
               )}
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {format(new Date(s.started_at), "d MMM yyyy, HH:mm")}
-              </span>
-              {s.duration_minutes ? <span>{s.duration_minutes} min</span> : null}
-            </div>
+            >
+              {s.status.replace("_", " ")}
+            </span>
           </div>
-          <span
-            className={cn(
-              "text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0",
-              s.status === "completed"
-                ? "bg-success/10 text-success"
-                : s.status === "in_progress"
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground",
-            )}
-          >
-            {s.status.replace("_", " ")}
-          </span>
         </div>
       </Card>
     </Link>

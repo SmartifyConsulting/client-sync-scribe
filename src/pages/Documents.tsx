@@ -133,6 +133,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
   const [selectedTemplate, setSelectedTemplate] = useState<DisplayTemplate | null>(null);
   const [isNewTemplateOpen, setIsNewTemplateOpen] = useState(false);
   const [isNewHFTemplateOpen, setIsNewHFTemplateOpen] = useState(false);
+  const [newHFKind, setNewHFKind] = useState<"header" | "footer" | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<DisplayTemplate | null>(null);
   const [editingHFTemplate, setEditingHFTemplate] = useState<HeaderFooterTemplate | null>(null);
   const [editingHFMode, setEditingHFMode] = useState<"header-only" | "footer-only" | "edit">("edit");
@@ -359,6 +360,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
       is_default: false,
     });
     setIsNewHFTemplateOpen(false);
+    setNewHFKind(null);
   };
 
   const handleEditHFTemplate = async (template: HeaderFooterTemplateData) => {
@@ -477,23 +479,60 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
             <p className="text-sm text-muted-foreground">
               Create reusable header and footer layouts that apply to all your documents
             </p>
-            <Dialog open={isNewHFTemplateOpen} onOpenChange={setIsNewHFTemplateOpen}>
+            <Dialog
+              open={isNewHFTemplateOpen}
+              onOpenChange={(open) => {
+                setIsNewHFTemplateOpen(open);
+                if (!open) setNewHFKind(null);
+              }}
+            >
               <DialogTrigger asChild>
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />
-                  New Header/Footer
+                  New
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-[83rem] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Create Header & Footer Template</DialogTitle>
-                  <DialogDescription>Design a reusable header and footer layout for your documents</DialogDescription>
-                </DialogHeader>
-                <HeaderFooterTemplateForm
-                  onSubmit={handleCreateHFTemplate}
-                  onCancel={() => setIsNewHFTemplateOpen(false)}
-                  mode="create"
-                />
+              <DialogContent className={newHFKind ? "max-w-[83rem] max-h-[90vh] overflow-y-auto" : "max-w-md"}>
+                {!newHFKind ? (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle>What would you like to create?</DialogTitle>
+                      <DialogDescription>Choose whether this new template is a Header or a Footer layout.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-3 py-2">
+                      <button
+                        onClick={() => setNewHFKind("header")}
+                        className="flex flex-col items-center gap-2 rounded-xl border border-border p-6 hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <LayoutTemplate className="h-6 w-6 text-primary" />
+                        <span className="text-sm font-medium text-foreground">Header</span>
+                      </button>
+                      <button
+                        onClick={() => setNewHFKind("footer")}
+                        className="flex flex-col items-center gap-2 rounded-xl border border-border p-6 hover:border-primary hover:bg-primary/5 transition-colors"
+                      >
+                        <LayoutTemplate className="h-6 w-6 text-primary" />
+                        <span className="text-sm font-medium text-foreground">Footer</span>
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle>{newHFKind === "header" ? "Create Header" : "Create Footer"}</DialogTitle>
+                      <DialogDescription>
+                        {newHFKind === "header"
+                          ? "Design a reusable header layout for your documents"
+                          : "Design a reusable footer layout for your documents"}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <HeaderFooterTemplateForm
+                      onSubmit={handleCreateHFTemplate}
+                      onCancel={() => { setIsNewHFTemplateOpen(false); setNewHFKind(null); }}
+                      mode={newHFKind === "header" ? "create-header-only" : "create-footer-only"}
+                    />
+                  </>
+                )}
               </DialogContent>
             </Dialog>
           </div>
@@ -609,7 +648,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted mb-3">
                   <Plus className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <p className="text-sm font-medium text-muted-foreground">Create Header/Footer</p>
+                <p className="text-sm font-medium text-muted-foreground">Create Header or Footer</p>
               </div>
             </div>
           )}
@@ -618,7 +657,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         {/* Content Templates Tab */}
         <TabsContent value="content" className="space-y-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               {t("documents.contentHelper")}
             </p>
             <Dialog open={isNewTemplateOpen} onOpenChange={setIsNewTemplateOpen}>
@@ -711,21 +750,6 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   <div onClick={() => handleSelectTemplate(template)}>
                     <h3 className="text-sm font-semibold text-foreground mb-1">{template.name}</h3>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
-                    {(() => {
-                      const headerId = (template as any).header_template_id || template.header_footer_template_id;
-                      const footerId = (template as any).footer_template_id || template.header_footer_template_id;
-                      const linkedHeader = headerFooterTemplates.find((hf) => hf.id === headerId);
-                      const linkedFooter = headerFooterTemplates.find((hf) => hf.id === footerId);
-                      const label = headerId === footerId || !linkedFooter
-                        ? linkedHeader?.name ?? t("documents.letterheadDefault")
-                        : `${linkedHeader?.name ?? t("documents.letterheadDefault")} / ${linkedFooter.name}`;
-                      return (
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {t("documents.letterhead")}{" "}
-                          <span className="font-medium text-foreground">{label}</span>
-                        </p>
-                      );
-                    })()}
                     <span className="text-sm text-muted-foreground">{template.lastModified}</span>
                   </div>
                 </div>

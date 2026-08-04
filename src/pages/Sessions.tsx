@@ -1782,7 +1782,7 @@ export default function Sessions() {
           const renderSessionRow = (session: typeof filteredSessions[0]) => (
             <div
               key={session.id}
-              className="flex items-center justify-between p-2 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors"
             >
               {(() => {
                 const daysSinceCreation = Math.floor((Date.now() - new Date(session.created_at).getTime()) / (1000 * 60 * 60 * 24));
@@ -1819,9 +1819,8 @@ export default function Sessions() {
                   <User className="h-4 w-4 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{session.title || 'Untitled Session'}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {session.patient?.name || 'Unknown Patient'} • {format(new Date(session.started_at), 'MMM d, yyyy h:mm a')}
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {session.patient?.name || 'Unknown Patient'} — {format(new Date(session.started_at), 'MMMM d, yyyy')}
                   </p>
                 </div>
               </div>
@@ -1875,7 +1874,7 @@ export default function Sessions() {
                 <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
                   This Week <Badge variant="secondary" className="text-xs">{thisWeekSessions.length}</Badge>
                 </h3>
-                <div className="space-y-1.5">
+                <div className="space-y-3">
                   {thisWeekSessions.map(renderSessionRow)}
                 </div>
               </div>
@@ -1892,7 +1891,7 @@ export default function Sessions() {
                       </span>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="space-y-1.5">
+                      <div className="space-y-3 pt-2">
                         {lastWeekSessions.map(renderSessionRow)}
                       </div>
                     </AccordionContent>
@@ -1906,7 +1905,7 @@ export default function Sessions() {
                       </span>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="space-y-1.5">
+                      <div className="space-y-3 pt-2">
                         {sessions.map(renderSessionRow)}
                       </div>
                     </AccordionContent>

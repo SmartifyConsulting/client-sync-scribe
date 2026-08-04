@@ -75,7 +75,9 @@ export function DocumentCanvas({ content, headerFooter, fontFamily, logoUrl, com
   const resolvedFont = getFontFamilyCss(fontFamily ?? headerFooter?.font_family);
   const hasHeader = sectionHasContent(headerFooter?.header);
   const hasFooter = sectionHasContent(headerFooter?.footer);
-  const bodyFontSize = compact ? 12 : 14;
+  // Compact mode mirrors the Content editor exactly, including its unit (pt) and
+  // default size, so the preview and the editor never visually drift apart.
+  const bodyFontSize = compact ? "12pt" : "14px";
   const sectionFontSize = 9;
 
   return (
@@ -107,7 +109,7 @@ export function DocumentCanvas({ content, headerFooter, fontFamily, logoUrl, com
       {content ? (
         <div
           className="whitespace-pre-wrap text-black leading-relaxed"
-          style={{ fontFamily: resolvedFont, fontSize: `${bodyFontSize}px` }}
+          style={{ fontFamily: resolvedFont, fontSize: bodyFontSize }}
           dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
         />
       ) : compact ? (
