@@ -369,9 +369,6 @@ export default function Landing() {
                 </div>
               </div>
 
-              <p className="text-base sm:text-lg text-muted-foreground max-w-2xl">
-                {t("landing.hero.description")}
-              </p>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
