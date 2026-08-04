@@ -178,6 +178,7 @@ export default function Sessions() {
   // Single summary dialog for all documents generated from this session
   const [showGeneratedDocsDialog, setShowGeneratedDocsDialog] = useState(false);
   const [generatedDocs, setGeneratedDocs] = useState<GeneratedDoc[]>([]);
+  const [previewDocKey, setPreviewDocKey] = useState<GeneratedDocKey | null>(null);
   const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
   const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
   const doctorIdRef = useRef<string | null>(null);
