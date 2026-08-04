@@ -948,7 +948,11 @@ export default function Sessions() {
       {/* Documents Generated — single summary dialog with View → Edit/Send/Save per document */}
       <GeneratedDocumentsDialog
         open={showGeneratedDocsDialog}
-        onOpenChange={setShowGeneratedDocsDialog}
+        openDocKey={previewDocKey}
+        onOpenChange={(next) => {
+          setShowGeneratedDocsDialog(next);
+          if (!next) setPreviewDocKey(null);
+        }}
         documents={generatedDocs}
         onSend={async (doc) => {
           const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
