@@ -4,14 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
-import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
+import { useHeaderFooterTemplates, mergeHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 import { TemplateSectionEditor, SectionContent } from "./TemplateSectionEditor";
-import {
-  stripHeadingMarkup,
-  renderFormattedContent as renderDocumentHtml,
-} from "@/features/documents/utils/documentFormatting";
+import { stripHeadingMarkup } from "@/features/documents/utils/documentFormatting";
 import { resolveTemplatePreviewTokens } from "@/features/documents/lib/resolveTemplatePreview";
-import { getFontClass } from "./fontOptions";
+import { getFontFamilyCss } from "./fontOptions";
+import { DocumentCanvas } from "./DocumentCanvas";
 
 
 import {
@@ -49,10 +47,25 @@ const defaultSectionContent = (): SectionContent => ({
   imageUrl: undefined,
 });
 
+/** True when a letterhead's header/footer section actually has content —
+ *  used to only offer letterheads with a filled Header in the Header
+ *  dropdown, and likewise for Footer, instead of listing every letterhead
+ *  in both regardless of which sections were actually filled in. */
+function sectionHasContent(section: any): boolean {
+  if (!section) return false;
+  return !!(
+    section.left?.text || section.left?.imageUrl ||
+    section.center?.text || section.center?.imageUrl ||
+    section.right?.text || section.right?.imageUrl
+  );
+}
+
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
   const { templates: headerFooterTemplates } = useHeaderFooterTemplates();
+  const headerTemplateOptions = headerFooterTemplates.filter((t) => sectionHasContent(t.header));
+  const footerTemplateOptions = headerFooterTemplates.filter((t) => sectionHasContent(t.footer));
   const [selectedHeaderId, setSelectedHeaderId] = useState<string>(
     initialData?.headerTemplateId || ""
   );
@@ -61,16 +74,19 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   );
 
   // Auto-default header and footer to the user's `is_default` letterhead (or
-  // first available) when neither is linked yet, so doctors get a sensible
-  // pre-selection instead of "None" on a brand-new template.
+  // first available with content in that section) when neither is linked
+  // yet, so doctors get a sensible pre-selection instead of "None" on a
+  // brand-new template.
   useEffect(() => {
-    if (headerFooterTemplates.length === 0) return;
-    const preferred =
-      headerFooterTemplates.find((t) => (t as any).is_default) ??
-      headerFooterTemplates[0];
-    if (!preferred) return;
-    if (!selectedHeaderId && !initialData?.headerTemplateId) setSelectedHeaderId(preferred.id);
-    if (!selectedFooterId && !initialData?.footerTemplateId) setSelectedFooterId(preferred.id);
+    if (!selectedHeaderId && !initialData?.headerTemplateId && headerTemplateOptions.length > 0) {
+      const preferred = headerTemplateOptions.find((t) => (t as any).is_default) ?? headerTemplateOptions[0];
+      setSelectedHeaderId(preferred.id);
+    }
+    if (!selectedFooterId && !initialData?.footerTemplateId && footerTemplateOptions.length > 0) {
+      const preferred = footerTemplateOptions.find((t) => (t as any).is_default) ?? footerTemplateOptions[0];
+      setSelectedFooterId(preferred.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headerFooterTemplates, initialData?.headerTemplateId, initialData?.footerTemplateId, selectedHeaderId, selectedFooterId]);
 
   const [formData, setFormData] = useState({
@@ -128,85 +144,22 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
     });
   };
 
-  // Previews show the signed-in doctor's real details; patient-scoped tokens
+  // Preview shows the signed-in doctor's real details; patient-scoped tokens
   // fall back to the shared quiet "___" placeholder instead of raw brackets.
   const replacePlaceholders = (text: string) =>
     resolveTemplatePreviewTokens(text, profile as any);
 
-  const renderFormattedContent = (content: string) => renderDocumentHtml(content);
-
-
-  const renderSectionPreview = (section: SectionContent | undefined | null, placeholder?: string) => {
-    const hasContent = section && (section.text || section.imageUrl);
-    const alignment = section?.alignment || 'left';
-    
-    return (
-      <div className="min-h-[24px]" style={{ textAlign: alignment as 'left' | 'center' | 'right' }}>
-        {hasContent ? (
-          <>
-            {section?.imageUrl && (
-              <img 
-                src={section.imageUrl} 
-                alt="" 
-                className="max-h-12 inline-block mb-1"
-              />
-            )}
-            {section?.text && (
-              <div 
-                className="whitespace-pre-wrap text-sm"
-                dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(section.text)) }}
-              />
-            )}
-          </>
-        ) : placeholder ? (
-          <span className="text-xs text-gray-400">{placeholder}</span>
-        ) : null}
-      </div>
-    );
-  };
-
-  const renderHeaderFooterPreview = (type: 'header' | 'footer') => {
-    const placeholders = ['Left', 'Center', 'Right'];
-    const source = type === 'header' ? selectedHeader : selectedFooter;
-
-    if (!source) {
-      return (
-        <div className="grid grid-cols-3 gap-4">
-          {placeholders.map((label) => (
-            <div key={label} className="min-h-[24px] border border-dashed border-gray-300 rounded flex items-center justify-center p-2">
-              <span className="text-xs text-gray-400">{label}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    const sectionData = type === 'header'
-      ? source.header
-      : source.footer;
-
-    // Handle both direct object and JSON parsed object
-    const section = typeof sectionData === 'string' 
-      ? JSON.parse(sectionData) 
-      : sectionData as { left?: SectionContent; center?: SectionContent; right?: SectionContent } | null;
-
-    return (
-      <div className="grid grid-cols-3 gap-4">
-        <div className="min-h-[24px]">{renderSectionPreview(section?.left)}</div>
-        <div className="min-h-[24px]">{renderSectionPreview(section?.center)}</div>
-        <div className="min-h-[24px]">{renderSectionPreview(section?.right)}</div>
-      </div>
-    );
-  };
+  const previewHeaderFooter = mergeHeaderFooterTemplates(selectedHeader ?? null, selectedFooter ?? null);
+  const previewFontFamily = getFontFamilyCss(selectedHeader?.font_family ?? selectedFooter?.font_family);
 
   return (
     <div className="space-y-2">
       <div className="grid gap-3 lg:grid-cols-2 items-start">
         {/* LEFT: Design */}
         <div className="space-y-2 min-w-0">
-          {/* Name, Header & Footer — one compact row */}
-          <div className="grid gap-2 sm:grid-cols-3">
-            <div className="flex items-center gap-1.5">
+          {/* Name, Header & Footer — one row, Name wider than the two dropdowns */}
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1.5 flex-[2] min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
               <Input
                 placeholder="e.g., Medical Certificate"
@@ -215,7 +168,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 className="h-8 flex-1 text-sm"
               />
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Header</label>
               <Select
                 value={selectedHeaderId || "none"}
@@ -226,7 +179,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {headerFooterTemplates.map((template) => (
+                  {headerTemplateOptions.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
                     </SelectItem>
@@ -234,7 +187,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Footer</label>
               <Select
                 value={selectedFooterId || "none"}
@@ -245,7 +198,7 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
-                  {headerFooterTemplates.map((template) => (
+                  {footerTemplateOptions.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
                     </SelectItem>
@@ -315,6 +268,7 @@ Yours faithfully,
 [DoctorName]"
                 rows={8}
                 showImageUpload={false}
+                fontFamily={previewFontFamily}
               />
             </div>
           </div>
@@ -330,40 +284,20 @@ Yours faithfully,
           </div>
         </div>
 
-        {/* RIGHT: Live Preview */}
+        {/* RIGHT: Live Preview — identical rendering to the full-screen Preview
+            dialog (DocumentCanvas), just embedded and compact. */}
         <div className="lg:sticky lg:top-2 min-w-0">
           <div className="border border-border rounded-lg overflow-hidden bg-white">
             <div className="bg-muted/50 px-3 py-1.5 border-b border-border">
               <span className="text-xs font-medium text-foreground">Content Preview</span>
             </div>
-            <div className={`p-3 min-h-[200px] ${getFontClass(selectedHeader?.font_family ?? selectedFooter?.font_family)}`}>
-              {/* Header Preview */}
-              <div className="pb-2 border-b border-gray-200 mb-2">
-                {renderHeaderFooterPreview('header')}
-                {!selectedHeader && (
-                  <p className="text-gray-400 italic text-[10px] text-center mt-1">Select a Header template</p>
-                )}
-              </div>
-
-              {/* Body Preview */}
-              <div className="min-h-[100px] py-2 text-sm" style={{ textAlign: body.alignment }}>
-                {body.imageUrl && (
-                  <img src={body.imageUrl} alt="" className="max-h-12 inline-block mb-1.5" />
-                )}
-                {body.text ? (
-                  <div
-                    className="whitespace-pre-wrap"
-                    dangerouslySetInnerHTML={{ __html: renderFormattedContent(replacePlaceholders(body.text)) }}
-                  />
-                ) : (
-                  <p className="text-gray-400 italic text-center">Main content will appear here...</p>
-                )}
-              </div>
-
-              {/* Footer Preview */}
-              <div className="pt-2 border-t border-gray-200 mt-2">
-                {renderHeaderFooterPreview('footer')}
-              </div>
+            <div className="min-h-[200px] max-h-[500px] overflow-y-auto">
+              <DocumentCanvas
+                content={replacePlaceholders(body.text)}
+                headerFooter={previewHeaderFooter}
+                fontFamily={selectedHeader?.font_family ?? selectedFooter?.font_family}
+                compact
+              />
             </div>
           </div>
         </div>

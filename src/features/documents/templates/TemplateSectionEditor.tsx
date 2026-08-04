@@ -26,6 +26,10 @@ interface TemplateSectionEditorProps {
   rows?: number;
   showImageUpload?: boolean;
   compact?: boolean;
+  /** Default font-family (CSS stack) to open the editor with — kept in sync
+   *  with the letterhead's font so the editor matches the Content Preview,
+   *  until the user explicitly picks a different font from the toolbar. */
+  fontFamily?: string;
 }
 
 const FONT_FAMILIES = [
@@ -65,6 +69,7 @@ export function TemplateSectionEditor({
   rows = 3,
   showImageUpload = true,
   compact = false,
+  fontFamily,
 }: TemplateSectionEditorProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -74,8 +79,16 @@ export function TemplateSectionEditor({
   // Shown selected in the toolbar and applied as the editor's base style, so the
   // content weight/size is obvious up front instead of silently falling back to
   // the browser default (which often looks lighter/heavier than the preview).
-  const [currentFont, setCurrentFont] = useState(FONT_FAMILIES[0].value);
+  // Defaults to the letterhead's own font (kept in sync below) so the editor
+  // matches the Content Preview until the user explicitly overrides it.
+  const [currentFont, setCurrentFont] = useState(fontFamily || FONT_FAMILIES[0].value);
   const [currentSize, setCurrentSize] = useState(FONT_SIZES[2]);
+  const userChangedFont = useRef(false);
+
+  useEffect(() => {
+    if (userChangedFont.current) return;
+    if (fontFamily) setCurrentFont(fontFamily);
+  }, [fontFamily]);
 
   // Keep the editable surface in sync with external value changes without
   // clobbering the caret while the user is typing.
@@ -162,6 +175,7 @@ export function TemplateSectionEditor({
   };
 
   const applyFontFamily = (family: string) => {
+    userChangedFont.current = true;
     setCurrentFont(family);
     ensureSelection();
     runCommand("fontName", family);

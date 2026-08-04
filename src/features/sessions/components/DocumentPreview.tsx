@@ -8,47 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { printDocument } from "@/utils/documentExport";
 import { HeaderFooterTemplate } from "@/hooks/useHeaderFooterTemplates";
-import { renderFormattedContent } from "@/utils/documentFormatting";
 import { fillDocumentPlaceholders } from "@/lib/fillDocumentPlaceholders";
-
-const FONT_FAMILY_MAP: Record<string, string> = {
-  sans: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-  roboto: '"Roboto", sans-serif',
-  "open-sans": '"Open Sans", sans-serif',
-  lora: '"Lora", serif',
-  merriweather: '"Merriweather", serif',
-  playfair: '"Playfair Display", serif',
-  "source-serif": '"Source Serif 4", serif',
-  rockwell: 'Rockwell, Georgia, serif',
-};
-
-const resolveFont = (key?: string | null) =>
-  (key && FONT_FAMILY_MAP[key]) || FONT_FAMILY_MAP.sans;
-
-function renderHeaderFooterSection(section: { left: { text: string; alignment: string; imageUrl?: string }; center: { text: string; alignment: string; imageUrl?: string }; right: { text: string; alignment: string; imageUrl?: string } }, fontFamily?: string) {
-  const hasContent = section.left?.text || section.center?.text || section.right?.text || section.left?.imageUrl || section.center?.imageUrl || section.right?.imageUrl;
-  if (!hasContent) return null;
-
-  const renderCell = (cell: { text: string; alignment: string; imageUrl?: string }, align: string) => (
-    <div style={{ textAlign: align as any }}>
-      {cell.imageUrl && <img src={cell.imageUrl} alt="" style={{ maxHeight: '50px', objectFit: 'contain', marginBottom: '4px' }} />}
-      {cell.text && (
-        <div
-          style={{ whiteSpace: 'pre-wrap', fontSize: '9pt', lineHeight: '1.4', fontFamily: resolveFont(fontFamily) }}
-          dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
-        />
-      )}
-    </div>
-  );
-
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', width: '100%' }}>
-      {renderCell(section.left, 'left')}
-      {renderCell(section.center, 'center')}
-      {renderCell(section.right, 'right')}
-    </div>
-  );
-}
+import { DocumentCanvas } from "@/features/documents/templates/DocumentCanvas";
 
 interface DocumentPreviewProps {
   title: string;
@@ -165,49 +126,12 @@ export function DocumentPreview({
 
         {/* Print-ready Document Preview */}
         <div className="p-6 max-h-[60vh] overflow-y-auto bg-muted/30">
-          <div 
-            className="bg-white shadow-lg mx-auto"
-            style={{
-              width: "210mm",
-              minHeight: "297mm",
-              maxWidth: "100%",
-              padding: "20mm",
-              fontFamily: resolveFont(fontFamily),
-            }}
-          >
-            {/* Structured Header */}
-            {headerFooter?.header && renderHeaderFooterSection(headerFooter.header, fontFamily || headerFooter.font_family || undefined) && (
-              <div style={{ marginBottom: '16px' }}>
-                {renderHeaderFooterSection(headerFooter.header, fontFamily || headerFooter.font_family || undefined)}
-                <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '12px 0' }} />
-              </div>
-            )}
-
-            {/* Logo (fallback if no header template) */}
-            {!headerFooter?.header && logoUrl && (
-              <div className="mb-6">
-                <img src={logoUrl} alt="Logo" className="max-h-16 object-contain" />
-              </div>
-            )}
-            
-            {/* Document Content */}
-            <div 
-              className="whitespace-pre-wrap text-black leading-relaxed"
-              style={{ 
-                fontFamily: resolveFont(fontFamily),
-                fontSize: "14px",
-              }}
-              dangerouslySetInnerHTML={{ __html: renderFormattedContent(safeContent) }}
-            />
-
-            {/* Structured Footer */}
-            {headerFooter?.footer && renderHeaderFooterSection(headerFooter.footer, fontFamily || headerFooter.font_family || undefined) && (
-              <div style={{ marginTop: '24px' }}>
-                <hr style={{ border: 'none', borderTop: '1px solid #ccc', margin: '12px 0' }} />
-                {renderHeaderFooterSection(headerFooter.footer, fontFamily || headerFooter.font_family || undefined)}
-              </div>
-            )}
-          </div>
+          <DocumentCanvas
+            content={safeContent}
+            headerFooter={headerFooter}
+            fontFamily={fontFamily}
+            logoUrl={logoUrl}
+          />
         </div>
 
         {/* Footer with Actions */}
