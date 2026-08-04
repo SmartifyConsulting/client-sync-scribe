@@ -51,7 +51,8 @@ import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnostic
 
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
-import { GeneratedDocumentsDialog, type GeneratedDoc } from "@/features/sessions/components/GeneratedDocumentsDialog";
+import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
+import { SessionGeneratedDocuments } from "@/features/sessions/components/SessionGeneratedDocuments";
 import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
