@@ -45,6 +45,8 @@ import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
+import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
 import { DrawingPad } from "@/components/drawings/DrawingPad";
