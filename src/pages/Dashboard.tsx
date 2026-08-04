@@ -324,11 +324,11 @@ export default function Dashboard() {
         {isDoctor && (
           <Link
             to="/doctor/rewards"
-            className="col-span-2 flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-primary bg-white p-2 md:p-3 min-h-[80px] md:min-h-[100px] text-center shadow-card hover:shadow-card-hover transition-all duration-300"
+            className="col-span-2 h-full flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-primary bg-white p-2 md:p-3 text-center shadow-card hover:shadow-card-hover transition-all duration-300"
           >
-            <img src={vulaVouchersLogo} alt="Vulas" className="h-8 w-auto md:h-10 object-contain shrink-0" />
+            <img src={vulaVouchersLogo} alt="Vulas" className="h-7 w-auto md:h-8 object-contain shrink-0" />
             <div className="min-w-0">
-              <p className="text-sm md:text-base font-bold text-foreground leading-tight">
+              <p className="text-xs md:text-sm font-bold text-foreground leading-tight">
                 Vulas reward you for doing and being better.
               </p>
               <p className="text-xs text-muted-foreground">
