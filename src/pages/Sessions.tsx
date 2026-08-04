@@ -69,6 +69,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Command,
   CommandEmpty,
   CommandGroup,
@@ -143,6 +151,10 @@ export default function Sessions() {
   const currentSessionIdRef = useRef<string | null>(null);
   const [isPreparingSession, setIsPreparingSession] = useState(false);
   const [preparingMessage, setPreparingMessage] = useState("");
+  const [personalNotes, setPersonalNotes] = useState("");
+  const [aiConsultEnabled, setAiConsultEnabled] = useState(false);
+  const [showAboutRecordingDialog, setShowAboutRecordingDialog] = useState(false);
+  const [showAiConsultPrompt, setShowAiConsultPrompt] = useState(false);
   const micPreWarmedRef = useRef(false);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
   const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
@@ -316,22 +328,6 @@ export default function Sessions() {
       setIsGeneratingDiagnosis(false);
     }
   };
-
-  // Manual AI Clinician consult — can be triggered at any point during a session.
-  const handleAiConsult = async () => {
-    const consultText =
-      latestTranscriptRef.current || transcript || liveTranscript || notes || "";
-    if (!consultText.trim()) {
-      toast({
-        title: "Nothing to analyse yet",
-        description: "Record or type some session content first.",
-      });
-      return;
-    }
-    setShowDiagnosticsModal(true);
-    await generateAIDiagnosis({ summary: summary || consultText, transcript: consultText });
-  };
-
 
   // Helper to calculate age from DOB
   const calculateAge = (dob: string): number => {
@@ -714,7 +710,7 @@ export default function Sessions() {
 
   // Live AI diagnostic hint while doctor is recording (before they conclude)
   const { hint: liveHint, isLoading: liveHintLoading } = useLiveDiagnosticHint({
-    enabled: isRecording && !isPaused,
+    enabled: isRecording && !isPaused && aiConsultEnabled,
     transcript: liveTranscript || transcript,
     patientAge: (currentPatient as any)?.dob
       ? Math.max(0, Math.floor((Date.now() - new Date((currentPatient as any).dob).getTime()) / 31557600000))
@@ -814,21 +810,23 @@ export default function Sessions() {
     // Give immediate feedback — the mic permission / setup gap is otherwise silent.
     setIsPreparingSession(true);
     setPreparingMessage("Setting up your session...");
-    toast({
-      title: "Starting session",
-      description: "Requesting microphone access, then recording and transcription will begin automatically.",
-    });
-
     setTimeout(() => setPreparingMessage("Requesting microphone access..."), 400);
     // Safety net — if mic access fails/is denied, don't leave the UI stuck "preparing".
     setTimeout(() => setIsPreparingSession(false), 8000);
 
-    toast({
-      title: "About this recording",
-      description: "This session recording is only shared between you and your patient. It's automatically deleted from our servers within 7 days — download it beforehand if either of you wants to keep a copy.",
-    });
+    // Recording only actually starts once the doctor has acknowledged the
+    // About the Session Recording notice and answered the AI Consult prompt.
+    setShowAboutRecordingDialog(true);
+  };
 
-    // Auto-start recording when session begins
+  const handleAboutRecordingAck = () => {
+    setShowAboutRecordingDialog(false);
+    setShowAiConsultPrompt(true);
+  };
+
+  const handleAiConsultChoice = (enabled: boolean) => {
+    setAiConsultEnabled(enabled);
+    setShowAiConsultPrompt(false);
     startRecording();
   };
 
@@ -880,8 +878,40 @@ export default function Sessions() {
         }}
       />
 
+      {/* About the Session Recording — shown centered every time a session starts */}
+      <Dialog open={showAboutRecordingDialog} onOpenChange={(open) => !open && handleAboutRecordingAck()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>About the Session Recording</DialogTitle>
+            <DialogDescription>
+              This session recording is only shared between you and your patient. It's
+              automatically deleted from our servers within 7 days — download it beforehand
+              if either of you wants to keep a copy.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={handleAboutRecordingAck}>Got it</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-
+      {/* AI Consult — asked fresh at the start of every session instead of a manual button */}
+      <Dialog open={showAiConsultPrompt} onOpenChange={() => {}}>
+        <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle>Run AI Consult in parallel?</DialogTitle>
+            <DialogDescription>
+              The AI Clinician can analyse the conversation as it happens and surface
+              differentials, red flags, and suggestions while you record. Would you like to
+              run it alongside this session?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleAiConsultChoice(false)}>Not this time</Button>
+            <Button onClick={() => handleAiConsultChoice(true)}>Yes, run AI Consult</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Documents Generated — single summary dialog with View → Edit/Send/Save per document */}
       <GeneratedDocumentsDialog
@@ -1088,41 +1118,9 @@ export default function Sessions() {
       )}
 
       {sessionState === "active" && (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
-           {/* Notes/Drawing Panel - Tabbed Interface */}
-           <div className="min-h-[500px] order-2 lg:order-1">
-              <Tabs defaultValue="notes" className="h-full">
-                <TabsList className="mb-2">
-                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
-                    <FileText className="h-3.5 w-3.5" />
-                    Session Notes
-                  </TabsTrigger>
-                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
-                    <PenTool className="h-3.5 w-3.5" />
-                    Drawing Pad
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="notes" className="mt-0">
-                  <SessionNotepad
-                    patientId={patientId || ""}
-                    sessionId={currentSessionId}
-                    patientName={currentPatient?.name}
-                    notes={notes}
-                    onNotesChange={setNotes}
-                    isRecording={isRecording}
-                  />
-                </TabsContent>
-                <TabsContent value="drawing" className="mt-0">
-                  <DrawingPad
-                    patientId={patientId || ""}
-                    sessionId={currentSessionId || undefined}
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
-
-          {/* Compact Recording Panel - Sidebar */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:order-2">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+          {/* Record Session — column 1, full height (rows 1-3) */}
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -1180,29 +1178,9 @@ export default function Sessions() {
                     <span className="hidden sm:inline whitespace-nowrap">{isPaused ? "Resume" : "Pause"}</span>
                   </button>
                 )}
-
-                {/* Manual AI Clinician consult — available at any point in the session */}
-                <button
-                  onClick={handleAiConsult}
-                  disabled={isGeneratingDiagnosis}
-                  aria-label="AI Consult"
-                  title="Ask the AI Clinician for findings so far"
-                  className={cn(
-                    "flex h-12 items-center justify-center gap-2 rounded-full px-4 border-2 border-primary text-sm font-medium transition-all duration-300",
-                    "bg-primary/10 text-primary hover:bg-primary/20",
-                    isGeneratingDiagnosis && "opacity-60 cursor-not-allowed"
-                  )}
-                >
-                  {isGeneratingDiagnosis ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-5 w-5" />
-                  )}
-                  <span className="hidden sm:inline whitespace-nowrap">AI Consult</span>
-                </button>
               </div>
 
-              
+
               <p className="text-xs text-muted-foreground text-center">
                 {isPreparingSession
                   ? preparingMessage || "Setting up your session..."
@@ -1212,10 +1190,7 @@ export default function Sessions() {
                       ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
                       : "Tap to record"}
               </p>
-              <p className="text-xs text-muted-foreground/70 text-center mt-1">
-                💡 Say "End Session" to automatically stop recording
-              </p>
-              <p className="text-[11px] text-muted-foreground/60 text-center mt-1 px-2 leading-snug">
+              <p className="text-xs text-muted-foreground/60 text-center mt-1 px-2 leading-snug">
                 🔒 Only shared between you and the patient — auto-deleted from our servers within 7 days. Download it beforehand to keep a copy.
               </p>
 
@@ -1227,8 +1202,8 @@ export default function Sessions() {
               )}
             </div>
 
-            {/* Live AI diagnostic hint - only while recording */}
-            {isRecording && (liveHint || liveHintLoading) && (
+            {/* Live AI diagnostic hint - only while recording, and only if the doctor opted in at session start */}
+            {isRecording && aiConsultEnabled && (liveHint || liveHintLoading) && (
               <div className="border-t bg-primary/5 p-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-1.5">
@@ -1253,60 +1228,6 @@ export default function Sessions() {
               </div>
             )}
 
-            {/* Live Transcript Preview - Collapsible */}
-            {(transcript || liveTranscript || isTranscribing) && (
-              <div className="border-t p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-xs font-medium text-primary-dark">Transcript</p>
-                  </div>
-                  {transcript && !isTranscribing && (
-                    <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
-                  )}
-                  {!transcript && isRecording && (
-                    <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Live</span>
-                  )}
-                  {isTranscribing && (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  )}
-                </div>
-                <div className="max-h-[180px] overflow-y-auto bg-muted/30 rounded p-2.5">
-                  {!transcript && liveTranscript ? (
-                    <div className="space-y-2">
-                      {/* Break the running live transcript into sentence-level paragraphs so it doesn't read as one dense block */}
-                      {(liveTranscript.match(/[^.!?]+[.!?]*/g) || [liveTranscript])
-                        .map((s) => s.trim())
-                        .filter(Boolean)
-                        .map((sentence, index) => (
-                          <p key={index} className="text-xs text-foreground leading-relaxed">{sentence}</p>
-                        ))}
-                    </div>
-                  ) : transcript ? (
-                    <div className="space-y-2">
-                      {transcript.split('\n').map((line, index) => {
-                        const colonIndex = line.indexOf(':');
-                        if (colonIndex > 0 && colonIndex < 50) {
-                          const speaker = line.substring(0, colonIndex);
-                          const text = line.substring(colonIndex + 1);
-                          const speakerLower = speaker.toLowerCase().trim();
-                          const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
-                          return (
-                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
-                              <span className="font-bold">{speaker}</span>:{text}
-                            </p>
-                          );
-                        }
-                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Audio Playback */}
             {audioUrl && !isRecording && (
               <div className="border-t p-3">
@@ -1324,6 +1245,107 @@ export default function Sessions() {
                 Use the main Mic/Square button above — no duplicate End Session button here. */}
           </div>
 
+          {/* Column 2 — Session Notes (rows 1-2) stacked above Personal Notes (row 3) */}
+          <div className="flex flex-col gap-4 min-h-[500px] order-2">
+            <div className="flex-[2] min-h-0">
+              <Tabs defaultValue="notes" className="h-full">
+                <TabsList className="mb-2">
+                  <TabsTrigger value="notes" className="gap-1.5 text-xs">
+                    <FileText className="h-3.5 w-3.5" />
+                    Session Notes
+                  </TabsTrigger>
+                  <TabsTrigger value="drawing" className="gap-1.5 text-xs">
+                    <PenTool className="h-3.5 w-3.5" />
+                    Drawing Pad
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="notes" className="mt-0 space-y-3">
+                  {/* Session Note Transcriptions — live/finalized transcript, now shown with Session Notes */}
+                  {(transcript || liveTranscript || isTranscribing) && (
+                    <div className="rounded-xl border border-border bg-card shadow-sm p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <FileText className="h-3.5 w-3.5 text-primary" />
+                          <p className="text-xs font-medium text-primary-dark">Transcript</p>
+                        </div>
+                        {transcript && !isTranscribing && (
+                          <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
+                        )}
+                        {!transcript && isRecording && (
+                          <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Live</span>
+                        )}
+                        {isTranscribing && (
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="max-h-[180px] overflow-y-auto bg-muted/30 rounded p-2.5">
+                        {!transcript && liveTranscript ? (
+                          <div className="space-y-2">
+                            {/* Break the running live transcript into sentence-level paragraphs so it doesn't read as one dense block */}
+                            {(liveTranscript.match(/[^.!?]+[.!?]*/g) || [liveTranscript])
+                              .map((s) => s.trim())
+                              .filter(Boolean)
+                              .map((sentence, index) => (
+                                <p key={index} className="text-xs text-foreground leading-relaxed">{sentence}</p>
+                              ))}
+                          </div>
+                        ) : transcript ? (
+                          <div className="space-y-2">
+                            {transcript.split('\n').map((line, index) => {
+                              const colonIndex = line.indexOf(':');
+                              if (colonIndex > 0 && colonIndex < 50) {
+                                const speaker = line.substring(0, colonIndex);
+                                const text = line.substring(colonIndex + 1);
+                                const speakerLower = speaker.toLowerCase().trim();
+                                const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
+                                return (
+                                  <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                                    <span className="font-bold">{speaker}</span>:{text}
+                                  </p>
+                                );
+                              }
+                              return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted-foreground italic">Transcribing...</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <SessionNotepad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId}
+                    patientName={currentPatient?.name}
+                    notes={notes}
+                    onNotesChange={setNotes}
+                    isRecording={isRecording}
+                  />
+                </TabsContent>
+                <TabsContent value="drawing" className="mt-0">
+                  <DrawingPad
+                    patientId={patientId || ""}
+                    sessionId={currentSessionId || undefined}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Personal Notes — column 2, row 3. Private to the doctor, not shared with the patient. */}
+            <div className="flex-1 min-h-[140px] flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+              <div className="flex items-center gap-1.5 px-3 py-2 border-b bg-muted/30">
+                <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                <p className="text-xs font-medium text-foreground">Personal Notes</p>
+                <span className="text-[10px] text-muted-foreground ml-auto">Private — not shared with the patient</span>
+              </div>
+              <Textarea
+                value={personalNotes}
+                onChange={(e) => setPersonalNotes(e.target.value)}
+                placeholder="Jot down private thoughts for yourself..."
+                className="flex-1 resize-none border-0 rounded-none focus-visible:ring-0 text-sm min-h-[100px]"
+              />
+            </div>
+          </div>
         </div>
       )}
 
