@@ -288,6 +288,11 @@ export default function Landing() {
               <span className="text-muted-foreground"> ]</span>
             </p>
 
+            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
+              {t("landing.hero.description")}
+            </p>
+
+
             <div className="relative pt-4">
               {/* Waveform motif */}
               <div className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 opacity-40">
