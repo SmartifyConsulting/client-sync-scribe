@@ -1148,7 +1148,7 @@ export default function Sessions() {
       {sessionState === "active" && (
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
           {/* Record Session — column 1, full height (rows 1-3) */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1">
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:min-h-[700px]">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
