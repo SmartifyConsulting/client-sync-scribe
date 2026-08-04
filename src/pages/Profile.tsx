@@ -195,7 +195,7 @@ function DoctorPatientsTab() {
                             <DropdownMenuItem onClick={() => navigate(`/patients/${patient.id}`)}>
                               View Profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/sessions?patient=${patient.id}`)}>
+                            <DropdownMenuItem onClick={() => navigate(`/sessions?patient=${patient.id}&autoStart=true`)}>
                               Start Session
                             </DropdownMenuItem>
                             {!isMe && (

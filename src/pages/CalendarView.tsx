@@ -547,7 +547,7 @@ export default function CalendarView() {
   const handleStartSession = () => {
     if (selectedEvent?.patientId) {
       setIsEventDetailOpen(false);
-      navigate(`/sessions?patient=${selectedEvent.patientId}`);
+      navigate(`/sessions?patient=${selectedEvent.patientId}&autoStart=true`);
     }
   };
 

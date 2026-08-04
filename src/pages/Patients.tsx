@@ -379,7 +379,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   };
 
   const handleStartSession = (patientId: string) => {
-    navigate(`/sessions?patient=${patientId}`);
+    navigate(`/sessions?patient=${patientId}&autoStart=true`);
   };
 
   if (loading) {
