@@ -1409,24 +1409,11 @@ export default function Sessions() {
             </Tabs>
           </div>
         </div>
-      )}
-
-      {sessionState === "processing" && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-primary bg-card p-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-            <Sparkles className="h-8 w-8 text-primary animate-pulse" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            Processing Session
-          </h2>
-          <p className="text-muted-foreground max-w-md">
-            AI is analyzing your session notes and generating a summary with action points...
-          </p>
-        </div>
+        </>
       )}
 
       {sessionState === "completed" && (
-        <div className="space-y-6">
+        <div className="space-y-6 mt-6">
           {/* Success Banner */}
           <div className="flex items-center gap-4 rounded-xl border border-success/30 bg-success/5 p-4">
             <CheckCircle className="h-6 w-6 text-success" />
