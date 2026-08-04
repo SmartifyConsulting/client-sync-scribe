@@ -39,4 +39,30 @@ Goal: make both provider portals show a realistic, connected workflow, using pat
 - Linked admissions set `patient_id` and `patient_user_id` from the existing `patients` rows so patient-side screens (My Admissions) render the same stay.
 - The existing unlinked "Shannon Kennedy" admission is updated in place to point at Sharon Kennedy's real record rather than creating a duplicate.
 - Ambulance and hospital records stay on the shared `holarchelp_incidents` model — no duplicated incident data.
-- No UI, styling or navigation changes.
+- No UI, styling or navigation changes from the seeding work itself.
+
+## Additional UI fixes (same turn)
+
+### 1. Vula card height on the doctor dashboard
+
+The Vula promo tile in the stats row is a custom link block with its own `min-h`, so it grows taller than the neighbouring stat cards. Make it fill the row height exactly like the other cards (same min-height and padding rhythm, `h-full`), so all cards in the row line up.
+
+### 2. One consistent document/template rendering surface
+
+Today three surfaces render the same content differently:
+
+- Left "Content" editor in Edit Template — 12pt body, chosen font.
+- Right "Content Preview" panel — the shared canvas in compact mode.
+- The three-dot "Preview" dialog on a template card — a different preview component with 14px body.
+
+Changes:
+
+- Make the shared canvas the single renderer for all three, so the three-dot Preview dialog shows exactly what the Content Preview panel shows (page-sized, but identical typography).
+- Adopt the Content Preview typography as the app-wide default: body at 12pt in both compact and full page modes, same line height and font resolution.
+- Header and footer cells currently render at a fixed 9px, which is why letterheads look tiny and out of proportion. Raise them to a proportional size relative to the body (around 10.5pt), with the logo and divider spacing scaled to match.
+- The three-dot Preview must resolve known data the same way the editor preview does — practice, doctor and patient tokens, linked header/footer letterhead, signature — so populated fields show real values instead of raw placeholders.
+
+### Technical notes
+
+- Work stays in `src/features/documents/templates/DocumentCanvas.tsx` (font size constants, header/footer sizing), the template preview dialog wiring in `src/pages/Documents.tsx` (switch to the shared canvas and reuse the same token resolution), `TemplateSectionEditor.tsx` (default size alignment), and the Vula tile markup in `src/pages/Dashboard.tsx`.
+- No colour or brand changes; typography and sizing only.
