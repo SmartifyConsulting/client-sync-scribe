@@ -45,6 +45,8 @@ import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
+import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
 import { DrawingPad } from "@/components/drawings/DrawingPad";
@@ -1148,7 +1150,7 @@ export default function Sessions() {
       {sessionState === "active" && (
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
           {/* Record Session — column 1, full height (rows 1-3) */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1">
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:min-h-[700px]">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -1327,15 +1329,20 @@ export default function Sessions() {
                 Use the main Mic/Square button above — no duplicate End Session button here. */}
           </div>
 
-          {/* Column 2 — Personal Notes on top, AI Clinician Notes below. Both size
-              to their own content instead of being forced into a fixed split. */}
+          {/* Column 2 — Patient Overview (1.5 rows), then Personal Notes, then AI Clinician Notes. */}
           <div className="flex flex-col gap-4 order-2">
+            {/* Patient Overview — AI recap of the last 6 months, spans ~1.5 rows. */}
+            <div className="min-h-[210px] flex flex-col">
+              <SessionPatientOverview patient={currentPatient} currentMedications={currentMedications} />
+            </div>
+
             {/* Personal Notes — private to the doctor, not shared with the patient. */}
-            <div className="min-h-[140px] flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+            <div className="min-h-[140px] flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between p-3 border-b bg-primary/5">
                 <h3 className="text-sm font-semibold text-foreground">Personal Notes</h3>
                 <span className="text-[10px] text-muted-foreground">Private — not shared with the patient</span>
               </div>
+
               <div className="p-3">
                 <Textarea
                   value={personalNotes}
@@ -1358,15 +1365,29 @@ export default function Sessions() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="notes" className="mt-0">
-                <SessionNotepad
-                  patientId={patientId || ""}
-                  sessionId={currentSessionId}
-                  patientName={currentPatient?.name}
-                  notes={notes}
-                  onNotesChange={setNotes}
-                  isRecording={isRecording}
-                />
+                <div className="flex gap-3">
+                  <div className="w-40 shrink-0 rounded-lg border border-border bg-muted/30 p-2.5">
+                    <p className="text-[11px] font-semibold text-foreground leading-snug">
+                      Private — not shared with the patient and only available for the duration of the session.
+                    </p>
+                    <p className="mt-1.5 text-[10px] text-muted-foreground leading-snug">
+                      Disclaimer: AI-generated clinical notes are decision support only. They may be incomplete or
+                      inaccurate and must be reviewed and confirmed by the treating clinician before any clinical use.
+                    </p>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <SessionNotepad
+                      patientId={patientId || ""}
+                      sessionId={currentSessionId}
+                      patientName={currentPatient?.name}
+                      notes={notes}
+                      onNotesChange={setNotes}
+                      isRecording={isRecording}
+                    />
+                  </div>
+                </div>
               </TabsContent>
+
               <TabsContent value="drawing" className="mt-0">
                 <DrawingPad
                   patientId={patientId || ""}

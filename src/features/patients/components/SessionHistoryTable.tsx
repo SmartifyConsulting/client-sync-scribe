@@ -102,7 +102,7 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
                   {session.duration_minutes ? `${session.duration_minutes} min` : "—"}
                 </TableCell>
                 <TableCell>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-lg text-muted-foreground line-clamp-2">
                     {session.summary || "No summary available"}
                   </p>
                 </TableCell>

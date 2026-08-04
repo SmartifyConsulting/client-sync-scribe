@@ -23,7 +23,7 @@ export function UpcomingAppointments() {
   const [loading, setLoading] = useState(true);
 
   const handleStartSession = (patientId: string) => {
-    navigate(`/sessions?patient=${patientId}`);
+    navigate(`/sessions?patient=${patientId}&autoStart=true`);
   };
 
   useEffect(() => {
