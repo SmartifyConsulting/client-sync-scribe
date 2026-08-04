@@ -1425,18 +1425,28 @@ export default function Sessions() {
             </div>
           </div>
 
-          {/* Generated Documents Banner — reopens the single summary dialog */}
-          {generatedDocs.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium text-foreground">
-                {generatedDocs.length} document{generatedDocs.length === 1 ? '' : 's'} generated from this session.
-              </span>
-              <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowGeneratedDocsDialog(true)}>
-                <FileTextIcon className="h-4 w-4" /> View Documents
-              </Button>
-            </div>
-          )}
+          {/* Documents from this session — inline preview cards (dialog still available). */}
+          <SessionGeneratedDocuments
+            documents={generatedDocs}
+            onPreview={(doc) => {
+              setPreviewDocKey(doc.key);
+              setShowGeneratedDocsDialog(true);
+            }}
+            onSend={async (doc) => {
+              const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
+              if (ok) {
+                await completeSessionTodo(doc.label);
+                setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
+                toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the patient'}.` });
+              }
+            }}
+            onSaveForReview={(doc) => {
+              toast({
+                title: 'Saved for review',
+                description: `${doc.label} is saved to the patient's documents for later review.`,
+              });
+            }}
+          />
 
           <div className="grid gap-3 lg:grid-cols-3">
             {/* Transcription */}
