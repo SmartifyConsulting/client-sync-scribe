@@ -51,7 +51,8 @@ import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnostic
 
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
-import { GeneratedDocumentsDialog, type GeneratedDoc } from "@/features/sessions/components/GeneratedDocumentsDialog";
+import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
+import { SessionGeneratedDocuments } from "@/features/sessions/components/SessionGeneratedDocuments";
 import { Toggle } from "@/components/ui/toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -177,6 +178,7 @@ export default function Sessions() {
   // Single summary dialog for all documents generated from this session
   const [showGeneratedDocsDialog, setShowGeneratedDocsDialog] = useState(false);
   const [generatedDocs, setGeneratedDocs] = useState<GeneratedDoc[]>([]);
+  const [previewDocKey, setPreviewDocKey] = useState<GeneratedDocKey | null>(null);
   const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
   const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
   const doctorIdRef = useRef<string | null>(null);
@@ -946,7 +948,11 @@ export default function Sessions() {
       {/* Documents Generated — single summary dialog with View → Edit/Send/Save per document */}
       <GeneratedDocumentsDialog
         open={showGeneratedDocsDialog}
-        onOpenChange={setShowGeneratedDocsDialog}
+        openDocKey={previewDocKey}
+        onOpenChange={(next) => {
+          setShowGeneratedDocsDialog(next);
+          if (!next) setPreviewDocKey(null);
+        }}
         documents={generatedDocs}
         onSend={async (doc) => {
           const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
@@ -1147,7 +1153,17 @@ export default function Sessions() {
         </div>
       )}
 
-      {sessionState === "active" && (
+      {(sessionState === "active" || sessionState === "processing" || sessionState === "completed") && (
+        <>
+        {/* Inline status strip — replaces the old standalone "Processing Session" screen. */}
+        {sessionState === "processing" && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            <p className="text-sm text-foreground">
+              Analysing session — generating summary, action points and documents…
+            </p>
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
           {/* Record Session — column 1, full height (rows 1-3) */}
           <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:min-h-[700px]">
@@ -1397,24 +1413,11 @@ export default function Sessions() {
             </Tabs>
           </div>
         </div>
-      )}
-
-      {sessionState === "processing" && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-primary bg-card p-12 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-            <Sparkles className="h-8 w-8 text-primary animate-pulse" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            Processing Session
-          </h2>
-          <p className="text-muted-foreground max-w-md">
-            AI is analyzing your session notes and generating a summary with action points...
-          </p>
-        </div>
+        </>
       )}
 
       {sessionState === "completed" && (
-        <div className="space-y-6">
+        <div className="space-y-6 mt-6">
           {/* Success Banner */}
           <div className="flex items-center gap-4 rounded-xl border border-success/30 bg-success/5 p-4">
             <CheckCircle className="h-6 w-6 text-success" />
@@ -1426,18 +1429,28 @@ export default function Sessions() {
             </div>
           </div>
 
-          {/* Generated Documents Banner — reopens the single summary dialog */}
-          {generatedDocs.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium text-foreground">
-                {generatedDocs.length} document{generatedDocs.length === 1 ? '' : 's'} generated from this session.
-              </span>
-              <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowGeneratedDocsDialog(true)}>
-                <FileTextIcon className="h-4 w-4" /> View Documents
-              </Button>
-            </div>
-          )}
+          {/* Documents from this session — inline preview cards (dialog still available). */}
+          <SessionGeneratedDocuments
+            documents={generatedDocs}
+            onPreview={(doc) => {
+              setPreviewDocKey(doc.key);
+              setShowGeneratedDocsDialog(true);
+            }}
+            onSend={async (doc) => {
+              const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
+              if (ok) {
+                await completeSessionTodo(doc.label);
+                setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
+                toast({ title: 'Sent', description: `${doc.label} emailed to ${doc.recipientName || 'the patient'}.` });
+              }
+            }}
+            onSaveForReview={(doc) => {
+              toast({
+                title: 'Saved for review',
+                description: `${doc.label} is saved to the patient's documents for later review.`,
+              });
+            }}
+          />
 
           <div className="grid gap-3 lg:grid-cols-3">
             {/* Transcription */}

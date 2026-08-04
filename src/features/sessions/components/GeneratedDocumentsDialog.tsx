@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileText, Pill, Receipt, Users, Send, Pencil, Check, Loader2, ArrowLeft, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,6 +39,8 @@ interface GeneratedDocumentsDialogProps {
   onSend: (doc: GeneratedDoc) => Promise<void>;
   onSaveEdit: (doc: GeneratedDoc, newContent: string) => Promise<void>;
   onContinue: () => void;
+  /** When set, the dialog opens straight into this document's preview. */
+  openDocKey?: GeneratedDocKey | null;
 }
 
 export function GeneratedDocumentsDialog({
@@ -48,11 +50,20 @@ export function GeneratedDocumentsDialog({
   onSend,
   onSaveEdit,
   onContinue,
+  openDocKey = null,
 }: GeneratedDocumentsDialogProps) {
   const [viewingKey, setViewingKey] = useState<GeneratedDocKey | null>(null);
   const [editing, setEditing] = useState(false);
   const [draftContent, setDraftContent] = useState("");
   const [busyKey, setBusyKey] = useState<GeneratedDocKey | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setViewingKey(openDocKey);
+    setEditing(false);
+    const doc = documents.find((d) => d.key === openDocKey);
+    if (doc) setDraftContent(doc.content);
+  }, [open, openDocKey, documents]);
 
   const viewingDoc = documents.find((d) => d.key === viewingKey) || null;
 
