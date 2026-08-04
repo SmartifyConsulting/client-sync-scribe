@@ -23,16 +23,16 @@ function sectionHasContent(section: Section | null | undefined): boolean {
   );
 }
 
-function renderCell(cell: SectionCell | undefined, fontFamily: string, fontSizePx: number) {
+function renderCell(cell: SectionCell | undefined, fontFamily: string, fontSize: string) {
   if (!cell) return <div />;
   return (
     <div style={{ textAlign: (cell.alignment || "left") as any }}>
       {cell.imageUrl && (
-        <img src={cell.imageUrl} alt="" style={{ maxHeight: "50px", objectFit: "contain", marginBottom: "4px" }} />
+        <img src={cell.imageUrl} alt="" style={{ maxHeight: "60px", objectFit: "contain", marginBottom: "4px" }} />
       )}
       {cell.text && (
         <div
-          style={{ whiteSpace: "pre-wrap", fontSize: `${fontSizePx}px`, lineHeight: 1.4, fontFamily }}
+          style={{ whiteSpace: "pre-wrap", fontSize, lineHeight: 1.4, fontFamily }}
           dangerouslySetInnerHTML={{ __html: renderFormattedContent(cell.text) }}
         />
       )}
@@ -40,13 +40,13 @@ function renderCell(cell: SectionCell | undefined, fontFamily: string, fontSizeP
   );
 }
 
-function renderSectionGrid(section: Section | null | undefined, fontFamily: string, fontSizePx: number) {
+function renderSectionGrid(section: Section | null | undefined, fontFamily: string, fontSize: string) {
   if (!sectionHasContent(section)) return null;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", width: "100%" }}>
-      {renderCell(section?.left, fontFamily, fontSizePx)}
-      {renderCell(section?.center, fontFamily, fontSizePx)}
-      {renderCell(section?.right, fontFamily, fontSizePx)}
+      {renderCell(section?.left, fontFamily, fontSize)}
+      {renderCell(section?.center, fontFamily, fontSize)}
+      {renderCell(section?.right, fontFamily, fontSize)}
     </div>
   );
 }
@@ -75,10 +75,10 @@ export function DocumentCanvas({ content, headerFooter, fontFamily, logoUrl, com
   const resolvedFont = getFontFamilyCss(fontFamily ?? headerFooter?.font_family);
   const hasHeader = sectionHasContent(headerFooter?.header);
   const hasFooter = sectionHasContent(headerFooter?.footer);
-  // Compact mode mirrors the Content editor exactly, including its unit (pt) and
-  // default size, so the preview and the editor never visually drift apart.
-  const bodyFontSize = compact ? "12pt" : "14px";
-  const sectionFontSize = 9;
+  // Typography is identical in both modes so the Content editor, the Content
+  // Preview panel and the full Preview dialog never visually drift apart.
+  const bodyFontSize = "12pt";
+  const sectionFontSize = "10.5pt";
 
   return (
     <div
