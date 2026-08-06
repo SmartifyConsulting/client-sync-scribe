@@ -69,7 +69,14 @@ export default function DoctorAdmissions() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [] as { id: string; name: string }[];
       const { data } = await supabase.from("patients").select("id, name").eq("user_id", user.id).order("name");
-      return (data || []) as { id: string; name: string }[];
+      // Guard against duplicate patient records showing as repeated rows.
+      const seen = new Set<string>();
+      return ((data || []) as { id: string; name: string }[]).filter((p) => {
+        const key = (p.name || "").trim().toLowerCase().replace(/\s+/g, " ");
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     },
   });
 

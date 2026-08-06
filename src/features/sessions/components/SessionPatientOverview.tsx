@@ -10,34 +10,44 @@ interface SessionPatientOverviewProps {
 const stripTags = (s: string) =>
   s.replace(/<\/?(med|symptom|condition)>/g, "").replace(/\s+/g, " ").trim();
 
+const firstSentences = (s: string, count = 2) => {
+  const parts = (s.match(/[^.!?]+[.!?]+/g) || [s]).map((p) => p.trim()).filter(Boolean);
+  return parts.slice(0, count).join(" ");
+};
+
+interface OverviewData {
+  headline: string;
+  conditions: string[];
+  medications: string[];
+  allergies: string[];
+  symptoms: string[];
+  visits: string[];
+}
+
 /**
- * Patient Overview — a single-paragraph, read-only recap of the last 6 months
- * (conditions, current medications, allergies and presenting symptoms), shown
- * above Personal Notes during an active session.
+ * Patient Overview — a read-only recap of the last 6 months presented as short,
+ * labelled key points (conditions, current medications, allergies, symptoms,
+ * recent visits) rather than one long paragraph.
  */
 export function SessionPatientOverview({ patient, currentMedications = [] }: SessionPatientOverviewProps) {
   const [loading, setLoading] = useState(false);
-  const [paragraph, setParagraph] = useState<string>("");
+  const [data, setData] = useState<OverviewData | null>(null);
 
-  const fallbackParagraph = () => {
-    if (!patient) return "";
-    const conditions = (patient.conditions_diagnoses || [])
+  const fallbackData = (visits: string[] = []): OverviewData => {
+    const conditions = (patient?.conditions_diagnoses || [])
       .map((c: any) => c?.name || c?.condition)
       .filter(Boolean);
     const meds = currentMedications.length
       ? currentMedications.map((m) => `${m.medication}${m.dosage ? ` ${m.dosage}` : ""}`)
-      : (patient.current_medications || []).map((m: any) => m?.name).filter(Boolean);
-    const parts: string[] = [];
-    parts.push(`${patient.name} — overview of the last 6 months.`);
-    parts.push(
-      conditions.length
-        ? `Known conditions: ${conditions.join(", ")}.`
-        : "No conditions recorded."
-    );
-    parts.push(meds.length ? `Current medications: ${meds.join(", ")}.` : "No active medications recorded.");
-    parts.push(patient.allergies ? `Allergies: ${patient.allergies}.` : "No known allergies recorded.");
-    if (patient.notes) parts.push(`Notes: ${String(patient.notes).slice(0, 240)}`);
-    return parts.join(" ");
+      : (patient?.current_medications || []).map((m: any) => m?.name || m?.medication).filter(Boolean);
+    return {
+      headline: `${patient?.name || "This patient"} — key points from the last 6 months.`,
+      conditions,
+      medications: meds,
+      allergies: patient?.allergies ? [String(patient.allergies)] : [],
+      symptoms: [],
+      visits,
+    };
   };
 
   useEffect(() => {
@@ -45,7 +55,8 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
     const run = async () => {
       if (!patient?.id) return;
       setLoading(true);
-      setParagraph("");
+      setData(null);
+      let visitLabels: string[] = [];
       try {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -57,29 +68,39 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
           .order("started_at", { ascending: false })
           .limit(20);
 
-        const { data, error } = await supabase.functions.invoke("summarize-patient-history", {
+        visitLabels = (sessions || []).slice(0, 3).map((s: any) => {
+          const d = s.started_at ? new Date(s.started_at).toLocaleDateString() : "Visit";
+          const gist = stripTags(String(s.summary || "")).slice(0, 90);
+          return gist ? `${d} — ${gist}` : d;
+        });
+
+        const { data: res, error } = await supabase.functions.invoke("summarize-patient-history", {
           body: { patient, sessions: sessions || [] },
         });
-        if (error || data?.error) throw error || new Error(data.error);
+        if (error || res?.error) throw error || new Error(res.error);
 
-        const summary = stripTags(String(data?.summary || ""));
-        const conditions = (data?.conditions || []).map((c: any) => c.name).filter(Boolean);
-        const meds = (data?.medications || []).filter((m: any) => m.status !== "inactive").map((m: any) => m.name).filter(Boolean);
-        const allergies = (data?.allergies || []).map((a: any) => (typeof a === "string" ? a : a?.name)).filter(Boolean);
-        const symptoms = (data?.symptoms || []).map((s: any) => s.name).filter(Boolean);
-
-        const tail = [
-          conditions.length ? `Conditions: ${conditions.join(", ")}.` : null,
-          meds.length ? `Current medications: ${meds.join(", ")}.` : null,
-          allergies.length ? `Allergies: ${allergies.join(", ")}.` : null,
-          symptoms.length ? `Symptoms: ${symptoms.join(", ")}.` : null,
-        ].filter(Boolean).join(" ");
-
-        const text = [summary, tail].filter(Boolean).join(" ");
-        if (!cancelled) setParagraph(text || fallbackParagraph());
+        const summary = stripTags(String(res?.summary || ""));
+        const next: OverviewData = {
+          headline: firstSentences(summary) || fallbackData().headline,
+          conditions: (res?.conditions || []).map((c: any) => c?.name || c).filter(Boolean),
+          medications: (res?.medications || [])
+            .filter((m: any) => m?.status !== "inactive")
+            .map((m: any) => [m?.name, m?.dosage].filter(Boolean).join(" "))
+            .filter(Boolean),
+          allergies: (res?.allergies || [])
+            .map((a: any) => (typeof a === "string" ? a : a?.name))
+            .filter(Boolean),
+          symptoms: (res?.symptoms || []).map((s: any) => s?.name || s).filter(Boolean),
+          visits: visitLabels,
+        };
+        const fb = fallbackData(visitLabels);
+        if (!next.medications.length) next.medications = fb.medications;
+        if (!next.conditions.length) next.conditions = fb.conditions;
+        if (!next.allergies.length) next.allergies = fb.allergies;
+        if (!cancelled) setData(next);
       } catch (e) {
         console.warn("Patient overview generation failed", e);
-        if (!cancelled) setParagraph(fallbackParagraph());
+        if (!cancelled) setData(fallbackData(visitLabels));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -90,6 +111,36 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patient?.id]);
+
+  const Row = ({
+    label,
+    items,
+    tone = "default",
+  }: {
+    label: string;
+    items: string[];
+    tone?: "default" | "danger";
+  }) => (
+    <div className="flex gap-2 py-1">
+      <span className="w-[104px] shrink-0 text-xs font-bold text-foreground">{label}</span>
+      <div className="min-w-0 flex-1">
+        {items.length ? (
+          <ul className="space-y-0.5">
+            {items.slice(0, 6).map((item, i) => (
+              <li
+                key={i}
+                className={`text-xs leading-relaxed ${tone === "danger" ? "text-destructive font-medium" : "text-foreground"}`}
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="text-xs text-muted-foreground">None recorded</span>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
@@ -103,10 +154,21 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Building overview...
           </div>
+        ) : data ? (
+          <div className="space-y-1">
+            {data.headline && (
+              <p className="text-xs leading-relaxed text-foreground mb-2">{data.headline}</p>
+            )}
+            <div className="divide-y divide-border">
+              <Row label="Conditions" items={data.conditions} />
+              <Row label="Current meds" items={data.medications} />
+              <Row label="Allergies" items={data.allergies} tone="danger" />
+              <Row label="Symptoms" items={data.symptoms} />
+              <Row label="Recent visits" items={data.visits} />
+            </div>
+          </div>
         ) : (
-          <p className="text-xs leading-relaxed text-foreground whitespace-pre-wrap">
-            {paragraph || "No history available for this patient yet."}
-          </p>
+          <p className="text-xs text-muted-foreground">No history available for this patient yet.</p>
         )}
       </div>
     </div>
