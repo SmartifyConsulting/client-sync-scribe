@@ -740,7 +740,7 @@ export default function Sessions() {
     },
     onTranscriptionComplete: (text) => {
       latestTranscriptRef.current = text;
-      // The transcript belongs in Speaker Notes only — AI Clinician Notes keeps
+      // The transcript lives in the Session Transcript accordion only — AI Clinician Notes keeps
       // the accumulated live clinical guidance, never a copy of the transcript.
 
       
@@ -1552,7 +1552,7 @@ export default function Sessions() {
           />
 
           <div className="grid gap-3 lg:grid-cols-2">
-            {/* Summary — transcript lives in Speaker Notes only */}
+            {/* Summary — transcript lives in the Session Transcript accordion only */}
             <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-4 w-4 text-primary" />
