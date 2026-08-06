@@ -186,27 +186,28 @@ export default function Landing() {
               className="lg:col-span-6 lg:pt-6"
             >
               <div className="w-full">
-                <img
-                  src={holarcLogo}
-                  alt="Holarc Health"
-                  className="h-28 sm:h-36 lg:h-44 w-auto mx-auto lg:mx-0"
-                />
-
-                {/* Tagline block — full column width, copy runs left-to-right up to the mosaic */}
-                <div className="mt-5 w-full space-y-3 text-center lg:text-left">
-                  <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
-                    {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
-                  </p>
-                  <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
-                    <span className="text-muted-foreground">[ </span>
-                    {t("landing.hero.titleHighlight")}
-                    <span className="text-muted-foreground"> ]</span>
-                  </p>
-                  <p className="text-[16px] leading-relaxed font-normal text-muted-foreground text-justify">
+                <div className="flex flex-col items-center lg:items-start">
+                  <div className="inline-flex flex-col items-center mx-auto lg:mx-0">
+                    <img
+                      src={holarcLogo}
+                      alt="Holarc Health"
+                      className="h-28 sm:h-36 lg:h-44 w-auto"
+                    />
+                    <p className="mt-5 font-mono text-xs sm:text-sm text-muted-foreground tracking-wider text-center">
+                      {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
+                    </p>
+                    <p className="mt-3 font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight text-center">
+                      <span className="text-muted-foreground">[ </span>
+                      {t("landing.hero.titleHighlight")}
+                      <span className="text-muted-foreground"> ]</span>
+                    </p>
+                  </div>
+                  <p className="mt-3 w-full text-[16px] leading-relaxed font-normal text-muted-foreground text-justify">
                     {t("landing.hero.description")}
                   </p>
                 </div>
               </div>
+
 
             </motion.div>
 
@@ -298,7 +299,7 @@ export default function Landing() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center -mt-6 lg:-mt-20"
+            className="text-center py-8 lg:py-12"
           >
             <img
               src={capabilitiesAsset.url}
@@ -306,7 +307,7 @@ export default function Landing() {
               loading="lazy"
               width={1920}
               height={720}
-              className="w-full max-w-5xl mx-auto h-auto"
+              className="w-full max-w-[51rem] mx-auto h-auto"
             />
           </motion.div>
 
@@ -314,7 +315,8 @@ export default function Landing() {
 
 
           {/* BOTTOM ROW — CTAs left, SOS card right */}
-          <div className="grid lg:grid-cols-12 gap-6 items-start -mt-4 lg:-mt-16">
+          <div className="grid lg:grid-cols-12 gap-6 items-start">
+
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
