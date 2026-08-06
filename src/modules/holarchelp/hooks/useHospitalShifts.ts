@@ -16,7 +16,12 @@ export type StaffShift = {
   clocked_out_at: string | null;
   status: string;
   is_sample: boolean;
+  rest_ack_by?: string | null;
+  rest_ack_at?: string | null;
+  rest_ack_note?: string | null;
+  notes?: string | null;
 };
+
 
 /** Shift roster for a hospital (optionally limited to a ward). */
 export function useHospitalShifts(hospitalId: string | null, wardId?: string | null) {
