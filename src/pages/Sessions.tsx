@@ -547,9 +547,10 @@ export default function Sessions() {
     // talk, still raise a standard consultation invoice so the doctor always has
     // a document to review, send or discard.
     if (!extractedInvoice) {
+      const amount = await lookupConsultationPrice();
       const d = await createInvoiceDocument({
-        items: [{ description: 'Consultation', amount: 0 }],
-        total: 0,
+        items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
+        total: amount,
       } as InvoiceData);
       if (d) results.push(d);
     }
