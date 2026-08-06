@@ -653,31 +653,6 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Action Points / TO-DO List */}
-      {session.action_points && session.action_points.length > 0 && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Action Points / TO-DO</h2>
-              <p className="text-sm text-muted-foreground">Tasks extracted from this session</p>
-            </div>
-          </div>
-          <ul className="space-y-2 ml-4">
-            {session.action_points.map((point, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-sm text-foreground p-3 rounded-lg bg-muted/30"
-              >
-                <Circle className="h-4 w-4 text-primary fill-primary shrink-0 mt-0.5" />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
