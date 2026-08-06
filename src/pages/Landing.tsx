@@ -172,39 +172,45 @@ export default function Landing() {
           <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         </div>
 
-        <div className="max-w-7xl mx-auto mb-8">
+        <div className="max-w-7xl mx-auto mb-5">
           <InstallAppPrompt />
         </div>
 
-        <div className="max-w-7xl mx-auto space-y-10">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* TOP ROW — logo left, mosaic right */}
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left lg:pt-6"
+              className="lg:col-span-6 lg:pt-6"
             >
-              <img
-                src={holarcLogo}
-                alt="Holarc Health"
-                className="h-28 sm:h-36 lg:h-44 w-auto"
-              />
+              <div className="w-fit mx-auto lg:mx-0">
+                <img
+                  src={holarcLogo}
+                  alt="Holarc Health"
+                  className="h-28 sm:h-36 lg:h-44 w-auto"
+                />
 
-              <div className="mt-5 space-y-3">
-                <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
-                  {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
-                </p>
-                <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
-                  <span className="text-muted-foreground">[ </span>
-                  {t("landing.hero.titleHighlight")}
-                  <span className="text-muted-foreground"> ]</span>
-                </p>
-                <p className="text-sm font-normal text-muted-foreground">
-                  {t("landing.hero.description")}
-                </p>
+                {/* Tagline block — centred on the logo's axis, logo stays put */}
+                <div className="mt-5 w-0 min-w-full flex justify-center">
+                  <div className="w-[34rem] max-w-[calc(100vw-2.5rem)] shrink-0 space-y-3 text-center">
+                    <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
+                      {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
+                    </p>
+                    <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
+                      <span className="text-muted-foreground">[ </span>
+                      {t("landing.hero.titleHighlight")}
+                      <span className="text-muted-foreground"> ]</span>
+                    </p>
+                    <p className="text-[18px] leading-relaxed font-normal text-muted-foreground">
+                      {t("landing.hero.description")}
+                    </p>
+                  </div>
+                </div>
               </div>
             </motion.div>
+
 
 
             <motion.div
