@@ -186,27 +186,28 @@ export default function Landing() {
               className="lg:col-span-6 lg:pt-6"
             >
               <div className="w-full">
-                <img
-                  src={holarcLogo}
-                  alt="Holarc Health"
-                  className="h-28 sm:h-36 lg:h-44 w-auto mx-auto lg:mx-0"
-                />
-
-                {/* Tagline block — full column width, copy runs left-to-right up to the mosaic */}
-                <div className="mt-5 w-full space-y-3 text-center lg:text-left">
-                  <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
-                    {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
-                  </p>
-                  <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
-                    <span className="text-muted-foreground">[ </span>
-                    {t("landing.hero.titleHighlight")}
-                    <span className="text-muted-foreground"> ]</span>
-                  </p>
-                  <p className="text-[16px] leading-relaxed font-normal text-muted-foreground text-justify">
+                <div className="flex flex-col items-center lg:items-start">
+                  <div className="inline-flex flex-col items-center mx-auto lg:mx-0">
+                    <img
+                      src={holarcLogo}
+                      alt="Holarc Health"
+                      className="h-28 sm:h-36 lg:h-44 w-auto"
+                    />
+                    <p className="mt-5 font-mono text-xs sm:text-sm text-muted-foreground tracking-wider text-center">
+                      {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
+                    </p>
+                    <p className="mt-3 font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight text-center">
+                      <span className="text-muted-foreground">[ </span>
+                      {t("landing.hero.titleHighlight")}
+                      <span className="text-muted-foreground"> ]</span>
+                    </p>
+                  </div>
+                  <p className="mt-3 w-full text-[16px] leading-relaxed font-normal text-muted-foreground text-justify">
                     {t("landing.hero.description")}
                   </p>
                 </div>
               </div>
+
 
             </motion.div>
 
