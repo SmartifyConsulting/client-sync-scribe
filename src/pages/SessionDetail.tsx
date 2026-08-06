@@ -83,6 +83,7 @@ export default function SessionDetail() {
   const { toast } = useToast();
   const { session, loading, refetch } = useSession(id || "");
   const { deleteSession } = useSessions();
+  const { isAdmin } = useIsAdmin();
   const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
