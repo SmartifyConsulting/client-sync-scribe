@@ -94,6 +94,47 @@ import {
 
 type SessionState = "idle" | "active" | "processing" | "completed";
 
+/**
+ * Best-guess price for a standard GP consultation from the doctor's own
+ * Service Offerings & Pricing. Scores each service name against consultation
+ * keywords and prefers a plain/general consultation over specialised entries.
+ * Never returns a hard-coded R0 when any priced service exists.
+ */
+async function lookupConsultationPrice(): Promise<number> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 0;
+    const { data: prices } = await supabase
+      .from("service_prices")
+      .select("default_price, service_name")
+      .eq("user_id", user.id)
+      .limit(100);
+    const rows = (prices || []).filter((p: any) => Number(p.default_price) > 0);
+    if (!rows.length) return 0;
+
+    const score = (name: string) => {
+      const n = (name || "").toLowerCase();
+      let s = 0;
+      if (n.includes("consult")) s += 10;
+      if (n.includes("gp") || n.includes("general practitioner")) s += 6;
+      if (n.includes("general")) s += 4;
+      if (n.includes("standard") || n.includes("basic")) s += 3;
+      if (n.includes("follow")) s -= 6;
+      if (n.includes("after hours") || n.includes("after-hours") || n.includes("emergency")) s -= 6;
+      if (n.includes("specialist") || n.includes("procedure") || n.includes("home visit")) s -= 5;
+      // Shorter, plainer names are usually the standard consult.
+      s -= Math.min(3, Math.floor(n.length / 25));
+      return s;
+    };
+
+    const best = [...rows].sort((a: any, b: any) => score(b.service_name) - score(a.service_name))[0];
+    return Number(best?.default_price) || Number(rows[0]?.default_price) || 0;
+  } catch (e) {
+    console.error("Pricing lookup failed:", e);
+    return 0;
+  }
+}
+
 export default function Sessions() {
   const { t } = useTranslation();
   const { toast } = useToast();
