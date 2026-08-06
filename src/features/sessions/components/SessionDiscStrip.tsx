@@ -5,7 +5,10 @@ import { useUserRole } from "@/hooks/useUserRole";
 
 interface Props {
   patientId?: string;
+  /** Inline mode renders a single chip row with no card frame (used at the top of Patient Overview). */
+  inline?: boolean;
 }
+
 
 type Dim = "dominance" | "influence" | "steadiness" | "conscientiousness";
 
