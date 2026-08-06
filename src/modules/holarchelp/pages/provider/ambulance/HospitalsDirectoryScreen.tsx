@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 type H = {
   id: string; name: string; ownership: string | null; city?: string | null;
   accepting_patients: boolean | null; er_capacity_status: "green"|"yellow"|"red"|null;
-  er_beds_available: number | null; icu_beds_available: number | null;
+  er_beds_available: number | null; icu_available: number | null;
   latitude: number | null; longitude: number | null;
   contact_phone?: string | null;
 };
@@ -33,7 +33,7 @@ export default function HospitalsDirectoryScreen() {
 
   useEffect(() => {
     supabase.from("holarchelp_hospitals" as any)
-      .select("id,name,ownership,city,accepting_patients,er_capacity_status,er_beds_available,icu_beds_available,latitude,longitude,contact_phone")
+      .select("id,name,ownership,city,accepting_patients,er_capacity_status,er_beds_available,icu_available,latitude,longitude,contact_phone")
       .eq("status", "approved")
       .then(({ data }) => setList(((data as any) ?? []) as H[]));
     if (navigator.geolocation) {
@@ -86,7 +86,7 @@ export default function HospitalsDirectoryScreen() {
                   {(h.er_capacity_status ?? "green").toUpperCase()}
                 </span>
                 {h.er_beds_available != null && <span className="rounded-full border bg-background px-1.5 py-0.5">{h.er_beds_available} {t("hospitalsDirectory.erBeds")}</span>}
-                {h.icu_beds_available != null && <span className="rounded-full border bg-background px-1.5 py-0.5">{h.icu_beds_available} {t("hospitalsDirectory.icu")}</span>}
+                {h.icu_available != null && <span className="rounded-full border bg-background px-1.5 py-0.5">{h.icu_available} {t("hospitalsDirectory.icu")}</span>}
                 {!h.accepting_patients && <span className="rounded-full border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-destructive">{t("hospitalsDirectory.notAccepting")}</span>}
               </div>
               {h.contact_phone && (

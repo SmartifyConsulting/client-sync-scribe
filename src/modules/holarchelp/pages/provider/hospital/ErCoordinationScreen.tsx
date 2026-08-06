@@ -88,7 +88,7 @@ export default function ErCoordinationScreen() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-2xl font-extrabold">ER Coordination</h2>
+          <h2 className="text-2xl font-extrabold">ER Dispatch</h2>
           <p className="text-sm text-muted-foreground">
             {rows.length} incoming · {pending.length} awaiting acceptance
           </p>

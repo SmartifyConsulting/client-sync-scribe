@@ -42,8 +42,9 @@ function HospitalStatsStrip() {
       )}
       <TopChip label={t("hospital.liveQueue")} value={stats.activeEmergencies} tone="bg-sos/10 text-sos" />
       <TopChip label={t("nav.incomingEr")} value={stats.incomingAmbulances} tone="bg-primary/10 text-primary" />
+      <TopChip label={t("capacity.erBeds")} value={stats.erBedsAvailable ?? "—"} tone="bg-card text-foreground" />
       <TopChip label={t("capacity.icuBeds")} value={stats.icuAvailable ?? "—"} tone="bg-card text-foreground" />
-      <TopChip label={t("capacity.title")} value={t(`status.${stats.capacityStatus ?? "green"}`)} tone={capTone} />
+      <TopChip label={t("capacity.title")} value={t(`capacity.${stats.capacityStatus ?? "green"}`)} tone={capTone} />
       <TopChip label={t("topbar.notifications")} value={stats.alerts} tone="bg-warning/10 text-warning" />
     </div>
   );

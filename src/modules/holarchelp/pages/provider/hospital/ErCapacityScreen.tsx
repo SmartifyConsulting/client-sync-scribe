@@ -56,7 +56,7 @@ export default function ErCapacityScreen() {
         </Tile>
 
         <Tile icon={BedDouble} label={t("capacity.icuBeds")}>
-          <NumberField value={h.icu_beds_available} onSave={(v) => patch({ icu_beds_available: v })} saving={saving} />
+          <NumberField value={h.icu_available} onSave={(v) => patch({ icu_available: v })} saving={saving} />
         </Tile>
 
         <Tile icon={BedDouble} label={t("capacity.traumaBays")}>
@@ -79,11 +79,11 @@ export default function ErCapacityScreen() {
 }
 
 const Tile = ({ icon: Icon, label, children }: any) => (
-  <div className="rounded-2xl border bg-card p-3 space-y-2">
-    <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-      <Icon className="h-3.5 w-3.5" /> {label}
+  <div className="overflow-hidden rounded-2xl border-2 border-primary bg-card">
+    <p className="flex items-center gap-1.5 bg-primary px-3 py-2 text-sm font-bold uppercase tracking-wider text-white">
+      <Icon className="h-3.5 w-3.5 text-white" /> {label}
     </p>
-    {children}
+    <div className="p-3">{children}</div>
   </div>
 );
 

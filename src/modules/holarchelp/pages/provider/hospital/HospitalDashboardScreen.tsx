@@ -23,7 +23,7 @@ const VEHICLE_TONE: Record<string, string> = {
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="rounded-2xl border bg-card px-4 py-3">
+    <div className="rounded-2xl border-2 border-primary bg-card px-4 py-3">
       <p className="text-xs font-semibold text-muted-foreground">{label}</p>
       <p className="mt-1 text-3xl font-extrabold tabular-nums text-foreground">
         {value}
@@ -37,11 +37,11 @@ function Panel({ icon: Icon, title, children, action }: {
   icon: typeof BedDouble; title: string; children: React.ReactNode; action?: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border bg-card">
-      <header className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
+    <section className="overflow-hidden rounded-2xl border-2 border-primary bg-card">
+      <header className="flex items-center justify-between gap-2 bg-primary px-4 py-2.5">
         <span className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-primary" />
-          <h2 className="text-sm font-bold">{title}</h2>
+          <Icon className="h-4 w-4 text-white" />
+          <h2 className="text-sm font-bold text-white">{title}</h2>
         </span>
         {action}
       </header>

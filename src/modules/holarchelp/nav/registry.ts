@@ -68,8 +68,8 @@ export const PROVIDER_MODULES: NavModule[] = [
     portals: ["hospital"],
     enabled: (c) => c.hasEmergencyDepartment,
     items: [
-      { icon: Siren, labelKey: "nav.erDashboard", label: "ER Dashboard", to: "/provider/hospital/er", danger: true },
-      { icon: Activity, labelKey: "nav.liveQueue", label: "Live Queue", to: "/provider/hospital", end: true },
+      { icon: Activity, labelKey: "nav.liveQueue", label: "Live Queue", to: "/provider/hospital", end: true, danger: true },
+      { icon: Siren, labelKey: "nav.erDashboard", label: "ER Dispatch", to: "/provider/hospital/er" },
       { icon: Ambulance, labelKey: "nav.incomingAmbulances", label: "Incoming Ambulances", to: "/provider/hospital/incoming" },
       { icon: Stethoscope, labelKey: "nav.triageBoard", label: "Triage Board", to: "/provider/hospital/triage" },
       { icon: HeartPulse, labelKey: "nav.traumaBays", label: "Trauma Bays", to: "/provider/hospital/trauma-bays" },

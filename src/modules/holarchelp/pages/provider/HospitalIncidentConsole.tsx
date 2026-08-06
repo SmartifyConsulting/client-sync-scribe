@@ -7,6 +7,7 @@ import { IncidentPhotos } from "../../components/IncidentPhotos";
 import { EtaCountdown } from "../../components/EtaCountdown";
 import { EmergencyPatientContext } from "../../components/EmergencyPatientContext";
 import { TriageControls } from "../../components/TriageControls";
+import { AdmittedPatientChart } from "../../components/AdmittedPatientChart";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -111,33 +112,41 @@ export default function HospitalIncidentConsole() {
         </div>
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-3">
-          <SosLiveMap incidentId={id!} mode="hospital" height={320} />
-          <div className="rounded-2xl border bg-card p-3 space-y-2">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("hospitalConsole.admissionStepper")}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {ADMISSION_STEPS.map((s) => (
-                <Button key={s.v} size="sm"
-                        variant={incident.hospital_admission_status === s.v ? "default" : "outline"}
-                        onClick={() => setAdmissionStatus(s.v)}>
-                  {t(s.labelKey)}
-                </Button>
-              ))}
+      {incident.hospital_admission_status === "admitted" ? (
+        <AdmittedPatientChart incidentId={id!} />
+      ) : (
+        // Pre-admission workflow — map / admission stepper / triage assessment /
+        // timeline. Once the patient is admitted to a ward these are replaced by
+        // the bedside chart above; kept here (not deleted) in case this incident
+        // needs re-triaging or the admission status is reverted.
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="space-y-3">
+            <SosLiveMap incidentId={id!} mode="hospital" height={320} />
+            <div className="rounded-2xl border bg-card p-3 space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t("hospitalConsole.admissionStepper")}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {ADMISSION_STEPS.map((s) => (
+                  <Button key={s.v} size="sm"
+                          variant={incident.hospital_admission_status === s.v ? "default" : "outline"}
+                          onClick={() => setAdmissionStatus(s.v)}>
+                    {t(s.labelKey)}
+                  </Button>
+                ))}
+              </div>
             </div>
+            <TriageControls incidentId={id!} current={{
+              triage_priority: incident.triage_priority,
+              triage_bay: incident.triage_bay,
+              triage_nurse: incident.triage_nurse,
+            }} />
           </div>
-          <TriageControls incidentId={id!} current={{
-            triage_priority: incident.triage_priority,
-            triage_bay: incident.triage_bay,
-            triage_nurse: incident.triage_nurse,
-          }} />
+          <div className="space-y-3">
+            <EmergencyPatientContext incidentId={id!} />
+            <IncidentPhotos incidentId={id!} readOnly />
+            <IncidentTimeline incidentId={id!} />
+          </div>
         </div>
-        <div className="space-y-3">
-          <EmergencyPatientContext incidentId={id!} />
-          <IncidentPhotos incidentId={id!} readOnly />
-          <IncidentTimeline incidentId={id!} />
-        </div>
-      </div>
+      )}
     </div>
   );
 }

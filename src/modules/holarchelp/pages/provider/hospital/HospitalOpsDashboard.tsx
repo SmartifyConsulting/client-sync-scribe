@@ -40,6 +40,18 @@ export default function HospitalOpsDashboard() {
   const [crews, setCrews] = useState<Record<string,string>>({});
   const [patients, setPatients] = useState<Record<string,string>>({});
 
+  // en_route is the stage that needs the most immediate attention (ambulance
+  // already committed, ETA ticking) — always shown first regardless of when
+  // the incident was created.
+  const STATUS_ORDER: Record<string, number> = {
+    en_route: 0,
+    en_route_to_hospital: 0,
+    arrived: 1,
+    patient_collected: 1,
+    at_hospital: 2,
+    assigned: 3,
+  };
+
   const load = async () => {
     if (!providerId) return;
     const { data } = await supabase.from("holarchelp_incidents" as any)
@@ -48,10 +60,12 @@ export default function HospitalOpsDashboard() {
       .in("status", ["assigned","en_route","arrived","patient_collected","en_route_to_hospital","at_hospital"])
       .order("created_at", { ascending: false }).limit(200);
     const list = ((data as any) ?? []) as Row[];
+    list.sort((a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9));
     setRows(list);
 
     const ambIds = Array.from(new Set(list.map(r => r.assigned_provider_id).filter(Boolean))) as string[];
     const userIds = Array.from(new Set(list.map(r => r.user_id).filter(Boolean))) as string[];
+    const incidentIds = list.map(r => r.id);
     if (ambIds.length) {
       const { data: amb } = await supabase.from("holarchelp_ambulance_providers" as any)
         .select("id, company_name").in("id", ambIds);
@@ -59,13 +73,22 @@ export default function HospitalOpsDashboard() {
       ((amb as any) ?? []).forEach((a: any) => { m[a.id] = a.company_name; });
       setCrews(m);
     }
+
+    // Patient names: prefer the admission record's patient_name (always a
+    // real display name, including sample-seeded patients), then fall back
+    // to the incident creator's own profile.
+    const nameMap: Record<string,string> = {};
+    if (incidentIds.length) {
+      const { data: admissions } = await supabase.from("hospital_inpatient_admissions" as any)
+        .select("incident_id, patient_name").in("incident_id", incidentIds);
+      ((admissions as any) ?? []).forEach((a: any) => { if (a.incident_id) nameMap[a.incident_id] = a.patient_name; });
+    }
     if (userIds.length) {
       const { data: profs } = await supabase.from("profiles" as any)
         .select("id, full_name").in("id", userIds);
-      const m: Record<string,string> = {};
-      ((profs as any) ?? []).forEach((p: any) => { m[p.id] = p.full_name; });
-      setPatients(m);
+      ((profs as any) ?? []).forEach((p: any) => { if (!nameMap[p.id]) nameMap[p.id] = p.full_name; });
     }
+    setPatients(nameMap);
   };
 
   useEffect(() => {
@@ -102,7 +125,9 @@ export default function HospitalOpsDashboard() {
             {rows.map((r) => (
               <tr key={r.id} className="transition hover:bg-muted/40">
                 <td className="px-3 py-2">
-                  <p className="font-semibold">{r.user_id ? (patients[r.user_id] ?? `${t("common.patient")} ${r.id.slice(0,6)}`) : `${t("ambulance.incident")} ${r.id.slice(0,6)}`}</p>
+                  <p className="font-semibold">
+                    {patients[r.id] ?? (r.user_id ? patients[r.user_id] : null) ?? `${t("ambulance.incident")} ${r.id.slice(0,6)}`}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {r.conscious === false && <span className="text-destructive font-semibold">{t("ambulance.unconscious")} · </span>}
                     {r.breathing === false && <span className="text-destructive font-semibold">{t("ambulance.notBreathing")} · </span>}

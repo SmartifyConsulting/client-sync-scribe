@@ -63,12 +63,12 @@ export function ProviderSidebar({ portal, onNavigate }: ProviderSidebarProps) {
                     onClick={onNavigate}
                     className={cn(
                       "flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-[13px] font-medium transition-all duration-200",
-                      isActive
-                        ? item.danger
-                          ? "bg-red-600 text-white shadow-sm"
-                          : "bg-primary text-primary-foreground shadow-sm"
-                        : item.danger
-                          ? "text-red-600 hover:bg-red-600/10"
+                      item.danger
+                        ? isActive
+                          ? "bg-red-700 text-white shadow-sm"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                        : isActive
+                          ? "bg-primary text-primary-foreground shadow-sm"
                           : "text-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                     )}
                   >
