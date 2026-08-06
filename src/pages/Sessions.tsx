@@ -46,6 +46,7 @@ import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmission
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
@@ -283,6 +284,7 @@ export default function Sessions() {
       
       if (!error && data) {
         setPastPatientSessions(data.map(s => ({
+          id: s.id,
           date: format(new Date(s.started_at), 'MMM d, yyyy'),
           summary: s.summary
         })));
@@ -1204,8 +1206,38 @@ export default function Sessions() {
             <Play className="h-5 w-5" />
             Start New Session
           </Button>
+
+          {/* Past Sessions — quick recap of this patient's previous consultations. */}
+          {currentPatient && (
+            <div className="mt-6 w-full max-w-2xl text-left rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+              <div className="px-3 py-2 border-b bg-primary/5">
+                <h3 className="text-sm font-semibold text-foreground">Past Sessions</h3>
+              </div>
+              <div className="max-h-64 overflow-y-auto divide-y divide-border">
+                {pastPatientSessions.length === 0 ? (
+                  <p className="p-3 text-xs text-muted-foreground">No previous sessions</p>
+                ) : (
+                  pastPatientSessions.map((s: any) => (
+                    <button
+                      key={s.id}
+                      onClick={() => navigate(`/sessions/${s.id}`)}
+                      className="w-full text-left p-3 hover:bg-muted/50 transition-colors"
+                    >
+                      <p className="text-xs font-bold text-foreground">{s.date}</p>
+                      <p className="text-sm text-foreground line-clamp-2">
+                        {String(s.summary || "No summary")
+                          .replace(/<\/?(med|symptom|condition)>/g, "")
+                          .trim()}
+                      </p>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
+
 
       {(sessionState === "active" || sessionState === "processing" || sessionState === "completed") && (
         <>
@@ -1455,6 +1487,9 @@ export default function Sessions() {
             <div className="min-h-[210px] flex flex-col">
               <SessionPatientOverview patient={currentPatient} currentMedications={currentMedications} />
             </div>
+
+            {/* DISC personality reminder — doctors only, adjectives instead of paragraphs. */}
+            <SessionDiscStrip patientId={currentPatient?.id} />
 
             {/* Personal Notes — private to the doctor, not shared with the patient. */}
             <div className="min-h-[140px] flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
