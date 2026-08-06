@@ -1456,6 +1456,9 @@ export default function Sessions() {
               <SessionPatientOverview patient={currentPatient} currentMedications={currentMedications} />
             </div>
 
+            {/* DISC personality reminder — doctors only, adjectives instead of paragraphs. */}
+            <SessionDiscStrip patientId={currentPatient?.id} />
+
             {/* Personal Notes — private to the doctor, not shared with the patient. */}
             <div className="min-h-[140px] flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
               <div className="flex items-center justify-between p-3 border-b bg-primary/5">
