@@ -54,3 +54,37 @@ The remaining tabs carry over the existing section content unchanged, keeping th
 - `useHospitalInpatients` reads from `hospital_admissions` filtered by hospital and non-discharged status; `useHospitalAdmissions` is unchanged in shape.
 - `InpatientsScreen` gains an authorisation column and status filter; `InpatientDialogs` writes to the merged table.
 - `AdmissionsView` swaps `Collapsible` sections for the shared tab component, with a new `AdmissionPatientOverviewTab` component.
+
+## Shift Schedule as a calendar
+
+The hospital Shift Schedule screen becomes a real calendar instead of a list, so an administrator can see and assign cover at a glance:
+
+- Week view by default (with day and month toggles), staff down the side and time across the top, shifts drawn as blocks coloured by day/night and by ward.
+- Click an empty slot to create a shift; drag a block to move it or stretch it to change hours.
+- An availability rail shows, for each nurse and doctor, whether they are free, already rostered, or off — so the allocator picks from people who can actually work.
+
+**Rest-period warning.** When the allocator assigns someone who finished a shift less than 8 hours before the new one starts (or is already rostered inside that window), a warning appears naming the previous shift and the actual gap. The shift cannot be saved until the allocator ticks an acknowledgement that they are knowingly booking a double shift or short turnaround. The acknowledgement is stored on the shift with who accepted it and when, so it can be audited later.
+
+## My Shift for doctors and nurses
+
+"My Shift" is only meaningful to people actually rostered on duty, so it appears for doctors and nurses rather than in the hospital admin nav:
+
+- **Doctors** — a "My Shift" item in the doctor sidebar directly under Sessions, showing today's and upcoming shifts, ward and bed assignments, clock in/out, and the rest-period notice if they are on a short turnaround.
+- **Nurses** — the same screen in the nurse navigation, plus their patient assignments for the shift.
+
+Both reuse the existing My Shift screen rather than building a third variant.
+
+## Nurse profile and profile switching
+
+Nurses become a first-class user type:
+
+- A nurse profile page mirroring the doctor profile: name, registration number, hospital and ward, specialities, contact details, About Me, and their shift and patient-assignment history.
+- Nurse accounts are linked to their hospital nurse record so the roster and their login are the same person.
+- A nurse is added to the avatar profile switcher so you can hop between patient, doctor and nurse views the same way as today, and a demo nurse account is seeded at Holarc General Hospital for testing.
+
+## Technical notes for shifts and nurses
+
+- Shift calendar: new `ShiftCalendar` component on `ShiftsScreen.tsx` reading `hospital_staff_shifts` for the visible range; availability derived from existing rows plus a new `staff_unavailability` table for leave/off days.
+- Rest-period check: query the staff member's most recent `ends_at` before the proposed `starts_at`; if the gap is under 8 hours, block save until acknowledged. Add `short_turnaround_ack_by` and `short_turnaround_ack_at` to `hospital_staff_shifts`.
+- Nav: add "My Shift" to the doctor sidebar under Sessions and to the nurse nav; the route reuses `MyShiftScreen`, resolving the viewer as doctor (`doctor_id = auth.uid()`) or nurse (`hospital_nurses.linked_user_id = auth.uid()`) — both already permitted by the existing shift policies.
+- Nurse profile: new page backed by `hospital_nurses` joined to `profiles`; add the nurse entry to the avatar switcher allow-list and seed one demo nurse user.
