@@ -6,10 +6,8 @@ import {
   BedDouble,
   CalendarClock,
   ClipboardList,
-  Clock,
   HeartPulse,
   LayoutDashboard,
-  LogOut,
   LucideIcon,
   Navigation as NavIcon,
   Radar,
@@ -52,16 +50,6 @@ const always = () => true;
  */
 export const PROVIDER_MODULES: NavModule[] = [
   {
-    id: "operations",
-    titleKey: "nav.moduleOperations",
-    title: "Operations",
-    portals: ["hospital"],
-    enabled: always,
-    items: [
-      { icon: LayoutDashboard, labelKey: "nav.hospitalDashboard", label: "Dashboard", to: "/provider/hospital/dashboard" },
-    ],
-  },
-  {
     id: "emergency",
     titleKey: "nav.moduleEmergency",
     title: "Emergency",
@@ -76,25 +64,15 @@ export const PROVIDER_MODULES: NavModule[] = [
     ],
   },
   {
-    id: "patients",
-    titleKey: "nav.modulePatients",
-    title: "Patients",
+    id: "operations",
+    titleKey: "nav.moduleOperations",
+    title: "Operations",
     portals: ["hospital"],
     enabled: always,
     items: [
+      { icon: LayoutDashboard, labelKey: "nav.hospitalDashboard", label: "Dashboard", to: "/provider/hospital/dashboard" },
       { icon: ClipboardList, labelKey: "nav.admissions", label: "Admissions", to: "/provider/hospital/admissions" },
-      { icon: LogOut, labelKey: "nav.discharges", label: "Discharges", to: "/provider/hospital/discharges" },
-    ],
-  },
-  {
-    id: "staff",
-    titleKey: "nav.moduleStaff",
-    title: "Staff",
-    portals: ["hospital"],
-    enabled: always,
-    items: [
-      { icon: CalendarClock, labelKey: "nav.shifts", label: "Shift Schedule", to: "/provider/hospital/shifts" },
-      { icon: Clock, labelKey: "nav.myShift", label: "My Shift", to: "/provider/hospital/my-shift" },
+      { icon: CalendarClock, labelKey: "nav.resourcePlanning", label: "Resource Planning", to: "/provider/hospital/shifts" },
     ],
   },
   {

@@ -63,19 +63,19 @@ export default function ShiftsScreen() {
     if (!providerId) return;
     (async () => {
       const [{ data: nurses }, { data: affils }] = await Promise.all([
-        supabase.from("hospital_nurses").select("id, full_name").eq("hospital_id", providerId),
+        supabase.from("hospital_nurses").select("id, full_name, mobile_number").eq("hospital_id", providerId),
         supabase.from("doctor_hospital_affiliations").select("doctor_id").eq("hospital_id", providerId).not("doctor_id", "is", null),
       ]);
       const doctorIds = ((affils ?? []) as { doctor_id: string }[]).map((a) => a.doctor_id);
-      let doctors: { id: string; full_name: string | null }[] = [];
+      let doctors: { id: string; full_name: string | null; mobile_number: string | null }[] = [];
       if (doctorIds.length) {
-        const { data } = await supabase.from("profiles").select("id, full_name").in("id", doctorIds);
-        doctors = (data ?? []) as { id: string; full_name: string | null }[];
+        const { data } = await supabase.from("profiles").select("id, full_name, mobile_number").in("id", doctorIds);
+        doctors = (data ?? []) as { id: string; full_name: string | null; mobile_number: string | null }[];
       }
       setStaff([
-        ...doctors.map((d) => ({ key: `doctor:${d.id}`, role: "doctor" as const, id: d.id, name: d.full_name ?? "Doctor" })),
-        ...((nurses ?? []) as { id: string; full_name: string }[]).map((n) => ({
-          key: `nurse:${n.id}`, role: "nurse" as const, id: n.id, name: n.full_name,
+        ...doctors.map((d) => ({ key: `doctor:${d.id}`, role: "doctor" as const, id: d.id, name: d.full_name ?? "Doctor", phone: d.mobile_number })),
+        ...((nurses ?? []) as { id: string; full_name: string; mobile_number: string | null }[]).map((n) => ({
+          key: `nurse:${n.id}`, role: "nurse" as const, id: n.id, name: n.full_name, phone: n.mobile_number,
         })),
       ]);
     })();
@@ -161,7 +161,7 @@ export default function ShiftsScreen() {
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
-          <h1 className="text-2xl font-extrabold">Shift schedule</h1>
+          <h1 className="text-2xl font-extrabold">Resource Planning</h1>
           <p className="text-xs text-muted-foreground">{onShiftNow.length} staff on shift right now</p>
         </div>
         <Button size="sm" onClick={() => setOpen(true)} disabled={!providerId}><Plus className="mr-1 h-4 w-4" /> Add shift</Button>

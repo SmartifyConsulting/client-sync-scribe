@@ -1,8 +1,9 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, AlertTriangle, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, Plus, Phone } from "lucide-react";
 import type { StaffShift } from "../hooks/useHospitalShifts";
 import {
   SHIFT_BANDS,
@@ -18,7 +19,7 @@ import {
   weekLabel,
 } from "../lib/shiftScheduling";
 
-export type StaffOption = { key: string; role: "doctor" | "nurse"; id: string; name: string };
+export type StaffOption = { key: string; role: "doctor" | "nurse"; id: string; name: string; phone?: string | null };
 
 interface ShiftCalendarProps {
   weekStart: Date;
@@ -42,6 +43,7 @@ export function ShiftCalendar({
 }: ShiftCalendarProps) {
   const days = weekDays(weekStart);
   const today = new Date();
+  const phoneByKey = useMemo(() => new Map(staff.map((s) => [s.key, s.phone])), [staff]);
 
   const shiftWeek = (delta: number) => {
     const d = new Date(weekStart);
@@ -55,7 +57,7 @@ export function ShiftCalendar({
   });
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
+    <div className="space-y-4">
       <div className="overflow-hidden rounded-2xl border bg-card">
         <div className="flex items-center gap-2 border-b bg-muted/40 px-3 py-2">
           <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => shiftWeek(-1)} aria-label="Previous week">
@@ -120,24 +122,33 @@ export function ShiftCalendar({
                           !isLastBand && "border-b",
                         )}
                       >
-                        {cell.map((s) => (
-                          <button
-                            key={s.id}
-                            onClick={(e) => { e.stopPropagation(); onChipClick(s); }}
-                            className={cn(
-                              "flex w-full items-center gap-1 rounded-md px-1.5 py-1 text-left text-[11px] font-semibold",
-                              s.staff_role === "doctor"
-                                ? "bg-primary/10 text-primary"
-                                : "bg-[hsl(214_88%_54%/0.12)] text-[hsl(214_88%_40%)]",
-                            )}
-                          >
-                            {!!s.clocked_in_at && !s.clocked_out_at && (
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
-                            )}
-                            <span className="truncate">{s.staff_name}</span>
-                            {s.rest_ack_at && <AlertTriangle className="ml-auto h-3 w-3 shrink-0 text-amber-500" />}
-                          </button>
-                        ))}
+                        {cell.map((s) => {
+                          const phone = phoneByKey.get(staffKeyOf(s));
+                          return (
+                            <Tooltip key={s.id}>
+                              <TooltipTrigger asChild>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onChipClick(s); }}
+                                  className={cn(
+                                    "flex w-full items-center gap-1 rounded-md px-1.5 py-1 text-left text-[11px] font-semibold",
+                                    s.staff_role === "doctor"
+                                      ? "bg-primary/10 text-primary"
+                                      : "bg-[hsl(214_88%_54%/0.12)] text-[hsl(214_88%_40%)]",
+                                  )}
+                                >
+                                  {!!s.clocked_in_at && !s.clocked_out_at && (
+                                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+                                  )}
+                                  <span className="truncate">{s.staff_name}</span>
+                                  {s.rest_ack_at && <AlertTriangle className="ml-auto h-3 w-3 shrink-0 text-amber-500" />}
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent className="flex items-center gap-1 text-xs">
+                                <Phone className="h-3 w-3" /> {phone || "No phone on file"}
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })}
                         {!cell.length && (
                           <span className="hidden items-center gap-1 text-[11px] text-muted-foreground group-hover:flex">
                             <Plus className="h-3 w-3" /> Assign
@@ -153,10 +164,10 @@ export function ShiftCalendar({
         </div>
       </div>
 
-      {/* Availability rail */}
+      {/* Availability — moved below the calendar so the calendar itself can use the full width */}
       <div className="overflow-hidden rounded-2xl border bg-card">
         <div className="border-b bg-muted/40 px-3 py-2 text-xs font-bold uppercase tracking-wider">Availability</div>
-        <ul className="divide-y">
+        <ul className="grid divide-y sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-3 xl:grid-cols-4">
           {staff.map((p) => {
             const hours = scheduledHours(weekShifts, p.key);
             const next = nextShiftFor(shifts, p.key);
@@ -169,7 +180,14 @@ export function ShiftCalendar({
                 className="cursor-grab px-3 py-2 text-xs active:cursor-grabbing hover:bg-muted/30"
               >
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold">{p.name}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="font-semibold">{p.name}</span>
+                    </TooltipTrigger>
+                    <TooltipContent className="flex items-center gap-1 text-xs">
+                      <Phone className="h-3 w-3" /> {p.phone || "No phone on file"}
+                    </TooltipContent>
+                  </Tooltip>
                   <Badge variant="outline" className="capitalize">{p.role}</Badge>
                   {hours === 0 ? (
                     <Badge className="ml-auto bg-success text-success-foreground">Free</Badge>
@@ -186,7 +204,7 @@ export function ShiftCalendar({
               </li>
             );
           })}
-          {!staff.length && <li className="p-6 text-center text-xs text-muted-foreground">No staff linked to this hospital.</li>}
+          {!staff.length && <li className="p-6 text-center text-xs text-muted-foreground sm:col-span-full">No staff linked to this hospital.</li>}
         </ul>
       </div>
     </div>
