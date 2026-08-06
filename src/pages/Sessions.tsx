@@ -47,6 +47,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
+import { SessionProcessingDialog } from "@/features/sessions/components/SessionProcessingDialog";
+import { SessionTranscriptAccordion } from "@/features/sessions/components/SessionTranscriptAccordion";
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
