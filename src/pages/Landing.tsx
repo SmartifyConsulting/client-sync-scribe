@@ -302,7 +302,7 @@ export default function Landing() {
           >
             <img
               src={capabilitiesAsset.url}
-              alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network"
+              alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network, Increased Governance"
               loading="lazy"
               width={1920}
               height={720}
