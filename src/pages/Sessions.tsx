@@ -1348,8 +1348,19 @@ export default function Sessions() {
               </div>
             )}
 
-            {/* Stop recording = ends session and triggers transcription pipeline.
-                Use the main Mic/Square button above — no duplicate End Session button here. */}
+            {/* Personal Notes — private to the doctor, same body font as the other frames. */}
+            <div className="border-t p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-sm font-semibold text-foreground">Personal Notes</p>
+                <span className="text-[10px] text-muted-foreground">Private</span>
+              </div>
+              <Textarea
+                value={personalNotes}
+                onChange={(e) => setPersonalNotes(e.target.value)}
+                placeholder="Jot down private thoughts for yourself..."
+                className="min-h-[90px] resize-y text-sm p-2"
+              />
+            </div>
           </div>
 
           {/* Column 2 — Patient Overview (DISC at top), Live AI Clinician, then AI Clinician Notes. */}
