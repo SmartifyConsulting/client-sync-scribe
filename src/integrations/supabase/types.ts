@@ -3709,7 +3709,11 @@ export type Database = {
           hospital_id: string
           id: string
           is_sample: boolean
+          notes: string | null
           nurse_id: string | null
+          rest_ack_at: string | null
+          rest_ack_by: string | null
+          rest_ack_note: string | null
           shift_type: string
           staff_name: string
           staff_role: string
@@ -3727,7 +3731,11 @@ export type Database = {
           hospital_id: string
           id?: string
           is_sample?: boolean
+          notes?: string | null
           nurse_id?: string | null
+          rest_ack_at?: string | null
+          rest_ack_by?: string | null
+          rest_ack_note?: string | null
           shift_type?: string
           staff_name: string
           staff_role: string
@@ -3745,7 +3753,11 @@ export type Database = {
           hospital_id?: string
           id?: string
           is_sample?: boolean
+          notes?: string | null
           nurse_id?: string | null
+          rest_ack_at?: string | null
+          rest_ack_by?: string | null
+          rest_ack_note?: string | null
           shift_type?: string
           staff_name?: string
           staff_role?: string

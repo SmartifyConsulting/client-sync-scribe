@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type UserRole = 'doctor' | 'patient' | 'admin' | 'emergency' | null;
+export type UserRole = 'doctor' | 'patient' | 'admin' | 'emergency' | 'nurse' | null;
 type ResolvedRole = Exclude<UserRole, null>;
-type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank';
+type RawRole = 'doctor' | 'patient' | 'admin' | 'hospital_staff' | 'ambulance_staff' | 'blood_bank' | 'nurse';
 const EMERGENCY_RAW: RawRole[] = ['hospital_staff', 'ambulance_staff', 'blood_bank'];
 
 // Module-level cache so navigating across layout groups (which remounts the
@@ -72,7 +72,7 @@ export function useUserRole() {
         const profileRole = profileData?.role as ResolvedRole | undefined;
         if (profileRole) normalized.push(profileRole);
         for (const r of rawRoles) {
-          if (r === 'doctor' || r === 'patient' || r === 'admin') {
+          if (r === 'doctor' || r === 'patient' || r === 'admin' || r === 'nurse') {
             if (!normalized.includes(r)) normalized.push(r);
           }
         }
@@ -83,7 +83,9 @@ export function useUserRole() {
         // switcher still surfaces the provider portal via hasEmergencyRole.
         const effectiveRole: UserRole =
           profileRole ??
-          (normalized.includes('doctor')
+          (normalized.includes('nurse')
+            ? 'nurse'
+            : normalized.includes('doctor')
             ? 'doctor'
             : normalized.includes('patient')
               ? 'patient'
@@ -116,6 +118,8 @@ export function useUserRole() {
     isDoctor: role === 'doctor',
     isPatient: role === 'patient',
     isEmergency: role === 'emergency',
+    isNurse: role === 'nurse',
+    hasNurseRole: availableRoles.includes('nurse'),
     isAdmin: availableRoles.includes('admin'),
     hasDoctorRole: availableRoles.includes('doctor'),
     hasPatientRole: availableRoles.includes('patient'),

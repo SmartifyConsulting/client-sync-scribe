@@ -22,6 +22,7 @@ import {
   BedDouble,
   Activity,
   SlidersHorizontal,
+  Clock,
   ChevronUp,
   ChevronDown,
   Eye,
@@ -69,6 +70,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
+      { icon: Clock, label: "My Shift", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
       { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
@@ -106,6 +108,14 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
+];
+
+/** Nurses on duty get a lean menu focused on their shift and their patients. */
+const nurseNavItems: (NavItem & { tour?: string })[] = [
+  { icon: Clock, label: "My Shift", labelKey: "nav.myShift", to: "/my-shift" },
+  { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/provider/hospital/inpatients" },
+  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+  { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -164,14 +174,17 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // While the role is still resolving we must NOT fall back to the route-based
   // guess, otherwise a doctor sees the patient nav for one frame.
   const isDoctor = role === "doctor";
+  const isNurseMenu = role === "nurse";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
-  const isPatientMenu = !isDoctor && (isPatient || routeSaysPatient);
+  const isPatientMenu = !isDoctor && !isNurseMenu && (isPatient || routeSaysPatient);
 
-  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !(isAdmin && isOnAdminRoute);
+  const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems
-    : isPatientMenu
+    : isNurseMenu
+      ? nurseNavItems
+      : isPatientMenu
       ? patientNavItems
       : doctorModeItems;
 
@@ -326,7 +339,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         </nav>
 
         {/* Customise menu — doctors only */}
-        {!loading && !isPatientMenu && !isOnAdminRoute && (
+        {!loading && !isPatientMenu && !isNurseMenu && !isOnAdminRoute && (
           <div className="px-4 pb-1">
             <Popover>
               <PopoverTrigger asChild>
