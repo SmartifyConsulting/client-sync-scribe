@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmergencyPatientContext } from "./EmergencyPatientContext";
 import { IncidentPhotos } from "./IncidentPhotos";
+import { PatientOverviewTabs } from "./PatientOverviewTabs";
+import { TestResultsPanel } from "./TestResultsPanel";
 import {
   ClipboardList, HeartPulse, Pill, Stethoscope, NotebookPen, Droplet,
-  Utensils, Activity, FlaskConical, Scan, Syringe, Bandage, ShieldAlert,
-  Target, FileText, ArrowLeftRight, UserRound, AlertTriangle,
+  Utensils, Activity, FlaskConical, Scan, ShieldAlert,
+  FileText, ArrowLeftRight, UserRound, AlertTriangle, HeartHandshake,
+  Send, LogOut,
 } from "lucide-react";
 
 type Admission = {
@@ -85,7 +87,7 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
         <div className="flex flex-wrap items-center justify-between gap-2 bg-primary px-4 py-3 text-white">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider opacity-90">Bedside Chart</p>
-            <h2 className="text-lg font-extrabold">{admission?.patient_name ?? "Patient"}</h2>
+            <h2 className="text-lg font-extrabold text-white">{admission?.patient_name ?? "Patient"}</h2>
           </div>
           <div className="flex flex-wrap gap-2 text-sm font-semibold">
             {wardName && <span className="rounded-full bg-white/15 px-3 py-1">{wardName}</span>}
@@ -116,12 +118,12 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
           <TabsTrigger value="meds-fluids" className={TAB_TRIGGER}><Pill className="h-3.5 w-3.5" /> Medications &amp; Fluids</TabsTrigger>
           <TabsTrigger value="notes" className={TAB_TRIGGER}><NotebookPen className="h-3.5 w-3.5" /> Notes</TabsTrigger>
           <TabsTrigger value="results" className={TAB_TRIGGER}><FlaskConical className="h-3.5 w-3.5" /> Results</TabsTrigger>
-          <TabsTrigger value="care" className={TAB_TRIGGER}><ShieldAlert className="h-3.5 w-3.5" /> Care &amp; Procedures</TabsTrigger>
-          <TabsTrigger value="orders-handover" className={TAB_TRIGGER}><FileText className="h-3.5 w-3.5" /> Orders &amp; Handover</TabsTrigger>
+          <TabsTrigger value="care" className={TAB_TRIGGER}><ShieldAlert className="h-3.5 w-3.5" /> Care Plan</TabsTrigger>
+          <TabsTrigger value="orders-handover" className={TAB_TRIGGER}><FileText className="h-3.5 w-3.5" /> Orders</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="p-4 mt-0">
-          <EmergencyPatientContext incidentId={incidentId} />
+          <PatientOverviewTabs incidentId={incidentId} patientId={admission?.patient_id} patientName={admission?.patient_name} />
         </TabsContent>
 
         <TabsContent value="vitals-obs" className="p-4 mt-0">
@@ -165,7 +167,7 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
               <TabsTrigger value="labs" className="text-xs gap-1.5"><FlaskConical className="h-3.5 w-3.5" /> Laboratory Results</TabsTrigger>
               <TabsTrigger value="imaging" className="text-xs gap-1.5"><Scan className="h-3.5 w-3.5" /> Imaging</TabsTrigger>
             </TabsList>
-            <TabsContent value="labs" className="mt-0"><Empty>No lab results filed yet.</Empty></TabsContent>
+            <TabsContent value="labs" className="mt-0"><TestResultsPanel patientId={admission?.patient_id} /></TabsContent>
             <TabsContent value="imaging" className="mt-0">
               <IncidentPhotos incidentId={incidentId} readOnly />
             </TabsContent>
@@ -173,29 +175,24 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
         </TabsContent>
 
         <TabsContent value="care" className="p-4 mt-0">
-          <Tabs defaultValue="procedures">
-            <TabsList>
-              <TabsTrigger value="procedures" className="text-xs gap-1.5"><Syringe className="h-3.5 w-3.5" /> Procedures</TabsTrigger>
-              <TabsTrigger value="wound-care" className="text-xs gap-1.5"><Bandage className="h-3.5 w-3.5" /> Wound Care</TabsTrigger>
-              <TabsTrigger value="risk" className="text-xs gap-1.5"><ShieldAlert className="h-3.5 w-3.5" /> Risk Assessments</TabsTrigger>
-              <TabsTrigger value="care-plan" className="text-xs gap-1.5"><Target className="h-3.5 w-3.5" /> Care Plan</TabsTrigger>
+          <Tabs defaultValue="care-activities">
+            <TabsList className="flex-wrap h-auto gap-1">
+              <TabsTrigger value="care-activities" className="text-xs gap-1.5"><HeartHandshake className="h-3.5 w-3.5" /> Care Activities</TabsTrigger>
+              <TabsTrigger value="interventions" className="text-xs gap-1.5"><Activity className="h-3.5 w-3.5" /> Interventions</TabsTrigger>
+              <TabsTrigger value="referrals" className="text-xs gap-1.5"><Send className="h-3.5 w-3.5" /> Referrals</TabsTrigger>
+              <TabsTrigger value="handover" className="text-xs gap-1.5"><ArrowLeftRight className="h-3.5 w-3.5" /> Handover</TabsTrigger>
+              <TabsTrigger value="discharge" className="text-xs gap-1.5"><LogOut className="h-3.5 w-3.5" /> Discharge</TabsTrigger>
             </TabsList>
-            <TabsContent value="procedures" className="mt-0"><Empty>No procedures logged yet.</Empty></TabsContent>
-            <TabsContent value="wound-care" className="mt-0"><Empty>No wound care entries yet.</Empty></TabsContent>
-            <TabsContent value="risk" className="mt-0"><Empty>No risk assessments completed yet.</Empty></TabsContent>
-            <TabsContent value="care-plan" className="mt-0"><Empty>No care plan goals set yet.</Empty></TabsContent>
+            <TabsContent value="care-activities" className="mt-0"><Empty>No care activities recorded yet.</Empty></TabsContent>
+            <TabsContent value="interventions" className="mt-0"><Empty>No interventions recorded yet.</Empty></TabsContent>
+            <TabsContent value="referrals" className="mt-0"><Empty>No referrals made yet.</Empty></TabsContent>
+            <TabsContent value="handover" className="mt-0"><Empty>No handover notes recorded yet.</Empty></TabsContent>
+            <TabsContent value="discharge" className="mt-0"><Empty>No discharge planning started yet.</Empty></TabsContent>
           </Tabs>
         </TabsContent>
 
         <TabsContent value="orders-handover" className="p-4 mt-0">
-          <Tabs defaultValue="orders">
-            <TabsList>
-              <TabsTrigger value="orders" className="text-xs gap-1.5"><FileText className="h-3.5 w-3.5" /> Orders</TabsTrigger>
-              <TabsTrigger value="handover" className="text-xs gap-1.5"><ArrowLeftRight className="h-3.5 w-3.5" /> Handover Sheet</TabsTrigger>
-            </TabsList>
-            <TabsContent value="orders" className="mt-0"><Empty>No outstanding orders.</Empty></TabsContent>
-            <TabsContent value="handover" className="mt-0"><Empty>No handover notes recorded yet.</Empty></TabsContent>
-          </Tabs>
+          <Empty>No outstanding orders.</Empty>
         </TabsContent>
       </Tabs>
     </div>

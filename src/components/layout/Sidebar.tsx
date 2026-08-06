@@ -28,6 +28,7 @@ import {
   Eye,
   EyeOff,
   RotateCcw,
+  FlaskConical,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -106,6 +107,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
+  { icon: FlaskConical, label: "Lab Results", labelKey: "nav.labResults", to: "/patient/lab-results" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];

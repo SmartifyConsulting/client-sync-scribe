@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
-import { CheckCircle2, ChevronRight } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 type Row = {
@@ -62,14 +62,15 @@ export default function AdmissionsScreen() {
               <th className="px-3 py-2 text-left">{t("admissions.priority")}</th>
               <th className="px-3 py-2 text-left">{t("admissions.bayNurse")}</th>
               <th className="px-3 py-2 text-left">{t("admissions.admitted")}</th>
-              <th className="px-3 py-2" />
             </tr>
           </thead>
           <tbody className="divide-y">
             {rows.map((r) => (
               <tr key={r.id} className="hover:bg-muted/40">
                 <td className="px-3 py-2">
-                  <p className="font-semibold">#{r.id.slice(0,8)}</p>
+                  <Link to={`/provider/hospital/incident/${r.id}`} className="font-semibold text-primary hover:underline">
+                    #{r.id.slice(0,8)}
+                  </Link>
                   <p className="text-xs text-muted-foreground">{statusLabel(r.status, t)}</p>
                 </td>
                 <td className="px-3 py-2 text-xs">
@@ -83,15 +84,10 @@ export default function AdmissionsScreen() {
                   {r.triage_bay ?? "—"}{r.triage_nurse ? ` · ${r.triage_nurse}` : ""}
                 </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">{ago(r.admitted_at ?? r.completed_at)} {t("common.ago")}</td>
-                <td className="px-3 py-2 text-right">
-                  <Link to={`/provider/hospital/incident/${r.id}`} className="inline-flex items-center gap-1 rounded-lg border bg-background px-2 py-1 text-sm font-semibold hover:bg-muted">
-                    {t("common.open")} <ChevronRight className="h-3 w-3" />
-                  </Link>
-                </td>
               </tr>
             ))}
             {!rows.length && (
-              <tr><td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">{t("admissions.noAdmissions")}</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-xs text-muted-foreground">{t("admissions.noAdmissions")}</td></tr>
             )}
           </tbody>
         </table>
