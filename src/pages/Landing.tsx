@@ -164,7 +164,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section — full ecosystem showcase */}
-      <section className="relative pt-28 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-24 pb-10 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Ambient background blobs */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute top-20 -left-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
