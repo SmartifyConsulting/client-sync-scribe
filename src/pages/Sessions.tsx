@@ -597,7 +597,7 @@ export default function Sessions() {
       
       if (result) {
         setCurrentSessionId(result.id);
-        setSummary(result.summary || "Session completed successfully.");
+        setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
         // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
 
