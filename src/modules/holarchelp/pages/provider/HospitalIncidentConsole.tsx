@@ -113,7 +113,7 @@ export default function HospitalIncidentConsole() {
       )}
 
       {incident.hospital_admission_status === "admitted" ? (
-        <AdmittedPatientChart incidentId={id!} />
+        <AdmittedPatientChart incidentId={id!} incident={incident} />
       ) : (
         // Pre-admission workflow — map / admission stepper / triage assessment /
         // timeline. Once the patient is admitted to a ward these are replaced by
