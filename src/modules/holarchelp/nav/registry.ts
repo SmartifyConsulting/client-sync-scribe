@@ -72,7 +72,7 @@ export const PROVIDER_MODULES: NavModule[] = [
       { icon: Siren, labelKey: "nav.erDashboard", label: "ER Dispatch", to: "/provider/hospital/er" },
       { icon: Ambulance, labelKey: "nav.incomingAmbulances", label: "Incoming Ambulances", to: "/provider/hospital/incoming" },
       { icon: Stethoscope, labelKey: "nav.triageBoard", label: "Triage Board", to: "/provider/hospital/triage" },
-      { icon: HeartPulse, labelKey: "nav.traumaBays", label: "Trauma Bays", to: "/provider/hospital/trauma-bays" },
+      { icon: BedDouble, labelKey: "nav.wardBoard", label: "Ward Board", to: "/provider/hospital/ward-board" },
     ],
   },
   {
@@ -83,8 +83,6 @@ export const PROVIDER_MODULES: NavModule[] = [
     enabled: always,
     items: [
       { icon: ClipboardList, labelKey: "nav.admissions", label: "Admissions", to: "/provider/hospital/admissions" },
-      { icon: BedDouble, labelKey: "nav.wards", label: "Wards", to: "/provider/hospital/wards" },
-      { icon: Users, labelKey: "nav.inpatients", label: "Inpatients", to: "/provider/hospital/inpatients" },
       { icon: LogOut, labelKey: "nav.discharges", label: "Discharges", to: "/provider/hospital/discharges" },
     ],
   },

@@ -17,8 +17,7 @@ import EmergencyHubScreen from "./pages/provider/hospital/EmergencyHubScreen";
 import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
 import HospitalDashboardScreen from "./pages/provider/hospital/HospitalDashboardScreen";
 import HospitalAdminDashboard from "./pages/provider/hospital/HospitalAdminDashboard";
-import WardsScreen from "./pages/provider/hospital/WardsScreen";
-import InpatientsScreen from "./pages/provider/hospital/InpatientsScreen";
+import WardBoardScreen from "./pages/provider/hospital/WardBoardScreen";
 import ShiftsScreen from "./pages/provider/hospital/ShiftsScreen";
 import MyShiftScreen from "./pages/provider/hospital/MyShiftScreen";
 import IncidentTimelineScreen from "./pages/provider/hospital/IncidentTimelineScreen";
@@ -131,17 +130,18 @@ export default function ProviderRoutes() {
         <Route path="er" element={<EmergencyCapability><ErCoordinationScreen /></EmergencyCapability>} />
         <Route path="incoming" element={<EmergencyCapability><IncomingAmbulancesScreen /></EmergencyCapability>} />
         <Route path="triage" element={<EmergencyCapability><TriageScreen /></EmergencyCapability>} />
-        <Route path="trauma-bays" element={<EmergencyCapability><TraumaBaysScreen /></EmergencyCapability>} />
+        <Route path="ward-board" element={<EmergencyCapability><WardBoardScreen /></EmergencyCapability>} />
+        <Route path="trauma-bays" element={<Navigate to="/provider/hospital/ward-board" replace />} />
+        <Route path="wards" element={<Navigate to="/provider/hospital/ward-board?tab=wards" replace />} />
+        <Route path="inpatients" element={<Navigate to="/provider/hospital/admissions?tab=inpatients" replace />} />
         <Route path="dashboard" element={<HospitalDashboardScreen />} />
         <Route path="admin-dashboard" element={<HospitalAdminDashboard />} />
         <Route path="analytics" element={<ExecutiveDashboardScreen />} />
         <Route path="admissions" element={<AdmissionsScreen />} />
-        <Route path="wards" element={<WardsScreen />} />
-        <Route path="inpatients" element={<InpatientsScreen />} />
         <Route path="discharges" element={<DischargesScreen />} />
         <Route path="shifts" element={<ShiftsScreen />} />
         <Route path="my-shift" element={<MyShiftScreen />} />
-        <Route path="capacity" element={<Navigate to="/provider/hospital/trauma-bays" replace />} />
+        <Route path="capacity" element={<Navigate to="/provider/hospital/ward-board" replace />} />
         <Route path="timeline" element={<IncidentTimelineScreen />} />
         <Route path="providers" element={<ProvidersScreen />} />
         <Route path="doctors" element={<Navigate to="/provider/hospital/providers?tab=doctors" replace />} />

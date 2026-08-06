@@ -16,11 +16,11 @@ import { useToast } from "@/hooks/use-toast";
 import { BedDouble, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function WardForm({ hospitalId, onSaved }: { hospitalId: string; onSaved: () => void }) {
+function WardForm({ hospitalId, onSaved, defaultWardType }: { hospitalId: string; onSaved: () => void; defaultWardType?: string }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [wardType, setWardType] = useState("general");
+  const [wardType, setWardType] = useState(defaultWardType ?? "general");
   const [capacity, setCapacity] = useState("20");
   const [saving, setSaving] = useState(false);
 
@@ -35,7 +35,7 @@ function WardForm({ hospitalId, onSaved }: { hospitalId: string; onSaved: () => 
     });
     setSaving(false);
     if (error) { toast({ title: "Could not add ward", description: error.message, variant: "destructive" }); return; }
-    setName(""); setCapacity("20"); setWardType("general"); setOpen(false);
+    setName(""); setCapacity("20"); setWardType(defaultWardType ?? "general"); setOpen(false);
     onSaved();
   };
 
@@ -76,12 +76,17 @@ function WardForm({ hospitalId, onSaved }: { hospitalId: string; onSaved: () => 
   );
 }
 
-export default function WardsScreen() {
+export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: string; title?: string } = {}) {
   const { providerId } = useProviderAccess();
   const { toast } = useToast();
-  const { wards, totals, reload } = useHospitalWards(providerId);
+  const { wards: allWards, totals: allTotals, reload } = useHospitalWards(providerId);
   const { inpatients } = useHospitalInpatients(providerId);
   const { onShiftNow } = useHospitalShifts(providerId);
+
+  const wards = wardType ? allWards.filter((w) => w.ward_type === wardType) : allWards;
+  const totals = wardType
+    ? wards.reduce((acc, w) => ({ capacity: acc.capacity + (w.bed_capacity || 0), occupied: acc.occupied + w.occupied }), { capacity: 0, occupied: 0 })
+    : allTotals;
 
   const archive = async (id: string) => {
     const { error } = await supabase.from("hospital_wards").update({ is_active: false }).eq("id", id);
@@ -94,18 +99,18 @@ export default function WardsScreen() {
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
-          <h1 className="text-2xl font-extrabold">Wards</h1>
+          <h1 className="text-2xl font-extrabold">{title}</h1>
           <p className="text-xs text-muted-foreground">
             {totals.occupied} of {totals.capacity} beds occupied across {wards.length} wards
           </p>
         </div>
-        {providerId && <WardForm hospitalId={providerId} onSaved={reload} />}
+        {providerId && <WardForm hospitalId={providerId} onSaved={reload} defaultWardType={wardType} />}
       </header>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
         <Accordion type="multiple" className="divide-y">
           {wards.map((ward, i) => {
-            const patients = inpatients.filter((p) => p.ward_id === ward.id && p.status === "admitted");
+            const patients = inpatients.filter((p) => p.ward_id === ward.id && p.status !== "discharged");
             const staff = onShiftNow.filter((s) => s.ward_id === ward.id);
             const pct = ward.bed_capacity ? Math.min(100, (ward.occupied / ward.bed_capacity) * 100) : 0;
             return (

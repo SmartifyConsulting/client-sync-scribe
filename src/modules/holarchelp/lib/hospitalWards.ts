@@ -5,6 +5,8 @@
 export const WARD_TYPES = [
   { value: "general", label: "General" },
   { value: "icu", label: "ICU" },
+  { value: "theatre", label: "Theatre" },
+  { value: "high_care", label: "High Care" },
   { value: "maternity", label: "Maternity" },
   { value: "paediatric", label: "Paediatric" },
   { value: "surgical", label: "Surgical" },

@@ -12,17 +12,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import { ArrowRightLeft, LogOut, NotebookPen, Plus, Stethoscope, UserPlus } from "lucide-react";
+
+const STATUS_CHIPS = [
+  { value: "admitted", label: "Admitted" },
+  { value: "discharged", label: "Discharged" },
+  { value: "transferred", label: "Transferred" },
+] as const;
 
 export default function InpatientsScreen() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { providerId } = useProviderAccess();
   const { wards } = useHospitalWards(providerId);
-  const { inpatients, reload } = useHospitalInpatients(providerId);
+  const { inpatients, reload } = useHospitalInpatients(providerId, true);
   const { shifts } = useHospitalShifts(providerId);
 
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("admitted");
   const [admitOpen, setAdmitOpen] = useState(false);
   const [transferFor, setTransferFor] = useState<InpatientRecord | null>(null);
   const [doctorFor, setDoctorFor] = useState<InpatientRecord | null>(null);
@@ -31,11 +39,16 @@ export default function InpatientsScreen() {
 
   const wardName = (id: string | null) => wards.find((w) => w.id === id)?.name ?? "Unassigned";
 
+  const byStatus = useMemo(
+    () => inpatients.filter((p) => p.status === statusFilter),
+    [inpatients, statusFilter],
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return inpatients;
-    return inpatients.filter((p) => p.patient_name.toLowerCase().includes(q) || wardName(p.ward_id).toLowerCase().includes(q));
-  }, [inpatients, search, wards]);
+    if (!q) return byStatus;
+    return byStatus.filter((p) => p.patient_name.toLowerCase().includes(q) || wardName(p.ward_id).toLowerCase().includes(q));
+  }, [byStatus, search, wards]);
 
   const discharge = async (row: InpatientRecord) => {
     const { error } = await supabase
@@ -51,7 +64,7 @@ export default function InpatientsScreen() {
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-lg font-extrabold">Inpatients</h2>
-          <p className="text-xs text-muted-foreground">{inpatients.length} active admissions</p>
+          <p className="text-xs text-muted-foreground">{filtered.length} {statusFilter}</p>
         </div>
         <div className="flex items-center gap-2">
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search patient or ward" className="h-9 w-52" />
@@ -60,6 +73,23 @@ export default function InpatientsScreen() {
           </Button>
         </div>
       </header>
+
+      <div className="flex flex-wrap gap-1.5">
+        {STATUS_CHIPS.map((chip) => (
+          <button
+            key={chip.value}
+            onClick={() => setStatusFilter(chip.value)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+              statusFilter === chip.value
+                ? "border-primary bg-primary text-white"
+                : "border-border bg-background text-muted-foreground hover:bg-muted",
+            )}
+          >
+            {chip.label} · {inpatients.filter((p) => p.status === chip.value).length}
+          </button>
+        ))}
+      </div>
 
       <div className="overflow-hidden rounded-2xl border bg-card">
         <table className="w-full text-sm">

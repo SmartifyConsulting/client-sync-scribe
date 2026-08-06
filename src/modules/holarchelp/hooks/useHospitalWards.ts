@@ -33,7 +33,7 @@ export function useHospitalWards(hospitalId: string | null) {
         .from("hospital_inpatient_admissions")
         .select("ward_id")
         .eq("hospital_id", hospitalId)
-        .eq("status", "admitted"),
+        .neq("status", "discharged"),
     ]);
 
     const counts = new Map<string, number>();

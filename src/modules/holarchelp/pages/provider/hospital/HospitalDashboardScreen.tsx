@@ -102,7 +102,7 @@ export default function HospitalDashboardScreen() {
         <Panel
           icon={BedDouble}
           title="Ward occupancy"
-          action={<Link to="/provider/hospital/wards" className="text-xs font-semibold text-primary hover:underline">Manage wards</Link>}
+          action={<Link to="/provider/hospital/ward-board?tab=wards" className="text-xs font-semibold text-primary hover:underline">Manage wards</Link>}
         >
           <div className="space-y-3 p-4">
             {wards.map((ward, i) => {
@@ -123,7 +123,7 @@ export default function HospitalDashboardScreen() {
             })}
             {!wards.length && (
               <p className="py-6 text-center text-xs text-muted-foreground">
-                No wards yet — <Link to="/provider/hospital/wards" className="font-semibold text-primary hover:underline">add your first ward</Link>.
+                No wards yet — <Link to="/provider/hospital/ward-board?tab=wards" className="font-semibold text-primary hover:underline">add your first ward</Link>.
               </p>
             )}
           </div>

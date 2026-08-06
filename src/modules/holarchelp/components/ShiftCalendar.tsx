@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -70,69 +71,84 @@ export function ShiftCalendar({
         </div>
 
         <div className="overflow-x-auto">
-          <div className="min-w-[880px]">
-            <div className="grid grid-cols-[92px_repeat(7,1fr)] border-b bg-muted/20">
-              <div />
-              {days.map((d) => (
-                <div
-                  key={d.toISOString()}
-                  className={cn(
-                    "px-2 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide",
-                    sameDay(d, today) && "text-primary",
-                  )}
-                >
-                  {dayLabel(d)}
-                </div>
-              ))}
-            </div>
-
-            {SHIFT_BANDS.map((band) => (
-              <div key={band.value} className="grid grid-cols-[92px_repeat(7,1fr)] border-b last:border-b-0">
-                <div className="flex items-center border-r bg-muted/20 px-2 py-2 text-[11px] font-bold uppercase tracking-wide">
-                  {band.label}
-                </div>
-                {days.map((d) => {
-                  const cell = shiftsForSlot(weekShifts, d, band.value);
-                  return (
-                    <div
-                      key={`${band.value}-${d.toISOString()}`}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        const key = e.dataTransfer.getData("text/staff-key");
-                        if (key) onAssign(key, d, band.value);
-                      }}
-                      onClick={() => onSlotClick(d, band.value)}
-                      className="group min-h-[72px] cursor-pointer space-y-1 border-r p-1.5 last:border-r-0 hover:bg-muted/30"
-                    >
-                      {cell.map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={(e) => { e.stopPropagation(); onChipClick(s); }}
-                          className={cn(
-                            "flex w-full items-center gap-1 rounded-md px-1.5 py-1 text-left text-[11px] font-semibold",
-                            s.staff_role === "doctor"
-                              ? "bg-primary/10 text-primary"
-                              : "bg-[hsl(214_88%_54%/0.12)] text-[hsl(214_88%_40%)]",
-                          )}
-                        >
-                          {!!s.clocked_in_at && !s.clocked_out_at && (
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
-                          )}
-                          <span className="truncate">{s.staff_name}</span>
-                          {s.rest_ack_at && <AlertTriangle className="ml-auto h-3 w-3 shrink-0 text-amber-500" />}
-                        </button>
-                      ))}
-                      {!cell.length && (
-                        <span className="hidden items-center gap-1 text-[11px] text-muted-foreground group-hover:flex">
-                          <Plus className="h-3 w-3" /> Assign
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
+          {/* A single shared grid spans the header row and every shift-band row, so
+              the 7 day columns share exactly the same track sizes everywhere —
+              splitting each row into its own grid let 1fr tracks drift by
+              sub-pixels row to row, which showed up as misaligned day columns. */}
+          <div className="grid min-w-[880px] grid-cols-[92px_repeat(7,1fr)]">
+            <div className="border-b bg-muted/20" />
+            {days.map((d) => (
+              <div
+                key={d.toISOString()}
+                className={cn(
+                  "border-b bg-muted/20 px-2 py-1.5 text-center text-[11px] font-bold uppercase tracking-wide",
+                  sameDay(d, today) && "text-primary",
+                )}
+              >
+                {dayLabel(d)}
               </div>
             ))}
+
+            {SHIFT_BANDS.map((band, bandIndex) => {
+              const isLastBand = bandIndex === SHIFT_BANDS.length - 1;
+              return (
+                <Fragment key={band.value}>
+                  <div
+                    className={cn(
+                      "flex items-center border-r bg-muted/20 px-2 py-2 text-[11px] font-bold uppercase tracking-wide",
+                      !isLastBand && "border-b",
+                    )}
+                  >
+                    {band.label}
+                  </div>
+                  {days.map((d, dayIndex) => {
+                    const cell = shiftsForSlot(weekShifts, d, band.value);
+                    const isLastDay = dayIndex === days.length - 1;
+                    return (
+                      <div
+                        key={`${band.value}-${d.toISOString()}`}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const key = e.dataTransfer.getData("text/staff-key");
+                          if (key) onAssign(key, d, band.value);
+                        }}
+                        onClick={() => onSlotClick(d, band.value)}
+                        className={cn(
+                          "group min-h-[72px] cursor-pointer space-y-1 border-r p-1.5 hover:bg-muted/30",
+                          isLastDay && "border-r-0",
+                          !isLastBand && "border-b",
+                        )}
+                      >
+                        {cell.map((s) => (
+                          <button
+                            key={s.id}
+                            onClick={(e) => { e.stopPropagation(); onChipClick(s); }}
+                            className={cn(
+                              "flex w-full items-center gap-1 rounded-md px-1.5 py-1 text-left text-[11px] font-semibold",
+                              s.staff_role === "doctor"
+                                ? "bg-primary/10 text-primary"
+                                : "bg-[hsl(214_88%_54%/0.12)] text-[hsl(214_88%_40%)]",
+                            )}
+                          >
+                            {!!s.clocked_in_at && !s.clocked_out_at && (
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+                            )}
+                            <span className="truncate">{s.staff_name}</span>
+                            {s.rest_ack_at && <AlertTriangle className="ml-auto h-3 w-3 shrink-0 text-amber-500" />}
+                          </button>
+                        ))}
+                        {!cell.length && (
+                          <span className="hidden items-center gap-1 text-[11px] text-muted-foreground group-hover:flex">
+                            <Plus className="h-3 w-3" /> Assign
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
           </div>
         </div>
       </div>
