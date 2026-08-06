@@ -1477,32 +1477,88 @@ export default function Sessions() {
                 Use the main Mic/Square button above — no duplicate End Session button here. */}
           </div>
 
-          {/* Column 2 — Patient Overview (1.5 rows), then Personal Notes, then AI Clinician Notes. */}
+          {/* Column 2 — Patient Overview (DISC at top), Live AI Clinician, then AI Clinician Notes. */}
           <div className="flex flex-col gap-4 order-2">
-            {/* Patient Overview — AI recap of the last 6 months, spans ~1.5 rows. */}
+            {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
-              <SessionPatientOverview patient={currentPatient} currentMedications={currentMedications} />
+              <SessionPatientOverview
+                patient={currentPatient}
+                currentMedications={currentMedications}
+                discSlot={<SessionDiscStrip patientId={currentPatient?.id} inline />}
+              />
             </div>
 
-            {/* DISC personality reminder — doctors only, adjectives instead of paragraphs. */}
-            <SessionDiscStrip patientId={currentPatient?.id} />
+            {/* Live AI Clinician — sits directly above the AI Clinician Notes frame. */}
+            {isRecording && aiConsultEnabled && (liveHint || liveHintLoading) && (
+              <div className="rounded-xl border border-primary bg-primary/5 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    <p className="text-sm font-medium text-primary-dark">Live AI Clinician</p>
+                  </div>
+                  {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+                </div>
 
-            {/* Personal Notes — private to the doctor, not shared with the patient. */}
-            <div className="min-h-[140px] flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between p-3 border-b bg-primary/5">
-                <h3 className="text-sm font-semibold text-foreground">Personal Notes</h3>
-                <span className="text-[10px] text-muted-foreground">Private — not shared with the patient</span>
-              </div>
+                {/* Safety alerts first — this is what the doctor must see before prescribing */}
+                {liveHint?.alerts && liveHint.alerts.length > 0 && (
+                  <div className="mb-2 space-y-1">
+                    {liveHint.alerts.map((a, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex items-start gap-1.5 rounded-md border px-2 py-1.5",
+                          a.severity === "critical"
+                            ? "border-destructive/40 bg-destructive/10"
+                            : a.severity === "caution"
+                              ? "border-warning/40 bg-warning/10"
+                              : "border-border bg-muted/40",
+                        )}
+                      >
+                        <ShieldAlert
+                          className={cn(
+                            "h-3.5 w-3.5 mt-0.5 shrink-0",
+                            a.severity === "critical"
+                              ? "text-destructive"
+                              : a.severity === "caution"
+                                ? "text-warning"
+                                : "text-muted-foreground",
+                          )}
+                        />
+                        <p
+                          className={cn(
+                            "text-sm leading-relaxed",
+                            a.severity === "critical" ? "text-destructive font-medium" : "text-foreground",
+                          )}
+                        >
+                          {a.message}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-              <div className="p-3">
-                <Textarea
-                  value={personalNotes}
-                  onChange={(e) => setPersonalNotes(e.target.value)}
-                  placeholder="Jot down private thoughts for yourself..."
-                  className="min-h-[100px] resize-y border-0 focus-visible:ring-0 p-2"
-                />
+                <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+                  {liveHint?.suggestion && (
+                    <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
+                  )}
+                  {liveHint?.differentials && liveHint.differentials.length > 0 && (
+                    <p className="text-sm text-foreground leading-relaxed">
+                      <span className="font-bold">Consider:</span> {liveHint.differentials.join(" · ")}
+                    </p>
+                  )}
+                  {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
+                    <p className="text-sm text-destructive leading-relaxed">
+                      <span className="font-bold">Rule out:</span> {liveHint.red_flags.join(" · ")}
+                    </p>
+                  )}
+                  {liveHint?.suggested_investigations && liveHint.suggested_investigations.length > 0 && (
+                    <p className="text-sm text-foreground leading-relaxed">
+                      <span className="font-bold">Checks:</span> {liveHint.suggested_investigations.join(" · ")}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <Tabs defaultValue="notes">
               <TabsList className="mb-2">
@@ -1516,27 +1572,23 @@ export default function Sessions() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="notes" className="mt-0">
-                <div className="flex gap-3">
-                  <div className="w-40 shrink-0 rounded-lg border border-border bg-muted/30 p-2.5">
-                    <p className="text-[11px] font-semibold text-foreground leading-snug">
-                      Private — not shared with the patient and only available for the duration of the session.
-                    </p>
-                    <p className="mt-1.5 text-[10px] text-muted-foreground leading-snug">
+                <SessionNotepad
+                  patientId={patientId || ""}
+                  sessionId={currentSessionId}
+                  patientName={currentPatient?.name}
+                  notes={notes}
+                  onNotesChange={setNotes}
+                  isRecording={isRecording}
+                  disclaimer={
+                    <p className="text-xs text-muted-foreground leading-snug">
+                      <span className="font-semibold text-foreground">
+                        Private — not shared with the patient and only available for the duration of the session.
+                      </span>{" "}
                       Disclaimer: AI-generated clinical notes are decision support only. They may be incomplete or
                       inaccurate and must be reviewed and confirmed by the treating clinician before any clinical use.
                     </p>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <SessionNotepad
-                      patientId={patientId || ""}
-                      sessionId={currentSessionId}
-                      patientName={currentPatient?.name}
-                      notes={notes}
-                      onNotesChange={setNotes}
-                      isRecording={isRecording}
-                    />
-                  </div>
-                </div>
+                  }
+                />
               </TabsContent>
 
               <TabsContent value="drawing" className="mt-0">
