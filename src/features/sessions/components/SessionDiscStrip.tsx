@@ -84,6 +84,30 @@ export function SessionDiscStrip({ patientId, inline = false }: Props) {
 
   if (!isDoctor || !patientId) return null;
 
+  if (inline) {
+    if (!profile) return null;
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Brain className="h-3.5 w-3.5 text-primary shrink-0" />
+        {DIMS.map((d) => {
+          const score = Number(profile[d.key] ?? 0);
+          const words = score >= 60 ? d.high : score >= 40 ? d.moderate : [];
+          if (!words.length) return null;
+          return (
+            <span
+              key={d.key}
+              className={`rounded border px-1.5 py-0.5 text-[11px] ${d.chip}`}
+            >
+              <span className="font-bold">{d.letter}</span> {words.join(", ")}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
       <div className="flex items-center gap-1.5 px-3 py-2 border-b bg-primary/5">
