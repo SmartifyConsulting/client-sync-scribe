@@ -177,19 +177,34 @@ export default function Landing() {
 
         <div className="max-w-7xl mx-auto space-y-10">
           {/* TOP ROW — logo left, mosaic right */}
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="lg:col-span-6 flex justify-center lg:justify-start"
+              className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left lg:pt-6"
             >
               <img
                 src={holarcLogo}
                 alt="Holarc Health"
                 className="h-28 sm:h-36 lg:h-44 w-auto"
               />
+
+              <div className="mt-5 space-y-3">
+                <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
+                  {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
+                </p>
+                <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
+                  <span className="text-muted-foreground">[ </span>
+                  {t("landing.hero.titleHighlight")}
+                  <span className="text-muted-foreground"> ]</span>
+                </p>
+                <p className="text-sm font-normal text-muted-foreground">
+                  {t("landing.hero.description")}
+                </p>
+              </div>
             </motion.div>
+
 
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
