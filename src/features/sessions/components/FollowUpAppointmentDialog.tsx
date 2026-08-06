@@ -202,13 +202,13 @@ export function FollowUpAppointmentDialog({
           )}
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="ghost" onClick={handleIgnore} className="sm:mr-auto" disabled={submitting}>
-            Ignore (no follow-up)
+        <DialogFooter className="flex-col sm:flex-row gap-2 sm:justify-end">
+          <Button variant="ghost" onClick={handleIgnore} disabled={submitting}>
+            Skip
           </Button>
           <Button onClick={handleSet} disabled={!slot || submitting}>
             {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
-            Set follow-up
+            Schedule
           </Button>
         </DialogFooter>
       </DialogContent>
