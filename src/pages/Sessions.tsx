@@ -634,13 +634,19 @@ export default function Sessions() {
         // Silently create every detected document, then show one summary dialog.
         setTimeout(() => generateAllDocuments(), 0);
       } else {
-        setSummary("Session completed. No content was recorded or noted.");
+        setSummary("No content was recorded or noted.");
         setActionPoints([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in handleSessionComplete:", error);
-      setSummary("Session completed. No content was recorded or noted.");
+      setSummary("");
       setActionPoints([]);
+      toast({
+        title: "Analysis didn't complete",
+        description:
+          "The AI analysis failed or timed out, so no summary, action points or documents were produced. Your recording and notes are saved — tap the mic and use AI Consult to retry.",
+        variant: "destructive",
+      });
     }
 
     setSessionState("completed");
