@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Loader2, Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SessionPatientOverviewProps {
   patient: any | undefined;
   currentMedications?: { medication: string; dosage: string; frequency: string }[];
+  /** Rendered at the top of the frame (used for the DISC descriptor chips). */
+  discSlot?: ReactNode;
 }
 
 const stripTags = (s: string) =>
@@ -29,7 +31,7 @@ interface OverviewData {
  * labelled key points (conditions, current medications, allergies, symptoms,
  * recent visits) rather than one long paragraph.
  */
-export function SessionPatientOverview({ patient, currentMedications = [] }: SessionPatientOverviewProps) {
+export function SessionPatientOverview({ patient, currentMedications = [], discSlot }: SessionPatientOverviewProps) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OverviewData | null>(null);
 
@@ -112,7 +114,7 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patient?.id]);
 
-  const Row = ({
+  const Column = ({
     label,
     items,
     tone = "default",
@@ -121,26 +123,36 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
     items: string[];
     tone?: "default" | "danger";
   }) => (
-    <div className="flex gap-2 py-1">
-      <span className="w-[104px] shrink-0 text-xs font-bold text-foreground">{label}</span>
-      <div className="min-w-0 flex-1">
-        {items.length ? (
-          <ul className="space-y-0.5">
-            {items.slice(0, 6).map((item, i) => (
-              <li
-                key={i}
-                className={`text-xs leading-relaxed ${tone === "danger" ? "text-destructive font-medium" : "text-foreground"}`}
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <span className="text-xs text-muted-foreground">None recorded</span>
-        )}
-      </div>
+    <div className="min-w-0">
+      <p className="text-xs font-bold text-foreground mb-1">{label}</p>
+      {items.length ? (
+        <ul className="space-y-0.5">
+          {items.slice(0, 6).map((item, i) => (
+            <li
+              key={i}
+              className={`text-xs leading-relaxed ${tone === "danger" ? "text-destructive font-medium" : "text-foreground"}`}
+            >
+              {item}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <span className="text-xs text-muted-foreground">None recorded</span>
+      )}
     </div>
   );
+
+  /** "12 Mar 2026 — acute foot pain" → date normal, problem bold. */
+  const Visit = ({ value }: { value: string }) => {
+    const idx = value.indexOf("—");
+    if (idx < 0) return <li className="text-xs text-foreground leading-relaxed">{value}</li>;
+    return (
+      <li className="text-xs text-foreground leading-relaxed">
+        <span className="text-muted-foreground">{value.slice(0, idx).trim()} — </span>
+        <span className="font-bold">{value.slice(idx + 1).trim()}</span>
+      </li>
+    );
+  };
 
   return (
     <div className="flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
@@ -150,21 +162,33 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
         <span className="text-[10px] text-muted-foreground ml-auto">Last 6 months</span>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-3">
+        {discSlot && <div className="mb-2 pb-2 border-b border-border">{discSlot}</div>}
         {loading ? (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Building overview...
           </div>
         ) : data ? (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {data.headline && (
-              <p className="text-xs leading-relaxed text-foreground mb-2">{data.headline}</p>
+              <p className="text-xs leading-relaxed text-foreground">{data.headline}</p>
             )}
-            <div className="divide-y divide-border">
-              <Row label="Conditions" items={data.conditions} />
-              <Row label="Current meds" items={data.medications} />
-              <Row label="Allergies" items={data.allergies} tone="danger" />
-              <Row label="Symptoms" items={data.symptoms} />
-              <Row label="Recent visits" items={data.visits} />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Column label="Conditions" items={data.conditions} />
+              <Column label="Current meds" items={data.medications} />
+              <Column label="Allergies" items={data.allergies} tone="danger" />
+              <Column label="Symptoms" items={data.symptoms} />
+            </div>
+            <div className="pt-2 border-t border-border">
+              <p className="text-xs font-bold text-foreground mb-1">Recent visits</p>
+              {data.visits.length ? (
+                <ul className="space-y-0.5">
+                  {data.visits.map((v, i) => (
+                    <Visit key={i} value={v} />
+                  ))}
+                </ul>
+              ) : (
+                <span className="text-xs text-muted-foreground">None recorded</span>
+              )}
             </div>
           </div>
         ) : (
@@ -174,3 +198,4 @@ export function SessionPatientOverview({ patient, currentMedications = [] }: Ses
     </div>
   );
 }
+
