@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface LiveDiagnosticAlert {
+  type: "duplicate" | "interaction" | "allergy" | "recurrence" | "red_flag" | "gap";
+  severity: "critical" | "caution" | "info";
+  message: string;
+}
+
 export interface LiveDiagnosticHint {
   suggestion: string;
+  alerts?: LiveDiagnosticAlert[];
   differentials?: string[];
   red_flags?: string[];
   suggested_investigations?: string[];
@@ -38,8 +45,8 @@ export function useLiveDiagnosticHint({
   pastSessions,
 
   language,
-  intervalMs = 20000,
-  minGrowthChars = 80,
+  intervalMs = 12000,
+  minGrowthChars = 40,
 }: Args) {
   const [hint, setHint] = useState<LiveDiagnosticHint | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,7 +82,7 @@ export function useLiveDiagnosticHint({
             currentMedications,
             chronicConditions,
             allergies,
-            pastSessions: (pastSessions ?? []).slice(0, 3),
+            pastSessions: (pastSessions ?? []).slice(0, 5),
 
             language,
           },
@@ -85,7 +92,7 @@ export function useLiveDiagnosticHint({
           console.warn("live-diagnostic-hint error:", error);
           return;
         }
-        if (data && (data.suggestion || data.differentials?.length)) {
+        if (data && (data.suggestion || data.differentials?.length || data.alerts?.length)) {
           setHint(data as LiveDiagnosticHint);
         }
       } catch (e) {
@@ -97,7 +104,7 @@ export function useLiveDiagnosticHint({
       }
     };
 
-    const warmup = setTimeout(tick, 8000);
+    const warmup = setTimeout(tick, 6000);
     const interval = setInterval(tick, intervalMs);
     return () => {
       clearTimeout(warmup);

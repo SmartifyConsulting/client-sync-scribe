@@ -662,6 +662,8 @@ export default function Sessions() {
     isSavingAudio,
     transcript,
     liveTranscript,
+    liveMessages,
+    isSpeaking,
     audioUrl,
     savedAudioUrl,
     startRecording,
@@ -689,7 +691,9 @@ export default function Sessions() {
     },
     onTranscriptionComplete: (text) => {
       latestTranscriptRef.current = text;
-      setNotes(text);
+      // The transcript belongs in Speaker Notes only — AI Clinician Notes keeps
+      // the accumulated live clinical guidance, never a copy of the transcript.
+
       
       // Whisper fallback: check transcript for end session phrases
       const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
@@ -730,16 +734,53 @@ export default function Sessions() {
     language: (typeof doctorLanguage === "string" ? doctorLanguage : undefined),
   });
 
-  // Write each new AI Clinician suggestion into the notes as it's generated,
-  // so AI Clinician Notes fills in live during the recording. The doctor can
-  // still freely edit/type in the same field.
-  const appendedHintsRef = useRef<Set<string>>(new Set());
+  // The live hints ARE the AI Clinician Notes: each new hint is merged into a
+  // running, de-duplicated clinical note instead of being appended verbatim, so
+  // the note stays readable and free of repetition.
+  const hintImpressionRef = useRef<string>("");
+  const hintLinesRef = useRef<Set<string>>(new Set());
+  const hintSectionsRef = useRef<{ alerts: string[]; differentials: string[]; investigations: string[] }>({
+    alerts: [],
+    differentials: [],
+    investigations: [],
+  });
   useEffect(() => {
-    if (!aiConsultEnabled || !liveHint?.suggestion) return;
-    if (appendedHintsRef.current.has(liveHint.suggestion)) return;
-    appendedHintsRef.current.add(liveHint.suggestion);
-    setNotes((prev) => (prev ? `${prev}\n\n${liveHint.suggestion}` : liveHint.suggestion));
-  }, [liveHint, aiConsultEnabled]);
+    if (!liveHint) return;
+    const s = hintSectionsRef.current;
+    const addAll = (bucket: string[], items?: string[]) => {
+      (items || []).forEach((raw) => {
+        const item = String(raw).trim();
+        if (!item) return;
+        const key = item.toLowerCase();
+        if (hintLinesRef.current.has(key)) return;
+        hintLinesRef.current.add(key);
+        bucket.push(item);
+      });
+    };
+
+    if (liveHint.suggestion?.trim()) hintImpressionRef.current = liveHint.suggestion.trim();
+    addAll(
+      s.alerts,
+      (liveHint.alerts || []).map(
+        (a) => `[${a.severity === "critical" ? "CRITICAL" : a.severity === "caution" ? "CAUTION" : "NOTE"}] ${a.message}`,
+      ),
+    );
+    addAll(s.alerts, (liveHint.red_flags || []).map((r) => `[CAUTION] Rule out: ${r}`));
+    addAll(s.differentials, liveHint.differentials);
+    addAll(s.investigations, liveHint.suggested_investigations);
+
+    const composed = [
+      hintImpressionRef.current ? `WORKING IMPRESSION\n${hintImpressionRef.current}` : null,
+      s.alerts.length ? `SAFETY CHECKS\n${s.alerts.map((a) => `• ${a}`).join("\n")}` : null,
+      s.differentials.length ? `DIFFERENTIALS\n${s.differentials.map((d) => `• ${d}`).join("\n")}` : null,
+      s.investigations.length ? `SUGGESTED CHECKS\n${s.investigations.map((i) => `• ${i}`).join("\n")}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    if (composed) setNotes(composed);
+  }, [liveHint]);
+
 
   // Recording has actually started — drop the "preparing" state so the UI stops guessing.
   useEffect(() => {
@@ -822,7 +863,9 @@ export default function Sessions() {
     setAiDiagnosis(null);
     setCurrentSessionId(crypto.randomUUID());
     clearTranscript();
-    appendedHintsRef.current.clear();
+    hintImpressionRef.current = "";
+    hintLinesRef.current.clear();
+    hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
@@ -1251,31 +1294,75 @@ export default function Sessions() {
             {/* Live AI diagnostic hint - only while recording, and only if the doctor opted in at session start */}
             {isRecording && aiConsultEnabled && (liveHint || liveHintLoading) && (
               <div className="border-t bg-primary/5 p-3">
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-xs font-medium text-primary-dark">Live AI hint</p>
+                    <p className="text-xs font-medium text-primary-dark">Live AI Clinician</p>
                   </div>
                   {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                 </div>
+
+                {/* Safety alerts first — this is what the doctor must see before prescribing */}
+                {liveHint?.alerts && liveHint.alerts.length > 0 && (
+                  <div className="mb-2 space-y-1">
+                    {liveHint.alerts.map((a, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex items-start gap-1.5 rounded-md border px-2 py-1.5",
+                          a.severity === "critical"
+                            ? "border-destructive/40 bg-destructive/10"
+                            : a.severity === "caution"
+                              ? "border-warning/40 bg-warning/10"
+                              : "border-border bg-muted/40",
+                        )}
+                      >
+                        <ShieldAlert
+                          className={cn(
+                            "h-3.5 w-3.5 mt-0.5 shrink-0",
+                            a.severity === "critical"
+                              ? "text-destructive"
+                              : a.severity === "caution"
+                                ? "text-warning"
+                                : "text-muted-foreground",
+                          )}
+                        />
+                        <p
+                          className={cn(
+                            "text-xs leading-relaxed",
+                            a.severity === "critical" ? "text-destructive font-medium" : "text-foreground",
+                          )}
+                        >
+                          {a.message}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {liveHint?.suggestion && (
-                  <p className="text-[10px] text-foreground leading-relaxed">{liveHint.suggestion}</p>
+                  <p className="text-xs text-foreground leading-relaxed">{liveHint.suggestion}</p>
                 )}
                 {liveHint?.differentials && liveHint.differentials.length > 0 && (
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    <span className="font-medium text-foreground">Consider:</span> {liveHint.differentials.join(" · ")}
+                  <p className="mt-1.5 text-xs text-foreground leading-relaxed">
+                    <span className="font-bold">Consider:</span> {liveHint.differentials.join(" · ")}
                   </p>
                 )}
                 {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
-                  <p className="mt-1 text-[10px] text-destructive">
-                    <span className="font-medium">Rule out:</span> {liveHint.red_flags.join(" · ")}
+                  <p className="mt-1 text-xs text-destructive leading-relaxed">
+                    <span className="font-bold">Rule out:</span> {liveHint.red_flags.join(" · ")}
+                  </p>
+                )}
+                {liveHint?.suggested_investigations && liveHint.suggested_investigations.length > 0 && (
+                  <p className="mt-1 text-xs text-foreground leading-relaxed">
+                    <span className="font-bold">Checks:</span> {liveHint.suggested_investigations.join(" · ")}
                   </p>
                 )}
               </div>
             )}
 
-            {/* Speaker Notes — live/finalized transcript, captured in the recording frame */}
-            {(transcript || liveTranscript || isTranscribing) && (
+            {/* Speaker Notes — finalised messages only, written message by message */}
+            {(transcript || liveMessages.length > 0 || isRecording || isTranscribing) && (
               <div className="border-t p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
@@ -1293,15 +1380,16 @@ export default function Sessions() {
                   )}
                 </div>
                 <div className="max-h-[220px] overflow-y-auto bg-muted/30 rounded p-2.5">
-                  {!transcript && liveTranscript ? (
+                  {!transcript && liveMessages.length > 0 ? (
                     <div className="space-y-2">
-                      {/* Break the running live transcript into sentence-level paragraphs so it doesn't read as one dense block */}
-                      {(liveTranscript.match(/[^.!?]+[.!?]*/g) || [liveTranscript])
-                        .map((s) => s.trim())
-                        .filter(Boolean)
-                        .map((sentence, index) => (
-                          <p key={index} className="text-xs text-foreground leading-relaxed">{sentence}</p>
-                        ))}
+                      {liveMessages.map((message, index) => (
+                        <p key={index} className="text-sm text-foreground leading-relaxed">
+                          {message}
+                        </p>
+                      ))}
+                      {isSpeaking && (
+                        <p className="text-xs text-muted-foreground italic">Listening…</p>
+                      )}
                     </div>
                   ) : transcript ? (
                     <div className="space-y-2">
@@ -1313,20 +1401,25 @@ export default function Sessions() {
                           const speakerLower = speaker.toLowerCase().trim();
                           const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
                           return (
-                            <p key={index} className={`text-xs leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
+                            <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
                               <span className="font-bold">{speaker}</span>:{text}
                             </p>
                           );
                         }
-                        return line.trim() ? <p key={index} className="text-xs text-foreground leading-relaxed">{line}</p> : null;
+                        return line.trim() ? <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p> : null;
                       })}
                     </div>
+                  ) : isTranscribing ? (
+                    <p className="text-xs text-muted-foreground italic">Transcribing…</p>
                   ) : (
-                    <p className="text-xs text-muted-foreground italic">Transcribing...</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      {isSpeaking ? "Listening…" : "Messages appear here as each sentence is completed."}
+                    </p>
                   )}
                 </div>
               </div>
             )}
+
 
             {/* Audio Playback */}
             {audioUrl && !isRecording && (
@@ -1418,16 +1511,7 @@ export default function Sessions() {
 
       {sessionState === "completed" && (
         <div className="space-y-6 mt-6">
-          {/* Success Banner */}
-          <div className="flex items-center gap-4 rounded-xl border border-success/30 bg-success/5 p-4">
-            <CheckCircle className="h-6 w-6 text-success" />
-            <div>
-              <p className="font-medium text-foreground">Session Completed Successfully</p>
-              <p className="text-sm text-muted-foreground">
-                Summary and action points have been generated, saved to patient history, and added to your to-do list
-              </p>
-            </div>
-          </div>
+
 
           {/* Documents from this session — inline preview cards (dialog still available). */}
           <SessionGeneratedDocuments
@@ -1452,33 +1536,15 @@ export default function Sessions() {
             }}
           />
 
-          <div className="grid gap-3 lg:grid-cols-3">
-            {/* Transcription */}
+          <div className="grid gap-3 lg:grid-cols-2">
+            {/* Summary — transcript lives in Speaker Notes only */}
             <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <Mic className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-sm text-foreground">Transcription</h3>
+                <Sparkles className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-sm text-foreground">AI Summary</h3>
               </div>
-              <div className="max-h-[150px] overflow-y-auto space-y-1">
-                {transcript ? (
-                  transcript.split('\n').map((line, index) => {
-                    const colonIndex = line.indexOf(':');
-                    if (colonIndex > 0 && colonIndex < 50) {
-                      const speaker = line.substring(0, colonIndex);
-                      const text = line.substring(colonIndex + 1);
-                      const speakerLower = speaker.toLowerCase().trim();
-                      const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
-                      return (
-                        <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
-                          <span className="font-bold">{speaker}</span>:{text}
-                        </p>
-                      );
-                    }
-                    return line.trim() ? <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p> : null;
-                  })
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">No transcription recorded.</p>
-                )}
+              <div className="max-h-[150px] overflow-y-auto">
+                <p className="text-sm text-foreground leading-relaxed">{summary}</p>
               </div>
               {audioUrl && (
                 <div className="mt-2 pt-2 border-t border-border">
@@ -1489,16 +1555,6 @@ export default function Sessions() {
               )}
             </div>
 
-            {/* Summary */}
-            <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold text-sm text-foreground">AI Summary</h3>
-              </div>
-              <div className="max-h-[150px] overflow-y-auto">
-                <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
-              </div>
-            </div>
 
             {/* Action Points */}
             <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">

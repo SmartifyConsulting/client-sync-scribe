@@ -24,6 +24,11 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
   // such as AI Consult work mid-session, before the final transcription runs.
   const [liveTranscript, setLiveTranscript] = useState('');
   const liveTranscriptRef = useRef('');
+  // Finalised utterances only — rendered message-by-message so the UI never shows
+  // half-written "ghost writer" text while somebody is still speaking.
+  const [liveMessages, setLiveMessages] = useState<string[]>([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const speakingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [savedAudioUrl, setSavedAudioUrl] = useState<string | null>(null);
   
@@ -157,6 +162,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       endSessionDetectedRef.current = false;
       liveTranscriptRef.current = '';
       setLiveTranscript('');
+      setLiveMessages([]);
+      setIsSpeaking(false);
       
       // Start Web Speech API for real-time "End Session" detection
       try {
@@ -176,7 +183,15 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
               if (finalText) {
                 liveTranscriptRef.current = `${liveTranscriptRef.current} ${finalText}`.trim();
                 setLiveTranscript(liveTranscriptRef.current);
+                setLiveMessages((prev) => [...prev, finalText]);
               }
+              setIsSpeaking(false);
+              if (speakingTimerRef.current) clearTimeout(speakingTimerRef.current);
+            } else {
+              // Somebody is mid-sentence: show an indicator, never the partial text.
+              setIsSpeaking(true);
+              if (speakingTimerRef.current) clearTimeout(speakingTimerRef.current);
+              speakingTimerRef.current = setTimeout(() => setIsSpeaking(false), 2500);
             }
             if (endSessionDetectedRef.current) return;
             const text = last[0].transcript.toLowerCase().trim();
@@ -264,11 +279,18 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
             recognition.lang = 'en-US';
             recognition.onresult = (event: SpeechRecognitionEvent) => {
               const last = event.results[event.results.length - 1];
-              if (!last.isFinal) return;
+              if (!last.isFinal) {
+                setIsSpeaking(true);
+                if (speakingTimerRef.current) clearTimeout(speakingTimerRef.current);
+                speakingTimerRef.current = setTimeout(() => setIsSpeaking(false), 2500);
+                return;
+              }
+              setIsSpeaking(false);
               const finalText = last[0].transcript.trim();
               if (!finalText) return;
               liveTranscriptRef.current = `${liveTranscriptRef.current} ${finalText}`.trim();
               setLiveTranscript(liveTranscriptRef.current);
+              setLiveMessages((prev) => [...prev, finalText]);
             };
             recognition.start();
             speechRecognitionRef.current = recognition;
@@ -361,6 +383,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     setTranscript('');
     liveTranscriptRef.current = '';
     setLiveTranscript('');
+    setLiveMessages([]);
+    setIsSpeaking(false);
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
@@ -375,6 +399,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     isSavingAudio,
     transcript,
     liveTranscript,
+    liveMessages,
+    isSpeaking,
     audioUrl,
     savedAudioUrl,
     startRecording,
