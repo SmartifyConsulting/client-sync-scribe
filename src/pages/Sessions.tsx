@@ -47,6 +47,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
+import { SessionProcessingDialog } from "@/features/sessions/components/SessionProcessingDialog";
+import { SessionTranscriptAccordion } from "@/features/sessions/components/SessionTranscriptAccordion";
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
@@ -91,6 +93,47 @@ import {
 } from "@/components/ui/command";
 
 type SessionState = "idle" | "active" | "processing" | "completed";
+
+/**
+ * Best-guess price for a standard GP consultation from the doctor's own
+ * Service Offerings & Pricing. Scores each service name against consultation
+ * keywords and prefers a plain/general consultation over specialised entries.
+ * Never returns a hard-coded R0 when any priced service exists.
+ */
+async function lookupConsultationPrice(): Promise<number> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 0;
+    const { data: prices } = await supabase
+      .from("service_prices")
+      .select("default_price, service_name")
+      .eq("user_id", user.id)
+      .limit(100);
+    const rows = (prices || []).filter((p: any) => Number(p.default_price) > 0);
+    if (!rows.length) return 0;
+
+    const score = (name: string) => {
+      const n = (name || "").toLowerCase();
+      let s = 0;
+      if (n.includes("consult")) s += 10;
+      if (n.includes("gp") || n.includes("general practitioner")) s += 6;
+      if (n.includes("general")) s += 4;
+      if (n.includes("standard") || n.includes("basic")) s += 3;
+      if (n.includes("follow")) s -= 6;
+      if (n.includes("after hours") || n.includes("after-hours") || n.includes("emergency")) s -= 6;
+      if (n.includes("specialist") || n.includes("procedure") || n.includes("home visit")) s -= 5;
+      // Shorter, plainer names are usually the standard consult.
+      s -= Math.min(3, Math.floor(n.length / 25));
+      return s;
+    };
+
+    const best = [...rows].sort((a: any, b: any) => score(b.service_name) - score(a.service_name))[0];
+    return Number(best?.default_price) || Number(rows[0]?.default_price) || 0;
+  } catch (e) {
+    console.error("Pricing lookup failed:", e);
+    return 0;
+  }
+}
 
 export default function Sessions() {
   const { t } = useTranslation();
@@ -545,9 +588,10 @@ export default function Sessions() {
     // talk, still raise a standard consultation invoice so the doctor always has
     // a document to review, send or discard.
     if (!extractedInvoice) {
+      const amount = await lookupConsultationPrice();
       const d = await createInvoiceDocument({
-        items: [{ description: 'Consultation', amount: 0 }],
-        total: 0,
+        items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
+        total: amount,
       } as InvoiceData);
       if (d) results.push(d);
     }
@@ -594,7 +638,7 @@ export default function Sessions() {
       
       if (result) {
         setCurrentSessionId(result.id);
-        setSummary(result.summary || "Session completed successfully.");
+        setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
         // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
 
@@ -617,21 +661,7 @@ export default function Sessions() {
           // A consultation always bills — synthesise a default line item so the
           // doctor is always offered an invoice to review (amount pre-filled from
           // their Service Offerings & Pricing where available).
-          let amount = 0;
-          try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              const { data: price } = await supabase
-                .from('service_prices')
-                .select('default_price, service_name')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: true })
-                .limit(20);
-              const consult = (price || []).find((p: any) =>
-                (p.service_name || '').toLowerCase().includes('consult'));
-              amount = Number(consult?.default_price ?? (price?.[0] as any)?.default_price ?? 0) || 0;
-            }
-          } catch (e) { console.error('Pricing lookup failed:', e); }
+          const amount = await lookupConsultationPrice();
           setExtractedInvoice({
             items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
             total: amount,
@@ -645,13 +675,19 @@ export default function Sessions() {
         // Silently create every detected document, then show one summary dialog.
         setTimeout(() => generateAllDocuments(), 0);
       } else {
-        setSummary("Session completed. No content was recorded or noted.");
+        setSummary("No content was recorded or noted.");
         setActionPoints([]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in handleSessionComplete:", error);
-      setSummary("Session completed. No content was recorded or noted.");
+      setSummary("");
       setActionPoints([]);
+      toast({
+        title: "Analysis didn't complete",
+        description:
+          "The AI analysis failed or timed out, so no summary, action points or documents were produced. Your recording and notes are saved — tap the mic and use AI Consult to retry.",
+        variant: "destructive",
+      });
     }
 
     setSessionState("completed");
@@ -704,7 +740,7 @@ export default function Sessions() {
     },
     onTranscriptionComplete: (text) => {
       latestTranscriptRef.current = text;
-      // The transcript belongs in Speaker Notes only — AI Clinician Notes keeps
+      // The transcript lives in the Session Transcript accordion only — AI Clinician Notes keeps
       // the accumulated live clinical guidance, never a copy of the transcript.
 
       
@@ -1218,18 +1254,19 @@ export default function Sessions() {
                   <p className="p-3 text-xs text-muted-foreground">No previous sessions</p>
                 ) : (
                   pastPatientSessions.map((s: any) => (
-                    <button
-                      key={s.id}
-                      onClick={() => navigate(`/sessions/${s.id}`)}
-                      className="w-full text-left p-3 hover:bg-muted/50 transition-colors"
-                    >
-                      <p className="text-xs font-bold text-foreground">{s.date}</p>
+                    <div key={s.id} className="p-3 hover:bg-muted/50 transition-colors">
+                      <button
+                        onClick={() => navigate(`/sessions/${s.id}`)}
+                        className="text-xs font-bold text-primary underline underline-offset-2 hover:text-primary/80"
+                      >
+                        {s.date}
+                      </button>
                       <p className="text-sm text-foreground line-clamp-2">
                         {String(s.summary || "No summary")
                           .replace(/<\/?(med|symptom|condition)>/g, "")
                           .trim()}
                       </p>
-                    </button>
+                    </div>
                   ))
                 )}
               </div>
@@ -1241,15 +1278,9 @@ export default function Sessions() {
 
       {(sessionState === "active" || sessionState === "processing" || sessionState === "completed") && (
         <>
-        {/* Inline status strip — replaces the old standalone "Processing Session" screen. */}
-        {sessionState === "processing" && (
-          <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <p className="text-sm text-foreground">
-              Analysing session — generating summary, action points and documents…
-            </p>
-          </div>
-        )}
+        {/* Centred progress box — replaces the old status strip and toasts. */}
+        <SessionProcessingDialog open={sessionState === "processing" || isTranscribing} />
+
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
           {/* Record Session — column 1, full height (rows 1-3) */}
           <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:min-h-[700px]">
@@ -1334,13 +1365,57 @@ export default function Sessions() {
               )}
             </div>
 
-            {/* Live AI diagnostic hint - only while recording, and only if the doctor opted in at session start */}
+            {/* Transcript — collapsed accordion, only once transcription has finished.
+                Nothing is streamed on screen while recording (the waveform above shows progress). */}
+            <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
+
+
+            {/* Audio Playback */}
+            {audioUrl && !isRecording && (
+              <div className="border-t p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs font-medium text-foreground">Playback</p>
+                </div>
+                <audio controls className="w-full h-8" src={audioUrl}>
+                  Your browser does not support audio.
+                </audio>
+              </div>
+            )}
+
+            {/* Personal Notes — private to the doctor, same body font as the other frames. */}
+            <div className="border-t p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-sm font-semibold text-foreground">Personal Notes</p>
+                <span className="text-[10px] text-muted-foreground">Private</span>
+              </div>
+              <Textarea
+                value={personalNotes}
+                onChange={(e) => setPersonalNotes(e.target.value)}
+                placeholder="Jot down private thoughts for yourself..."
+                className="min-h-[90px] resize-y text-sm p-2"
+              />
+            </div>
+          </div>
+
+          {/* Column 2 — Patient Overview (DISC at top), Live AI Clinician, then AI Clinician Notes. */}
+          <div className="flex flex-col gap-4 order-2">
+            {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
+            <div className="min-h-[210px] flex flex-col">
+              <SessionPatientOverview
+                patient={currentPatient}
+                currentMedications={currentMedications}
+                discSlot={<SessionDiscStrip patientId={currentPatient?.id} inline />}
+              />
+            </div>
+
+            {/* Live AI Clinician — sits directly above the AI Clinician Notes frame. */}
             {isRecording && aiConsultEnabled && (liveHint || liveHintLoading) && (
-              <div className="border-t bg-primary/5 p-3">
+              <div className="rounded-xl border border-primary bg-primary/5 p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-xs font-medium text-primary-dark">Live AI Clinician</p>
+                    <p className="text-sm font-medium text-primary-dark">Live AI Clinician</p>
                   </div>
                   {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                 </div>
@@ -1372,7 +1447,7 @@ export default function Sessions() {
                         />
                         <p
                           className={cn(
-                            "text-xs leading-relaxed",
+                            "text-sm leading-relaxed",
                             a.severity === "critical" ? "text-destructive font-medium" : "text-foreground",
                           )}
                         >
@@ -1383,130 +1458,28 @@ export default function Sessions() {
                   </div>
                 )}
 
-                {liveHint?.suggestion && (
-                  <p className="text-xs text-foreground leading-relaxed">{liveHint.suggestion}</p>
-                )}
-                {liveHint?.differentials && liveHint.differentials.length > 0 && (
-                  <p className="mt-1.5 text-xs text-foreground leading-relaxed">
-                    <span className="font-bold">Consider:</span> {liveHint.differentials.join(" · ")}
-                  </p>
-                )}
-                {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
-                  <p className="mt-1 text-xs text-destructive leading-relaxed">
-                    <span className="font-bold">Rule out:</span> {liveHint.red_flags.join(" · ")}
-                  </p>
-                )}
-                {liveHint?.suggested_investigations && liveHint.suggested_investigations.length > 0 && (
-                  <p className="mt-1 text-xs text-foreground leading-relaxed">
-                    <span className="font-bold">Checks:</span> {liveHint.suggested_investigations.join(" · ")}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Speaker Notes — finalised messages only, written message by message */}
-            {(transcript || liveMessages.length > 0 || isRecording || isTranscribing) && (
-              <div className="border-t p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-xs font-medium text-primary-dark">Speaker Notes</p>
-                  </div>
-                  {transcript && !isTranscribing && (
-                    <span className="text-xs bg-success/15 text-success px-1.5 py-0.5 rounded">✓</span>
+                <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+                  {liveHint?.suggestion && (
+                    <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
                   )}
-                  {!transcript && isRecording && (
-                    <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">Live</span>
+                  {liveHint?.differentials && liveHint.differentials.length > 0 && (
+                    <p className="text-sm text-foreground leading-relaxed">
+                      <span className="font-bold">Consider:</span> {liveHint.differentials.join(" · ")}
+                    </p>
                   )}
-                  {isTranscribing && (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
+                    <p className="text-sm text-destructive leading-relaxed">
+                      <span className="font-bold">Rule out:</span> {liveHint.red_flags.join(" · ")}
+                    </p>
                   )}
-                </div>
-                <div className="max-h-[220px] overflow-y-auto bg-muted/30 rounded p-2.5">
-                  {!transcript && liveMessages.length > 0 ? (
-                    <div className="space-y-2">
-                      {liveMessages.map((message, index) => (
-                        <p key={index} className="text-sm text-foreground leading-relaxed">
-                          {message}
-                        </p>
-                      ))}
-                      {isSpeaking && (
-                        <p className="text-xs text-muted-foreground italic">Listening…</p>
-                      )}
-                    </div>
-                  ) : transcript ? (
-                    <div className="space-y-2">
-                      {transcript.split('\n').map((line, index) => {
-                        const colonIndex = line.indexOf(':');
-                        if (colonIndex > 0 && colonIndex < 50) {
-                          const speaker = line.substring(0, colonIndex);
-                          const text = line.substring(colonIndex + 1);
-                          const speakerLower = speaker.toLowerCase().trim();
-                          const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
-                          return (
-                            <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
-                              <span className="font-bold">{speaker}</span>:{text}
-                            </p>
-                          );
-                        }
-                        return line.trim() ? <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p> : null;
-                      })}
-                    </div>
-                  ) : isTranscribing ? (
-                    <p className="text-xs text-muted-foreground italic">Transcribing…</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground italic">
-                      {isSpeaking ? "Listening…" : "Messages appear here as each sentence is completed."}
+                  {liveHint?.suggested_investigations && liveHint.suggested_investigations.length > 0 && (
+                    <p className="text-sm text-foreground leading-relaxed">
+                      <span className="font-bold">Checks:</span> {liveHint.suggested_investigations.join(" · ")}
                     </p>
                   )}
                 </div>
               </div>
             )}
-
-
-            {/* Audio Playback */}
-            {audioUrl && !isRecording && (
-              <div className="border-t p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  <p className="text-xs font-medium text-foreground">Playback</p>
-                </div>
-                <audio controls className="w-full h-8" src={audioUrl}>
-                  Your browser does not support audio.
-                </audio>
-              </div>
-            )}
-
-            {/* Stop recording = ends session and triggers transcription pipeline.
-                Use the main Mic/Square button above — no duplicate End Session button here. */}
-          </div>
-
-          {/* Column 2 — Patient Overview (1.5 rows), then Personal Notes, then AI Clinician Notes. */}
-          <div className="flex flex-col gap-4 order-2">
-            {/* Patient Overview — AI recap of the last 6 months, spans ~1.5 rows. */}
-            <div className="min-h-[210px] flex flex-col">
-              <SessionPatientOverview patient={currentPatient} currentMedications={currentMedications} />
-            </div>
-
-            {/* DISC personality reminder — doctors only, adjectives instead of paragraphs. */}
-            <SessionDiscStrip patientId={currentPatient?.id} />
-
-            {/* Personal Notes — private to the doctor, not shared with the patient. */}
-            <div className="min-h-[140px] flex flex-col rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between p-3 border-b bg-primary/5">
-                <h3 className="text-sm font-semibold text-foreground">Personal Notes</h3>
-                <span className="text-[10px] text-muted-foreground">Private — not shared with the patient</span>
-              </div>
-
-              <div className="p-3">
-                <Textarea
-                  value={personalNotes}
-                  onChange={(e) => setPersonalNotes(e.target.value)}
-                  placeholder="Jot down private thoughts for yourself..."
-                  className="min-h-[100px] resize-y border-0 focus-visible:ring-0 p-2"
-                />
-              </div>
-            </div>
 
             <Tabs defaultValue="notes">
               <TabsList className="mb-2">
@@ -1520,27 +1493,23 @@ export default function Sessions() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="notes" className="mt-0">
-                <div className="flex gap-3">
-                  <div className="w-40 shrink-0 rounded-lg border border-border bg-muted/30 p-2.5">
-                    <p className="text-[11px] font-semibold text-foreground leading-snug">
-                      Private — not shared with the patient and only available for the duration of the session.
-                    </p>
-                    <p className="mt-1.5 text-[10px] text-muted-foreground leading-snug">
+                <SessionNotepad
+                  patientId={patientId || ""}
+                  sessionId={currentSessionId}
+                  patientName={currentPatient?.name}
+                  notes={notes}
+                  onNotesChange={setNotes}
+                  isRecording={isRecording}
+                  disclaimer={
+                    <p className="text-xs text-muted-foreground leading-snug">
+                      <span className="font-semibold text-foreground">
+                        Private — not shared with the patient and only available for the duration of the session.
+                      </span>{" "}
                       Disclaimer: AI-generated clinical notes are decision support only. They may be incomplete or
                       inaccurate and must be reviewed and confirmed by the treating clinician before any clinical use.
                     </p>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <SessionNotepad
-                      patientId={patientId || ""}
-                      sessionId={currentSessionId}
-                      patientName={currentPatient?.name}
-                      notes={notes}
-                      onNotesChange={setNotes}
-                      isRecording={isRecording}
-                    />
-                  </div>
-                </div>
+                  }
+                />
               </TabsContent>
 
               <TabsContent value="drawing" className="mt-0">
@@ -1583,7 +1552,7 @@ export default function Sessions() {
           />
 
           <div className="grid gap-3 lg:grid-cols-2">
-            {/* Summary — transcript lives in Speaker Notes only */}
+            {/* Summary — transcript lives in the Session Transcript accordion only */}
             <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-4 w-4 text-primary" />

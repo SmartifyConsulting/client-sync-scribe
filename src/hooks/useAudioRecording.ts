@@ -363,10 +363,9 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       logger.debug('Calling onTranscriptionComplete with text length:', transcribedText.length);
       optionsRef.current.onTranscriptionComplete?.(transcribedText);
 
-      toast({
-        title: "Transcription Complete",
-        description: "Audio has been transcribed successfully",
-      });
+      // No "Transcription Complete" toast — the session screen shows a single
+      // centred progress dialog instead.
+
     } catch (error: any) {
       console.error('Transcription error:', error);
       toast({

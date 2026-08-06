@@ -5,7 +5,10 @@ import { useUserRole } from "@/hooks/useUserRole";
 
 interface Props {
   patientId?: string;
+  /** Inline mode renders a single chip row with no card frame (used at the top of Patient Overview). */
+  inline?: boolean;
 }
+
 
 type Dim = "dominance" | "influence" | "steadiness" | "conscientiousness";
 
@@ -55,7 +58,7 @@ const DIMS: {
  * Compact DISC personality reminder for the live session screen.
  * Shows scores plus adjectives only — no rationale paragraphs.
  */
-export function SessionDiscStrip({ patientId }: Props) {
+export function SessionDiscStrip({ patientId, inline = false }: Props) {
   const { isDoctor } = useUserRole();
   const [profile, setProfile] = useState<Record<string, any> | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -80,6 +83,30 @@ export function SessionDiscStrip({ patientId }: Props) {
   }, [patientId, isDoctor]);
 
   if (!isDoctor || !patientId) return null;
+
+  if (inline) {
+    if (!profile) return null;
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Brain className="h-3.5 w-3.5 text-primary shrink-0" />
+        {DIMS.map((d) => {
+          const score = Number(profile[d.key] ?? 0);
+          const words = score >= 60 ? d.high : score >= 40 ? d.moderate : [];
+          if (!words.length) return null;
+          return (
+            <span
+              key={d.key}
+              className={`rounded border px-1.5 py-0.5 text-[11px] ${d.chip}`}
+            >
+              <span className="font-bold">{d.letter}</span> {words.join(", ")}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
