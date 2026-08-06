@@ -31,7 +31,7 @@ interface OverviewData {
  * labelled key points (conditions, current medications, allergies, symptoms,
  * recent visits) rather than one long paragraph.
  */
-export function SessionPatientOverview({ patient, currentMedications = [] }: SessionPatientOverviewProps) {
+export function SessionPatientOverview({ patient, currentMedications = [], discSlot }: SessionPatientOverviewProps) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OverviewData | null>(null);
 
