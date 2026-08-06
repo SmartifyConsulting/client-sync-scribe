@@ -143,75 +143,68 @@ export default function InpatientsScreen() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <div className="overflow-hidden rounded-xl border">
-                  <table className="w-full text-sm">
-                    <thead className="bg-primary text-xs uppercase tracking-wider text-white">
-                      <tr>
-                        <th className="px-3 py-2 text-left">Admission</th>
-                        <th className="px-3 py-2 text-left">Ward / bed</th>
-                        <th className="px-3 py-2 text-left">Attending doctors</th>
-                        <th className="px-3 py-2 text-left">Attending nurses</th>
-                        <th className="px-3 py-2 text-left">Admitted</th>
-                        <th className="px-3 py-2" />
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {group.rows.map((p) => {
-                        const href = recordLink(p);
-                        return (
-                          <tr key={p.id} className="align-top hover:bg-muted/40">
-                            <td className="px-3 py-2">
-                              {href ? (
-                                <Link to={href} className="font-semibold text-primary hover:underline">
-                                  {p.patient_name}
-                                </Link>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => setLogFor(p)}
-                                  className="font-semibold text-primary hover:underline"
-                                >
-                                  {p.patient_name}
-                                </button>
-                              )}
-                              <p className="text-xs capitalize text-muted-foreground">{p.status}{p.reason ? ` · ${p.reason}` : ""}</p>
-                            </td>
-                            <td className="px-3 py-2 text-xs">
-                              <p className="font-semibold">{wardName(p.ward_id)}</p>
-                              <p className="text-muted-foreground">Bed {p.bed_number || "—"}</p>
-                            </td>
-                            <td className="px-3 py-2 text-xs">
+                <Accordion type="multiple" className="space-y-2">
+                  {group.rows.map((p) => {
+                    const href = recordLink(p);
+                    return (
+                      <AccordionItem key={p.id} value={p.id} className="rounded-xl border bg-card overflow-hidden">
+                        <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-muted/50">
+                          <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pr-2 text-left">
+                            <span className="text-sm font-semibold">
+                              {wardName(p.ward_id)} · Bed {p.bed_number || "—"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              <span className="capitalize">{p.status}</span> · {new Date(p.admitted_at).toLocaleString()}
+                            </span>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-3 px-3 pb-3 pt-1">
+                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                            {href ? (
+                              <Link to={href} className="font-semibold text-primary hover:underline">
+                                {p.patient_name}
+                              </Link>
+                            ) : (
+                              <button type="button" onClick={() => setLogFor(p)} className="font-semibold text-primary hover:underline">
+                                {p.patient_name}
+                              </button>
+                            )}
+                            {p.reason ? <span className="text-muted-foreground">· {p.reason}</span> : null}
+                          </div>
+
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="text-xs">
+                              <p className="mb-1 font-bold">Attending doctors</p>
                               {p.doctors.length ? p.doctors.map((d) => (
                                 <p key={d.id} className="flex items-center gap-1">
                                   {d.doctor_name}
                                   {d.is_primary && <Badge variant="secondary" className="px-1 py-0 text-[10px]">Primary</Badge>}
                                 </p>
                               )) : <span className="text-muted-foreground">None</span>}
-                            </td>
-                            <td className="px-3 py-2 text-xs">
+                            </div>
+                            <div className="text-xs">
+                              <p className="mb-1 font-bold">Attending nurses</p>
                               {p.nurses.length ? p.nurses.map((n) => (
                                 <p key={n.id}>
                                   {n.nurse_name}
                                   {n.care_tasks?.length ? <span className="block text-muted-foreground">{n.care_tasks.join(", ")}</span> : null}
                                 </p>
                               )) : <span className="text-muted-foreground">None</span>}
-                            </td>
-                            <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(p.admitted_at).toLocaleString()}</td>
-                            <td className="px-3 py-2">
-                              <div className="flex flex-wrap justify-end gap-1">
-                                <Button variant="ghost" size="sm" onClick={() => setDoctorFor(p)} title="Assign doctor"><Stethoscope className="h-3.5 w-3.5" /></Button>
-                                <Button variant="ghost" size="sm" onClick={() => setNurseFor(p)} title="Assign nurse"><UserPlus className="h-3.5 w-3.5" /></Button>
-                                <Button variant="ghost" size="sm" onClick={() => setTransferFor(p)} title="Transfer ward"><ArrowRightLeft className="h-3.5 w-3.5" /></Button>
-                                <Button variant="ghost" size="sm" onClick={() => setLogFor(p)} title="Log activity"><NotebookPen className="h-3.5 w-3.5" /></Button>
-                                <Button variant="ghost" size="sm" className="text-destructive" onClick={() => discharge(p)} title="Discharge"><LogOut className="h-3.5 w-3.5" /></Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap justify-end gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => setDoctorFor(p)} title="Assign doctor"><Stethoscope className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => setNurseFor(p)} title="Assign nurse"><UserPlus className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => setTransferFor(p)} title="Transfer ward"><ArrowRightLeft className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => setLogFor(p)} title="Log activity"><NotebookPen className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="sm" className="text-destructive" onClick={() => discharge(p)} title="Discharge"><LogOut className="h-3.5 w-3.5" /></Button>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
+                </Accordion>
               </AccordionContent>
             </AccordionItem>
           ))}

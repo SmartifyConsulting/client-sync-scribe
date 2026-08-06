@@ -12,7 +12,7 @@ import { isToday, differenceInCalendarDays } from "date-fns";
  *               (text-foreground, text-primary, ...) cannot override it.
  */
 export const SECTION_TRIGGER_CLASS = cn(
-  "group px-4 py-3 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted",
+  "group px-4 py-2 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted",
   "data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white",
   "[&[data-state=open]_*]:!text-white",
   "[&>svg]:group-data-[state=open]:!text-white",
@@ -23,7 +23,7 @@ export const SECTION_TRIGGER_CLASS = cn(
  * Used on My Sessions, My Tasks and Documents.
  */
 export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
-  "group px-4 py-3 hover:no-underline border-0 rounded-none",
+  "group px-4 py-2 hover:no-underline border-0 rounded-none",
   "!bg-primary hover:!bg-primary/90 !text-white",
   "[&_*:not(.section-count-pill)]:!text-white",
   "[&>svg]:!text-white",
@@ -32,7 +32,7 @@ export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
 
 
 /** Padding for accordion content so sub-rows aren't flush against the header. */
-export const SECTION_CONTENT_CLASS = "px-4 pt-4 pb-4 space-y-3";
+export const SECTION_CONTENT_CLASS = "px-4 pt-3 pb-3 space-y-2";
 
 /** Frame around a group of section accordion items — thin white line between items. */
 export const SECTION_FRAME_CLASS =

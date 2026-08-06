@@ -51,8 +51,8 @@ const always = () => true;
 export const PROVIDER_MODULES: NavModule[] = [
   {
     id: "emergency",
-    titleKey: "nav.moduleEmergency",
-    title: "Emergency",
+    titleKey: "",
+    title: "",
     portals: ["hospital"],
     enabled: (c) => c.hasEmergencyDepartment,
     items: [
