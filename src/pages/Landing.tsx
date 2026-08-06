@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
-import capabilitiesAsset from "@/assets/holarc-capabilities.jpg.asset.json";
+import capabilitiesAsset from "@/assets/holarc-capabilities-teal.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
@@ -164,7 +164,7 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section — full ecosystem showcase */}
-      <section className="relative pt-28 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-24 pb-10 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Ambient background blobs */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute top-20 -left-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
@@ -172,39 +172,46 @@ export default function Landing() {
           <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
         </div>
 
-        <div className="max-w-7xl mx-auto mb-8">
+        <div className="max-w-7xl mx-auto mb-5">
           <InstallAppPrompt />
         </div>
 
-        <div className="max-w-7xl mx-auto space-y-10">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* TOP ROW — logo left, mosaic right */}
           <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left lg:pt-6"
+              className="lg:col-span-6 lg:pt-6"
             >
-              <img
-                src={holarcLogo}
-                alt="Holarc Health"
-                className="h-28 sm:h-36 lg:h-44 w-auto"
-              />
+              <div className="w-fit mx-auto lg:mx-0">
+                <img
+                  src={holarcLogo}
+                  alt="Holarc Health"
+                  className="h-28 sm:h-36 lg:h-44 w-auto"
+                />
 
-              <div className="mt-5 space-y-3">
-                <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
-                  {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
-                </p>
-                <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
-                  <span className="text-muted-foreground">[ </span>
-                  {t("landing.hero.titleHighlight")}
-                  <span className="text-muted-foreground"> ]</span>
-                </p>
-                <p className="text-sm font-normal text-muted-foreground">
-                  {t("landing.hero.description")}
-                </p>
+                {/* Tagline block — starts at the logo's left edge, copy centred; logo stays put */}
+                <div className="mt-5 w-0 min-w-full">
+                  <div className="w-[30rem] max-w-[calc(100vw-2.5rem)] space-y-3 text-center">
+
+                    <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
+                      {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
+                    </p>
+                    <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
+                      <span className="text-muted-foreground">[ </span>
+                      {t("landing.hero.titleHighlight")}
+                      <span className="text-muted-foreground"> ]</span>
+                    </p>
+                    <p className="text-[18px] leading-relaxed font-normal text-muted-foreground">
+                      {t("landing.hero.description")}
+                    </p>
+                  </div>
+                </div>
               </div>
             </motion.div>
+
 
 
             <motion.div
@@ -293,15 +300,19 @@ export default function Landing() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center"
+            className="text-center -mt-2 lg:-mt-6"
           >
             <img
               src={capabilitiesAsset.url}
               alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network"
               loading="lazy"
+              width={1920}
+              height={720}
               className="w-full max-w-5xl mx-auto h-auto"
             />
           </motion.div>
+
+
 
 
           {/* BOTTOM ROW — CTAs left, SOS card right */}
