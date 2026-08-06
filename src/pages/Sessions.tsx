@@ -620,21 +620,7 @@ export default function Sessions() {
           // A consultation always bills — synthesise a default line item so the
           // doctor is always offered an invoice to review (amount pre-filled from
           // their Service Offerings & Pricing where available).
-          let amount = 0;
-          try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              const { data: price } = await supabase
-                .from('service_prices')
-                .select('default_price, service_name')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: true })
-                .limit(20);
-              const consult = (price || []).find((p: any) =>
-                (p.service_name || '').toLowerCase().includes('consult'));
-              amount = Number(consult?.default_price ?? (price?.[0] as any)?.default_price ?? 0) || 0;
-            }
-          } catch (e) { console.error('Pricing lookup failed:', e); }
+          const amount = await lookupConsultationPrice();
           setExtractedInvoice({
             items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
             total: amount,
