@@ -1250,7 +1250,7 @@ export default function Sessions() {
               <div className="px-3 py-2 border-b bg-primary/5">
                 <h3 className="text-sm font-semibold text-foreground">Past Sessions</h3>
               </div>
-              <div className="max-h-64 overflow-y-auto divide-y divide-border">
+              <div className="divide-y divide-border">
                 {pastPatientSessions.length === 0 ? (
                   <p className="p-3 text-xs text-muted-foreground">No previous sessions</p>
                 ) : (
@@ -1262,10 +1262,8 @@ export default function Sessions() {
                       >
                         {s.date}
                       </button>
-                      <p className="text-sm text-foreground line-clamp-2">
-                        {String(s.summary || "No summary")
-                          .replace(/<\/?(med|symptom|condition)>/g, "")
-                          .trim()}
+                      <p className="text-sm text-foreground leading-relaxed">
+                        {renderClinicalHighlights(String(s.summary || "No summary"))}
                       </p>
                     </div>
                   ))
