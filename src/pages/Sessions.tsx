@@ -539,12 +539,23 @@ export default function Sessions() {
       const d = await createReferralDocument(extractedReferral);
       if (d) results.push(d);
     }
+    // Every consultation is billable — if the AI didn't pick up explicit billing
+    // talk, still raise a standard consultation invoice so the doctor always has
+    // a document to review, send or discard.
+    if (!extractedInvoice) {
+      const d = await createInvoiceDocument({
+        items: [{ description: 'Consultation', amount: 0 }],
+        total: 0,
+      } as InvoiceData);
+      if (d) results.push(d);
+    }
     if (results.length > 0) {
       setGeneratedDocs(results);
       setShowGeneratedDocsDialog(true);
     } else {
       advanceToFollowUp();
     }
+
   }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, advanceToFollowUp, patientId, currentPatient]);
 
   const handleFollowUpDone = useCallback(() => {
