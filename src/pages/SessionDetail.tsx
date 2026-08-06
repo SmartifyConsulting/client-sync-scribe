@@ -56,6 +56,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
+import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
@@ -81,6 +83,7 @@ export default function SessionDetail() {
   const { toast } = useToast();
   const { session, loading, refetch } = useSession(id || "");
   const { deleteSession } = useSessions();
+  const { isAdmin } = useIsAdmin();
   const [showPrescriptionEditor, setShowPrescriptionEditor] = useState(false);
   const [showInvoiceEditor, setShowInvoiceEditor] = useState(false);
   const [showMedicalCertificateEditor, setShowMedicalCertificateEditor] = useState(false);
@@ -317,26 +320,33 @@ export default function SessionDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="gap-2">
-              <Trash2 className="h-4 w-4" />
-              Delete Session
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Session</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the session record.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          {isAdmin ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  Delete Session
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Session</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the session record.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" />
+              Session records are permanent and can only be removed by a system administrator.
+            </p>
+          )}
         </div>
       </div>
 
@@ -399,145 +409,95 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* AI Summary */}
-      {session.summary && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                <Sparkles className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-foreground">AI Summary</h2>
-                <p className="text-sm text-muted-foreground">Generated from session content</p>
-              </div>
-            </div>
+      {/* Session results — same layout as the screen shown right after a recording ends */}
+      <SessionResultPanels
+        transcript={session.transcript}
+        doctorName={doctorName}
+        summary={translatedSummary || session.summary}
+        audioUrl={signedAudioUrl}
+        actionPoints={session.action_points || []}
+        clinicianNotes={(session as any).ai_diagnosis}
+        showTodoHint={false}
+        summaryActions={
+          <>
+            {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            <Select value={selectedLanguage} onValueChange={handleTranslate}>
+              <SelectTrigger className="w-[150px] h-8 text-xs">
+                <Languages className="h-3.5 w-3.5 mr-1.5" />
+                <SelectValue placeholder="Translate..." />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code} className="text-sm">
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {translatedSummary && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs h-8"
+                onClick={() => {
+                  setTranslatedSummary(null);
+                  setSelectedLanguage("");
+                }}
+              >
+                Original
+              </Button>
+            )}
+          </>
+        }
+      />
+
+      {/* Recording retention + downloads */}
+      {(session.audio_url || session.transcript) && (
+        <div className="rounded-xl border border-primary bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-              <Select value={selectedLanguage} onValueChange={handleTranslate}>
-                <SelectTrigger className="w-[160px] h-8 text-sm">
-                  <Languages className="h-3.5 w-3.5 mr-1.5" />
-                  <SelectValue placeholder="Translate..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {LANGUAGES.map(lang => (
-                    <SelectItem key={lang.code} value={lang.code} className="text-sm">
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {translatedSummary && (
-                <Button variant="ghost" size="sm" className="text-sm h-8" onClick={() => { setTranslatedSummary(null); setSelectedLanguage(""); }}>
-                  Original
-                </Button>
-              )}
+              <Volume2 className="h-4 w-4 text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Voice recordings and transcriptions are automatically deleted after 7 days. AI summaries remain
+                permanently.
+              </p>
             </div>
+            <Select
+              onValueChange={(value) => {
+                if (value === "audio") handleDownloadAudio();
+                else if (value === "transcript" && session.transcript) {
+                  const blob = new Blob([session.transcript], { type: "text/plain" });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `transcript-${format(new Date(session.started_at), "yyyy-MM-dd")}.txt`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }
+              }}
+            >
+              <SelectTrigger className="w-[160px] h-8 text-sm">
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                <SelectValue placeholder="Download..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
+                  Download audio
+                </SelectItem>
+                <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
+                  Download transcript
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <p className="text-sm text-foreground leading-relaxed">{translatedSummary || session.summary}</p>
         </div>
       )}
 
-      {/* Session Notes — combined Audio + Transcript + Notes */}
-      {(session.audio_url || session.transcript || session.notes) && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
-                <Volume2 className="h-4 w-4 text-purple-600" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-foreground">Session Notes</h2>
-                <p className="text-sm text-muted-foreground">Audio, transcript, and manual notes from the consultation</p>
-              </div>
-            </div>
-            {(session.audio_url || session.transcript) && (
-              <Select
-                onValueChange={(value) => {
-                  if (value === "audio") handleDownloadAudio();
-                  else if (value === "transcript" && session.transcript) {
-                    const blob = new Blob([session.transcript], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `transcript-${format(new Date(session.started_at), 'yyyy-MM-dd')}.txt`;
-                    link.click();
-                    URL.revokeObjectURL(url);
-                  }
-                }}
-              >
-                <SelectTrigger className="w-[160px] h-8 text-sm">
-                  <Download className="h-3.5 w-3.5 mr-1.5" />
-                  <SelectValue placeholder="Download..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
-                    Download audio
-                  </SelectItem>
-                  <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
-                    Download transcript
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-
-          {/* Audio subsection */}
-          {session.audio_url && (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Audio</p>
-              <audio controls className="w-full" src={signedAudioUrl || ''}>
-                Your browser does not support the audio element.
-              </audio>
-              <Alert className="border-amber-500/30 bg-amber-500/5">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-sm text-amber-700">
-                  Voice recordings and transcriptions are automatically deleted after 7 days. Download them to keep.
-                  AI summaries remain permanently.
-                </AlertDescription>
-              </Alert>
-            </div>
-          )}
-
-          {/* Transcript subsection */}
-          {session.transcript && (
-            <>
-              {session.audio_url && <hr className="my-4 border-border/60" />}
-              <div className="space-y-3">
-                <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Transcript</p>
-                <div className="bg-muted/30 rounded-lg p-4 max-h-[400px] overflow-y-auto space-y-2">
-                  {session.transcript.split('\n').map((line, index) => {
-                    const colonIndex = line.indexOf(':');
-                    if (colonIndex > 0 && colonIndex < 50) {
-                      const speaker = line.substring(0, colonIndex);
-                      const text = line.substring(colonIndex + 1);
-                      const speakerLower = speaker.toLowerCase().trim();
-                      const isDoctor = speakerLower.includes('dr') || speakerLower.includes('doctor') || (doctorName && speakerLower.includes(doctorName.toLowerCase()));
-                      return (
-                        <p key={index} className={`text-sm leading-relaxed ${isDoctor ? 'text-primary' : 'text-foreground'}`}>
-                          <span className="font-bold">{speaker}</span>:{text}
-                        </p>
-                      );
-                    }
-                    return line.trim() ? (
-                      <p key={index} className="text-sm text-foreground leading-relaxed">{line}</p>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Notes subsection */}
-          {session.notes && (
-            <>
-              {(session.audio_url || session.transcript) && <hr className="my-4 border-border/60" />}
-              <div className="space-y-3">
-                <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
-                <p className="text-sm text-foreground whitespace-pre-wrap">{session.notes}</p>
-              </div>
-            </>
-          )}
+      {/* Manual session notes */}
+      {session.notes && (
+        <div className="rounded-xl border border-primary bg-card p-4">
+          <p className="text-sm font-semibold text-foreground mb-2">Notes</p>
+          <p className="text-sm text-foreground whitespace-pre-wrap">{session.notes}</p>
         </div>
       )}
 
@@ -653,31 +613,6 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Action Points / TO-DO List */}
-      {session.action_points && session.action_points.length > 0 && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Action Points / TO-DO</h2>
-              <p className="text-sm text-muted-foreground">Tasks extracted from this session</p>
-            </div>
-          </div>
-          <ul className="space-y-2 ml-4">
-            {session.action_points.map((point, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-sm text-foreground p-3 rounded-lg bg-muted/30"
-              >
-                <Circle className="h-4 w-4 text-primary fill-primary shrink-0 mt-0.5" />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       {/* Empty State */}
       {!session.summary && !session.transcript && (!session.action_points || session.action_points.length === 0) && (
