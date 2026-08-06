@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import capabilitiesAsset from "@/assets/holarc-capabilities.jpg.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
@@ -177,19 +178,34 @@ export default function Landing() {
 
         <div className="max-w-7xl mx-auto space-y-10">
           {/* TOP ROW — logo left, mosaic right */}
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="lg:col-span-6 flex justify-center lg:justify-start"
+              className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left lg:pt-6"
             >
               <img
                 src={holarcLogo}
                 alt="Holarc Health"
                 className="h-28 sm:h-36 lg:h-44 w-auto"
               />
+
+              <div className="mt-5 space-y-3">
+                <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
+                  {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
+                </p>
+                <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
+                  <span className="text-muted-foreground">[ </span>
+                  {t("landing.hero.titleHighlight")}
+                  <span className="text-muted-foreground"> ]</span>
+                </p>
+                <p className="text-sm font-normal text-muted-foreground">
+                  {t("landing.hero.description")}
+                </p>
+              </div>
             </motion.div>
+
 
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
@@ -272,68 +288,21 @@ export default function Landing() {
             </motion.div>
           </div>
 
-          {/* MIDDLE BAND — mono eyebrow + capability pills over waveform */}
+          {/* MIDDLE BAND — capability graphic */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center space-y-4"
+            className="text-center"
           >
-            <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
-              {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
-            </p>
-            <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
-              <span className="text-muted-foreground">[ </span>
-              {t("landing.hero.titleHighlight")}
-              <span className="text-muted-foreground"> ]</span>
-            </p>
-
-            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl mx-auto">
-              {t("landing.hero.description")}
-            </p>
-
-
-            <div className="relative pt-4">
-              {/* Waveform motif */}
-              <div className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2 opacity-40">
-                <div className="flex items-end gap-1 h-10">
-                  {[10, 22, 14, 28, 18, 32, 16, 24, 12, 26, 20, 30, 14, 22].map((h, i) => (
-                    <span key={`l${i}`} className="w-0.5 rounded-full bg-primary/50" style={{ height: `${h}px` }} />
-                  ))}
-                </div>
-                <div className="flex items-end gap-1 h-10">
-                  {[22, 14, 28, 18, 32, 16, 24, 12, 26, 20, 30, 14, 22, 10].map((h, i) => (
-                    <span key={`r${i}`} className="w-0.5 rounded-full bg-primary/50" style={{ height: `${h}px` }} />
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative flex flex-wrap gap-2 justify-center max-w-4xl mx-auto">
-                {[
-                  { icon: Mic, label: t("landing.capabilities.voiceConsultations") },
-                  { icon: Brain, label: t("landing.capabilities.aiSummaries") },
-                  { icon: Video, label: t("landing.capabilities.incentivizedAdherence") },
-                  { icon: Gift, label: t("landing.capabilities.rewards") },
-                  { icon: Users, label: t("landing.capabilities.roundTable") },
-                  { icon: Pill, label: t("landing.capabilities.prescriptions") },
-                  { icon: Hospital, label: t("landing.capabilities.hospitalAdmissions") },
-                  { icon: ClipboardList, label: t("landing.capabilities.autoTasks") },
-                  { icon: Calendar, label: t("landing.capabilities.unifiedCalendar") },
-                  { icon: Siren, label: t("landing.capabilities.emergencySOS") },
-                  { icon: Ambulance, label: t("landing.capabilities.emergencyResponseDispatch") },
-                  { icon: Building2, label: t("landing.capabilities.hospitalNetwork") },
-                ].map((p) => (
-                  <span
-                    key={p.label}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 backdrop-blur-sm px-3 py-1.5 text-xs text-foreground/80 hover:border-primary/40 transition-colors"
-                  >
-                    <p.icon className="h-3.5 w-3.5 text-primary" />
-                    {p.label}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <img
+              src={capabilitiesAsset.url}
+              alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network"
+              loading="lazy"
+              className="w-full max-w-5xl mx-auto h-auto"
+            />
           </motion.div>
+
 
           {/* BOTTOM ROW — CTAs left, SOS card right */}
           <div className="grid lg:grid-cols-12 gap-6 items-start">
