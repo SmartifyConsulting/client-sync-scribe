@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
-import capabilitiesAsset from "@/assets/holarc-capabilities.jpg.asset.json";
+import capabilitiesAsset from "@/assets/holarc-capabilities-teal.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
