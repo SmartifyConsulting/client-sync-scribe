@@ -131,7 +131,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RoleBasedRedirect() {
-  const { isPatient, isEmergency, hasDoctorRole, hasPatientRole, loading } = useUserRole();
+  const { isPatient, isEmergency, isNurse, hasDoctorRole, hasPatientRole, loading } = useUserRole();
   const { providerType, loading: providerLoading } = useProviderAccess();
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
 
@@ -152,6 +152,10 @@ function RoleBasedRedirect() {
 
   if (isAdmin) {
     return <Navigate to="/doctor-dashboard" replace />;
+  }
+
+  if (isNurse) {
+    return <Navigate to="/my-shift" replace />;
   }
 
   if (isPatient) {
