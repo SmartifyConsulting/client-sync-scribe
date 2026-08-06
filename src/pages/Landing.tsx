@@ -185,31 +185,29 @@ export default function Landing() {
               transition={{ duration: 0.6 }}
               className="lg:col-span-6 lg:pt-6"
             >
-              <div className="w-fit mx-auto lg:mx-0">
+              <div className="w-full">
                 <img
                   src={holarcLogo}
                   alt="Holarc Health"
-                  className="h-28 sm:h-36 lg:h-44 w-auto"
+                  className="h-28 sm:h-36 lg:h-44 w-auto mx-auto lg:mx-0"
                 />
 
-                {/* Tagline block — starts at the logo's left edge, copy centred; logo stays put */}
-                <div className="mt-5 w-0 min-w-full">
-                  <div className="w-[30rem] max-w-[calc(100vw-2.5rem)] space-y-3 text-center">
-
-                    <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
-                      {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
-                    </p>
-                    <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
-                      <span className="text-muted-foreground">[ </span>
-                      {t("landing.hero.titleHighlight")}
-                      <span className="text-muted-foreground"> ]</span>
-                    </p>
-                    <p className="text-[18px] leading-relaxed font-normal text-muted-foreground">
-                      {t("landing.hero.description")}
-                    </p>
-                  </div>
+                {/* Tagline block — full column width, copy runs left-to-right up to the mosaic */}
+                <div className="mt-5 w-full space-y-3 text-center lg:text-left">
+                  <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
+                    {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
+                  </p>
+                  <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
+                    <span className="text-muted-foreground">[ </span>
+                    {t("landing.hero.titleHighlight")}
+                    <span className="text-muted-foreground"> ]</span>
+                  </p>
+                  <p className="text-[16px] leading-relaxed font-normal text-muted-foreground text-justify">
+                    {t("landing.hero.description")}
+                  </p>
                 </div>
               </div>
+
             </motion.div>
 
 
