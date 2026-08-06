@@ -1220,18 +1220,19 @@ export default function Sessions() {
                   <p className="p-3 text-xs text-muted-foreground">No previous sessions</p>
                 ) : (
                   pastPatientSessions.map((s: any) => (
-                    <button
-                      key={s.id}
-                      onClick={() => navigate(`/sessions/${s.id}`)}
-                      className="w-full text-left p-3 hover:bg-muted/50 transition-colors"
-                    >
-                      <p className="text-xs font-bold text-foreground">{s.date}</p>
+                    <div key={s.id} className="p-3 hover:bg-muted/50 transition-colors">
+                      <button
+                        onClick={() => navigate(`/sessions/${s.id}`)}
+                        className="text-xs font-bold text-primary underline underline-offset-2 hover:text-primary/80"
+                      >
+                        {s.date}
+                      </button>
                       <p className="text-sm text-foreground line-clamp-2">
                         {String(s.summary || "No summary")
                           .replace(/<\/?(med|symptom|condition)>/g, "")
                           .trim()}
                       </p>
-                    </button>
+                    </div>
                   ))
                 )}
               </div>
