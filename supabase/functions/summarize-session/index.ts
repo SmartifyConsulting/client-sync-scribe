@@ -297,8 +297,45 @@ Respond using the provided tool/function schema.`,
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
-    const data = await response.json();
+    // Consume the SSE stream so bytes keep flowing (avoids the 150s idle timeout
+    // on long generations) and rebuild the non-streaming response shape.
+    let argsBuffer = "";
+    let contentBuffer = "";
+    {
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const payload = trimmed.slice(5).trim();
+          if (!payload || payload === "[DONE]") continue;
+          try {
+            const chunk = JSON.parse(payload);
+            const delta = chunk.choices?.[0]?.delta;
+            const tc = delta?.tool_calls?.[0];
+            if (tc?.function?.arguments) argsBuffer += tc.function.arguments;
+            if (typeof delta?.content === "string") contentBuffer += delta.content;
+          } catch { /* ignore partial/keep-alive lines */ }
+        }
+      }
+    }
+    const data = {
+      choices: [{
+        message: {
+          content: contentBuffer || null,
+          tool_calls: argsBuffer ? [{ function: { arguments: argsBuffer } }] : undefined,
+        },
+      }],
+    } as any;
     console.log("AI response received");
+
     
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (toolCall?.function?.arguments) {
