@@ -149,7 +149,7 @@ export function FollowUpAppointmentDialog({
           <DialogTitle>Schedule follow-up</DialogTitle>
           <DialogDescription>
             Pick a slot for a follow-up with {patientName || "the patient"}. Greyed-out times are already booked.
-            Tap "Ignore" if no follow-up is needed.
+            Tap "Skip" if no follow-up is needed.
           </DialogDescription>
         </DialogHeader>
 
