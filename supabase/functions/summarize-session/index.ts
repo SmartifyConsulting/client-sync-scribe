@@ -274,7 +274,9 @@ Respond using the provided tool/function schema.`,
           },
         ],
         tool_choice: { type: "function", function: { name: "generate_session_summary" } },
+        stream: true,
       }),
+
     });
 
     if (!response.ok) {
