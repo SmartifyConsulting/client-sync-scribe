@@ -58,7 +58,7 @@ const DIMS: {
  * Compact DISC personality reminder for the live session screen.
  * Shows scores plus adjectives only — no rationale paragraphs.
  */
-export function SessionDiscStrip({ patientId }: Props) {
+export function SessionDiscStrip({ patientId, inline = false }: Props) {
   const { isDoctor } = useUserRole();
   const [profile, setProfile] = useState<Record<string, any> | null>(null);
   const [loaded, setLoaded] = useState(false);
