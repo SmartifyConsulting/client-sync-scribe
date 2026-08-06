@@ -18,6 +18,8 @@ import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
 import MySessions from "./pages/MySessions";
+import MyShiftScreen from "./modules/holarchelp/pages/provider/hospital/MyShiftScreen";
+
 
 // Documents page is now wrapped inside DoctorDocumentsPage
 import Settings from "./pages/Settings";
@@ -129,7 +131,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RoleBasedRedirect() {
-  const { isPatient, isEmergency, hasDoctorRole, hasPatientRole, loading } = useUserRole();
+  const { isPatient, isEmergency, isNurse, hasDoctorRole, hasPatientRole, loading } = useUserRole();
   const { providerType, loading: providerLoading } = useProviderAccess();
   const { isAdmin, isLoading: adminLoading } = useIsAdmin();
 
@@ -150,6 +152,10 @@ function RoleBasedRedirect() {
 
   if (isAdmin) {
     return <Navigate to="/doctor-dashboard" replace />;
+  }
+
+  if (isNurse) {
+    return <Navigate to="/my-shift" replace />;
   }
 
   if (isPatient) {
@@ -247,7 +253,9 @@ const App = () => (
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/my-sessions" element={<MySessions />} />
+            <Route path="/my-shift" element={<MyShiftScreen />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
+
 
             <Route path="/documents" element={<DoctorDocumentsPage />} />
             <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />

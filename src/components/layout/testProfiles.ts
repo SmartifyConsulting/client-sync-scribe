@@ -1,4 +1,4 @@
-import { ShieldCheck, Stethoscope, HeartPulse, Building2, Ambulance } from "lucide-react";
+import { ShieldCheck, Stethoscope, HeartPulse, Building2, Ambulance, Syringe } from "lucide-react";
 
 export type TestProfile = {
   email: string;
@@ -20,4 +20,5 @@ export const TEST_PROFILES: TestProfile[] = [
   { email: "ifeanyi.okoli@greenoriagroup.com", name: "Samuel Okoli (Okili)", role: "Patient", icon: HeartPulse },
   { email: "dr.buttons@smartify.co.za", name: "Dr Gianna Buttons", role: "Doctor", icon: Stethoscope },
   { email: "2348167581572@phone.holarc.local", name: "Samuel Okoli (Phone)", role: "Patient", icon: HeartPulse },
+  { email: "nurse.test@holarchealth.com", name: "Nomvula Dlamini", role: "Nurse", icon: Syringe },
 ];
