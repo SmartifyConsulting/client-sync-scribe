@@ -298,7 +298,7 @@ export default function Landing() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center -mt-2 lg:-mt-6"
+            className="text-center -mt-6 lg:-mt-20"
           >
             <img
               src={capabilitiesAsset.url}
@@ -314,7 +314,7 @@ export default function Landing() {
 
 
           {/* BOTTOM ROW — CTAs left, SOS card right */}
-          <div className="grid lg:grid-cols-12 gap-6 items-start">
+          <div className="grid lg:grid-cols-12 gap-6 items-start -mt-4 lg:-mt-16">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}

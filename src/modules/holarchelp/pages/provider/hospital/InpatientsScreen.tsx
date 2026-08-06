@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProviderAccess } from "../../../components/ProviderGate";
@@ -8,6 +9,11 @@ import { useHospitalShifts } from "../../../hooks/useHospitalShifts";
 import {
   AdmitPatientDialog, AssignDoctorDialog, AssignNurseDialog, LogActivityDialog, TransferPatientDialog,
 } from "../../../components/InpatientDialogs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  SECTION_CONTENT_CLASS, SECTION_FRAME_CLASS, SECTION_ITEM_CLASS,
+  SECTION_TRIGGER_ALWAYS_GREEN_CLASS, SectionCountPill,
+} from "@/components/ui/section-accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +26,14 @@ const STATUS_CHIPS = [
   { value: "discharged", label: "Discharged" },
   { value: "transferred", label: "Transferred" },
 ] as const;
+
+type PatientGroup = {
+  key: string;
+  name: string;
+  patientId: string | null;
+  rows: InpatientRecord[];
+  latest: number;
+};
 
 export default function InpatientsScreen() {
   const { user } = useAuth();
@@ -50,6 +64,26 @@ export default function InpatientsScreen() {
     return byStatus.filter((p) => p.patient_name.toLowerCase().includes(q) || wardName(p.ward_id).toLowerCase().includes(q));
   }, [byStatus, search, wards]);
 
+  /** Group by patient, newest admission first — both inside a group and across groups. */
+  const groups = useMemo<PatientGroup[]>(() => {
+    const map = new Map<string, PatientGroup>();
+    for (const row of filtered) {
+      const key = row.patient_id || row.patient_user_id || row.patient_name.toLowerCase();
+      const at = new Date(row.admitted_at).getTime();
+      const existing = map.get(key);
+      if (existing) {
+        existing.rows.push(row);
+        existing.latest = Math.max(existing.latest, at);
+        if (!existing.patientId && row.patient_id) existing.patientId = row.patient_id;
+      } else {
+        map.set(key, { key, name: row.patient_name, patientId: row.patient_id, rows: [row], latest: at });
+      }
+    }
+    const list = [...map.values()];
+    list.forEach((g) => g.rows.sort((a, b) => new Date(b.admitted_at).getTime() - new Date(a.admitted_at).getTime()));
+    return list.sort((a, b) => b.latest - a.latest);
+  }, [filtered]);
+
   const discharge = async (row: InpatientRecord) => {
     const { error } = await supabase
       .from("hospital_inpatient_admissions")
@@ -59,11 +93,13 @@ export default function InpatientsScreen() {
     reload();
   };
 
+  const recordLink = (p: InpatientRecord) => (p.patient_id ? `/patients/${p.patient_id}` : null);
+
   return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-lg font-extrabold">Inpatients</h2>
+          <h2 className="text-lg font-extrabold">Admissions</h2>
           <p className="text-xs text-muted-foreground">{filtered.length} {statusFilter}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -91,63 +127,100 @@ export default function InpatientsScreen() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
-            <tr>
-              <th className="px-3 py-2 text-left">Patient</th>
-              <th className="px-3 py-2 text-left">Ward / bed</th>
-              <th className="px-3 py-2 text-left">Attending doctors</th>
-              <th className="px-3 py-2 text-left">Attending nurses</th>
-              <th className="px-3 py-2 text-left">Admitted</th>
-              <th className="px-3 py-2" />
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {filtered.map((p) => (
-              <tr key={p.id} className="align-top hover:bg-muted/40">
-                <td className="px-3 py-2">
-                  <p className="font-semibold">{p.patient_name}</p>
-                  <p className="text-xs capitalize text-muted-foreground">{p.status}{p.reason ? ` · ${p.reason}` : ""}</p>
-                </td>
-                <td className="px-3 py-2 text-xs">
-                  <p className="font-semibold">{wardName(p.ward_id)}</p>
-                  <p className="text-muted-foreground">Bed {p.bed_number || "—"}</p>
-                </td>
-                <td className="px-3 py-2 text-xs">
-                  {p.doctors.length ? p.doctors.map((d) => (
-                    <p key={d.id} className="flex items-center gap-1">
-                      {d.doctor_name}
-                      {d.is_primary && <Badge variant="secondary" className="px-1 py-0 text-[10px]">Primary</Badge>}
-                    </p>
-                  )) : <span className="text-muted-foreground">None</span>}
-                </td>
-                <td className="px-3 py-2 text-xs">
-                  {p.nurses.length ? p.nurses.map((n) => (
-                    <p key={n.id}>
-                      {n.nurse_name}
-                      {n.care_tasks?.length ? <span className="block text-muted-foreground">{n.care_tasks.join(", ")}</span> : null}
-                    </p>
-                  )) : <span className="text-muted-foreground">None</span>}
-                </td>
-                <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(p.admitted_at).toLocaleString()}</td>
-                <td className="px-3 py-2">
-                  <div className="flex flex-wrap justify-end gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => setDoctorFor(p)} title="Assign doctor"><Stethoscope className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => setNurseFor(p)} title="Assign nurse"><UserPlus className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => setTransferFor(p)} title="Transfer ward"><ArrowRightLeft className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => setLogFor(p)} title="Log activity"><NotebookPen className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="sm" className="text-destructive" onClick={() => discharge(p)} title="Discharge"><LogOut className="h-3.5 w-3.5" /></Button>
+      {groups.length ? (
+        <Accordion type="multiple" defaultValue={groups.slice(0, 1).map((g) => g.key)} className={SECTION_FRAME_CLASS}>
+          {groups.map((group) => (
+            <AccordionItem key={group.key} value={group.key} className={SECTION_ITEM_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+                <div className="flex flex-1 items-center justify-between gap-3 pr-2">
+                  <span className="text-base font-bold">{group.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs">
+                      {wardName(group.rows[0].ward_id)} · {new Date(group.latest).toLocaleDateString()}
+                    </span>
+                    <SectionCountPill count={group.rows.length} />
                   </div>
-                </td>
-              </tr>
-            ))}
-            {!filtered.length && (
-              <tr><td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">No active inpatients.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
+                <div className="overflow-hidden rounded-xl border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-primary text-xs uppercase tracking-wider text-white">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Admission</th>
+                        <th className="px-3 py-2 text-left">Ward / bed</th>
+                        <th className="px-3 py-2 text-left">Attending doctors</th>
+                        <th className="px-3 py-2 text-left">Attending nurses</th>
+                        <th className="px-3 py-2 text-left">Admitted</th>
+                        <th className="px-3 py-2" />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {group.rows.map((p) => {
+                        const href = recordLink(p);
+                        return (
+                          <tr key={p.id} className="align-top hover:bg-muted/40">
+                            <td className="px-3 py-2">
+                              {href ? (
+                                <Link to={href} className="font-semibold text-primary hover:underline">
+                                  {p.patient_name}
+                                </Link>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => setLogFor(p)}
+                                  className="font-semibold text-primary hover:underline"
+                                >
+                                  {p.patient_name}
+                                </button>
+                              )}
+                              <p className="text-xs capitalize text-muted-foreground">{p.status}{p.reason ? ` · ${p.reason}` : ""}</p>
+                            </td>
+                            <td className="px-3 py-2 text-xs">
+                              <p className="font-semibold">{wardName(p.ward_id)}</p>
+                              <p className="text-muted-foreground">Bed {p.bed_number || "—"}</p>
+                            </td>
+                            <td className="px-3 py-2 text-xs">
+                              {p.doctors.length ? p.doctors.map((d) => (
+                                <p key={d.id} className="flex items-center gap-1">
+                                  {d.doctor_name}
+                                  {d.is_primary && <Badge variant="secondary" className="px-1 py-0 text-[10px]">Primary</Badge>}
+                                </p>
+                              )) : <span className="text-muted-foreground">None</span>}
+                            </td>
+                            <td className="px-3 py-2 text-xs">
+                              {p.nurses.length ? p.nurses.map((n) => (
+                                <p key={n.id}>
+                                  {n.nurse_name}
+                                  {n.care_tasks?.length ? <span className="block text-muted-foreground">{n.care_tasks.join(", ")}</span> : null}
+                                </p>
+                              )) : <span className="text-muted-foreground">None</span>}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(p.admitted_at).toLocaleString()}</td>
+                            <td className="px-3 py-2">
+                              <div className="flex flex-wrap justify-end gap-1">
+                                <Button variant="ghost" size="sm" onClick={() => setDoctorFor(p)} title="Assign doctor"><Stethoscope className="h-3.5 w-3.5" /></Button>
+                                <Button variant="ghost" size="sm" onClick={() => setNurseFor(p)} title="Assign nurse"><UserPlus className="h-3.5 w-3.5" /></Button>
+                                <Button variant="ghost" size="sm" onClick={() => setTransferFor(p)} title="Transfer ward"><ArrowRightLeft className="h-3.5 w-3.5" /></Button>
+                                <Button variant="ghost" size="sm" onClick={() => setLogFor(p)} title="Log activity"><NotebookPen className="h-3.5 w-3.5" /></Button>
+                                <Button variant="ghost" size="sm" className="text-destructive" onClick={() => discharge(p)} title="Discharge"><LogOut className="h-3.5 w-3.5" /></Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      ) : (
+        <div className="rounded-2xl border bg-card p-8 text-center text-xs text-muted-foreground">
+          No {statusFilter} admissions.
+        </div>
+      )}
 
       {providerId && (
         <AdmitPatientDialog open={admitOpen} onOpenChange={setAdmitOpen} hospitalId={providerId} wards={wards} onSaved={reload} />
