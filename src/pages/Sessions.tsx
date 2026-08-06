@@ -1241,15 +1241,9 @@ export default function Sessions() {
 
       {(sessionState === "active" || sessionState === "processing" || sessionState === "completed") && (
         <>
-        {/* Inline status strip — replaces the old standalone "Processing Session" screen. */}
-        {sessionState === "processing" && (
-          <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <p className="text-sm text-foreground">
-              Analysing session — generating summary, action points and documents…
-            </p>
-          </div>
-        )}
+        {/* Centred progress box — replaces the old status strip and toasts. */}
+        <SessionProcessingDialog open={sessionState === "processing" || isTranscribing} />
+
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
           {/* Record Session — column 1, full height (rows 1-3) */}
           <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:min-h-[700px]">
