@@ -46,6 +46,7 @@ import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmission
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
