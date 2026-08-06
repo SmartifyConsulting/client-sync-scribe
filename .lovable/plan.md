@@ -1,35 +1,50 @@
-# Merge the post-session screen into the active Session screen
+# Session screen: smarter live AI Clinician, readable overview, cleaner post-recording view
 
-Today, stopping a recording moves the doctor to a "Processing Session" screen and then to a separate "completed" screen. That completed screen mostly repeats what was already on the active session screen, so the hand-off feels like a dead step.
+## 1. Live AI Clinician — make it useful DURING the session
 
-## What changes
+Today the live hint only gets the rolling transcript plus a thin patient context, is asked for "a very short hint", and only refreshes after 80 new characters every 20s. Result: thin output, no safety flags.
 
-Stay on the active Session screen after the recording stops. The results appear in place, beneath the live session layout, so the doctor keeps the patient context and has time to read the AI Clinician output.
+Changes:
+- Send full safety context to `live-diagnostic-hint`: active medication list (name, dose, frequency), allergies, chronic conditions/diagnoses, and the last 5 session summaries with dates.
+- Rewrite the prompt so the model must actively cross-check and flag:
+  - **Already prescribed** — doctor is suggesting a drug the patient is already on (duplicate therapy).
+  - **Interaction / counter-intuitive** — the suggested drug conflicts with a current medication or a chronic condition.
+  - **Allergy conflict** — suggested drug matches a documented allergy.
+  - **Recurrence** — "this has happened before" (same complaint in prior sessions, with the date).
+  - **Red flags** — symptoms needing urgent action.
+- Extend the response schema with `alerts: [{ type, severity, message }]` alongside the existing suggestion / differentials / red_flags / investigations.
+- Refresh faster: poll every 12s, trigger after ~40 new characters, first hint after ~6s.
+- Redesign the live panel in the recording frame: severity-coloured alert rows (red = critical, amber = caution) at the top, then working impression, differentials and suggested checks — instead of the current one-line grey text.
 
-1. **Remove the standalone processing screen**
-   - Stopping the recording keeps the active layout visible.
-   - Processing is shown as an inline status strip at the top of the session screen ("Analysing session…" with a spinner), replaced by a completion banner when finished.
+## 2. Patient Overview — key points instead of one paragraph
 
-2. **Show results inline in the active session**
-   - Once analysis completes, a results block renders under the existing session grid:
-     - **Transcription** (with audio playback)
-     - **AI Summary**
-     - **Action Points** (with the "Added to To-Do List" confirmation)
-     - **AI Clinician** panel with the confidential decision-support disclaimer, translate and narrate controls — laid out as in the reference image.
-   - The recorder, Patient Overview, Personal Notes and Drawing Pad stay on screen above it.
+Replace the single paragraph in `SessionPatientOverview` with a compact structured card:
+- A one-line headline recap (2 sentences max).
+- Labelled key-point rows: Conditions, Current medications, Allergies, Recent symptoms, Recent visits — each as short bullet chips/lines rather than prose.
+- Allergies rendered in the destructive colour so they stand out.
+- Same 6-month data source and AI call; only the output shape and rendering change.
 
-3. **Auto-created documents appear on the same screen**
-   - Documents detected from the transcript (prescription, medical certificate, invoice, referral, admission) render as preview cards in a **Documents from this session** section instead of only living behind a dialog.
-   - Each card shows the document type, key details and a small preview, with actions: **Preview**, **Send**, **Save for review**, matching the existing document editor actions.
-   - The existing "Create Document" picker stays, so the doctor can add a document that the AI did not detect.
-   - The generated-documents dialog remains available (reopened from the section header) but is no longer the only path.
+## 3. Post-recording layout — one transcript, one set of fonts
 
-4. **End-of-session actions**
-   - "Start New Session", "View To-Do List" and "View Patient Profile" move to the bottom of the same screen. Starting a new session clears the results block and resets to the idle/selector state.
+- Transcript appears **only** in the top-left **Speaker Notes** frame. Remove the separate "Transcription" card from the post-recording grid, and stop writing the transcript into AI Clinician Notes (`onTranscriptionComplete` currently does `setNotes(text)`).
+- **AI Clinician Notes** keeps only AI-generated clinical notes and live hints.
+- The post-recording row becomes: **AI Summary** and **Action Points** (wider, two columns), with the AI Clinician panel full-width below.
+- Remove the green **"Session Completed Successfully"** banner entirely.
+
+### Typography (applied to Speaker Notes, AI Summary, Action Points, AI Clinician output)
+All body text becomes the same font, size, weight and colour:
+- **Font:** Manrope (`font-sans`, the app body font; headings elsewhere use Sora)
+- **Size:** 14px (`text-sm`), line-height 1.6 (`leading-relaxed`)
+- **Weight:** 400 (normal); speaker labels stay 700 (bold)
+- **Colour:** `text-foreground` (black) — the muted grey currently used for AI Summary is dropped
+
+## 4. Documents not auto-generating
+
+Invoice, Prescription and Medical Certificate are supposed to be extracted by `summarize-session` and then created by `generateAllDocuments()`. They are not appearing, so this step is diagnose-then-fix:
+1. Run a session end-to-end and read the `summarize-session` and document-creation logs to see whether extraction returns null or the creation call fails.
+2. Fix whichever stage breaks — most likely candidates are the extraction schema returning nothing for a short transcript, or `generateAllDocuments()` being called before the extracted-document state has settled (it is fired in a `setTimeout(...,0)` immediately after the `setExtracted*` calls, so it can read stale state).
+3. Make the invoice fallback unconditional so a consultation always produces at least an invoice to review.
 
 ## Technical notes
-
-- `src/pages/Sessions.tsx`: collapse the `processing` and `completed` branches of `SessionState` into the `active` branch. Keep the state machine values so the existing completion pipeline (`handleSessionComplete`, follow-up, visit-category and Vula sequencing) is unchanged; only the rendering condition changes.
-- Extract the results markup (Transcription / Summary / Action Points / AI Clinician) and the new documents section into components under `src/features/sessions/components/` so `Sessions.tsx` does not grow further.
-- Document previews reuse the existing preview renderer (`resolveDocumentPreviewContent`) and `SendDocumentButton` for send/save so styling and behaviour match Documents elsewhere.
-- Presentation and layout only: no schema changes, no edge-function changes, no change to when documents are created or Vulas are awarded.
+- Files: `src/pages/Sessions.tsx`, `src/features/sessions/components/SessionPatientOverview.tsx`, `src/features/sessions/components/SessionNotepad.tsx`, `src/hooks/useLiveDiagnosticHint.ts`, `supabase/functions/live-diagnostic-hint/index.ts`, and `supabase/functions/summarize-session/index.ts` if extraction is the fault.
+- The live hint stays advisory with its existing disclaimer; no auto-prescribing or blocking behaviour.
