@@ -58,7 +58,7 @@ export const PROVIDER_MODULES: NavModule[] = [
     items: [
       { icon: Activity, labelKey: "nav.liveQueue", label: "Live Queue", to: "/provider/hospital", end: true, danger: true },
       { icon: Siren, labelKey: "nav.erDashboard", label: "ER Dispatch", to: "/provider/hospital/er" },
-      { icon: Ambulance, labelKey: "nav.incomingAmbulances", label: "Incoming Ambulances", to: "/provider/hospital/incoming" },
+      { icon: Ambulance, labelKey: "nav.incomingAmbulances", label: "Incoming ER", to: "/provider/hospital/incoming" },
       { icon: Stethoscope, labelKey: "nav.triageBoard", label: "Triage Board", to: "/provider/hospital/triage" },
       { icon: BedDouble, labelKey: "nav.wardBoard", label: "Ward Board", to: "/provider/hospital/ward-board" },
     ],
@@ -97,7 +97,6 @@ export const PROVIDER_MODULES: NavModule[] = [
     portals: ["hospital"],
     enabled: always,
     items: [
-      { icon: UserCheck, labelKey: "nav.hospitalAdmin", label: "Hospital Admin", to: "/provider/hospital/admin-dashboard" },
       { icon: Users, labelKey: "nav.admin", label: "Admin", to: "/provider/hospital/admins" },
     ],
   },
