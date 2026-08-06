@@ -192,9 +192,10 @@ export default function Landing() {
                   className="h-28 sm:h-36 lg:h-44 w-auto"
                 />
 
-                {/* Tagline block — centred on the logo's axis, logo stays put */}
-                <div className="mt-5 w-0 min-w-full flex justify-center">
-                  <div className="w-[34rem] max-w-[calc(100vw-2.5rem)] shrink-0 space-y-3 text-center">
+                {/* Tagline block — starts at the logo's left edge, copy centred; logo stays put */}
+                <div className="mt-5 w-0 min-w-full">
+                  <div className="w-[30rem] max-w-[calc(100vw-2.5rem)] space-y-3 text-center">
+
                     <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
                       {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
                     </p>
