@@ -18,6 +18,8 @@ import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
 import MySessions from "./pages/MySessions";
+import MyShiftScreen from "./modules/holarchelp/pages/provider/hospital/MyShiftScreen";
+
 
 // Documents page is now wrapped inside DoctorDocumentsPage
 import Settings from "./pages/Settings";
