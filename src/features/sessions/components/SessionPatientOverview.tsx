@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Loader2, Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface SessionPatientOverviewProps {
   patient: any | undefined;
   currentMedications?: { medication: string; dosage: string; frequency: string }[];
+  /** Rendered at the top of the frame (used for the DISC descriptor chips). */
+  discSlot?: ReactNode;
 }
 
 const stripTags = (s: string) =>
