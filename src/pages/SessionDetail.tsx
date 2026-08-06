@@ -319,26 +319,33 @@ export default function SessionDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" className="gap-2">
-              <Trash2 className="h-4 w-4" />
-              Delete Session
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Session</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the session record.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+          {isAdmin ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  Delete Session
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Session</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the session record.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" />
+              Session records are permanent and can only be removed by a system administrator.
+            </p>
+          )}
         </div>
       </div>
 
