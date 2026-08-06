@@ -284,6 +284,7 @@ export default function Sessions() {
       
       if (!error && data) {
         setPastPatientSessions(data.map(s => ({
+          id: s.id,
           date: format(new Date(s.started_at), 'MMM d, yyyy'),
           summary: s.summary
         })));
