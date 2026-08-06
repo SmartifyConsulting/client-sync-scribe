@@ -56,6 +56,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
+import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
