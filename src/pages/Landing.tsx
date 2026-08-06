@@ -299,15 +299,19 @@ export default function Landing() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center"
+            className="text-center -mt-2 lg:-mt-6"
           >
             <img
               src={capabilitiesAsset.url}
               alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network"
               loading="lazy"
+              width={1920}
+              height={720}
               className="w-full max-w-5xl mx-auto h-auto"
             />
           </motion.div>
+
+
 
 
           {/* BOTTOM ROW — CTAs left, SOS card right */}
