@@ -4,7 +4,7 @@
 
 1. **Copy size** — The intro paragraph under the bracketed slogan goes from 14px to 18px (`text-[18px]`, Manrope, weight 400).
 
-2. **Centre alignment** — The eyebrow line, the bracketed slogan `[ built around you. ]` and the intro paragraph are centred on all breakpoints (currently left-aligned on desktop). The logo stays where it is; the tagline block centres beneath it within the left column.
+2. **Centre alignment** — The eyebrow line, the bracketed slogan `[ built around you. ]` and the intro paragraph are centred horizontally on the logo, so the tagline block's centre axis matches the logo's centre axis. The logo itself does not move — its position and size stay exactly as they are.
 
 3. **Capability graphic moves up** — The radio-wave capabilities image moves out of the separate band below the mosaic and sits directly under the tagline copy, still full-width across the hero, with the vertical rhythm tightened (reduced top/bottom spacing) so the whole hero fits neatly above the fold without a large gap.
 
