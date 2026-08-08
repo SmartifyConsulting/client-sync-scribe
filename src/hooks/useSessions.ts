@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 import { fillDocumentPlaceholders } from '@/lib/fillDocumentPlaceholders';
 import { renderSignatureHtml } from '@/lib/signature';
+import { classifyTask } from '@/lib/taskAssignee';
 
 export interface Session {
   id: string;
@@ -44,6 +45,37 @@ const notifyPatientOfTask = async (patientId: string, taskTitle: string, taskId:
     }
   } catch (err) { console.error('Error sending task notification:', err); }
 };
+
+// Saves session action points as todos, routing each one to the doctor or the
+// patient. Medication/prescription instructions are dropped — the prescription
+// document and medication adherence module already cover them.
+const insertActionPointTodos = async (
+  actionPoints: string[],
+  userId: string,
+  sessionId: string,
+  patientId?: string | null,
+) => {
+  const rows = actionPoints
+    .map((point) => ({ point, owner: classifyTask(point) }))
+    .filter((r) => r.owner !== 'skip')
+    .map((r) => ({
+      user_id: userId,
+      session_id: sessionId,
+      patient_id: patientId || null,
+      title: r.point,
+      priority: 'medium',
+      status: 'pending',
+      assignee: r.owner,
+    }));
+  if (rows.length === 0) return;
+  await supabase.from('todos').insert(rows as any);
+  if (patientId) {
+    for (const row of rows) {
+      if (row.assignee === 'patient') await notifyPatientOfTask(patientId, row.title, sessionId);
+    }
+  }
+};
+
 
 // Helper to transform database session to our Session type
 const transformSession = (dbSession: any): Session => ({
@@ -271,22 +303,8 @@ const completeSession = async (
           
           if (processError) {
             console.error('Error auto-executing action points:', processError);
-            // Fallback: save as pending todos
-            const todosToInsert = summaryData.action_points.map((point: string) => ({
-              user_id: user.id,
-              session_id: sessionId,
-              patient_id: patientId || null,
-              title: point,
-              priority: 'medium',
-              status: 'pending',
-            }));
-            await supabase.from('todos').insert(todosToInsert);
-            // Notify patient about assigned tasks
-            if (patientId) {
-              for (const point of summaryData.action_points) {
-                await notifyPatientOfTask(patientId, point, sessionId);
-              }
-            }
+            // Fallback: save as pending todos, routed to the right owner
+            await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, patientId);
           } else {
             logger.debug('Auto-execution result:', processResult);
             const autoCount = processResult?.results?.filter((r: any) => r.auto_executed).length || 0;
@@ -297,23 +315,10 @@ const completeSession = async (
           }
         } catch (execError) {
           console.error('Failed to invoke process-todo-actions:', execError);
-          // Fallback: save as pending todos
-          const todosToInsert = summaryData.action_points.map((point: string) => ({
-            user_id: user.id,
-            session_id: sessionId,
-            patient_id: patientId || null,
-            title: point,
-            priority: 'medium',
-            status: 'pending',
-          }));
-          await supabase.from('todos').insert(todosToInsert);
-          // Notify patient about assigned tasks
-          if (patientId) {
-            for (const point of summaryData.action_points) {
-              await notifyPatientOfTask(patientId, point, sessionId);
-            }
-          }
+          // Fallback: save as pending todos, routed to the right owner
+          await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, patientId);
         }
+
       }
 
       // Auto-create hospital admission document if detected
@@ -1008,15 +1013,40 @@ ${tasksHtml}`;
               task_type: 'document_review',
               priority: 'high',
               status: 'pending',
+              assignee: 'doctor',
             } as any);
           }
-          // Remove duplicate action_point todos for exercises/tasks
+
+          // The instructions themselves belong on the patient's task list
+          const patientTaskRows = tasks
+            .filter((t: any) => t?.title && classifyTask(t.title) !== 'skip')
+            .map((t: any) => ({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId,
+              title: t.title,
+              description: t.description || null,
+              priority: 'medium',
+              status: 'pending',
+              vulas_reward: t.vulas_reward || 1,
+              assignee: 'patient',
+            }));
+          if (patientTaskRows.length > 0) {
+            await supabase.from('todos').insert(patientTaskRows as any);
+            for (const row of patientTaskRows) {
+              await notifyPatientOfTask(patientId, row.title, sessionId!);
+            }
+          }
+
+          // Remove duplicate doctor-side action_point todos for exercises/tasks
           await supabase.from('todos')
             .delete()
             .eq('session_id', sessionId!)
             .eq('user_id', user.id)
+            .eq('assignee', 'doctor')
             .neq('task_type', 'document_review')
             .ilike('title', '%exercise%');
+
         } catch (taskError) {
           console.error('Error creating patient task assignment:', taskError);
         }

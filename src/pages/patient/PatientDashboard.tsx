@@ -93,9 +93,11 @@ export default function PatientDashboard() {
         .from("todos")
         .select("id, title, description, vulas_reward, due_date, status")
         .eq("patient_id", patientRecord.id)
+        .eq("assignee", "patient")
         .eq("status", "pending")
         .order("due_date", { ascending: true })
         .limit(5);
+
       return (data || []) as AssignedTask[];
     },
     enabled: !!patientRecord?.id,

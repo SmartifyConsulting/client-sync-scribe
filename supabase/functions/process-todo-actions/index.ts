@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { classifyTask } from "../_shared/taskAssignee.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -225,7 +226,12 @@ Rules:
         const patientRecord = patientId ? patients.find((p) => p.id === patientId) : null;
 
         if (action.action_type === "manual_task" || (!patientId && action.action_type !== "manual_task")) {
-          // Create manual todo
+          // Create manual todo — skip medication instructions (covered by prescriptions)
+          const manualOwner = classifyTask(action.description);
+          if (manualOwner === "skip") {
+            results.push({ action_type: action.action_type, description: action.description, auto_executed: false });
+            continue;
+          }
           await supabase.from("todos").insert({
             user_id: user.id,
             title: action.description,
@@ -233,10 +239,11 @@ Rules:
             status: "pending",
             is_auto_executed: false,
             patient_id: patientId,
+            assignee: manualOwner,
           });
 
           // Notify the patient if the task is assigned to one
-          if (patientId && patientRecord?.patient_user_id) {
+          if (manualOwner === "patient" && patientId && patientRecord?.patient_user_id) {
             await supabase.from("notifications").insert({
               user_id: patientRecord.patient_user_id,
               title: "📋 New task assigned by your doctor",
@@ -244,6 +251,7 @@ Rules:
               type: "task_assigned",
             });
           }
+
 
           results.push({ action_type: action.action_type, description: action.description, auto_executed: false });
           continue;
@@ -414,26 +422,35 @@ Rules:
         }
 
         // Create pending todo for the auto-executed action — requires manual approval
-        await supabase.from("todos").insert({
-          user_id: user.id,
-          title: action.description,
-          priority: "medium",
-          status: "pending",
-          is_auto_executed: true,
-          patient_id: patientId,
-        });
+        const autoOwner = classifyTask(action.description);
+        if (autoOwner !== "skip") {
+          await supabase.from("todos").insert({
+            user_id: user.id,
+            title: action.description,
+            priority: "medium",
+            status: "pending",
+            is_auto_executed: true,
+            patient_id: patientId,
+            assignee: autoOwner,
+          });
+        }
 
         results.push({ action_type: action.action_type, description: action.description, auto_executed: true });
       } catch (actionError) {
         console.error("Action error:", actionError);
         // Fallback to manual todo
-        await supabase.from("todos").insert({
-          user_id: user.id,
-          title: action.description,
-          priority: "medium",
-          status: "pending",
-          is_auto_executed: false,
-        });
+        const fallbackOwner = classifyTask(action.description);
+        if (fallbackOwner !== "skip") {
+          await supabase.from("todos").insert({
+            user_id: user.id,
+            title: action.description,
+            priority: "medium",
+            status: "pending",
+            is_auto_executed: false,
+            assignee: fallbackOwner,
+          });
+        }
+
         results.push({
           action_type: action.action_type,
           description: action.description,

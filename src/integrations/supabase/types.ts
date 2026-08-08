@@ -6092,6 +6092,7 @@ export type Database = {
       }
       todos: {
         Row: {
+          assignee: string
           completed_at: string | null
           created_at: string
           description: string | null
@@ -6111,6 +6112,7 @@ export type Database = {
           vulas_reward: number
         }
         Insert: {
+          assignee?: string
           completed_at?: string | null
           created_at?: string
           description?: string | null
@@ -6130,6 +6132,7 @@ export type Database = {
           vulas_reward?: number
         }
         Update: {
+          assignee?: string
           completed_at?: string | null
           created_at?: string
           description?: string | null
