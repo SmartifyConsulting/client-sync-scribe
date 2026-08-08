@@ -19,7 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SectionAccordion } from "@/components/ui/section-accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  SECTION_CONTENT_CLASS,
+  SECTION_FRAME_CLASS,
+  SECTION_ITEM_CLASS,
+  SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+} from "@/components/ui/section-accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDocuments, type Document } from "@/hooks/useDocuments";
@@ -272,13 +283,19 @@ export function DocumentsBrowser({
           <p className="text-xs text-muted-foreground">No documents yet</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <Accordion
+          type="multiple"
+          defaultValue={groups.map((g) => g.label)}
+          className={SECTION_FRAME_CLASS}
+        >
           {groups.map((group) => (
-            <SectionAccordion
-              key={group.label}
-              title={`${group.label} (${group.docs.length})`}
-              defaultOpen
-            >
+            <AccordionItem key={group.label} value={group.label} className={SECTION_ITEM_CLASS}>
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+                <span className="text-sm font-semibold">
+                  {group.label} ({group.docs.length})
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
               <div className="divide-y divide-border/50">
                 {group.docs.map((doc) => {
                   const mediaUrl = (doc as any).media_url as string | undefined;
@@ -338,9 +355,10 @@ export function DocumentsBrowser({
                   );
                 })}
               </div>
-            </SectionAccordion>
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       )}
 
       {previewDoc && (
