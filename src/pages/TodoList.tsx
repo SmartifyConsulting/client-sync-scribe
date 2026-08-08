@@ -783,7 +783,14 @@ export default function TodoList() {
         <p className="text-sm text-muted-foreground text-center">{completedCount} of {todos.length} tasks completed</p>
       )}
 
+      <AssignTaskDialog
+        open={showAssignTask}
+        onOpenChange={setShowAssignTask}
+        onCreated={fetchTodos}
+      />
+
       {/* Document Preview Modal */}
+
       {previewDoc && (
         <DocumentPreview
           title={previewDoc.title}
