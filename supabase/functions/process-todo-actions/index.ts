@@ -226,7 +226,12 @@ Rules:
         const patientRecord = patientId ? patients.find((p) => p.id === patientId) : null;
 
         if (action.action_type === "manual_task" || (!patientId && action.action_type !== "manual_task")) {
-          // Create manual todo
+          // Create manual todo — skip medication instructions (covered by prescriptions)
+          const manualOwner = classifyTask(action.description);
+          if (manualOwner === "skip") {
+            results.push({ action_type: action.action_type, description: action.description, auto_executed: false });
+            continue;
+          }
           await supabase.from("todos").insert({
             user_id: user.id,
             title: action.description,
@@ -234,10 +239,11 @@ Rules:
             status: "pending",
             is_auto_executed: false,
             patient_id: patientId,
+            assignee: manualOwner,
           });
 
           // Notify the patient if the task is assigned to one
-          if (patientId && patientRecord?.patient_user_id) {
+          if (manualOwner === "patient" && patientId && patientRecord?.patient_user_id) {
             await supabase.from("notifications").insert({
               user_id: patientRecord.patient_user_id,
               title: "📋 New task assigned by your doctor",
@@ -245,6 +251,7 @@ Rules:
               type: "task_assigned",
             });
           }
+
 
           results.push({ action_type: action.action_type, description: action.description, auto_executed: false });
           continue;
