@@ -12,6 +12,7 @@ import {
   Loader2,
   Sparkles,
   User as UserIcon,
+  UserPlus,
   CalendarDays,
   Clock,
   Timer,
@@ -55,6 +56,7 @@ interface TodoRowProps {
   onPreviewCalendar?: (todo: TodoRowItem) => void;
   onEditAppointment?: (todo: TodoRowItem) => void;
   onSetPriority?: (id: string, p: "low" | "medium" | "high") => void;
+  onAssign?: (todo: TodoRowItem) => void;
   isEditing?: boolean;
   editText?: string;
   setEditText?: (v: string) => void;
@@ -92,6 +94,7 @@ export function TodoRow({
   onPreviewCalendar,
   onEditAppointment,
   onSetPriority,
+  onAssign,
   isEditing,
   editText,
   setEditText,
@@ -273,6 +276,12 @@ export function TodoRow({
                       {t("todo.actions.markComplete")}
                     </>
                   )}
+                </DropdownMenuItem>
+              )}
+              {onAssign && (
+                <DropdownMenuItem onClick={() => onAssign(todo)}>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Assign Task
                 </DropdownMenuItem>
               )}
               {onSetPriority && (
