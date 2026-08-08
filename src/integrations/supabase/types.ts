@@ -1614,6 +1614,7 @@ export type Database = {
           email_sent_at: string | null
           id: string
           is_draft: boolean | null
+          linked_document_ids: string[]
           media_type: string | null
           media_url: string | null
           name: string
@@ -1634,6 +1635,7 @@ export type Database = {
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
+          linked_document_ids?: string[]
           media_type?: string | null
           media_url?: string | null
           name: string
@@ -1654,6 +1656,7 @@ export type Database = {
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
+          linked_document_ids?: string[]
           media_type?: string | null
           media_url?: string | null
           name?: string
@@ -4999,6 +5002,7 @@ export type Database = {
           id: string
           invited_by: string
           invited_email: string
+          invited_role: string
           practice_id: string
           status: string
           token: string
@@ -5009,6 +5013,7 @@ export type Database = {
           id?: string
           invited_by: string
           invited_email: string
+          invited_role?: string
           practice_id: string
           status?: string
           token?: string
@@ -5019,6 +5024,7 @@ export type Database = {
           id?: string
           invited_by?: string
           invited_email?: string
+          invited_role?: string
           practice_id?: string
           status?: string
           token?: string
@@ -6092,9 +6098,11 @@ export type Database = {
       }
       todos: {
         Row: {
+          assigned_to_user_id: string | null
           assignee: string
           completed_at: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           document_id: string | null
           due_date: string | null
@@ -6112,9 +6120,11 @@ export type Database = {
           vulas_reward: number
         }
         Insert: {
+          assigned_to_user_id?: string | null
           assignee?: string
           completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           document_id?: string | null
           due_date?: string | null
@@ -6132,9 +6142,11 @@ export type Database = {
           vulas_reward?: number
         }
         Update: {
+          assigned_to_user_id?: string | null
           assignee?: string
           completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           document_id?: string | null
           due_date?: string | null
@@ -6691,6 +6703,10 @@ export type Database = {
         Returns: boolean
       }
       approve_blood_donation: { Args: { _donation_id: string }; Returns: Json }
+      assistant_of_doctor: {
+        Args: { _assistant: string; _doctor: string }
+        Returns: boolean
+      }
       award_doctor_checkin: {
         Args: { _note?: string; _patient_user_id: string }
         Returns: Json
@@ -6987,6 +7003,7 @@ export type Database = {
         Returns: boolean
       }
       is_paramedic: { Args: { _user_id: string }; Returns: boolean }
+      is_practice_assistant: { Args: { _user_id: string }; Returns: boolean }
       is_practice_member: {
         Args: { _practice_id: string; _user_id: string }
         Returns: boolean
@@ -7039,6 +7056,10 @@ export type Database = {
       seed_default_header_footer_template: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      shares_practice: {
+        Args: { _user_a: string; _user_b: string }
+        Returns: boolean
       }
       storage_object_path: {
         Args: { _bucket: string; _url: string }

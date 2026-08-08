@@ -59,6 +59,31 @@ serve(async (req) => {
       subject = subject || `${documentName}${doc.patient_name ? ` - ${doc.patient_name}` : ""}`;
     }
 
+    // Optional: additional saved documents that must be emailed together with
+    // this one (used by referral letters with attachments).
+    const attachedDocumentIds: string[] = Array.isArray(body.attachedDocumentIds)
+      ? body.attachedDocumentIds.filter((id: unknown) => typeof id === "string")
+      : [];
+    let attachedDocs: Array<{ name: string; content: string }> = [];
+    if (attachedDocumentIds.length > 0) {
+      const admin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+      const { data: rows, error: attachError } = await admin
+        .from("documents")
+        .select("name, content")
+        .in("id", attachedDocumentIds.slice(0, 20));
+      if (attachError) {
+        console.error("Failed to load attachments:", attachError.message);
+      } else {
+        attachedDocs = (rows || []).map((r: any) => ({
+          name: r.name || "Document",
+          content: r.content || "",
+        }));
+      }
+    }
+
     if (!to || !subject || (!documentContent && !documentHtml)) {
       throw new Error("Missing required fields: to, subject, documentContent or documentHtml");
     }
@@ -106,6 +131,18 @@ serve(async (req) => {
               ${practiceName ? `<br/>From: ${practiceName}` : ""}
             </div>
             <div class="content">${formattedContent}</div>
+            ${attachedDocs
+              .map(
+                (d) => `
+              <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e5e5;">
+                <div style="font-weight:bold;margin-bottom:8px;">Attachment: ${d.name}</div>
+                <div style="white-space:pre-wrap;">${d.content
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/\n/g, "<br/>")}</div>
+              </div>`,
+              )
+              .join("")}
             <div class="footer">
               Sent by ${senderName}${practiceName ? ` - ${practiceName}` : ""}
             </div>

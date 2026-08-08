@@ -130,6 +130,7 @@ const CURRENCIES = [
 ];
 
 import { LANGUAGES } from "@/lib/languages";
+import { PracticeAssistants } from "@/components/practice/PracticeAssistants";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
 const COUNTRY_CODE_TO_LANGUAGE: Record<string, string> = {
@@ -1751,6 +1752,16 @@ export default function MyPractice() {
               </Dialog>
 
             </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Practice Management Assistants */}
+              <AccordionItem value="practice-assistants" className={SECTION_ITEM_CLASS}>
+                <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                  <h4 className="text-sm font-semibold">Practice Management Assistants</h4>
+                </AccordionTrigger>
+                <AccordionContent className={SECTION_CONTENT_CLASS}>
+                  <PracticeAssistants />
                 </AccordionContent>
               </AccordionItem>
 
