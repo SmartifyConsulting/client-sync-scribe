@@ -46,6 +46,37 @@ const notifyPatientOfTask = async (patientId: string, taskTitle: string, taskId:
   } catch (err) { console.error('Error sending task notification:', err); }
 };
 
+// Saves session action points as todos, routing each one to the doctor or the
+// patient. Medication/prescription instructions are dropped — the prescription
+// document and medication adherence module already cover them.
+const insertActionPointTodos = async (
+  actionPoints: string[],
+  userId: string,
+  sessionId: string,
+  patientId?: string | null,
+) => {
+  const rows = actionPoints
+    .map((point) => ({ point, owner: classifyTask(point) }))
+    .filter((r) => r.owner !== 'skip')
+    .map((r) => ({
+      user_id: userId,
+      session_id: sessionId,
+      patient_id: patientId || null,
+      title: r.point,
+      priority: 'medium',
+      status: 'pending',
+      assignee: r.owner,
+    }));
+  if (rows.length === 0) return;
+  await supabase.from('todos').insert(rows as any);
+  if (patientId) {
+    for (const row of rows) {
+      if (row.assignee === 'patient') await notifyPatientOfTask(patientId, row.title, sessionId);
+    }
+  }
+};
+
+
 // Helper to transform database session to our Session type
 const transformSession = (dbSession: any): Session => ({
   ...dbSession,
