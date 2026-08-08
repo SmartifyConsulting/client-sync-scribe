@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 import { fillDocumentPlaceholders } from '@/lib/fillDocumentPlaceholders';
 import { renderSignatureHtml } from '@/lib/signature';
+import { classifyTask } from '@/lib/taskAssignee';
 
 export interface Session {
   id: string;
