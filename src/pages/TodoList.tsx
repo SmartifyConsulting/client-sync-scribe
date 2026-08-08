@@ -321,7 +321,7 @@ export default function TodoList() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
-      const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending' }).select().single();
+      const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending', assignee: 'doctor' } as any).select().single();
       if (error) throw error;
 
       // Notify patient if task has a patient_id
