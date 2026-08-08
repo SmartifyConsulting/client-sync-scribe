@@ -12,7 +12,7 @@ interface PracticePatient {
   id: string;
   name: string;
   email: string | null;
-  mobile_number: string | null;
+  phone: string | null;
   user_id: string;
 }
 
@@ -37,7 +37,7 @@ export default function PracticePatients() {
       }
       const { data } = await supabase
         .from("patients")
-        .select("id, name, email, mobile_number, user_id")
+        .select("id, name, email, phone, user_id")
         .in("user_id", doctorIds)
         .order("name", { ascending: true });
       setPatients((data || []) as PracticePatient[]);
@@ -87,7 +87,7 @@ export default function PracticePatients() {
                 </Badge>
               </div>
               <p className="truncate text-xs text-muted-foreground">
-                {[p.email, p.mobile_number].filter(Boolean).join(" · ") || "No contact details"}
+                {[p.email, p.phone].filter(Boolean).join(" · ") || "No contact details"}
               </p>
             </div>
             <Button
