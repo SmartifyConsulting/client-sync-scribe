@@ -39,6 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
@@ -120,6 +121,13 @@ const nurseNavItems: (NavItem & { tour?: string })[] = [
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
 ];
 
+/** Extra tools for a Practice Management Assistant, appended to their own menu. */
+const assistantNavItems: (NavItem & { tour?: string })[] = [
+  { icon: Users, label: "Practice Patients", labelKey: "nav.practicePatients", to: "/practice-patients" },
+  { icon: Calendar, label: "Practice Calendar", labelKey: "nav.practiceCalendar", to: "/calendar" },
+  { icon: ListChecks, label: "Practice Tasks", labelKey: "nav.practiceTasks", to: "/todos" },
+];
+
 const adminNavItems: NavItem[] = [
   { icon: LayoutDashboard, label: "Home", labelKey: "nav.home", to: "/doctor-dashboard" },
   { icon: Users, label: "Users", labelKey: "nav.users", to: "/admin/users" },
@@ -157,6 +165,7 @@ interface SidebarProps {
 export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
+  const { isAssistant } = usePracticeAssistant();
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
@@ -190,11 +199,17 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       ? patientNavItems
       : doctorModeItems;
 
+  // Practice Management Assistants keep their own (patient) menu plus the
+  // practice-admin tools they are responsible for.
+  const withAssistant = isAssistant && !isOnAdminRoute
+    ? [...baseNav.filter((i) => !assistantNavItems.some((a) => a.to === i.to)), ...assistantNavItems]
+    : baseNav;
+
   // For admins not currently on an admin route, surface an "Admin" entry so
   // they can always reach the admin section.
   const navItems = isAdmin && !isOnAdminRoute
-    ? [...baseNav, { icon: UserCog, label: "Admin", labelKey: "nav.admin", to: "/admin/users" }]
-    : baseNav;
+    ? [...withAssistant, { icon: UserCog, label: "Admin", labelKey: "nav.admin", to: "/admin/users" }]
+    : withAssistant;
 
   const { preferences, savePreferences } = useSidebarPreferences();
   const visibleItems = (!isDoctor || isOnAdminRoute)
