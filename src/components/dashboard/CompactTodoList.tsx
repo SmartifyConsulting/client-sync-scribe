@@ -160,7 +160,9 @@ export function CompactTodoList() {
         .from("todos")
         .select("*")
         .eq("user_id", user.id)
+        .eq("assignee", "doctor")
         .order("created_at", { ascending: false });
+
 
       if (error) throw error;
 
