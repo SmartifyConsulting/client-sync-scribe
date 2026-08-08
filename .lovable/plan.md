@@ -37,6 +37,14 @@ Signed in as an assistant, the person keeps their own patient profile and can sw
 - Patient list and patient detail render an assistant variant that only mounts the admin tabs (Details, Appointments, Invoices, Tasks) plus a "New hospital admission form" action.
 - Task creation dialog gains an "Assign to" picker: practice doctors, the practice assistant, or a patient. Reuses the existing notification insert.
 
+### 4. Referrals: attachments and send/save
+- The Referral frame gets two explicit actions: **Send to referring doctor** (emails the referral immediately) and **Save** (keeps it as a draft for later, no email).
+- An **Attach documents** control lets the doctor pick existing patient documents (and upload a new file) to travel with the referral.
+- On send, the referral letter plus every attached document go out in a single email to the referring doctor, with the attachment list shown on the referral record.
+- Saved referrals can be reopened, have attachments added or removed, and sent later from the same frame.
+- Technical: attachments stored as a join between the referral document and `documents` rows; the existing send-document edge function is extended to accept multiple document IDs and build one multi-attachment email. Assistants may attach and save but sending stays with the doctor.
+
 ## Out of scope
+
 - Assistants do not get session recording, AI features, clinical document templates, or Vula rewards.
 - No billing/subscription changes for assistant seats.
