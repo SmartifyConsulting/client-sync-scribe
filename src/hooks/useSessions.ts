@@ -1038,13 +1038,15 @@ ${tasksHtml}`;
             }
           }
 
-          // Remove duplicate action_point todos for exercises/tasks
+          // Remove duplicate doctor-side action_point todos for exercises/tasks
           await supabase.from('todos')
             .delete()
             .eq('session_id', sessionId!)
             .eq('user_id', user.id)
+            .eq('assignee', 'doctor')
             .neq('task_type', 'document_review')
             .ilike('title', '%exercise%');
+
         } catch (taskError) {
           console.error('Error creating patient task assignment:', taskError);
         }
