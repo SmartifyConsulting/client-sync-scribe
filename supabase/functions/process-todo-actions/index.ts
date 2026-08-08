@@ -422,26 +422,35 @@ Rules:
         }
 
         // Create pending todo for the auto-executed action — requires manual approval
-        await supabase.from("todos").insert({
-          user_id: user.id,
-          title: action.description,
-          priority: "medium",
-          status: "pending",
-          is_auto_executed: true,
-          patient_id: patientId,
-        });
+        const autoOwner = classifyTask(action.description);
+        if (autoOwner !== "skip") {
+          await supabase.from("todos").insert({
+            user_id: user.id,
+            title: action.description,
+            priority: "medium",
+            status: "pending",
+            is_auto_executed: true,
+            patient_id: patientId,
+            assignee: autoOwner,
+          });
+        }
 
         results.push({ action_type: action.action_type, description: action.description, auto_executed: true });
       } catch (actionError) {
         console.error("Action error:", actionError);
         // Fallback to manual todo
-        await supabase.from("todos").insert({
-          user_id: user.id,
-          title: action.description,
-          priority: "medium",
-          status: "pending",
-          is_auto_executed: false,
-        });
+        const fallbackOwner = classifyTask(action.description);
+        if (fallbackOwner !== "skip") {
+          await supabase.from("todos").insert({
+            user_id: user.id,
+            title: action.description,
+            priority: "medium",
+            status: "pending",
+            is_auto_executed: false,
+            assignee: fallbackOwner,
+          });
+        }
+
         results.push({
           action_type: action.action_type,
           description: action.description,
