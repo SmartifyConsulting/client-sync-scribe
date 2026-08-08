@@ -28,6 +28,8 @@ interface AssignTaskDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Pre-selected patient (optional). */
   patientId?: string | null;
+  /** Existing task being re-assigned (optional). */
+  task?: { id: string; title?: string | null; patient_id?: string | null } | null;
   onCreated?: () => void;
 }
 
@@ -43,6 +45,7 @@ export function AssignTaskDialog({
   open,
   onOpenChange,
   patientId,
+  task,
   onCreated,
 }: AssignTaskDialogProps) {
   const { toast } = useToast();
@@ -69,8 +72,11 @@ export function AssignTaskDialog({
   }, [open]);
 
   useEffect(() => {
-    if (open && patientId) setTargetKey(`patient:${patientId}`);
-  }, [open, patientId]);
+    if (!open) return;
+    const pid = task?.patient_id ?? patientId;
+    if (pid) setTargetKey(`patient:${pid}`);
+    if (task?.title) setTitle(task.title);
+  }, [open, patientId, task?.id]);
 
   const targets = useMemo<Target[]>(() => {
     const list: Target[] = colleagues.map((c) => ({
@@ -113,8 +119,32 @@ export function AssignTaskDialog({
         patient_id: isPatient ? id : patientId ?? null,
       };
 
-      const { data, error } = await supabase.from("todos").insert(payload as any).select().single();
-      if (error) throw error;
+      let data: any;
+      if (task?.id) {
+        const { data: updated, error: updateError } = await supabase
+          .from("todos")
+          .update({
+            title: payload.title,
+            description: payload.description,
+            priority: payload.priority,
+            due_date: payload.due_date,
+            assignee: payload.assignee,
+            assigned_to_user_id: payload.assigned_to_user_id,
+          } as any)
+          .eq("id", task.id)
+          .select()
+          .single();
+        if (updateError) throw updateError;
+        data = updated;
+      } else {
+        const { data: created, error } = await supabase
+          .from("todos")
+          .insert(payload as any)
+          .select()
+          .single();
+        if (error) throw error;
+        data = created;
+      }
 
       const notifyUser = isPatient ? patient?.patient_user_id : id;
       if (notifyUser) {
