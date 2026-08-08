@@ -200,7 +200,9 @@ export default function TodoList() {
       const { data, error } = await supabase
         .from('todos')
         .select('*, patients(name)')
+        .eq('assignee', 'doctor')
         .order('created_at', { ascending: false });
+
 
       if (error) throw error;
 
