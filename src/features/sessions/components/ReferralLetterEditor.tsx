@@ -15,7 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
-import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Paperclip, Send } from "lucide-react";
@@ -89,7 +88,7 @@ export function ReferralLetterEditor({
   const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
 
   const [referralOptions, setReferralOptions] = useState<
-    Array<{ id: string; label: string; specialty: string | null; address: string | null }>
+    Array<{ id: string; label: string; specialty: string | null; address: string | null; email: string | null }>
   >([]);
   const [selectedReferralId, setSelectedReferralId] = useState<string>("");
 
@@ -101,7 +100,7 @@ export function ReferralLetterEditor({
       if (!user) return;
       const { data } = await supabase
         .from("referral_doctors")
-        .select("id, first_name, last_name, specialty, address")
+        .select("id, first_name, last_name, specialty, address, email")
         .eq("user_id", user.id)
         .order("last_name", { ascending: true });
       setReferralOptions(
@@ -110,6 +109,7 @@ export function ReferralLetterEditor({
           label: `Dr ${[d.first_name, d.last_name].filter(Boolean).join(" ")}`.trim(),
           specialty: d.specialty,
           address: d.address,
+          email: d.email,
         })),
       );
     })();
@@ -183,6 +183,85 @@ export function ReferralLetterEditor({
       .replace(/\[DoctorNumber\]/g, doctorNumber)
       .replace("[REFERRED_TO]", referredTo)
       .replace("[REFERRAL_CONTENT]", generateReferralContent());
+  };
+
+  /** Persists the referral and returns the created document id. */
+  const persistReferral = async (): Promise<string | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+    const { data, error } = await supabase
+      .from("documents")
+      .insert({
+        name: `Referral Letter - ${patientName} - ${new Date().toLocaleDateString()}`,
+        content: generateContent(),
+        patient_id: patientId,
+        patient_name: patientName,
+        template_name: "Referral Letter",
+        user_id: user.id,
+        linked_document_ids: attachedIds,
+      } as any)
+      .select("id")
+      .single();
+    if (error) throw error;
+    return (data as any)?.id ?? null;
+  };
+
+  /** Saves the referral and emails it — with any attached documents — to the
+   *  referring doctor in one message. */
+  const handleSendToReferringDoctor = async () => {
+    const recipient =
+      referralOptions.find((o) => o.id === selectedReferralId)?.email || "";
+    if (!recipient) {
+      toast({
+        title: "No email address",
+        description: "Pick a referral doctor that has an email address on file.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!referredTo.trim() || !reasonForReferral.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in the specialist/hospital and reason for referral",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSending(true);
+    try {
+      const documentId = await persistReferral();
+      const { error } = await supabase.functions.invoke("send-document-email", {
+        body: {
+          to: recipient,
+          subject: `Referral Letter for ${patientName}`,
+          documentName: `Referral Letter - ${patientName}`,
+          documentContent: generateContent(),
+          senderName: doctorName,
+          attachedDocumentIds: attachedIds,
+        },
+      });
+      if (error) throw error;
+      if (documentId) {
+        await supabase
+          .from("documents")
+          .update({ email_sent_at: new Date().toISOString() })
+          .eq("id", documentId);
+      }
+      toast({
+        title: "Referral sent",
+        description: `Emailed to ${recipient}${attachedIds.length ? ` with ${attachedIds.length} attachment(s)` : ""}`,
+      });
+      onSave({ content: generateContent() });
+      onClose();
+    } catch (err: any) {
+      toast({
+        title: "Send failed",
+        description: err?.message || "Could not send the referral letter",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleSave = async () => {
@@ -337,6 +416,33 @@ export function ReferralLetterEditor({
               className="min-h-[80px]"
             />
           </div>
+
+          {availableDocs.length > 0 && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Paperclip className="h-3.5 w-3.5 text-primary" />
+                Attach documents
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Attached documents are emailed together with this referral.
+              </p>
+              <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-md border border-border p-2">
+                {availableDocs.map((d) => (
+                  <label key={d.id} className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={attachedIds.includes(d.id)}
+                      onCheckedChange={(checked) =>
+                        setAttachedIds((prev) =>
+                          checked ? [...prev, d.id] : prev.filter((id) => id !== d.id),
+                        )
+                      }
+                    />
+                    <span className="truncate">{d.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -349,12 +455,19 @@ export function ReferralLetterEditor({
               <Eye className="h-4 w-4" />
               Preview
             </Button>
-            <SendDocumentButton
-              patientId={patientId}
-              patientName={patientName}
-              documentLabel="Referral Letter"
-              getContent={generateContent}
-            />
+            <Button
+              variant="outline"
+              onClick={handleSendToReferringDoctor}
+              disabled={isSending}
+              className="gap-2"
+            >
+              {isSending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              Send to Referring Doctor
+            </Button>
             <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
               {isSaving ? (
                 <>
@@ -364,7 +477,7 @@ export function ReferralLetterEditor({
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Save
+                  Save for Later
                 </>
               )}
             </Button>
