@@ -355,7 +355,7 @@ export function CompactTodoList() {
       if (!user) return;
       const { data, error } = await supabase
         .from("todos")
-        .insert({ user_id: user.id, title: newTaskText.trim(), priority: "medium", status: "pending" })
+        .insert({ user_id: user.id, title: newTaskText.trim(), priority: "medium", status: "pending", assignee: "doctor" } as any)
         .select()
         .single();
       if (error) throw error;
