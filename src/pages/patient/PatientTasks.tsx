@@ -52,7 +52,9 @@ export default function PatientTasks() {
         (supabase.from("todos") as any)
           .select("*, patients!inner(id)")
           .eq("patients.patient_user_id", user!.id)
+          .eq("assignee", "patient")
           .order("created_at", { ascending: false }),
+
         supabase.from("patients").select("id").eq("patient_user_id", user!.id),
       ]);
 
