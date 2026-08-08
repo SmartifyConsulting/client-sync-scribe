@@ -96,7 +96,7 @@ export default function DoctorDocumentsTab() {
   const { documents, loading } = useDocuments(undefined, { allOwners: true });
   const { templates } = useTemplates();
   const [q, setQ] = useState("");
-  const [groupMode, setGroupMode] = useState<GroupMode>("date");
+  const [groupMode, setGroupMode] = useState<GroupMode>("type");
   const [selectedTemplate, setSelectedTemplate] = useState<(typeof templates)[number] | null>(null);
 
   const filtered = useMemo(() => {

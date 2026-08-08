@@ -31,6 +31,7 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
+import { AssignTaskDialog } from "@/components/tasks/AssignTaskDialog";
 import { getTodoDisplay } from "@/lib/todoDisplay";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight, User as UserIcon, CalendarDays } from "lucide-react";
@@ -95,6 +96,7 @@ export function CompactTodoList() {
   const navigate = useNavigate();
   const { profile } = useProfile();
   const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [assignTask, setAssignTask] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [newTaskText, setNewTaskText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -543,6 +545,7 @@ export function CompactTodoList() {
                   onStartEdit={(t) => { setEditingId(t.id); setEditText(t.title); }}
                   onDelete={deleteTask}
                   onPreview={(t) => handlePreviewDoc(t as any)}
+                  onAssign={(t) => setAssignTask(t)}
                   onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
                   onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
                   onSend={async (t) => {
@@ -613,6 +616,13 @@ export function CompactTodoList() {
         </div>
 
       </div>
+
+      <AssignTaskDialog
+        open={!!assignTask}
+        onOpenChange={(o) => { if (!o) setAssignTask(null); }}
+        task={assignTask}
+        onCreated={fetchTodos}
+      />
 
       {/* Document Preview Modal */}
       {previewDoc && (

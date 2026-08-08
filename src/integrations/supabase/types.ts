@@ -1604,6 +1604,56 @@ export type Database = {
         }
         Relationships: []
       }
+      document_shares: {
+        Row: {
+          created_at: string
+          document_id: string
+          expires_at: string | null
+          id: string
+          message: string | null
+          opened_at: string | null
+          recipient_email: string
+          recipient_user_id: string | null
+          shared_by: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          opened_at?: string | null
+          recipient_email: string
+          recipient_user_id?: string | null
+          shared_by: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          opened_at?: string | null
+          recipient_email?: string
+          recipient_user_id?: string | null
+          shared_by?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_shares_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           ai_analysis: string | null
@@ -1614,13 +1664,17 @@ export type Database = {
           email_sent_at: string | null
           id: string
           is_draft: boolean | null
+          is_transcribed: boolean
           linked_document_ids: string[]
           media_type: string | null
           media_url: string | null
           name: string
           patient_id: string | null
           patient_name: string | null
+          record_date: string | null
           session_id: string | null
+          source_file_name: string | null
+          source_file_url: string | null
           template_id: string | null
           template_name: string | null
           updated_at: string
@@ -1635,13 +1689,17 @@ export type Database = {
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
+          is_transcribed?: boolean
           linked_document_ids?: string[]
           media_type?: string | null
           media_url?: string | null
           name: string
           patient_id?: string | null
           patient_name?: string | null
+          record_date?: string | null
           session_id?: string | null
+          source_file_name?: string | null
+          source_file_url?: string | null
           template_id?: string | null
           template_name?: string | null
           updated_at?: string
@@ -1656,13 +1714,17 @@ export type Database = {
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
+          is_transcribed?: boolean
           linked_document_ids?: string[]
           media_type?: string | null
           media_url?: string | null
           name?: string
           patient_id?: string | null
           patient_name?: string | null
+          record_date?: string | null
           session_id?: string | null
+          source_file_name?: string | null
+          source_file_url?: string | null
           template_id?: string | null
           template_name?: string | null
           updated_at?: string
