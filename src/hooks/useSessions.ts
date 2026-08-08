@@ -1013,8 +1013,31 @@ ${tasksHtml}`;
               task_type: 'document_review',
               priority: 'high',
               status: 'pending',
+              assignee: 'doctor',
             } as any);
           }
+
+          // The instructions themselves belong on the patient's task list
+          const patientTaskRows = tasks
+            .filter((t: any) => t?.title && classifyTask(t.title) !== 'skip')
+            .map((t: any) => ({
+              user_id: user.id,
+              session_id: sessionId,
+              patient_id: patientId,
+              title: t.title,
+              description: t.description || null,
+              priority: 'medium',
+              status: 'pending',
+              vulas_reward: t.vulas_reward || 1,
+              assignee: 'patient',
+            }));
+          if (patientTaskRows.length > 0) {
+            await supabase.from('todos').insert(patientTaskRows as any);
+            for (const row of patientTaskRows) {
+              await notifyPatientOfTask(patientId, row.title, sessionId!);
+            }
+          }
+
           // Remove duplicate action_point todos for exercises/tasks
           await supabase.from('todos')
             .delete()
