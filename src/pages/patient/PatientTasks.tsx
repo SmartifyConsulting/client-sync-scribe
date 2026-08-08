@@ -154,7 +154,9 @@ export default function PatientTasks() {
         status: "pending",
         priority: "medium",
         task_type: "general",
-      });
+        assignee: "patient",
+      } as any);
+
       if (error) throw error;
       setTaskText("");
       toast({ title: "Task added" });
