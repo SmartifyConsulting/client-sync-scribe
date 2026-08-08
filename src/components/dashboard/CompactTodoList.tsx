@@ -31,6 +31,7 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
+import { AssignTaskDialog } from "@/components/tasks/AssignTaskDialog";
 import { getTodoDisplay } from "@/lib/todoDisplay";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight, User as UserIcon, CalendarDays } from "lucide-react";

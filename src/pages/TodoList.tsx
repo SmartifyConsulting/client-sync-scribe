@@ -191,6 +191,7 @@ export default function TodoList() {
   };
 
   const [showAssignTask, setShowAssignTask] = useState(false);
+  const [assignTask, setAssignTask] = useState<any | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -555,6 +556,7 @@ export default function TodoList() {
       onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
       onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
       onSetPriority={updatePriority}
+      onAssign={(t) => { setAssignTask(t); setShowAssignTask(true); }}
       isEditing={editingId === todo.id}
       editText={editText}
       setEditText={setEditText}
@@ -785,7 +787,8 @@ export default function TodoList() {
 
       <AssignTaskDialog
         open={showAssignTask}
-        onOpenChange={setShowAssignTask}
+        onOpenChange={(o) => { setShowAssignTask(o); if (!o) setAssignTask(null); }}
+        task={assignTask}
         onCreated={fetchTodos}
       />
 
