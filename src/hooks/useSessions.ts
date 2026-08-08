@@ -272,22 +272,8 @@ const completeSession = async (
           
           if (processError) {
             console.error('Error auto-executing action points:', processError);
-            // Fallback: save as pending todos
-            const todosToInsert = summaryData.action_points.map((point: string) => ({
-              user_id: user.id,
-              session_id: sessionId,
-              patient_id: patientId || null,
-              title: point,
-              priority: 'medium',
-              status: 'pending',
-            }));
-            await supabase.from('todos').insert(todosToInsert);
-            // Notify patient about assigned tasks
-            if (patientId) {
-              for (const point of summaryData.action_points) {
-                await notifyPatientOfTask(patientId, point, sessionId);
-              }
-            }
+            // Fallback: save as pending todos, routed to the right owner
+            await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, patientId);
           } else {
             logger.debug('Auto-execution result:', processResult);
             const autoCount = processResult?.results?.filter((r: any) => r.auto_executed).length || 0;
@@ -298,23 +284,10 @@ const completeSession = async (
           }
         } catch (execError) {
           console.error('Failed to invoke process-todo-actions:', execError);
-          // Fallback: save as pending todos
-          const todosToInsert = summaryData.action_points.map((point: string) => ({
-            user_id: user.id,
-            session_id: sessionId,
-            patient_id: patientId || null,
-            title: point,
-            priority: 'medium',
-            status: 'pending',
-          }));
-          await supabase.from('todos').insert(todosToInsert);
-          // Notify patient about assigned tasks
-          if (patientId) {
-            for (const point of summaryData.action_points) {
-              await notifyPatientOfTask(patientId, point, sessionId);
-            }
-          }
+          // Fallback: save as pending todos, routed to the right owner
+          await insertActionPointTodos(summaryData.action_points, user.id, sessionId!, patientId);
         }
+
       }
 
       // Auto-create hospital admission document if detected
