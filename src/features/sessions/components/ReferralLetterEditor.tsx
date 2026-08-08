@@ -17,6 +17,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
 import { SendDocumentButton } from "./SendDocumentButton";
 import { DocumentPreview } from "./DocumentPreview";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Paperclip, Send } from "lucide-react";
 
 interface ReferralLetterEditorProps {
   patientId: string;
@@ -77,7 +79,12 @@ export function ReferralLetterEditor({
   const [currentDiagnosis, setCurrentDiagnosis] = useState("");
   const [reasonForReferral, setReasonForReferral] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Documents on file for this patient that can be emailed together with the referral.
+  const [availableDocs, setAvailableDocs] = useState<Array<{ id: string; name: string }>>([]);
+  const [attachedIds, setAttachedIds] = useState<string[]>([]);
 
   const baseTemplate = savedTemplate || FALLBACK_TEMPLATE;
 
@@ -107,6 +114,20 @@ export function ReferralLetterEditor({
       );
     })();
   }, []);
+
+  // Documents already on file for this patient — these can be attached so they
+  // are emailed together with the referral letter.
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("documents")
+        .select("id, name")
+        .eq("patient_id", patientId)
+        .order("created_at", { ascending: false })
+        .limit(30);
+      setAvailableDocs((data || []) as Array<{ id: string; name: string }>);
+    })();
+  }, [patientId]);
 
   // Auto-populate a referral summary from the latest session for this patient.
   useEffect(() => {
@@ -190,7 +211,8 @@ export function ReferralLetterEditor({
           patient_name: patientName,
           template_name: 'Referral Letter',
           user_id: user.id,
-        });
+          linked_document_ids: attachedIds,
+        } as any);
 
       if (error) throw error;
 
