@@ -6,6 +6,8 @@ Today emailed documents are rebuilt as plain text inside a generic wrapper, so t
 
 - Render the document with the same component used for on-screen preview (letterhead header, 12pt body, 10.5pt header/footer, chosen font, logo) and send that exact rendering as the email body.
 - Applies to every send path: prescriptions, invoices, medical certificates, referral letters, templates and any document sent from a document editor or the Documents screen.
+- The Holarc Health logo sits centred at the top of the email, about one third of the document frame's width, directly above the document content.
+
 
 ## 2. Attach the document as a PDF
 
