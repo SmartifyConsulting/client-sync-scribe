@@ -361,6 +361,7 @@ export function PostSessionStepDialog({
       onSend={onSend}
       onSaveEdit={onSaveEdit}
       onAdvance={onAdvance}
+      clinicianNotes={clinicianNotes}
     />
   );
 }
