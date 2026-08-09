@@ -568,6 +568,7 @@ export default function PatientProfile() {
           <div className="rounded-2xl bg-card p-4 shadow-card">
             <PatientProgrammesTab
               patientId={patient.id}
+              patientName={patient.name}
               canManage
               isSelf={(patient as any).patient_user_id === currentUserId}
             />
