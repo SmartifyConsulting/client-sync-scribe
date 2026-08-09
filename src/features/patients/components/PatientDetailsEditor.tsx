@@ -2091,6 +2091,13 @@ export function PatientDetailsEditor({
             )}
 
             {isSelfService && (
+              <TabsContent value="programmes" className="mt-4">
+                <PatientProgrammesTab patientId={patient.id} canManage={false} isSelf />
+              </TabsContent>
+            )}
+
+
+            {isSelfService && (
               <TabsContent value="documents" className="mt-4">
                 <Suspense
                   fallback={
