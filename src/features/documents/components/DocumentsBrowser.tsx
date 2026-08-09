@@ -119,7 +119,7 @@ export function DocumentsBrowser({
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       ),
     }));
-  }, [documents, search, groupBy]);
+  }, [documents, search, groupBy, templateFilter]);
 
   const openPreview = async (doc: Document) => {
     setPreviewDoc(doc);
