@@ -47,6 +47,10 @@ interface DocumentsBrowserProps {
   patientName?: string;
   /** Show documents from every owner the RLS policies allow. */
   allOwners?: boolean;
+  /** Only list documents whose template name matches one of these (case-insensitive). */
+  templateFilter?: string[];
+  /** Copy shown when nothing matches. */
+  emptyLabel?: string;
   className?: string;
 }
 
@@ -66,6 +70,8 @@ export function DocumentsBrowser({
   patientId,
   patientName,
   allOwners,
+  templateFilter,
+  emptyLabel,
   className,
 }: DocumentsBrowserProps) {
   const { toast } = useToast();
@@ -86,7 +92,12 @@ export function DocumentsBrowser({
 
   const groups = useMemo(() => {
     const term = search.trim().toLowerCase();
+    const wanted = templateFilter?.map((t) => t.toLowerCase());
     const filtered = documents.filter((doc) => {
+      if (wanted) {
+        const name = (doc.template_name || "").toLowerCase();
+        if (!wanted.some((w) => name.includes(w))) return false;
+      }
       if (!term) return true;
       return (
         doc.name.toLowerCase().includes(term) ||
@@ -108,7 +119,7 @@ export function DocumentsBrowser({
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
       ),
     }));
-  }, [documents, search, groupBy]);
+  }, [documents, search, groupBy, templateFilter]);
 
   const openPreview = async (doc: Document) => {
     setPreviewDoc(doc);
@@ -280,7 +291,7 @@ export function DocumentsBrowser({
           <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
             <FileText className="h-7 w-7 text-muted-foreground" />
           </div>
-          <p className="text-xs text-muted-foreground">No documents yet</p>
+          <p className="text-xs text-muted-foreground">{emptyLabel || "No documents yet"}</p>
         </div>
       ) : (
         <Accordion
