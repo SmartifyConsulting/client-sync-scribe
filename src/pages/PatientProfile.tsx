@@ -1,4 +1,7 @@
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { BiologPanel } from "@/features/biolog/BiologPanel";
+import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
+
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -419,6 +422,12 @@ export default function PatientProfile() {
             {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
+            value="biolog"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Biolog
+          </TabsTrigger>
+          <TabsTrigger
             value="admissions"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
@@ -431,11 +440,18 @@ export default function PatientProfile() {
             {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
+            value="programmes"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Programmes
+          </TabsTrigger>
+          <TabsTrigger
             value="documents"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             {t("patientProfile.tabDocuments")}
           </TabsTrigger>
+
           <TabsTrigger
             value="roundtable"
             className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
@@ -535,6 +551,29 @@ export default function PatientProfile() {
             <DoctorsOnProfile patientId={patient.id} patientName={patient.name} />
           </div>
         </TabsContent>
+
+        {/* Biolog Tab — the care team reviews the patient's own Biolog */}
+        <TabsContent value="biolog">
+          {(patient as any).patient_user_id ? (
+            <BiologPanel ownerUserId={(patient as any).patient_user_id} readOnly />
+          ) : (
+            <div className="rounded-2xl bg-card p-6 text-sm text-muted-foreground shadow-card">
+              This patient has not activated their app account yet, so there is no Biolog to show.
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Programmes Tab — eating plan, exercise programme and weigh-ins */}
+        <TabsContent value="programmes">
+          <div className="rounded-2xl bg-card p-4 shadow-card">
+            <PatientProgrammesTab
+              patientId={patient.id}
+              canManage
+              isSelf={(patient as any).patient_user_id === currentUserId}
+            />
+          </div>
+        </TabsContent>
+
 
         <TabsContent value="documents" className="space-y-4">
           {/* Document intake address — own record uses your alias, otherwise the patient's */}

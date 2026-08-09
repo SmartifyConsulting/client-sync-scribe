@@ -1810,6 +1810,82 @@ export type Database = {
           },
         ]
       }
+      exercise_plan_days: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          description: string
+          id: string
+          plan_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          description?: string
+          id?: string
+          plan_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          description?: string
+          id?: string
+          plan_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_plan_days_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercise_plans: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_plans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gamification_config: {
         Row: {
           created_at: string
@@ -4081,6 +4157,192 @@ export type Database = {
           },
         ]
       }
+      meal_plan_foods: {
+        Row: {
+          created_at: string
+          energy_kj: number | null
+          food_group: string
+          grams: number
+          id: string
+          name: string
+          plan_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          energy_kj?: number | null
+          food_group: string
+          grams?: number
+          id?: string
+          name: string
+          plan_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          energy_kj?: number | null
+          food_group?: string
+          grams?: number
+          id?: string
+          name?: string
+          plan_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_foods_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plan_slot_instructions: {
+        Row: {
+          created_at: string
+          energy_unit: string
+          id: string
+          instruction_kind: string
+          instruction_text: string | null
+          plan_id: string
+          slot_key: string
+          target_energy: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          energy_unit?: string
+          id?: string
+          instruction_kind?: string
+          instruction_text?: string | null
+          plan_id: string
+          slot_key: string
+          target_energy?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          energy_unit?: string
+          id?: string
+          instruction_kind?: string
+          instruction_text?: string | null
+          plan_id?: string
+          slot_key?: string
+          target_energy?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_slot_instructions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plan_slot_items: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          food_group: string
+          food_id: string | null
+          food_name: string
+          grams: number
+          id: string
+          plan_id: string
+          slot_key: string
+          unit_multiplier: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          food_group: string
+          food_id?: string | null
+          food_name: string
+          grams?: number
+          id?: string
+          plan_id: string
+          slot_key: string
+          unit_multiplier?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          food_group?: string
+          food_id?: string | null
+          food_name?: string
+          grams?: number
+          id?: string
+          plan_id?: string
+          slot_key?: string
+          unit_multiplier?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_slot_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plan_foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plan_slot_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plans: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_adherence: {
         Row: {
           auto_approved_at: string | null
@@ -4814,6 +5076,53 @@ export type Database = {
             columns: ["streak_config_id"]
             isOneToOne: false
             referencedRelation: "streak_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_weigh_ins: {
+        Row: {
+          created_at: string
+          id: string
+          kg_lost: number
+          patient_id: string
+          previous_weight_kg: number | null
+          recorded_at: string
+          recorded_by: string
+          updated_at: string
+          vulas_awarded: number
+          weight_kg: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kg_lost?: number
+          patient_id: string
+          previous_weight_kg?: number | null
+          recorded_at?: string
+          recorded_by: string
+          updated_at?: string
+          vulas_awarded?: number
+          weight_kg: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kg_lost?: number
+          patient_id?: string
+          previous_weight_kg?: number | null
+          recorded_at?: string
+          recorded_by?: string
+          updated_at?: string
+          vulas_awarded?: number
+          weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_weigh_ins_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -5588,6 +5897,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      programme_adherence: {
+        Row: {
+          completed: boolean
+          created_at: string
+          entry_date: string
+          id: string
+          kind: string
+          patient_id: string
+          slot_key: string
+          updated_at: string
+          vulas_awarded: number
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          entry_date?: string
+          id?: string
+          kind: string
+          patient_id: string
+          slot_key?: string
+          updated_at?: string
+          vulas_awarded?: number
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          entry_date?: string
+          id?: string
+          kind?: string
+          patient_id?: string
+          slot_key?: string
+          updated_at?: string
+          vulas_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programme_adherence_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provider_approval_tokens: {
         Row: {
@@ -6787,12 +7140,20 @@ export type Database = {
         Args: { _hospital_id: string; _patient_id: string }
         Returns: boolean
       }
+      can_manage_patient_programme: {
+        Args: { _patient_id: string }
+        Returns: boolean
+      }
       can_upload_holarchelp_incident: {
         Args: { _incident_id: string }
         Returns: boolean
       }
       can_view_inpatient_admission: {
         Args: { _admission_id: string }
+        Returns: boolean
+      }
+      can_view_patient_programme: {
+        Args: { _patient_id: string }
         Returns: boolean
       }
       check_provider_duplicate: {

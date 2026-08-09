@@ -60,6 +60,17 @@ function sectionHasContent(section: any): boolean {
   );
 }
 
+/** The seeded letterhead is literally called "Header and Footer", which reads
+ *  as a non-existent template inside the Header / Footer dropdowns. Show it as
+ *  "Default Header" / "Default Footer" instead; custom letterheads keep their
+ *  own name. */
+function optionLabel(name: string, section: "header" | "footer"): string {
+  if ((name || "").trim().toLowerCase() === "header and footer") {
+    return section === "header" ? "Default Header" : "Default Footer";
+  }
+  return name;
+}
+
 export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" }: TemplateFormProps) {
   const { toast } = useToast();
   const { profile } = useProfile();
@@ -72,22 +83,25 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
   const [selectedFooterId, setSelectedFooterId] = useState<string>(
     initialData?.footerTemplateId || ""
   );
+  // Once the doctor deliberately picks "None" we stop re-applying the default.
+  const [headerCleared, setHeaderCleared] = useState(false);
+  const [footerCleared, setFooterCleared] = useState(false);
 
-  // Auto-default header and footer to the user's `is_default` letterhead (or
-  // first available with content in that section) when neither is linked
-  // yet, so doctors get a sensible pre-selection instead of "None" on a
-  // brand-new template.
+  // Always pre-select the default letterhead (or the first one that has content
+  // in that section) whenever nothing is selected — new templates and existing
+  // templates saved without a header/footer link alike.
   useEffect(() => {
-    if (!selectedHeaderId && !initialData?.headerTemplateId && headerTemplateOptions.length > 0) {
+    if (!selectedHeaderId && !headerCleared && headerTemplateOptions.length > 0) {
       const preferred = headerTemplateOptions.find((t) => (t as any).is_default) ?? headerTemplateOptions[0];
       setSelectedHeaderId(preferred.id);
     }
-    if (!selectedFooterId && !initialData?.footerTemplateId && footerTemplateOptions.length > 0) {
+    if (!selectedFooterId && !footerCleared && footerTemplateOptions.length > 0) {
       const preferred = footerTemplateOptions.find((t) => (t as any).is_default) ?? footerTemplateOptions[0];
       setSelectedFooterId(preferred.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerFooterTemplates, initialData?.headerTemplateId, initialData?.footerTemplateId, selectedHeaderId, selectedFooterId]);
+  }, [headerFooterTemplates, selectedHeaderId, selectedFooterId, headerCleared, footerCleared]);
+
 
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
@@ -157,9 +171,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       <div className="grid gap-3 lg:grid-cols-2 items-start">
         {/* LEFT: Design */}
         <div className="space-y-2 min-w-0">
-          {/* Name, Header & Footer — one row, Name wider than the two dropdowns */}
+          {/* Name, Header & Footer — one row; the dropdowns get room to breathe */}
           <div className="flex gap-2">
-            <div className="flex items-center gap-1.5 flex-[2] min-w-0">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
               <Input
                 placeholder="e.g., Medical Certificate"
@@ -168,45 +182,56 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 className="h-8 flex-1 text-sm"
               />
             </div>
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-[1.2] min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Header</label>
               <Select
                 value={selectedHeaderId || "none"}
-                onValueChange={(val) => setSelectedHeaderId(val === "none" ? "" : val)}
+                onValueChange={(val) => {
+                  setSelectedHeaderId(val === "none" ? "" : val);
+                  setHeaderCleared(val === "none");
+                }}
               >
                 <SelectTrigger className="h-8 flex-1 text-sm">
-                  <SelectValue placeholder="None" />
+                  <SelectValue placeholder="None">
+                    {selectedHeader ? optionLabel(selectedHeader.name, "header") : "None"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {headerTemplateOptions.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      {template.name}
+                      {optionLabel(template.name, "header")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-[1.2] min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Footer</label>
               <Select
                 value={selectedFooterId || "none"}
-                onValueChange={(val) => setSelectedFooterId(val === "none" ? "" : val)}
+                onValueChange={(val) => {
+                  setSelectedFooterId(val === "none" ? "" : val);
+                  setFooterCleared(val === "none");
+                }}
               >
                 <SelectTrigger className="h-8 flex-1 text-sm">
-                  <SelectValue placeholder="None" />
+                  <SelectValue placeholder="None">
+                    {selectedFooter ? optionLabel(selectedFooter.name, "footer") : "None"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {footerTemplateOptions.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      {template.name}
+                      {optionLabel(template.name, "footer")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+
 
           {/* Dynamic Fields Info */}
           <div className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border">

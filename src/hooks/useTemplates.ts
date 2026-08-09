@@ -324,7 +324,7 @@ Patient: [PatientName]
     footer_template_id: null,
   },
   {
-    name: "Exercise Programme",
+    name: "General Exercise Programme",
     description: "Structured exercise plan the patient follows between visits",
     category: "Lifestyle",
     content: `EXERCISE PROGRAMME
@@ -370,7 +370,7 @@ REVIEW DATE
     footer_template_id: null,
   },
   {
-    name: "Eating Plan",
+    name: "General Eating Plan",
     description: "Daily eating plan with targets and guidance for the patient",
     category: "Lifestyle",
     content: `EATING PLAN
