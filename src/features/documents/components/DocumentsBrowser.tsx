@@ -38,6 +38,7 @@ import { DocumentPreview } from "@/features/sessions/components/DocumentPreview"
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { InformDocumentDialog } from "./InformDocumentDialog";
 import { UploadProgressBar, type UploadProgressState } from "./UploadProgressBar";
+import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
 import { cn } from "@/lib/utils";
 
 type GroupBy = "type" | "date" | "patient";
@@ -91,6 +92,7 @@ export function DocumentsBrowser({
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<UploadProgressState>({ stage: "idle", percent: 0 });
+  const [pendingHistory, setPendingHistory] = useState<ExtractedHistory | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const groups = useMemo(() => {
@@ -190,6 +192,7 @@ export function DocumentsBrowser({
               if (!error && data?.text) {
                 content = data.text;
                 transcribed = true;
+                if (patientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
               }
             } catch {
               /* fall back to the plain upload record */
@@ -308,6 +311,17 @@ export function DocumentsBrowser({
       </div>
 
       <UploadProgressBar state={progress} />
+
+      {patientId && pendingHistory && (
+        <ApplyHistoryDialog
+          open
+          onOpenChange={(o) => !o && setPendingHistory(null)}
+          patientId={patientId}
+          history={pendingHistory}
+          recordDate={recordDate || undefined}
+          onApplied={() => setPendingHistory(null)}
+        />
+      )}
 
       {/* List */}
       {loading ? (
