@@ -171,9 +171,9 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
       <div className="grid gap-3 lg:grid-cols-2 items-start">
         {/* LEFT: Design */}
         <div className="space-y-2 min-w-0">
-          {/* Name, Header & Footer — one row, Name wider than the two dropdowns */}
+          {/* Name, Header & Footer — one row; the dropdowns get room to breathe */}
           <div className="flex gap-2">
-            <div className="flex items-center gap-1.5 flex-[2] min-w-0">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
               <Input
                 placeholder="e.g., Medical Certificate"
@@ -182,45 +182,56 @@ export function TemplateForm({ initialData, onSubmit, onCancel, mode = "create" 
                 className="h-8 flex-1 text-sm"
               />
             </div>
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-[1.2] min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Header</label>
               <Select
                 value={selectedHeaderId || "none"}
-                onValueChange={(val) => setSelectedHeaderId(val === "none" ? "" : val)}
+                onValueChange={(val) => {
+                  setSelectedHeaderId(val === "none" ? "" : val);
+                  setHeaderCleared(val === "none");
+                }}
               >
                 <SelectTrigger className="h-8 flex-1 text-sm">
-                  <SelectValue placeholder="None" />
+                  <SelectValue placeholder="None">
+                    {selectedHeader ? optionLabel(selectedHeader.name, "header") : "None"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {headerTemplateOptions.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      {template.name}
+                      {optionLabel(template.name, "header")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-[1.2] min-w-0">
               <label className="text-xs font-medium text-foreground shrink-0 w-14">Footer</label>
               <Select
                 value={selectedFooterId || "none"}
-                onValueChange={(val) => setSelectedFooterId(val === "none" ? "" : val)}
+                onValueChange={(val) => {
+                  setSelectedFooterId(val === "none" ? "" : val);
+                  setFooterCleared(val === "none");
+                }}
               >
                 <SelectTrigger className="h-8 flex-1 text-sm">
-                  <SelectValue placeholder="None" />
+                  <SelectValue placeholder="None">
+                    {selectedFooter ? optionLabel(selectedFooter.name, "footer") : "None"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
                   {footerTemplateOptions.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      {template.name}
+                      {optionLabel(template.name, "footer")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+
 
           {/* Dynamic Fields Info */}
           <div className="px-2 py-1.5 rounded-lg bg-muted/50 border border-border">
