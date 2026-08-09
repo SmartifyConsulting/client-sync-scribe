@@ -164,7 +164,44 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ text: text.trim() }), {
+    // Second pass: pull structured history out of the transcription so the
+    // clinician can optionally merge it into the patient record.
+    let history: Record<string, string[]> | null = null;
+    const clean = text.trim();
+    if (clean.length > 40) {
+      try {
+        const extractRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Extract structured clinical history from the record. Reply with JSON only: " +
+                  '{"conditions_diagnoses":[],"current_medications":[],"allergies":[],"surgeries":[],"family_history":[],"notable_events":[]}. ' +
+                  "Only include items explicitly present in the record. Use empty arrays otherwise.",
+              },
+              { role: "user", content: clean.slice(0, 12000) },
+            ],
+          }),
+        });
+        if (extractRes.ok) {
+          const json = await extractRes.json();
+          const raw = json?.choices?.[0]?.message?.content ?? "";
+          const match = raw.match(/\{[\s\S]*\}/);
+          if (match) history = JSON.parse(match[0]);
+        }
+      } catch (e) {
+        console.error("history extraction failed", e);
+      }
+    }
+
+    return new Response(JSON.stringify({ text: clean, history }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
