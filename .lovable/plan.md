@@ -63,4 +63,6 @@ Add a Biolog tab immediately after Session History on the patient profile. It re
 - New schema: a meal-plan table (plan per patient, slot assignments with food, group, grams, unit multiplier) plus a daily adherence table for eating and exercise ticks, all with RLS scoped to the patient and their connected doctors, and GRANTs for authenticated/service_role.
 - New components under `src/features/programmes/`: food palette, week calendar strip, exercise week strip, shared tick/adherence control wired to `src/services/supabase/rewards.ts`.
 - Doctor Biolog tab reuses the existing `src/features/biolog/*` components with `ownerUserId` set to the patient's user id and `readOnly` off.
+- Meal-slot instructions stored on the meal plan slot rows (`instruction_kind`, `instruction_text`, `target_energy`); weigh-in awards extend `gamification_config` / `vula_adherence_configs` with a per-kg rule and write to `patient_rewards`.
+
 
