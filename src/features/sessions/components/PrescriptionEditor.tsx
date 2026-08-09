@@ -544,6 +544,9 @@ Signature: ___________________
               documentLabel="Prescription"
               getContent={generateContent}
               preferredField="pharmacy_email"
+              headerFooter={headerFooter}
+              fontFamily={headerFooter?.font_family || undefined}
+              logoUrl={profile?.logo_url || undefined}
             />
             <Button
               variant="outline"

@@ -86,6 +86,7 @@ export function DocumentsBrowser({
   const [previewContent, setPreviewContent] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [informDoc, setInformDoc] = useState<Document | null>(null);
+  const [recordDate, setRecordDate] = useState("");
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -197,6 +198,7 @@ export function DocumentsBrowser({
             source_file_url: publicUrl,
             source_file_name: file.name,
             is_transcribed: transcribed,
+            record_date: recordDate || null,
           } as any);
           if (insertError) throw insertError;
         }
@@ -213,7 +215,7 @@ export function DocumentsBrowser({
         setUploading(false);
       }
     },
-    [patientId, patientName, toast, fetchDocuments],
+    [patientId, patientName, recordDate, toast, fetchDocuments],
   );
 
   return (
@@ -239,6 +241,16 @@ export function DocumentsBrowser({
             <SelectItem value="patient">Group by Patient</SelectItem>
           </SelectContent>
         </Select>
+        <div className="flex items-center gap-1">
+          <span className="text-[11px] text-muted-foreground whitespace-nowrap">Record date</span>
+          <Input
+            type="date"
+            value={recordDate}
+            onChange={(e) => setRecordDate(e.target.value)}
+            className="h-9 w-[150px]"
+            title="Optional — file an old record under the date it was originally written"
+          />
+        </div>
         <Button
           variant="outline"
           className="gap-2"
@@ -278,7 +290,8 @@ export function DocumentsBrowser({
         )}
       >
         Drop files here to upload. Photos or scans of handwritten records are
-        transcribed automatically by AI.
+        transcribed automatically by AI. Set a record date first to file
+        historical notes under the date they were written.
       </div>
 
       {/* List */}
@@ -330,7 +343,10 @@ export function DocumentsBrowser({
                           {doc.name}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(doc.created_at), "MMM d, yyyy")}
+                          {format(
+                            new Date((doc as any).record_date || doc.created_at),
+                            "MMM d, yyyy",
+                          )}
                           {doc.patient_name && groupBy !== "patient" ? ` · ${doc.patient_name}` : ""}
                         </p>
                       </div>
