@@ -11,6 +11,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { GeneratedDoc } from "./GeneratedDocumentsDialog";
+import { FollowUpAppointmentDialog } from "./FollowUpAppointmentDialog";
+import { VisitCategoryDialog } from "./VisitCategoryDialog";
 
 const DOC_ICONS: Record<string, typeof FileText> = {
   medcert: FileText,
@@ -20,6 +22,7 @@ const DOC_ICONS: Record<string, typeof FileText> = {
 };
 
 export type DocStepType = "prescription" | "medcert" | "referral" | "invoice";
+export type PostSessionStepType = DocStepType | "schedule" | "vula";
 
 interface PostSessionStepDialogProps {
   open: boolean;
@@ -41,7 +44,7 @@ function extractInvoiceTotal(content: string): string {
  * referral / invoice). Send and Save each play a brief confirmation
  * animation before auto-advancing the queue.
  */
-export function PostSessionStepDialog({
+function DocStepDialog({
   open,
   stepType,
   doc,
@@ -211,5 +214,101 @@ export function PostSessionStepDialog({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+
+interface PostSessionQueueDialogProps {
+  /** Ordered post-session steps to run, one at a time. */
+  queue: PostSessionStepType[];
+  index: number;
+  documents: GeneratedDoc[];
+  onSend: (doc: GeneratedDoc) => Promise<void>;
+  onSaveEdit: (doc: GeneratedDoc, newContent: string) => Promise<void>;
+  onAdvance: () => void;
+  onFinish: () => void;
+  currentPatient: { id: string; name: string; patient_user_id: string | null } | null;
+  doctorId: string;
+  doctorName?: string;
+  extractedFollowUp?: { follow_up_date?: string; follow_up_time?: string; notes?: string } | null;
+  patientName?: string;
+  transcript?: string;
+  onVulaConfirm: (categories: string[] | null) => Promise<void> | void;
+}
+
+/**
+ * Drives the sequential post-session queue: document steps render the step
+ * dialog above, while schedule and vula steps delegate to their own dialogs.
+ */
+export function PostSessionStepDialog({
+  queue,
+  index,
+  documents,
+  onSend,
+  onSaveEdit,
+  onAdvance,
+  onFinish,
+  currentPatient,
+  doctorId,
+  doctorName,
+  extractedFollowUp,
+  patientName,
+  transcript,
+  onVulaConfirm,
+}: PostSessionQueueDialogProps) {
+  const step = queue[index];
+  if (!step) return null;
+
+  if (step === "schedule") {
+    if (!currentPatient || !doctorId) {
+      return null;
+    }
+    return (
+      <FollowUpAppointmentDialog
+        open
+        onOpenChange={(o) => {
+          if (!o) onAdvance();
+        }}
+        doctorId={doctorId}
+        doctorName={doctorName}
+        patientId={currentPatient.id}
+        patientUserId={currentPatient.patient_user_id}
+        patientName={patientName || currentPatient.name}
+        suggestedDate={extractedFollowUp?.follow_up_date}
+        suggestedTime={extractedFollowUp?.follow_up_time}
+        onDone={onAdvance}
+      />
+    );
+  }
+
+  if (step === "vula") {
+    return (
+      <VisitCategoryDialog
+        open
+        onOpenChange={(o) => {
+          if (!o) onFinish();
+        }}
+        patientName={patientName}
+        transcript={transcript}
+        onConfirm={async (categories) => {
+          await onVulaConfirm(categories);
+          onFinish();
+        }}
+      />
+    );
+  }
+
+  const doc = documents.find((d) => d.key === step) || null;
+  if (!doc) return null;
+
+  return (
+    <DocStepDialog
+      open
+      stepType={step}
+      doc={doc}
+      onSend={onSend}
+      onSaveEdit={onSaveEdit}
+      onAdvance={onAdvance}
+    />
   );
 }
