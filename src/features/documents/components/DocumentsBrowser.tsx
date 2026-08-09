@@ -47,6 +47,10 @@ interface DocumentsBrowserProps {
   patientName?: string;
   /** Show documents from every owner the RLS policies allow. */
   allOwners?: boolean;
+  /** Only list documents whose template name matches one of these (case-insensitive). */
+  templateFilter?: string[];
+  /** Copy shown when nothing matches. */
+  emptyLabel?: string;
   className?: string;
 }
 
