@@ -1,3 +1,4 @@
+import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
@@ -1482,6 +1483,11 @@ export function PatientDetailsEditor({
           {show("tasks") && (
             <TabsTrigger value="tasks" className={triggerClass}>
               {t("nav.myTasks")}
+            </TabsTrigger>
+          )}
+          {show("programmes") && (
+            <TabsTrigger value="programmes" className={triggerClass}>
+              Programmes
             </TabsTrigger>
           )}
           {show("documents") && (
