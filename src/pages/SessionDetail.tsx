@@ -20,6 +20,7 @@ import {
   Hospital,
   Languages,
   Download,
+  Eye,
   AlertTriangle,
   Edit3,
   Send,
@@ -586,7 +587,17 @@ export default function SessionDetail() {
                   size="icon"
                   variant="ghost"
                   className="h-7 w-7"
+                  title="Preview"
                   onClick={() => navigate(`/documents?view=${doc.id}`)}
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  title="Edit"
+                  onClick={() => navigate(`/documents?edit=${doc.id}`)}
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                 </Button>

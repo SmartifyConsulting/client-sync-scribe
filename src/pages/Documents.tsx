@@ -165,6 +165,22 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
     }
   }, [documents, searchParams]);
 
+  // Auto-open the document editor from ?edit= param
+  useEffect(() => {
+    const editDocId = searchParams.get("edit");
+    if (editDocId && documents.length > 0) {
+      const doc = documents.find((d) => d.id === editDocId);
+      if (doc) {
+        setActiveTab("documents");
+        setEditingDocument(doc);
+        setEditDocName(doc.name);
+        setEditDocContent(doc.content);
+        searchParams.delete("edit");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [documents, searchParams]);
+
 
   const templates: DisplayTemplate[] = dbTemplates.map((t) => ({
     ...t,
