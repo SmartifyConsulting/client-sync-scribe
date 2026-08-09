@@ -177,7 +177,7 @@ export function DocumentsBrowser({
             try {
               const { data, error } = await supabase.functions.invoke(
                 "transcribe-record",
-                { body: { fileUrl: publicUrl, mimeType: file.type, fileName: file.name } },
+                { body: { storagePath: path, bucket: "patient-media", mimeType: file.type, fileName: file.name } },
               );
               if (!error && data?.text) {
                 content = data.text;
