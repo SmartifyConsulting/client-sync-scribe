@@ -419,6 +419,12 @@ export default function PatientProfile() {
             {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
+            value="biolog"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Biolog
+          </TabsTrigger>
+          <TabsTrigger
             value="admissions"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
@@ -431,11 +437,18 @@ export default function PatientProfile() {
             {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
+            value="programmes"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Programmes
+          </TabsTrigger>
+          <TabsTrigger
             value="documents"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             {t("patientProfile.tabDocuments")}
           </TabsTrigger>
+
           <TabsTrigger
             value="roundtable"
             className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
