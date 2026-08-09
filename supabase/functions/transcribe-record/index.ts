@@ -37,9 +37,9 @@ serve(async (req) => {
       });
     }
 
-    const { fileUrl, mimeType, fileName } = await req.json();
-    if (!fileUrl || typeof fileUrl !== "string") {
-      return new Response(JSON.stringify({ error: "fileUrl is required" }), {
+    const { fileUrl, storagePath, bucket, mimeType, fileName } = await req.json();
+    if (!fileUrl && !storagePath) {
+      return new Response(JSON.stringify({ error: "fileUrl or storagePath is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -51,13 +51,56 @@ serve(async (req) => {
       "medication names and dosages. Use plain text with line breaks. If a word is " +
       "illegible, write [illegible]. Do not add commentary or interpretation.";
 
+    // Private buckets can't be fetched by the model, so pull the bytes here with
+    // the service role and inline them as base64.
+    let base64: string | null = null;
+    if (storagePath) {
+      const admin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+      const { data: blob, error: dlError } = await admin.storage
+        .from(bucket || "patient-media")
+        .download(storagePath);
+      if (dlError || !blob) {
+        return new Response(JSON.stringify({ error: `Could not read uploaded file: ${dlError?.message || "not found"}` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      if (bytes.length === 0) {
+        return new Response(JSON.stringify({ error: "Uploaded file is empty" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      base64 = btoa(binary);
+    }
+
     let contentBlock: unknown;
     if (isPdf) {
-      const fileRes = await fetch(fileUrl);
-      const bytes = new Uint8Array(await fileRes.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-      const base64 = btoa(binary);
+      if (!base64) {
+        const fileRes = await fetch(fileUrl);
+        if (!fileRes.ok) {
+          return new Response(JSON.stringify({ error: `Could not read uploaded file (${fileRes.status})` }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const bytes = new Uint8Array(await fileRes.arrayBuffer());
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+        }
+        base64 = btoa(binary);
+      }
       contentBlock = [
         { type: "text", text: instruction },
         {
@@ -68,7 +111,10 @@ serve(async (req) => {
     } else {
       contentBlock = [
         { type: "text", text: instruction },
-        { type: "image_url", image_url: { url: fileUrl } },
+        {
+          type: "image_url",
+          image_url: { url: base64 ? `data:${mimeType || "image/jpeg"};base64,${base64}` : fileUrl },
+        },
       ];
     }
 
