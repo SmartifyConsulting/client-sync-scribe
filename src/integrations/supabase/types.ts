@@ -7170,6 +7170,10 @@ export type Database = {
         Returns: undefined
       }
       current_verified_email: { Args: never; Returns: string }
+      doctor_had_access_at: {
+        Args: { _created_at: string; _patient_id: string }
+        Returns: boolean
+      }
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
