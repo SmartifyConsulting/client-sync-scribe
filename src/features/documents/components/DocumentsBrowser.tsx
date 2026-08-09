@@ -70,6 +70,8 @@ export function DocumentsBrowser({
   patientId,
   patientName,
   allOwners,
+  templateFilter,
+  emptyLabel,
   className,
 }: DocumentsBrowserProps) {
   const { toast } = useToast();
