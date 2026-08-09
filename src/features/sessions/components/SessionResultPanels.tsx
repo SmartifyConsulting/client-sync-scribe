@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AlertCircle, Brain, CheckCircle, Sparkles, ShieldAlert } from "lucide-react";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
+import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
 
 interface SessionResultPanelsProps {
   /** Finalised transcript — rendered in a collapsed accordion when present. */
@@ -123,15 +124,9 @@ export function SessionResultPanels({
           </p>
         </div>
 
-        {clinicianNotes ? (
-          <div className="p-4 rounded-lg bg-muted/50 border border-border max-h-[400px] overflow-y-auto">
-            <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
-              {clinicianNotes}
-            </pre>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No AI Clinician notes recorded for this session.</p>
-        )}
+        <div className="max-h-[400px] overflow-y-auto">
+          <ClinicianNotesAccordion notes={clinicianNotes} />
+        </div>
       </div>
     </div>
   );
