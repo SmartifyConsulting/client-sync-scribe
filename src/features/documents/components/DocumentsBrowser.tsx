@@ -291,7 +291,7 @@ export function DocumentsBrowser({
           <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
             <FileText className="h-7 w-7 text-muted-foreground" />
           </div>
-          <p className="text-xs text-muted-foreground">No documents yet</p>
+          <p className="text-xs text-muted-foreground">{emptyLabel || "No documents yet"}</p>
         </div>
       ) : (
         <Accordion
