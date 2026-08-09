@@ -1,3 +1,4 @@
+import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LANGUAGES } from "@/lib/languages";
@@ -377,7 +378,7 @@ function AnimatedCounter({ target }: { target: number }) {
 
 const SECTION_TABS: Record<string, string[]> = {
   health: ["personal", "medical", "overview", "history", "roundtable"],
-  admin: ["calendar", "tasks", "documents"],
+  admin: ["calendar", "tasks", "programmes", "documents"],
 };
 
 export function PatientDetailsEditor({
@@ -1484,6 +1485,11 @@ export function PatientDetailsEditor({
               {t("nav.myTasks")}
             </TabsTrigger>
           )}
+          {show("programmes") && (
+            <TabsTrigger value="programmes" className={triggerClass}>
+              Programmes
+            </TabsTrigger>
+          )}
           {show("documents") && (
             <TabsTrigger value="documents" className={triggerClass}>
               {t("nav.myDocuments")}
@@ -2089,6 +2095,13 @@ export function PatientDetailsEditor({
                 </Suspense>
               </TabsContent>
             )}
+
+            {isSelfService && (
+              <TabsContent value="programmes" className="mt-4">
+                <PatientProgrammesTab patientId={patient.id} canManage={false} isSelf />
+              </TabsContent>
+            )}
+
 
             {isSelfService && (
               <TabsContent value="documents" className="mt-4">

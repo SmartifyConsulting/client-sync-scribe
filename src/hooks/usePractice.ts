@@ -28,6 +28,7 @@ export interface PracticeInvitation {
   practice_id: string;
   invited_email: string;
   invited_by: string;
+  invited_role?: string;
   status: string;
   token: string;
   created_at: string;
@@ -183,7 +184,7 @@ export function usePractice() {
   );
 
   const inviteMember = useCallback(
-    async (email: string) => {
+    async (email: string, invitedRole: "member" | "assistant" = "member") => {
       if (!user || !practice) return { error: new Error("No practice") };
       const cleanEmail = email.trim().toLowerCase();
       if (!cleanEmail) return { error: new Error("Email required") };
@@ -193,6 +194,7 @@ export function usePractice() {
           practice_id: practice.id,
           invited_email: cleanEmail,
           invited_by: user.id,
+          invited_role: invitedRole,
         })
         .select()
         .single();
@@ -246,7 +248,7 @@ export function usePractice() {
         .insert({
           practice_id: invitation.practice_id,
           doctor_id: user.id,
-          role: "member",
+          role: (invitation as any).invited_role === "assistant" ? "assistant" : "member",
         });
       if (memberError && memberError.code !== "23505") {
         toast.error("Failed to join practice");

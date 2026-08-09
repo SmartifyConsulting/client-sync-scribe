@@ -65,6 +65,8 @@ import { useDocumentHeaderFooter } from "@/hooks/useDocumentHeaderFooter";
 import { useProfile } from "@/hooks/useProfile";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { TodoRow } from "@/components/todos/TodoRow";
+import { UserPlus } from "lucide-react";
+import { AssignTaskDialog } from "@/components/tasks/AssignTaskDialog";
 import { getTodoDisplay } from "@/lib/todoDisplay";
 
 interface TodoItem {
@@ -188,6 +190,9 @@ export default function TodoList() {
     }
   };
 
+  const [showAssignTask, setShowAssignTask] = useState(false);
+  const [assignTask, setAssignTask] = useState<any | null>(null);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -197,10 +202,15 @@ export default function TodoList() {
 
   const fetchTodos = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      // Own doctor tasks, plus anything explicitly assigned to me (e.g. by a
+      // Practice Management Assistant or a practice colleague).
       const { data, error } = await supabase
         .from('todos')
         .select('*, patients(name)')
+        .or(`assignee.eq.doctor,assigned_to_user_id.eq.${user?.id ?? '00000000-0000-0000-0000-000000000000'}`)
         .order('created_at', { ascending: false });
+
 
       if (error) throw error;
 
@@ -319,7 +329,7 @@ export default function TodoList() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
-      const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending' }).select().single();
+      const { data, error } = await supabase.from('todos').insert({ user_id: user.id, title: newTaskText.trim(), priority: newTaskPriority, status: 'pending', assignee: 'doctor' } as any).select().single();
       if (error) throw error;
 
       // Notify patient if task has a patient_id
@@ -546,6 +556,7 @@ export default function TodoList() {
       onPreviewCalendar={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
       onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
       onSetPriority={updatePriority}
+      onAssign={(t) => { setAssignTask(t); setShowAssignTask(true); }}
       isEditing={editingId === todo.id}
       editText={editText}
       setEditText={setEditText}
@@ -603,6 +614,10 @@ export default function TodoList() {
             <ToggleGroupItem value="date" className="text-xs px-3">{t("todo.groupByDate", "Date")}</ToggleGroupItem>
             <ToggleGroupItem value="patient" className="text-xs px-3">{t("todo.groupByPatient", "Patient")}</ToggleGroupItem>
           </ToggleGroup>
+          <Button size="sm" variant="outline" className="gap-2" onClick={() => setShowAssignTask(true)}>
+            <UserPlus className="h-4 w-4" />
+            {t("todo.assignTask", "Assign Task")}
+          </Button>
           <Button size="sm" className="gap-2" onClick={() => setShowAddTask((v) => !v)}>
             <Plus className="h-4 w-4" />
             {t("todo.addNewTask", "Add Task")}
@@ -770,7 +785,15 @@ export default function TodoList() {
         <p className="text-sm text-muted-foreground text-center">{completedCount} of {todos.length} tasks completed</p>
       )}
 
+      <AssignTaskDialog
+        open={showAssignTask}
+        onOpenChange={(o) => { setShowAssignTask(o); if (!o) setAssignTask(null); }}
+        task={assignTask}
+        onCreated={fetchTodos}
+      />
+
       {/* Document Preview Modal */}
+
       {previewDoc && (
         <DocumentPreview
           title={previewDoc.title}

@@ -124,7 +124,9 @@ export default function Dashboard() {
         .from("todos")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
+        .eq("assignee", "doctor")
         .eq("status", "pending");
+
 
       if (error) return 0;
       return count || 0;

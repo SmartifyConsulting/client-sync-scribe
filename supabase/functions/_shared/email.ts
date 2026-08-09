@@ -20,6 +20,8 @@ export interface SendEmailInput {
   replyTo?: string | EmailAddressInput;
   cc?: string | string[] | EmailAddressInput | EmailAddressInput[];
   bcc?: string | string[] | EmailAddressInput | EmailAddressInput[];
+  /** Base64-encoded file attachments (no data-url prefix). */
+  attachments?: Array<{ filename: string; content: string; contentType?: string }>;
 }
 
 export interface SendEmailResult {
@@ -83,6 +85,13 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   if (input.text) payload.text = input.text;
   if (ccArr?.length) payload.cc = ccArr;
   if (bccArr?.length) payload.bcc = bccArr;
+  if (input.attachments?.length) {
+    payload.attachments = input.attachments.map((a) => ({
+      filename: a.filename,
+      content: a.content,
+      ...(a.contentType ? { content_type: a.contentType } : {}),
+    }));
+  }
   if (input.replyTo) {
     payload.reply_to = formatAddress(parseAddress(input.replyTo));
   }

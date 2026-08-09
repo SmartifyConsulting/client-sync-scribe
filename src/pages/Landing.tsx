@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
-import capabilitiesAsset from "@/assets/holarc-capabilities-teal.png.asset.json";
+import capabilitiesAsset from "@/assets/holarc-capabilities-wave.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
 import { motion } from "framer-motion";
 import {
@@ -185,31 +185,30 @@ export default function Landing() {
               transition={{ duration: 0.6 }}
               className="lg:col-span-6 lg:pt-6"
             >
-              <div className="w-fit mx-auto lg:mx-0">
-                <img
-                  src={holarcLogo}
-                  alt="Holarc Health"
-                  className="h-28 sm:h-36 lg:h-44 w-auto"
-                />
-
-                {/* Tagline block — starts at the logo's left edge, copy centred; logo stays put */}
-                <div className="mt-5 w-0 min-w-full">
-                  <div className="w-[30rem] max-w-[calc(100vw-2.5rem)] space-y-3 text-center">
-
-                    <p className="font-mono text-xs sm:text-sm text-muted-foreground tracking-wider">
+              <div className="w-full">
+                <div className="flex flex-col items-center lg:items-start">
+                  <div className="inline-flex flex-col items-center mx-auto lg:mx-0">
+                    <img
+                      src={holarcLogo}
+                      alt="Holarc Health"
+                      className="h-28 sm:h-36 lg:h-44 w-auto"
+                    />
+                    <p className="mt-5 font-mono text-xs sm:text-sm text-muted-foreground tracking-wider text-center">
                       {t("landing.hero.badge")} <span className="text-primary">/ [STATUS: ACTIVE]</span>
                     </p>
-                    <p className="font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight">
+                    <p className="mt-3 font-mono text-lg sm:text-2xl font-semibold text-foreground tracking-tight text-center">
                       <span className="text-muted-foreground">[ </span>
                       {t("landing.hero.titleHighlight")}
                       <span className="text-muted-foreground"> ]</span>
                     </p>
-                    <p className="text-[18px] leading-relaxed font-normal text-muted-foreground">
-                      {t("landing.hero.description")}
-                    </p>
                   </div>
+                  <p className="mt-3 w-full text-[16px] leading-relaxed font-normal text-muted-foreground text-justify">
+                    {t("landing.hero.description")}
+                  </p>
                 </div>
               </div>
+
+
             </motion.div>
 
 
@@ -300,15 +299,15 @@ export default function Landing() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center -mt-2 lg:-mt-6"
+            className="text-center py-8 lg:py-12"
           >
             <img
               src={capabilitiesAsset.url}
-              alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network"
+              alt="Holarc capabilities: Voice Consultations, AI Summaries, Incentivized Adherence, Rewards, Round Table, Prescriptions, Hospital Admissions, Auto-Tasks, Unified Calendar, Emergency SOS, Emergency Response Dispatch, Hospital Network, Increased Governance"
               loading="lazy"
               width={1920}
               height={720}
-              className="w-full max-w-5xl mx-auto h-auto"
+              className="w-full max-w-[51rem] mx-auto h-auto"
             />
           </motion.div>
 
@@ -317,6 +316,7 @@ export default function Landing() {
 
           {/* BOTTOM ROW — CTAs left, SOS card right */}
           <div className="grid lg:grid-cols-12 gap-6 items-start">
+
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}

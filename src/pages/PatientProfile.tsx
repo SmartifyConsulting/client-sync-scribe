@@ -1,4 +1,7 @@
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { BiologPanel } from "@/features/biolog/BiologPanel";
+import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
+
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
@@ -49,6 +52,7 @@ import { PatientOverview } from "@/components/patients/PatientOverview";
 import { InvitePatientDialog } from "@/components/patients/InvitePatientDialog";
 import { EmoticonSender } from "@/components/patients/EmoticonSender";
 import { DoctorsOnProfile } from "@/components/patients/DoctorsOnProfile";
+import { DocumentsBrowser } from "@/features/documents/components/DocumentsBrowser";
 import { PatientDetailsEditor } from "@/components/patients/PatientDetailsEditor";
 import { RequestConnectionButton } from "@/components/patients/RequestConnectionButton";
 import { RoundTable } from "@/components/patients/RoundTable";
@@ -418,6 +422,12 @@ export default function PatientProfile() {
             {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
+            value="biolog"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Biolog
+          </TabsTrigger>
+          <TabsTrigger
             value="admissions"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
@@ -430,11 +440,18 @@ export default function PatientProfile() {
             {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
+            value="programmes"
+            className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+          >
+            Programmes
+          </TabsTrigger>
+          <TabsTrigger
             value="documents"
             className="rounded-lg px-4 py-2.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             {t("patientProfile.tabDocuments")}
           </TabsTrigger>
+
           <TabsTrigger
             value="roundtable"
             className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
@@ -534,6 +551,30 @@ export default function PatientProfile() {
             <DoctorsOnProfile patientId={patient.id} patientName={patient.name} />
           </div>
         </TabsContent>
+
+        {/* Biolog Tab — the care team reviews the patient's own Biolog */}
+        <TabsContent value="biolog">
+          {(patient as any).patient_user_id ? (
+            <BiologPanel ownerUserId={(patient as any).patient_user_id} readOnly />
+          ) : (
+            <div className="rounded-2xl bg-card p-6 text-sm text-muted-foreground shadow-card">
+              This patient has not activated their app account yet, so there is no Biolog to show.
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Programmes Tab — eating plan, exercise programme and weigh-ins */}
+        <TabsContent value="programmes">
+          <div className="rounded-2xl bg-card p-4 shadow-card">
+            <PatientProgrammesTab
+              patientId={patient.id}
+              patientName={patient.name}
+              canManage
+              isSelf={(patient as any).patient_user_id === currentUserId}
+            />
+          </div>
+        </TabsContent>
+
 
         <TabsContent value="documents" className="space-y-4">
           {/* Document intake address — own record uses your alias, otherwise the patient's */}
@@ -792,174 +833,7 @@ export default function PatientProfile() {
               <GitCompareArrows className="h-5 w-5" />
             </Button>
           </div>
-          <div className="rounded-2xl bg-card shadow-card overflow-hidden">
-            {(() => {
-              const patientDocuments = documents;
-              if (documentsLoading) {
-                return (
-                  <div className="p-10 text-center">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                  </div>
-                );
-              }
-              if (patientDocuments.length === 0) {
-                return (
-                  <div className="p-10 text-center">
-                    <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                      <FileText className="h-7 w-7 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground">No documents yet</p>
-                    <p className="text-xs text-muted-foreground mt-1">Create a new document from a template</p>
-                  </div>
-                );
-              }
-              return (
-                <div className="divide-y divide-border/50">
-                  {patientDocuments.map((doc) => {
-                    const mediaUrl = (doc as any).media_url as string | undefined;
-                    const mediaType = (doc as any).media_type as string | undefined;
-                    const isImageDoc = !!mediaUrl && (mediaType === "image" || /\.(jpe?g|png|webp|heic)(\?|$)/i.test(mediaUrl));
-                    const aiAnalysis = (doc as any).ai_analysis as string | undefined;
-                    const isAnalyzing = analyzingDocId === doc.id;
-                    return (
-                    <div
-                      key={doc.id}
-                      className="flex items-center gap-3 p-3 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
-                    >
-                      <div
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden"
-                        onClick={() => navigate(`/documents?view=${doc.id}`)}
-                      >
-                        {isImageDoc ? (
-                          <img src={mediaUrl} alt={doc.name} className="h-8 w-8 object-cover" />
-                        ) : (
-                          <FileText className="h-4 w-4 text-primary" />
-                        )}
-                      </div>
-                      <div className="flex-1" onClick={() => navigate(`/documents?view=${doc.id}`)}>
-                        <p className="text-sm font-semibold text-foreground leading-tight">{doc.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(doc.created_at), "MMM d, yyyy")}
-                        </p>
-                      </div>
-                      {(doc as any).is_draft && !(doc as any).email_sent_at && (
-                        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-sm font-medium text-warning border border-warning/30">
-                          DRAFT
-                        </span>
-                      )}
-                      {doc.template_name && (
-                        <span className="rounded-full bg-muted/70 px-2 py-0.5 text-sm font-medium text-muted-foreground">
-                          {doc.template_name}
-                        </span>
-                      )}
-                      <div className="flex items-center gap-1">
-                        {isImageDoc && (
-                          <button
-                            className="h-7 w-7 rounded-full flex items-center justify-center text-violet-600 hover:text-violet-700 hover:bg-violet-50 transition-colors disabled:opacity-50"
-                            title={aiAnalysis ? "View AI analysis" : "Analyse with AI"}
-                            disabled={isAnalyzing}
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (aiAnalysis) {
-                                setAnalysisDialog(doc);
-                                return;
-                              }
-                              setAnalyzingDocId(doc.id);
-                              try {
-                                const { data, error } = await supabase.functions.invoke("analyze-medical-image", {
-                                  body: { imageUrl: mediaUrl, documentId: doc.id },
-                                });
-                                if (error) throw error;
-                                const updated = { ...doc, ai_analysis: data.analysis, ai_analyzed_at: data.analyzedAt } as any;
-                                setAnalysisDialog(updated);
-                                fetchDocuments();
-                                toast({ title: "Analysis Complete", description: "AI interpretation is ready" });
-                              } catch (err: any) {
-                                toast({ title: "Analysis Failed", description: err.message || "Could not analyse the image", variant: "destructive" });
-                              } finally {
-                                setAnalyzingDocId(null);
-                              }
-                            }}
-                          >
-                            {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                          </button>
-                        )}
-                        <button
-                          className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                          title="Preview"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPreviewDoc(doc);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="h-7 w-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                          title="Edit"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingDoc(doc);
-                            setEditDocName(doc.name);
-                            setEditDocContent(doc.content);
-                          }}
-                        >
-                          <Edit3 className="h-4 w-4" />
-                        </button>
-                        <button
-                          className={cn(
-                            "h-7 w-7 rounded-full flex items-center justify-center transition-colors",
-                            (doc as any).email_sent_at
-                              ? "text-muted-foreground cursor-default"
-                              : "text-green-600 hover:text-green-700 hover:bg-green-50",
-                          )}
-                          disabled={!!(doc as any).email_sent_at}
-                          title={(doc as any).email_sent_at ? "Sent" : "Send"}
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            if ((doc as any).email_sent_at) return;
-                            try {
-                              const { data: patient } = await supabase
-                                .from("patients")
-                                .select("email, pharmacy_email")
-                                .eq("id", doc.patient_id!)
-                                .maybeSingle();
-                              const email = doc.template_name?.toLowerCase().includes("prescription")
-                                ? patient?.pharmacy_email || patient?.email
-                                : patient?.email;
-                              if (email)
-                                await supabase.functions.invoke("send-document-email", {
-                                  body: { documentId: doc.id, recipientEmail: email },
-                                });
-                              await (
-                                supabase
-                                  .from("documents")
-                                  .update({ email_sent_at: new Date().toISOString(), is_draft: false } as any) as any
-                              ).eq("id", doc.id);
-                              fetchDocuments();
-                            } catch {}
-                          }}
-                        >
-                          <Send className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="h-7 w-7 rounded-full flex items-center justify-center text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
-                          title="Delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDocToDelete(doc);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                    );
-                  })}
-                </div>
-              );
-            })()}
-          </div>
+          <DocumentsBrowser patientId={patient.id} patientName={patient.name} />
         </TabsContent>
 
         <TabsContent value="details">

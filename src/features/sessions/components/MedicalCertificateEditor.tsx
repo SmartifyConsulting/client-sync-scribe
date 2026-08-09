@@ -352,6 +352,8 @@ export function MedicalCertificateEditor({
               patientName={patientName}
               documentLabel="Medical Certificate"
               getContent={generateContent}
+              headerFooter={headerFooter}
+              fontFamily={headerFooter?.font_family || undefined}
             />
             <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
               {isSaving ? (

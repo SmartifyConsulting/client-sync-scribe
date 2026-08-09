@@ -395,6 +395,8 @@ Total: ${getCurrencySymbol(currency)} ${totalAmount.toFixed(2)}`;
               documentLabel="Invoice"
               getContent={generateContent}
               preferredField="claims_email"
+              headerFooter={headerFooter}
+              fontFamily={headerFooter?.font_family || undefined}
             />
             <Button onClick={handleSubmit} className="gap-2" disabled={isSubmitting || totalAmount <= 0}>
               {isSubmitting ? (

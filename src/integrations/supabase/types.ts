@@ -1604,6 +1604,56 @@ export type Database = {
         }
         Relationships: []
       }
+      document_shares: {
+        Row: {
+          created_at: string
+          document_id: string
+          expires_at: string | null
+          id: string
+          message: string | null
+          opened_at: string | null
+          recipient_email: string
+          recipient_user_id: string | null
+          shared_by: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          opened_at?: string | null
+          recipient_email: string
+          recipient_user_id?: string | null
+          shared_by: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          expires_at?: string | null
+          id?: string
+          message?: string | null
+          opened_at?: string | null
+          recipient_email?: string
+          recipient_user_id?: string | null
+          shared_by?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_shares_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           ai_analysis: string | null
@@ -1614,12 +1664,17 @@ export type Database = {
           email_sent_at: string | null
           id: string
           is_draft: boolean | null
+          is_transcribed: boolean
+          linked_document_ids: string[]
           media_type: string | null
           media_url: string | null
           name: string
           patient_id: string | null
           patient_name: string | null
+          record_date: string | null
           session_id: string | null
+          source_file_name: string | null
+          source_file_url: string | null
           template_id: string | null
           template_name: string | null
           updated_at: string
@@ -1634,12 +1689,17 @@ export type Database = {
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
+          is_transcribed?: boolean
+          linked_document_ids?: string[]
           media_type?: string | null
           media_url?: string | null
           name: string
           patient_id?: string | null
           patient_name?: string | null
+          record_date?: string | null
           session_id?: string | null
+          source_file_name?: string | null
+          source_file_url?: string | null
           template_id?: string | null
           template_name?: string | null
           updated_at?: string
@@ -1654,12 +1714,17 @@ export type Database = {
           email_sent_at?: string | null
           id?: string
           is_draft?: boolean | null
+          is_transcribed?: boolean
+          linked_document_ids?: string[]
           media_type?: string | null
           media_url?: string | null
           name?: string
           patient_id?: string | null
           patient_name?: string | null
+          record_date?: string | null
           session_id?: string | null
+          source_file_name?: string | null
+          source_file_url?: string | null
           template_id?: string | null
           template_name?: string | null
           updated_at?: string
@@ -1741,6 +1806,82 @@ export type Database = {
             columns: ["reply_to_id"]
             isOneToOne: false
             referencedRelation: "emoticon_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercise_plan_days: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          description: string
+          id: string
+          plan_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          description?: string
+          id?: string
+          plan_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          description?: string
+          id?: string
+          plan_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_plan_days_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercise_plans: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_plans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -4016,6 +4157,192 @@ export type Database = {
           },
         ]
       }
+      meal_plan_foods: {
+        Row: {
+          created_at: string
+          energy_kj: number | null
+          food_group: string
+          grams: number
+          id: string
+          name: string
+          plan_id: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          energy_kj?: number | null
+          food_group: string
+          grams?: number
+          id?: string
+          name: string
+          plan_id: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          energy_kj?: number | null
+          food_group?: string
+          grams?: number
+          id?: string
+          name?: string
+          plan_id?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_foods_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plan_slot_instructions: {
+        Row: {
+          created_at: string
+          energy_unit: string
+          id: string
+          instruction_kind: string
+          instruction_text: string | null
+          plan_id: string
+          slot_key: string
+          target_energy: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          energy_unit?: string
+          id?: string
+          instruction_kind?: string
+          instruction_text?: string | null
+          plan_id: string
+          slot_key: string
+          target_energy?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          energy_unit?: string
+          id?: string
+          instruction_kind?: string
+          instruction_text?: string | null
+          plan_id?: string
+          slot_key?: string
+          target_energy?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_slot_instructions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plan_slot_items: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          food_group: string
+          food_id: string | null
+          food_name: string
+          grams: number
+          id: string
+          plan_id: string
+          slot_key: string
+          unit_multiplier: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          food_group: string
+          food_id?: string | null
+          food_name: string
+          grams?: number
+          id?: string
+          plan_id: string
+          slot_key: string
+          unit_multiplier?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          food_group?: string
+          food_id?: string | null
+          food_name?: string
+          grams?: number
+          id?: string
+          plan_id?: string
+          slot_key?: string
+          unit_multiplier?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_slot_items_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plan_foods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plan_slot_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plans: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          patient_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plans_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medication_adherence: {
         Row: {
           auto_approved_at: string | null
@@ -4753,6 +5080,53 @@ export type Database = {
           },
         ]
       }
+      patient_weigh_ins: {
+        Row: {
+          created_at: string
+          id: string
+          kg_lost: number
+          patient_id: string
+          previous_weight_kg: number | null
+          recorded_at: string
+          recorded_by: string
+          updated_at: string
+          vulas_awarded: number
+          weight_kg: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kg_lost?: number
+          patient_id: string
+          previous_weight_kg?: number | null
+          recorded_at?: string
+          recorded_by: string
+          updated_at?: string
+          vulas_awarded?: number
+          weight_kg: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kg_lost?: number
+          patient_id?: string
+          previous_weight_kg?: number | null
+          recorded_at?: string
+          recorded_by?: string
+          updated_at?: string
+          vulas_awarded?: number
+          weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_weigh_ins_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           address: string | null
@@ -4999,6 +5373,7 @@ export type Database = {
           id: string
           invited_by: string
           invited_email: string
+          invited_role: string
           practice_id: string
           status: string
           token: string
@@ -5009,6 +5384,7 @@ export type Database = {
           id?: string
           invited_by: string
           invited_email: string
+          invited_role?: string
           practice_id: string
           status?: string
           token?: string
@@ -5019,6 +5395,7 @@ export type Database = {
           id?: string
           invited_by?: string
           invited_email?: string
+          invited_role?: string
           practice_id?: string
           status?: string
           token?: string
@@ -5520,6 +5897,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      programme_adherence: {
+        Row: {
+          completed: boolean
+          created_at: string
+          entry_date: string
+          id: string
+          kind: string
+          patient_id: string
+          slot_key: string
+          updated_at: string
+          vulas_awarded: number
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          entry_date?: string
+          id?: string
+          kind: string
+          patient_id: string
+          slot_key?: string
+          updated_at?: string
+          vulas_awarded?: number
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          entry_date?: string
+          id?: string
+          kind?: string
+          patient_id?: string
+          slot_key?: string
+          updated_at?: string
+          vulas_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programme_adherence_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       provider_approval_tokens: {
         Row: {
@@ -6092,8 +6513,11 @@ export type Database = {
       }
       todos: {
         Row: {
+          assigned_to_user_id: string | null
+          assignee: string
           completed_at: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           document_id: string | null
           due_date: string | null
@@ -6111,8 +6535,11 @@ export type Database = {
           vulas_reward: number
         }
         Insert: {
+          assigned_to_user_id?: string | null
+          assignee?: string
           completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           document_id?: string | null
           due_date?: string | null
@@ -6130,8 +6557,11 @@ export type Database = {
           vulas_reward?: number
         }
         Update: {
+          assigned_to_user_id?: string | null
+          assignee?: string
           completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           document_id?: string | null
           due_date?: string | null
@@ -6688,6 +7118,10 @@ export type Database = {
         Returns: boolean
       }
       approve_blood_donation: { Args: { _donation_id: string }; Returns: Json }
+      assistant_of_doctor: {
+        Args: { _assistant: string; _doctor: string }
+        Returns: boolean
+      }
       award_doctor_checkin: {
         Args: { _note?: string; _patient_user_id: string }
         Returns: Json
@@ -6706,12 +7140,20 @@ export type Database = {
         Args: { _hospital_id: string; _patient_id: string }
         Returns: boolean
       }
+      can_manage_patient_programme: {
+        Args: { _patient_id: string }
+        Returns: boolean
+      }
       can_upload_holarchelp_incident: {
         Args: { _incident_id: string }
         Returns: boolean
       }
       can_view_inpatient_admission: {
         Args: { _admission_id: string }
+        Returns: boolean
+      }
+      can_view_patient_programme: {
+        Args: { _patient_id: string }
         Returns: boolean
       }
       check_provider_duplicate: {
@@ -6728,6 +7170,10 @@ export type Database = {
         Returns: undefined
       }
       current_verified_email: { Args: never; Returns: string }
+      doctor_had_access_at: {
+        Args: { _created_at: string; _patient_id: string }
+        Returns: boolean
+      }
       doctor_has_access_request_from: {
         Args: { patient_id: string }
         Returns: boolean
@@ -6984,6 +7430,7 @@ export type Database = {
         Returns: boolean
       }
       is_paramedic: { Args: { _user_id: string }; Returns: boolean }
+      is_practice_assistant: { Args: { _user_id: string }; Returns: boolean }
       is_practice_member: {
         Args: { _practice_id: string; _user_id: string }
         Returns: boolean
@@ -7036,6 +7483,10 @@ export type Database = {
       seed_default_header_footer_template: {
         Args: { _user_id: string }
         Returns: undefined
+      }
+      shares_practice: {
+        Args: { _user_a: string; _user_b: string }
+        Returns: boolean
       }
       storage_object_path: {
         Args: { _bucket: string; _url: string }

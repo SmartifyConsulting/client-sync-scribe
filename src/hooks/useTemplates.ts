@@ -323,7 +323,109 @@ Patient: [PatientName]
     header_template_id: null,
     footer_template_id: null,
   },
+  {
+    name: "General Exercise Programme",
+    description: "Structured exercise plan the patient follows between visits",
+    category: "Lifestyle",
+    content: `EXERCISE PROGRAMME
+
+Patient: [PatientName]
+Date: [ConsultationDate]
+Prescribed by: [DoctorName]
+
+GOAL
+[Goal]
+
+FREQUENCY
+Sessions per week: [SessionsPerWeek]
+Duration per session: [SessionDuration]
+
+WARM-UP (5-10 minutes)
+[WarmUp]
+
+MAIN PROGRAMME
+1. [Exercise1] — [Sets1] sets x [Reps1] reps
+2. [Exercise2] — [Sets2] sets x [Reps2] reps
+3. [Exercise3] — [Sets3] sets x [Reps3] reps
+4. [Exercise4] — [Sets4] sets x [Reps4] reps
+
+COOL-DOWN / STRETCHES
+[CoolDown]
+
+PRECAUTIONS
+[Precautions]
+
+REVIEW DATE
+[ReviewDate]
+
+[DoctorSignature]
+
+[DoctorName]`,
+    logo_url: null,
+    logo_position: null,
+    font_family: "sans",
+    is_default: true,
+    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
+  },
+  {
+    name: "General Eating Plan",
+    description: "Daily eating plan with targets and guidance for the patient",
+    category: "Lifestyle",
+    content: `EATING PLAN
+
+Patient: [PatientName]
+Date: [ConsultationDate]
+Prescribed by: [DoctorName]
+
+GOAL
+[Goal]
+
+DAILY TARGETS
+Energy: [DailyCalories]
+Protein: [Protein]
+Carbohydrates: [Carbohydrates]
+Fat: [Fat]
+Water: [WaterIntake]
+
+BREAKFAST
+[Breakfast]
+
+MID-MORNING SNACK
+[MorningSnack]
+
+LUNCH
+[Lunch]
+
+AFTERNOON SNACK
+[AfternoonSnack]
+
+DINNER
+[Dinner]
+
+FOODS TO LIMIT OR AVOID
+[FoodsToAvoid]
+
+NOTES
+[Notes]
+
+REVIEW DATE
+[ReviewDate]
+
+[DoctorSignature]
+
+[DoctorName]`,
+    logo_url: null,
+    logo_position: null,
+    font_family: "sans",
+    is_default: true,
+    header_footer_template_id: null,
+    header_template_id: null,
+    footer_template_id: null,
+  },
 ];
+
 
 export function useTemplates() {
   const { user } = useAuth();
