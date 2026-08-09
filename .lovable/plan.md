@@ -42,8 +42,18 @@ Patient side:
 ## 7. Exercise programme week strip
 Directly below the eating plan week, a second scrollable week strip showing what is required each day from the selected exercise programme template, with the same tick/compliance indicator per day and matching left/right week navigation.
 
-## 8. Patient Biolog tab for doctors
+## 8. Per-meal instructions in Biolog
+Each meal slot carries its own instruction line, set by the doctor and shown to the patient above that slot's badges. Two kinds:
+- Preset rules, e.g. "Choose any one of the below" or "Choose any options adding up to X kJ / X kcal" (with a live running total against the target while the patient selects).
+- Free text, e.g. "Eat greens first, then proteins, then carbs, then sweets."
+
+## 9. Weigh-in Vula awards
+When a patient checks in and the doctor weighs them, the doctor can award Vulas from the check-in screen. The Vula reward matrix gains a weight-loss rule: 50 Vulas per kilogram lost against the previous recorded weight, with the equivalent shown in stones/pounds for regions using imperial units (award maths always runs in kg). The award is logged against the weigh-in so the same kilo can't be paid twice.
+
+## 10. Patient Biolog tab for doctors
 Add a Biolog tab immediately after Session History on the patient profile. It renders the full Biolog experience for that patient — Today, History, Insights, Programmes and Customise — with the doctor able to edit and customise on the patient's behalf (the existing read-only doctor view is widened for this tab).
+
+
 
 ## Technical notes
 - `src/features/patients/components/PatientDetailsEditor.tsx`: add the `programmes` trigger + content before `documents`, and a `biolog` tab after Session History; include both in the tab visibility lists.
