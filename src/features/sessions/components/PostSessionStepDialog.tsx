@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Pill, Receipt, Users, Send, Pencil, Check, Save } from "lucide-react";
+import { FileText, Pill, Receipt, Users, Send, Pencil, Check, Save, Eye, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -13,6 +13,7 @@ import {
 import type { GeneratedDoc } from "./GeneratedDocumentsDialog";
 import { FollowUpAppointmentDialog } from "./FollowUpAppointmentDialog";
 import { VisitCategoryDialog } from "./VisitCategoryDialog";
+import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
 
 const DOC_ICONS: Record<string, typeof FileText> = {
   medcert: FileText,
@@ -32,6 +33,8 @@ interface PostSessionStepDialogProps {
   onSaveEdit: (doc: GeneratedDoc, newContent: string) => Promise<void>;
   /** Move on to the next step in the post-session queue. */
   onAdvance: () => void;
+  /** Cleaned AI Clinician notes, reviewable from the prescription step. */
+  clinicianNotes?: string | null;
 }
 
 function extractInvoiceTotal(content: string): string {
@@ -51,18 +54,23 @@ function DocStepDialog({
   onSend,
   onSaveEdit,
   onAdvance,
+  clinicianNotes,
 }: PostSessionStepDialogProps) {
   const [editing, setEditing] = useState(false);
   const [draftContent, setDraftContent] = useState("");
   const [busy, setBusy] = useState(false);
   const [anim, setAnim] = useState<"idle" | "sending" | "sent" | "saving" | "saved">("idle");
   const [invoiceStage, setInvoiceStage] = useState<"summary" | "detail">("summary");
+  const [showPreview, setShowPreview] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setEditing(false);
     setAnim("idle");
     setInvoiceStage("summary");
+    setShowPreview(false);
+    setShowNotes(false);
     setDraftContent(doc?.content || "");
   }, [open, doc?.key]);
 
@@ -184,6 +192,16 @@ function DocStepDialog({
                 </div>
               ) : (
                 <div className="flex gap-2 w-full justify-end flex-wrap">
+                  <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-1.5">
+                    <Eye className="h-4 w-4" />
+                    Preview
+                  </Button>
+                  {stepType === "prescription" && clinicianNotes && (
+                    <Button variant="outline" onClick={() => setShowNotes(true)} className="gap-1.5">
+                      <Brain className="h-4 w-4" />
+                      Review AI Clinician notes
+                    </Button>
+                  )}
                   {stepType !== "invoice" && (
                     <Button variant="outline" onClick={() => setEditing(true)} className="gap-1.5">
                       <Pencil className="h-4 w-4" />
@@ -213,6 +231,37 @@ function DocStepDialog({
           </>
         )}
       </DialogContent>
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="sm:max-w-[760px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-primary" />
+              {doc.label} preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto rounded-lg border border-border bg-white p-6">
+            <div className="whitespace-pre-wrap text-sm" dangerouslySetInnerHTML={{ __html: doc.content }} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNotes} onOpenChange={setShowNotes}>
+        <DialogContent className="sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-primary" />
+              AI Clinician notes
+            </DialogTitle>
+            <DialogDescription>
+              Review before finalising the prescription. Decision support only.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto">
+            <ClinicianNotesAccordion notes={clinicianNotes} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
@@ -234,6 +283,8 @@ interface PostSessionQueueDialogProps {
   patientName?: string;
   transcript?: string;
   onVulaConfirm: (categories: string[] | null) => Promise<void> | void;
+  /** AI Clinician notes surfaced on the prescription step. */
+  clinicianNotes?: string | null;
 }
 
 /**
@@ -255,6 +306,7 @@ export function PostSessionStepDialog({
   patientName,
   transcript,
   onVulaConfirm,
+  clinicianNotes,
 }: PostSessionQueueDialogProps) {
   const step = queue[index];
   if (!step) return null;
@@ -309,6 +361,7 @@ export function PostSessionStepDialog({
       onSend={onSend}
       onSaveEdit={onSaveEdit}
       onAdvance={onAdvance}
+      clinicianNotes={clinicianNotes}
     />
   );
 }

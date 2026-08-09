@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AlertCircle, Brain, CheckCircle, Sparkles, ShieldAlert } from "lucide-react";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
+import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
 
 interface SessionResultPanelsProps {
   /** Finalised transcript — rendered in a collapsed accordion when present. */
@@ -14,6 +15,8 @@ interface SessionResultPanelsProps {
   clinicianNotes?: string | null;
   /** Buttons rendered inside the AI Clinician header (translate / narrate). */
   clinicianActions?: ReactNode;
+  /** Controls rendered directly beneath the audio player (e.g. downloads). */
+  audioActions?: ReactNode;
   /** Extra controls in the AI Summary header (e.g. language select). */
   summaryActions?: ReactNode;
   /** Shown when action points were pushed to the to-do list. */
@@ -30,6 +33,7 @@ export function SessionResultPanels({
   doctorName,
   summary,
   audioUrl,
+  audioActions,
   actionPoints = [],
   clinicianNotes,
   clinicianActions,
@@ -62,6 +66,7 @@ export function SessionResultPanels({
               <audio controls className="w-full h-8" src={audioUrl}>
                 Your browser does not support audio playback.
               </audio>
+              {audioActions && <div className="mt-2 flex items-center gap-2">{audioActions}</div>}
             </div>
           )}
         </div>
@@ -123,15 +128,9 @@ export function SessionResultPanels({
           </p>
         </div>
 
-        {clinicianNotes ? (
-          <div className="p-4 rounded-lg bg-muted/50 border border-border max-h-[400px] overflow-y-auto">
-            <pre className="text-sm text-foreground whitespace-pre-wrap font-sans leading-relaxed">
-              {clinicianNotes}
-            </pre>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">No AI Clinician notes recorded for this session.</p>
-        )}
+        <div className="max-h-[400px] overflow-y-auto">
+          <ClinicianNotesAccordion notes={clinicianNotes} />
+        </div>
       </div>
     </div>
   );

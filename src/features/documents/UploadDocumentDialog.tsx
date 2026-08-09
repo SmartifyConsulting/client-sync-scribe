@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePatients } from "@/hooks/usePatients";
 import { useUpload } from "@/features/uploads/useUpload";
 import { supabase } from "@/integrations/supabase/client";
+import { UploadProgressBar, type UploadProgressState } from "./components/UploadProgressBar";
 
 const ACCEPT = "audio/*,video/*,.pdf,.doc,.docx,.jpg,.jpeg,.png,.bmp,.dicom,image/*";
 const NO_PATIENT_VALUE = "__none__";
@@ -44,7 +45,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
   const { toast } = useToast();
   const { user } = useAuth();
   const { patients } = usePatients();
-  const { upload, isUploading } = useUpload("patient-media");
+  const { upload, isUploading } = useUpload("patient-media", { maxBytes: 20 * 1024 * 1024 });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
@@ -52,6 +53,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [progress, setProgress] = useState<UploadProgressState>({ stage: "idle", percent: 0 });
 
   const reset = () => {
     setName("");
@@ -92,10 +94,11 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
       const selectedPatient =
         patientId !== NO_PATIENT_VALUE ? patients.find((p) => p.id === patientId) : null;
 
-      const ext = file.name.split(".").pop() || "dat";
-      const folder = selectedPatient ? selectedPatient.id : user.id;
-      const path = `${folder}/${Date.now()}.${ext}`;
+      // Storage RLS requires the first folder to be the uploader's own user id.
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
+      const path = `${user.id}/${selectedPatient?.id || "self"}/${Date.now()}-${safeName}`;
 
+      setProgress({ stage: "uploading", percent: 25, fileName: file.name });
       const result = await upload(file, path);
       if (!result) {
         toast({
@@ -106,6 +109,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
         return;
       }
 
+      setProgress({ stage: "saving", percent: 80, fileName: file.name });
       const { error: docError } = await supabase.from("documents").insert({
         name: name.trim(),
         content: `[FILE] ${name.trim()}`,
@@ -117,6 +121,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
       });
       if (docError) throw docError;
 
+      setProgress({ stage: "done", percent: 100, fileName: file.name });
       toast({ title: "Document Uploaded", description: `"${name.trim()}" has been saved` });
       onUploaded?.();
       reset();
@@ -129,6 +134,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
       });
     } finally {
       setIsSaving(false);
+      setTimeout(() => setProgress({ stage: "idle", percent: 0 }), 1200);
     }
   };
 
@@ -219,6 +225,7 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
               </Button>
             )}
           </div>
+          <UploadProgressBar state={progress} />
         </div>
 
         <DialogFooter>

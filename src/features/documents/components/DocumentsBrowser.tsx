@@ -37,6 +37,8 @@ import { useDocuments, type Document } from "@/hooks/useDocuments";
 import { DocumentPreview } from "@/features/sessions/components/DocumentPreview";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { InformDocumentDialog } from "./InformDocumentDialog";
+import { UploadProgressBar, type UploadProgressState } from "./UploadProgressBar";
+import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
 import { cn } from "@/lib/utils";
 
 type GroupBy = "type" | "date" | "patient";
@@ -89,6 +91,8 @@ export function DocumentsBrowser({
   const [recordDate, setRecordDate] = useState("");
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [progress, setProgress] = useState<UploadProgressState>({ stage: "idle", percent: 0 });
+  const [pendingHistory, setPendingHistory] = useState<ExtractedHistory | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const groups = useMemo(() => {
@@ -145,7 +149,12 @@ export function DocumentsBrowser({
         } = await supabase.auth.getUser();
         if (!user) throw new Error("You must be signed in to upload");
 
-        for (const file of Array.from(files)) {
+        const list = Array.from(files);
+        let index = 0;
+        for (const file of list) {
+          index += 1;
+          const meta = { fileName: file.name, current: index, total: list.length };
+          setProgress({ stage: "uploading", percent: 20, ...meta });
           if (file.size > 20 * 1024 * 1024) {
             toast({
               title: "File too large",
@@ -174,6 +183,7 @@ export function DocumentsBrowser({
           let transcribed = false;
 
           if (isImage || isPdf) {
+            setProgress({ stage: "transcribing", percent: 60, ...meta });
             try {
               const { data, error } = await supabase.functions.invoke(
                 "transcribe-record",
@@ -182,12 +192,14 @@ export function DocumentsBrowser({
               if (!error && data?.text) {
                 content = data.text;
                 transcribed = true;
+                if (patientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
               }
             } catch {
               /* fall back to the plain upload record */
             }
           }
 
+          setProgress({ stage: "saving", percent: 85, ...meta });
           const { error: insertError } = await supabase.from("documents").insert({
             user_id: user.id,
             patient_id: patientId || null,
@@ -205,6 +217,7 @@ export function DocumentsBrowser({
           if (insertError) throw insertError;
         }
 
+        setProgress({ stage: "done", percent: 100 });
         toast({ title: "Upload complete" });
         fetchDocuments();
       } catch (err: any) {
@@ -215,6 +228,7 @@ export function DocumentsBrowser({
         });
       } finally {
         setUploading(false);
+        setTimeout(() => setProgress({ stage: "idle", percent: 0 }), 1500);
       }
     },
     [patientId, patientName, recordDate, toast, fetchDocuments],
@@ -295,6 +309,19 @@ export function DocumentsBrowser({
         transcribed automatically by AI. Set a record date first to file
         historical notes under the date they were written.
       </div>
+
+      <UploadProgressBar state={progress} />
+
+      {patientId && pendingHistory && (
+        <ApplyHistoryDialog
+          open
+          onOpenChange={(o) => !o && setPendingHistory(null)}
+          patientId={patientId}
+          history={pendingHistory}
+          recordDate={recordDate || undefined}
+          onApplied={() => setPendingHistory(null)}
+        />
+      )}
 
       {/* List */}
       {loading ? (
