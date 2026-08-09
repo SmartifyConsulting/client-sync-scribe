@@ -17,6 +17,8 @@ Today emailed documents are rebuilt as plain text inside a generic wrapper, so t
 Already present in the Documents screen (drag-and-drop / Upload button, AI transcription of handwritten scans, record-date filing). This plan verifies both work end to end and fixes anything broken:
 - Drag-and-drop and Upload accept PDFs, images, Word files and scans.
 - Scans/photos are offered to AI transcription, producing an editable document linked back to the original file.
+- The same drag-and-drop / Upload experience is added to the **Documents tab inside a patient's profile**, pre-scoped to that patient: drop a file, get AI transcription when it is handwritten, and set a **record date** so old notes file retrospectively into that patient's medical history at their original date.
+
 
 ## 4. Inform button (links, never files)
 
