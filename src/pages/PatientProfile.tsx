@@ -549,6 +549,29 @@ export default function PatientProfile() {
           </div>
         </TabsContent>
 
+        {/* Biolog Tab — the care team reviews the patient's own Biolog */}
+        <TabsContent value="biolog">
+          {(patient as any).patient_user_id ? (
+            <BiologPanel ownerUserId={(patient as any).patient_user_id} readOnly />
+          ) : (
+            <div className="rounded-2xl bg-card p-6 text-sm text-muted-foreground shadow-card">
+              This patient has not activated their app account yet, so there is no Biolog to show.
+            </div>
+          )}
+        </TabsContent>
+
+        {/* Programmes Tab — eating plan, exercise programme and weigh-ins */}
+        <TabsContent value="programmes">
+          <div className="rounded-2xl bg-card p-4 shadow-card">
+            <PatientProgrammesTab
+              patientId={patient.id}
+              canManage
+              isSelf={(patient as any).patient_user_id === currentUserId}
+            />
+          </div>
+        </TabsContent>
+
+
         <TabsContent value="documents" className="space-y-4">
           {/* Document intake address — own record uses your alias, otherwise the patient's */}
           {(() => {
