@@ -1,4 +1,7 @@
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { BiologPanel } from "@/features/biolog/BiologPanel";
+import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
+
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
