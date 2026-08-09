@@ -200,6 +200,8 @@ export function GeneralLetterEditor({
               patientName={patientName}
               documentLabel="Letter"
               getContent={generateContent}
+              headerFooter={headerFooter}
+              fontFamily={headerFooter?.font_family || undefined}
             />
             <Button onClick={handleSave} className="gap-2" disabled={isSaving}>
               {isSaving ? (
