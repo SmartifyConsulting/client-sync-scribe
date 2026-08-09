@@ -3,6 +3,8 @@ import { Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { buildDocumentEmailHtml } from "@/features/documents/utils/documentEmailHtml";
+import { buildDocumentPdfBase64, pdfFileName } from "@/features/documents/utils/documentPdf";
 
 interface SendDocumentButtonProps {
   patientId: string;
@@ -18,6 +20,12 @@ interface SendDocumentButtonProps {
   preferredField?: "email" | "pharmacy_email" | "claims_email" | "reporting_to_email";
   /** Existing document row to stamp as sent. */
   documentId?: string | null;
+  /** Letterhead used by the editor so the email matches the template exactly. */
+  headerFooter?: any;
+  /** Font key from the letterhead/template. */
+  fontFamily?: string | null;
+  /** Practice logo shown when no letterhead header exists. */
+  logoUrl?: string | null;
   /** Called after a successful send. */
   onSent?: () => void;
   disabled?: boolean;
@@ -34,6 +42,9 @@ export function SendDocumentButton({
   getContent,
   preferredField = "email",
   documentId,
+  headerFooter,
+  fontFamily,
+  logoUrl,
   onSent,
   disabled,
 }: SendDocumentButtonProps) {
@@ -72,13 +83,28 @@ export function SendDocumentButton({
         senderName = profile?.full_name || senderName;
       }
 
+      const content = getContent();
+      const documentHtml = buildDocumentEmailHtml({
+        content,
+        headerFooter,
+        fontFamily: fontFamily ?? headerFooter?.font_family ?? null,
+        logoUrl,
+        senderName,
+      });
+
+      const pdfBase64 = await buildDocumentPdfBase64(documentHtml);
+
       const { error } = await supabase.functions.invoke("send-document-email", {
         body: {
           to: recipient,
           subject: `${documentLabel} for ${patientName}`,
           documentName: `${documentLabel} - ${patientName}`,
-          documentContent: getContent(),
+          documentContent: content,
+          documentHtml,
           senderName,
+          attachments: pdfBase64
+            ? [{ filename: pdfFileName(`${documentLabel}-${patientName}`), content: pdfBase64 }]
+            : undefined,
         },
       });
       if (error) throw error;

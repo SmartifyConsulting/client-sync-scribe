@@ -30,6 +30,15 @@ serve(async (req) => {
     let documentContent = body.documentContent;
     const documentHtml: string | undefined = body.documentHtml;
     const replyTo: string | undefined = body.replyTo;
+    const rawAttachments = Array.isArray(body.attachments) ? body.attachments : [];
+    const attachments = rawAttachments
+      .filter((a: any) => a && typeof a.filename === "string" && typeof a.content === "string")
+      .slice(0, 5)
+      .map((a: any) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: typeof a.contentType === "string" ? a.contentType : "application/pdf",
+      }));
     let documentName = body.documentName || "Document";
     let senderName = body.senderName || "Holarc Health";
     let practiceName = body.practiceName;
@@ -157,6 +166,7 @@ serve(async (req) => {
       subject,
       html: htmlContent,
       replyTo,
+      attachments: attachments.length ? attachments : undefined,
     });
 
     if (!result.ok) {
