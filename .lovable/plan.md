@@ -122,7 +122,12 @@ The prescription review step reuses this same structured, de-duplicated view via
   structured history; apply via a confirm dialog.
 - Sequencing/animations: `src/features/sessions/components/PostSessionStepDialog.tsx`
   and the generated-documents panel.
-- AI notes: new `cleanClinicianNotes` helper + accordion renderer shared by
-  `SessionResultPanels.tsx` and the prescription review sheet.
+- AI panel: new `parseClinicianNotes.ts` (parse + de-dupe + merge-by-key) and a
+  `ClinicalIntelligencePanel` component replacing the `<pre>` block in
+  `src/features/sessions/components/SessionResultPanels.tsx`; also used by the live panel
+  in `src/pages/Sessions.tsx` and by the prescription review sheet. Raw note text stays
+  available in an expandable "Full AI notes" block. No changes to the AI edge functions
+  or the live-hint merge logic.
+
 - Session view edits: `src/pages/SessionDetail.tsx`; tab rename in
   `src/pages/PatientProfile.tsx`.
