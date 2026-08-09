@@ -415,6 +415,35 @@ export default function SessionDetail() {
         doctorName={doctorName}
         summary={translatedSummary || session.summary}
         audioUrl={signedAudioUrl}
+        audioActions={
+            <Select
+            onValueChange={(value) => {
+              if (value === "audio") handleDownloadAudio();
+              else if (value === "transcript" && session.transcript) {
+                const blob = new Blob([session.transcript], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `transcript-${format(new Date(session.started_at), "yyyy-MM-dd")}.txt`;
+                link.click();
+                URL.revokeObjectURL(url);
+              }
+            }}
+          >
+            <SelectTrigger className="w-[160px] h-8 text-sm">
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              <SelectValue placeholder="Download..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
+                Download audio
+              </SelectItem>
+              <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
+                Download transcript
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        }
         actionPoints={session.action_points || []}
         clinicianNotes={(session as any).ai_diagnosis}
         showTodoHint={false}
@@ -451,46 +480,13 @@ export default function SessionDetail() {
         }
       />
 
-      {/* Recording retention + downloads */}
+      {/* Retention notice — downloads now sit directly under the audio player */}
       {(session.audio_url || session.transcript) && (
-        <div className="rounded-xl border border-primary bg-card p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Volume2 className="h-4 w-4 text-primary" />
-              <p className="text-sm text-muted-foreground">
-                Voice recordings and transcriptions are automatically deleted after 7 days. AI summaries remain
-                permanently.
-              </p>
-            </div>
-            <Select
-              onValueChange={(value) => {
-                if (value === "audio") handleDownloadAudio();
-                else if (value === "transcript" && session.transcript) {
-                  const blob = new Blob([session.transcript], { type: "text/plain" });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = `transcript-${format(new Date(session.started_at), "yyyy-MM-dd")}.txt`;
-                  link.click();
-                  URL.revokeObjectURL(url);
-                }
-              }}
-            >
-              <SelectTrigger className="w-[160px] h-8 text-sm">
-                <Download className="h-3.5 w-3.5 mr-1.5" />
-                <SelectValue placeholder="Download..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
-                  Download audio
-                </SelectItem>
-                <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
-                  Download transcript
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <p className="text-xs text-muted-foreground flex items-center gap-2">
+          <Volume2 className="h-3.5 w-3.5 text-primary" />
+          Voice recordings and transcriptions are automatically deleted after 7 days. AI summaries remain
+          permanently.
+        </p>
       )}
 
       {/* Manual session notes */}

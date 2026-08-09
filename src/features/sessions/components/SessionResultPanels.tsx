@@ -15,6 +15,8 @@ interface SessionResultPanelsProps {
   clinicianNotes?: string | null;
   /** Buttons rendered inside the AI Clinician header (translate / narrate). */
   clinicianActions?: ReactNode;
+  /** Controls rendered directly beneath the audio player (e.g. downloads). */
+  audioActions?: ReactNode;
   /** Extra controls in the AI Summary header (e.g. language select). */
   summaryActions?: ReactNode;
   /** Shown when action points were pushed to the to-do list. */
@@ -31,6 +33,7 @@ export function SessionResultPanels({
   doctorName,
   summary,
   audioUrl,
+  audioActions,
   actionPoints = [],
   clinicianNotes,
   clinicianActions,
@@ -63,6 +66,7 @@ export function SessionResultPanels({
               <audio controls className="w-full h-8" src={audioUrl}>
                 Your browser does not support audio playback.
               </audio>
+              {audioActions && <div className="mt-2 flex items-center gap-2">{audioActions}</div>}
             </div>
           )}
         </div>
