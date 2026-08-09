@@ -189,6 +189,11 @@ export default {
         },
       },
       animation: {
+        "upload-shimmer": "upload-shimmer 1.2s ease-in-out infinite",
+        "doc-sent": "doc-sent 0.7s ease-in forwards",
+        "doc-saved": "doc-saved 0.7s ease-out forwards",
+        "doc-scheduled": "doc-scheduled 0.5s ease-out forwards",
+
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out",
