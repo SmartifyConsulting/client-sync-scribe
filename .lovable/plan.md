@@ -46,16 +46,62 @@ Every step gets:
 - micro-animations on completion: paper plane flying off for Send, rotating floppy disk
   for Save, calendar-with-tick for Scheduled.
 
-## 5. AI Clinician notes cleanup and accordions
+## 5. AI Clinician notes → Live Clinical Intelligence Panel
 
-When a session finishes, de-duplicate the AI output: strip repeated cautions/disclaimers
-and repeated bullet lines, keeping one instance of each. Render the cleaned notes as
-collapsible accordion sections: **Working Impression**, **Safety Checks**,
-**Differentials**, **Suggested Checks** (same always-green accordion styling used
-elsewhere).
+Replace the dense prose block (currently a raw `<pre>` dump of the AI text) with a
+structured, scannable panel. The AI engine, live hint merging, transcription, extraction
+and clinical logic stay exactly as they are — this is a presentation and
+information-architecture change only. Nothing is fabricated; every element is mapped from
+existing AI output, and the raw text is retained underneath.
 
-The prescription review step shows this same cleaned, de-duplicated, sectioned view via
+**Parsing layer (presentation only).** A `parseClinicianNotes` helper turns the existing
+note text into a structured model: impression (+ confidence when stated), attention items
+(CRITICAL / CAUTION / interactions / contraindications / discrepancies / safety flags),
+findings, differentials, suggested checks, and background. It de-duplicates repeated
+lines and repeated cautions, and keeps each item's own detail text for expansion. Nothing
+that can't be classified is dropped — it lands in a "Other AI notes" expandable block.
+
+**Panel layout** (single primary column, stacks on narrow widths):
+
+1. Compact header: "AI Clinical Assistant", a small `● Listening` indicator (subtle
+   "Updating" pulse while processing), the existing Edit action, and the subtitle
+   "Continuously analysing the consultation".
+2. One-line compact disclaimer, always visible:
+   "AI-generated clinical insights are decision support only and must be reviewed by the
+   treating clinician."
+3. **Current Impression** card — impression + confidence; placeholder
+   "Building clinical impression…" when empty.
+4. **Needs Attention** with a count — items ordered critical → caution → informational.
+   Severity is shown through visual hierarchy (border weight, tone, small icon), not
+   literal `[CAUTION]`/`[CRITICAL]` labels. Red reserved for genuinely critical items.
+   Each item expands via "Why am I seeing this?" showing the AI's own explanation.
+5. **Clinical Findings** — short titled findings with concise qualifiers, as compact rows
+   rather than paragraphs. Where the source distinguishes them, findings are labelled
+   *Patient reported* vs *AI interpretation* so an inference never reads as a fact.
+6. **Differentials** — compact chips, expandable for the AI's context/confidence, headed
+   "AI-generated differential considerations".
+7. **Suggested Checks** — consolidated single-instance list, with "View all →" when long.
+
+**Live update behaviour.** New AI output is merged into the existing structured model by
+stable item key rather than appended: existing cards update in place, duplicates
+consolidate, section order stays fixed so the page does not reflow or jump. Newly added
+items show a subtle "NEW" badge that fades after a few seconds.
+
+**Empty states.** "Building clinical impression…", "Listening for clinically relevant
+findings…", "No differential considerations identified yet.", "Will appear as clinically
+relevant information is identified." Sections with nothing and no useful placeholder stay
+hidden.
+
+**Edits.** The existing Edit flow is kept. Clinician-edited content is marked
+"Edited by clinician" and is never overwritten by later AI updates.
+
+This live panel stays intelligence-focused — the existing post-session summary and
+document/final-note workflow are unchanged, and continue to consume the same underlying
+AI data.
+
+The prescription review step reuses this same structured, de-duplicated view via
 "Review AI Clinician notes", so the doctor can amend the prescription before sending.
+
 
 ## 6. Session view fixes
 
@@ -76,7 +122,12 @@ The prescription review step shows this same cleaned, de-duplicated, sectioned v
   structured history; apply via a confirm dialog.
 - Sequencing/animations: `src/features/sessions/components/PostSessionStepDialog.tsx`
   and the generated-documents panel.
-- AI notes: new `cleanClinicianNotes` helper + accordion renderer shared by
-  `SessionResultPanels.tsx` and the prescription review sheet.
+- AI panel: new `parseClinicianNotes.ts` (parse + de-dupe + merge-by-key) and a
+  `ClinicalIntelligencePanel` component replacing the `<pre>` block in
+  `src/features/sessions/components/SessionResultPanels.tsx`; also used by the live panel
+  in `src/pages/Sessions.tsx` and by the prescription review sheet. Raw note text stays
+  available in an expandable "Full AI notes" block. No changes to the AI edge functions
+  or the live-hint merge logic.
+
 - Session view edits: `src/pages/SessionDetail.tsx`; tab rename in
   `src/pages/PatientProfile.tsx`.
