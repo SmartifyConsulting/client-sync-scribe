@@ -116,6 +116,25 @@ export default {
         "22": "5.5rem",
       },
       keyframes: {
+        "upload-shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(300%)" },
+        },
+        "doc-sent": {
+          "0%": { transform: "translate(0,0) rotate(0deg)", opacity: "1" },
+          "100%": { transform: "translate(28px,-24px) rotate(18deg)", opacity: "0" },
+        },
+        "doc-saved": {
+          "0%": { transform: "rotate(0deg) scale(1)" },
+          "60%": { transform: "rotate(360deg) scale(1.15)" },
+          "100%": { transform: "rotate(360deg) scale(1)" },
+        },
+        "doc-scheduled": {
+          "0%": { transform: "scale(0.6)", opacity: "0" },
+          "60%": { transform: "scale(1.18)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
