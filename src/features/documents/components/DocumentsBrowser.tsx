@@ -92,7 +92,12 @@ export function DocumentsBrowser({
 
   const groups = useMemo(() => {
     const term = search.trim().toLowerCase();
+    const wanted = templateFilter?.map((t) => t.toLowerCase());
     const filtered = documents.filter((doc) => {
+      if (wanted) {
+        const name = (doc.template_name || "").toLowerCase();
+        if (!wanted.some((w) => name.includes(w))) return false;
+      }
       if (!term) return true;
       return (
         doc.name.toLowerCase().includes(term) ||
