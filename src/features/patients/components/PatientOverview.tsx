@@ -30,9 +30,25 @@ interface PatientOverviewProps {
     emergency_contact_email?: string | null;
     emergency_contact_relationship?: string | null;
     emergency_contacts?: Array<{ name?: string; phone?: string; email?: string; relationship?: string }> | null;
+    current_medications?: Array<{
+      id: string;
+      name: string;
+      dosage?: string;
+      is_chronic?: boolean;
+      status?: string;
+      start_date?: string;
+      end_date?: string;
+    }> | null;
   };
   sessions: Session[];
   isSelfService?: boolean;
+}
+
+/** Extracts just the 4-digit year from a date string (e.g. "Nov 2024" -> "2024").
+ * Falls back to the original string if no year can be found. */
+function extractYear(dateStr: string): string {
+  const match = String(dateStr || "").match(/\b(19|20)\d{2}\b/);
+  return match ? match[0] : dateStr;
 }
 
 
@@ -762,7 +778,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                         <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/60"}`} />
                         <div className={cond.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
                           <span className={cond.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{cond.name}</span>
-                          <span className="text-muted-foreground ml-2 text-xs no-underline">({cond.date})</span>
+                          <span className="text-muted-foreground ml-2 text-xs no-underline">({extractYear(cond.date)})</span>
                         </div>
                       </div>
                       <Button
@@ -809,7 +825,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
                       <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/60"}`} />
                       <div className={med.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
                         <span className={med.status === "inactive" ? "text-muted-foreground" : "text-foreground font-medium"}>{med.name}</span>
-                        <span className="text-muted-foreground ml-2 text-xs no-underline">({med.date})</span>
+                        <span className="text-muted-foreground ml-2 text-xs no-underline">({extractYear(med.date)})</span>
                         {med.status === "inactive" && med.end_date && (
                           <span className="text-muted-foreground ml-2 text-xs no-underline italic">
                             Stopped {(() => { try { return format(new Date(med.end_date), "d MMM yyyy"); } catch { return med.end_date; } })()}
@@ -878,6 +894,39 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
           </CollapsibleContent>
         </Collapsible>
       </div>
+
+      {/* Chronic Medications — from the patient's own current_medications list (distinct shape from the AI-summarised Medications card above). */}
+      {(() => {
+        const chronicMeds = (patient.current_medications || []).filter((m) => m?.is_chronic);
+        if (chronicMeds.length === 0) return null;
+        return (
+          <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
+            <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
+              <ChevronDown className="h-4 w-4 text-terracotta transition-transform data-[state=closed]:rotate-[-90deg]" />
+              <Pill className="h-4 w-4 text-terracotta" />
+              <h4 className="font-medium text-foreground">Chronic Medications</h4>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3">
+              <ul className="space-y-2">
+                {chronicMeds.map((med) => {
+                  const isActive = (med.status || "current") !== "past";
+                  return (
+                    <li key={med.id} className="text-sm flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isActive ? "bg-terracotta" : "bg-muted-foreground/60"}`} />
+                      <div className={!isActive ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
+                        <span className={!isActive ? "text-muted-foreground" : "text-foreground font-medium"}>{med.name}</span>
+                        {med.start_date && (
+                          <span className="text-muted-foreground ml-2 text-xs no-underline">({extractYear(med.start_date)})</span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </CollapsibleContent>
+          </Collapsible>
+        );
+      })()}
     </div>
   );
 }

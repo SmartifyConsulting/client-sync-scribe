@@ -34,11 +34,13 @@ import {
   PenTool,
   FileText as FileTextIcon,
   Download,
+  Lock,
+  Send,
+  Save,
+  CalendarCheck,
 } from "lucide-react";
 import { PrescriptionEditor } from "@/components/sessions/PrescriptionEditor";
 import { InvoiceEditor } from "@/components/sessions/InvoiceEditor";
-import { VisitCategoryDialog } from "@/components/sessions/VisitCategoryDialog";
-import { FollowUpAppointmentDialog } from "@/features/sessions/components/FollowUpAppointmentDialog";
 import { MedicalCertificateEditor } from "@/components/sessions/MedicalCertificateEditor";
 import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor";
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
@@ -55,6 +57,7 @@ import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnostic
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
+import { PostSessionStepDialog, type PostSessionStepType } from "@/features/sessions/components/PostSessionStepDialog";
 import { SessionGeneratedDocuments } from "@/features/sessions/components/SessionGeneratedDocuments";
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
 import { renderClinicalHighlights } from "@/features/sessions/lib/clinicalHighlights";
@@ -191,7 +194,6 @@ export default function Sessions() {
   const [doctorLanguage, setDoctorLanguage] = useState<string>("English");
   const [pastPatientSessions, setPastPatientSessions] = useState<any[]>([]);
   const savedAudioUrlRef = useRef<string | null>(null);
-  const [showVisitCategoryDialog, setShowVisitCategoryDialog] = useState(false);
   const [pendingTranscript, setPendingTranscript] = useState<string>("");
   const pendingCompletionRef = useRef(false);
   // Guarantees the post-session chain (documents → follow-up → Vula) runs exactly once
@@ -225,8 +227,11 @@ export default function Sessions() {
   const [showGeneratedDocsDialog, setShowGeneratedDocsDialog] = useState(false);
   const [generatedDocs, setGeneratedDocs] = useState<GeneratedDoc[]>([]);
   const [previewDocKey, setPreviewDocKey] = useState<GeneratedDocKey | null>(null);
-  const [showFollowUpDialog, setShowFollowUpDialog] = useState(false);
   const [extractedFollowUp, setExtractedFollowUp] = useState<{ follow_up_date?: string; follow_up_time?: string; notes?: string } | null>(null);
+  // Sequential post-session flow: one step (document / schedule / invoice / vula) at a time.
+  const [postSessionQueue, setPostSessionQueue] = useState<PostSessionStepType[]>([]);
+  const [postSessionIndex, setPostSessionIndex] = useState(0);
+  const [showPostSessionFlow, setShowPostSessionFlow] = useState(false);
   const doctorIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -402,15 +407,18 @@ export default function Sessions() {
     notesRef.current = notes;
   }, [notes]);
 
-  // Helper: chain to next post-session step (after all doc dialogs are processed)
-  const advanceToFollowUp = useCallback(() => {
-    if (currentPatient && doctorIdRef.current) {
-      setShowFollowUpDialog(true);
-    } else {
-      // No patient context — skip directly to vula
-      setShowVisitCategoryDialog(true);
-    }
-  }, [currentPatient]);
+  // Advance to the next step in the sequential post-session queue, closing the
+  // flow once every step (documents → schedule → invoice → vula) has run.
+  const advancePostSession = useCallback(() => {
+    setPostSessionIndex((prev) => {
+      const next = prev + 1;
+      if (next >= postSessionQueue.length) {
+        setShowPostSessionFlow(false);
+        return prev;
+      }
+      return next;
+    });
+  }, [postSessionQueue.length]);
 
   // Persist the AI assessment + doctor findings note against the session row
   const persistAssessment = useCallback(async (note?: string) => {
@@ -597,18 +605,20 @@ export default function Sessions() {
       } as InvoiceData);
       if (d) results.push(d);
     }
-    if (results.length > 0) {
-      setGeneratedDocs(results);
-      setShowGeneratedDocsDialog(true);
-    } else {
-      advanceToFollowUp();
-    }
+    setGeneratedDocs(results);
 
-  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, advanceToFollowUp, patientId, currentPatient]);
+    // Build the sequential post-session queue from only the documents that were
+    // actually generated this session, then always end with schedule → invoice → vula.
+    const steps: PostSessionStepType[] = [];
+    if (extractedPrescription) steps.push("prescription");
+    if (extractedMedCert) steps.push("medcert");
+    if (extractedReferral) steps.push("referral");
+    steps.push("schedule", "invoice", "vula");
+    setPostSessionQueue(steps);
+    setPostSessionIndex(0);
+    setShowPostSessionFlow(true);
 
-  const handleFollowUpDone = useCallback(() => {
-    setShowVisitCategoryDialog(true);
-  }, []);
+  }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, patientId, currentPatient]);
 
   // Callback to handle session completion after transcription
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
@@ -694,16 +704,17 @@ export default function Sessions() {
 
     setSessionState("completed");
     pendingCompletionRef.current = false;
-  }, [completeSession, patientId, advanceToFollowUp, generateAllDocuments]);
+  }, [completeSession, patientId, generateAllDocuments]);
 
-  // Visit-category dialog now runs at the END of the post-session chain (Vula award)
+  // Visit-category dialog runs as the final step of the post-session queue (Vula award).
+  // PostSessionStepDialog calls onFinish() itself right after this resolves.
   const handleVisitCategoryConfirm = async (categories: string[] | null) => {
-    setShowVisitCategoryDialog(false);
-    if (!categories || categories.length === 0 || !currentSessionId) return;
-    // Persist visit categories to the already-created session
-    try {
-      await (supabase.from('sessions').update({ visit_category: categories[0] } as any) as any).eq('id', currentSessionId);
-    } catch (e) { console.error(e); }
+    if (categories && categories.length > 0 && currentSessionId) {
+      // Persist visit categories to the already-created session
+      try {
+        await (supabase.from('sessions').update({ visit_category: categories[0] } as any) as any).eq('id', currentSessionId);
+      } catch (e) { console.error(e); }
+    }
   };
 
   const { 
@@ -1065,32 +1076,38 @@ export default function Sessions() {
         }}
         onContinue={() => {
           setShowGeneratedDocsDialog(false);
-          advanceToFollowUp();
         }}
       />
 
-      {/* Visit Category Dialog */}
-      <VisitCategoryDialog
-        open={showVisitCategoryDialog}
-        onOpenChange={setShowVisitCategoryDialog}
-        onConfirm={handleVisitCategoryConfirm}
-        patientName={currentPatient?.name}
-        transcript={pendingTranscript}
-      />
-
-      {/* Follow-up Appointment Dialog (after documents, before Vula award) */}
-      {currentPatient && doctorIdRef.current && (
-        <FollowUpAppointmentDialog
-          open={showFollowUpDialog}
-          onOpenChange={setShowFollowUpDialog}
+      {/* Sequential post-session flow — one step at a time: generated documents,
+          then schedule follow-up, then invoice, then Award Vula. */}
+      {showPostSessionFlow && postSessionQueue.length > 0 && (
+        <PostSessionStepDialog
+          queue={postSessionQueue}
+          index={postSessionIndex}
+          documents={generatedDocs}
+          onSend={async (doc) => {
+            const ok = await sendDeliveryDocument({ documentId: doc.documentId, recipientEmail: doc.recipientEmail });
+            if (ok) {
+              await completeSessionTodo(doc.label);
+              setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, sent: true } : d)));
+            }
+          }}
+          onSaveEdit={async (doc, newContent) => {
+            if (doc.documentId) {
+              await supabase.from('documents').update({ content: newContent } as any).eq('id', doc.documentId);
+            }
+            setGeneratedDocs((prev) => prev.map((d) => (d.key === doc.key ? { ...d, content: newContent } : d)));
+          }}
+          onAdvance={advancePostSession}
+          onFinish={() => setShowPostSessionFlow(false)}
+          currentPatient={currentPatient ? { id: currentPatient.id, name: currentPatient.name, patient_user_id: (currentPatient as any).patient_user_id || null } : null}
           doctorId={doctorIdRef.current}
           doctorName={doctorName}
-          patientId={currentPatient.id}
-          patientUserId={(currentPatient as any).patient_user_id || null}
-          patientName={currentPatient.name}
-          suggestedDate={extractedFollowUp?.follow_up_date}
-          suggestedTime={extractedFollowUp?.follow_up_time}
-          onDone={handleFollowUpDone}
+          extractedFollowUp={extractedFollowUp}
+          patientName={currentPatient?.name}
+          transcript={pendingTranscript}
+          onVulaConfirm={handleVisitCategoryConfirm}
         />
       )}
 
@@ -1383,19 +1400,6 @@ export default function Sessions() {
               </div>
             )}
 
-            {/* Personal Notes — private to the doctor, same body font as the other frames. */}
-            <div className="border-t p-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-sm font-semibold text-foreground">Personal Notes</p>
-                <span className="text-[10px] text-muted-foreground">Private</span>
-              </div>
-              <Textarea
-                value={personalNotes}
-                onChange={(e) => setPersonalNotes(e.target.value)}
-                placeholder="Jot down private thoughts for yourself..."
-                className="min-h-[90px] resize-y text-sm p-2"
-              />
-            </div>
           </div>
 
           {/* Column 2 — Patient Overview (DISC at top), Live AI Clinician, then AI Clinician Notes. */}
@@ -1487,6 +1491,10 @@ export default function Sessions() {
                   <FileText className="h-3.5 w-3.5" />
                   AI Clinician Notes
                 </TabsTrigger>
+                <TabsTrigger value="personal" className="gap-1.5 text-xs">
+                  <Lock className="h-3.5 w-3.5" />
+                  Personal Notes
+                </TabsTrigger>
                 <TabsTrigger value="drawing" className="gap-1.5 text-xs">
                   <PenTool className="h-3.5 w-3.5" />
                   Drawing Pad
@@ -1510,6 +1518,21 @@ export default function Sessions() {
                     </p>
                   }
                 />
+              </TabsContent>
+
+              <TabsContent value="personal" className="mt-0">
+                <div className="rounded-xl border border-primary bg-card shadow-sm p-3">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-sm font-semibold text-foreground">Personal Notes</p>
+                    <span className="text-[10px] text-muted-foreground">Private</span>
+                  </div>
+                  <Textarea
+                    value={personalNotes}
+                    onChange={(e) => setPersonalNotes(e.target.value)}
+                    placeholder="Jot down private thoughts for yourself..."
+                    className="min-h-[220px] resize-y text-sm p-2"
+                  />
+                </div>
               </TabsContent>
 
               <TabsContent value="drawing" className="mt-0">

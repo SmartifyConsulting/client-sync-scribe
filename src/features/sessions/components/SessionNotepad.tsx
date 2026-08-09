@@ -55,14 +55,26 @@ export function SessionNotepad({
       <div className="p-3">
         {showColumns ? (
           <div className="columns-1 md:columns-2 xl:columns-4 gap-4 [column-fill:balance]">
-            {lines.map((line, i) => (
-              <p
-                key={i}
-                className="mb-2 break-inside-avoid text-sm text-foreground leading-relaxed"
-              >
-                {line}
-              </p>
-            ))}
+            {lines.map((line, i) => {
+              const match = line.match(/^([^:]{2,30}):\s*(.+)$/);
+              if (match) {
+                const [, heading, content] = match;
+                return (
+                  <div key={i} className="mb-2 break-inside-avoid">
+                    <p className="font-semibold text-foreground text-sm mt-3 mb-1">{heading}</p>
+                    <p className="text-sm text-foreground leading-relaxed mb-2">{content}</p>
+                  </div>
+                );
+              }
+              return (
+                <p
+                  key={i}
+                  className="mb-2 break-inside-avoid text-sm text-foreground leading-relaxed"
+                >
+                  {line}
+                </p>
+              );
+            })}
           </div>
         ) : (
           <Textarea

@@ -243,6 +243,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // AI Analysis state
   const [docGroupBy, setDocGroupBy] = useState<"date" | "type">("date");
@@ -432,8 +433,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     setMediaTitle("");
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const processFile = (file: globalThis.File) => {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
       toast({
@@ -458,6 +458,22 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     setRecordedUrl(URL.createObjectURL(file));
     if (!mediaTitle) setMediaTitle(file.name.replace(/\.[^/.]+$/, ""));
   };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+  };
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files?.[0];
+      if (file) processFile(file);
+    },
+    [mediaTitle, patientIds, patientName, user],
+  );
 
   const handleImageUpload = async (file: globalThis.File) => {
     if (!patientIds[0]) return;
@@ -906,19 +922,42 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : filteredDocs.length === 0 ? (
-        <Card>
+        <Card
+          className={cn(
+            "border-2 border-dashed transition-colors",
+            isDragging && "border-primary bg-primary/5",
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+        >
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <FileText className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-1">
               {filter === "all" ? t("patientDocuments.noDocuments") : "No matching documents"}
             </h3>
             <p className="text-muted-foreground text-sm">
-              Documents generated during your consultations will appear here.
+              Documents generated during your consultations will appear here. Drag & drop a file here, or use Add above, to upload one.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <div key={docGroupBy} className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
+        <div
+          key={docGroupBy}
+          className={cn(
+            "patient-section-frame rounded-xl border overflow-hidden divide-y divide-white transition-colors",
+            isDragging ? "border-2 border-dashed border-primary bg-primary/5" : "border-neutral-400 bg-white",
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+        >
           {patientDocGroups.map((group) => (
             <Collapsible key={group.key} defaultOpen={defaultOpenDocGroup.includes(group.key)} className="bg-white overflow-hidden">
               <SectionHeader icon={FileText} label={group.label} extra={<SectionCountPill count={group.items.length} />} />

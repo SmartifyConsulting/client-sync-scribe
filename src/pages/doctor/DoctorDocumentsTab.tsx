@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Loader2, Search, User, Clock, Plus } from "lucide-react";
+import { FileText, Loader2, Search, User, Clock, Plus, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,6 +30,7 @@ import {
 import { useDocuments } from "@/hooks/useDocuments";
 import { useTemplates } from "@/hooks/useTemplates";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { UploadDocumentDialog } from "@/features/documents/UploadDocumentDialog";
 import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
 import { format } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
@@ -93,11 +94,12 @@ function DocumentCard({ doc }: { doc: DocRow }) {
 export default function DoctorDocumentsTab() {
   // Documents where the doctor is themself the patient are covered by the My Profile
   // view now, so this list is just every practice document — no owner filter needed.
-  const { documents, loading } = useDocuments(undefined, { allOwners: true });
+  const { documents, loading, fetchDocuments } = useDocuments(undefined, { allOwners: true });
   const { templates } = useTemplates();
   const [q, setQ] = useState("");
   const [groupMode, setGroupMode] = useState<GroupMode>("date");
   const [selectedTemplate, setSelectedTemplate] = useState<(typeof templates)[number] | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -222,6 +224,15 @@ export default function DoctorDocumentsTab() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-xs"
+            onClick={() => setUploadOpen(true)}
+          >
+            <Upload className="h-4 w-4" />
+            Upload File
+          </Button>
         </div>
       </div>
 
@@ -313,6 +324,12 @@ export default function DoctorDocumentsTab() {
           onSave={() => setSelectedTemplate(null)}
         />
       )}
+
+      <UploadDocumentDialog
+        open={uploadOpen}
+        onOpenChange={setUploadOpen}
+        onUploaded={fetchDocuments}
+      />
     </div>
   );
 }

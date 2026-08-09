@@ -152,6 +152,22 @@ export default {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        "plane-send": {
+          "0%": { transform: "translate(-40px, 10px) rotate(-8deg)", opacity: "0" },
+          "15%": { opacity: "1" },
+          "85%": { opacity: "1" },
+          "100%": { transform: "translate(40px, -10px) rotate(-8deg)", opacity: "0" },
+        },
+        "disk-save": {
+          "0%": { transform: "scale(0.9) rotate(0deg)", opacity: "0.6" },
+          "50%": { transform: "scale(1.05) rotate(180deg)", opacity: "1" },
+          "100%": { transform: "scale(1) rotate(360deg)", opacity: "1" },
+        },
+        "calendar-check": {
+          "0%": { transform: "scale(0.85)", opacity: "0.5" },
+          "60%": { transform: "scale(1.08)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -163,6 +179,9 @@ export default {
         "scale-in": "scale-in 0.2s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
         shimmer: "shimmer 2s infinite linear",
+        "plane-send": "plane-send 1s ease-in-out forwards",
+        "disk-save": "disk-save 1s ease-in-out forwards",
+        "calendar-check": "calendar-check 1s ease-out forwards",
       },
       transitionDuration: {
         "400": "400ms",
