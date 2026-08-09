@@ -35,7 +35,14 @@ Note: item 2 (PDF attachment) applies to sending a document to a patient/pharmac
 - Change so a previously connected doctor keeps read-only visibility of the records from the period they were connected (sessions, documents, prescriptions, notes), while losing ongoing/live access and the ability to add anything new.
 - The patient keeps everything, and newly connected doctors continue to see the full history.
 
+## 6. Only doctors earn a patient Vulas for weigh-ins
+
+- A weigh-in only awards Vulas when a **doctor** records it for the patient.
+- Patients logging or committing a weight change themselves (including in Biolog) still updates their weight history and charts, but earns no Vulas.
+- The weigh-in card shows clearly whether an entry is doctor-recorded (rewarded) or self-recorded (not rewarded).
+
 ## Technical notes
+
 
 - Extract a shared `renderDocumentHtml()` that produces the same markup/inline styles as `DocumentCanvas` (header/footer grids, font family, sizes, logo). Use it for the email body in `send-document-email` payloads instead of the plain-text wrapper.
 - Generate the PDF client-side from the same rendered node (`html2canvas` + existing `jspdf` dependency), base64-encode it, and pass it as `attachments` on the send payload. Extend `_shared/email.ts` `SendEmailInput` with `attachments: { filename, content (base64) }[]` and forward to Resend; extend `send-document-email` to accept and pass them through. `SendDocumentButton` gains the rendered HTML + PDF producers so all editors get the behaviour at once.
