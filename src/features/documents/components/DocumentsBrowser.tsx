@@ -155,7 +155,9 @@ export function DocumentsBrowser({
             continue;
           }
 
-          const path = `${patientId || user.id}/${Date.now()}-${file.name}`;
+          // Storage RLS requires the first folder to be the uploader's user id.
+          const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
+          const path = `${user.id}/${patientId || "self"}/${Date.now()}-${safeName}`;
           const { error: uploadError } = await supabase.storage
             .from("patient-media")
             .upload(path, file, { upsert: true });
