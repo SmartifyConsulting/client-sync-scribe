@@ -13,6 +13,7 @@ This is the canonical styling reference for the Holarc Health app (repo: `proflo
 2. Look up the matching pattern below and copy the `className` string exactly.
 3. If an element on the screen you're auditing doesn't match, flag the diff and propose the exact replacement className — don't just say "make it more consistent."
 4. If you hit a case not covered here (a new element type), don't guess — extend this document with the new pattern once it's agreed with the user, rather than silently inventing a one-off style.
+5. **When auditing "the app" or "all screens", search the whole `src/` tree** — don't scope to `src/pages/` alone. Several screens live under `src/modules/holarchelp/` (a separate module directory, e.g. `MyShiftScreen.tsx`) and possibly other module folders. A directory-limited grep will silently miss these; confirm scope covers everywhere a route/page component can live before declaring an audit complete.
 
 ---
 
@@ -85,7 +86,7 @@ There's a second, unrelated grey-frame pattern used for other accordion grouping
 ```
 rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white
 ```
-Use the `border-primary`/`bg-card` record-card pattern (above) for patient clinical record lists (Allergies/Medications/Conditions-style content). Use the `section-accordion.tsx` grey-frame pattern only for the kind of grouped-settings accordions it's already used for elsewhere (e.g. Practice Information) — don't mix the two for the same purpose.
+Use the `border-primary`/`bg-card` record-card pattern (above) for patient clinical record lists (Allergies/Medications/Conditions-style content). Use the `section-accordion.tsx` grey-frame pattern for grouped-settings accordions (e.g. Practice Information) AND for static header-bar list panels — a title bar row plus a plain (non-collapsible) `divide-y` list, e.g. "Upcoming shifts" / "My patients" on My Shift (`src/modules/holarchelp/pages/provider/hospital/MyShiftScreen.tsx`) — since both share the same visual frame even though one collapses and the other doesn't. Don't mix either grey-frame use with the primary-bordered record cards.
 
 ---
 

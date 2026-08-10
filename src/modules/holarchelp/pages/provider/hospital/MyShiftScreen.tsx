@@ -49,10 +49,10 @@ export default function MyShiftScreen() {
     <div className="space-y-4">
       <header>
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
-        <h1 className="text-2xl font-extrabold">My shift</h1>
+        <h1 className="text-3xl font-bold text-foreground">My shift</h1>
       </header>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
+      <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
         <div className="border-b bg-muted/40 px-3 py-2 text-xs font-bold uppercase tracking-wider">Upcoming & current shifts</div>
         <ul className="divide-y">
           {shifts.map((s) => {
@@ -79,7 +79,7 @@ export default function MyShiftScreen() {
         </ul>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
+      <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
         <div className="border-b bg-muted/40 px-3 py-2 text-xs font-bold uppercase tracking-wider">My patients</div>
         <ul className="divide-y">
           {myPatients.map(({ patient, tasks, isDoctor }) => (
