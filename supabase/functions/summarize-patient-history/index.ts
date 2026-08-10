@@ -33,7 +33,7 @@ serve(async (req) => {
       );
     }
 
-    const { patient, sessions, language } = await req.json();
+    const { patient, sessions, language, historicalRecords } = await req.json();
     
     if (!patient) {
       return new Response(
@@ -53,6 +53,12 @@ serve(async (req) => {
       ?.map((s: any) => `- Date: ${s.started_at} | Summary: ${s.summary || 'No summary available'} | Transcript: ${s.transcript || 'No transcript'}`)
       ?.join('\n') || 'No completed sessions yet.';
 
+    const historicalContext = Array.isArray(historicalRecords) && historicalRecords.length > 0
+      ? historicalRecords
+          .map((r: any) => `- Record date: ${r.record_date || r.created_at || 'Unknown'} | ${r.name || 'Historical record'}: ${(r.content || '').slice(0, 4000)}`)
+          .join('\n')
+      : 'No historical paper records transcribed.';
+
     const patientContext = `
 Patient Name: ${patient.name}
 Date of Birth: ${patient.dob || 'Unknown'}
@@ -66,6 +72,9 @@ Allergies: ${patient.allergies || 'None recorded'}
 
 Session History (with dates):
 ${sessionSummaries}
+
+Retrospective / historical records (transcribed handwritten or paper notes — place these on the timeline by their record date, not by upload date):
+${historicalContext}
 `;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
