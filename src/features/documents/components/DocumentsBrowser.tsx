@@ -192,6 +192,7 @@ export function DocumentsBrowser({
               if (!error && data?.text) {
                 content = data.text;
                 transcribed = true;
+                setProgress({ stage: "extracting", percent: 75, ...meta });
                 if (patientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
               }
             } catch {
@@ -221,14 +222,15 @@ export function DocumentsBrowser({
         toast({ title: "Upload complete" });
         fetchDocuments();
       } catch (err: any) {
-        toast({
-          title: "Upload failed",
-          description: err?.message || "Could not upload the file",
-          variant: "destructive",
-        });
+        const message = err?.message || "Could not upload the file";
+        setProgress((prev) => ({ ...prev, stage: "error", message }));
+        toast({ title: "Upload failed", description: message, variant: "destructive" });
       } finally {
         setUploading(false);
-        setTimeout(() => setProgress({ stage: "idle", percent: 0 }), 1500);
+        setTimeout(
+          () => setProgress((prev) => (prev.stage === "error" ? prev : { stage: "idle", percent: 0 })),
+          1800,
+        );
       }
     },
     [patientId, patientName, recordDate, toast, fetchDocuments],
@@ -319,7 +321,10 @@ export function DocumentsBrowser({
           patientId={patientId}
           history={pendingHistory}
           recordDate={recordDate || undefined}
-          onApplied={() => setPendingHistory(null)}
+          onApplied={() => {
+            setPendingHistory(null);
+            fetchDocuments();
+          }}
         />
       )}
 
