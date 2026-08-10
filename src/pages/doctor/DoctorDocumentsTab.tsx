@@ -63,7 +63,7 @@ function DocumentCard({ doc }: { doc: DocRow }) {
             </p>
             <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
               {doc.patient_name && (
-                <span className={cn("flex items-center gap-1", sample && "italic")}>
+                <span className="flex items-center gap-1">
                   <User className="h-3 w-3" />
                   {doc.patient_name}
                   {sample && <SampleBadge />}

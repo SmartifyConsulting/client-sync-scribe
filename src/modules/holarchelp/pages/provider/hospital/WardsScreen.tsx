@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
+import { SECTION_FRAME_CLASS, SECTION_ITEM_CLASS, SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
 import { useToast } from "@/hooks/use-toast";
 import { BedDouble, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -98,8 +98,7 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
-          <h1 className="text-2xl font-extrabold">{title}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{title}</h1>
           <p className="text-xs text-muted-foreground">
             {totals.occupied} of {totals.capacity} beds occupied across {wards.length} wards
           </p>
@@ -107,14 +106,14 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
         {providerId && <WardForm hospitalId={providerId} onSaved={reload} defaultWardType={wardType} />}
       </header>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        <Accordion type="multiple" className="divide-y">
+      <div className={SECTION_FRAME_CLASS}>
+        <Accordion type="multiple">
           {wards.map((ward, i) => {
             const patients = inpatients.filter((p) => p.ward_id === ward.id && p.status !== "discharged");
             const staff = onShiftNow.filter((s) => s.ward_id === ward.id);
             const pct = ward.bed_capacity ? Math.min(100, (ward.occupied / ward.bed_capacity) * 100) : 0;
             return (
-              <AccordionItem key={ward.id} value={ward.id} className="border-0">
+              <AccordionItem key={ward.id} value={ward.id} className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <div className="flex w-full items-center gap-3 pr-3">
                     <BedDouble className="h-4 w-4 shrink-0" />

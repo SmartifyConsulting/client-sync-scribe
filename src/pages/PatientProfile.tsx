@@ -299,15 +299,11 @@ export default function PatientProfile() {
               {initials}
             </div>
             <div>
-              <h1 className={cn("text-3xl font-bold tracking-tight text-foreground flex items-center gap-2", isSamplePatient(patient) && "italic")}>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
                 {patient.name}
                 <div className={cn("h-2.5 w-2.5 rounded-full flex-shrink-0", patient.status === "active" ? "bg-emerald-500" : "bg-red-400")} />
+                {isSamplePatient(patient) && <SampleBadge size="md" />}
               </h1>
-              {isSamplePatient(patient) && (
-                <div className="mt-1">
-                  <SampleBadge size="md" />
-                </div>
-              )}
 
               <div className="flex flex-wrap items-center gap-3 text-base text-muted-foreground mt-1">
                 {patient.email && (
@@ -420,12 +416,6 @@ export default function PatientProfile() {
             className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
           >
             {t("patientProfile.tabSessions")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="biolog"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
-          >
-            Biolog
           </TabsTrigger>
           <TabsTrigger
             value="admissions"

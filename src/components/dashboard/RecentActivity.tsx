@@ -148,7 +148,7 @@ export function RecentActivity() {
                       {activity.title}
                     </Link>
                     {activity.patientId && activity.patientName ? (
-                      <p className={cn("text-xs text-muted-foreground truncate inline-flex items-center gap-1", isSamplePatient({ name: activity.patientName }) && "italic")}>
+                      <p className="text-xs text-muted-foreground truncate inline-flex items-center gap-1">
                         {activity.patientName}
                         {isSamplePatient({ name: activity.patientName }) && <SampleBadge />}
                       </p>

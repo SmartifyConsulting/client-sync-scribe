@@ -5131,6 +5131,7 @@ export type Database = {
         Row: {
           address: string | null
           allergies: string | null
+          allergies_structured: Json | null
           blood_type: string | null
           chronic_medications: string | null
           claims_email: string | null
@@ -5195,6 +5196,7 @@ export type Database = {
         Insert: {
           address?: string | null
           allergies?: string | null
+          allergies_structured?: Json | null
           blood_type?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
@@ -5259,6 +5261,7 @@ export type Database = {
         Update: {
           address?: string | null
           allergies?: string | null
+          allergies_structured?: Json | null
           blood_type?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
@@ -5794,6 +5797,7 @@ export type Database = {
           narration_voice: string | null
           notify_contacts_on_missed_meds: boolean
           notify_contacts_on_taken_meds: boolean
+          banking_details: string | null
           practice_address: string | null
           practice_color: string | null
           practice_number: string | null
@@ -5833,6 +5837,7 @@ export type Database = {
           mailbox_id?: string
           mfa_required?: boolean
           mobile_number?: string | null
+          banking_details?: string | null
           narration_voice?: string | null
           notify_contacts_on_missed_meds?: boolean
           notify_contacts_on_taken_meds?: boolean
@@ -5875,6 +5880,7 @@ export type Database = {
           mailbox_id?: string
           mfa_required?: boolean
           mobile_number?: string | null
+          banking_details?: string | null
           narration_voice?: string | null
           notify_contacts_on_missed_meds?: boolean
           notify_contacts_on_taken_meds?: boolean

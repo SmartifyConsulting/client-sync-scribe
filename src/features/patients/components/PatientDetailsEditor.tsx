@@ -79,6 +79,7 @@ import {
   NextOfKinMember,
   CurrentMedication,
   ConditionDiagnosis,
+  Allergy,
 } from "@/hooks/usePatients";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -546,6 +547,15 @@ export function PatientDetailsEditor({
     status: "active" as "active" | "resolved",
   });
   const [editingConditionId, setEditingConditionId] = useState<string | null>(null);
+  const [allergiesStructured, setAllergiesStructured] = useState<Allergy[]>([]);
+  const [showAddAllergy, setShowAddAllergy] = useState(false);
+  const [newAllergy, setNewAllergy] = useState({
+    name: "",
+    severity: "mild" as "mild" | "moderate" | "severe",
+    reaction: "",
+    date_identified: "",
+  });
+  const [editingAllergyId, setEditingAllergyId] = useState<string | null>(null);
   const [gpSearchResults, setGpSearchResults] = useState<any[]>([]);
   const [gpSearchOpen, setGpSearchOpen] = useState(false);
   const [gpSearchTerm, setGpSearchTerm] = useState("");
@@ -657,6 +667,7 @@ export function PatientDetailsEditor({
       setNokMembers(patient.next_of_kin_members || []);
       setCurrentMedications(patient.current_medications || []);
       setConditionsDiagnoses(patient.conditions_diagnoses || []);
+      setAllergiesStructured(patient.allergies_structured || []);
       const existingPharmacies = patient.pharmacies || [];
       if (existingPharmacies.length === 0 && (patient.pharmacy_name || patient.pharmacy_email)) {
         setPharmacies([
@@ -811,6 +822,7 @@ export function PatientDetailsEditor({
         next_of_kin_members: nokMembers,
         current_medications: currentMedications,
         conditions_diagnoses: conditionsDiagnoses,
+        allergies_structured: allergiesStructured,
         is_chronic: isChronic,
       } as any);
       // Sync chronic meds → prescriptions so they appear under Rewards
@@ -819,7 +831,7 @@ export function PatientDetailsEditor({
       setHasChanges(false);
       setLastSavedAt(Date.now());
     },
-    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, syncChronicMedsToPrescriptions, patient?.id, toast],
+    [onSave, pharmacies, familyHistory, organDonorOrgans, nokMembers, currentMedications, conditionsDiagnoses, allergiesStructured, syncChronicMedsToPrescriptions, patient?.id, toast],
   );
 
   useEffect(() => {
@@ -841,6 +853,7 @@ export function PatientDetailsEditor({
     nokMembers,
     currentMedications,
     conditionsDiagnoses,
+    allergiesStructured,
     isEditing,
     hasChanges,
     performSave,
@@ -1161,6 +1174,55 @@ export function PatientDetailsEditor({
     setShowAddCondition(true);
   };
 
+  // Allergies handlers
+  const handleAddAllergy = () => {
+    if (!newAllergy.name.trim()) {
+      toast({ title: "Required", description: "Allergy name is required", variant: "destructive" });
+      return;
+    }
+    if (editingAllergyId) {
+      setAllergiesStructured((prev) =>
+        prev.map((a) =>
+          a.id === editingAllergyId
+            ? {
+                ...a,
+                name: newAllergy.name.trim(),
+                severity: newAllergy.severity,
+                reaction: newAllergy.reaction.trim() || undefined,
+                date_identified: newAllergy.date_identified || undefined,
+              }
+            : a,
+        ),
+      );
+      setEditingAllergyId(null);
+    } else {
+      setAllergiesStructured((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          name: newAllergy.name.trim(),
+          severity: newAllergy.severity,
+          reaction: newAllergy.reaction.trim() || undefined,
+          date_identified: newAllergy.date_identified || undefined,
+        },
+      ]);
+    }
+    setNewAllergy({ name: "", severity: "mild", reaction: "", date_identified: "" });
+    setShowAddAllergy(false);
+    setHasChanges(true);
+  };
+
+  const handleEditAllergy = (a: Allergy) => {
+    setNewAllergy({
+      name: a.name,
+      severity: a.severity,
+      reaction: a.reaction || "",
+      date_identified: a.date_identified || "",
+    });
+    setEditingAllergyId(a.id);
+    setShowAddAllergy(true);
+  };
+
   const handleToggleMedChronic = (id: string) => {
     setCurrentMedications((prev) => prev.map((m) => (m.id === id ? { ...m, is_chronic: !m.is_chronic } : m)));
     setHasChanges(true);
@@ -1237,6 +1299,7 @@ export function PatientDetailsEditor({
     setNokMembers(patient.next_of_kin_members || []);
     setCurrentMedications(patient.current_medications || []);
     setConditionsDiagnoses(patient.conditions_diagnoses || []);
+    setAllergiesStructured(patient.allergies_structured || []);
     setIsEditing(false);
   };
 
@@ -1861,7 +1924,39 @@ export function PatientDetailsEditor({
                         <h4 className="text-xs font-semibold text-foreground tracking-wide flex items-center gap-1.5">
                           <AlertCircle className="h-3.5 w-3.5" /> Allergies
                         </h4>
-                        <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                        {allergiesStructured.length > 0 ? (
+                          <div className="space-y-1">
+                            {allergiesStructured.map((a) => (
+                              <div key={a.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-foreground">{a.name}</p>
+                                    {(a.reaction || a.date_identified) && (
+                                      <p className="text-xs text-muted-foreground">
+                                        {a.reaction || ""}
+                                        {a.reaction && a.date_identified ? " · " : ""}
+                                        {a.date_identified ? format(new Date(a.date_identified), "MMM d, yyyy") : ""}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Badge
+                                    className={`text-xs border-0 ${
+                                      a.severity === "severe"
+                                        ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                                        : a.severity === "moderate"
+                                          ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
+                                          : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                    }`}
+                                  >
+                                    {a.severity.charAt(0).toUpperCase() + a.severity.slice(1)}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-foreground">{patient.allergies || "None recorded"}</p>
+                        )}
                       </div>
 
                       {/* Medication */}
@@ -2899,17 +2994,158 @@ export function PatientDetailsEditor({
                   <CollapsibleContent className="px-3 pb-3 space-y-3">
                     {/* Allergies */}
                     <div className="rounded-lg border border-border/50 p-2.5 space-y-2">
-                      <Label className="text-sm font-semibold tracking-wide flex items-center gap-1.5">
-                        <AlertCircle className="h-3.5 w-3.5" /> Allergies
-                      </Label>
-                      <Textarea
-                        id="allergies"
-                        className="text-sm"
-                        value={formData.allergies}
-                        onChange={(e) => updateFormData({ allergies: e.target.value })}
-                        placeholder="List any allergies (medications, food, etc.)"
-                        rows={2}
-                      />
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm font-semibold tracking-wide flex items-center gap-1.5">
+                          <AlertCircle className="h-3.5 w-3.5" /> Allergies
+                        </Label>
+                        {!showAddAllergy && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 text-xs h-8 px-3"
+                            onClick={() => setShowAddAllergy(true)}
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add
+                          </Button>
+                        )}
+                      </div>
+                      {showAddAllergy && (
+                        <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 mb-3 space-y-2">
+                          <div className={FIELD_GRID_2_CLASS}>
+                            <div className="space-y-1.5">
+                              <Label>Allergy *</Label>
+                              <Input
+                                className="text-sm"
+                                value={newAllergy.name}
+                                onChange={(e) => setNewAllergy((p) => ({ ...p, name: e.target.value }))}
+                                placeholder="e.g., Penicillin"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label>Severity</Label>
+                              <Select
+                                value={newAllergy.severity}
+                                onValueChange={(v) =>
+                                  setNewAllergy((p) => ({ ...p, severity: v as "mild" | "moderate" | "severe" }))
+                                }
+                              >
+                                <SelectTrigger className="text-sm">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="mild">Mild</SelectItem>
+                                  <SelectItem value="moderate">Moderate</SelectItem>
+                                  <SelectItem value="severe">Severe</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label>Reaction</Label>
+                              <Input
+                                className="text-sm"
+                                value={newAllergy.reaction}
+                                onChange={(e) => setNewAllergy((p) => ({ ...p, reaction: e.target.value }))}
+                                placeholder="e.g., Rash, swelling"
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label>Date Identified</Label>
+                              <Input
+                                className="text-sm"
+                                type="date"
+                                value={newAllergy.date_identified}
+                                onChange={(e) => setNewAllergy((p) => ({ ...p, date_identified: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-xs h-7"
+                              onClick={() => {
+                                setShowAddAllergy(false);
+                                setEditingAllergyId(null);
+                                setNewAllergy({ name: "", severity: "mild", reaction: "", date_identified: "" });
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                            <Button size="sm" className="text-xs h-7" onClick={handleAddAllergy}>
+                              {editingAllergyId ? "Save" : "Add"}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                      {allergiesStructured.length === 0 ? (
+                        <p className="text-xs text-muted-foreground">No allergies recorded</p>
+                      ) : (
+                        <div className="space-y-1">
+                          {allergiesStructured.map((a) => (
+                            <div
+                              key={a.id}
+                              className="flex items-center justify-between p-1.5 rounded-lg bg-primary/5 border border-primary/20"
+                            >
+                              <div>
+                                <p className="text-xs font-medium text-foreground">{a.name}</p>
+                                {(a.reaction || a.date_identified) && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {a.reaction || ""}
+                                    {a.reaction && a.date_identified ? " · " : ""}
+                                    {a.date_identified ? format(new Date(a.date_identified), "MMM d, yyyy") : ""}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <Badge
+                                  className={`text-xs border-0 ${
+                                    a.severity === "severe"
+                                      ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                                      : a.severity === "moderate"
+                                        ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
+                                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                  }`}
+                                >
+                                  {a.severity.charAt(0).toUpperCase() + a.severity.slice(1)}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => handleEditAllergy(a)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-destructive"
+                                  onClick={() => {
+                                    setAllergiesStructured((prev) => prev.filter((x) => x.id !== a.id));
+                                    setHasChanges(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="pt-2 border-t border-border/40">
+                        <Label htmlFor="allergies" className="text-xs text-muted-foreground">
+                          Additional notes (legacy free-text)
+                        </Label>
+                        <Textarea
+                          id="allergies"
+                          className="text-xs mt-1"
+                          value={formData.allergies}
+                          onChange={(e) => updateFormData({ allergies: e.target.value })}
+                          placeholder="Any older free-text allergy notes"
+                          rows={2}
+                        />
+                      </div>
                     </div>
 
                     {/* Medication */}

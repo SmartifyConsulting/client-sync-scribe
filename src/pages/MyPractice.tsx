@@ -31,6 +31,7 @@ import {
   Palette,
   Sparkles,
   Info,
+  Landmark,
 } from "lucide-react";
 
 import ReferralDoctors from "@/pages/ReferralDoctors";
@@ -441,6 +442,7 @@ export default function MyPractice() {
     specialty: "",
     mobile_number: "",
     country_code: "+27",
+    banking_details: "",
   });
 
   // ── Signature form state (auto-save) ──
@@ -600,6 +602,7 @@ export default function MyPractice() {
         specialty: (profile as any).specialty || "",
         mobile_number: mobileNumber,
         country_code: countryCode,
+        banking_details: (profile as any).banking_details || "",
       };
       isSettingFromProfile.current = true;
       profileLoadedData.current = newFormData;
@@ -667,6 +670,7 @@ export default function MyPractice() {
         practice_address: formData.practice_address,
         specialty: formData.specialty,
         mobile_number: fullMobileNumber,
+        banking_details: formData.banking_details,
       } as any);
       if (error) {
         setSavedStatus("idle");
@@ -1775,6 +1779,30 @@ export default function MyPractice() {
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
+              </AccordionContent>
+            </AccordionItem>
+
+           {/* Banking Details Accordion */}
+            <AccordionItem value="banking-details" className="border-0">
+              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+                <div className="flex items-center gap-2">
+                  <Landmark className="h-4 w-4 text-primary" />
+                  <h3 className="text-xs font-semibold text-primary-dark">Banking Details</h3>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className={SECTION_CONTENT_CLASS}>
+                <div className="space-y-1.5">
+                  <Label>Banking Details</Label>
+                  <Textarea
+                    value={formData.banking_details}
+                    onChange={(e) => setFormData({ ...formData, banking_details: e.target.value })}
+                    placeholder={"Bank Name:\nAccount Type:\nAccount Number:\nSWIFT Code:"}
+                    rows={4}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Used on invoices so patients know where to pay. Stored as free text — enter whichever of Bank Name, Account Type, Account Number and SWIFT Code apply to you.
+                  </p>
+                </div>
               </AccordionContent>
             </AccordionItem>
 

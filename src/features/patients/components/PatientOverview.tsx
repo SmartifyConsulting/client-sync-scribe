@@ -23,6 +23,13 @@ interface PatientOverviewProps {
     occupation?: string | null;
     notes?: string | null;
     allergies?: string | null;
+    allergies_structured?: Array<{
+      id: string;
+      name: string;
+      severity: "mild" | "moderate" | "severe";
+      reaction?: string;
+      date_identified?: string;
+    }> | null;
     is_chronic?: boolean | null;
     blood_type?: string | null;
     emergency_contact_name?: string | null;
@@ -744,7 +751,17 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3">
               <div className="flex flex-wrap gap-2">
-                {summaryData.allergies.length > 0 ? (
+                {patient.allergies_structured && patient.allergies_structured.length > 0 ? (
+                  patient.allergies_structured.map((allergy) => (
+                    <Badge
+                      key={allergy.id}
+                      variant="outline"
+                      className={`${getSeverityColor(allergy.severity)} capitalize`}
+                    >
+                      {allergy.name} ({allergy.severity})
+                    </Badge>
+                  ))
+                ) : summaryData.allergies.length > 0 ? (
                   summaryData.allergies.map((allergy, i) => (
                     <Badge
                       key={i}

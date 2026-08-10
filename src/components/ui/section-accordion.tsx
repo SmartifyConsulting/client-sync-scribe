@@ -6,16 +6,18 @@ import { isToday, differenceInCalendarDays } from "date-fns";
  * Shared styling for the flat "table frame" accordions used across
  * My Practice, My Sessions, My Tasks, Documents, Personal / Medical Information.
  *
- * Closed row  → white background, light grey hover.
+ * Closed row  → white background, green hover with white text.
  * Open row    → green (primary) background with EVERY descendant forced white,
  *               so inner labels/badges that carry their own colour classes
  *               (text-foreground, text-primary, ...) cannot override it.
  */
 export const SECTION_TRIGGER_CLASS = cn(
-  "group px-4 py-2 hover:no-underline border-0 rounded-none bg-transparent hover:bg-muted",
+  "group px-4 py-2 hover:no-underline border-0 rounded-none bg-transparent hover:!bg-primary hover:!text-white",
   "data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white",
   "[&[data-state=open]_*]:!text-white",
+  "[&:hover_*]:!text-white",
   "[&>svg]:group-data-[state=open]:!text-white",
+  "[&>svg]:group-hover:!text-white",
 );
 
 /**

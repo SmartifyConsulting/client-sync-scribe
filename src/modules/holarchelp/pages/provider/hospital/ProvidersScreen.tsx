@@ -22,14 +22,23 @@ export default function ProvidersScreen() {
   return (
     <div className="space-y-4">
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="doctors">
+        <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
+          <TabsTrigger
+            value="doctors"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+          >
             Doctors
           </TabsTrigger>
-          <TabsTrigger value="nurses">
+          <TabsTrigger
+            value="nurses"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+          >
             Nurses
           </TabsTrigger>
-          <TabsTrigger value="er">
+          <TabsTrigger
+            value="er"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+          >
             ER Providers
           </TabsTrigger>
         </TabsList>

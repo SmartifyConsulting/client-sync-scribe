@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { Activity, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { SECTION_FRAME_CLASS } from "@/components/ui/section-accordion";
 
 type Ev = { id: string; incident_id: string; event_type: string; payload: any; created_at: string };
 
@@ -42,11 +43,10 @@ export default function IncidentTimelineScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
-        <h1 className="text-2xl font-extrabold">{t("nav.incidentTimeline")}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("nav.incidentTimeline")}</h1>
       </header>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
+      <div className={SECTION_FRAME_CLASS}>
         <ul className="divide-y">
           {events.map((e) => (
             <li key={e.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40">

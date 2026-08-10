@@ -99,7 +99,7 @@ export default function InpatientsScreen() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-lg font-extrabold">Admissions</h2>
+          <h1 className="text-3xl font-bold text-foreground">Admissions</h1>
           <p className="text-xs text-muted-foreground">{filtered.length} {statusFilter}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -147,7 +147,7 @@ export default function InpatientsScreen() {
                   {group.rows.map((p) => {
                     const href = recordLink(p);
                     return (
-                      <AccordionItem key={p.id} value={p.id} className="rounded-xl border bg-card overflow-hidden">
+                      <AccordionItem key={p.id} value={p.id} className="rounded-xl border border-primary bg-card overflow-hidden">
                         <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-muted/50">
                           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pr-2 text-left">
                             <span className="text-sm font-semibold">
@@ -165,9 +165,12 @@ export default function InpatientsScreen() {
                                 {p.patient_name}
                               </Link>
                             ) : (
-                              <button type="button" onClick={() => setLogFor(p)} className="font-semibold text-primary hover:underline">
+                              <span
+                                className="font-semibold text-muted-foreground"
+                                title="Not linked to a patient profile"
+                              >
                                 {p.patient_name}
-                              </button>
+                              </span>
                             )}
                             {p.reason ? <span className="text-muted-foreground">· {p.reason}</span> : null}
                           </div>

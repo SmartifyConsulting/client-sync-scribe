@@ -117,13 +117,16 @@ export function UpcomingAppointments() {
                 {appointment.patientId ? (
                   <Link
                     to={`/patients/${appointment.patientId}`}
-                    className={cn("font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1", isSamplePatient({ name: appointment.patientName }) && "italic")}
+                    className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
                     {appointment.patientName}
                     {isSamplePatient({ name: appointment.patientName }) && <SampleBadge />}
                   </Link>
                 ) : (
-                  <span className={cn("font-medium text-foreground", isSamplePatient({ name: appointment.patientName }) && "italic")}>{appointment.patientName}</span>
+                  <span className="font-medium text-foreground inline-flex items-center gap-1">
+                    {appointment.patientName}
+                    {isSamplePatient({ name: appointment.patientName }) && <SampleBadge />}
+                  </span>
                 )}
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">

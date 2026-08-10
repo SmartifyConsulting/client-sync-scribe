@@ -1001,7 +1001,8 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               const footerId = (previewTemplate as any).footer_template_id || previewTemplate.header_footer_template_id;
               const linkedHeader = headerFooterTemplates.find((hf) => hf.id === headerId);
               const linkedFooter = headerFooterTemplates.find((hf) => hf.id === footerId);
-              return linkedHeader?.font_family || linkedFooter?.font_family || undefined;
+              const defaultHf = !linkedHeader && !linkedFooter ? headerFooterTemplates.find((hf) => hf.is_default) : undefined;
+              return linkedHeader?.font_family || linkedFooter?.font_family || defaultHf?.font_family || undefined;
             })()
           }
           headerFooter={resolveHeaderFooterTokens(
@@ -1010,6 +1011,10 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
               const footerId = (previewTemplate as any).footer_template_id || previewTemplate.header_footer_template_id;
               const linkedHeader = headerFooterTemplates.find((hf) => hf.id === headerId) || null;
               const linkedFooter = headerFooterTemplates.find((hf) => hf.id === footerId) || null;
+              if (!linkedHeader && !linkedFooter) {
+                const defaultHf = headerFooterTemplates.find((hf) => hf.is_default) || null;
+                return mergeHeaderFooterTemplates(defaultHf, defaultHf);
+              }
               return mergeHeaderFooterTemplates(linkedHeader, linkedFooter);
             })(),
             profile as any,

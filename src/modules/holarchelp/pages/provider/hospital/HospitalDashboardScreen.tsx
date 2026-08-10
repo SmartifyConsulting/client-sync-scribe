@@ -80,7 +80,7 @@ function StatCard({
           ? "text-success"
           : "text-foreground";
   return (
-    <div className="rounded-2xl border-2 border-primary bg-card px-4 py-3">
+    <div className="rounded-xl border border-primary bg-card px-4 py-3">
       <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
         {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
         {label}
@@ -97,7 +97,7 @@ function Panel({ icon: Icon, title, children, action }: {
   icon: typeof BedDouble; title: string; children: React.ReactNode; action?: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border-2 border-primary bg-card">
+    <section className="overflow-hidden rounded-xl border border-primary bg-card">
       <header className="flex items-center justify-between gap-2 bg-primary px-4 py-2.5">
         <span className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-white" />
@@ -179,8 +179,7 @@ export default function HospitalDashboardScreen() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
-          <h1 className="text-2xl font-extrabold">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
         </div>
         <div className="flex items-center gap-2">
           <Select value={wardFilter} onValueChange={setWardFilter}>

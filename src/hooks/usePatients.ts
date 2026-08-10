@@ -65,6 +65,14 @@ export interface ConditionDiagnosis {
   status: 'active' | 'resolved';
 }
 
+export interface Allergy {
+  id: string;
+  name: string;
+  severity: 'mild' | 'moderate' | 'severe';
+  reaction?: string;
+  date_identified?: string;
+}
+
 export interface Patient {
   id: string;
   user_id: string;
@@ -114,6 +122,7 @@ export interface Patient {
   next_of_kin_members: NextOfKinMember[] | null;
   current_medications: CurrentMedication[] | null;
   conditions_diagnoses?: ConditionDiagnosis[] | null;
+  allergies_structured?: Allergy[] | null;
   last_visit?: string | null;
   patient_user_id?: string | null;
 }
@@ -161,6 +170,12 @@ const parseConditionsDiagnoses = (data: Json | null): ConditionDiagnosis[] | nul
   return null;
 };
 
+const parseAllergiesStructured = (data: Json | null): Allergy[] | null => {
+  if (!data) return null;
+  if (Array.isArray(data)) return data as unknown as Allergy[];
+  return null;
+};
+
 // Helper to convert patient from DB to typed Patient
 const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   ...data,
@@ -170,12 +185,13 @@ const toPatient = (data: any, lastVisit?: string | null): Patient => ({
   next_of_kin_members: parseNOKMembers(data.next_of_kin_members),
   current_medications: parseCurrentMedications(data.current_medications),
   conditions_diagnoses: parseConditionsDiagnoses(data.conditions_diagnoses),
+  allergies_structured: parseAllergiesStructured(data.allergies_structured),
   last_visit: lastVisit ?? data.last_visit ?? null,
 });
 
 // Helper to prepare patient data for DB (convert surgeries/pharmacies to JSON)
 const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
-  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, next_of_kin_members, current_medications, conditions_diagnoses, ...rest } = updates as any;
+  const { surgeries, pharmacies, family_history, organ_donor_organs, last_visit, next_of_kin_members, current_medications, conditions_diagnoses, allergies_structured, ...rest } = updates as any;
   return {
     ...rest,
     ...(surgeries !== undefined ? { surgeries: surgeries as unknown as Json } : {}),
@@ -185,6 +201,7 @@ const toDbPatient = (updates: Partial<Patient>): Record<string, any> => {
     ...(next_of_kin_members !== undefined ? { next_of_kin_members: next_of_kin_members as unknown as Json } : {}),
     ...(current_medications !== undefined ? { current_medications: current_medications as unknown as Json } : {}),
     ...(conditions_diagnoses !== undefined ? { conditions_diagnoses: conditions_diagnoses as unknown as Json } : {}),
+    ...(allergies_structured !== undefined ? { allergies_structured: allergies_structured as unknown as Json } : {}),
   };
 };
 

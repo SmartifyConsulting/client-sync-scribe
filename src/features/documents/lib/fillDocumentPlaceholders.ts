@@ -20,8 +20,20 @@ export interface FillPatient {
   phone?: string | null;
   email?: string | null;
   allergies?: string | null;
+  allergies_structured?: Array<{ name: string; severity?: string | null }> | null;
   pharmacy_name?: string | null;
   claims_email?: string | null;
+}
+
+/** Formats structured allergies as a joined string, e.g. "Penicillin (severe), Peanuts (moderate)". */
+function formatAllergies(patient?: FillPatient | null): string {
+  const structured = patient?.allergies_structured;
+  if (structured && structured.length > 0) {
+    return structured
+      .map((a) => (a.severity ? `${a.name} (${a.severity})` : a.name))
+      .join(", ");
+  }
+  return patient?.allergies || "";
 }
 
 export interface FillProfile {
@@ -123,7 +135,7 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     DOB: patient?.dob || "",
     Phone: patient?.phone || "",
     Email: patient?.email || "",
-    Allergies: patient?.allergies || "",
+    Allergies: formatAllergies(patient),
     Pharmacy: patient?.pharmacy_name || "",
     ClaimsEmail: patient?.claims_email || "",
 

@@ -954,7 +954,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
                                 </Tooltip>
                               </TooltipProvider>
                             )}
-                            <span className={cn("font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap inline-flex items-center gap-1", isSamplePatient(patient) && "italic")}>
+                            <span className="font-medium text-xs text-foreground group-hover:text-primary transition-colors whitespace-nowrap inline-flex items-center gap-1">
                               {patient.name.includes(',') ? patient.name : (() => {
                                 const parts = patient.name.trim().split(/\s+/);
                                 if (parts.length <= 1) return patient.name;

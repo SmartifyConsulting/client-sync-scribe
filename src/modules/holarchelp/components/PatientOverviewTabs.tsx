@@ -22,6 +22,7 @@ type PatientRow = {
   emergency_contact_relationship: string | null;
   blood_type: string | null;
   allergies: string | null;
+  allergies_structured: Array<{ id: string; name: string; severity: string }> | null;
   chronic_medications: string | null;
   is_chronic: boolean | null;
   general_practitioner: string | null;
@@ -38,7 +39,8 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-const SUB_TAB = "gap-1.5 text-xs data-[state=active]:bg-primary data-[state=active]:text-white";
+const SUB_TAB =
+  "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5";
 
 /**
  * The bedside chart's Overview tab — mirrors the same information groupings
@@ -58,7 +60,7 @@ export function PatientOverviewTabs({ incidentId, patientId, patientName }: {
     let cancelled = false;
     supabase
       .from("patients" as any)
-      .select("id, name, dob, gender, id_passport_number, phone, email, physical_address, marital_status, occupation, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, blood_type, allergies, chronic_medications, is_chronic, general_practitioner, medical_aid, medical_aid_number")
+      .select("id, name, dob, gender, id_passport_number, phone, email, physical_address, marital_status, occupation, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, blood_type, allergies, allergies_structured, chronic_medications, is_chronic, general_practitioner, medical_aid, medical_aid_number")
       .eq("id", patientId)
       .maybeSingle()
       .then(({ data }) => { if (!cancelled) setPatient((data as any) ?? null); });
@@ -67,7 +69,7 @@ export function PatientOverviewTabs({ incidentId, patientId, patientName }: {
 
   return (
     <Tabs defaultValue="overview">
-      <TabsList className="flex-wrap h-auto gap-1">
+      <TabsList className="bg-neutral-600 flex-wrap h-auto gap-1">
         <TabsTrigger value="overview" className={SUB_TAB}><LayoutGrid className="h-3.5 w-3.5" /> Overview</TabsTrigger>
         <TabsTrigger value="personal" className={SUB_TAB}><User className="h-3.5 w-3.5" /> Personal Information</TabsTrigger>
         <TabsTrigger value="medical" className={SUB_TAB}><HeartPulse className="h-3.5 w-3.5" /> Medical Information</TabsTrigger>
@@ -106,7 +108,14 @@ export function PatientOverviewTabs({ incidentId, patientId, patientName }: {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Blood Type" value={patient.blood_type} />
-            <Field label="Allergies" value={patient.allergies} />
+            <Field
+              label="Allergies"
+              value={
+                patient.allergies_structured && patient.allergies_structured.length > 0
+                  ? patient.allergies_structured.map((a) => `${a.name} (${a.severity})`).join(", ")
+                  : patient.allergies
+              }
+            />
             <Field label="Chronic Medications" value={patient.chronic_medications} />
             <Field label="Chronic Condition" value={patient.is_chronic ? "Yes" : "No"} />
             <Field label="General Practitioner" value={patient.general_practitioner} />
