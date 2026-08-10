@@ -253,8 +253,18 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
   const generateSummary = async () => {
     setLoading(true);
     try {
+      // Transcribed handwritten/paper records so the overview timeline includes
+      // retrospective history, dated by the record date rather than upload date.
+      const { data: historicalRecords } = await supabase
+        .from("documents")
+        .select("name, content, record_date, created_at")
+        .eq("patient_id", patient.id)
+        .eq("is_transcribed", true)
+        .order("record_date", { ascending: true })
+        .limit(20);
+
       const { data, error } = await supabase.functions.invoke("summarize-patient-history", {
-        body: { patient, sessions },
+        body: { patient, sessions, historicalRecords: historicalRecords || [] },
       });
 
       if (error) throw error;
