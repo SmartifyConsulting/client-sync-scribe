@@ -40,6 +40,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import {
   SECTION_FRAME_CLASS,
   SECTION_ITEM_CLASS,
+  SECTION_TRIGGER_CLASS,
   SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
   SECTION_CONTENT_CLASS,
   SectionCountPill,
@@ -473,10 +474,10 @@ export function CompactTodoList() {
         {/* Tabs */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
           <TabsList className="h-9 w-full bg-neutral-600 p-1">
-            <TabsTrigger value="active" className="text-sm h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger value="active" className="h-7 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
               {t("doctorDashboard.active")} ({activeCount})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="text-sm h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger value="completed" className="h-7 flex-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
               {t("doctorDashboard.done")} ({completedCount})
             </TabsTrigger>
           </TabsList>
@@ -575,7 +576,7 @@ export function CompactTodoList() {
               const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
               if (buckets.length === 0) return null;
               return (
-                <Accordion type="multiple" defaultValue={[buckets[0].key]} className="divide-y divide-neutral-200">
+                <Accordion type="multiple" defaultValue={[buckets[0].key]} className="space-y-2">
                   {buckets.map((b) => (
                     <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_CLASS}>
                       <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "px-3 py-2")}>
@@ -589,8 +590,8 @@ export function CompactTodoList() {
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
                         <Accordion type="multiple" className="space-y-3">
                           {patientGroups(grouped[b.key]).map(([patientName, items]) => (
-                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden">
-                              <AccordionTrigger className="px-3 py-1.5 hover:no-underline hover:bg-muted/50 text-foreground">
+                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className={SECTION_ITEM_CLASS}>
+                              <AccordionTrigger className={cn(SECTION_TRIGGER_CLASS, "px-3 py-1.5")}>
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   <UserIcon className="h-4 w-4 text-primary shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}

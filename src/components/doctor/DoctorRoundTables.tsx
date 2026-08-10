@@ -120,7 +120,7 @@ export function DoctorRoundTables({ compact = false }: { compact?: boolean } = {
   const renderEntry = (entry: RoundTableEntry) => (
     <div
       onClick={() => navigate(`/patients/${entry.patientId}?tab=roundtable`)}
-      className={`mb-2 flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-colors hover:bg-muted/50 ${
+      className={`mb-2 flex items-center gap-3 py-2 px-3 rounded-xl border cursor-pointer transition-colors hover:bg-muted/50 ${
         entry.unreadCount > 0 ? "border-primary/50 bg-primary/5" : "border-border bg-card"
       }`}
     >
