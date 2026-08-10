@@ -359,7 +359,7 @@ function AboutMeAccordion({ value, onSave }: { value: string; onSave: (v: string
       <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          <h3 className="text-base font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
+          <h3 className="text-xs font-semibold text-primary-dark">{t("myPractice.aboutMe")}</h3>
         </div>
       </AccordionTrigger>
       <AccordionContent className={SECTION_CONTENT_CLASS}>
@@ -1244,7 +1244,7 @@ export default function MyPractice() {
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold text-primary-dark">Personal Information</h3>
+                  <h3 className="text-xs font-semibold text-primary-dark">Personal Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
@@ -1342,7 +1342,7 @@ export default function MyPractice() {
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold text-primary-dark">Practice Information</h3>
+                  <h3 className="text-xs font-semibold text-primary-dark">Practice Information</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
@@ -1352,8 +1352,8 @@ export default function MyPractice() {
             <Accordion type="multiple" className="rounded-xl border border-primary bg-white overflow-hidden divide-y divide-primary">
               {/* Practice Details */}
               <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-white">
-                <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none !bg-neutral-400 hover:!bg-neutral-400/90 !text-white [&_*:not(.section-count-pill)]:!text-white [&>svg]:!text-white">
-                  <h4 className="text-sm font-semibold">Practice Details</h4>
+                <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                  <h4 className="text-xs font-semibold">Practice Details</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <div className="flex flex-wrap items-end gap-4">
@@ -1417,7 +1417,7 @@ export default function MyPractice() {
               {/* Partners */}
               <AccordionItem value="partners" className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-sm font-semibold">Partners</h4>
+                  <h4 className="text-xs font-semibold">Partners</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
             {/* Calendar color (used on shared practice calendar) */}
@@ -1473,7 +1473,7 @@ export default function MyPractice() {
                   {partners.map((partner) => (
                     <div
                       key={partner.id}
-                      className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border"
+                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-border"
                     >
                       {editingPartnerId === partner.id ? (
                         <div className="flex-1 grid gap-2 sm:grid-cols-3 mr-3">
@@ -1758,7 +1758,7 @@ export default function MyPractice() {
               {/* Practice Management Assistants */}
               <AccordionItem value="practice-assistants" className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-sm font-semibold">Practice Management Assistants</h4>
+                  <h4 className="text-xs font-semibold">Practice Management Assistants</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <PracticeAssistants />
@@ -1768,7 +1768,7 @@ export default function MyPractice() {
               {/* Hospital Affiliations */}
               <AccordionItem value="hospital-affiliations" className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-sm font-semibold">Hospital Affiliations</h4>
+                  <h4 className="text-xs font-semibold">Hospital Affiliations</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <HospitalAffiliations />
@@ -1783,7 +1783,7 @@ export default function MyPractice() {
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold text-primary-dark">Service Offerings & Pricing</h3>
+                  <h3 className="text-xs font-semibold text-primary-dark">Service Offerings & Pricing</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
@@ -1969,7 +1969,7 @@ export default function MyPractice() {
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <PenTool className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold text-primary-dark">Digital Signature</h3>
+                  <h3 className="text-xs font-semibold text-primary-dark">Digital Signature</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
@@ -2083,7 +2083,7 @@ export default function MyPractice() {
               <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
                 <div className="flex items-center gap-2">
                   <Volume2 className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold text-primary-dark">Voice Narration Settings</h3>
+                  <h3 className="text-xs font-semibold text-primary-dark">Voice Narration Settings</h3>
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>

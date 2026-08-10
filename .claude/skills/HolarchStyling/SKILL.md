@@ -88,6 +88,13 @@ rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-wh
 ```
 Use the `border-primary`/`bg-card` record-card pattern (above) for patient clinical record lists (Allergies/Medications/Conditions-style content). Use the `section-accordion.tsx` grey-frame pattern for grouped-settings accordions (e.g. Practice Information) AND for static header-bar list panels — a title bar row plus a plain (non-collapsible) `divide-y` list, e.g. "Upcoming shifts" / "My patients" on My Shift (`src/modules/holarchelp/pages/provider/hospital/MyShiftScreen.tsx`) — since both share the same visual frame even though one collapses and the other doesn't. Don't mix either grey-frame use with the primary-bordered record cards.
 
+### Records inside a concertina (accordion) — spacing and height
+
+Reference: `src/pages/Documents.tsx`'s document rows inside its accordion content (`renderDocRow`) — `className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors"`, `p-4` padding, `text-sm` text, ~72px total row height. This is the "Documents concertina record" reference size — 100%.
+
+- **Padding between records.** Records inside any accordion's content must have visible spacing between them — don't rely on a bare `divide-y` hairline with the rows flush against each other (that's the current app-wide default and is NOT the standard going forward: e.g. `divide-y divide-border` wrapping rows with no `space-y-*`/gap, as seen in `Documents.tsx`, `PatientTasks.tsx`, and elsewhere). Add real spacing between individual records — e.g. `space-y-2` (or equivalent gap) on the row list, or padding-driven separation — so records don't sit edge-to-edge.
+- **Record height elsewhere = 50% of the Documents reference.** Any other accordion's individual records (not the Documents screen itself, which stays at its current ~72px/`p-4` reference size) should target roughly HALF that height (~36px) — i.e. lighter padding than `p-4`, closer to `py-2` or similar, keeping the same `text-sm` text size. This keeps compact record lists (task rows, medication rows, etc.) visually lighter than the Documents screen's fuller document rows, rather than everything defaulting to the same dense `p-4` sizing.
+
 ---
 
 ## Underlying design tokens
@@ -117,4 +124,6 @@ When styling or reviewing a screen, check each element type present against this
 - [ ] Top-level tabs use `bg-primary` bar + `text-xs` white/black-on-white triggers with fixed `px-3 py-1.5`
 - [ ] Sub-tabs use `bg-neutral-600` bar + same trigger color logic, but responsive `px-1.5 py-1 sm:px-3 sm:py-1.5` padding
 - [ ] Record/accordion cards use `rounded-xl border border-primary bg-card p-5` (or the red-tinted danger variant where semantically appropriate)
+- [ ] Records inside any concertina/accordion have visible padding/spacing between them, not a bare flush `divide-y` hairline
+- [ ] Record row height elsewhere is ~50% of the Documents screen's reference row height (~36px vs. ~72px), unless it genuinely is the Documents screen
 - [ ] No raw/arbitrary colors introduced where a token or an established pattern above already covers the case

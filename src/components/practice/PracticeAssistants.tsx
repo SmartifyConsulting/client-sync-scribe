@@ -79,7 +79,7 @@ export function PracticeAssistants() {
           {assistants.map((a) => (
             <div
               key={a.id}
-              className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3"
+              className="flex items-center justify-between rounded-lg border border-border bg-white p-3"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <UserCog className="h-4 w-4 text-primary shrink-0" />
