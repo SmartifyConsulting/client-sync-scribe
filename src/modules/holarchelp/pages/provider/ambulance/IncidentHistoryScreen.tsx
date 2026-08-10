@@ -42,6 +42,7 @@ export default function IncidentHistoryScreen() {
   return (
     <div className="space-y-4">
       <header>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("incidentHistory.title")}</h1>
       </header>
 

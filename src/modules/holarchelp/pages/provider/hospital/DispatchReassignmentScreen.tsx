@@ -68,6 +68,9 @@ export default function DispatchReassignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Dispatch Management
+        </p>
         <h1 className="text-3xl font-extrabold">Reassign Dispatch</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Change ambulance assignment for an active dispatch

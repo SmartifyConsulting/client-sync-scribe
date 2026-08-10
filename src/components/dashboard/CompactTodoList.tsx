@@ -473,10 +473,10 @@ export function CompactTodoList() {
         {/* Tabs */}
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "completed")}>
           <TabsList className="h-9 w-full bg-neutral-600 p-1">
-            <TabsTrigger value="active" className="text-base font-semibold h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger value="active" className="text-sm h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               {t("doctorDashboard.active")} ({activeCount})
             </TabsTrigger>
-            <TabsTrigger value="completed" className="text-base font-semibold h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
+            <TabsTrigger value="completed" className="text-sm h-7 flex-1 px-3 data-[state=active]:bg-white data-[state=active]:text-black text-white">
               {t("doctorDashboard.done")} ({completedCount})
             </TabsTrigger>
           </TabsList>

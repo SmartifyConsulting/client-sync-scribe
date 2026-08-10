@@ -54,6 +54,7 @@ export default function VehicleTypeManagementScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Configuration</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Types</h1>
           <p className="text-sm text-muted-foreground mt-2">Manage ambulance types, equipment, and configurations</p>
         </div>

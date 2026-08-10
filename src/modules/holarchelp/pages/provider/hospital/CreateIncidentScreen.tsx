@@ -64,6 +64,9 @@ export default function CreateIncidentScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Emergency Dispatch
+          </p>
           <h1 className="text-3xl font-extrabold">Create New Incident</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Receive and log emergency call details

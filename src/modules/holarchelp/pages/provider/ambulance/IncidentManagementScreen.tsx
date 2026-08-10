@@ -178,6 +178,9 @@ export default function IncidentManagementScreen() {
   return (
     <div className="space-y-6">
       <header>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          ER Provider Operations
+        </p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Incident Management</h1>
         <p className="text-sm text-muted-foreground mt-1">
           All incidents (self-created and from affiliated hospitals)

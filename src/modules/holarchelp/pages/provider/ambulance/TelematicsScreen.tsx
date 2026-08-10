@@ -238,9 +238,9 @@ export default function TelematicsScreen() {
       </header>
 
       <Tabs defaultValue="live" className="w-full">
-        <TabsList className="bg-neutral-600">
-          <TabsTrigger value="live" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">{t("telematics.liveFleet")}</TabsTrigger>
-          <TabsTrigger value="trips" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">{t("telematics.tripsStops")}</TabsTrigger>
+        <TabsList>
+          <TabsTrigger value="live">{t("telematics.liveFleet")}</TabsTrigger>
+          <TabsTrigger value="trips">{t("telematics.tripsStops")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="live" className="mt-3">

@@ -72,6 +72,7 @@ export default function IncomingSosScreen() {
   return (
     <div className="space-y-4">
       <header>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("provider.emergencyResponseDispatch")}</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">{t("incomingSos.title")}</h1>
         <p className="text-xs text-muted-foreground">{t("incomingSos.subtitle")}</p>
       </header>

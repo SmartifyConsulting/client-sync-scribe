@@ -271,11 +271,11 @@ export function SettingsContent() {
   return (
     <div className="space-y-4 max-w-3xl">
       <Tabs defaultValue="preferences" className="w-full">
-        <TabsList className="flex w-full flex-wrap bg-neutral-600 justify-start rounded-lg">
-          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold">Preferences</TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold">Notifications</TabsTrigger>
-          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold">Security</TabsTrigger>
-          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold">Billing</TabsTrigger>
+        <TabsList className="flex w-full flex-wrap bg-primary/80 justify-start rounded-lg">
+          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Preferences</TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Notifications</TabsTrigger>
+          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Security</TabsTrigger>
+          <TabsTrigger value="billing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs">Billing</TabsTrigger>
         </TabsList>
 
         {/* PREFERENCES */}

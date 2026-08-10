@@ -343,6 +343,9 @@ export default function AdministratorsScreen() {
   return (
     <div className="space-y-3">
       <div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {t("administrators.header.label")}
+        </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-primary" />
           Admin
@@ -364,11 +367,11 @@ export default function AdministratorsScreen() {
         onValueChange={(val) => setSearchParams({ tab: val })}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-4 h-9 bg-neutral-600">
-          <TabsTrigger value="users" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">Users</TabsTrigger>
-          <TabsTrigger value="crew" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">Crew</TabsTrigger>
-          <TabsTrigger value="fleet" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">Fleet Admin</TabsTrigger>
-          <TabsTrigger value="hospitals" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">Hospitals</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 h-9">
+          <TabsTrigger value="users" className="text-xs">Users</TabsTrigger>
+          <TabsTrigger value="crew" className="text-xs">Crew</TabsTrigger>
+          <TabsTrigger value="fleet" className="text-xs">Fleet Admin</TabsTrigger>
+          <TabsTrigger value="hospitals" className="text-xs">Hospitals</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-3">

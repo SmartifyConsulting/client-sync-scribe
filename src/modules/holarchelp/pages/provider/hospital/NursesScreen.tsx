@@ -66,6 +66,7 @@ export default function NursesScreen() {
     <div className="space-y-4">
       <header className="flex items-start justify-between gap-3">
         <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital Operations</p>
           <h1 className="text-2xl font-extrabold">Our Nurses</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Build your nursing roster. Inactive nurses can be selected on admission records; their Vulas claim automatically when they sign up.

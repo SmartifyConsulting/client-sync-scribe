@@ -30,7 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import vulaSymbol from "@/assets/vula-symbol.png";
 import { AdminPage } from "@/pages/admin/_shared/AdminPage";
-import { adminTabsListClassNeutral, adminTabsTriggerClass } from "@/pages/admin/_shared/AdminTabs";
+import { adminTabsListClass, adminTabsTriggerClass } from "@/pages/admin/_shared/AdminTabs";
 
 interface PartnerApp {
   id: string;
@@ -419,7 +419,7 @@ export default function GamificationAdmin() {
       </div>
 
       <Tabs defaultValue="rewards">
-        <TabsList className={adminTabsListClassNeutral}>
+        <TabsList className={adminTabsListClass}>
           <TabsTrigger value="rewards" className={`${adminTabsTriggerClass} gap-1.5`}>
             <Gift className="h-3.5 w-3.5" />Visit Rewards
           </TabsTrigger>

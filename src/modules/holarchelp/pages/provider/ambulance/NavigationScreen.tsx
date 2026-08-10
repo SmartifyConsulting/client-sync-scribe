@@ -111,6 +111,9 @@ export default function NavigationScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            {t("provider.emergencyResponseDispatch")} · {t("navigationScreen.activeMission", "Active Mission")}
+          </p>
           <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
             <NavIcon className="h-5 w-5 text-primary" />
             {t("navigationScreen.mission")} #{(incident.incident_number ?? activeId.slice(0,8))}

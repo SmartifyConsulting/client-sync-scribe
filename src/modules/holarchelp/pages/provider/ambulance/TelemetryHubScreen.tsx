@@ -58,6 +58,7 @@ export default function TelemetryHubScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Integration</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Telemetry Integration Hub</h1>
           <p className="text-sm text-muted-foreground mt-2">Connect and manage telematics providers</p>
         </div>

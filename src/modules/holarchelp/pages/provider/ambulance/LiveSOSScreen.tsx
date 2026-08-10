@@ -115,6 +115,7 @@ export default function LiveSOSScreen() {
             <HeartPulse className="h-5 w-5" />
           </div>
           <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{t("liveSos.subtitle")}</p>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-tight">{t("liveSos.title")}</h1>
           </div>
         </div>

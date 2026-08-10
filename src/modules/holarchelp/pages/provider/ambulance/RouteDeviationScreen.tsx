@@ -65,6 +65,9 @@ export default function RouteDeviationScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Vehicle Abuse Prevention
+          </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Route Deviation</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Monitor when ambulances deviate from authorized dispatch routes.

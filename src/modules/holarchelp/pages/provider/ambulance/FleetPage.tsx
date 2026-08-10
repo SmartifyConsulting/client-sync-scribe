@@ -160,6 +160,7 @@ export default function FleetPage() {
   return (
     <div className="space-y-6">
       <header>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">Fleet Management</h1>
         <p className="text-sm text-muted-foreground mt-2">
           {stats.total} vehicles total • {stats.available} available • {stats.assigned} in-service • {stats.maintenance} maintenance

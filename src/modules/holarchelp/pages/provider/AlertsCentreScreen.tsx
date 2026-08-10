@@ -103,6 +103,7 @@ export default function AlertsCentreScreen() {
   return (
     <div className="space-y-6">
       <header>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Notifications</p>
         <h1 className="text-3xl font-extrabold mt-2">Alerts Centre</h1>
         <p className="text-sm text-muted-foreground mt-2">Critical events and notifications</p>
       </header>

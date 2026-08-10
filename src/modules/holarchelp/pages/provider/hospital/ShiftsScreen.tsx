@@ -160,6 +160,7 @@ export default function ShiftsScreen() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
           <h1 className="text-2xl font-extrabold">Resource Planning</h1>
           <p className="text-xs text-muted-foreground">{onShiftNow.length} staff on shift right now</p>
         </div>

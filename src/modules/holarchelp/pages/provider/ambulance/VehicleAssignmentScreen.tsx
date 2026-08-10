@@ -50,6 +50,7 @@ export default function VehicleAssignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Assignment</h1>
         <p className="text-sm text-muted-foreground mt-2">Assign vehicles to crew and routes</p>
       </header>

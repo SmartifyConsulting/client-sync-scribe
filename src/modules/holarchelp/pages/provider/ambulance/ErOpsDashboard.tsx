@@ -142,6 +142,9 @@ export default function ErOpsDashboard() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Emergency response
+          </p>
           <h1 className="text-2xl font-extrabold leading-tight">Ops Dashboard</h1>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Last updated: {Math.max(0, Math.round((Date.now() - stats.lastUpdated) / 1000))} seconds ago

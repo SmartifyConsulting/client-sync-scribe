@@ -1444,7 +1444,7 @@ export function PatientDetailsEditor({
     const activeTabs = isSelfService && section ? SECTION_TABS[section] || null : null;
     const show = (tab: string) => !activeTabs || activeTabs.includes(tab);
     const triggerClass =
-      "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5";
+      "data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
 
     // Self-service (mobile + tablet + web): tabs filtered by current section
     if (isSelfService && section) {
@@ -1504,13 +1504,13 @@ export function PatientDetailsEditor({
       <TabsList className="bg-primary flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
         <TabsTrigger
           value="personal"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-base font-semibold px-3 py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-3 py-1.5"
         >
           {t("patientProfile.togglePersonal")}
         </TabsTrigger>
         <TabsTrigger
           value="medical"
-          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-base font-semibold px-3 py-1.5"
+          className="whitespace-nowrap text-white data-[state=active]:bg-white data-[state=active]:text-black text-xs px-3 py-1.5"
         >
           {t("patientProfile.toggleMedical")}
         </TabsTrigger>
@@ -1598,10 +1598,10 @@ export function PatientDetailsEditor({
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
                 <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
-                  <TabsTrigger value="insurance" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
-                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
-                  <TabsTrigger value="hospitals" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
+                  <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
+                  <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
+                  <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
                 </TabsList>
 
             {/* === INSURANCE SUB-TAB (view) === */}
@@ -2170,10 +2170,10 @@ export function PatientDetailsEditor({
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
               <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
-                <TabsTrigger value="insurance" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
-                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
-                <TabsTrigger value="hospitals" className="whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
+                <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
+                <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
+                <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
               </TabsList>
 
           {/* === HOSPITALS SUB-TAB (EDIT) === */}
