@@ -24,6 +24,7 @@ import { usePatients } from "@/hooks/usePatients";
 import { useUpload } from "@/features/uploads/useUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { UploadProgressBar, type UploadProgressState } from "./components/UploadProgressBar";
+import { ApplyHistoryDialog, type ExtractedHistory } from "./components/ApplyHistoryDialog";
 
 const ACCEPT = "audio/*,video/*,.pdf,.doc,.docx,.jpg,.jpeg,.png,.bmp,.dicom,image/*";
 const NO_PATIENT_VALUE = "__none__";
@@ -54,6 +55,8 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
   const [isDragging, setIsDragging] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState<UploadProgressState>({ stage: "idle", percent: 0 });
+  const [pendingHistory, setPendingHistory] = useState<ExtractedHistory | null>(null);
+  const [historyPatientId, setHistoryPatientId] = useState<string | null>(null);
 
   const reset = () => {
     setName("");
@@ -109,16 +112,48 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
         return;
       }
 
-      setProgress({ stage: "saving", percent: 80, fileName: file.name });
+      // Photos and scans of handwritten records get transcribed, then the
+      // extracted history is offered for the patient record.
+      let content = `[FILE] ${name.trim()}`;
+      let transcribed = false;
+      const canTranscribe = file.type.startsWith("image/") || file.type === "application/pdf";
+      if (canTranscribe) {
+        setProgress({ stage: "transcribing", percent: 55, fileName: file.name });
+        try {
+          const { data, error } = await supabase.functions.invoke("transcribe-record", {
+            body: {
+              storagePath: path,
+              bucket: "patient-media",
+              mimeType: file.type,
+              fileName: file.name,
+            },
+          });
+          if (!error && data?.text) {
+            content = data.text;
+            transcribed = true;
+            setProgress({ stage: "extracting", percent: 70, fileName: file.name });
+            if (selectedPatient?.id && data?.history) {
+              setHistoryPatientId(selectedPatient.id);
+              setPendingHistory(data.history as ExtractedHistory);
+            }
+          }
+        } catch {
+          /* keep the plain upload record */
+        }
+      }
+
+      setProgress({ stage: "saving", percent: 85, fileName: file.name });
       const { error: docError } = await supabase.from("documents").insert({
         name: name.trim(),
-        content: `[FILE] ${name.trim()}`,
+        content,
+        template_name: transcribed ? "Historical Record" : undefined,
+        is_transcribed: transcribed,
         user_id: user.id,
         patient_id: selectedPatient?.id || null,
         patient_name: selectedPatient?.name || null,
         media_url: result.url,
         media_type: inferMediaType(file),
-      });
+      } as any);
       if (docError) throw docError;
 
       setProgress({ stage: "done", percent: 100, fileName: file.name });
@@ -127,20 +162,40 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
       reset();
       onOpenChange(false);
     } catch (err: any) {
-      toast({
-        title: "Error",
-        description: err.message || "Failed to upload document",
-        variant: "destructive",
-      });
+      const message = err.message || "Failed to upload document";
+      setProgress((prev) => ({ ...prev, stage: "error", message }));
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setIsSaving(false);
-      setTimeout(() => setProgress({ stage: "idle", percent: 0 }), 1200);
+      setTimeout(
+        () => setProgress((prev) => (prev.stage === "error" ? prev : { stage: "idle", percent: 0 })),
+        1500,
+      );
     }
   };
 
   const busy = isSaving || isUploading;
 
   return (
+    <>
+    {historyPatientId && pendingHistory && (
+      <ApplyHistoryDialog
+        open
+        onOpenChange={(o) => {
+          if (!o) {
+            setPendingHistory(null);
+            setHistoryPatientId(null);
+          }
+        }}
+        patientId={historyPatientId}
+        history={pendingHistory}
+        onApplied={() => {
+          setPendingHistory(null);
+          setHistoryPatientId(null);
+          onUploaded?.();
+        }}
+      />
+    )}
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
