@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { format, setHours, setMinutes, isBefore, parseISO, addDays } from "date-fns";
-import { CalendarIcon, Clock, Loader2 } from "lucide-react";
+import { CalendarCheck, CalendarIcon, Check, Clock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -61,6 +61,7 @@ export function FollowUpAppointmentDialog({
   const [slot, setSlot] = useState<{ hour: number; minute: number; label: string } | null>(initialSlot);
   const [busy, setBusy] = useState<{ start: Date; end: Date }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [scheduled, setScheduled] = useState(false);
 
   // Sync date/slot when dialog re-opens with new AI suggestion
   useEffect(() => {
@@ -133,8 +134,13 @@ export function FollowUpAppointmentDialog({
       }
 
       toast({ title: "Follow-up booked", description: `${format(start, "MMM d")} at ${slot.label}` });
-      onOpenChange(false);
-      onDone();
+      // Calendar + tick confirmation micro-animation before advancing.
+      setScheduled(true);
+      setTimeout(() => {
+        setScheduled(false);
+        onOpenChange(false);
+        onDone();
+      }, 1100);
     } catch (err: any) {
       toast({ title: "Could not book follow-up", description: err.message, variant: "destructive" });
     } finally {
@@ -153,6 +159,15 @@ export function FollowUpAppointmentDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {scheduled ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-12 animate-doc-scheduled">
+            <div className="relative">
+              <CalendarCheck className="h-12 w-12 text-primary" />
+              <Check className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-500 p-0.5 text-white" />
+            </div>
+            <p className="text-sm font-medium text-foreground">Follow-up scheduled</p>
+          </div>
+        ) : (
         <div className="space-y-3">
           <Popover>
             <PopoverTrigger asChild>
@@ -201,7 +216,9 @@ export function FollowUpAppointmentDialog({
             </div>
           )}
         </div>
+        )}
 
+        {!scheduled && (
         <DialogFooter className="flex-col sm:flex-row gap-2 sm:justify-end">
           <Button variant="ghost" onClick={handleIgnore} disabled={submitting}>
             Skip
@@ -211,6 +228,7 @@ export function FollowUpAppointmentDialog({
             Schedule
           </Button>
         </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

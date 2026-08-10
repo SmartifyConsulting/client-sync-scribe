@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Pill, Receipt, Users, Send, Pencil, Check, Save } from "lucide-react";
+import { FileText, Pill, Receipt, Users, Send, Pencil, Check, Save, Eye, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -11,6 +11,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { GeneratedDoc } from "./GeneratedDocumentsDialog";
+import { FollowUpAppointmentDialog } from "./FollowUpAppointmentDialog";
+import { VisitCategoryDialog } from "./VisitCategoryDialog";
+import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
 
 const DOC_ICONS: Record<string, typeof FileText> = {
   medcert: FileText,
@@ -20,6 +23,7 @@ const DOC_ICONS: Record<string, typeof FileText> = {
 };
 
 export type DocStepType = "prescription" | "medcert" | "referral" | "invoice";
+export type PostSessionStepType = DocStepType | "schedule" | "vula";
 
 interface PostSessionStepDialogProps {
   open: boolean;
@@ -29,6 +33,8 @@ interface PostSessionStepDialogProps {
   onSaveEdit: (doc: GeneratedDoc, newContent: string) => Promise<void>;
   /** Move on to the next step in the post-session queue. */
   onAdvance: () => void;
+  /** Cleaned AI Clinician notes, reviewable from the prescription step. */
+  clinicianNotes?: string | null;
 }
 
 function extractInvoiceTotal(content: string): string {
@@ -41,25 +47,30 @@ function extractInvoiceTotal(content: string): string {
  * referral / invoice). Send and Save each play a brief confirmation
  * animation before auto-advancing the queue.
  */
-export function PostSessionStepDialog({
+function DocStepDialog({
   open,
   stepType,
   doc,
   onSend,
   onSaveEdit,
   onAdvance,
+  clinicianNotes,
 }: PostSessionStepDialogProps) {
   const [editing, setEditing] = useState(false);
   const [draftContent, setDraftContent] = useState("");
   const [busy, setBusy] = useState(false);
   const [anim, setAnim] = useState<"idle" | "sending" | "sent" | "saving" | "saved">("idle");
   const [invoiceStage, setInvoiceStage] = useState<"summary" | "detail">("summary");
+  const [showPreview, setShowPreview] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setEditing(false);
     setAnim("idle");
     setInvoiceStage("summary");
+    setShowPreview(false);
+    setShowNotes(false);
     setDraftContent(doc?.content || "");
   }, [open, doc?.key]);
 
@@ -181,6 +192,16 @@ export function PostSessionStepDialog({
                 </div>
               ) : (
                 <div className="flex gap-2 w-full justify-end flex-wrap">
+                  <Button variant="outline" onClick={() => setShowPreview(true)} className="gap-1.5">
+                    <Eye className="h-4 w-4" />
+                    Preview
+                  </Button>
+                  {stepType === "prescription" && clinicianNotes && (
+                    <Button variant="outline" onClick={() => setShowNotes(true)} className="gap-1.5">
+                      <Brain className="h-4 w-4" />
+                      Review AI Clinician notes
+                    </Button>
+                  )}
                   {stepType !== "invoice" && (
                     <Button variant="outline" onClick={() => setEditing(true)} className="gap-1.5">
                       <Pencil className="h-4 w-4" />
@@ -210,6 +231,137 @@ export function PostSessionStepDialog({
           </>
         )}
       </DialogContent>
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="sm:max-w-[760px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-primary" />
+              {doc.label} preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto rounded-lg border border-border bg-white p-6">
+            <div className="whitespace-pre-wrap text-sm" dangerouslySetInnerHTML={{ __html: doc.content }} />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNotes} onOpenChange={setShowNotes}>
+        <DialogContent className="sm:max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-primary" />
+              AI Clinician notes
+            </DialogTitle>
+            <DialogDescription>
+              Review before finalising the prescription. Decision support only.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto">
+            <ClinicianNotesAccordion notes={clinicianNotes} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
+  );
+}
+
+
+interface PostSessionQueueDialogProps {
+  /** Ordered post-session steps to run, one at a time. */
+  queue: PostSessionStepType[];
+  index: number;
+  documents: GeneratedDoc[];
+  onSend: (doc: GeneratedDoc) => Promise<void>;
+  onSaveEdit: (doc: GeneratedDoc, newContent: string) => Promise<void>;
+  onAdvance: () => void;
+  onFinish: () => void;
+  currentPatient: { id: string; name: string; patient_user_id: string | null } | null;
+  doctorId: string;
+  doctorName?: string;
+  extractedFollowUp?: { follow_up_date?: string; follow_up_time?: string; notes?: string } | null;
+  patientName?: string;
+  transcript?: string;
+  onVulaConfirm: (categories: string[] | null) => Promise<void> | void;
+  /** AI Clinician notes surfaced on the prescription step. */
+  clinicianNotes?: string | null;
+}
+
+/**
+ * Drives the sequential post-session queue: document steps render the step
+ * dialog above, while schedule and vula steps delegate to their own dialogs.
+ */
+export function PostSessionStepDialog({
+  queue,
+  index,
+  documents,
+  onSend,
+  onSaveEdit,
+  onAdvance,
+  onFinish,
+  currentPatient,
+  doctorId,
+  doctorName,
+  extractedFollowUp,
+  patientName,
+  transcript,
+  onVulaConfirm,
+  clinicianNotes,
+}: PostSessionQueueDialogProps) {
+  const step = queue[index];
+  if (!step) return null;
+
+  if (step === "schedule") {
+    if (!currentPatient || !doctorId) {
+      return null;
+    }
+    return (
+      <FollowUpAppointmentDialog
+        open
+        onOpenChange={(o) => {
+          if (!o) onAdvance();
+        }}
+        doctorId={doctorId}
+        doctorName={doctorName}
+        patientId={currentPatient.id}
+        patientUserId={currentPatient.patient_user_id}
+        patientName={patientName || currentPatient.name}
+        suggestedDate={extractedFollowUp?.follow_up_date}
+        suggestedTime={extractedFollowUp?.follow_up_time}
+        onDone={onAdvance}
+      />
+    );
+  }
+
+  if (step === "vula") {
+    return (
+      <VisitCategoryDialog
+        open
+        onOpenChange={(o) => {
+          if (!o) onFinish();
+        }}
+        patientName={patientName}
+        transcript={transcript}
+        onConfirm={async (categories) => {
+          await onVulaConfirm(categories);
+          onFinish();
+        }}
+      />
+    );
+  }
+
+  const doc = documents.find((d) => d.key === step) || null;
+  if (!doc) return null;
+
+  return (
+    <DocStepDialog
+      open
+      stepType={step}
+      doc={doc}
+      onSend={onSend}
+      onSaveEdit={onSaveEdit}
+      onAdvance={onAdvance}
+      clinicianNotes={clinicianNotes}
+    />
   );
 }

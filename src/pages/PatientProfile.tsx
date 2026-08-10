@@ -454,7 +454,7 @@ export default function PatientProfile() {
 
           <TabsTrigger
             value="roundtable"
-            className="rounded-lg px-4 py-2.5 gap-1.5 text-white hover:text-white/80 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5 gap-1.5"
           >
             {t("patientProfile.tabRoundTable")}
             {unreadRoundTableCount > 0 && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}

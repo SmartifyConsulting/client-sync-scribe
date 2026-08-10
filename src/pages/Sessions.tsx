@@ -58,6 +58,7 @@ import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
 import { PostSessionStepDialog, type PostSessionStepType } from "@/features/sessions/components/PostSessionStepDialog";
+import { cleanClinicianNotes } from "@/features/sessions/utils/clinicianNotesSections";
 import { SessionGeneratedDocuments } from "@/features/sessions/components/SessionGeneratedDocuments";
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
 import { renderClinicalHighlights } from "@/features/sessions/lib/clinicalHighlights";
@@ -613,6 +614,12 @@ export default function Sessions() {
     if (extractedPrescription) steps.push("prescription");
     if (extractedMedCert) steps.push("medcert");
     if (extractedReferral) steps.push("referral");
+    // Any other generated document types slot in before the invoice.
+    for (const d of results) {
+      const key = d.key as PostSessionStepType;
+      if (!steps.includes(key) && key !== "invoice") steps.push(key);
+    }
+    // Invoice is always second-last, Vulas last.
     steps.push("schedule", "invoice", "vula");
     setPostSessionQueue(steps);
     setPostSessionIndex(0);
@@ -1108,6 +1115,7 @@ export default function Sessions() {
           patientName={currentPatient?.name}
           transcript={pendingTranscript}
           onVulaConfirm={handleVisitCategoryConfirm}
+          clinicianNotes={cleanClinicianNotes(notes)}
         />
       )}
 

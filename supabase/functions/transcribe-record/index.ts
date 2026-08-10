@@ -37,9 +37,9 @@ serve(async (req) => {
       });
     }
 
-    const { fileUrl, mimeType, fileName } = await req.json();
-    if (!fileUrl || typeof fileUrl !== "string") {
-      return new Response(JSON.stringify({ error: "fileUrl is required" }), {
+    const { fileUrl, storagePath, bucket, mimeType, fileName } = await req.json();
+    if (!fileUrl && !storagePath) {
+      return new Response(JSON.stringify({ error: "fileUrl or storagePath is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -51,13 +51,56 @@ serve(async (req) => {
       "medication names and dosages. Use plain text with line breaks. If a word is " +
       "illegible, write [illegible]. Do not add commentary or interpretation.";
 
+    // Private buckets can't be fetched by the model, so pull the bytes here with
+    // the service role and inline them as base64.
+    let base64: string | null = null;
+    if (storagePath) {
+      const admin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+      const { data: blob, error: dlError } = await admin.storage
+        .from(bucket || "patient-media")
+        .download(storagePath);
+      if (dlError || !blob) {
+        return new Response(JSON.stringify({ error: `Could not read uploaded file: ${dlError?.message || "not found"}` }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      if (bytes.length === 0) {
+        return new Response(JSON.stringify({ error: "Uploaded file is empty" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      base64 = btoa(binary);
+    }
+
     let contentBlock: unknown;
     if (isPdf) {
-      const fileRes = await fetch(fileUrl);
-      const bytes = new Uint8Array(await fileRes.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-      const base64 = btoa(binary);
+      if (!base64) {
+        const fileRes = await fetch(fileUrl);
+        if (!fileRes.ok) {
+          return new Response(JSON.stringify({ error: `Could not read uploaded file (${fileRes.status})` }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const bytes = new Uint8Array(await fileRes.arrayBuffer());
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+        }
+        base64 = btoa(binary);
+      }
       contentBlock = [
         { type: "text", text: instruction },
         {
@@ -68,7 +111,10 @@ serve(async (req) => {
     } else {
       contentBlock = [
         { type: "text", text: instruction },
-        { type: "image_url", image_url: { url: fileUrl } },
+        {
+          type: "image_url",
+          image_url: { url: base64 ? `data:${mimeType || "image/jpeg"};base64,${base64}` : fileUrl },
+        },
       ];
     }
 
@@ -118,7 +164,44 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ text: text.trim() }), {
+    // Second pass: pull structured history out of the transcription so the
+    // clinician can optionally merge it into the patient record.
+    let history: Record<string, string[]> | null = null;
+    const clean = text.trim();
+    if (clean.length > 40) {
+      try {
+        const extractRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Deno.env.get("LOVABLE_API_KEY")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Extract structured clinical history from the record. Reply with JSON only: " +
+                  '{"conditions_diagnoses":[],"current_medications":[],"allergies":[],"surgeries":[],"family_history":[],"notable_events":[]}. ' +
+                  "Only include items explicitly present in the record. Use empty arrays otherwise.",
+              },
+              { role: "user", content: clean.slice(0, 12000) },
+            ],
+          }),
+        });
+        if (extractRes.ok) {
+          const json = await extractRes.json();
+          const raw = json?.choices?.[0]?.message?.content ?? "";
+          const match = raw.match(/\{[\s\S]*\}/);
+          if (match) history = JSON.parse(match[0]);
+        }
+      } catch (e) {
+        console.error("history extraction failed", e);
+      }
+    }
+
+    return new Response(JSON.stringify({ text: clean, history }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
