@@ -153,6 +153,9 @@ export function DoctorRoundTables({ compact = false }: { compact?: boolean } = {
       renderItem={renderEntry}
       defaultOpenFirst={false}
       hideControls={compact}
+      frameless={compact}
+      headerIcon={compact ? CalendarDays : undefined}
+
       actions={
         compact ? undefined : (
           <ToggleGroup
