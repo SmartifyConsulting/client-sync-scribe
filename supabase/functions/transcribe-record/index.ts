@@ -166,7 +166,7 @@ serve(async (req) => {
 
     // Second pass: pull structured history out of the transcription so the
     // clinician can optionally merge it into the patient record.
-    let history: Record<string, string[]> | null = null;
+    let history: Record<string, unknown> | null = null;
     const clean = text.trim();
     if (clean.length > 40) {
       try {
@@ -183,8 +183,10 @@ serve(async (req) => {
                 role: "system",
                 content:
                   "Extract structured clinical history from the record. Reply with JSON only: " +
-                  '{"conditions_diagnoses":[],"current_medications":[],"allergies":[],"surgeries":[],"family_history":[],"notable_events":[]}. ' +
-                  "Only include items explicitly present in the record. Use empty arrays otherwise.",
+                  '{"conditions_diagnoses":[],"current_medications":[],"allergies":[],"surgeries":[],"family_history":[],"notable_events":[],"overview_bullets":[],"record_date":null}. ' +
+                  "overview_bullets: short clinical bullet points (one fact each, max 12 words) summarising this record for the patient overview. " +
+                  "record_date: the date the record was written, as YYYY-MM-DD, or null if not stated. " +
+                  "Only include items explicitly present in the record. Never invent facts. Use empty arrays otherwise.",
               },
               { role: "user", content: clean.slice(0, 12000) },
             ],
