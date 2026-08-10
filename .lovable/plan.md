@@ -44,7 +44,24 @@ pre-selected, showing the bullets and the structured items about to be added. Th
 confirms (or unticks items) before anything is written — no silent changes to a patient record.
 After applying, the Overview refreshes so the new entries are visible immediately.
 
+## 5. Progress bar with stage labels
+
+The existing upload progress bar is extended to narrate every stage of the pipeline, so the
+clinician always knows what is happening (and that a long transcription hasn't stalled):
+
+```text
+Uploading document…            (real % of the file transfer)
+Transcribing handwritten notes…(animated shimmer while the AI reads the pages)
+Extracting medical history…    (conditions, medications, allergies)
+Recording data in the app…     (saving the document + updating the patient record)
+Done                           (brief tick, then the review dialog)
+```
+
+Multi-file drops show "File 2 of 5" alongside the stage. Failures stop the bar on the stage that
+failed with a plain-English reason rather than a generic error.
+
 ## Technical notes
+
 
 - `supabase/functions/transcribe-record/index.ts`: extraction pass also returns
   `overview_bullets` and a normalised `record_date`.
