@@ -152,16 +152,20 @@ export function ListGroupToolbar<T>({
         <Accordion
           type="multiple"
           defaultValue={defaultOpenFirst ? [groups[0][0]] : []}
-          className={SECTION_FRAME_CLASS}
+          className={frameless ? "space-y-2" : SECTION_FRAME_CLASS}
         >
           {groups.map(([label, entries]) => (
             <AccordionItem key={label} value={label} className={SECTION_ITEM_CLASS}>
-              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
-                <span className="flex w-full items-center justify-between gap-2 pr-2 text-sm font-semibold">
-                  <span>{label}</span>
-                  <SectionCountPill count={entries.length} />
-                </span>
+              <AccordionTrigger
+                className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, frameless && "px-3 py-2")}
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {HeaderIcon && <HeaderIcon className="h-3.5 w-3.5 text-primary shrink-0" />}
+                  <span className="text-sm font-semibold truncate text-left">{label}</span>
+                  <SectionCountPill count={entries.length} className="ml-auto mr-1" />
+                </div>
               </AccordionTrigger>
+
               <AccordionContent className={SECTION_CONTENT_CLASS}>
                 <div className="space-y-4 py-1">
                   {entries.map((e, idx) => (
