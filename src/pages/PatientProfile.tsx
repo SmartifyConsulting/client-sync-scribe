@@ -405,56 +405,56 @@ export default function PatientProfile() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="details"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("patientProfile.tabDetails")}
           </TabsTrigger>
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("patientProfile.tabOverview")}
           </TabsTrigger>
           <TabsTrigger
             value="sessions"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("patientProfile.tabSessions")}
           </TabsTrigger>
           <TabsTrigger
             value="biolog"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             Biolog
           </TabsTrigger>
           <TabsTrigger
             value="admissions"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("patientProfile.tabAdmissions")}
           </TabsTrigger>
           <TabsTrigger
             value="doctors"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("patientProfile.tabProviders")}
           </TabsTrigger>
           <TabsTrigger
             value="programmes"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             Programmes
           </TabsTrigger>
           <TabsTrigger
             value="documents"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("patientProfile.tabDocuments")}
           </TabsTrigger>
 
           <TabsTrigger
             value="roundtable"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5 gap-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5 gap-1.5"
           >
             {t("patientProfile.tabRoundTable")}
             {unreadRoundTableCount > 0 && <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />}

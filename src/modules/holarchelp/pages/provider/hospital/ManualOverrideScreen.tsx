@@ -45,9 +45,6 @@ export default function ManualOverrideScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Admin Functions
-        </p>
         <h1 className="text-3xl font-extrabold">Manual Override</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Emergency override of standard dispatch protocols (requires authorization)

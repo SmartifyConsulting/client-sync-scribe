@@ -1201,31 +1201,31 @@ export default function MyPractice() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="practice"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("myPractice.tabPractice")}
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("documents.tabTemplates")}
           </TabsTrigger>
           <TabsTrigger
             value="referrals"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("myPractice.tabReferrals")}
           </TabsTrigger>
           <TabsTrigger
             value="certificates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("myPractice.tabCredentials")}
           </TabsTrigger>
           <TabsTrigger
             value="rewards"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5"
           >
             {t("myPractice.tabRewards")}
           </TabsTrigger>
@@ -1352,8 +1352,8 @@ export default function MyPractice() {
             <Accordion type="multiple" className="rounded-xl border border-primary bg-white overflow-hidden divide-y divide-primary">
               {/* Practice Details */}
               <AccordionItem value="practice-basic-details" className="border-0 rounded-none bg-white">
-                <AccordionTrigger className="group px-4 py-3 hover:no-underline border-0 rounded-none !bg-neutral-400 hover:!bg-neutral-400/90 !text-white [&_*:not(.section-count-pill)]:!text-white [&>svg]:!text-white">
-                  <h4 className="text-sm font-semibold">Practice Details</h4>
+                <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
+                  <h4 className="text-base font-semibold">Practice Details</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <div className="flex flex-wrap items-end gap-4">
@@ -1417,7 +1417,7 @@ export default function MyPractice() {
               {/* Partners */}
               <AccordionItem value="partners" className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-sm font-semibold">Partners</h4>
+                  <h4 className="text-base font-semibold">Partners</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
             {/* Calendar color (used on shared practice calendar) */}
@@ -1603,9 +1603,9 @@ export default function MyPractice() {
 
                   <Tabs defaultValue="existing">
                     <TabsList className="grid w-full grid-cols-3 bg-neutral-600">
-                      <TabsTrigger value="existing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Select existing</TabsTrigger>
-                      <TabsTrigger value="invite" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Invite by email</TabsTrigger>
-                      <TabsTrigger value="share" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Share app link</TabsTrigger>
+                      <TabsTrigger value="existing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5">Select existing</TabsTrigger>
+                      <TabsTrigger value="invite" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5">Invite by email</TabsTrigger>
+                      <TabsTrigger value="share" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-1.5 py-1 sm:px-3 sm:py-1.5">Share app link</TabsTrigger>
                     </TabsList>
 
                     {/* ── Existing user ── */}
@@ -1758,7 +1758,7 @@ export default function MyPractice() {
               {/* Practice Management Assistants */}
               <AccordionItem value="practice-assistants" className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-sm font-semibold">Practice Management Assistants</h4>
+                  <h4 className="text-base font-semibold">Practice Management Assistants</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <PracticeAssistants />
@@ -1768,7 +1768,7 @@ export default function MyPractice() {
               {/* Hospital Affiliations */}
               <AccordionItem value="hospital-affiliations" className={SECTION_ITEM_CLASS}>
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
-                  <h4 className="text-sm font-semibold">Hospital Affiliations</h4>
+                  <h4 className="text-base font-semibold">Hospital Affiliations</h4>
                 </AccordionTrigger>
                 <AccordionContent className={SECTION_CONTENT_CLASS}>
                   <HospitalAffiliations />
@@ -2209,7 +2209,7 @@ export default function MyPractice() {
         <TabsContent value="referrals" className="mt-4 space-y-4 my-practice-tab-body">
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-base font-semibold text-primary-dark">Referral Doctors</h3>
+              <h3 className="text-base font-semibold text-neutral-600">Referral Doctors</h3>
             </div>
             <ReferralDoctors hideHeader />
           </div>
@@ -2220,7 +2220,7 @@ export default function MyPractice() {
         <TabsContent value="certificates" className="mt-4 my-practice-tab-body">
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-base font-semibold text-primary-dark">Credentials</h3>
+              <h3 className="text-base font-semibold text-neutral-600">Credentials</h3>
               <Button
                 size="sm"
                 onClick={() => {

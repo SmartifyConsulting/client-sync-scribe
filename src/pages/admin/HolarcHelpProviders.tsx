@@ -32,7 +32,7 @@ import { AccountabilityPanel } from "./HolarcHelpAccountability";
 import UsersTab from "@/features/admin/components/UsersTab";
 import { AdminPage } from "./_shared/AdminPage";
 import { AdminPanel } from "./_shared/AdminPanel";
-import { adminTabsListClass, adminTabsTriggerClass } from "./_shared/AdminTabs";
+import { adminTabsListClass, adminTabsListClassNeutral, adminTabsTriggerClass } from "./_shared/AdminTabs";
 import { EmptyState } from "./_shared/EmptyState";
 import { RowSkeleton } from "./_shared/RowSkeleton";
 
@@ -383,7 +383,7 @@ export default function HolarcHelpProviders() {
 
         <TabsContent value="users" className="mt-4 space-y-3">
           <Tabs defaultValue="patients" value={undefined}>
-            <TabsList className={adminTabsListClass}>
+            <TabsList className={adminTabsListClassNeutral}>
               <TabsTrigger value="patients" className={`${adminTabsTriggerClass} gap-1.5`}>
                 <Users className="h-3.5 w-3.5" />Patients
               </TabsTrigger>

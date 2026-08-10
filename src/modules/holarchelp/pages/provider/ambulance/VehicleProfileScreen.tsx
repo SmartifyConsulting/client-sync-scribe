@@ -99,7 +99,6 @@ export default function VehicleProfileScreen() {
           Back to Fleet
         </Button>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Ambulance Operations</p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">{vehicle.code}</h1>
           <p className="text-sm text-muted-foreground mt-1">{vehicle.make} {vehicle.model}</p>
           <p className="text-xs text-muted-foreground">{vehicle.type} • {vehicle.location}</p>

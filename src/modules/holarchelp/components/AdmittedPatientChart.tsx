@@ -33,7 +33,7 @@ function Empty({ children = "No data recorded yet." }: { children?: React.ReactN
 }
 
 const TAB_TRIGGER =
-  "gap-1.5 text-xs data-[state=active]:bg-primary data-[state=active]:text-white";
+  "gap-1.5 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white";
 
 /** "ambulance" source means the patient arrived via an emergency/SOS
  *  transport — labelled as an Emergency Admission rather than the raw
@@ -128,9 +128,9 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
 
         <TabsContent value="vitals-obs" className="p-4 mt-0">
           <Tabs defaultValue="vitals">
-            <TabsList>
-              <TabsTrigger value="vitals" className="text-xs gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Vital Signs Chart</TabsTrigger>
-              <TabsTrigger value="observations" className="text-xs gap-1.5"><Activity className="h-3.5 w-3.5" /> Observation Charts</TabsTrigger>
+            <TabsList className="bg-neutral-600">
+              <TabsTrigger value="vitals" className="text-base font-semibold gap-1.5"><HeartPulse className="h-3.5 w-3.5" /> Vital Signs Chart</TabsTrigger>
+              <TabsTrigger value="observations" className="text-base font-semibold gap-1.5"><Activity className="h-3.5 w-3.5" /> Observation Charts</TabsTrigger>
             </TabsList>
             <TabsContent value="vitals" className="mt-0"><Empty>No vitals recorded yet.</Empty></TabsContent>
             <TabsContent value="observations" className="mt-0"><Empty>No specialised observation charts started yet.</Empty></TabsContent>
@@ -139,10 +139,10 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
 
         <TabsContent value="meds-fluids" className="p-4 mt-0">
           <Tabs defaultValue="mar">
-            <TabsList>
-              <TabsTrigger value="mar" className="text-xs gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication Administration</TabsTrigger>
-              <TabsTrigger value="fluid-balance" className="text-xs gap-1.5"><Droplet className="h-3.5 w-3.5" /> Fluid Balance</TabsTrigger>
-              <TabsTrigger value="nutrition" className="text-xs gap-1.5"><Utensils className="h-3.5 w-3.5" /> Intake &amp; Nutrition</TabsTrigger>
+            <TabsList className="bg-neutral-600">
+              <TabsTrigger value="mar" className="text-base font-semibold gap-1.5"><Pill className="h-3.5 w-3.5" /> Medication Administration</TabsTrigger>
+              <TabsTrigger value="fluid-balance" className="text-base font-semibold gap-1.5"><Droplet className="h-3.5 w-3.5" /> Fluid Balance</TabsTrigger>
+              <TabsTrigger value="nutrition" className="text-base font-semibold gap-1.5"><Utensils className="h-3.5 w-3.5" /> Intake &amp; Nutrition</TabsTrigger>
             </TabsList>
             <TabsContent value="mar" className="mt-0"><Empty>No medications administered yet.</Empty></TabsContent>
             <TabsContent value="fluid-balance" className="mt-0"><Empty>No fluid balance entries yet.</Empty></TabsContent>
@@ -152,9 +152,9 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
 
         <TabsContent value="notes" className="p-4 mt-0">
           <Tabs defaultValue="doctor-notes">
-            <TabsList>
-              <TabsTrigger value="doctor-notes" className="text-xs gap-1.5"><Stethoscope className="h-3.5 w-3.5" /> Doctor's Progress Notes</TabsTrigger>
-              <TabsTrigger value="nursing-notes" className="text-xs gap-1.5"><NotebookPen className="h-3.5 w-3.5" /> Nursing Notes</TabsTrigger>
+            <TabsList className="bg-neutral-600">
+              <TabsTrigger value="doctor-notes" className="text-base font-semibold gap-1.5"><Stethoscope className="h-3.5 w-3.5" /> Doctor's Progress Notes</TabsTrigger>
+              <TabsTrigger value="nursing-notes" className="text-base font-semibold gap-1.5"><NotebookPen className="h-3.5 w-3.5" /> Nursing Notes</TabsTrigger>
             </TabsList>
             <TabsContent value="doctor-notes" className="mt-0"><Empty>No progress notes recorded yet.</Empty></TabsContent>
             <TabsContent value="nursing-notes" className="mt-0"><Empty>No nursing notes recorded yet.</Empty></TabsContent>
@@ -163,9 +163,9 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
 
         <TabsContent value="results" className="p-4 mt-0">
           <Tabs defaultValue="labs">
-            <TabsList>
-              <TabsTrigger value="labs" className="text-xs gap-1.5"><FlaskConical className="h-3.5 w-3.5" /> Laboratory Results</TabsTrigger>
-              <TabsTrigger value="imaging" className="text-xs gap-1.5"><Scan className="h-3.5 w-3.5" /> Imaging</TabsTrigger>
+            <TabsList className="bg-neutral-600">
+              <TabsTrigger value="labs" className="text-base font-semibold gap-1.5"><FlaskConical className="h-3.5 w-3.5" /> Laboratory Results</TabsTrigger>
+              <TabsTrigger value="imaging" className="text-base font-semibold gap-1.5"><Scan className="h-3.5 w-3.5" /> Imaging</TabsTrigger>
             </TabsList>
             <TabsContent value="labs" className="mt-0"><TestResultsPanel patientId={admission?.patient_id} /></TabsContent>
             <TabsContent value="imaging" className="mt-0">
@@ -176,12 +176,12 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
 
         <TabsContent value="care" className="p-4 mt-0">
           <Tabs defaultValue="care-activities">
-            <TabsList className="flex-wrap h-auto gap-1">
-              <TabsTrigger value="care-activities" className="text-xs gap-1.5"><HeartHandshake className="h-3.5 w-3.5" /> Care Activities</TabsTrigger>
-              <TabsTrigger value="interventions" className="text-xs gap-1.5"><Activity className="h-3.5 w-3.5" /> Interventions</TabsTrigger>
-              <TabsTrigger value="referrals" className="text-xs gap-1.5"><Send className="h-3.5 w-3.5" /> Referrals</TabsTrigger>
-              <TabsTrigger value="handover" className="text-xs gap-1.5"><ArrowLeftRight className="h-3.5 w-3.5" /> Handover</TabsTrigger>
-              <TabsTrigger value="discharge" className="text-xs gap-1.5"><LogOut className="h-3.5 w-3.5" /> Discharge</TabsTrigger>
+            <TabsList className="flex-wrap h-auto gap-1 bg-neutral-600">
+              <TabsTrigger value="care-activities" className="text-base font-semibold gap-1.5"><HeartHandshake className="h-3.5 w-3.5" /> Care Activities</TabsTrigger>
+              <TabsTrigger value="interventions" className="text-base font-semibold gap-1.5"><Activity className="h-3.5 w-3.5" /> Interventions</TabsTrigger>
+              <TabsTrigger value="referrals" className="text-base font-semibold gap-1.5"><Send className="h-3.5 w-3.5" /> Referrals</TabsTrigger>
+              <TabsTrigger value="handover" className="text-base font-semibold gap-1.5"><ArrowLeftRight className="h-3.5 w-3.5" /> Handover</TabsTrigger>
+              <TabsTrigger value="discharge" className="text-base font-semibold gap-1.5"><LogOut className="h-3.5 w-3.5" /> Discharge</TabsTrigger>
             </TabsList>
             <TabsContent value="care-activities" className="mt-0"><Empty>No care activities recorded yet.</Empty></TabsContent>
             <TabsContent value="interventions" className="mt-0"><Empty>No interventions recorded yet.</Empty></TabsContent>

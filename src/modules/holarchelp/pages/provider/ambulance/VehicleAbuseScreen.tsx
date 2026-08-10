@@ -206,11 +206,11 @@ export default function VehicleAbuseScreen() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">All Events</TabsTrigger>
-          <TabsTrigger value="geofence">Geofence</TabsTrigger>
-          <TabsTrigger value="hours">After-Hours</TabsTrigger>
-          <TabsTrigger value="routes">Routes</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4 bg-neutral-600">
+          <TabsTrigger value="dashboard" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">All Events</TabsTrigger>
+          <TabsTrigger value="geofence" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">Geofence</TabsTrigger>
+          <TabsTrigger value="hours" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">After-Hours</TabsTrigger>
+          <TabsTrigger value="routes" className="text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">Routes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-2">

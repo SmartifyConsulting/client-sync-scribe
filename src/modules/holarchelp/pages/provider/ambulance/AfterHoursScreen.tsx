@@ -72,9 +72,6 @@ export default function AfterHoursScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Vehicle Abuse Prevention
-          </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">After-Hours Vehicle Use</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Track vehicles that are used outside scheduled operating hours.

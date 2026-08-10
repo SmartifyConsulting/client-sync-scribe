@@ -179,7 +179,6 @@ export default function HospitalDashboardScreen() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
           <h1 className="text-2xl font-extrabold">Dashboard</h1>
         </div>
         <div className="flex items-center gap-2">

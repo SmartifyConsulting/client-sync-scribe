@@ -111,7 +111,6 @@ export default function IncidentsScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Live Operations</p>
           <h1 className="mt-1 flex items-center gap-2 text-2xl font-extrabold">
             <Siren className="h-5 w-5 text-primary" /> Incidents
           </h1>

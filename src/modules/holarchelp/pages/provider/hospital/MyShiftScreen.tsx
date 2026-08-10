@@ -48,7 +48,6 @@ export default function MyShiftScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
         <h1 className="text-3xl font-bold text-foreground">My shift</h1>
       </header>
 

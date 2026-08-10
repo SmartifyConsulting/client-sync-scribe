@@ -450,8 +450,8 @@ export default function Notifications() {
         <>
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "notifications" | "messages" | "sent")}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <TabsList>
-                <TabsTrigger value="notifications" className="gap-2">
+              <TabsList className="bg-neutral-600">
+                <TabsTrigger value="notifications" className="gap-2 text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">
                   <Bell className="h-4 w-4" />
                   {t("notifications.alerts")}
                   {unreadNotificationsCount > 0 && (
@@ -460,7 +460,7 @@ export default function Notifications() {
                     </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="messages" className="gap-2">
+                <TabsTrigger value="messages" className="gap-2 text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">
                   <Mail className="h-4 w-4" />
                   {t("notifications.messages")}
                   {unreadMessagesCount > 0 && (
@@ -469,7 +469,7 @@ export default function Notifications() {
                     </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="sent" className="gap-2">
+                <TabsTrigger value="sent" className="gap-2 text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-black text-white">
                   <Send className="h-4 w-4" />
                   {t("notifications.sent")}
                 </TabsTrigger>

@@ -132,7 +132,6 @@ export default function FleetOperationsScreen() {
     <div className="space-y-4">
       <header className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Operations</p>
           <h2 className="text-xl font-extrabold mt-0.5 flex items-center gap-2">
             <Truck className="h-5 w-5 text-primary" /> Fleet Admin
           </h2>

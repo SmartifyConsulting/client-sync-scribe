@@ -66,9 +66,6 @@ export default function ActiveDispatchScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Real-time Tracking
-        </p>
         <h1 className="text-3xl font-extrabold">Active Dispatch: {dispatch.ambulance_id}</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Monitor live dispatch status and communication

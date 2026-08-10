@@ -43,9 +43,6 @@ export default function HospitalSelectionScreen() {
   return (
     <div className="space-y-4">
       <div className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {t("holarcHelp.emergency.dispatch.dispatchManagement")}
-        </p>
         <h1 className="text-2xl font-semibold tracking-tight">
           {t("holarcHelp.emergency.dispatch.selectHospitalDestination")}
         </h1>

@@ -38,7 +38,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-const SUB_TAB = "gap-1.5 text-xs data-[state=active]:bg-primary data-[state=active]:text-white";
+const SUB_TAB = "gap-1.5 text-base font-semibold data-[state=active]:bg-primary data-[state=active]:text-white";
 
 /**
  * The bedside chart's Overview tab — mirrors the same information groupings

@@ -42,7 +42,6 @@ export default function IncidentTimelineScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{t("provider.hospitalEmergencyOperations")}</p>
         <h1 className="text-2xl font-extrabold">{t("nav.incidentTimeline")}</h1>
       </header>
 

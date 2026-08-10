@@ -60,8 +60,7 @@ export default function PublicTrack() {
       <div className="mx-auto max-w-2xl px-5 py-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Live emergency tracking</p>
-            <h1 className="mt-1 text-2xl font-extrabold">{incident.full_name ?? "Someone"} needs help</h1>
+            <h1 className="text-3xl font-bold text-foreground">{incident.full_name ?? "Someone"} needs help</h1>
           </div>
           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${incident.status === "active" ? "bg-sos/10 text-sos" : "bg-secondary text-primary"}`}>
             {incident.status.toUpperCase()}

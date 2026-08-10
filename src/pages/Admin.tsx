@@ -12,25 +12,25 @@ export default function Admin() {
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger
             value="calendar"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold whitespace-nowrap px-3 py-1.5"
           >
             Calendar
           </TabsTrigger>
           <TabsTrigger
             value="todo"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold whitespace-nowrap px-3 py-1.5"
           >
             To-Do
           </TabsTrigger>
           <TabsTrigger
             value="invoices"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold whitespace-nowrap px-3 py-1.5"
           >
             Invoices
           </TabsTrigger>
           <TabsTrigger
             value="templates"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-xs whitespace-nowrap px-3 py-1.5"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold whitespace-nowrap px-3 py-1.5"
           >
             Templates
           </TabsTrigger>

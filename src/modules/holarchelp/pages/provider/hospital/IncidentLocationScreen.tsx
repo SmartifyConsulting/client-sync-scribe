@@ -60,9 +60,6 @@ export default function IncidentLocationScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Emergency Dispatch
-        </p>
         <h1 className="text-3xl font-extrabold">Capture Incident Location</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Pin the exact location of the emergency

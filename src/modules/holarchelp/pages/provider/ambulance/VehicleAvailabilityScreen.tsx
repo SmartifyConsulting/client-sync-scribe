@@ -54,7 +54,6 @@ export default function VehicleAvailabilityScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Operations</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Vehicle Availability</h1>
         <p className="text-sm text-muted-foreground mt-2">Live status of every vehicle in your fleet.</p>
       </header>

@@ -120,9 +120,6 @@ export default function RealTimeMonitoringScreen() {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          {t("realTimeMonitoring.eyebrow", "Operations")}
-        </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <Radar className="h-5 w-5 text-primary" />
           {t("nav.realTimeMonitoring", "Fleet Live")}

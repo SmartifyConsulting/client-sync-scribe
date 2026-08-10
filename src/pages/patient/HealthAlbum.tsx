@@ -216,15 +216,15 @@ export default function HealthAlbum() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4 bg-primary">
-              <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">All</TabsTrigger>
-              <TabsTrigger value="gym" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">
+            <TabsList className="mb-4 bg-neutral-600">
+              <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5">All</TabsTrigger>
+              <TabsTrigger value="gym" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5">
                 <Dumbbell className="h-4 w-4" /> Gym
               </TabsTrigger>
-              <TabsTrigger value="healthy_meal" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">
+              <TabsTrigger value="healthy_meal" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5">
                 <Utensils className="h-4 w-4" /> Meals
               </TabsTrigger>
-              <TabsTrigger value="medication" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5">
+              <TabsTrigger value="medication" className="gap-1 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-base font-semibold px-3 py-1.5">
                 <Pill className="h-4 w-4" /> Medication
               </TabsTrigger>
             </TabsList>

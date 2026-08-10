@@ -98,7 +98,6 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospital operations</p>
           <h1 className="text-2xl font-extrabold">{title}</h1>
           <p className="text-xs text-muted-foreground">
             {totals.occupied} of {totals.capacity} beds occupied across {wards.length} wards

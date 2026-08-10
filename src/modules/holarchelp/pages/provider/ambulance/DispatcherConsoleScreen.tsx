@@ -229,7 +229,6 @@ export default function DispatcherConsoleScreen() {
     <div className="space-y-3">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Emergency Response Dispatch</p>
           <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
             <Radio className="h-5 w-5 text-primary" /> Dispatcher Console
           </h1>

@@ -82,9 +82,6 @@ export default function EmergencyDashboardScreen() {
   return (
     <div className="space-y-4">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          {t("provider.emergencyResponseDispatch") || "Emergency Response Dispatch"}
-        </p>
         <h1 className="text-2xl font-extrabold mt-1 flex items-center gap-2">
           <Siren className="h-5 w-5 text-primary" />
           {t("nav.emergencyDashboard", "Dispatch Dashboard")}

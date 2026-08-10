@@ -91,7 +91,6 @@ export default function FleetCalendarScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Fleet Management</p>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground mt-2">Maintenance Calendar</h1>
         <p className="text-sm text-muted-foreground mt-2">Plan maintenance, inspections, and renewals</p>
       </header>

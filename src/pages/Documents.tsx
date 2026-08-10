@@ -478,14 +478,14 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
         <TabsList className="bg-neutral-600">
           <TabsTrigger
             value="content"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold"
           >
             <FileText className="h-4 w-4 mr-2" />
             {t("documents.tabContent")}
           </TabsTrigger>
           <TabsTrigger
             value="header-footer"
-            className="data-[state=active]:bg-white data-[state=active]:text-black text-white"
+            className="data-[state=active]:bg-white data-[state=active]:text-black text-white text-base font-semibold"
           >
             <LayoutTemplate className="h-4 w-4 mr-2" />
             {t("documents.tabHeaderFooter")}

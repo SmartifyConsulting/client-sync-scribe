@@ -6,9 +6,14 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
-import { SectionCountPill, DATE_BUCKETS, dateBucketFor } from "@/components/ui/section-accordion";
-import { SectionHeader } from "@/features/patients/components/sectionStyles";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  SectionCountPill,
+  DATE_BUCKETS,
+  dateBucketFor,
+  SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+  SECTION_CONTENT_CLASS,
+} from "@/components/ui/section-accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -245,47 +250,69 @@ export default function PatientTasks() {
           {filteredTodos.length === 0 ? (
             <p className="text-xs text-muted-foreground px-1 py-6 text-center">No tasks match your search.</p>
           ) : groupBy === "date" ? (
-            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-              {dateGroups.map((group, idx) => (
-                <Collapsible key={group.key} defaultOpen={idx === 0} className="bg-white overflow-hidden">
-                  <SectionHeader icon={Clock} label={group.label} extra={<SectionCountPill count={group.items.length} />} />
-                  <CollapsibleContent className="p-3">
-                    <div className="divide-y divide-border">
-                      {group.items.map((todo) => (
-                        <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
-                      ))}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              ))}
+            <div className="rounded-xl border border-neutral-400 bg-white shadow-sm overflow-hidden">
+              <Accordion type="multiple" defaultValue={dateGroups.slice(0, 1).map((g) => g.key)} className="divide-y divide-white">
+                {dateGroups.map((group) => (
+                  <AccordionItem key={group.key} value={group.key} className="border-0">
+                    <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-primary" />
+                        <h3 className="text-base font-semibold text-primary-dark">{group.label}</h3>
+                        <SectionCountPill count={group.items.length} />
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className={SECTION_CONTENT_CLASS}>
+                      <div className="divide-y divide-border">
+                        {group.items.map((todo) => (
+                          <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
           ) : (
-            <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
-              {pendingTodos.length > 0 && (
-                <Collapsible defaultOpen className="bg-white overflow-hidden">
-                  <SectionHeader icon={Clock} label="Pending" extra={<SectionCountPill count={pendingTodos.length} />} />
-                  <CollapsibleContent className="p-3">
-                    <div className="divide-y divide-border">
-                      {pendingTodos.map((todo) => (
-                        <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
-                      ))}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
+            <div className="rounded-xl border border-neutral-400 bg-white shadow-sm overflow-hidden">
+              <Accordion type="multiple" defaultValue={["pending"]} className="divide-y divide-white">
+                {pendingTodos.length > 0 && (
+                  <AccordionItem value="pending" className="border-0">
+                    <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-primary" />
+                        <h3 className="text-base font-semibold text-primary-dark">Pending</h3>
+                        <SectionCountPill count={pendingTodos.length} />
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className={SECTION_CONTENT_CLASS}>
+                      <div className="divide-y divide-border">
+                        {pendingTodos.map((todo) => (
+                          <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
 
-              {completedTodos.length > 0 && (
-                <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                  <SectionHeader icon={CheckCircle2} label="Completed" extra={<SectionCountPill count={completedTodos.length} />} />
-                  <CollapsibleContent className="p-3">
-                    <div className="divide-y divide-border">
-                      {completedTodos.map((todo) => (
-                        <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
-                      ))}
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              )}
+                {completedTodos.length > 0 && (
+                  <AccordionItem value="completed" className="border-0">
+                    <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                        <h3 className="text-base font-semibold text-primary-dark">Completed</h3>
+                        <SectionCountPill count={completedTodos.length} />
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className={SECTION_CONTENT_CLASS}>
+                      <div className="divide-y divide-border">
+                        {completedTodos.map((todo) => (
+                          <TaskCard key={todo.id} todo={todo} onComplete={fetchTodos} />
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+              </Accordion>
             </div>
           )}
         </>
