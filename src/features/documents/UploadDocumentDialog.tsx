@@ -303,5 +303,6 @@ export function UploadDocumentDialog({ open, onOpenChange, onUploaded }: UploadD
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
