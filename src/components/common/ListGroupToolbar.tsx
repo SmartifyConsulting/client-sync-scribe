@@ -58,6 +58,10 @@ interface Props<T> {
   defaultOpenFirst?: boolean;
   /** Hide the search box, group-by select, and actions row entirely (default false). */
   hideControls?: boolean;
+  /** Drop the shared frame and space groups apart (matches the dashboard To-Do list). */
+  frameless?: boolean;
+  /** Optional icon rendered before each group heading label. */
+  headerIcon?: React.ComponentType<{ className?: string }>;
 }
 
 export function ListGroupToolbar<T>({
@@ -70,7 +74,10 @@ export function ListGroupToolbar<T>({
   actions,
   defaultOpenFirst = true,
   hideControls = false,
+  frameless = false,
+  headerIcon: HeaderIcon,
 }: Props<T>) {
+
   const prefKey = `listGroupBy:${storageKey}`;
   const [query, setQuery] = React.useState("");
   const [debounced, setDebounced] = React.useState("");
