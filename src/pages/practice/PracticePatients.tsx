@@ -57,7 +57,7 @@ export default function PracticePatients() {
     <div className="space-y-4 p-4 md:p-6">
       <div className="flex items-center gap-2">
         <Users className="h-5 w-5 text-primary" />
-        <h1 className="text-xl font-semibold">Practice Patients</h1>
+        <h1 className="text-3xl font-bold text-foreground">Practice Patients</h1>
       </div>
       <p className="text-sm text-muted-foreground">
         Administrative view of the practice doctors' patients. Clinical records are not shown.

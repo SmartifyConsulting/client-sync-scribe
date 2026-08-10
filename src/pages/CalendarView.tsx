@@ -578,7 +578,7 @@ export default function CalendarView() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">{t("nav.myCalendar", "Calendar")}</h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-xs">
             {t("calendar.subtitle")}
           </p>
         </div>

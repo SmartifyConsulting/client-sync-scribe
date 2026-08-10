@@ -580,7 +580,7 @@ export default function TodoList() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-base font-semibold text-foreground">{t("nav.myTasks", "Tasks")}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("nav.myTasks", "Tasks")}</h1>
           <p className="mt-1 text-muted-foreground text-xs">Manage your tasks with voice or text input — AI can auto-execute actions</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">

@@ -70,7 +70,7 @@ export default function PatientAdmissions() {
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex items-center gap-2">
         <BedDouble className="h-5 w-5 text-primary" />
-        <h1 className="text-lg font-semibold text-foreground">My Admissions</h1>
+        <h1 className="text-3xl font-bold text-foreground">My Admissions</h1>
       </div>
 
       {loading ? (

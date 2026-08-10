@@ -74,7 +74,7 @@ export default function HolarcHelpProviderIncidents() {
       <Link to="/admin/users"><Button size="sm" variant="ghost" className="text-primary"><ArrowLeft className="mr-1 h-4 w-4" /> Back to admin</Button></Link>
       <div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Incident history</p>
-        <h1 className="text-2xl font-extrabold">{providerName}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{providerName}</h1>
         <p className="text-xs text-muted-foreground">{provider?.country ?? "—"} · {provider?.tier ?? "—"} · <span className="capitalize">{provider?.status}</span></p>
       </div>
 

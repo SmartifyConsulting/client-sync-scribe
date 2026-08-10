@@ -1115,7 +1115,7 @@ export default function MyPractice() {
       <div className="space-y-4 animate-fade-in">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Round Tables</h1>
-          <p className="text-muted-foreground text-sm">View round table discussions you've contributed to</p>
+          <p className="text-muted-foreground text-xs">View round table discussions you've contributed to</p>
         </div>
         <DoctorRoundTables />
       </div>
@@ -1603,9 +1603,9 @@ export default function MyPractice() {
 
                   <Tabs defaultValue="existing">
                     <TabsList className="grid w-full grid-cols-3 bg-neutral-600">
-                      <TabsTrigger value="existing" className="text-xs data-[state=active]:bg-white data-[state=active]:text-black text-white">Select existing</TabsTrigger>
-                      <TabsTrigger value="invite" className="text-xs data-[state=active]:bg-white data-[state=active]:text-black text-white">Invite by email</TabsTrigger>
-                      <TabsTrigger value="share" className="text-xs data-[state=active]:bg-white data-[state=active]:text-black text-white">Share app link</TabsTrigger>
+                      <TabsTrigger value="existing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Select existing</TabsTrigger>
+                      <TabsTrigger value="invite" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Invite by email</TabsTrigger>
+                      <TabsTrigger value="share" className="data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:text-xs sm:px-3 sm:py-1.5">Share app link</TabsTrigger>
                     </TabsList>
 
                     {/* ── Existing user ── */}
