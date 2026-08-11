@@ -30,6 +30,7 @@ import {
 import { useDocuments } from "@/hooks/useDocuments";
 import { useTemplates } from "@/hooks/useTemplates";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
 import { UploadDocumentDialog } from "@/features/documents/UploadDocumentDialog";
 import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
 import { format } from "date-fns";
@@ -98,6 +99,7 @@ export default function DoctorDocumentsTab() {
   const [groupMode, setGroupMode] = useState<GroupMode>("type");
   const [selectedTemplate, setSelectedTemplate] = useState<(typeof templates)[number] | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<DocRow | null>(null);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -280,7 +282,7 @@ export default function DoctorDocumentsTab() {
                             <div className="divide-y divide-border">
                               {rows.map((d) => (
                                 <div key={d.id} className="px-4 py-3">
-                                  <DocumentCard doc={d} />
+                                  <DocumentCard doc={d} onPreview={setPreviewDoc} />
                                 </div>
                               ))}
                             </div>
@@ -292,7 +294,7 @@ export default function DoctorDocumentsTab() {
                   <ul className="space-y-2">
                     {g.rows.map((d) => (
                       <li key={d.id}>
-                        <DocumentCard doc={d} />
+                        <DocumentCard doc={d} onPreview={setPreviewDoc} />
                       </li>
                     ))}
                   </ul>
@@ -320,6 +322,13 @@ export default function DoctorDocumentsTab() {
           }}
           onClose={() => setSelectedTemplate(null)}
           onSave={() => setSelectedTemplate(null)}
+        />
+      )}
+
+      {previewDoc && (
+        <DocumentPreviewWithLetterhead
+          document={previewDoc as any}
+          onClose={() => setPreviewDoc(null)}
         />
       )}
 
