@@ -69,12 +69,18 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     const clean = line
       .replace(/^[•\-*\u2022]\s*/, "")
       // Severity markers are conveyed by colour in the UI, not by a repeated word.
-      // They can appear anywhere (start of line, after a bullet, mid-sentence).
-      .replace(/\[(?:caution|note|critical|warning|important)\]\s*/gi, "")
-      .replace(/^(?:caution|note|warning|important)\s*[:\-–]\s*/i, "")
+      // They can appear anywhere: bracketed, bolded, parenthesised, or mid-sentence.
+      .replace(/[\[(]\s*(?:caution|note|critical|warning|important)\s*[\])]\s*[:\-–]?\s*/gi, "")
+      .replace(/\*{1,2}\s*(?:caution|note|critical|warning|important)\s*\*{1,2}\s*[:\-–]?\s*/gi, "")
+      .replace(/(^|[.;:—–-]\s*)(?:caution|note|warning|important)\s*[:\-–]\s*/gi, "$1")
+      .replace(/\b(?:caution|note)\s*[:\-–]\s*/gi, "")
+      .replace(/^(?:caution|note|warning|important)\b[\s:,\-–]*/i, "")
+      .replace(/\s*[—–-]?\s*\((?:caution|note)\)\s*/gi, " ")
       .replace(/\s{2,}/g, " ")
+      .replace(/^[\s:,\-–]+/, "")
       .trim();
     if (!clean || isCaution(clean)) return;
+
 
     const key = fuzzyKey(clean);
     if (!key || seen.has(key)) return;
