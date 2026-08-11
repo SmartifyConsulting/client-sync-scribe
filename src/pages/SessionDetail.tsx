@@ -620,7 +620,12 @@ export default function SessionDetail() {
         </div>
       )}
 
+      {previewDoc && (
+        <DocumentPreviewWithLetterhead document={previewDoc} onClose={() => setPreviewDoc(null)} />
+      )}
+
       {/* Prescription Editor Modal */}
+
       {showPrescriptionEditor && session.patient && (
         <PrescriptionEditor
           patientId={session.patient_id}
