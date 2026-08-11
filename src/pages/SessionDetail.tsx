@@ -481,22 +481,9 @@ export default function SessionDetail() {
         }
       />
 
-      {/* Retention notice — downloads now sit directly under the audio player */}
-      {(session.audio_url || session.transcript) && (
-        <p className="text-xs text-muted-foreground flex items-center gap-2">
-          <Volume2 className="h-3.5 w-3.5 text-primary" />
-          Voice recordings and transcriptions are automatically deleted after 7 days. AI summaries remain
-          permanently.
-        </p>
-      )}
+      {/* Retention notice now sits beside the download control in the AI Summary card,
+          and session notes are folded into the AI Clinician Notes panel. */}
 
-      {/* Manual session notes */}
-      {session.notes && (
-        <div className="rounded-xl border border-primary bg-card p-4">
-          <p className="text-sm font-semibold text-foreground mb-2">Notes</p>
-          <p className="text-sm text-foreground whitespace-pre-wrap">{session.notes}</p>
-        </div>
-      )}
 
       {/* Private Notes — doctor-only */}
       <div className="rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-6">
