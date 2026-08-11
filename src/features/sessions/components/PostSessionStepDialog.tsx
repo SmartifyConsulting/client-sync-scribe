@@ -16,7 +16,7 @@ import { VisitCategoryDialog } from "./VisitCategoryDialog";
 import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
 import { DocumentPreview } from "./DocumentPreview";
 import { useProfile } from "@/hooks/useProfile";
-import { useHeaderFooterTemplates, mergeHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
+import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 
 const DOC_ICONS: Record<string, typeof FileText> = {
   medcert: FileText,
@@ -70,7 +70,10 @@ function DocStepDialog({
   const { templates: headerFooterTemplates } = useHeaderFooterTemplates();
   // Preview the document exactly as it will be printed/emailed — with the
   // practice letterhead and footer applied, not as bare content.
-  const headerFooter = mergeHeaderFooterTemplates(headerFooterTemplates || []);
+  const headerFooter =
+    (headerFooterTemplates || []).find((t) => /header and footer|default/i.test(t.name || "")) ||
+    (headerFooterTemplates || [])[0] ||
+    null;
 
   useEffect(() => {
     if (!open) return;
