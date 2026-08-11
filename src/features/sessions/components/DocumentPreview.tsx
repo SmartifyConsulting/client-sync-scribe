@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { X, Eye, Printer, Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,8 +106,8 @@ export function DocumentPreview({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
+  const overlay = (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
       <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl border border-primary bg-card shadow-lg">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
@@ -164,7 +165,7 @@ export function DocumentPreview({
 
       {/* Email Dialog */}
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent>
+        <DialogContent className="z-[210]">
           <DialogHeader>
             <DialogTitle>Share Document via Email</DialogTitle>
           </DialogHeader>
@@ -211,4 +212,8 @@ export function DocumentPreview({
       </Dialog>
     </div>
   );
+
+  // Rendered in a portal above any open dialog / toast so the document is
+  // always in front, with its own close button in the header.
+  return typeof document !== "undefined" ? createPortal(overlay, document.body) : overlay;
 }

@@ -25,6 +25,26 @@ const CAUTION_PATTERNS = [
 
 const isCaution = (line: string) => CAUTION_PATTERNS.some((re) => re.test(line));
 
+const STOP_WORDS = new Set([
+  "the", "a", "an", "of", "or", "and", "to", "in", "for", "with", "her", "his", "their",
+  "patient", "patients", "rule", "out", "has", "have", "is", "are", "was", "were", "that",
+]);
+
+/**
+ * Normalised comparison key that ignores filler words and word order so
+ * near-duplicate lines ("Trismus (difficulty opening the mouth)" vs
+ * "Trismus (difficulty opening mouth)") collapse into one bullet.
+ */
+const fuzzyKey = (line: string) =>
+  line
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((w) => w && !STOP_WORDS.has(w))
+    .sort()
+    .join(" ");
+
+
 const titleCase = (raw: string) =>
   raw
     .toLowerCase()
@@ -49,12 +69,14 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     const clean = line
       .replace(/^[•\-*\u2022]\s*/, "")
       // Severity markers are conveyed by colour in the UI, not by a repeated word.
-      .replace(/^\[(?:caution|note|critical|warning)\]\s*/i, "")
+      // They can appear anywhere (start of line, after a bullet, mid-sentence).
+      .replace(/\[(?:caution|note|critical|warning|important)\]\s*/gi, "")
       .replace(/^(?:caution|note|warning|important)\s*[:\-–]\s*/i, "")
+      .replace(/\s{2,}/g, " ")
       .trim();
     if (!clean || isCaution(clean)) return;
 
-    const key = clean.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const key = fuzzyKey(clean);
     if (!key || seen.has(key)) return;
     seen.add(key);
     if (!current) {
@@ -63,6 +85,7 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     }
     current.items.push(clean);
   };
+
 
   for (const raw of lines) {
     const line = raw.trim();

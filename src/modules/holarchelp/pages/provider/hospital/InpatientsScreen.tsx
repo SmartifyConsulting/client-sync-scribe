@@ -131,9 +131,9 @@ export default function InpatientsScreen() {
         <Accordion type="multiple" defaultValue={groups.slice(0, 1).map((g) => g.key)} className={SECTION_FRAME_CLASS}>
           {groups.map((group) => (
             <AccordionItem key={group.key} value={group.key} className={SECTION_ITEM_CLASS}>
-              <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>
+              <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "py-3")}>
                 <div className="flex flex-1 items-center justify-between gap-3 pr-2">
-                  <span className="text-base font-bold">{group.name}</span>
+                  <span className="text-xs font-semibold tracking-wide">{group.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs">
                       {wardName(group.rows[0].ward_id)} · {new Date(group.latest).toLocaleDateString()}
@@ -143,17 +143,17 @@ export default function InpatientsScreen() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <Accordion type="multiple" className="rounded-lg border border-border overflow-hidden">
+                <Accordion type="multiple" className={SECTION_FRAME_CLASS}>
                   {group.rows.map((p) => {
                     const href = recordLink(p);
                     return (
-                      <AccordionItem key={p.id} value={p.id} className="border-b border-border last:border-b-0 bg-card">
-                        <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-muted/50">
+                      <AccordionItem key={p.id} value={p.id} className={SECTION_ITEM_CLASS}>
+                        <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "py-3")}>
                           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pr-2 text-left">
-                            <span className="text-sm font-semibold">
+                            <span className="text-xs font-semibold tracking-wide">
                               {wardName(p.ward_id)} · Bed {p.bed_number || "—"}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs">
                               <span className="capitalize">{p.status}</span> · {new Date(p.admitted_at).toLocaleString()}
                             </span>
                           </div>
