@@ -35,3 +35,55 @@ The Admissions list adopts the same section styling used on the patient profile'
 - `InpatientsScreen.tsx`: `recordLink` points at the hospital route; accordion classes swap to the `SectionHeader` typography/`SECTION_*` scale from `src/features/patients/components/sectionStyles.tsx`.
 - Database migration: read policies on `patients` (and the clinical tables the screen reads) via a security-definer helper that checks for a current admission at the caller's hospital; plus data backfill inserting and linking the missing patient records.
 - No changes to the doctor-side patient profile.
+
+---
+
+# Session screen: task noise, AI Clinician layout, document confirmations
+
+## 5. Stop non-actionable items landing in the To-Do list
+
+The "General Tasks" bucket is where patient-less to-dos collect, and it is filling with items that are not real tasks. Recent examples from the live list:
+
+- "Schedule appointment with Unknown Patient on 2026-08-18 at 09:00 (30 min)"
+- "Schedule a follow-up appointment on 2026-08-18 to discuss HRT treatment plan. (Patient not specified)"
+- "Dr. Allie to issue a medical certificate for Georgia Adams for today. (Patient Georgia Adams not found in list)"
+- "Schedule an appointment with Dr. Buttons for a foot assessment (No matching patient for Dr. Buttons)"
+- Long clinical narration copied verbatim from the AI summary ("Review medications (Oroclor, Ibuprofen) and assess effectiveness… calculate Centor Score…")
+
+Rules to apply when action points are turned into to-dos:
+- Discard anything whose text carries an unresolved-patient marker ("Unknown Patient", "Patient not specified", "not found in list", "No matching patient").
+- Discard scheduling items — follow-ups are handled by the Schedule step of the post-session queue, so they must not also become a task.
+- Discard items that duplicate a document already generated this session (certificate/prescription/referral/invoice), since a "Review …" task is created for those already.
+- Keep only short, actionable clinical instructions tied to a patient; anything longer than a sentence is trimmed to its actionable clause.
+- Anything still patient-less after that is attached to the session's patient rather than dumped into General Tasks.
+
+## 6. Remove the "Opening session" toast
+
+The toast fired when Start Session is clicked goes away; navigation alone is the feedback.
+
+## 7. Prescription generation
+
+Prescriptions are only created when the analysis returns medications. Add a fallback so that when the transcript clearly contains prescribed medication but the structured prescription is missing, the medications are re-extracted from the summary/transcript before the queue is built, and log the reason when nothing can be produced so the doctor is not left guessing.
+
+## 8. AI Clinician notes: remove CAUTION noise and widen the panel
+
+- Strip the repeated "CAUTION" / "NOTE" prefixes from clinician output; severity is shown by colour, not by a repeated word.
+- The left recording frame ends just below the audio playback — no trailing empty space.
+- AI Clinician Notes then spans the full width of the screen beneath it.
+- Body text drops to the same size as the Patient Overview content in the top frame.
+- Section headings render bold; key terms are bold and colour-coded, with a small legend (e.g. red = risk/red flag, amber = caution, teal = medication, grey = investigation) shown inline on the AI Clinician Notes heading row.
+
+## 9. Medical Certificate preview uses the real template
+
+The preview currently shows the raw generated text. It will render through the same document renderer used elsewhere — the doctor's letterhead header, body in the certificate template layout, signature block and footer — so the preview matches exactly what gets sent.
+
+## 10. Replace toast confirmations for documents
+
+Generation, save and send confirmations stop using toast messages. Each step confirms inline in the step dialog with its existing micro-animation (paper plane for sent, floppy disk for saved, tick for generated) and a persistent state on the document card, so the doctor can see what happened after the animation ends.
+
+## Technical notes (this section)
+
+- `src/pages/Sessions.tsx`, `src/features/sessions/components/PostSessionStepDialog.tsx`, `SessionResultPanels.tsx`, `ClinicianNotesAccordion.tsx`, `src/features/sessions/utils/clinicianNotesSections.ts`.
+- To-do filtering happens where action points are converted (`supabase/functions/process-todo-actions`) plus a client-side guard before insert.
+- `src/pages/PatientProfile.tsx` line ~234: remove the "Opening session" toast.
+- Certificate preview reuses the shared document renderer and header/footer hooks already used by the Documents module.
