@@ -592,12 +592,19 @@ export function useTemplates() {
   const seedDefaultTemplates = async () => {
     if (!user) return;
 
+    const letterheadId = await ensureDefaultLetterheadId();
     const templatesWithUserId = defaultTemplates.map((t) => ({
       ...t,
       user_id: user.id,
+      header_template_id: letterheadId,
+      footer_template_id: letterheadId,
     }));
 
-    const { data, error } = await supabase.from("templates").insert(templatesWithUserId).select();
+    const { data, error } = await supabase
+      .from("templates")
+      .upsert(templatesWithUserId, { onConflict: "user_id,name", ignoreDuplicates: true })
+      .select();
+
 
     if (error) {
       console.error("Error seeding templates:", error);
