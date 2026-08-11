@@ -117,7 +117,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
 
 /** Nurses on duty get a lean menu focused on their shift and their patients. */
 const nurseNavItems: (NavItem & { tour?: string })[] = [
-  { icon: Clock, label: "My Shift", labelKey: "nav.myShift", to: "/my-shift" },
+  { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
   { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/provider/hospital/inpatients" },
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
