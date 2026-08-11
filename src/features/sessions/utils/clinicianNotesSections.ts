@@ -49,12 +49,14 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     const clean = line
       .replace(/^[•\-*\u2022]\s*/, "")
       // Severity markers are conveyed by colour in the UI, not by a repeated word.
-      .replace(/^\[(?:caution|note|critical|warning)\]\s*/i, "")
+      // They can appear anywhere (start of line, after a bullet, mid-sentence).
+      .replace(/\[(?:caution|note|critical|warning|important)\]\s*/gi, "")
       .replace(/^(?:caution|note|warning|important)\s*[:\-–]\s*/i, "")
+      .replace(/\s{2,}/g, " ")
       .trim();
     if (!clean || isCaution(clean)) return;
 
-    const key = clean.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const key = fuzzyKey(clean);
     if (!key || seen.has(key)) return;
     seen.add(key);
     if (!current) {
@@ -63,6 +65,7 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     }
     current.items.push(clean);
   };
+
 
   for (const raw of lines) {
     const line = raw.trim();
