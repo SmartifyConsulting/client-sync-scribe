@@ -80,10 +80,20 @@ export function SessionResultPanels({
               <audio controls className="w-full h-8" src={audioUrl}>
                 Your browser does not support audio playback.
               </audio>
-              {audioActions && <div className="mt-2 flex items-center gap-2">{audioActions}</div>}
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {audioActions}
+                {showRetentionNotice && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Volume2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                    Voice recordings and transcriptions are automatically deleted after 7 days. AI
+                    summaries remain permanently.
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>
+
 
         {/* Action Points */}
         <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
