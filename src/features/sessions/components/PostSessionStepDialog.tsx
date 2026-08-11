@@ -154,11 +154,20 @@ function DocStepDialog({
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total</p>
               <p className="text-2xl font-bold text-foreground">{extractInvoiceTotal(doc.content)}</p>
             </div>
-            <DialogFooter>
-              <Button onClick={() => setInvoiceStage("detail")} className="w-full sm:w-auto gap-1.5">
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowPreview(true)}
+                className="w-full sm:w-auto gap-1.5"
+              >
+                <Eye className="h-4 w-4" />
                 Preview Invoice
               </Button>
+              <Button onClick={() => setInvoiceStage("detail")} className="w-full sm:w-auto gap-1.5">
+                Review &amp; Send
+              </Button>
             </DialogFooter>
+
           </>
         ) : (
           <>
