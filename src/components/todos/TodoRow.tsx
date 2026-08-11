@@ -141,10 +141,17 @@ export function TodoRow({
     <TooltipProvider delayDuration={300}>
       <div
         className={cn(
-          "flex items-center gap-3 rounded-md pr-2 hover:bg-muted/40 group text-sm",
-          "pl-2",
-          compact ? "py-1.5" : "py-2",
-          todo.completed && "bg-muted/20"
+          "group text-sm",
+          insideGroup
+            ? cn(
+                "flex items-center gap-3 py-2 px-3 rounded-xl border border-border bg-card cursor-default transition-colors hover:bg-muted/50",
+                todo.completed && "bg-muted/20",
+              )
+            : cn(
+                "flex items-center gap-3 rounded-md pr-2 pl-2 hover:bg-muted/40",
+                compact ? "py-1.5" : "py-2",
+                todo.completed && "bg-muted/20",
+              ),
         )}
       >
         {isAppointment ? (
@@ -157,51 +164,79 @@ export function TodoRow({
           />
         )}
 
-
         {/* Kind icon */}
-        <Icon className="h-4 w-4 text-primary shrink-0" />
-
-        {/* Label */}
-        <span
-          className={cn(
-            "flex-1 min-w-0 truncate font-medium",
-            todo.completed && "line-through text-muted-foreground"
-          )}
-        >
-          {primaryLabel}
-        </span>
-
-        {/* Appointment: date · time chunk always visible */}
-        {isAppointment && (display.date || display.time) && (
-          <span className="inline-flex items-center gap-1 text-muted-foreground shrink-0">
-            <CalendarDays className="h-3.5 w-3.5" />
-            {[display.date, display.time].filter(Boolean).join(" · ")}
-          </span>
+        {insideGroup ? (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
+        ) : (
+          <Icon className="h-4 w-4 text-primary shrink-0" />
         )}
 
-        {/* Non-appointment meta: date */}
-        {!isAppointment && display.date && !compact && (
-          <span className="hidden sm:inline-flex items-center gap-1 text-muted-foreground shrink-0">
-            <CalendarDays className="h-3.5 w-3.5" />
-            {display.date}
-          </span>
+        {insideGroup ? (
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <p
+                className={cn(
+                  "font-medium text-sm text-foreground truncate",
+                  todo.completed && "line-through text-muted-foreground",
+                )}
+              >
+                {primaryLabel}
+              </p>
+            </div>
+            {(display.date || display.time || display.duration) && (
+              <p className="text-xs text-muted-foreground truncate">
+                {[display.date, display.time, display.duration].filter(Boolean).join(" · ")}
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Label */}
+            <span
+              className={cn(
+                "flex-1 min-w-0 truncate font-medium",
+                todo.completed && "line-through text-muted-foreground"
+              )}
+            >
+              {primaryLabel}
+            </span>
+
+            {/* Appointment: date · time chunk always visible */}
+            {isAppointment && (display.date || display.time) && (
+              <span className="inline-flex items-center gap-1 text-muted-foreground shrink-0">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {[display.date, display.time].filter(Boolean).join(" · ")}
+              </span>
+            )}
+
+            {/* Non-appointment meta: date */}
+            {!isAppointment && display.date && !compact && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-muted-foreground shrink-0">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {display.date}
+              </span>
+            )}
+
+            {/* Non-appointment meta: time */}
+            {!isAppointment && display.time && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-muted-foreground shrink-0">
+                <Clock className="h-3.5 w-3.5" />
+                {display.time}
+              </span>
+            )}
+
+            {/* Meta: duration */}
+            {display.duration && !compact && (
+              <span className="hidden md:inline-flex items-center gap-1 text-muted-foreground shrink-0">
+                <Timer className="h-3.5 w-3.5" />
+                {display.duration}
+              </span>
+            )}
+          </>
         )}
 
-        {/* Non-appointment meta: time */}
-        {!isAppointment && display.time && (
-          <span className="hidden sm:inline-flex items-center gap-1 text-muted-foreground shrink-0">
-            <Clock className="h-3.5 w-3.5" />
-            {display.time}
-          </span>
-        )}
-
-        {/* Meta: duration */}
-        {display.duration && !compact && (
-          <span className="hidden md:inline-flex items-center gap-1 text-muted-foreground shrink-0">
-            <Timer className="h-3.5 w-3.5" />
-            {display.duration}
-          </span>
-        )}
 
         {/* Actions */}
         <div className="flex items-center gap-0.5 shrink-0">

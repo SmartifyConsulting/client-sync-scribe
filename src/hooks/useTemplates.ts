@@ -448,8 +448,47 @@ export function useTemplates() {
     }
   }, [user]);
 
+  /**
+   * Returns the id of the account's default letterhead, creating the standard
+   * one if the account has none, so seeded templates always get a header/footer.
+   */
+  const ensureDefaultLetterheadId = async (): Promise<string | null> => {
+    if (!user) return null;
+    const { data: existing } = await supabase
+      .from("header_footer_templates")
+      .select("id, is_default, created_at")
+      .eq("user_id", user.id)
+      .order("is_default", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(1);
+    if (existing && existing.length > 0) return existing[0].id;
+
+    const { data: created } = await supabase
+      .from("header_footer_templates")
+      .insert({
+        user_id: user.id,
+        name: "Header and Footer",
+        header: {
+          left: { text: "<b>Dr. [Insert Data here]:</b> MP [Insert Data here]\n[Cell: Insert Data here]", alignment: "left" },
+          center: { text: "<b>[INSERT PRACTICE NAME]</b>\n<b>ADDRESS:</b> Insert Data here", alignment: "center" },
+          right: { text: "<b>CONTACT DETAILS:</b>\nPractice Contact Number: Insert Data here", alignment: "right" },
+        },
+        footer: {
+          left: { text: "", alignment: "left" },
+          center: { text: "<b>REGISTRATION NO.:  Insert Data here</b>", alignment: "center" },
+          right: { text: "", alignment: "right" },
+        },
+        font_family: "sans",
+        is_default: true,
+      })
+      .select("id")
+      .single();
+    return created?.id ?? null;
+  };
+
   const fetchTemplates = async () => {
     if (!user) return;
+
 
     setLoading(true);
     const { data, error } = await supabase
@@ -482,8 +521,18 @@ export function useTemplates() {
       const missingDefaults = defaultTemplates.filter(dt => !existingNames.has(dt.name));
 
       if (missingDefaults.length > 0) {
-        const toInsert = missingDefaults.map(t => ({ ...t, user_id: user.id }));
-        const { data: newData } = await supabase.from("templates").insert(toInsert).select();
+        const letterheadId = await ensureDefaultLetterheadId();
+        const toInsert = missingDefaults.map(t => ({
+          ...t,
+          user_id: user.id,
+          header_template_id: letterheadId,
+          footer_template_id: letterheadId,
+        }));
+        const { data: newData } = await supabase
+          .from("templates")
+          .upsert(toInsert, { onConflict: "user_id,name", ignoreDuplicates: true })
+          .select();
+
         if (newData) {
           const newParsed = newData.map(t => ({
             ...t,
@@ -543,12 +592,19 @@ export function useTemplates() {
   const seedDefaultTemplates = async () => {
     if (!user) return;
 
+    const letterheadId = await ensureDefaultLetterheadId();
     const templatesWithUserId = defaultTemplates.map((t) => ({
       ...t,
       user_id: user.id,
+      header_template_id: letterheadId,
+      footer_template_id: letterheadId,
     }));
 
-    const { data, error } = await supabase.from("templates").insert(templatesWithUserId).select();
+    const { data, error } = await supabase
+      .from("templates")
+      .upsert(templatesWithUserId, { onConflict: "user_id,name", ignoreDuplicates: true })
+      .select();
+
 
     if (error) {
       console.error("Error seeding templates:", error);
