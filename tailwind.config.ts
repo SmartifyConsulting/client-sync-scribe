@@ -56,6 +56,17 @@ export default {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
         },
+        clinical: {
+          impression: "hsl(var(--clinical-impression))",
+          "impression-border": "hsl(var(--clinical-impression-border))",
+          safety: "hsl(var(--clinical-safety))",
+          "safety-border": "hsl(var(--clinical-safety-border))",
+          differential: "hsl(var(--clinical-differential))",
+          "differential-border": "hsl(var(--clinical-differential-border))",
+          checks: "hsl(var(--clinical-checks))",
+          "checks-border": "hsl(var(--clinical-checks-border))",
+        },
+
         terracotta: {
           DEFAULT: "hsl(var(--terracotta))",
           foreground: "hsl(var(--terracotta-foreground))",
