@@ -575,57 +575,67 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  // Silently generate every AI-detected document, then show ONE summary dialog
-  // instead of chaining separate popups together.
-  const generateAllDocuments = useCallback(async () => {
-    const results: GeneratedDoc[] = [];
-    if (extractedMedCert) {
-      const d = await createMedCertDocument(extractedMedCert);
-      if (d) results.push(d);
-    }
-    if (extractedPrescription) {
-      const d = await createPrescriptionDocument(extractedPrescription);
-      if (d) results.push(d);
-    }
-    if (extractedInvoice) {
-      const d = await createInvoiceDocument(extractedInvoice);
-      if (d) results.push(d);
-    }
-    if (extractedReferral) {
-      const d = await createReferralDocument(extractedReferral);
-      if (d) results.push(d);
-    }
+  // Silently generate every AI-detected document, then run the sequential
+  // post-session queue. The extracted payload is passed in explicitly so this
+  // never reads state that has not committed yet.
+  const generateAllDocuments = useCallback(async (payload?: {
+    medCert?: MedCertData | null;
+    prescription?: PrescriptionData | null;
+    invoice?: InvoiceData | null;
+    referral?: ReferralData | null;
+  }) => {
+    const medCert = payload?.medCert ?? extractedMedCert;
+    const prescriptionData = payload?.prescription ?? extractedPrescription;
+    let invoiceData = payload?.invoice ?? extractedInvoice;
+    const referralData = payload?.referral ?? extractedReferral;
+
     // Every consultation is billable — if the AI didn't pick up explicit billing
-    // talk, still raise a standard consultation invoice so the doctor always has
-    // a document to review, send or discard.
-    if (!extractedInvoice) {
+    // talk, raise a standard consultation invoice (single source of truth).
+    if (!invoiceData?.items?.length) {
       const amount = await lookupConsultationPrice();
-      const d = await createInvoiceDocument({
+      invoiceData = {
         items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
         total: amount,
-      } as InvoiceData);
+      } as InvoiceData;
+      setExtractedInvoice(invoiceData);
+    }
+
+    // Create documents in the review order: prescription → med cert → referral → invoice.
+    const results: GeneratedDoc[] = [];
+    if (prescriptionData) {
+      const d = await createPrescriptionDocument(prescriptionData);
+      if (d) results.push(d);
+    }
+    if (medCert) {
+      const d = await createMedCertDocument(medCert);
+      if (d) results.push(d);
+    }
+    if (referralData) {
+      const d = await createReferralDocument(referralData);
+      if (d) results.push(d);
+    }
+    if (invoiceData) {
+      const d = await createInvoiceDocument(invoiceData);
       if (d) results.push(d);
     }
     setGeneratedDocs(results);
 
-    // Build the sequential post-session queue from only the documents that were
-    // actually generated this session, then always end with schedule → invoice → vula.
+    // Prescription → med cert → referral → any other doc → schedule → invoice → vulas.
     const steps: PostSessionStepType[] = [];
-    if (extractedPrescription) steps.push("prescription");
-    if (extractedMedCert) steps.push("medcert");
-    if (extractedReferral) steps.push("referral");
-    // Any other generated document types slot in before the invoice.
+    if (prescriptionData) steps.push("prescription");
+    if (medCert) steps.push("medcert");
+    if (referralData) steps.push("referral");
     for (const d of results) {
       const key = d.key as PostSessionStepType;
       if (!steps.includes(key) && key !== "invoice") steps.push(key);
     }
-    // Invoice is always second-last, Vulas last.
     steps.push("schedule", "invoice", "vula");
     setPostSessionQueue(steps);
     setPostSessionIndex(0);
     setShowPostSessionFlow(true);
 
   }, [extractedMedCert, extractedPrescription, extractedInvoice, extractedReferral, patientId, currentPatient]);
+
 
   // Callback to handle session completion after transcription
   const handleSessionComplete = useCallback(async (transcriptText: string, visitCategories?: string[] | null) => {
@@ -665,34 +675,24 @@ export default function Sessions() {
         if (docs?.follow_up_appointment?.follow_up_date) {
           setExtractedFollowUp(docs.follow_up_appointment);
         }
-        if (docs?.medical_certificate) {
-          setExtractedMedCert(docs.medical_certificate);
-          hasDocs = true;
-        }
-        if (docs?.prescription) {
-          setExtractedPrescription(docs.prescription);
-          if (!hasDocs) { hasDocs = true; }
-        }
-        if (docs?.invoice?.items?.length) {
-          setExtractedInvoice(docs.invoice);
-          if (!hasDocs) { hasDocs = true; }
-        } else if (fullContent?.trim()) {
-          // A consultation always bills — synthesise a default line item so the
-          // doctor is always offered an invoice to review (amount pre-filled from
-          // their Service Offerings & Pricing where available).
-          const amount = await lookupConsultationPrice();
-          setExtractedInvoice({
-            items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
-            total: amount,
-          } as any);
-          if (!hasDocs) { hasDocs = true; }
-        }
-        if (docs?.referral) {
-          setExtractedReferral(docs.referral);
-          if (!hasDocs) { hasDocs = true; }
-        }
-        // Silently create every detected document, then show one summary dialog.
-        setTimeout(() => generateAllDocuments(), 0);
+        const medCert = docs?.medical_certificate || null;
+        const prescriptionData = docs?.prescription || null;
+        const invoiceData = docs?.invoice?.items?.length ? docs.invoice : null;
+        const referralData = docs?.referral || null;
+        if (medCert) { setExtractedMedCert(medCert); hasDocs = true; }
+        if (prescriptionData) { setExtractedPrescription(prescriptionData); hasDocs = true; }
+        if (invoiceData) { setExtractedInvoice(invoiceData); hasDocs = true; }
+        if (referralData) { setExtractedReferral(referralData); hasDocs = true; }
+
+        // Create every detected document from the freshly returned payload
+        // (state may not have committed yet), then run the review queue.
+        await generateAllDocuments({
+          medCert,
+          prescription: prescriptionData,
+          invoice: invoiceData,
+          referral: referralData,
+        });
+
       } else {
         setSummary("No content was recorded or noted.");
         setActionPoints([]);
