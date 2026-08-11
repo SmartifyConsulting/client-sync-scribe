@@ -448,8 +448,47 @@ export function useTemplates() {
     }
   }, [user]);
 
+  /**
+   * Returns the id of the account's default letterhead, creating the standard
+   * one if the account has none, so seeded templates always get a header/footer.
+   */
+  const ensureDefaultLetterheadId = async (): Promise<string | null> => {
+    if (!user) return null;
+    const { data: existing } = await supabase
+      .from("header_footer_templates")
+      .select("id, is_default, created_at")
+      .eq("user_id", user.id)
+      .order("is_default", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(1);
+    if (existing && existing.length > 0) return existing[0].id;
+
+    const { data: created } = await supabase
+      .from("header_footer_templates")
+      .insert({
+        user_id: user.id,
+        name: "Header and Footer",
+        header: {
+          left: { text: "<b>Dr. [Insert Data here]:</b> MP [Insert Data here]\n[Cell: Insert Data here]", alignment: "left" },
+          center: { text: "<b>[INSERT PRACTICE NAME]</b>\n<b>ADDRESS:</b> Insert Data here", alignment: "center" },
+          right: { text: "<b>CONTACT DETAILS:</b>\nPractice Contact Number: Insert Data here", alignment: "right" },
+        },
+        footer: {
+          left: { text: "", alignment: "left" },
+          center: { text: "<b>REGISTRATION NO.:  Insert Data here</b>", alignment: "center" },
+          right: { text: "", alignment: "right" },
+        },
+        font_family: "sans",
+        is_default: true,
+      })
+      .select("id")
+      .single();
+    return created?.id ?? null;
+  };
+
   const fetchTemplates = async () => {
     if (!user) return;
+
 
     setLoading(true);
     const { data, error } = await supabase
