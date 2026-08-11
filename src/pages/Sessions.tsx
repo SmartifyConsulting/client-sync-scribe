@@ -550,10 +550,11 @@ export default function Sessions() {
         key: 'invoice',
         label: 'Invoice',
         documentId: doc?.id || null,
-        content,
+        content: existing?.content || content,
         recipientEmail: (currentPatient as any)?.email || null,
         recipientName: currentPatient?.name || null,
       };
+
     } catch (e) { console.error(e); return null; }
   };
 
