@@ -140,8 +140,16 @@ export function SessionResultPanels({
         </div>
 
         <div>
-          <ClinicianNotesAccordion notes={clinicianNotes} />
+          {notesExpired ? (
+            <p className="text-xs text-muted-foreground">
+              AI Clinician notes are retained for 7 days and are no longer displayed for this
+              session.
+            </p>
+          ) : (
+            <ClinicianNotesAccordion notes={clinicianNotes} />
+          )}
         </div>
+
 
       </div>
     </div>
