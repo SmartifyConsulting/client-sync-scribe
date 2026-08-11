@@ -521,8 +521,18 @@ export function useTemplates() {
       const missingDefaults = defaultTemplates.filter(dt => !existingNames.has(dt.name));
 
       if (missingDefaults.length > 0) {
-        const toInsert = missingDefaults.map(t => ({ ...t, user_id: user.id }));
-        const { data: newData } = await supabase.from("templates").insert(toInsert).select();
+        const letterheadId = await ensureDefaultLetterheadId();
+        const toInsert = missingDefaults.map(t => ({
+          ...t,
+          user_id: user.id,
+          header_template_id: letterheadId,
+          footer_template_id: letterheadId,
+        }));
+        const { data: newData } = await supabase
+          .from("templates")
+          .upsert(toInsert, { onConflict: "user_id,name", ignoreDuplicates: true })
+          .select();
+
         if (newData) {
           const newParsed = newData.map(t => ({
             ...t,
