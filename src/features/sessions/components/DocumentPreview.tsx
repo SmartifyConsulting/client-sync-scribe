@@ -165,7 +165,7 @@ export function DocumentPreview({
 
       {/* Email Dialog */}
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent>
+        <DialogContent className="z-[210]">
           <DialogHeader>
             <DialogTitle>Share Document via Email</DialogTitle>
           </DialogHeader>
