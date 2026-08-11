@@ -46,8 +46,14 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
   const seen = new Set<string>();
 
   const pushLine = (line: string) => {
-    const clean = line.replace(/^[•\-*\u2022]\s*/, "").trim();
+    const clean = line
+      .replace(/^[•\-*\u2022]\s*/, "")
+      // Severity markers are conveyed by colour in the UI, not by a repeated word.
+      .replace(/^\[(?:caution|note|critical|warning)\]\s*/i, "")
+      .replace(/^(?:caution|note|warning|important)\s*[:\-–]\s*/i, "")
+      .trim();
     if (!clean || isCaution(clean)) return;
+
     const key = clean.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     if (!key || seen.has(key)) return;
     seen.add(key);

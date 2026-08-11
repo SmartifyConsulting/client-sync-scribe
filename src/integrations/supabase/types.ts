@@ -7440,6 +7440,10 @@ export type Database = {
         Returns: boolean
       }
       norm_text: { Args: { _t: string }; Returns: string }
+      patient_admitted_at_my_hospital: {
+        Args: { _patient_id: string }
+        Returns: boolean
+      }
       process_provider_approval: {
         Args: { _action: string; _token: string }
         Returns: Json

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { AlertCircle, Brain, CheckCircle, Sparkles, ShieldAlert } from "lucide-react";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
 import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
+import { ClinicianLegend } from "../lib/clinicianHighlights";
+
 
 interface SessionResultPanelsProps {
   /** Finalised transcript — rendered in a collapsed accordion when present. */
@@ -103,34 +105,22 @@ export function SessionResultPanels({
       </div>
 
       {/* AI Clinician Decision Support */}
-      <div className="rounded-xl border border-primary/30 bg-card p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Brain className="h-5 w-5 text-primary" />
+      <div className="rounded-xl border border-primary/30 bg-card p-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Brain className="h-4 w-4 text-primary" />
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">AI Clinician</h3>
-              <p className="text-sm text-muted-foreground">
-                Get AI-powered diagnostic recommendations based on patient history
-              </p>
-            </div>
+            <h3 className="text-sm font-bold text-foreground">AI Clinician Notes</h3>
+            <ClinicianLegend className="ml-2" />
           </div>
           {clinicianActions}
         </div>
 
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
-          <ShieldAlert className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-          <p className="text-xs text-amber-700">
-            <strong>For Clinical Decision Support Only:</strong> This AI analysis is confidential and intended to
-            assist physician judgment. It is not a diagnosis and should not be shared with patients. Always apply
-            clinical expertise.
-          </p>
-        </div>
-
-        <div className="max-h-[400px] overflow-y-auto">
+        <div>
           <ClinicianNotesAccordion notes={clinicianNotes} />
         </div>
+
       </div>
     </div>
   );

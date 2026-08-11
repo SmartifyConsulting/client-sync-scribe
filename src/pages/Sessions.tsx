@@ -1308,7 +1308,7 @@ export default function Sessions() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
           {/* Record Session — column 1, full height (rows 1-3) */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 lg:min-h-[700px]">
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 self-start">
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -1493,6 +1493,11 @@ export default function Sessions() {
               </div>
             )}
 
+          </div>
+        </div>
+
+        {/* AI Clinician Notes — full width beneath the recording and overview columns. */}
+        <div className="mt-4">
             <Tabs defaultValue="notes">
               <TabsList className="mb-2 bg-neutral-600">
                 <TabsTrigger value="notes" className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
@@ -1550,7 +1555,6 @@ export default function Sessions() {
                 />
               </TabsContent>
             </Tabs>
-          </div>
         </div>
         </>
       )}

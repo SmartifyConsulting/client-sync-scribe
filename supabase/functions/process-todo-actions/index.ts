@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { classifyTask } from "../_shared/taskAssignee.ts";
+import { classifyTask, sanitizeTaskTitle } from "../_shared/taskAssignee.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -234,7 +234,7 @@ Rules:
           }
           await supabase.from("todos").insert({
             user_id: user.id,
-            title: action.description,
+            title: sanitizeTaskTitle(action.description),
             priority: "medium",
             status: "pending",
             is_auto_executed: false,
@@ -426,7 +426,7 @@ Rules:
         if (autoOwner !== "skip") {
           await supabase.from("todos").insert({
             user_id: user.id,
-            title: action.description,
+            title: sanitizeTaskTitle(action.description),
             priority: "medium",
             status: "pending",
             is_auto_executed: true,
@@ -443,7 +443,7 @@ Rules:
         if (fallbackOwner !== "skip") {
           await supabase.from("todos").insert({
             user_id: user.id,
-            title: action.description,
+            title: sanitizeTaskTitle(action.description),
             priority: "medium",
             status: "pending",
             is_auto_executed: false,

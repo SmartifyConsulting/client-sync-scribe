@@ -14,6 +14,9 @@ import type { GeneratedDoc } from "./GeneratedDocumentsDialog";
 import { FollowUpAppointmentDialog } from "./FollowUpAppointmentDialog";
 import { VisitCategoryDialog } from "./VisitCategoryDialog";
 import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
+import { DocumentPreview } from "./DocumentPreview";
+import { useProfile } from "@/hooks/useProfile";
+import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
 
 const DOC_ICONS: Record<string, typeof FileText> = {
   medcert: FileText,
@@ -63,6 +66,14 @@ function DocStepDialog({
   const [invoiceStage, setInvoiceStage] = useState<"summary" | "detail">("summary");
   const [showPreview, setShowPreview] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const { profile } = useProfile();
+  const { templates: headerFooterTemplates } = useHeaderFooterTemplates();
+  // Preview the document exactly as it will be printed/emailed — with the
+  // practice letterhead and footer applied, not as bare content.
+  const headerFooter =
+    (headerFooterTemplates || []).find((t) => /header and footer|default/i.test(t.name || "")) ||
+    (headerFooterTemplates || [])[0] ||
+    null;
 
   useEffect(() => {
     if (!open) return;
@@ -232,19 +243,17 @@ function DocStepDialog({
         )}
       </DialogContent>
 
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="sm:max-w-[760px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-primary" />
-              {doc.label} preview
-            </DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[70vh] overflow-y-auto rounded-lg border border-border bg-white p-6">
-            <div className="whitespace-pre-wrap text-sm" dangerouslySetInnerHTML={{ __html: doc.content }} />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {showPreview && (
+        <DocumentPreview
+          title={doc.label}
+          content={doc.content}
+          logoUrl={profile?.logo_url || undefined}
+          fontFamily={headerFooter?.font_family || undefined}
+          headerFooter={headerFooter}
+          onClose={() => setShowPreview(false)}
+          closeLabel="Back"
+        />
+      )}
 
       <Dialog open={showNotes} onOpenChange={setShowNotes}>
         <DialogContent className="sm:max-w-[640px]">

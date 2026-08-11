@@ -15,6 +15,8 @@ import DischargesScreen from "./pages/provider/hospital/DischargesScreen";
 import HospitalOpsLayout from "./pages/provider/hospital/HospitalOpsLayout";
 import EmergencyHubScreen from "./pages/provider/hospital/EmergencyHubScreen";
 import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
+import HospitalPatientRecordScreen from "./pages/provider/hospital/HospitalPatientRecordScreen";
+
 import HospitalDashboardScreen from "./pages/provider/hospital/HospitalDashboardScreen";
 import WardBoardScreen from "./pages/provider/hospital/WardBoardScreen";
 import ShiftsScreen from "./pages/provider/hospital/ShiftsScreen";
@@ -147,6 +149,8 @@ export default function ProviderRoutes() {
         <Route path="nurses" element={<Navigate to="/provider/hospital/providers?tab=nurses" replace />} />
         <Route path="ambulances" element={<Navigate to="/provider/hospital/providers?tab=er" replace />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
+        <Route path="patient/:patientId" element={<HospitalPatientRecordScreen />} />
+
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
 
