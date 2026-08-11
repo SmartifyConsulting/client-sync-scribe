@@ -44,6 +44,19 @@ export function DocumentPreview({
   const [emailSubject, setEmailSubject] = useState(title);
   const [isSending, setIsSending] = useState(false);
 
+  // Escape closes the preview even when it is opened above a modal dialog.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !showEmailDialog) {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [onClose, showEmailDialog]);
+
+
   // Belt-and-braces: if the parent forgot to resolve placeholders, do it here too.
   // No-op if `content` already has no [Token] markers.
   const safeContent = useMemo(() => {
