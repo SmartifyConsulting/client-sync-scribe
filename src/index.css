@@ -150,6 +150,17 @@
     --warning: 38 80% 55%;
     --warning-foreground: 0 0% 100%;
 
+    /* Pastel section tints for AI Clinician notes (muted for dark mode) */
+    --clinical-impression: 48 40% 16%;
+    --clinical-impression-border: 45 40% 34%;
+    --clinical-safety: 344 35% 18%;
+    --clinical-safety-border: 344 35% 38%;
+    --clinical-differential: 210 40% 18%;
+    --clinical-differential-border: 210 40% 38%;
+    --clinical-checks: 145 30% 16%;
+    --clinical-checks-border: 145 30% 34%;
+
+
     /* Holarc red accent — #C0252F */
     --terracotta: 356 67% 50%;
     --terracotta-foreground: 0 0% 100%;
