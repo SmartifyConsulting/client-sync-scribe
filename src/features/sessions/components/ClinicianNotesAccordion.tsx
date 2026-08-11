@@ -16,6 +16,27 @@ const ICONS: Record<string, typeof Brain> = {
   "suggested checks": ListChecks,
 };
 
+/** Pastel frame per section — yellow / pink / blue / green. */
+const TONES: Record<string, { frame: string; bullet: string }> = {
+  "working impression": {
+    frame: "bg-clinical-impression border-clinical-impression-border",
+    bullet: "border-clinical-impression-border",
+  },
+  "safety checks": {
+    frame: "bg-clinical-safety border-clinical-safety-border",
+    bullet: "border-clinical-safety-border",
+  },
+  differentials: {
+    frame: "bg-clinical-differential border-clinical-differential-border",
+    bullet: "border-clinical-differential-border",
+  },
+  "suggested checks": {
+    frame: "bg-clinical-checks border-clinical-checks-border",
+    bullet: "border-clinical-checks-border",
+  },
+};
+
+
 /**
  * Renders finalised AI Clinician notes as collapsible sections
  * (Working Impression, Safety Checks, Differentials, Suggested Checks) with
