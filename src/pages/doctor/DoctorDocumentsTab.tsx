@@ -46,15 +46,13 @@ function getSurname(name: string) {
   return (parts[parts.length - 1] || "").toUpperCase();
 }
 
-function DocumentCard({ doc }: { doc: DocRow }) {
-  const target = doc.patient_id
-    ? `/patients/${doc.patient_id}?tab=documents&doc=${doc.id}`
-    : `/documents`;
+function DocumentCard({ doc, onPreview }: { doc: DocRow; onPreview: (doc: DocRow) => void }) {
   const sample = !!doc.patient_name && isSamplePatient({ name: doc.patient_name });
 
   return (
-    <Link to={target}>
+    <button type="button" className="w-full text-left" onClick={() => onPreview(doc)}>
       <Card className="p-3 hover:bg-accent/40 transition-colors">
+
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-medium truncate flex items-center gap-1.5 text-xs">
