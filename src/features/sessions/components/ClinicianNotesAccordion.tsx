@@ -66,16 +66,18 @@ export function ClinicianNotesAccordion({
       className={cn("space-y-2", className)}
     >
       {sections.map((section) => {
-        const Icon = ICONS[section.title.toLowerCase()] || Brain;
-        const isSafety = section.title.toLowerCase() === "safety checks";
+        const key = section.title.toLowerCase();
+        const Icon = ICONS[key] || Brain;
+        const isSafety = key === "safety checks";
+        const tone = TONES[key] || { frame: "bg-card border-border", bullet: "border-primary/40" };
         return (
           <AccordionItem
             key={section.title}
             value={section.title}
-            className="rounded-lg border border-border overflow-hidden"
+            className={cn("rounded-lg border overflow-hidden", tone.frame)}
           >
             <AccordionTrigger className="px-3 py-2 hover:no-underline">
-              <span className="flex items-center gap-2 text-xs font-bold">
+              <span className="flex items-center gap-2 text-xs font-bold text-foreground">
                 <Icon className={cn("h-4 w-4", isSafety ? "text-destructive" : "text-primary")} />
                 {section.title}
                 {section.items.length > 0 && (
@@ -93,10 +95,7 @@ export function ClinicianNotesAccordion({
                   {section.items.map((item, i) => (
                     <li
                       key={i}
-                      className={cn(
-                        "text-xs leading-relaxed text-foreground pl-3 border-l-2",
-                        isSafety ? "border-destructive/50" : "border-primary/40",
-                      )}
+                      className={cn("text-xs leading-relaxed text-foreground pl-3 border-l-2", tone.bullet)}
                     >
                       {renderClinicianHighlights(item)}
                     </li>
@@ -107,6 +106,7 @@ export function ClinicianNotesAccordion({
           </AccordionItem>
         );
       })}
+
     </Accordion>
   );
 }
