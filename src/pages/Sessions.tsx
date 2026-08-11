@@ -675,34 +675,24 @@ export default function Sessions() {
         if (docs?.follow_up_appointment?.follow_up_date) {
           setExtractedFollowUp(docs.follow_up_appointment);
         }
-        if (docs?.medical_certificate) {
-          setExtractedMedCert(docs.medical_certificate);
-          hasDocs = true;
-        }
-        if (docs?.prescription) {
-          setExtractedPrescription(docs.prescription);
-          if (!hasDocs) { hasDocs = true; }
-        }
-        if (docs?.invoice?.items?.length) {
-          setExtractedInvoice(docs.invoice);
-          if (!hasDocs) { hasDocs = true; }
-        } else if (fullContent?.trim()) {
-          // A consultation always bills — synthesise a default line item so the
-          // doctor is always offered an invoice to review (amount pre-filled from
-          // their Service Offerings & Pricing where available).
-          const amount = await lookupConsultationPrice();
-          setExtractedInvoice({
-            items: [{ description: `Consultation — ${new Date().toLocaleDateString()}`, amount }],
-            total: amount,
-          } as any);
-          if (!hasDocs) { hasDocs = true; }
-        }
-        if (docs?.referral) {
-          setExtractedReferral(docs.referral);
-          if (!hasDocs) { hasDocs = true; }
-        }
-        // Silently create every detected document, then show one summary dialog.
-        setTimeout(() => generateAllDocuments(), 0);
+        const medCert = docs?.medical_certificate || null;
+        const prescriptionData = docs?.prescription || null;
+        const invoiceData = docs?.invoice?.items?.length ? docs.invoice : null;
+        const referralData = docs?.referral || null;
+        if (medCert) { setExtractedMedCert(medCert); hasDocs = true; }
+        if (prescriptionData) { setExtractedPrescription(prescriptionData); hasDocs = true; }
+        if (invoiceData) { setExtractedInvoice(invoiceData); hasDocs = true; }
+        if (referralData) { setExtractedReferral(referralData); hasDocs = true; }
+
+        // Create every detected document from the freshly returned payload
+        // (state may not have committed yet), then run the review queue.
+        await generateAllDocuments({
+          medCert,
+          prescription: prescriptionData,
+          invoice: invoiceData,
+          referral: referralData,
+        });
+
       } else {
         setSummary("No content was recorded or noted.");
         setActionPoints([]);
