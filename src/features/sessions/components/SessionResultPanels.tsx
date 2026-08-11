@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { AlertCircle, Brain, CheckCircle, Sparkles, ShieldAlert } from "lucide-react";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
 import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
+import { ClinicianLegend } from "../lib/clinicianHighlights";
+
 
 interface SessionResultPanelsProps {
   /** Finalised transcript — rendered in a collapsed accordion when present. */
