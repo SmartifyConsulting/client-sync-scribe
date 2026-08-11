@@ -30,6 +30,7 @@ import {
 import { useDocuments } from "@/hooks/useDocuments";
 import { useTemplates } from "@/hooks/useTemplates";
 import { DocumentEditor } from "@/components/documents/DocumentEditor";
+import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
 import { UploadDocumentDialog } from "@/features/documents/UploadDocumentDialog";
 import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
 import { format } from "date-fns";
@@ -46,15 +47,13 @@ function getSurname(name: string) {
   return (parts[parts.length - 1] || "").toUpperCase();
 }
 
-function DocumentCard({ doc }: { doc: DocRow }) {
-  const target = doc.patient_id
-    ? `/patients/${doc.patient_id}?tab=documents&doc=${doc.id}`
-    : `/documents`;
+function DocumentCard({ doc, onPreview }: { doc: DocRow; onPreview: (doc: DocRow) => void }) {
   const sample = !!doc.patient_name && isSamplePatient({ name: doc.patient_name });
 
   return (
-    <Link to={target}>
+    <button type="button" className="w-full text-left" onClick={() => onPreview(doc)}>
       <Card className="p-3 hover:bg-accent/40 transition-colors">
+
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="font-medium truncate flex items-center gap-1.5 text-xs">
@@ -87,7 +86,7 @@ function DocumentCard({ doc }: { doc: DocRow }) {
           )}
         </div>
       </Card>
-    </Link>
+    </button>
   );
 }
 
@@ -100,6 +99,7 @@ export default function DoctorDocumentsTab() {
   const [groupMode, setGroupMode] = useState<GroupMode>("type");
   const [selectedTemplate, setSelectedTemplate] = useState<(typeof templates)[number] | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<DocRow | null>(null);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -282,7 +282,7 @@ export default function DoctorDocumentsTab() {
                             <div className="divide-y divide-border">
                               {rows.map((d) => (
                                 <div key={d.id} className="px-4 py-3">
-                                  <DocumentCard doc={d} />
+                                  <DocumentCard doc={d} onPreview={setPreviewDoc} />
                                 </div>
                               ))}
                             </div>
@@ -294,7 +294,7 @@ export default function DoctorDocumentsTab() {
                   <ul className="space-y-2">
                     {g.rows.map((d) => (
                       <li key={d.id}>
-                        <DocumentCard doc={d} />
+                        <DocumentCard doc={d} onPreview={setPreviewDoc} />
                       </li>
                     ))}
                   </ul>
@@ -322,6 +322,13 @@ export default function DoctorDocumentsTab() {
           }}
           onClose={() => setSelectedTemplate(null)}
           onSave={() => setSelectedTemplate(null)}
+        />
+      )}
+
+      {previewDoc && (
+        <DocumentPreviewWithLetterhead
+          document={previewDoc as any}
+          onClose={() => setPreviewDoc(null)}
         />
       )}
 
