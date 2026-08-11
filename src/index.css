@@ -61,6 +61,17 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
+    /* Pastel section tints for AI Clinician notes */
+    --clinical-impression: 48 100% 94%;
+    --clinical-impression-border: 45 85% 76%;
+    --clinical-safety: 344 90% 95%;
+    --clinical-safety-border: 344 70% 82%;
+    --clinical-differential: 210 100% 95%;
+    --clinical-differential-border: 210 75% 80%;
+    --clinical-checks: 145 60% 93%;
+    --clinical-checks-border: 145 45% 74%;
+
+
     /* Holarc red accent (logo heart) — #E01837 */
     --terracotta: 356 67% 42%;
     --terracotta-foreground: 0 0% 100%;
