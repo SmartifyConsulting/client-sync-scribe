@@ -39,6 +39,26 @@ and action points stay permanent.
 The "Voice recordings and transcriptions are automatically deleted after 7 days" line moves out
 of the page footer into the AI Summary card, sitting inline beside the Download control.
 
+## 5. Remove leftover "Caution" / "Note" noise and restore colour coding
+
+"Caution" and "Note" still appear repeatedly inside clinician notes. Strengthen the cleaner so
+these words are stripped wherever they appear — inline mid-sentence, in parentheses, after a
+bullet, as bold/markdown markers, or as a repeated trailing sentence — not only at line start.
+
+Re-apply the agreed colour coding to the sections wherever clinician notes render (session
+screen, past session, prescription review): Working Impression pastel yellow, Safety Checks pink,
+Differentials blue, Suggested Checks green, bold headings, with the keyword legend
+(Risk / Caution / Medication / Investigation) on the header row.
+
+## 6. Preview documents in place, never navigate away
+
+- Session Documents frame on the session screen: the eye icon opens the document preview overlay
+  on top of the current screen instead of routing to `/documents?view=...`.
+- Documents screen: clicking a document row opens the same preview overlay rather than navigating
+  into the doctor's Documents tab.
+
+Both use the existing portaled preview with its close button; Edit keeps opening the editor.
+
 ## Technical notes
 
 - `src/pages/Sessions.tsx` — `createInvoiceDocument` reuses/looks up the session invoice document.
@@ -46,5 +66,9 @@ of the page footer into the AI Summary card, sitting inline beside the Download 
 - `src/features/sessions/components/SessionResultPanels.tsx` — accept `sessionDate` + `notes`
   fallback, render retention line next to `audioActions`.
 - `src/pages/SessionDetail.tsx` — drop the standalone Notes card and footer retention line, pass
-  `notes` and the session date down.
+  `notes` and the session date down; preview docs via local overlay state.
+- `src/features/sessions/utils/clinicianNotesSections.ts` — broader caution/note stripping.
+- `src/features/sessions/components/ClinicianNotesAccordion.tsx` — confirm pastel tones applied.
+- Documents browser/list — open `DocumentPreview` locally instead of navigating.
 - One data clean-up migration for the duplicate invoice documents.
+
