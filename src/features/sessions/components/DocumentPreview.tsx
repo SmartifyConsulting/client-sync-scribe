@@ -107,8 +107,16 @@ export function DocumentPreview({
   };
 
   const overlay = (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl border border-primary bg-card shadow-lg">
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-fade-in pointer-events-auto"
+      style={{ pointerEvents: "auto" }}
+      onMouseDown={(e) => {
+        // Clicking the backdrop closes the preview (but not clicks inside the card).
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-xl border border-primary bg-card shadow-lg pointer-events-auto">
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border p-4">
           <div className="flex items-center gap-3">
