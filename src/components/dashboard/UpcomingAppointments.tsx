@@ -12,6 +12,7 @@ interface Appointment {
   id: string;
   patientId: string | null;
   patientName: string;
+  patientCreatedAt?: string | null;
   time: string;
   type: "in-person" | "video";
   title: string;
@@ -48,14 +49,16 @@ export function UpcomingAppointments() {
           // Fetch patient names for appointments that have patient_id
           const patientIds = data.filter(a => a.patient_id).map(a => a.patient_id!);
           let patientMap: Record<string, string> = {};
-          
+          let patientCreatedAtMap: Record<string, string> = {};
+
           if (patientIds.length > 0) {
             const { data: patients } = await supabase
               .from('patients')
-              .select('id, name')
+              .select('id, name, created_at')
               .in('id', patientIds);
             if (patients) {
               patientMap = Object.fromEntries(patients.map(p => [p.id, p.name]));
+              patientCreatedAtMap = Object.fromEntries(patients.map(p => [p.id, p.created_at]));
             }
           }
 
@@ -63,6 +66,7 @@ export function UpcomingAppointments() {
             id: apt.id,
             patientId: apt.patient_id,
             patientName: apt.patient_id ? (patientMap[apt.patient_id] || apt.title) : apt.title,
+            patientCreatedAt: apt.patient_id ? patientCreatedAtMap[apt.patient_id] || null : null,
             time: format(new Date(apt.start_time), "h:mm a"),
             type: apt.type === "video" || apt.location?.toLowerCase().includes("video") ? "video" : "in-person",
             title: apt.title,
@@ -120,12 +124,12 @@ export function UpcomingAppointments() {
                     className="font-medium text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
                   >
                     {appointment.patientName}
-                    {isSamplePatient({ name: appointment.patientName }) && <SampleBadge />}
+                    {isSamplePatient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
                   </Link>
                 ) : (
                   <span className="font-medium text-foreground inline-flex items-center gap-1">
                     {appointment.patientName}
-                    {isSamplePatient({ name: appointment.patientName }) && <SampleBadge />}
+                    {isSamplePatient({ name: appointment.patientName, created_at: appointment.patientCreatedAt }) && <SampleBadge />}
                   </span>
                 )}
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">

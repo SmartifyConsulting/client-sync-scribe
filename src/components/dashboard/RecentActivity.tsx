@@ -18,6 +18,7 @@ interface Activity {
   timeIso: string;
   patientId?: string;
   patientName?: string;
+  patientCreatedAt?: string | null;
 }
 
 const activityIcons = {
@@ -72,6 +73,7 @@ export function RecentActivity() {
             timeIso: new Date(now - offsetsMs[index % offsetsMs.length]).toISOString(),
             patientId: patient.id,
             patientName: patient.name,
+            patientCreatedAt: patient.created_at,
           }));
 
           // Add a task activity without patient
@@ -150,7 +152,7 @@ export function RecentActivity() {
                     {activity.patientId && activity.patientName ? (
                       <p className="text-xs text-muted-foreground truncate inline-flex items-center gap-1">
                         {activity.patientName}
-                        {isSamplePatient({ name: activity.patientName }) && <SampleBadge />}
+                        {isSamplePatient({ name: activity.patientName, created_at: activity.patientCreatedAt }) && <SampleBadge />}
                       </p>
                     ) : (
                       <p className="text-xs text-muted-foreground truncate">
