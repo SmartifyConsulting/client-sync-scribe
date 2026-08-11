@@ -578,7 +578,7 @@ export default function SessionDetail() {
                   variant="ghost"
                   className="h-7 w-7"
                   title="Preview"
-                  onClick={() => navigate(`/documents?view=${doc.id}`)}
+                  onClick={() => setPreviewDoc(doc)}
                 >
                   <Eye className="h-3.5 w-3.5" />
                 </Button>
