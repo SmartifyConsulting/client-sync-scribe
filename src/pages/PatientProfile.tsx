@@ -230,10 +230,6 @@ export default function PatientProfile() {
 
   const handleStartSession = () => {
     navigate(`/sessions?patient=${id}&autoStart=true`);
-    toast({
-      title: "Opening session",
-      description: `Preparing consultation for ${patient?.name}`,
-    });
   };
 
   const handleScheduleAppointment = () => {
