@@ -483,7 +483,11 @@ export default function Auth() {
             }
           }
         } else {
-          // Non-invited patient: minimal patient record so MyDetails has something to edit
+          // Non-invited patient: minimal patient record so MyDetails has something to edit.
+          // Errors here (including a 23505 unique-violation if another flow,
+          // e.g. MyDetails' own self-heal, concurrently created this user's
+          // record first) are intentionally not fatal to signup — MyDetails
+          // will find/use whichever record exists on next load either way.
           await supabase.from("patients").insert({
             user_id: userId,
             patient_user_id: userId,

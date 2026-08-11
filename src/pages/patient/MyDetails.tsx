@@ -98,14 +98,29 @@ export default function MyDetails() {
           .single();
 
         if (insertErr) {
-          toast({
-            title: t("patient.myDetails.errorInitializeTitle"),
-            description: insertErr.message,
-            variant: "destructive",
-          });
-          return;
+          // A unique-violation means a concurrent flow (another tab, the
+          // signup insert, Profile.tsx's fallback) already created this
+          // user's record — fetch it instead of surfacing an error.
+          if ((insertErr as any).code === "23505") {
+            const { data: winner } = await supabase
+              .from("patients")
+              .select("*")
+              .eq("patient_user_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            data = winner;
+          } else {
+            toast({
+              title: t("patient.myDetails.errorInitializeTitle"),
+              description: insertErr.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        } else {
+          data = created;
         }
-        data = created;
       }
 
       if (data) {

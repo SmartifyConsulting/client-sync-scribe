@@ -37,15 +37,42 @@ function AutoCreatePatientFallback({ user, onCreated }: { user: any; onCreated: 
     if (!user) return;
     setCreating(true);
     try {
-      const { data: profileData } = await supabase.from("profiles").select("full_name, mobile_number").eq("id", user.id).single();
-      const { data, error } = await supabase.from("patients").insert({
-        user_id: user.id,
-        patient_user_id: user.id,
-        name: profileData?.full_name || "My Record",
-        email: user.email || null,
-        phone: profileData?.mobile_number || null,
-      }).select().single();
-      if (error) throw error;
+      // Re-check right before inserting — another tab/flow (signup, MyDetails'
+      // own self-heal) may have created this user's record in the meantime.
+      const { data: existing } = await supabase
+        .from("patients")
+        .select("*")
+        .eq("patient_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      let data = existing;
+      if (!data) {
+        const { data: profileData } = await supabase.from("profiles").select("full_name, mobile_number").eq("id", user.id).single();
+        const { data: inserted, error } = await supabase.from("patients").insert({
+          user_id: user.id,
+          patient_user_id: user.id,
+          name: profileData?.full_name || "My Record",
+          email: user.email || null,
+          phone: profileData?.mobile_number || null,
+        }).select().single();
+        // A unique-violation here means a concurrent insert won the race —
+        // fall back to fetching the record it created instead of erroring.
+        if (error && (error as any).code === "23505") {
+          const { data: winner } = await supabase
+            .from("patients")
+            .select("*")
+            .eq("patient_user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          data = winner;
+        } else if (error) {
+          throw error;
+        } else {
+          data = inserted;
+        }
+      }
       if (data) {
         onCreated({
           ...data,
