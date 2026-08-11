@@ -248,8 +248,9 @@ export function fillDocumentPlaceholders(
         replacedCount += 1;
         return val;
       }
-      // Indexed prescription slot with no data — render blank so unused rows disappear
-      if (slotKeys.has(key)) return "";
+      // Indexed prescription slot or optional field with no data — mark the line
+      // so the whole "Dosage:" / "2." skeleton row can be pruned below.
+      if (slotKeys.has(key) || OPTIONAL_TOKENS.has(key)) return EMPTY_MARK;
       // Known token, no value — render as quiet underscore placeholder.
       return blank;
     }
@@ -257,12 +258,68 @@ export function fillDocumentPlaceholders(
     return blank;
   });
 
+  const pruned = pruneEmptyLines(resolved);
+
   // Legacy templates hardcode an "INV-" prefix before [InvoiceNumber], while the
   // generated number already carries it. Collapse any duplicated prefix.
-  const deduped = resolved.replace(/\bINV-(?:INV-)+/gi, "INV-");
+  const deduped = pruned.replace(/\bINV-(?:INV-)+/gi, "INV-");
 
   return { content: deduped, replacedCount, hadPlaceholders };
 }
+
+/** Sentinel injected where an optional/indexed token resolved to nothing. */
+const EMPTY_MARK = "\u0000EMPTY\u0000";
+
+/** Single-line optional fields that should vanish entirely when blank. */
+const OPTIONAL_TOKENS = new Set([
+  "specialinstructions",
+  "numberofrepeats",
+  "repeats",
+]);
+
+/**
+ * Removes prescription rows whose value resolved to nothing (e.g. an unused
+ * medication slot leaving behind "2." / "Dosage:" / "Instructions:"), then
+ * renumbers the surviving medication entries and collapses blank-line runs.
+ */
+function pruneEmptyLines(content: string): string {
+  if (!content.includes(EMPTY_MARK)) return content;
+
+  const usesBr = /<br\s*\/?>/i.test(content);
+  const parts = usesBr ? content.split(/<br\s*\/?>/i) : content.split("\n");
+
+  const kept: string[] = [];
+  for (const raw of parts) {
+    if (!raw.includes(EMPTY_MARK)) {
+      kept.push(raw);
+      continue;
+    }
+    const withoutMark = raw.split(EMPTY_MARK).join("");
+    // Strip a leading list marker and a "Label:" prefix — if nothing meaningful
+    // remains, the row only existed to hold the missing value.
+    const remainder = withoutMark
+      .replace(/^\s*(?:\d+[.)]|[-•*])\s*/, "")
+      .replace(/^[^:<]{0,60}:\s*/, "")
+      .replace(/<[^>]*>/g, "")
+      .trim();
+    if (remainder === "") continue;
+    kept.push(withoutMark);
+  }
+
+  // Renumber surviving "1." / "2." medication rows.
+  let n = 0;
+  const renumbered = kept.map((line) =>
+    /^\s*\d+[.)]\s*\S/.test(line)
+      ? line.replace(/^(\s*)\d+([.)])/, (_m, pad) => `${pad}${++n}.`)
+      : line,
+  );
+
+  const joined = usesBr ? renumbered.join("<br>") : renumbered.join("\n");
+  return usesBr
+    ? joined.replace(/(?:<br>\s*){3,}/gi, "<br><br>")
+    : joined.replace(/\n{3,}/g, "\n\n");
+}
+
 
 /**
  * True if the content still contains any unresolved [Token] placeholder.
