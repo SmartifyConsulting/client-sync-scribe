@@ -93,7 +93,7 @@ export default function InpatientsScreen() {
     reload();
   };
 
-  const recordLink = (p: InpatientRecord) => (p.patient_id ? `/patients/${p.patient_id}` : null);
+  const recordLink = (p: InpatientRecord) => (p.patient_id ? `/provider/hospital/patient/${p.patient_id}` : null);
 
   return (
     <div className="space-y-4">
@@ -143,11 +143,11 @@ export default function InpatientsScreen() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <Accordion type="multiple" className="space-y-2">
+                <Accordion type="multiple" className="rounded-lg border border-border overflow-hidden">
                   {group.rows.map((p) => {
                     const href = recordLink(p);
                     return (
-                      <AccordionItem key={p.id} value={p.id} className="rounded-xl border border-primary bg-card overflow-hidden">
+                      <AccordionItem key={p.id} value={p.id} className="border-b border-border last:border-b-0 bg-card">
                         <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-muted/50">
                           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pr-2 text-left">
                             <span className="text-sm font-semibold">
