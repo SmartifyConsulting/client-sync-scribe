@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AlertCircle, Brain, CheckCircle, Sparkles, ShieldAlert } from "lucide-react";
+import { AlertCircle, Brain, CheckCircle, Sparkles, Volume2 } from "lucide-react";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
 import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
 import { ClinicianLegend } from "../lib/clinicianHighlights";
@@ -23,7 +23,13 @@ interface SessionResultPanelsProps {
   summaryActions?: ReactNode;
   /** Shown when action points were pushed to the to-do list. */
   showTodoHint?: boolean;
+  /** Session start date — clinician notes are only shown for 7 days after this. */
+  sessionDate?: string | Date | null;
+  /** Shows the 7-day recording retention line under the audio player. */
+  showRetentionNotice?: boolean;
 }
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * The shared "session results" layout — transcript, AI summary, action points and
@@ -41,7 +47,13 @@ export function SessionResultPanels({
   clinicianActions,
   summaryActions,
   showTodoHint = true,
+  sessionDate,
+  showRetentionNotice = false,
 }: SessionResultPanelsProps) {
+  const notesExpired = sessionDate
+    ? Date.now() - new Date(sessionDate).getTime() > SEVEN_DAYS_MS
+    : false;
+
   return (
     <div className="space-y-6">
       {transcript ? (
