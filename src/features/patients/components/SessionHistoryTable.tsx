@@ -89,7 +89,7 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
                       <Clock className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium text-foreground">
+                      <p className="text-xs font-semibold text-foreground">
                         {format(new Date(session.started_at), "MMM d, yyyy")}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -98,14 +98,15 @@ export function SessionHistoryTable({ sessions, patientId, patientName, allergie
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-xs text-foreground">
                   {session.duration_minutes ? `${session.duration_minutes} min` : "—"}
                 </TableCell>
                 <TableCell>
-                  <p className="text-lg text-muted-foreground line-clamp-2">
+                  <p className="text-xs text-muted-foreground line-clamp-2">
                     {session.summary || "No summary available"}
                   </p>
                 </TableCell>
+
                 <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center justify-end gap-2">
                     <Button
