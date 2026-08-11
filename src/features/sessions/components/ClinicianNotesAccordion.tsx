@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { parseClinicianNotes } from "../utils/clinicianNotesSections";
+import { renderClinicianHighlights } from "../lib/clinicianHighlights";
 
 const ICONS: Record<string, typeof Brain> = {
   "working impression": Stethoscope,
@@ -53,7 +54,7 @@ export function ClinicianNotesAccordion({
             className="rounded-lg border border-border overflow-hidden"
           >
             <AccordionTrigger className="px-3 py-2 hover:no-underline">
-              <span className="flex items-center gap-2 text-sm font-semibold">
+              <span className="flex items-center gap-2 text-xs font-bold">
                 <Icon className={cn("h-4 w-4", isSafety ? "text-destructive" : "text-primary")} />
                 {section.title}
                 {section.items.length > 0 && (
@@ -65,18 +66,18 @@ export function ClinicianNotesAccordion({
             </AccordionTrigger>
             <AccordionContent className="px-3 pb-3">
               {section.text ? (
-                <p className="text-sm leading-relaxed text-foreground">{section.text}</p>
+                <p className="text-xs leading-relaxed text-foreground">{renderClinicianHighlights(section.text)}</p>
               ) : (
                 <ul className="space-y-1.5">
                   {section.items.map((item, i) => (
                     <li
                       key={i}
                       className={cn(
-                        "text-sm leading-relaxed text-foreground pl-3 border-l-2",
+                        "text-xs leading-relaxed text-foreground pl-3 border-l-2",
                         isSafety ? "border-destructive/50" : "border-primary/40",
                       )}
                     >
-                      {item}
+                      {renderClinicianHighlights(item)}
                     </li>
                   ))}
                 </ul>
