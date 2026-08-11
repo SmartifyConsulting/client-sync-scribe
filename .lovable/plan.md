@@ -59,7 +59,15 @@ Differentials blue, Suggested Checks green, bold headings, with the keyword lege
 
 Both use the existing portaled preview with its close button; Edit keeps opening the editor.
 
+## 7. Fix the preview close button in the post-session sequence
+
+When a document is previewed during the generation sequence (preview / send / save steps), the
+close button does not dismiss the preview. Make the close action reliably clear the preview state
+and return to the step dialog — including Escape and clicking the backdrop — without closing the
+underlying generation sequence.
+
 ## Technical notes
+
 
 - `src/pages/Sessions.tsx` — `createInvoiceDocument` reuses/looks up the session invoice document.
 - `src/features/patients/components/SessionHistoryTable.tsx` — typography.
