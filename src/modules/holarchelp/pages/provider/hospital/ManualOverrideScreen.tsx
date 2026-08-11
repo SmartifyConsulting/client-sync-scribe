@@ -45,17 +45,14 @@ export default function ManualOverrideScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Admin Functions
-        </p>
-        <h1 className="text-3xl font-extrabold">Manual Override</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Manual Override</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Emergency override of standard dispatch protocols (requires authorization)
         </p>
       </header>
 
       {/* Warning */}
-      <div className="rounded-2xl border-l-4 border-l-red-600 bg-red-50 p-6 max-w-2xl">
+      <div className="rounded-xl border-l-4 border-l-red-600 bg-red-50 p-5 max-w-2xl">
         <div className="flex gap-3">
           <AlertTriangle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
@@ -70,7 +67,7 @@ export default function ManualOverrideScreen() {
 
       <div className="grid gap-6 max-w-2xl">
         {/* Override Type */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Override Type</h2>
           <select
             value={override.override_type}
@@ -96,7 +93,7 @@ export default function ManualOverrideScreen() {
         </div>
 
         {/* Reason */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Justification</h2>
           <textarea
             value={override.reason}
@@ -108,7 +105,7 @@ export default function ManualOverrideScreen() {
         </div>
 
         {/* Authorization */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
             <Lock className="h-5 w-5 text-primary" />
             Authorization
@@ -149,7 +146,7 @@ export default function ManualOverrideScreen() {
         </div>
 
         {/* Audit Notes */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Audit Notes</h2>
           <textarea
             value={override.notes}
@@ -164,7 +161,7 @@ export default function ManualOverrideScreen() {
         </div>
 
         {/* Summary */}
-        <div className="rounded-2xl border bg-blue-50 p-4">
+        <div className="rounded-xl border border-primary bg-blue-50 p-4">
           <p className="text-sm font-semibold text-blue-900">⚠️ Important Reminder</p>
           <ul className="text-xs text-blue-800 mt-2 space-y-1 ml-4 list-disc">
             <li>All overrides are permanently logged and audited</li>

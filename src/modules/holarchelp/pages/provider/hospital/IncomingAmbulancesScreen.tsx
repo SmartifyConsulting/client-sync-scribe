@@ -66,11 +66,11 @@ export default function IncomingAmbulancesScreen() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-extrabold">Incoming Ambulances</h2>
+      <h1 className="text-3xl font-bold text-foreground">Incoming Ambulances</h1>
 
 
       {!rows.length && (
-        <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           <AlertTriangle className="mx-auto mb-2 h-5 w-5 opacity-50" />
           No ambulances currently en route to your facility.
         </div>
@@ -81,7 +81,7 @@ export default function IncomingAmbulancesScreen() {
         {rows.map((r) => {
           const crew = crews[r.assigned_provider_id ?? ""];
           return (
-            <div key={r.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+            <div key={r.id} className="overflow-hidden rounded-xl border border-primary bg-card shadow-sm">
               <div className="flex items-center justify-between gap-3 border-b px-3 py-2">
                 <div className="min-w-0">
                   <p className="flex items-center gap-1.5 text-sm font-extrabold">

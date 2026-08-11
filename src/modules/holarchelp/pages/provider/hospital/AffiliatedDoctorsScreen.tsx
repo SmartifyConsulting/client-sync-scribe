@@ -70,7 +70,7 @@ export default function AffiliatedDoctorsScreen() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-lg font-bold flex items-center gap-2"><Stethoscope className="h-5 w-5 text-primary" /> Our Doctors</h1>
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2"><Stethoscope className="h-6 w-6 text-primary" /> Our Doctors</h1>
           <p className="text-xs text-muted-foreground">Doctors who serve at this hospital. Pending rows link automatically when the doctor signs up.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ export default function AffiliatedDoctorsScreen() {
             const practiceNo = r.doctor?.practice_number || r.pending_doctor_payload?.practice_number;
             const mobile = r.doctor?.mobile_number || r.pending_doctor_payload?.mobile_number;
             return (
-              <Card key={r.id} className={`p-3 flex items-center gap-3 border-2 ${pending ? "border-dashed border-muted-foreground/30" : "border-primary/20"}`}>
+              <Card key={r.id} className={`rounded-xl p-5 flex items-center gap-3 border bg-card ${pending ? "border-dashed border-muted-foreground/30" : "border-primary"}`}>
                 <Avatar className="h-12 w-12 border-2 border-primary/40">
                   <AvatarImage src={r.doctor?.avatar_url || undefined} />
                   <AvatarFallback>{pending ? <UserPlus className="h-4 w-4" /> : name.slice(0, 1)}</AvatarFallback>

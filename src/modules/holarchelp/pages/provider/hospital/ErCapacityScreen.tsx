@@ -37,7 +37,7 @@ export default function ErCapacityScreen() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-extrabold">{t("capacity.title")}</h2>
+      <h1 className="text-3xl font-bold text-foreground">{t("capacity.title")}</h1>
 
       <div className="grid gap-3 md:grid-cols-3">
         <Tile icon={Activity} label={t("capacity.status")}>
@@ -79,7 +79,7 @@ export default function ErCapacityScreen() {
 }
 
 const Tile = ({ icon: Icon, label, children }: any) => (
-  <div className="overflow-hidden rounded-2xl border-2 border-primary bg-card">
+  <div className="overflow-hidden rounded-xl border-2 border-primary bg-card">
     <p className="flex items-center gap-1.5 bg-primary px-3 py-2 text-sm font-bold uppercase tracking-wider text-white">
       <Icon className="h-3.5 w-3.5 text-white" /> {label}
     </p>

@@ -128,9 +128,9 @@ export function ImportDoctorsDialog({ hospitalId, onImported }: { hospitalId: st
                 <Badge variant="outline">{summary.skipped} skipped</Badge>
                 {summary.errors > 0 && <Badge variant="destructive">{summary.errors} errors</Badge>}
               </div>
-              <div className="max-h-56 overflow-auto rounded-md border divide-y text-xs">
+              <div className="max-h-56 overflow-auto rounded-md border p-1.5 space-y-1 text-xs">
                 {results.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between px-2 py-1.5">
+                  <div key={i} className="flex items-center justify-between rounded border bg-card px-2 py-1.5">
                     <span className="truncate">{r.full_name || <em className="text-muted-foreground">(no name)</em>}</span>
                     <span className="flex items-center gap-2">
                       <Badge variant={

@@ -86,11 +86,8 @@ export default function MultiIncidentBoardScreen() {
       <div className="space-y-6">
         <header className="flex items-end justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Dispatch Management
-            </p>
-            <h1 className="text-3xl font-extrabold">Multi-Incident Board</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Multi-Incident Board</h1>
+            <p className="text-xs text-muted-foreground mt-1">
               Overview of all active incidents and their dispatch status
             </p>
           </div>
@@ -183,10 +180,7 @@ export default function MultiIncidentBoardScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Dispatch Management
-          </p>
-          <h1 className="text-3xl font-extrabold">Multi-Incident Board</h1>
+            <h1 className="text-3xl font-bold text-foreground">Multi-Incident Board</h1>
         </div>
         <Button size="sm" variant="outline" onClick={() => setViewMode("grid")}>
           Switch to Grid

@@ -66,18 +66,15 @@ export default function ActiveDispatchScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Real-time Tracking
-        </p>
-        <h1 className="text-3xl font-extrabold">Active Dispatch: {dispatch.ambulance_id}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Active Dispatch: {dispatch.ambulance_id}</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Monitor live dispatch status and communication
         </p>
       </header>
 
       <div className="grid gap-6 max-w-3xl">
         {/* Status Card */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-xs text-muted-foreground">DISPATCH STATUS</p>
@@ -105,7 +102,7 @@ export default function ActiveDispatchScreen() {
         </div>
 
         {/* Location & Navigation */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
             Location & Route
@@ -140,7 +137,7 @@ export default function ActiveDispatchScreen() {
         </div>
 
         {/* Patient Status */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-primary" />
             Patient Status
@@ -155,7 +152,7 @@ export default function ActiveDispatchScreen() {
         </div>
 
         {/* Crew Communication */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <Phone className="h-5 w-4 text-primary" />
             Crew Communication
@@ -176,7 +173,7 @@ export default function ActiveDispatchScreen() {
         </div>
 
         {/* Timeline */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <Clock className="h-5 w-4 text-primary" />
             Dispatch Timeline

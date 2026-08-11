@@ -59,18 +59,15 @@ export default function IncidentTriageScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Emergency Dispatch
-        </p>
-        <h1 className="text-3xl font-extrabold">Incident Triage Assessment</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Incident Triage Assessment</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Categorize the incident by severity, type, and urgency
         </p>
       </header>
 
       <div className="grid gap-6 max-w-2xl">
         {/* Severity Level */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Severity Level</h2>
           <div className="grid grid-cols-4 gap-2">
             {SEVERITY_OPTIONS.map((option) => (
@@ -91,7 +88,7 @@ export default function IncidentTriageScreen() {
         </div>
 
         {/* Incident Type */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Incident Type</h2>
           <select
             value={triage.type}
@@ -107,7 +104,7 @@ export default function IncidentTriageScreen() {
         </div>
 
         {/* Urgency Level */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Response Urgency</h2>
           <div className="space-y-2">
             {[
@@ -150,7 +147,7 @@ export default function IncidentTriageScreen() {
         </div>
 
         {/* Vital Signs Assessment */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Vital Signs Assessment</h2>
           <div className="space-y-4">
             <div>
@@ -196,7 +193,7 @@ export default function IncidentTriageScreen() {
         </div>
 
         {/* Additional Notes */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Additional Notes</h2>
           <textarea
             value={triage.notes}

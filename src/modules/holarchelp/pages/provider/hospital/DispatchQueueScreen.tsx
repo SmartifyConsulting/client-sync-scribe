@@ -4,6 +4,7 @@ import { useProviderAccess } from "../../../components/ProviderGate";
 import { Button } from "@/components/ui/button";
 import { Clock, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SECTION_FRAME_CLASS, SECTION_ITEM_CLASS } from "@/components/ui/section-accordion";
 
 interface QueuedDispatch {
   id: string;
@@ -110,36 +111,33 @@ export default function DispatchQueueScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Dispatch Management
-        </p>
-        <h1 className="text-3xl font-extrabold">Dispatch Queue</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Dispatch Queue</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Monitor all dispatches: waiting, active, delayed, and completed
         </p>
       </header>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="rounded-2xl border bg-card p-4">
+        <div className="rounded-xl border border-primary bg-card p-4">
           <p className="text-xs font-semibold uppercase text-muted-foreground">
             Waiting
           </p>
           <p className="text-3xl font-bold text-yellow-600 mt-1">{stats.waiting}</p>
         </div>
-        <div className="rounded-2xl border bg-card p-4">
+        <div className="rounded-xl border border-primary bg-card p-4">
           <p className="text-xs font-semibold uppercase text-muted-foreground">
             Active
           </p>
           <p className="text-3xl font-bold text-blue-600 mt-1">{stats.active}</p>
         </div>
-        <div className="rounded-2xl border bg-card p-4">
+        <div className="rounded-xl border border-primary bg-card p-4">
           <p className="text-xs font-semibold uppercase text-muted-foreground">
             Delayed
           </p>
           <p className="text-3xl font-bold text-red-600 mt-1">{stats.delayed}</p>
         </div>
-        <div className="rounded-2xl border bg-card p-4">
+        <div className="rounded-xl border border-primary bg-card p-4">
           <p className="text-xs font-semibold uppercase text-muted-foreground">
             Completed
           </p>
@@ -163,11 +161,11 @@ export default function DispatchQueueScreen() {
       </div>
 
       {/* Queue List */}
-      <div className="space-y-2">
+      <div className={SECTION_FRAME_CLASS}>
         {filteredData.map((dispatch) => (
           <div
             key={dispatch.id}
-            className="rounded-2xl border bg-card p-4 hover:bg-muted/50 transition-colors"
+            className={cn(SECTION_ITEM_CLASS, "p-4 hover:bg-muted/50 transition-colors")}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -195,7 +193,7 @@ export default function DispatchQueueScreen() {
                 </div>
 
                 <h3 className="text-base font-bold">{dispatch.incident_id}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{dispatch.location}</p>
+                <p className="text-xs text-muted-foreground mt-1">{dispatch.location}</p>
 
                 <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                   <span>Created: {dispatch.created_at}</span>
@@ -225,7 +223,7 @@ export default function DispatchQueueScreen() {
       </div>
 
       {filteredData.length === 0 && (
-        <div className="rounded-2xl border bg-muted p-8 text-center">
+        <div className="rounded-xl border border-neutral-400 bg-muted p-8 text-center">
           <p className="text-muted-foreground">No {filter !== "all" ? filter : ""} dispatches</p>
         </div>
       )}

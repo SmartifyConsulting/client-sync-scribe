@@ -104,11 +104,11 @@ export default function HospitalOpsDashboard() {
   return (
     <div className="space-y-4">
       <header className="flex items-end justify-between">
-        <h1 className="text-2xl font-extrabold leading-tight">{t("hospital.liveQueue")}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t("hospital.liveQueue")}</h1>
         <span className="rounded-full border bg-card px-2.5 py-1 text-xs font-semibold">{rows.length} {t("hospital.active")}</span>
       </header>
 
-      <div className="overflow-hidden rounded-2xl border bg-card">
+      <div className="overflow-hidden rounded-xl border border-neutral-400 bg-card">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
             <tr>

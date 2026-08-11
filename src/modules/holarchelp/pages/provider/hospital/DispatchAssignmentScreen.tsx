@@ -45,18 +45,15 @@ export default function DispatchAssignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Emergency Dispatch
-        </p>
-        <h1 className="text-3xl font-extrabold">Confirm Dispatch Assignment</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Confirm Dispatch Assignment</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Finalize assignment and send dispatch to crew
         </p>
       </header>
 
       <div className="grid gap-6 max-w-2xl">
         {/* Dispatch Details */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Dispatch Details</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -92,7 +89,7 @@ export default function DispatchAssignmentScreen() {
         </div>
 
         {/* Destination */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
             Hospital Destination
@@ -113,7 +110,7 @@ export default function DispatchAssignmentScreen() {
         </div>
 
         {/* Route Priority */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Route Priority</h2>
           <div className="space-y-2">
             {[
@@ -157,7 +154,7 @@ export default function DispatchAssignmentScreen() {
         </div>
 
         {/* Special Instructions */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Special Instructions</h2>
           <textarea
             value={dispatch.special_instructions}

@@ -4,6 +4,8 @@ import { useProviderAccess } from "../../../components/ProviderGate";
 import ErCapacityScreen from "./ErCapacityScreen";
 import { Badge } from "@/components/ui/badge";
 import { HeartPulse } from "lucide-react";
+import { SECTION_FRAME_CLASS, SECTION_ITEM_CLASS } from "@/components/ui/section-accordion";
+import { cn } from "@/lib/utils";
 
 type Row = {
   id: string;
@@ -48,18 +50,18 @@ export default function TraumaBaysScreen() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-extrabold">Trauma Bays</h2>
+      <h1 className="text-3xl font-bold text-foreground">Trauma Bays</h1>
 
-      <div className="space-y-2 rounded-2xl border bg-card p-3">
+      <div className="space-y-2">
         <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground">
           <HeartPulse className="h-3.5 w-3.5" /> Current bay assignments
         </p>
         {!rows.length ? (
           <p className="text-sm text-muted-foreground">No trauma bays currently assigned.</p>
         ) : (
-          <div className="divide-y">
+          <div className={SECTION_FRAME_CLASS}>
             {rows.map((r) => (
-              <div key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+              <div key={r.id} className={cn(SECTION_ITEM_CLASS, "flex flex-wrap items-center justify-between gap-2 px-3 py-3")}>
                 <div className="min-w-0">
                   <p className="text-sm font-bold">{r.assigned_trauma_bay}</p>
                   <p className="text-xs text-muted-foreground">

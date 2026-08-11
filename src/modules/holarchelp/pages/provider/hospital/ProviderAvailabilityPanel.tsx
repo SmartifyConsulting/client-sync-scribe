@@ -54,6 +54,7 @@ const STATUS_CONFIG = {
     icon: "✓",
     color: "text-green-600",
     bgColor: "bg-green-50",
+    borderColor: "border-green-500",
     badgeColor: "bg-green-100 text-green-800",
     label: "AVAILABLE",
   },
@@ -61,6 +62,7 @@ const STATUS_CONFIG = {
     icon: "⚠",
     color: "text-orange-600",
     bgColor: "bg-orange-50",
+    borderColor: "border-orange-500",
     badgeColor: "bg-orange-100 text-orange-800",
     label: "LIMITED CAPACITY",
   },
@@ -68,6 +70,7 @@ const STATUS_CONFIG = {
     icon: "✗",
     color: "text-red-600",
     bgColor: "bg-red-50",
+    borderColor: "border-red-500",
     badgeColor: "bg-red-100 text-red-800",
     label: "NO CAPACITY",
   },
@@ -88,8 +91,7 @@ export function ProviderAvailabilityPanel({ onSelectProvider }: { onSelectProvid
         return (
           <div
             key={provider.id}
-            className={`rounded-xl border-2 p-4 space-y-3 ${config.bgColor} border-current`}
-            style={{ borderColor: config.color }}
+            className={`rounded-xl border-2 p-5 space-y-3 ${config.bgColor} ${config.borderColor}`}
           >
             {/* Header */}
             <div className="flex items-start justify-between">

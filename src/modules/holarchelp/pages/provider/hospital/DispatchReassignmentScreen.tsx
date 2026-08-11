@@ -68,18 +68,15 @@ export default function DispatchReassignmentScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Dispatch Management
-        </p>
-        <h1 className="text-3xl font-extrabold">Reassign Dispatch</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Reassign Dispatch</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Change ambulance assignment for an active dispatch
         </p>
       </header>
 
       <div className="grid gap-6 max-w-2xl">
         {/* Current Assignment */}
-        <div className="rounded-2xl border-2 border-orange-200 bg-orange-50 p-6">
+        <div className="rounded-xl border-2 border-orange-200 bg-orange-50 p-5">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-orange-600" />
             Current Assignment
@@ -110,7 +107,7 @@ export default function DispatchReassignmentScreen() {
         </div>
 
         {/* Reassignment Reason */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h3 className="text-lg font-bold mb-4">Reason for Reassignment</h3>
           <select
             value={reassignmentReason}
@@ -128,7 +125,7 @@ export default function DispatchReassignmentScreen() {
         </div>
 
         {/* Available Ambulances */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <ArrowLeftRight className="h-5 w-5 text-primary" />
             Available Ambulances
@@ -162,7 +159,7 @@ export default function DispatchReassignmentScreen() {
 
         {/* Comparison */}
         {selectedAmbulance && (
-          <div className="rounded-2xl border bg-blue-50 p-6">
+          <div className="rounded-xl border border-primary bg-blue-50 p-5">
             <h3 className="text-lg font-bold mb-4">Comparison</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">

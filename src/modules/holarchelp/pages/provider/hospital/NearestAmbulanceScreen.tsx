@@ -70,11 +70,8 @@ export default function NearestAmbulanceScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Emergency Dispatch
-        </p>
-        <h1 className="text-3xl font-extrabold">Recommended Ambulances</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Recommended Ambulances</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Select the nearest available ambulance for dispatch
         </p>
       </header>
@@ -84,7 +81,7 @@ export default function NearestAmbulanceScreen() {
           <div
             key={ambulance.id}
             onClick={() => handleSelect(ambulance.id)}
-            className={`rounded-2xl border-2 p-5 cursor-pointer transition-all ${
+            className={`rounded-xl border-2 p-5 cursor-pointer transition-all ${
               selectedAmbulance === ambulance.id
                 ? "border-primary bg-primary/10"
                 : "border-border hover:border-primary/50"
@@ -134,7 +131,7 @@ export default function NearestAmbulanceScreen() {
       </div>
 
       {/* Quick Stats */}
-      <div className="rounded-2xl border bg-card p-6 max-w-2xl">
+      <div className="rounded-xl border border-primary bg-card p-5 max-w-2xl">
         <h3 className="text-sm font-bold mb-3">DISPATCH SUMMARY</h3>
         {selectedAmbulance && (
           <div className="space-y-2 text-sm">

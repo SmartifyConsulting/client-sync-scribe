@@ -60,8 +60,8 @@ export default function AffiliatedAmbulancesScreen() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-lg font-bold flex items-center gap-2">
-            <Ambulance className="h-5 w-5 text-primary" /> Our ER Providers
+          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+            <Ambulance className="h-6 w-6 text-primary" /> Our ER Providers
           </h1>
           <p className="text-xs text-muted-foreground">ER providers partnered with this hospital.</p>
         </div>
@@ -78,7 +78,7 @@ export default function AffiliatedAmbulancesScreen() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((r) => (
-            <Card key={r.id} className="p-3 border-2 border-primary/20">
+            <Card key={r.id} className="rounded-xl border border-primary bg-card p-5">
               <div className="flex items-center gap-2">
                 <div className="h-10 w-10 rounded-full bg-sos/15 flex items-center justify-center">
                   <Ambulance className="h-5 w-5 text-sos" />

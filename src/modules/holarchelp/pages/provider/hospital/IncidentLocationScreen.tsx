@@ -60,11 +60,8 @@ export default function IncidentLocationScreen() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Emergency Dispatch
-        </p>
-        <h1 className="text-3xl font-extrabold">Capture Incident Location</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Capture Incident Location</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Pin the exact location of the emergency
         </p>
       </header>
@@ -187,7 +184,7 @@ export default function IncidentLocationScreen() {
 
         {/* Location Summary */}
         {location.address && (
-          <div className="rounded-2xl border bg-blue-50 p-4">
+          <div className="rounded-xl border border-primary bg-blue-50 p-4">
             <div className="flex gap-2">
               <MapPin className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>

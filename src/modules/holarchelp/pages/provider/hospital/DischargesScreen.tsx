@@ -4,6 +4,8 @@ import { useHospitalWards } from "../../../hooks/useHospitalWards";
 import { useHospitalInpatients } from "../../../hooks/useHospitalInpatients";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { SECTION_FRAME_CLASS, SECTION_ITEM_CLASS } from "@/components/ui/section-accordion";
+import { cn } from "@/lib/utils";
 
 /** Discharges — completed inpatient admissions for this hospital. */
 export default function DischargesScreen() {
@@ -26,7 +28,7 @@ export default function DischargesScreen() {
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-lg font-extrabold">Discharges</h2>
+          <h1 className="text-3xl font-bold text-foreground">Discharges</h1>
           <p className="text-xs text-muted-foreground">{discharged.length} discharged patients</p>
         </div>
         <Input
@@ -38,13 +40,13 @@ export default function DischargesScreen() {
       </header>
 
       {!discharged.length ? (
-        <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
           No discharges recorded yet.
         </div>
       ) : (
-        <div className="divide-y rounded-2xl border bg-card">
+        <div className={SECTION_FRAME_CLASS}>
           {discharged.map((p) => (
-            <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+            <div key={p.id} className={cn(SECTION_ITEM_CLASS, "flex flex-wrap items-center justify-between gap-2 px-3 py-3")}>
               <div className="min-w-0">
                 <p className="text-sm font-bold">{p.patient_name}</p>
                 <p className="text-xs text-muted-foreground">

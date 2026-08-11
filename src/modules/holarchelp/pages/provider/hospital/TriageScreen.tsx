@@ -66,13 +66,13 @@ export default function TriageScreen() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-extrabold">{t("triageBoard.title")}</h2>
+      <h1 className="text-3xl font-bold text-foreground">{t("triageBoard.title")}</h1>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-5">
         {COLUMNS.map((col) => {
           const items = bucketize(col);
           return (
-            <div key={col.key} className="flex min-h-[300px] flex-col rounded-2xl border bg-card">
+            <div key={col.key} className="flex min-h-[300px] flex-col rounded-xl border border-neutral-400 bg-card">
               <div className="flex items-center justify-between border-b px-3 py-2">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t(col.labelKey)}</p>
                 <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-bold">{items.length}</span>

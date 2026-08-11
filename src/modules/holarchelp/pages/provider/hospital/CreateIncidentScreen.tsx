@@ -64,11 +64,8 @@ export default function CreateIncidentScreen() {
     <div className="space-y-6">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Emergency Dispatch
-          </p>
-          <h1 className="text-3xl font-extrabold">Create New Incident</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Create New Incident</h1>
+          <p className="text-xs text-muted-foreground mt-1">
             Receive and log emergency call details
           </p>
         </div>
@@ -76,7 +73,7 @@ export default function CreateIncidentScreen() {
 
       <div className="grid gap-6 max-w-2xl">
         {/* Caller Information */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Caller Information</h2>
           <div className="space-y-4">
             <div>
@@ -115,7 +112,7 @@ export default function CreateIncidentScreen() {
         </div>
 
         {/* Emergency Details */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Emergency Details</h2>
           <div className="space-y-4">
             <div>
@@ -171,7 +168,7 @@ export default function CreateIncidentScreen() {
         </div>
 
         {/* Patient Information (Optional) */}
-        <div className="rounded-2xl border bg-card p-6">
+        <div className="rounded-xl border border-primary bg-card p-5">
           <h2 className="text-lg font-bold mb-4">Patient Information (Optional)</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
