@@ -147,6 +147,8 @@ export default function ProviderRoutes() {
         <Route path="nurses" element={<Navigate to="/provider/hospital/providers?tab=nurses" replace />} />
         <Route path="ambulances" element={<Navigate to="/provider/hospital/providers?tab=er" replace />} />
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
+        <Route path="patient/:patientId" element={<HospitalPatientRecordScreen />} />
+
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />
 
