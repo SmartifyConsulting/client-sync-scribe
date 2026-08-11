@@ -87,3 +87,12 @@ Generation, save and send confirmations stop using toast messages. Each step con
 - To-do filtering happens where action points are converted (`supabase/functions/process-todo-actions`) plus a client-side guard before insert.
 - `src/pages/PatientProfile.tsx` line ~234: remove the "Opening session" toast.
 - Certificate preview reuses the shared document renderer and header/footer hooks already used by the Documents module.
+
+## 11. Remove the duplicate Georgia Adams
+
+There are two patient records named Georgia Adams:
+
+- Created 21 Mar 2026 — 1 document, no sessions, no tasks, no admissions. This is the stale stub.
+- Created 10 Apr 2026 — 34 documents, 12 sessions, 27 tasks, and the Maternity Ward admission at Holarc General. This is the real, active record.
+
+The active (10 Apr) record is kept as the single Georgia Adams. The single document on the old stub is moved onto the kept record, then the stub is deleted along with its account link, so there is only one Georgia Adams everywhere — patient list, admissions, documents and search.
