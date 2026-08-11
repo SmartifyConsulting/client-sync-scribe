@@ -85,7 +85,7 @@ function DocumentCard({ doc, onPreview }: { doc: DocRow; onPreview: (doc: DocRow
           )}
         </div>
       </Card>
-    </Link>
+    </button>
   );
 }
 
