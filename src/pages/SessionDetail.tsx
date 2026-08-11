@@ -57,6 +57,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSessions } from "@/hooks/useSessions";
+import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
+
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
