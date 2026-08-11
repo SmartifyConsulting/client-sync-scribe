@@ -446,8 +446,11 @@ export default function SessionDetail() {
           </Select>
         }
         actionPoints={session.action_points || []}
-        clinicianNotes={(session as any).ai_diagnosis}
+        clinicianNotes={(session as any).ai_diagnosis || session.notes}
+        sessionDate={session.started_at}
+        showRetentionNotice={!!(session.audio_url || session.transcript)}
         showTodoHint={false}
+
         summaryActions={
           <>
             {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
