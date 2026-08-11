@@ -94,7 +94,8 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
 
   for (const raw of lines) {
-    const line = raw.trim();
+    // Headings often arrive as "**Safety Checks:**" or "## Differentials".
+    const line = raw.trim().replace(/^#{1,6}\s*/, "").replace(/^\*{1,2}\s*|\s*\*{1,2}$/g, "").trim();
     if (!line) continue;
     const upper = line.replace(/[:\s]+$/, "").toUpperCase();
     if (KNOWN_TITLES.includes(upper) || (/^[A-Z0-9 &/()-]{4,40}$/.test(line) && !line.includes("."))) {
@@ -104,6 +105,7 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     }
     pushLine(line);
   }
+
 
   // Working impression reads better as prose than as a bullet.
   return sections
