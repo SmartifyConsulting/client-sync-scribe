@@ -25,6 +25,26 @@ const CAUTION_PATTERNS = [
 
 const isCaution = (line: string) => CAUTION_PATTERNS.some((re) => re.test(line));
 
+const STOP_WORDS = new Set([
+  "the", "a", "an", "of", "or", "and", "to", "in", "for", "with", "her", "his", "their",
+  "patient", "patients", "rule", "out", "has", "have", "is", "are", "was", "were", "that",
+]);
+
+/**
+ * Normalised comparison key that ignores filler words and word order so
+ * near-duplicate lines ("Trismus (difficulty opening the mouth)" vs
+ * "Trismus (difficulty opening mouth)") collapse into one bullet.
+ */
+const fuzzyKey = (line: string) =>
+  line
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((w) => w && !STOP_WORDS.has(w))
+    .sort()
+    .join(" ");
+
+
 const titleCase = (raw: string) =>
   raw
     .toLowerCase()
