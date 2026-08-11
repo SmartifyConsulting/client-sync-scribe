@@ -519,14 +519,33 @@ export default function Sessions() {
       }).select().single();
       if (inv) setInvoice({ id: inv.id, invoice_number: inv.invoice_number, amount: inv.amount });
       const content = `<b>INVOICE ${invoiceNumber}</b>\n\nPatient: ${currentPatient?.name || ''}\n\n${data.items.map(i => `• ${i.description} — R${i.amount}`).join('\n')}\n\nTotal: R${total}`;
-      const { data: doc } = await supabase.from('documents').insert({
-        user_id: user.id,
-        patient_id: patientId,
-        patient_name: currentPatient?.name || null,
-        name: `Invoice ${invoiceNumber}`,
-        content,
-        template_name: 'Invoice',
-      }).select('id').single();
+      // The session finaliser may already have created a letterhead invoice document
+      // for this session — reuse it instead of inserting a duplicate plain copy.
+      const { data: existing } = await supabase
+        .from('documents')
+        .select('id, content')
+        .eq('user_id', user.id)
+        .eq('patient_id', patientId)
+        .eq('session_id', currentSessionIdRef.current)
+        .ilike('template_name', '%invoice%')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      let doc: { id: string } | null = existing ? { id: existing.id } : null;
+      if (!doc) {
+        const { data: inserted } = await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          session_id: currentSessionIdRef.current,
+          name: `Invoice ${invoiceNumber}`,
+          content,
+          template_name: 'Invoice',
+        }).select('id').single();
+        doc = inserted ?? null;
+      }
+
       return {
         key: 'invoice',
         label: 'Invoice',
