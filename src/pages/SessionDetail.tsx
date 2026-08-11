@@ -102,6 +102,8 @@ export default function SessionDetail() {
   const [editingPrivateNotes, setEditingPrivateNotes] = useState(false);
   const [privateNotesDraft, setPrivateNotesDraft] = useState("");
   const [savingPrivateNotes, setSavingPrivateNotes] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<any | null>(null);
+
 
   // Fetch doctor name
   useEffect(() => {
