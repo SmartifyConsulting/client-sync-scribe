@@ -569,15 +569,23 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
               <Square className="h-3.5 w-3.5" /> {closing ? "Stopping…" : "Stop"}
             </button>
           </div>
+          {voice.recording && voice.liveText && (
+            <p className="max-w-xl rounded-xl bg-muted/60 px-3 py-2 text-center text-[13px] italic leading-relaxed text-foreground">
+              {voice.liveText}
+            </p>
+          )}
           <p className="text-[11px] text-muted-foreground">
             {voice.transcribing
               ? "Listening back…"
               : voice.paused
                 ? "Paused — the microphone is off. Tap play to carry on."
                 : voice.recording
-                  ? "Tap send when you're done, or pause to step away"
-                  : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
+                  ? "I'm listening — tap send when you're done, or pause to step away"
+                  : voice.speaking
+                    ? "Maeve is speaking — the microphone opens as soon as she finishes."
+                    : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
           </p>
+
           {voice.speaking && (
             <button
               onClick={voice.stopSpeaking}
