@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { RelationshipAssessmentDetails } from "./RelationshipAssessmentDetails";
+import { useRelationshipEvidence } from "@/features/patients/relationship/useRelationshipEvidence";
 import {
   Choice,
   ENGINE_VERSION,
