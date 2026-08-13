@@ -859,16 +859,16 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
       )}
 
       {/* Clinical snapshot — four evenly sized cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-start">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 items-start">
         
-          <Collapsible defaultOpen={false} className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
+          <Collapsible defaultOpen className="rounded-lg border border-red-500/30 bg-red-500/5 p-2.5">
             <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-              <ChevronDown className="h-4 w-4 text-red-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
+              <ChevronDown className="h-3.5 w-3.5 text-red-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
               <AlertTriangle className="h-4 w-4 text-red-600" />
-              <h4 className="font-medium text-foreground">Allergies</h4>
+              <h4 className="text-xs font-bold text-foreground">Allergies</h4>
             </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
-              <div className="flex flex-wrap gap-2">
+            <CollapsibleContent className="mt-1.5">
+              <div className="flex flex-wrap gap-1">
                 {patient.allergies_structured && patient.allergies_structured.length > 0 ? (
                   patient.allergies_structured.map((allergy) => (
                     <Badge
@@ -890,25 +890,25 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                     </Badge>
                   ))
                 ) : patient.allergies ? (
-                  <span className="text-sm text-foreground">{patient.allergies}</span>
+                  <span className="text-xs text-foreground">{patient.allergies}</span>
                 ) : (
-                  <span className="text-sm text-muted-foreground italic">No allergies recorded</span>
+                  <span className="text-xs text-muted-foreground italic">No allergies recorded</span>
                 )}
               </div>
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
+          <Collapsible defaultOpen className="rounded-lg border border-primary bg-card p-2.5">
             <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-              <ChevronDown className="h-4 w-4 text-blue-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
+              <ChevronDown className="h-3.5 w-3.5 text-blue-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
               <HeartPulse className="h-4 w-4 text-blue-600" />
-              <h4 className="font-medium text-foreground">Conditions / Diagnoses</h4>
+              <h4 className="text-xs font-bold text-foreground">Conditions / Diagnoses</h4>
             </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
+            <CollapsibleContent className="mt-1.5">
               {summaryData.conditions.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {summaryData.conditions.map((cond, i) => (
-                    <div key={i} className="text-sm flex items-center justify-between gap-2 group">
+                    <div key={i} className="text-xs flex items-center justify-between gap-1.5 group">
                       <div className="flex items-start gap-2 flex-1">
                         <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${cond.status === "active" ? "bg-blue-500" : "bg-muted-foreground/60"}`} />
                         <div className={cond.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
@@ -919,34 +919,34 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 transition-opacity"
+                        className="h-5 px-1.5 transition-opacity"
                         onClick={() => toggleStatus("conditions", i)}
                       >
                         {cond.status === "active" ? (
-                          <span className="flex items-center gap-1 text-xs text-blue-600"><Check className="h-4 w-4" /> Active</span>
+                          <span className="flex items-center gap-1 text-xs text-blue-600"><Check className="h-3 w-3" /> Active</span>
                         ) : (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Resolved</span>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Resolved</span>
                         )}
                       </Button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground italic">No conditions/diagnoses recorded</p>
+                <p className="text-xs text-muted-foreground italic">No conditions/diagnoses recorded</p>
               )}
             </CollapsibleContent>
           </Collapsible>
-        <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
+        <Collapsible defaultOpen className="rounded-lg border border-primary bg-card p-2.5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-            <ChevronDown className="h-4 w-4 text-green-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
+            <ChevronDown className="h-3.5 w-3.5 text-green-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
             <Pill className="h-4 w-4 text-green-600" />
-            <h4 className="font-medium text-foreground">Medications</h4>
+            <h4 className="text-xs font-bold text-foreground">Medications</h4>
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3">
+          <CollapsibleContent className="mt-1.5">
             {summaryData.medications.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 {summaryData.medications.map((med, i) => (
-                  <li key={i} className="text-sm flex items-center justify-between gap-2 group">
+                  <li key={i} className="text-xs flex items-center justify-between gap-1.5 group">
                     <div className="flex items-start gap-2 flex-1">
                       <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${med.status === "active" ? "bg-green-500" : "bg-muted-foreground/60"}`} />
                       <div className={med.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
@@ -962,36 +962,36 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 transition-opacity"
+                      className="h-5 px-1.5 transition-opacity"
 
                       onClick={() => toggleStatus("medications", i)}
                     >
                       {med.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-green-600"><Check className="h-4 w-4" /> In Use</span>
+                        <span className="flex items-center gap-1 text-xs text-green-600"><Check className="h-3 w-3" /> In Use</span>
                       ) : (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Not Used</span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Not Used</span>
                       )}
                     </Button>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground italic">No medications recorded</p>
+              <p className="text-xs text-muted-foreground italic">No medications recorded</p>
             )}
           </CollapsibleContent>
         </Collapsible>
 
-        <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
+        <Collapsible defaultOpen className="rounded-lg border border-primary bg-card p-2.5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
-            <ChevronDown className="h-4 w-4 text-amber-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
+            <ChevronDown className="h-3.5 w-3.5 text-amber-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
             <Activity className="h-4 w-4 text-amber-600" />
-            <h4 className="font-medium text-foreground">Symptoms</h4>
+            <h4 className="text-xs font-bold text-foreground">Symptoms</h4>
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3">
+          <CollapsibleContent className="mt-1.5">
             {summaryData.symptoms.length > 0 ? (
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 {summaryData.symptoms.map((symptom, i) => (
-                  <li key={i} className="text-sm flex items-center justify-between gap-2 group">
+                  <li key={i} className="text-xs flex items-center justify-between gap-1.5 group">
                     <div className="flex items-start gap-2 flex-1">
                       <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${symptom.status === "active" ? "bg-amber-500" : "bg-muted-foreground/60"}`} />
                       <div className={symptom.status === "inactive" ? "text-muted-foreground line-through decoration-muted-foreground/50" : ""}>
@@ -1002,20 +1002,20 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 px-2 transition-opacity"
+                      className="h-5 px-1.5 transition-opacity"
                       onClick={() => toggleStatus("symptoms", i)}
                     >
                       {symptom.status === "active" ? (
-                        <span className="flex items-center gap-1 text-xs text-amber-600"><Check className="h-4 w-4" /> Active</span>
+                        <span className="flex items-center gap-1 text-xs text-amber-600"><Check className="h-3 w-3" /> Active</span>
                       ) : (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-4 w-4" /> Resolved</span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground"><X className="h-3 w-3" /> Resolved</span>
                       )}
                     </Button>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground italic">No symptoms recorded</p>
+              <p className="text-xs text-muted-foreground italic">No symptoms recorded</p>
             )}
           </CollapsibleContent>
         </Collapsible>
