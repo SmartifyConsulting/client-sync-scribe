@@ -172,7 +172,30 @@ export function MaeveChat({ sessionId }: Props) {
           <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             {current.name}
           </span>
+          <button
+            onClick={() => {
+              voice.stopSpeaking();
+              chooseMode(mode === "talk" ? "type" : "talk");
+            }}
+            className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
+          >
+            {mode === "talk" ? <Keyboard className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+            {mode === "talk" ? "Type instead" : "Talk instead"}
+          </button>
+          {mode === "talk" && (
+            <button
+              onClick={() => {
+                if (!muted) voice.stopSpeaking();
+                setMuted((v) => !v);
+              }}
+              className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
+            >
+              {muted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+              {muted ? "Muted" : "Voice on"}
+            </button>
+          )}
         </div>
+
       </div>
 
       {/* Disclaimer */}
