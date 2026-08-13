@@ -5692,6 +5692,97 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_relationship_profile_history: {
+        Row: {
+          completed_at: string | null
+          confidence: string | null
+          created_at: string
+          id: string
+          patient_id: string
+          pattern: number | null
+          responses: Json
+          status: string
+          version: string
+        }
+        Insert: {
+          completed_at?: string | null
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          patient_id: string
+          pattern?: number | null
+          responses?: Json
+          status: string
+          version?: string
+        }
+        Update: {
+          completed_at?: string | null
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          patient_id?: string
+          pattern?: number | null
+          responses?: Json
+          status?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_relationship_profile_history_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_relationship_profiles: {
+        Row: {
+          completed_at: string | null
+          confidence: string | null
+          created_at: string
+          id: string
+          patient_id: string
+          pattern: number | null
+          responses: Json
+          status: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          completed_at?: string | null
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          patient_id: string
+          pattern?: number | null
+          responses?: Json
+          status?: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          completed_at?: string | null
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          patient_id?: string
+          pattern?: number | null
+          responses?: Json
+          status?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_relationship_profiles_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_rewards: {
         Row: {
           awarded_at: string
