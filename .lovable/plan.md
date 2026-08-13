@@ -43,3 +43,11 @@ On the patient Overview tab:
 - Reduce the oversized heading and value typography to the standard compact clinical scale (12px bold labels, normal body text) used elsewhere in the patient record.
 
 Files touched: `src/features/patients/components/PatientOverview.tsx`.
+
+## 6. Saved clinician notes, legend frame, and profile summaries
+
+- Once a session is saved, its AI Clinician notes must render with exactly the same sectioned pastel shading, icons, bullets and clinical-term highlighting the doctor saw live (Working Impression, Safety Checks, Differentials, Suggested Checks) — in the session history/detail view, not as plain text.
+- Delete the standalone "AI Clinician Notes" legend strip (Risk / Caution / Medication / Investigation with the empty-state line); the sectioned notes replace it.
+- Show the DISC profile descriptors and the Enneagram-based "About Me" summary together under the patient overview panel, so both are visible at a glance alongside the clinical cards.
+
+Files touched: `src/pages/SessionDetail.tsx`, `src/features/sessions/components/SessionResultPanels.tsx`, `src/features/sessions/components/SessionPatientOverview.tsx` (plus the relationship insight components already in use).
