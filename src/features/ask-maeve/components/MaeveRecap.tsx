@@ -76,7 +76,7 @@ export function MaeveRecap({ sessionId, onContinue }: Props) {
   return (
     <div className="mx-auto w-full max-w-3xl px-1 pb-10">
       <div className="flex justify-center pb-4 pt-2">
-        <img src={logo} alt="Holarc Health" className="h-14 w-auto" />
+        <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
