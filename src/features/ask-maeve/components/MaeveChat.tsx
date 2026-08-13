@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Keyboard, Loader2, Mail, Mic, RotateCcw, Send, Share2, Sparkles, Square, Trash2, Volume2, VolumeX } from "lucide-react";
+import { Download, FileText, Keyboard, Loader2, Mail, Mic, Pause, Play, RotateCcw, Send, Share2, Sparkles, Square, Trash2, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ import { useMaeveVoice } from "../hooks/useMaeveVoice";
 import { processLabel, stateLabel } from "../lib/processes";
 import { CLIENT_FALLBACK, looksLikeAdvice } from "../lib/suggestionDetector";
 import { buildTranscript, downloadTranscript, shareTranscript, transcriptFileName } from "../lib/transcript";
+import { downloadTranscriptPdf } from "../lib/maevePdf";
 import { deleteMaeveSession } from "../lib/deleteSession";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -46,6 +47,7 @@ export function MaeveChat({ sessionId }: Props) {
   );
   const [muted, setMuted] = useState(false);
   const [emailing, setEmailing] = useState(false);
+  const [makingPdf, setMakingPdf] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -98,6 +100,10 @@ export function MaeveChat({ sessionId }: Props) {
       if (!ok) toast.error("Microphone unavailable — you can keep typing instead.");
       return;
     }
+    if (voice.paused) {
+      voice.resumeRecording();
+      return;
+    }
     const text = await voice.stopRecordingAndTranscribe();
     if (!text) {
       toast.error("I didn't catch that — try again.");
@@ -105,6 +111,28 @@ export function MaeveChat({ sessionId }: Props) {
     }
     await send(text);
   };
+
+  // Leaving the screen (tab hidden, window blurred, navigating away) pauses the
+  // recording and mutes the microphone. The exploration stays open so the
+  // patient can come back and carry on where they left off.
+  const pauseRef = useRef(voice.pauseRecording);
+  pauseRef.current = voice.pauseRecording;
+  useEffect(() => {
+    const pause = () => {
+      if (pauseRef.current()) toast("Paused — tap resume when you're ready.");
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") pause();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("blur", pause);
+    window.addEventListener("pagehide", pause);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("blur", pause);
+      window.removeEventListener("pagehide", pause);
+    };
+  }, []);
 
 
   const submit = async () => {
@@ -121,6 +149,9 @@ export function MaeveChat({ sessionId }: Props) {
 
   const closeSession = async () => {
     setClosing(true);
+    // Always release the microphone when the exploration ends.
+    voice.stopSpeaking();
+    voice.releaseMicrophone();
     const { error: err } = await safeInvoke("ask-maeve-summary", { session_id: sessionId });
     setClosing(false);
     if (err) {
@@ -128,6 +159,12 @@ export function MaeveChat({ sessionId }: Props) {
       return;
     }
     await reload();
+    if (messages.length > 0) {
+      const ok = await downloadTranscriptPdf(session, messages);
+      toast[ok ? "success" : "error"](
+        ok ? "Exploration closed — PDF saved to your device" : "Exploration closed, but the PDF could not be created",
+      );
+    }
   };
 
   const transcriptText = () => buildTranscript(session, messages);
@@ -136,6 +173,14 @@ export function MaeveChat({ sessionId }: Props) {
     if (messages.length === 0) return;
     downloadTranscript(transcriptText(), transcriptFileName(session));
     toast.success("Transcript saved to your device");
+  };
+
+  const savePdf = async () => {
+    if (messages.length === 0 || makingPdf) return;
+    setMakingPdf(true);
+    const ok = await downloadTranscriptPdf(session, messages);
+    setMakingPdf(false);
+    toast[ok ? "success" : "error"](ok ? "PDF saved to your device" : "Could not create the PDF");
   };
 
   const share = async () => {
@@ -370,7 +415,7 @@ export function MaeveChat({ sessionId }: Props) {
           onClick={closeSession}
           className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
         >
-          {closing ? "Closing…" : "Stop and close"}
+          {closing ? "Closing…" : "Stop and close (saves PDF)"}
         </button>
         <button
           onClick={() => navigate("/ask-maeve")}
@@ -388,6 +433,13 @@ export function MaeveChat({ sessionId }: Props) {
           className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
         >
           <Download className="h-3 w-3" /> Save transcript
+        </button>
+        <button
+          disabled={messages.length === 0 || makingPdf}
+          onClick={savePdf}
+          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
+        >
+          {makingPdf ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />} Save PDF
         </button>
         <button
           disabled={messages.length === 0}
@@ -445,28 +497,51 @@ export function MaeveChat({ sessionId }: Props) {
       {/* Composer */}
       {mode === "talk" ? (
         <div className="mt-2 flex flex-col items-center gap-2 border-t border-border pt-3">
-          <Button
-            onClick={handleMic}
-            disabled={thinking || voice.transcribing}
-            className={cn(
-              "h-16 w-16 rounded-full",
-              voice.recording ? "bg-destructive hover:bg-destructive/90" : "bg-maeve text-maeve-foreground hover:bg-maeve-dark",
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleMic}
+              disabled={thinking || voice.transcribing}
+              className={cn(
+                "h-16 w-16 rounded-full",
+                voice.recording && !voice.paused
+                  ? "bg-destructive hover:bg-destructive/90"
+                  : "bg-maeve text-maeve-foreground hover:bg-maeve-dark",
+              )}
+            >
+              {voice.transcribing ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : voice.paused ? (
+                <Play className="h-6 w-6" />
+              ) : voice.recording ? (
+                <Send className="h-6 w-6" />
+              ) : (
+                <Mic className="h-6 w-6" />
+              )}
+            </Button>
+            {voice.recording && !voice.paused && (
+              <button
+                onClick={() => voice.pauseRecording()}
+                className="flex items-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
+              >
+                <Pause className="h-3.5 w-3.5" /> Pause
+              </button>
             )}
-          >
-            {voice.transcribing ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : voice.recording ? (
-              <Square className="h-6 w-6" />
-            ) : (
-              <Mic className="h-6 w-6" />
-            )}
-          </Button>
+            <button
+              disabled={closing}
+              onClick={closeSession}
+              className="flex items-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:border-destructive hover:text-destructive disabled:opacity-50"
+            >
+              <Square className="h-3.5 w-3.5" /> {closing ? "Stopping…" : "Stop"}
+            </button>
+          </div>
           <p className="text-[11px] text-muted-foreground">
             {voice.transcribing
               ? "Listening back…"
-              : voice.recording
-                ? "Tap to stop when you're done"
-                : "Tap to speak"}
+              : voice.paused
+                ? "Paused — the microphone is off. Tap play to carry on."
+                : voice.recording
+                  ? "Tap send when you're done, or pause to step away"
+                  : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
           </p>
           {voice.speaking && (
             <button

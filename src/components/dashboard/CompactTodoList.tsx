@@ -1,3 +1,4 @@
+import { isClinicalObservationTask } from "@/lib/taskAssignee";
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -193,6 +194,8 @@ export function CompactTodoList() {
       setTodos(
         (data || [])
           .filter((todo: any) => !(todo.document_id && sentDocs.has(todo.document_id)))
+          // Clinical observations ("monitor symptoms…") are notes, not tasks.
+          .filter((todo: any) => todo.task_type === 'document_review' || !isClinicalObservationTask(todo.title))
           .map((todo: any) => ({
           ...todo,
           completed: todo.status === "completed",

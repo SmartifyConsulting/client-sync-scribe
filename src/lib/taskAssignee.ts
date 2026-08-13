@@ -72,9 +72,30 @@ const NON_ACTIONABLE_PATTERNS: RegExp[] = [
   /\b(issue|generate|create|prepare|draft)\b.*\b(medical certificate|sick note|prescription|referral( letter)?|invoice)\b/i,
 ];
 
+/**
+ * Clinical observations ("monitor symptoms", "watch for swelling", "observe the
+ * rash") are notes, not tasks. They belong in the clinical notes of the session
+ * and must never be created as — or displayed on — a to-do list.
+ */
+const CLINICAL_OBSERVATION_PATTERNS: RegExp[] = [
+  /\bsymptom/i,
+  /\bmonitor\b/i,
+  /\bmonitoring\b/i,
+  /\bwatch\s+(for|out|closely)\b/i,
+  /\bobserve\b/i,
+  /\bobservation\b/i,
+  /\bkeep an eye\b/i,
+  /\bif (symptoms|pain|it) (worsen|persist)/i,
+];
+
+export function isClinicalObservationTask(title: string): boolean {
+  return CLINICAL_OBSERVATION_PATTERNS.some((re) => re.test(title || ""));
+}
+
 export function isNonActionableTask(title: string): boolean {
   const text = (title || "").trim();
   if (!text) return true;
+  if (isClinicalObservationTask(text)) return true;
   return NON_ACTIONABLE_PATTERNS.some((re) => re.test(text));
 }
 

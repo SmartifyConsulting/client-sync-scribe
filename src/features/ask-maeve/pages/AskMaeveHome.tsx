@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Download, FileText, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -13,12 +13,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { createMaeveSession, type MaeveSessionRow } from "../hooks/useMaeveSession";
+import { createMaeveSession, type MaeveMessage, type MaeveSessionRow } from "../hooks/useMaeveSession";
 import { deleteMaeveSession } from "../lib/deleteSession";
+import { buildTranscript, downloadTranscript, transcriptFileName } from "../lib/transcript";
+import { downloadTranscriptPdf } from "../lib/maevePdf";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 import { toast } from "sonner";
 
 const logo = holarcLogoAsset.url;
+
+/** Loads every message of a past exploration so it can be exported. */
+async function loadMessages(sessionId: string): Promise<MaeveMessage[]> {
+  const { data } = await supabase
+    .from("ask_maeve_messages" as any)
+    .select("*")
+    .eq("session_id", sessionId)
+    .order("created_at", { ascending: true });
+  return ((data as any) ?? []) as MaeveMessage[];
+}
 
 export default function AskMaeveHome() {
   const navigate = useNavigate();
@@ -28,6 +40,27 @@ export default function AskMaeveHome() {
   const [startError, setStartError] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<MaeveSessionRow | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const exportSession = async (s: MaeveSessionRow, kind: "txt" | "pdf") => {
+    setBusy(`${s.id}-${kind}`);
+    try {
+      const messages = await loadMessages(s.id);
+      if (messages.length === 0) {
+        toast.error("This exploration has no conversation yet");
+        return;
+      }
+      if (kind === "txt") {
+        downloadTranscript(buildTranscript(s, messages), transcriptFileName(s));
+        toast.success("Transcript saved to your device");
+        return;
+      }
+      const ok = await downloadTranscriptPdf(s, messages);
+      toast[ok ? "success" : "error"](ok ? "PDF saved to your device" : "Could not create the PDF");
+    } finally {
+      setBusy(null);
+    }
+  };
 
   useEffect(() => {
     supabase
@@ -115,6 +148,24 @@ export default function AskMaeveHome() {
                 <p className="text-xs text-muted-foreground">
                   {new Date(s.created_at).toLocaleDateString()} · {s.status === "closed" ? "Closed" : "In progress"}
                 </p>
+              </button>
+              <button
+                aria-label="Download transcript"
+                title="Download transcript"
+                disabled={busy === `${s.id}-txt`}
+                onClick={() => exportSession(s, "txt")}
+                className="rounded-full p-2 text-muted-foreground transition hover:bg-maeve/10 hover:text-maeve-dark disabled:opacity-50"
+              >
+                {busy === `${s.id}-txt` ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              </button>
+              <button
+                aria-label="Download PDF"
+                title="Download PDF"
+                disabled={busy === `${s.id}-pdf`}
+                onClick={() => exportSession(s, "pdf")}
+                className="rounded-full p-2 text-muted-foreground transition hover:bg-maeve/10 hover:text-maeve-dark disabled:opacity-50"
+              >
+                {busy === `${s.id}-pdf` ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
               </button>
               <button
                 aria-label="Delete exploration"

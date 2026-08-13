@@ -14,8 +14,12 @@ import { isToday, differenceInCalendarDays } from "date-fns";
 export const SECTION_TRIGGER_CLASS = cn(
   "group px-4 py-2 hover:no-underline border-0 rounded-none bg-transparent hover:!bg-primary hover:!text-white",
   "data-[state=open]:!bg-primary data-[state=open]:hover:!bg-primary/90 data-[state=open]:!text-white",
-  "[&[data-state=open]_*]:!text-white",
-  "[&:hover_*]:!text-white",
+  // Everything inside turns white on hover / when open — except the count pill,
+  // which keeps a black number on a white pill so it stays readable.
+  "[&[data-state=open]_*:not(.section-count-pill)]:!text-white",
+  "[&:hover_*:not(.section-count-pill)]:!text-white",
+  "[&:hover_.section-count-pill]:!bg-white [&:hover_.section-count-pill]:!text-black",
+  "[&[data-state=open]_.section-count-pill]:!bg-white [&[data-state=open]_.section-count-pill]:!text-black",
   "[&>svg]:group-data-[state=open]:!text-white",
   "[&>svg]:group-hover:!text-white",
 );
@@ -29,7 +33,7 @@ export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
   "!bg-primary hover:!bg-primary/90 !text-white",
   "[&_*:not(.section-count-pill)]:!text-white",
   "[&>svg]:!text-white",
-  "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-primary",
+  "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-black",
 );
 
 
@@ -63,9 +67,11 @@ export function SectionCountPill({
     <span
       className={cn(
         "section-count-pill text-[10px] font-semibold px-1.5 py-0 min-w-5 h-5 inline-flex items-center justify-center rounded-full",
-        "bg-muted text-muted-foreground",
-        "group-data-[state=open]:!bg-white group-data-[state=open]:!text-primary",
-
+        // The number is always black; the pill turns white on hover and when the
+        // (green) header is expanded, so the count never disappears.
+        "bg-muted !text-black",
+        "group-hover:!bg-white group-hover:!text-black",
+        "group-data-[state=open]:!bg-white group-data-[state=open]:!text-black",
         className,
       )}
     >
