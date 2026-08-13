@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Send, Sparkles } from "lucide-react";
+import { Keyboard, Loader2, Mic, RotateCcw, Send, Sparkles, Square, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { safeInvoke } from "@/services/edge/safeInvoke";
 import { useMaeveSession } from "../hooks/useMaeveSession";
+import { useMaeveVoice } from "../hooks/useMaeveVoice";
 import { processLabel, stateLabel } from "../lib/processes";
 import { CLIENT_FALLBACK, looksLikeAdvice } from "../lib/suggestionDetector";
 
@@ -14,35 +15,78 @@ interface Props {
   sessionId: string;
 }
 
+type MaeveMode = "type" | "talk";
+const MODE_KEY = "maeve-mode";
+
 export function MaeveChat({ sessionId }: Props) {
   const navigate = useNavigate();
   const { session, messages, loading, thinking, error, send, reload } = useMaeveSession(sessionId);
+  const voice = useMaeveVoice();
   const [input, setInput] = useState("");
   const [showWhat, setShowWhat] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [mode, setMode] = useState<MaeveMode | null>(
+    () => (localStorage.getItem(MODE_KEY) as MaeveMode | null) ?? null,
+  );
+  const [muted, setMuted] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const openedRef = useRef(false);
+  const spokenRef = useRef<string | null>(null);
+
+  const chooseMode = (next: MaeveMode) => {
+    localStorage.setItem(MODE_KEY, next);
+    setMode(next);
+  };
+
+  const startOpening = useCallback(() => {
+    openedRef.current = true;
+    send("", true);
+  }, [send]);
 
   useEffect(() => {
-    if (loading || openedRef.current) return;
-    if (messages.length === 0) {
-      openedRef.current = true;
-      send("", true);
-    }
-  }, [loading, messages.length, send]);
+    if (loading || openedRef.current || !mode) return;
+    if (messages.length === 0) startOpening();
+  }, [loading, messages.length, mode, startOpening]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, thinking]);
 
   useEffect(() => {
-    if (!thinking) inputRef.current?.focus();
-  }, [thinking, sessionId]);
+    if (!thinking && mode === "type") inputRef.current?.focus();
+  }, [thinking, sessionId, mode]);
 
   useEffect(() => {
     if (error) toast.error(error);
   }, [error]);
+
+  // Read Maeve's newest reply aloud in talk mode.
+  useEffect(() => {
+    if (mode !== "talk" || muted || thinking) return;
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== "assistant") return;
+    if (spokenRef.current === last.id) return;
+    spokenRef.current = last.id;
+    const body = looksLikeAdvice(last.content) ? CLIENT_FALLBACK : last.content;
+    voice.speak(body);
+  }, [messages, mode, muted, thinking, voice]);
+
+  const handleMic = async () => {
+    if (thinking || voice.transcribing) return;
+    if (!voice.recording) {
+      const ok = await voice.startRecording();
+      if (!ok) toast.error("Microphone unavailable — you can keep typing instead.");
+      return;
+    }
+    const text = await voice.stopRecordingAndTranscribe();
+    if (!text) {
+      toast.error("I didn't catch that — try again.");
+      return;
+    }
+    await send(text);
+  };
+
 
   const submit = async () => {
     const text = input.trim();
@@ -72,6 +116,40 @@ export function MaeveChat({ sessionId }: Props) {
   );
   const current = stateLabel(session?.conversation_state);
 
+  if (!mode) {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-1 py-8">
+        <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
+          <Sparkles className="h-5 w-5 text-maeve" />
+          Ask Maeve
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          How would you like to explore today? You can change this at any time.
+        </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <button
+            onClick={() => chooseMode("type")}
+            className="rounded-2xl border border-border p-5 text-left transition hover:border-maeve"
+          >
+            <Keyboard className="h-6 w-6 text-maeve" />
+            <p className="mt-3 text-sm font-semibold text-foreground">Type</p>
+            <p className="mt-1 text-xs text-muted-foreground">Write your answers in your own time.</p>
+          </button>
+          <button
+            onClick={() => chooseMode("talk")}
+            className="rounded-2xl border border-border p-5 text-left transition hover:border-maeve"
+          >
+            <Mic className="h-6 w-6 text-maeve" />
+            <p className="mt-3 text-sm font-semibold text-foreground">Talk and listen</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Speak your answers and hear Maeve's questions read aloud.
+            </p>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex h-[calc(100vh-11rem)] w-full max-w-3xl flex-col">
       {/* Header */}
@@ -94,7 +172,30 @@ export function MaeveChat({ sessionId }: Props) {
           <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
             {current.name}
           </span>
+          <button
+            onClick={() => {
+              voice.stopSpeaking();
+              chooseMode(mode === "talk" ? "type" : "talk");
+            }}
+            className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
+          >
+            {mode === "talk" ? <Keyboard className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+            {mode === "talk" ? "Type instead" : "Talk instead"}
+          </button>
+          {mode === "talk" && (
+            <button
+              onClick={() => {
+                if (!muted) voice.stopSpeaking();
+                setMuted((v) => !v);
+              }}
+              className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
+            >
+              {muted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+              {muted ? "Muted" : "Voice on"}
+            </button>
+          )}
         </div>
+
       </div>
 
       {/* Disclaimer */}
@@ -196,26 +297,73 @@ export function MaeveChat({ sessionId }: Props) {
         </button>
       </div>
 
+      {/* Failed opening — visible error with a retry instead of an empty screen */}
+      {error && messages.length === 0 && !thinking && (
+        <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2">
+          <p className="text-xs text-foreground">Maeve could not start this exploration.</p>
+          <Button size="sm" variant="outline" onClick={startOpening} className="h-7 gap-1 text-xs">
+            <RotateCcw className="h-3 w-3" /> Try again
+          </Button>
+        </div>
+      )}
+
       {/* Composer */}
-      <div className="mt-2 flex items-end gap-2 border-t border-border pt-3">
-        <Textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              submit();
-            }
-          }}
-          rows={2}
-          placeholder="Take your time…"
-          className="min-h-[52px] resize-none text-[15px]"
-        />
-        <Button onClick={submit} disabled={thinking || !input.trim()} className="h-[52px] px-4">
-          {thinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        </Button>
-      </div>
+      {mode === "talk" ? (
+        <div className="mt-2 flex flex-col items-center gap-2 border-t border-border pt-3">
+          <Button
+            onClick={handleMic}
+            disabled={thinking || voice.transcribing}
+            className={cn(
+              "h-16 w-16 rounded-full",
+              voice.recording ? "bg-destructive hover:bg-destructive/90" : "bg-maeve text-maeve-foreground hover:bg-maeve-dark",
+            )}
+          >
+            {voice.transcribing ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : voice.recording ? (
+              <Square className="h-6 w-6" />
+            ) : (
+              <Mic className="h-6 w-6" />
+            )}
+          </Button>
+          <p className="text-[11px] text-muted-foreground">
+            {voice.transcribing
+              ? "Listening back…"
+              : voice.recording
+                ? "Tap to stop when you're done"
+                : "Tap to speak"}
+          </p>
+          {voice.speaking && (
+            <button
+              onClick={voice.stopSpeaking}
+              className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-muted-foreground hover:border-maeve hover:text-maeve-dark"
+            >
+              Stop audio
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="mt-2 flex items-end gap-2 border-t border-border pt-3">
+          <Textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submit();
+              }
+            }}
+            rows={2}
+            placeholder="Take your time…"
+            className="min-h-[52px] resize-none text-[15px]"
+          />
+          <Button onClick={submit} disabled={thinking || !input.trim()} className="h-[52px] px-4">
+            {thinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </div>
+      )}
+
     </div>
   );
 }

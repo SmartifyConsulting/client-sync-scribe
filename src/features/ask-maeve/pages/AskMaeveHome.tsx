@@ -11,6 +11,7 @@ export default function AskMaeveHome() {
   const [sessions, setSessions] = useState<MaeveSessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [startError, setStartError] = useState(false);
 
   useEffect(() => {
     supabase
@@ -25,9 +26,11 @@ export default function AskMaeveHome() {
 
   const start = async () => {
     setCreating(true);
+    setStartError(false);
     const id = await createMaeveSession();
     setCreating(false);
     if (!id) {
+      setStartError(true);
       toast.error("Could not start an exploration");
       return;
     }
@@ -53,6 +56,12 @@ export default function AskMaeveHome() {
         {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         Start an exploration
       </Button>
+
+      {startError && (
+        <p className="mt-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-foreground">
+          Maeve could not open a new exploration just now. Tap "Start an exploration" to try again.
+        </p>
+      )}
 
       <div className="mt-6 space-y-2">
         {loading ? (

@@ -43,6 +43,13 @@ export const SECTION_FRAME_CLASS =
 /** Item wrapper (no individual rounded border). */
 export const SECTION_ITEM_CLASS = "border-0 rounded-none bg-card";
 
+/**
+ * Rounded variant used on the Dashboard cards (To-Do List, My Round Tables),
+ * where group headings sit as soft pills rather than flat table rows.
+ */
+export const SECTION_ITEM_ROUNDED_CLASS = "border-0 rounded-xl overflow-hidden bg-card";
+export const SECTION_TRIGGER_ROUNDED_CLASS = "!rounded-xl";
+
 
 export function SectionCountPill({
   count,
