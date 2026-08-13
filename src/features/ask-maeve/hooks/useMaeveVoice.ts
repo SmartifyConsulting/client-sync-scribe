@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { getStoredVoiceId, phoneticForSpeech, storeVoiceId, voiceById } from "../lib/voices";
+import { getStoredVoiceId, loadProfileVoice, phoneticForSpeech, saveProfileVoice, storeVoiceId, voiceById } from "../lib/voices";
 
 interface Options {
   /** Called when Maeve finishes speaking (used to auto-open the mic in talk mode). */
@@ -31,6 +31,22 @@ export function useMaeveVoice(options: Options = {}) {
   const setVoiceId = useCallback((id: string, label?: string) => {
     storeVoiceId(id, label);
     setVoiceIdState(id);
+    void saveProfileVoice(id, label);
+  }, []);
+
+  // The saved voice on the person's profile wins, so it follows them across devices.
+  useEffect(() => {
+    let cancelled = false;
+    loadProfileVoice()
+      .then(({ id, label }) => {
+        if (cancelled || !id) return;
+        storeVoiceId(id, label ?? undefined);
+        setVoiceIdState(id);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const stopSpeaking = useCallback(() => {
