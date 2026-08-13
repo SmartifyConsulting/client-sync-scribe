@@ -646,11 +646,14 @@ export default function Sessions() {
     }
     setGeneratedDocs(results);
 
-    // Prescription → med cert → referral → any other doc → schedule → invoice → vulas.
+    // Only queue steps whose document actually exists, so the flow can never
+    // stall on an invisible step: prescription → med cert → referral → other
+    // docs → schedule → invoice → vulas.
     const steps: PostSessionStepType[] = [];
-    if (prescriptionData) steps.push("prescription");
-    if (medCert) steps.push("medcert");
-    if (referralData) steps.push("referral");
+    const ORDER: PostSessionStepType[] = ["prescription", "medcert", "referral"];
+    for (const key of ORDER) {
+      if (results.some((d) => d.key === key)) steps.push(key);
+    }
     for (const d of results) {
       const key = d.key as PostSessionStepType;
       if (!steps.includes(key) && key !== "invoice") steps.push(key);
@@ -658,6 +661,7 @@ export default function Sessions() {
     steps.push("schedule");
     if (results.some((d) => d.key === "invoice")) steps.push("invoice");
     steps.push("vula");
+
     setPostSessionQueue(steps);
     setPostSessionIndex(0);
     setShowPostSessionFlow(true);
