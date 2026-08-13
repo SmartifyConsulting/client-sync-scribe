@@ -10,6 +10,8 @@ import {
   SECTION_CONTENT_CLASS,
   SECTION_FRAME_CLASS,
   SECTION_ITEM_CLASS,
+  SECTION_ITEM_ROUNDED_CLASS,
+  SECTION_TRIGGER_ROUNDED_CLASS,
   SectionCountPill,
 } from "@/components/ui/section-accordion";
 import { isToday, isThisMonth, format } from "date-fns";
