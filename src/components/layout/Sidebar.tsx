@@ -195,13 +195,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
+  /** Doctors only see "My Shifts" once they're attached to a hospital. */
+  const hideMyShift = isDoctorMenu && !hasHospitalAffiliation;
+  const withShiftRule = (items: (NavItem & { tour?: string })[]) =>
+    hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
+
+  const doctorItems = withShiftRule(doctorModeItems);
+  const doctorSections = DOCTOR_SECTIONS.map((s) => ({ ...s, items: withShiftRule(s.items) }));
+
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems
     : isNurseMenu
       ? nurseNavItems
       : isPatientMenu
       ? patientNavItems
-      : doctorModeItems;
+      : doctorItems;
+
 
   // Practice Management Assistants keep their own (patient) menu plus the
   // practice-admin tools they are responsible for.
