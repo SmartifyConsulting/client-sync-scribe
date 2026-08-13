@@ -285,6 +285,15 @@ function DocStepDialog({
 }
 
 
+/** Renders nothing and immediately advances the queue past a missing document step. */
+function MissingStepAdvancer({ onAdvance }: { onAdvance: () => void }) {
+  useEffect(() => {
+    onAdvance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
+}
+
 interface PostSessionQueueDialogProps {
   /** Ordered post-session steps to run, one at a time. */
   queue: PostSessionStepType[];
@@ -369,7 +378,9 @@ export function PostSessionStepDialog({
   }
 
   const doc = documents.find((d) => d.key === step) || null;
-  if (!doc) return null;
+  // Safety net: a step whose document failed to generate must not stall the
+  // queue (it would silently swallow the invoice step before the Vula award).
+  if (!doc) return <MissingStepAdvancer onAdvance={onAdvance} />;
 
   return (
     <DocStepDialog

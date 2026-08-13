@@ -846,12 +846,13 @@ const completeSession = async (
             // No AI line items — fall back to the doctor's default service price.
             const defaultService = pickDefaultService();
             if (!defaultService) {
-              // No service prices configured at all — skip auto-invoice creation entirely.
+              // No service prices configured — skip ONLY the auto-invoice block
+              // (never abort the rest of the session finalisation).
               toast({
                 title: 'Auto-invoice skipped',
                 description: 'No default service price configured. Set one in Settings to enable auto-invoicing.',
               });
-              return;
+              throw new Error('__skip_invoice__');
             }
             currency = currencySymbol(defaultService.currency);
             computedTotal = Number(defaultService.default_price || 0);
@@ -861,66 +862,48 @@ const completeSession = async (
 
           const formattedTotal = computedTotal > 0
             ? `${currency} ${computedTotal.toFixed(2)}`
-            : (inv.total ? `${currency} ${Number(inv.total).toFixed(2)}` : '___');
+            : (inv.total ? `${currency} ${Number(inv.total).toFixed(2)}` : '');
 
           const invoiceTemplate = doctorTemplates.find(t =>
             t.name.toLowerCase().includes('invoice')
           );
 
           const patientName = patientRecord?.name || 'Unknown';
-          const replacements: Record<string, string> = {
-            ClientName: patientName,
-            PatientName: patientName,
-            'Patient Name': patientName,
-            Date: todayLong,
-            SessionDate: todayLong,
-            InvoiceDate: todayLong,
-            DueDate: dueDateLong,
-            DoctorName: docProfile?.full_name || '',
-            DoctorNumber: docProfile?.doctor_number || '',
-            RegistrationNumber: docProfile?.doctor_number || '',
-            PracticeNumber: docProfile?.practice_number || '',
-            PracticeAddress: docProfile?.practice_address || '',
-            Specialty: docProfile?.specialty || '',
-            PatientAddress: patientRecord?.physical_address || patientRecord?.address || '',
-            MedicalAid: patientRecord?.medical_aid || '',
-            MedicalAidNumber: patientRecord?.medical_aid_number || '',
-            IDNumber: patientRecord?.id_passport_number || '',
-            DOB: patientRecord?.dob || '',
-            Phone: patientRecord?.phone || '',
-            Email: patientRecord?.email || '',
-            Services: servicesLine,
-            TotalAmount: formattedTotal,
-            BankDetails:
-              (docProfile as any)?.bank_account_details ||
-              (docProfile as any)?.bank_details ||
-              '',
-            InvoiceNumber: generatedInvoiceNumber,
-            Signature: renderSignatureHtml(docProfile),
-            DoctorSignature: renderSignatureHtml(docProfile),
-          };
 
           let invoiceContent: string;
           if (invoiceTemplate) {
-            invoiceContent = invoiceTemplate.content;
-            for (const [key, value] of Object.entries(replacements)) {
-              invoiceContent = invoiceContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
-            }
+            // Use the shared placeholder filler so every alias ([Patient Name],
+            // [ClientName], [TotalAmount], [Services], signature, bank details…)
+            // resolves against the real patient / practice / invoice data.
+            invoiceContent = fillDocumentPlaceholders(invoiceTemplate.content, {
+              patient: patientRecord as any,
+              profile: docProfile as any,
+              invoice: {
+                invoice_number: generatedInvoiceNumber,
+                description: plainDescription,
+                amount: computedTotal || Number(inv.total) || 0,
+                due_date: dueDateISO,
+                created_at: today,
+                currency: 'ZAR',
+                services_html: servicesLine,
+              },
+            }).content;
           } else {
             const sessionSignature = renderSignatureHtml(docProfile);
             invoiceContent = `<h2>Invoice ${generatedInvoiceNumber}</h2>
 <p><strong>Date:</strong> ${todayLong}</p>
 <p><strong>Due Date:</strong> ${dueDateLong}</p>
 <p><strong>Patient:</strong> ${patientName}</p>
+${patientRecord?.physical_address || patientRecord?.address ? `<p><strong>Address:</strong> ${patientRecord?.physical_address || patientRecord?.address}</p>` : ''}
+${patientRecord?.medical_aid ? `<p><strong>Medical Aid:</strong> ${patientRecord.medical_aid}${patientRecord.medical_aid_number ? ` (${patientRecord.medical_aid_number})` : ''}</p>` : ''}
 <p><strong>Doctor:</strong> ${docProfile?.full_name || ''}</p>
-<p><strong>Practice Number:</strong> ${docProfile?.practice_number || ''}</p>
+${docProfile?.practice_number ? `<p><strong>Practice Number:</strong> ${docProfile.practice_number}</p>` : ''}
 <br/>
 <p><strong>Services:</strong><br/>${servicesLine}</p>
 <p><strong>Total:</strong> ${formattedTotal}</p>
 ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:1px solid #999;margin-top:4px;padding-top:4px;font-size:11px;color:#666;">${docProfile?.full_name || ''}</div>` : ''}`;
           }
-          // Generic fallback for any unmatched [Token]
-          invoiceContent = invoiceContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
+
 
           const { data: invoiceDoc } = await supabase.from('documents').insert({
             user_id: user.id,
@@ -969,9 +952,12 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
             .eq('user_id', user.id)
             .neq('task_type', 'document_review')
             .ilike('title', '%invoice%');
-        } catch (invError) {
-          console.error('Error creating invoice document:', invError);
+        } catch (invError: any) {
+          if (invError?.message !== '__skip_invoice__') {
+            console.error('Error creating invoice document:', invError);
+          }
         }
+
       }
 
       // Auto-create patient task assignment document if detected

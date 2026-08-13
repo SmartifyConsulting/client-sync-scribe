@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { AlertCircle, Brain, CheckCircle, Sparkles, Volume2 } from "lucide-react";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
 import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
-import { ClinicianLegend } from "../lib/clinicianHighlights";
 
 
 interface SessionResultPanelsProps {
@@ -134,7 +133,6 @@ export function SessionResultPanels({
               <Brain className="h-4 w-4 text-primary" />
             </div>
             <h3 className="text-sm font-bold text-foreground">AI Clinician Notes</h3>
-            <ClinicianLegend className="ml-2" />
           </div>
           {clinicianActions}
         </div>

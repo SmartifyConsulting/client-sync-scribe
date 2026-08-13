@@ -46,7 +46,6 @@ import { ReferralLetterEditor } from "@/components/sessions/ReferralLetterEditor
 import { GeneralLetterEditor } from "@/components/sessions/GeneralLetterEditor";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SessionNotepad } from "@/components/sessions/SessionNotepad";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { SessionProcessingDialog } from "@/features/sessions/components/SessionProcessingDialog";
@@ -54,6 +53,7 @@ import { SessionTranscriptAccordion } from "@/features/sessions/components/Sessi
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
+import { ClinicianNotesAccordion } from "@/features/sessions/components/ClinicianNotesAccordion";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
@@ -464,8 +464,9 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  const createPrescriptionDocument = async (data: PrescriptionData): Promise<GeneratedDoc | null> => {
-    if (!patientId || !currentSessionIdRef.current) return null;
+  const createPrescriptionDocument = async (data: PrescriptionData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
+    const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
+    if (!patientId || !sessionIdForDoc) return null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
@@ -473,7 +474,7 @@ export default function Sessions() {
         await supabase.from('prescriptions').insert({
           patient_id: patientId,
           doctor_id: user.id,
-          session_id: currentSessionIdRef.current,
+          session_id: sessionIdForDoc,
           medication: med.medication,
           dosage: med.dosage,
           frequency: med.frequency,
@@ -500,8 +501,9 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  const createInvoiceDocument = async (data: InvoiceData): Promise<GeneratedDoc | null> => {
-    if (!patientId || !currentSessionIdRef.current) return null;
+  const createInvoiceDocument = async (data: InvoiceData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
+    const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
+    if (!patientId || !sessionIdForDoc) return null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
@@ -511,7 +513,7 @@ export default function Sessions() {
       const { data: inv } = await supabase.from('invoices').insert({
         patient_id: patientId,
         doctor_id: user.id,
-        session_id: currentSessionIdRef.current,
+        session_id: sessionIdForDoc,
         invoice_number: invoiceNumber,
         description,
         amount: total,
@@ -526,7 +528,7 @@ export default function Sessions() {
         .select('id, content')
         .eq('user_id', user.id)
         .eq('patient_id', patientId)
-        .eq('session_id', currentSessionIdRef.current)
+        .eq('session_id', sessionIdForDoc)
         .ilike('template_name', '%invoice%')
         .order('created_at', { ascending: false })
         .limit(1)
@@ -538,7 +540,7 @@ export default function Sessions() {
           user_id: user.id,
           patient_id: patientId,
           patient_name: currentPatient?.name || null,
-          session_id: currentSessionIdRef.current,
+          session_id: sessionIdForDoc,
           name: `Invoice ${invoiceNumber}`,
           content,
           template_name: 'Invoice',
@@ -603,11 +605,15 @@ export default function Sessions() {
     prescription?: PrescriptionData | null;
     invoice?: InvoiceData | null;
     referral?: ReferralData | null;
+    sessionId?: string | null;
   }) => {
     const medCert = payload?.medCert ?? extractedMedCert;
     const prescriptionData = payload?.prescription ?? extractedPrescription;
     let invoiceData = payload?.invoice ?? extractedInvoice;
     const referralData = payload?.referral ?? extractedReferral;
+    // Never rely on currentSessionIdRef here — it is only synced by an effect
+    // on the next render, so it can still be null in this same tick.
+    const sessionIdForDocs = payload?.sessionId ?? currentSessionIdRef.current;
 
     // Every consultation is billable — if the AI didn't pick up explicit billing
     // talk, raise a standard consultation invoice (single source of truth).
@@ -623,7 +629,7 @@ export default function Sessions() {
     // Create documents in the review order: prescription → med cert → referral → invoice.
     const results: GeneratedDoc[] = [];
     if (prescriptionData) {
-      const d = await createPrescriptionDocument(prescriptionData);
+      const d = await createPrescriptionDocument(prescriptionData, sessionIdForDocs);
       if (d) results.push(d);
     }
     if (medCert) {
@@ -635,21 +641,27 @@ export default function Sessions() {
       if (d) results.push(d);
     }
     if (invoiceData) {
-      const d = await createInvoiceDocument(invoiceData);
+      const d = await createInvoiceDocument(invoiceData, sessionIdForDocs);
       if (d) results.push(d);
     }
     setGeneratedDocs(results);
 
-    // Prescription → med cert → referral → any other doc → schedule → invoice → vulas.
+    // Only queue steps whose document actually exists, so the flow can never
+    // stall on an invisible step: prescription → med cert → referral → other
+    // docs → schedule → invoice → vulas.
     const steps: PostSessionStepType[] = [];
-    if (prescriptionData) steps.push("prescription");
-    if (medCert) steps.push("medcert");
-    if (referralData) steps.push("referral");
+    const ORDER: PostSessionStepType[] = ["prescription", "medcert", "referral"];
+    for (const key of ORDER) {
+      if (results.some((d) => d.key === key)) steps.push(key);
+    }
     for (const d of results) {
       const key = d.key as PostSessionStepType;
       if (!steps.includes(key) && key !== "invoice") steps.push(key);
     }
-    steps.push("schedule", "invoice", "vula");
+    steps.push("schedule");
+    if (results.some((d) => d.key === "invoice")) steps.push("invoice");
+    steps.push("vula");
+
     setPostSessionQueue(steps);
     setPostSessionIndex(0);
     setShowPostSessionFlow(true);
@@ -687,6 +699,7 @@ export default function Sessions() {
       
       if (result) {
         setCurrentSessionId(result.id);
+        currentSessionIdRef.current = result.id;
         setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
         // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
@@ -711,6 +724,7 @@ export default function Sessions() {
           prescription: prescriptionData,
           invoice: invoiceData,
           referral: referralData,
+          sessionId: result.id,
         });
 
       } else {
@@ -1441,89 +1455,34 @@ export default function Sessions() {
               />
             </div>
 
-            {/* Live AI Clinician — sits directly above the AI Clinician Notes frame. */}
-            {isRecording && aiConsultEnabled && (liveHint || liveHintLoading) && (
-              <div className="rounded-xl border border-primary bg-primary/5 p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-sm font-medium text-primary-dark">Live AI Clinician</p>
-                  </div>
-                  {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
-                </div>
-
-                {/* Safety alerts first — this is what the doctor must see before prescribing */}
-                {liveHint?.alerts && liveHint.alerts.length > 0 && (
-                  <div className="mb-2 space-y-1">
-                    {liveHint.alerts.map((a, i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          "flex items-start gap-1.5 rounded-md border px-2 py-1.5",
-                          a.severity === "critical"
-                            ? "border-destructive/40 bg-destructive/10"
-                            : a.severity === "caution"
-                              ? "border-warning/40 bg-warning/10"
-                              : "border-border bg-muted/40",
-                        )}
-                      >
-                        <ShieldAlert
-                          className={cn(
-                            "h-3.5 w-3.5 mt-0.5 shrink-0",
-                            a.severity === "critical"
-                              ? "text-destructive"
-                              : a.severity === "caution"
-                                ? "text-warning"
-                                : "text-muted-foreground",
-                          )}
-                        />
-                        <p
-                          className={cn(
-                            "text-sm leading-relaxed",
-                            a.severity === "critical" ? "text-destructive font-medium" : "text-foreground",
-                          )}
-                        >
-                          {a.message}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-                  {liveHint?.suggestion && (
-                    <p className="text-sm text-foreground leading-relaxed">{liveHint.suggestion}</p>
-                  )}
-                  {liveHint?.differentials && liveHint.differentials.length > 0 && (
-                    <p className="text-sm text-foreground leading-relaxed">
-                      <span className="font-bold">Consider:</span> {liveHint.differentials.join(" · ")}
-                    </p>
-                  )}
-                  {liveHint?.red_flags && liveHint.red_flags.length > 0 && (
-                    <p className="text-sm text-destructive leading-relaxed">
-                      <span className="font-bold">Rule out:</span> {liveHint.red_flags.join(" · ")}
-                    </p>
-                  )}
-                  {liveHint?.suggested_investigations && liveHint.suggested_investigations.length > 0 && (
-                    <p className="text-sm text-foreground leading-relaxed">
-                      <span className="font-bold">Checks:</span> {liveHint.suggested_investigations.join(" · ")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
           </div>
         </div>
 
-        {/* AI Clinician Notes — full width beneath the recording and overview columns. */}
+        {/* Live AI Clinician — full width, rendered with the exact same
+            colour-coded sections the saved notes use. */}
+        {aiConsultEnabled && (isRecording || notes) && (
+          <div className="mt-4 rounded-xl border border-primary bg-primary/5 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <p className="text-sm font-semibold text-primary-dark">Live AI Clinician</p>
+              </div>
+              {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+            </div>
+            <ClinicianNotesAccordion notes={notes} />
+            <p className="mt-2 text-xs text-muted-foreground leading-snug">
+              <span className="font-semibold text-foreground">
+                Private — not shared with the patient.
+              </span>{" "}
+              AI-generated clinical notes are decision support only and must be reviewed by the
+              treating clinician.
+            </p>
+          </div>
+        )}
+
         <div className="mt-4">
-            <Tabs defaultValue="notes">
+            <Tabs defaultValue="personal">
               <TabsList className="mb-2 bg-neutral-600">
-                <TabsTrigger value="notes" className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
-                  <FileText className="h-3.5 w-3.5" />
-                  AI Clinician Notes
-                </TabsTrigger>
                 <TabsTrigger value="personal" className="gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5">
                   <Lock className="h-3.5 w-3.5" />
                   Personal Notes
@@ -1533,25 +1492,6 @@ export default function Sessions() {
                   Drawing Pad
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="notes" className="mt-0">
-                <SessionNotepad
-                  patientId={patientId || ""}
-                  sessionId={currentSessionId}
-                  patientName={currentPatient?.name}
-                  notes={notes}
-                  onNotesChange={setNotes}
-                  isRecording={isRecording}
-                  disclaimer={
-                    <p className="text-xs text-muted-foreground leading-snug">
-                      <span className="font-semibold text-foreground">
-                        Private — not shared with the patient and only available for the duration of the session.
-                      </span>{" "}
-                      Disclaimer: AI-generated clinical notes are decision support only. They may be incomplete or
-                      inaccurate and must be reviewed and confirmed by the treating clinician before any clinical use.
-                    </p>
-                  }
-                />
-              </TabsContent>
 
               <TabsContent value="personal" className="mt-0">
                 <div className="rounded-xl border border-primary bg-card shadow-sm p-3">
