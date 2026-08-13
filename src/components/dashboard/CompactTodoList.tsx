@@ -39,7 +39,8 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   SECTION_FRAME_CLASS,
-  SECTION_ITEM_CLASS,
+  SECTION_ITEM_ROUNDED_CLASS,
+  SECTION_TRIGGER_ROUNDED_CLASS,
   SECTION_TRIGGER_CLASS,
   SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
   SECTION_CONTENT_CLASS,
