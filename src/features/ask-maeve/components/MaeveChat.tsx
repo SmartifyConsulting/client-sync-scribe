@@ -114,7 +114,40 @@ export function MaeveChat({ sessionId }: Props) {
   const currentProcess = processLabel(
     [...messages].reverse().find((m) => m.process_key)?.process_key,
   );
-  const current = stateLabel(session?.conversation_state);
+
+  if (!mode) {
+    return (
+      <div className="mx-auto w-full max-w-2xl px-1 py-8">
+        <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
+          <Sparkles className="h-5 w-5 text-maeve" />
+          Ask Maeve
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          How would you like to explore today? You can change this at any time.
+        </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <button
+            onClick={() => chooseMode("type")}
+            className="rounded-2xl border border-border p-5 text-left transition hover:border-maeve"
+          >
+            <Keyboard className="h-6 w-6 text-maeve" />
+            <p className="mt-3 text-sm font-semibold text-foreground">Type</p>
+            <p className="mt-1 text-xs text-muted-foreground">Write your answers in your own time.</p>
+          </button>
+          <button
+            onClick={() => chooseMode("talk")}
+            className="rounded-2xl border border-border p-5 text-left transition hover:border-maeve"
+          >
+            <Mic className="h-6 w-6 text-maeve" />
+            <p className="mt-3 text-sm font-semibold text-foreground">Talk and listen</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Speak your answers and hear Maeve's questions read aloud.
+            </p>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex h-[calc(100vh-11rem)] w-full max-w-3xl flex-col">
