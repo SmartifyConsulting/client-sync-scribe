@@ -12,6 +12,7 @@ import {
   Siren,
   DollarSign,
   Home,
+  Sparkles,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
