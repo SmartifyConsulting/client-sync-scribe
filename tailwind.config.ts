@@ -77,6 +77,11 @@ export default {
           DEFAULT: "hsl(var(--sos))",
           foreground: "hsl(var(--sos-foreground))",
         },
+        maeve: {
+          DEFAULT: "hsl(var(--maeve))",
+          foreground: "hsl(var(--maeve-foreground))",
+          dark: "hsl(var(--maeve-dark))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
