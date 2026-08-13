@@ -114,6 +114,7 @@ export function MaeveChat({ sessionId }: Props) {
   const currentProcess = processLabel(
     [...messages].reverse().find((m) => m.process_key)?.process_key,
   );
+  const current = stateLabel(session?.conversation_state);
 
   if (!mode) {
     return (
