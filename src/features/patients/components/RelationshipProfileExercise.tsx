@@ -159,7 +159,9 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
       row?.pattern ?? null,
       (row?.confidence as any) ?? null,
       row?.responses,
+      evidence,
     );
+
     return (
       <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-3">
         <p className="text-xs font-bold text-foreground">Help us understand you</p>

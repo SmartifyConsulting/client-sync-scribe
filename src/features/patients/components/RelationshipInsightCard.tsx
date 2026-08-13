@@ -43,7 +43,7 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
 
   if (roleLoading || !isDoctor) return null;
 
-  const assessment = buildAssessment(row?.pattern ?? null, row?.confidence ?? null, row?.responses);
+  const assessment = buildAssessment(row?.pattern ?? null, row?.confidence ?? null, row?.responses, evidence);
 
   return (
     <div className="rounded-xl border border-primary/40 bg-card p-5 h-full">
