@@ -25,6 +25,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SessionTitleEditor } from "./SessionTitleEditor";
+import { MaeveVoicePicker } from "./MaeveVoicePicker";
+
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 
 const logo = holarcLogoAsset.url;
