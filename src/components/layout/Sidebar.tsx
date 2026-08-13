@@ -169,6 +169,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
+  const { hasHospitalAffiliation } = useHospitalAffiliation();
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
