@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "Canlı SOS"
+    "liveSOS": "Canlı SOS",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Hata bildir",

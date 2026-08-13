@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "实时SOS"
+    "liveSOS": "实时SOS",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "报告问题",

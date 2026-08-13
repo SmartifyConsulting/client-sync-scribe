@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "SOS Yepamhepo"
+    "liveSOS": "SOS Yepamhepo",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Shuma Dambudziko",

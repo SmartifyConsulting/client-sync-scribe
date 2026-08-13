@@ -12,6 +12,7 @@ import {
   Siren,
   DollarSign,
   Home,
+  Sparkles,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -21,7 +22,7 @@ const doctorNavItems = [
   { icon: LayoutDashboard, labelKey: "nav.home", to: "/doctor-dashboard" },
   { icon: User, labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Briefcase, labelKey: "bottomNav.practice", to: "/practice" },
-  { icon: UserCog, labelKey: "nav.admin", to: "/admin" },
+  { icon: Sparkles, labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
@@ -29,6 +30,7 @@ const patientSections = [
   { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
+  { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
 ];
 
@@ -114,24 +116,31 @@ export function BottomNav() {
                 </button>
               );
             }
+            const accent = (item as any).accent;
             return (
               <button
                 key={item.to}
                 onClick={() => navigate(item.to)}
                 className={cn(
                   "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  accent
+                    ? "text-maeve-dark"
+                    : isActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <div
                   className={cn(
                     "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
-                    isActive && "bg-primary/15 scale-110",
+                    accent ? "bg-maeve text-maeve-foreground" : isActive && "bg-primary/15 scale-110",
                   )}
                 >
-                  <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                  <item.icon className={cn("h-5 w-5", !accent && isActive && "text-primary")} />
                 </div>
-                <span className={cn("text-sm font-semibold", isActive && "text-primary")}>{t(item.labelKey)}</span>
+                <span className={cn("text-sm font-semibold", !accent && isActive && "text-primary")}>
+                  {t(item.labelKey)}
+                </span>
               </button>
             );
           })}
@@ -153,10 +162,13 @@ export function BottomNav() {
           const isActive =
             item.section === "rewards"
               ? location.pathname === "/patient/rewards"
+              : item.section === "maeve"
+              ? location.pathname.startsWith("/ask-maeve")
               : item.section === "sos"
               ? location.pathname.startsWith("/patient/holarchelp")
               : isOnDetails && currentSection === item.section;
           const danger = (item as any).danger;
+          const accent = (item as any).accent;
           if (danger) {
             return (
               <button
@@ -178,18 +190,24 @@ export function BottomNav() {
               onClick={() => navigate(item.to)}
               className={cn(
                 "flex flex-1 flex-col items-center gap-0.5 px-1 py-2 rounded-xl transition-all duration-200 min-w-0",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                accent
+                  ? "text-maeve-dark"
+                  : isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground",
               )}
             >
               <div
                 className={cn(
                   "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
-                  isActive && "bg-primary/15 scale-110",
+                  accent ? "bg-maeve text-maeve-foreground" : isActive && "bg-primary/15 scale-110",
                 )}
               >
-                <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                <item.icon className={cn("h-5 w-5", !accent && isActive && "text-primary")} />
               </div>
-              <span className={cn("text-sm font-semibold", isActive && "text-primary")}>{t(item.labelKey)}</span>
+              <span className={cn("text-sm font-semibold", !accent && isActive && "text-primary")}>
+                {t(item.labelKey)}
+              </span>
             </button>
           );
         })}

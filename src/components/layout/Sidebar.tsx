@@ -29,6 +29,7 @@ import {
   RotateCcw,
   FlaskConical,
   Activity,
+  Sparkles,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -50,6 +51,8 @@ interface NavItem {
   labelKey: string;
   to: string;
   danger?: boolean;
+  /** Ask Maeve — yellow-orange accent, distinct from the red SOS control. */
+  accent?: boolean;
 }
 
 interface NavSection {
@@ -96,6 +99,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
 ];
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
+  { icon: Sparkles, label: "Ask Maeve", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
@@ -116,6 +120,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
   { icon: FlaskConical, label: "Lab Results", labelKey: "nav.labResults", to: "/patient/lab-results" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
+  { icon: Sparkles, label: "Ask Maeve", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
@@ -124,6 +129,7 @@ const nurseNavItems: (NavItem & { tour?: string })[] = [
   { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
   { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/provider/hospital/inpatients" },
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+  { icon: Sparkles, label: "Ask Maeve", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
 ];
 
@@ -283,10 +289,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             isItemActive
               ? item.danger
                 ? "bg-red-600 text-white shadow-sm"
-                : "bg-primary text-primary-foreground shadow-sm"
+                : item.accent
+                  ? "bg-maeve-dark text-maeve-foreground shadow-sm"
+                  : "bg-primary text-primary-foreground shadow-sm"
               : item.danger
                 ? "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700"
-                : "text-foreground hover:border-primary",
+                : item.accent
+                  ? "bg-maeve text-maeve-foreground border-maeve hover:bg-maeve-dark hover:border-maeve-dark"
+                  : "text-foreground hover:border-primary",
           )
         }
       >

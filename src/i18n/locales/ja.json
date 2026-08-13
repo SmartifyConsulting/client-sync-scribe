@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "ライブSOS"
+    "liveSOS": "ライブSOS",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "バグ報告",

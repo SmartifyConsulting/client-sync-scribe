@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "Ζωντανό SOS"
+    "liveSOS": "Ζωντανό SOS",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Αναφορά σφάλματος",

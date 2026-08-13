@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "إس أو إس مباشر"
+    "liveSOS": "إس أو إس مباشر",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "الإبلاغ عن خطأ",

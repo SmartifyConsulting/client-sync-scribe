@@ -51,6 +51,8 @@ import PatientAdmissions from "./pages/patient/PatientAdmissions";
 import PatientLabResults from "./pages/patient/PatientLabResults";
 import PatientWardAdmission from "./pages/patient/PatientWardAdmission";
 import Biolog from "./pages/Biolog";
+import AskMaeveHome from "./features/ask-maeve/pages/AskMaeveHome";
+import AskMaeveSession from "./features/ask-maeve/pages/AskMaeveSession";
 import PatientDocuments from "./pages/patient/PatientDocuments";
 import PatientRoundTable from "./pages/patient/PatientRoundTable";
 import MyDetails from "./pages/patient/MyDetails";
@@ -225,6 +227,8 @@ const App = () => (
             <Route path="/patient/ward-admission/:incidentId" element={<PatientWardAdmission />} />
             <Route path="/patient/lab-results" element={<PatientLabResults />} />
             <Route path="/biolog" element={<Biolog />} />
+            <Route path="/ask-maeve" element={<AskMaeveHome />} />
+            <Route path="/ask-maeve/:sessionId" element={<AskMaeveSession />} />
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
@@ -253,6 +257,8 @@ const App = () => (
             <Route path="/patients/:id" element={<PatientProfile />} />
             <Route path="/admissions" element={<DoctorAdmissions />} />
             <Route path="/biolog" element={<Biolog />} />
+            <Route path="/ask-maeve" element={<AskMaeveHome />} />
+            <Route path="/ask-maeve/:sessionId" element={<AskMaeveSession />} />
             <Route path="/doctor/sessions" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />

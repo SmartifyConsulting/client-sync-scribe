@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "SOS dal vivo"
+    "liveSOS": "SOS dal vivo",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Segnala bug",

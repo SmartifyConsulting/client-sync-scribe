@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "실시간 SOS"
+    "liveSOS": "실시간 SOS",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "버그 신고",
