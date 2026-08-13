@@ -297,26 +297,73 @@ export function MaeveChat({ sessionId }: Props) {
         </button>
       </div>
 
+      {/* Failed opening — visible error with a retry instead of an empty screen */}
+      {error && messages.length === 0 && !thinking && (
+        <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2">
+          <p className="text-xs text-foreground">Maeve could not start this exploration.</p>
+          <Button size="sm" variant="outline" onClick={startOpening} className="h-7 gap-1 text-xs">
+            <RotateCcw className="h-3 w-3" /> Try again
+          </Button>
+        </div>
+      )}
+
       {/* Composer */}
-      <div className="mt-2 flex items-end gap-2 border-t border-border pt-3">
-        <Textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              submit();
-            }
-          }}
-          rows={2}
-          placeholder="Take your time…"
-          className="min-h-[52px] resize-none text-[15px]"
-        />
-        <Button onClick={submit} disabled={thinking || !input.trim()} className="h-[52px] px-4">
-          {thinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        </Button>
-      </div>
+      {mode === "talk" ? (
+        <div className="mt-2 flex flex-col items-center gap-2 border-t border-border pt-3">
+          <Button
+            onClick={handleMic}
+            disabled={thinking || voice.transcribing}
+            className={cn(
+              "h-16 w-16 rounded-full",
+              voice.recording ? "bg-destructive hover:bg-destructive/90" : "bg-maeve text-maeve-foreground hover:bg-maeve-dark",
+            )}
+          >
+            {voice.transcribing ? (
+              <Loader2 className="h-6 w-6 animate-spin" />
+            ) : voice.recording ? (
+              <Square className="h-6 w-6" />
+            ) : (
+              <Mic className="h-6 w-6" />
+            )}
+          </Button>
+          <p className="text-[11px] text-muted-foreground">
+            {voice.transcribing
+              ? "Listening back…"
+              : voice.recording
+                ? "Tap to stop when you're done"
+                : "Tap to speak"}
+          </p>
+          {voice.speaking && (
+            <button
+              onClick={voice.stopSpeaking}
+              className="rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-muted-foreground hover:border-maeve hover:text-maeve-dark"
+            >
+              Stop audio
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="mt-2 flex items-end gap-2 border-t border-border pt-3">
+          <Textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submit();
+              }
+            }}
+            rows={2}
+            placeholder="Take your time…"
+            className="min-h-[52px] resize-none text-[15px]"
+          />
+          <Button onClick={submit} disabled={thinking || !input.trim()} className="h-[52px] px-4">
+            {thinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </div>
+      )}
+
     </div>
   );
 }
