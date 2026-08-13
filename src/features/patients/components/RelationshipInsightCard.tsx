@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RelationshipAssessmentDetails } from "./RelationshipAssessmentDetails";
+import { useRelationshipEvidence } from "@/features/patients/relationship/useRelationshipEvidence";
 import {
   ETHICAL_TOOLTIP,
   buildAssessment,
 } from "@/features/patients/relationship/insights";
+
 
 
 /**
@@ -18,6 +20,8 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
   const { isDoctor, loading: roleLoading } = useUserRole();
   const [loading, setLoading] = useState(true);
   const [row, setRow] = useState<any | null>(null);
+  const { evidence } = useRelationshipEvidence(isDoctor ? patientId : null);
+
 
   useEffect(() => {
     if (!isDoctor || !patientId) return;
@@ -39,7 +43,7 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
 
   if (roleLoading || !isDoctor) return null;
 
-  const assessment = buildAssessment(row?.pattern ?? null, row?.confidence ?? null, row?.responses);
+  const assessment = buildAssessment(row?.pattern ?? null, row?.confidence ?? null, row?.responses, evidence);
 
   return (
     <div className="rounded-xl border border-primary/40 bg-card p-5 h-full">

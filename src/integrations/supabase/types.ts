@@ -5692,6 +5692,60 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_relationship_evidence: {
+        Row: {
+          created_at: string
+          id: string
+          patient_id: string
+          quote: string
+          session_date: string
+          session_id: string | null
+          signal_label: string
+          source: string
+          supports_pattern: number | null
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_id: string
+          quote: string
+          session_date?: string
+          session_id?: string | null
+          signal_label: string
+          source?: string
+          supports_pattern?: number | null
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_id?: string
+          quote?: string
+          session_date?: string
+          session_id?: string | null
+          signal_label?: string
+          source?: string
+          supports_pattern?: number | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_relationship_evidence_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_relationship_evidence_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_relationship_profile_history: {
         Row: {
           completed_at: string | null

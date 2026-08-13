@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { RelationshipAssessmentDetails } from "./RelationshipAssessmentDetails";
+import { useRelationshipEvidence } from "@/features/patients/relationship/useRelationshipEvidence";
 import {
   Choice,
   ENGINE_VERSION,
   NONE_LABEL,
   QUESTION_SETS,
   buildAssessment,
+
   derive,
 } from "@/features/patients/relationship/insights";
 
@@ -43,6 +45,8 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
   const [editing, setEditing] = useState(false);
   const [reviewing, setReviewing] = useState(false);
   const [justFinished, setJustFinished] = useState(false);
+  const { evidence } = useRelationshipEvidence(patientId);
+
 
   const load = async () => {
     setLoading(true);
@@ -159,7 +163,9 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
       row?.pattern ?? null,
       (row?.confidence as any) ?? null,
       row?.responses,
+      evidence,
     );
+
     return (
       <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-3">
         <p className="text-xs font-bold text-foreground">Help us understand you</p>

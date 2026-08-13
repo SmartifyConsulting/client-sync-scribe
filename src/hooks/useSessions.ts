@@ -291,6 +291,14 @@ const completeSession = async (
         return [transformedData, ...prev];
       });
 
+      // Rapport evidence from the transcript — fire-and-forget, never blocks the session flow.
+      if (sessionId && (content || '').trim().length > 200) {
+        supabase.functions
+          .invoke('extract-relationship-evidence', { body: { session_id: sessionId } })
+          .catch((e) => logger.debug('relationship evidence skipped', e));
+      }
+
+
       // Auto-execute action points via process-todo-actions
       if (summaryData?.action_points?.length > 0) {
         const actionPointsText = summaryData.action_points.join('. ');
