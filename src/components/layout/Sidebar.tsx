@@ -28,6 +28,7 @@ import {
   EyeOff,
   RotateCcw,
   FlaskConical,
+  Activity,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -80,6 +81,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
+      { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
@@ -107,6 +109,7 @@ const doctorModeItems: (NavItem & { tour?: string })[] = [
 
 const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: Users, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
+  { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
