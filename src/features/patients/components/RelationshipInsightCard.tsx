@@ -20,6 +20,8 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
   const { isDoctor, loading: roleLoading } = useUserRole();
   const [loading, setLoading] = useState(true);
   const [row, setRow] = useState<any | null>(null);
+  const { evidence } = useRelationshipEvidence(isDoctor ? patientId : null);
+
 
   useEffect(() => {
     if (!isDoctor || !patientId) return;
