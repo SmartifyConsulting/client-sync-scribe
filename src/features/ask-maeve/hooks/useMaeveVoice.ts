@@ -80,10 +80,10 @@ export function useMaeveVoice(options: Options = {}) {
   );
 
   const speak = useCallback(
-    async (text: string) => {
+    async (text: string, overrideVoiceId?: string) => {
       if (!text.trim()) return;
       stopSpeaking();
-      const chosen = voiceById(voiceId);
+      const chosen = voiceById(overrideVoiceId || voiceId);
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
