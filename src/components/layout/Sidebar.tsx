@@ -29,6 +29,7 @@ import {
   RotateCcw,
   FlaskConical,
   Activity,
+  Sparkles,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
