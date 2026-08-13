@@ -344,6 +344,16 @@ const SECONDARY_MAP: Record<number, number[]> = {
   9: [2, 6],
 };
 
+/** A short verbatim line quoted from a session transcript. */
+export interface SessionEvidence {
+  id: string;
+  quote: string;
+  signal_label: string;
+  supports_pattern: number | null;
+  session_id: string | null;
+  session_date: string;
+}
+
 export interface StructuredAssessment {
   pattern: number;
   secondary: number[];
@@ -352,6 +362,10 @@ export interface StructuredAssessment {
   evidence2: string | null;
   confirm: string[];
   insight: OverviewInsight | null;
+  /** Transcript-derived evidence, newest session first. */
+  sessionEvidence: SessionEvidence[];
+  /** Number of distinct sessions that corroborate the primary pattern. */
+  corroboratingSessions: number;
 }
 
 const evidenceTitle = (setIdx: number, key?: Choice | null) => {
@@ -359,26 +373,48 @@ const evidenceTitle = (setIdx: number, key?: Choice | null) => {
   return QUESTION_SETS[setIdx].options.find((o) => o.key === key)?.title ?? null;
 };
 
+const CONFIDENCE_ORDER: Confidence[] = ["Emerging", "Moderate", "Strong"];
+
+/**
+ * Confidence never drops below the questionnaire result; corroborating quotes
+ * across separate sessions can raise it.
+ */
+function escalateConfidence(base: Confidence, corroboratingSessions: number): Confidence {
+  const fromEvidence: Confidence =
+    corroboratingSessions >= 3 ? "Strong" : corroboratingSessions === 2 ? "Moderate" : "Emerging";
+  return CONFIDENCE_ORDER[
+    Math.max(CONFIDENCE_ORDER.indexOf(base), CONFIDENCE_ORDER.indexOf(fromEvidence))
+  ];
+}
+
 /**
  * Full clinician-facing result for a completed profile: primary pattern,
- * secondary candidates, confidence, the evidence behind each selection and the
- * areas worth confirming in conversation.
+ * secondary candidates, confidence, the evidence behind each selection, the
+ * evidence gathered from session recordings and the areas worth confirming.
  */
 export function buildAssessment(
   pattern: number | null,
   confidence: Confidence | null,
   responses?: Partial<Record<string, Choice>> | null,
+  sessionEvidence: SessionEvidence[] = [],
 ): StructuredAssessment | null {
   if (!pattern) return null;
   const lib = INSIGHT_LIBRARY[pattern];
+  const supporting = sessionEvidence.filter((e) => e.supports_pattern === pattern);
+  const corroboratingSessions = new Set(
+    supporting.map((e) => e.session_id ?? e.session_date),
+  ).size;
   return {
     pattern,
     secondary: SECONDARY_MAP[pattern] ?? [],
-    confidence: confidence ?? "Moderate",
+    confidence: escalateConfidence(confidence ?? "Moderate", corroboratingSessions),
     evidence1: evidenceTitle(0, responses?.question_set_1),
     evidence2: evidenceTitle(1, responses?.question_set_2),
     confirm: lib ? [...lib.explore, lib.confidenceGuidance] : [],
     insight: toOverviewInsight(pattern),
+    sessionEvidence,
+    corroboratingSessions,
   };
 }
+
 
