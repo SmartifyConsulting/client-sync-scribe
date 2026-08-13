@@ -36,12 +36,12 @@ export function useHospitalAffiliation() {
       if (hospitalIds.length === 0) return false;
 
       const { data: hospitals } = await supabase
-        .from("hospitals")
+        .from("holarchelp_hospitals")
         .select("id")
-        .in("id", hospitalIds)
+        .in("id", hospitalIds as string[])
         .limit(1);
 
-      return (hospitals?.length ?? 0) > 0;
+      return ((hospitals as { id: string }[] | null)?.length ?? 0) > 0;
     },
   });
 
