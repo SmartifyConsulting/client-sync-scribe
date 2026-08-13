@@ -15,17 +15,21 @@ The patient Overview becomes two subtabs, shown in the doctor's patient profile 
 
 - Only the patient can write and read their journal entries. A permanent notice sits above the entry box: *"This journal is private. Only you can read what you write here. Your care team never sees these entries — only a short, generalised note may appear in your health summary."*
 - Simple flow: date, a short free-text entry, save, and a list of past entries the patient can edit or delete.
+- The patient picks the handwriting-style font for their journal from the same font set doctors use for their signature, so entries read in their own hand.
 - Below the entry box, a short standing explainer on the somatological effect of emotions — that sustained stress, grief, anger or fear commonly express themselves physically (tension, pain, sleep and digestive changes) — written as general information, not a diagnosis.
-- When the patient views their own Overview, the Emotional State tab shows their entries in full. When a doctor views the profile, the Emotional State tab shows **only** the generalised emotional context — never the raw entries.
+- Past entries collapse into date accordions grouped **Today / This week / This month / Earlier**. Each accordion row shows the AI's short summation, which both the patient and the doctor can read.
+- Only the patient can expand an accordion to reveal the entry itself. For a doctor the rows are not expandable at all — they see the summation and nothing more.
 
 ## 4. What the AI does with the journal
 
-A new AI pass reads the journal and produces two short, conservative outputs that are stored separately from the raw entries:
+A new AI pass reads the journal and reports on possible metaphysical causes behind the patient's health results, based only on what the journalling contains. It produces short, conservative outputs stored separately from the raw entries:
 
 - A **generalised theme** — specifics are stripped and abstracted. "Father and daughter had a fight" becomes "internal family conflict". No names, no incidents, no quotes.
-- A **conservative metaphysical note** — a possible symbolic/emotional association for pains the patient is reporting, worded as a tentative observation ("may be associated with…"), never a cause, never a diagnosis, and only when the journal genuinely supports it.
+- A **conservative metaphysical note** — a reasonable, tentative symbolic/emotional association for the pains or results the patient is reporting ("may be associated with…"), never a cause, never a diagnosis.
+- **Silence is the default.** If nothing substantial emerges from the journal, the AI returns nothing and no emotional content appears anywhere — no filler, no speculative note.
 
 Both appear in the **AI Overview Summary** only, rendered in **bold orange**, and the doctor sees both. The raw journal text is never sent to the doctor's view and never stored in the summary.
+
 
 ## 5. Timeline stops regenerating
 
