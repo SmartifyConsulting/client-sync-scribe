@@ -257,6 +257,8 @@ const App = () => (
             <Route path="/patients/:id" element={<PatientProfile />} />
             <Route path="/admissions" element={<DoctorAdmissions />} />
             <Route path="/biolog" element={<Biolog />} />
+            <Route path="/ask-maeve" element={<AskMaeveHome />} />
+            <Route path="/ask-maeve/:sessionId" element={<AskMaeveSession />} />
             <Route path="/doctor/sessions" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
