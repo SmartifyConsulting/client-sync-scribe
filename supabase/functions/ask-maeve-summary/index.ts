@@ -54,9 +54,18 @@ Deno.serve(async (req) => {
       .eq("session_id", sessionId)
       .order("created_at", { ascending: true });
 
-    const transcript = (messages ?? [])
-      .map((m: any) => `${m.role === "user" ? "Person" : "Maeve"}: ${m.content}`)
+    // The summary is about the person, so their own words carry the transcript and
+    // Maeve's turns are only thin context.
+    const rows = messages ?? [];
+    const personTurns = rows.filter((m: any) => m.role === "user");
+    const transcript = rows
+      .map((m: any) =>
+        m.role === "user"
+          ? `Person: ${m.content}`
+          : `(context — do not summarise) Maeve: ${String(m.content).slice(0, 200)}`,
+      )
       .join("\n");
+    const hasPersonWords = personTurns.length > 0;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -71,17 +80,20 @@ Deno.serve(async (req) => {
           {
             role: "system",
             content: recap
-              ? "Write a short overarching recap of an NLP facilitation conversation, addressed to the person, so they " +
-                "can pick the exploration up again later. Rules: use only the person's own words and what they explored. " +
-                "No advice, no suggestions, no next steps, no interpretation, no diagnosis, no praise. Plain British " +
-                "English, 3-5 short sentences, no lists. Cover what they came with, what they explored and where the " +
-                "conversation had reached."
-              : "Write a short closing reflection of an NLP facilitation conversation, addressed to the person. " +
-              "Rules: use only the person's own words and what they explored. No advice, no suggestions, no next steps, " +
-              "no interpretation, no diagnosis, no praise. Plain British English, 3–5 short sentences, no lists. " +
+              ? "Write a short recap of what the PERSON said in an NLP facilitation conversation, addressed to them, " +
+                "so they can pick it up again later. Summarise only their own words: what they came with, what they " +
+                "said, felt and wanted, and where they had got to. Never describe Maeve, her questions, her techniques " +
+                "or the process — the lines marked as context exist only so the summary reads coherently. No advice, " +
+                "no suggestions, no next steps, no interpretation, no diagnosis, no praise. Plain British English, " +
+                "3-5 short sentences, no lists."
+              : "Write a short closing reflection of what the PERSON said in an NLP facilitation conversation, " +
+              "addressed to them. Summarise only their own words: what they brought, what they said, felt and wanted, " +
+              "and what shifted for them. Never describe Maeve, her questions, her techniques or the process — the " +
+              "lines marked as context exist only so the reflection reads coherently. No advice, no suggestions, " +
+              "no next steps, no interpretation, no diagnosis, no praise. Plain British English, 3–5 short sentences, no lists. " +
               'End with exactly this question on its own line: "What, if anything, would you like to explore from here?"',
           },
-          { role: "user", content: transcript || "The conversation was empty." },
+          { role: "user", content: hasPersonWords ? transcript : "The person did not say anything yet." },
         ],
       }),
     });

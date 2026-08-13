@@ -969,6 +969,30 @@ export type Database = {
           },
         ]
       }
+      ask_maeve_preferences: {
+        Row: {
+          created_at: string
+          updated_at: string
+          user_id: string
+          voice_id: string
+          voice_label: string | null
+        }
+        Insert: {
+          created_at?: string
+          updated_at?: string
+          user_id: string
+          voice_id?: string
+          voice_label?: string | null
+        }
+        Update: {
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+          voice_id?: string
+          voice_label?: string | null
+        }
+        Relationships: []
+      }
       ask_maeve_processes: {
         Row: {
           contraindications: Json

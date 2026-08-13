@@ -54,6 +54,8 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const [makingPdf, setMakingPdf] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmMessageId, setConfirmMessageId] = useState<string | null>(null);
+  const [deletingMessage, setDeletingMessage] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const openedRef = useRef(false);
@@ -249,6 +251,19 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     navigate("/ask-maeve");
   };
 
+  const removeMessage = async (messageId: string) => {
+    setDeletingMessage(true);
+    const { error: err } = await supabase.from("ask_maeve_messages").delete().eq("id", messageId);
+    setDeletingMessage(false);
+    if (err) {
+      toast.error("Could not delete that message");
+      return;
+    }
+    setConfirmMessageId(null);
+    toast.success("Message deleted");
+    reload();
+  };
+
   const currentProcess = processLabel(
     [...messages].reverse().find((m) => m.process_key)?.process_key,
   );
@@ -309,7 +324,16 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
             Ask Maeve
           </h1>
           <div className="mt-1">
-            <SessionTitleEditor sessionId={sessionId} title={session?.title} onRenamed={() => reload()} />
+            <div className="flex items-center gap-1.5">
+              <SessionTitleEditor sessionId={sessionId} title={session?.title} onRenamed={() => reload()} />
+              <button
+                aria-label="Delete this exploration"
+                onClick={() => setConfirmDelete(true)}
+                className="rounded-full border border-border p-1 text-muted-foreground transition hover:border-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
           </div>
           <p className="text-xs text-muted-foreground">
             {session?.status === "closed" ? "Exploration closed" : "Exploration in progress"}
@@ -400,7 +424,19 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
               ? full.slice(0, Math.max(1, Math.round(full.length * voice.speechProgress)))
               : full;
             return (
-              <div key={m.id} className={cn("flex", isMaeve ? "justify-start" : "justify-end")}>
+              <div
+                key={m.id}
+                className={cn("group flex items-start gap-1.5", isMaeve ? "justify-start" : "justify-end")}
+              >
+                {!isMaeve && (
+                  <button
+                    aria-label="Delete this message"
+                    onClick={() => setConfirmMessageId(m.id)}
+                    className="mt-2 rounded-full border border-transparent p-1 text-muted-foreground opacity-0 transition focus:opacity-100 group-hover:opacity-100 hover:border-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
                 <div
                   className={cn(
                     "max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-[15px] leading-relaxed",
@@ -413,6 +449,15 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
                 >
                   {body}
                 </div>
+                {isMaeve && (
+                  <button
+                    aria-label="Delete this message"
+                    onClick={() => setConfirmMessageId(m.id)}
+                    className="mt-2 rounded-full border border-transparent p-1 text-muted-foreground opacity-0 transition focus:opacity-100 group-hover:opacity-100 hover:border-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             );
           })
@@ -506,6 +551,32 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
           Once you share or email it, this conversation leaves your private space.
         </span>
       </div>
+
+      <AlertDialog
+        open={confirmMessageId !== null}
+        onOpenChange={(open) => !open && setConfirmMessageId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this message?</AlertDialogTitle>
+            <AlertDialogDescription>
+              It will be permanently removed from this exploration, and from any summary or PDF made from here on.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingMessage}>Keep it</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deletingMessage}
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmMessageId) removeMessage(confirmMessageId);
+              }}
+            >
+              {deletingMessage ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
