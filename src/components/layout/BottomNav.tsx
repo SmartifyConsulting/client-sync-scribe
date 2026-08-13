@@ -116,24 +116,31 @@ export function BottomNav() {
                 </button>
               );
             }
+            const accent = (item as any).accent;
             return (
               <button
                 key={item.to}
                 onClick={() => navigate(item.to)}
                 className={cn(
                   "flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 min-w-[64px]",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                  accent
+                    ? "text-maeve-dark"
+                    : isActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <div
                   className={cn(
                     "flex items-center justify-center h-8 w-8 rounded-xl transition-all duration-200",
-                    isActive && "bg-primary/15 scale-110",
+                    accent ? "bg-maeve text-maeve-foreground" : isActive && "bg-primary/15 scale-110",
                   )}
                 >
-                  <item.icon className={cn("h-5 w-5", isActive && "text-primary")} />
+                  <item.icon className={cn("h-5 w-5", !accent && isActive && "text-primary")} />
                 </div>
-                <span className={cn("text-sm font-semibold", isActive && "text-primary")}>{t(item.labelKey)}</span>
+                <span className={cn("text-sm font-semibold", !accent && isActive && "text-primary")}>
+                  {t(item.labelKey)}
+                </span>
               </button>
             );
           })}
