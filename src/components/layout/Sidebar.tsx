@@ -120,6 +120,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: FolderOpen, label: "My Documents", labelKey: "nav.myDocuments", to: "/patient/documents" },
   { icon: FlaskConical, label: "Lab Results", labelKey: "nav.labResults", to: "/patient/lab-results" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
+  { icon: Sparkles, label: "Ask Maeve", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
