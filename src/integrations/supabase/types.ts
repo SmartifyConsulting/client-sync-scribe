@@ -5017,6 +5017,93 @@ export type Database = {
           },
         ]
       }
+      patient_emotional_insights: {
+        Row: {
+          created_at: string
+          entry_id: string | null
+          generated_at: string
+          id: string
+          metaphysical_note: string | null
+          patient_id: string | null
+          patient_user_id: string
+          source_entry_count: number
+          summation: string | null
+          theme: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id?: string | null
+          generated_at?: string
+          id?: string
+          metaphysical_note?: string | null
+          patient_id?: string | null
+          patient_user_id: string
+          source_entry_count?: number
+          summation?: string | null
+          theme?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string | null
+          generated_at?: string
+          id?: string
+          metaphysical_note?: string | null
+          patient_id?: string | null
+          patient_user_id?: string
+          source_entry_count?: number
+          summation?: string | null
+          theme?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_emotional_insights_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "patient_emotional_journal"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_emotional_insights_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_emotional_journal: {
+        Row: {
+          body: string
+          created_at: string
+          entry_date: string
+          font_key: string | null
+          id: string
+          patient_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          entry_date?: string
+          font_key?: string | null
+          id?: string
+          patient_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          entry_date?: string
+          font_key?: string | null
+          id?: string
+          patient_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       patient_hidden_doctors: {
         Row: {
           doctor_id: string
@@ -5037,6 +5124,44 @@ export type Database = {
           patient_user_id?: string
         }
         Relationships: []
+      }
+      patient_history_timelines: {
+        Row: {
+          created_at: string
+          generated_at: string
+          id: string
+          patient_id: string
+          source_fingerprint: string
+          timeline: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          patient_id: string
+          source_fingerprint: string
+          timeline?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          patient_id?: string
+          source_fingerprint?: string
+          timeline?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_history_timelines_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: true
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       patient_invitations: {
         Row: {
@@ -7311,6 +7436,10 @@ export type Database = {
         Returns: boolean
       }
       can_view_patient_programme: {
+        Args: { _patient_id: string }
+        Returns: boolean
+      }
+      can_view_patient_record: {
         Args: { _patient_id: string }
         Returns: boolean
       }

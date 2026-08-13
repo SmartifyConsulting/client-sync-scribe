@@ -10,6 +10,8 @@ import type { Session } from "@/hooks/useSessions";
 import { medicationSyncBus } from "@/lib/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmotionalJournal } from "@/features/patients/components/overview/EmotionalJournal";
 
 interface PatientOverviewProps {
   patient: {
@@ -244,13 +246,27 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
   );
 }
 
-export function PatientOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
+function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
 
-  const generateSummary = async () => {
+  const [emotional, setEmotional] = useState<{ theme?: string | null; metaphysical_note?: string | null } | null>(null);
+
+  const loadEmotional = async () => {
+    const { data } = await supabase
+      .from("patient_emotional_insights")
+      .select("theme, metaphysical_note")
+      .eq("patient_id", patient.id)
+      .is("entry_id", null)
+      .order("generated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setEmotional((data as any) || null);
+  };
+
+  const generateSummary = async (force = false) => {
     setLoading(true);
     try {
       // Transcribed handwritten/paper records so the overview timeline includes
@@ -262,6 +278,26 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
         .eq("is_transcribed", true)
         .order("record_date", { ascending: true })
         .limit(20);
+
+      // Fingerprint of everything the timeline is built from — while it is
+      // unchanged the cached timeline is reused instead of regenerating.
+      const fingerprint = JSON.stringify({
+        s: (sessions || []).map((x: any) => [x.id, x.status, x.summary?.length || 0]),
+        h: (historicalRecords || []).map((r: any) => [r.name, r.record_date, (r.content || "").length]),
+        p: [patient.notes || "", patient.allergies || ""],
+      });
+
+      if (!force) {
+        const { data: cached } = await supabase
+          .from("patient_history_timelines")
+          .select("timeline, source_fingerprint")
+          .eq("patient_id", patient.id)
+          .maybeSingle();
+        if (cached && cached.source_fingerprint === fingerprint && cached.timeline) {
+          setSummaryData(cached.timeline as unknown as SummaryData);
+          return;
+        }
+      }
 
       const { data, error } = await supabase.functions.invoke("summarize-patient-history", {
         body: { patient, sessions, historicalRecords: historicalRecords || [] },
@@ -303,6 +339,17 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
       };
 
       setSummaryData(processedData);
+      await supabase
+        .from("patient_history_timelines")
+        .upsert(
+          {
+            patient_id: patient.id,
+            timeline: processedData as any,
+            source_fingerprint: fingerprint,
+            generated_at: new Date().toISOString(),
+          },
+          { onConflict: "patient_id" },
+        );
     } catch (error: any) {
       console.error("Error generating summary:", error);
       toast({
@@ -319,6 +366,8 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
     if (patient && !summaryData) {
       generateSummary();
     }
+    loadEmotional();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patient.id]);
 
   const toggleStatus = (
@@ -540,7 +589,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
     return (
       <div className="rounded-xl border border-primary bg-card p-8 text-center">
         <p className="text-muted-foreground mb-4">{t("patientProfile.aiSummaryEmpty")}</p>
-        <Button onClick={generateSummary} className="gap-2">
+        <Button onClick={() => generateSummary(true)} className="gap-2">
           <Sparkles className="h-4 w-4" />
           {t("patientProfile.aiSummaryGenerate")}
         </Button>
@@ -626,7 +675,7 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
             </div>
           </div>
           {!isSelfService && (
-            <Button variant="ghost" size="sm" onClick={generateSummary} className="gap-2">
+            <Button variant="ghost" size="sm" onClick={() => generateSummary(true)} className="gap-2">
               <RefreshCw className="h-4 w-4" />
               {t("patientProfile.aiSummaryRefresh")}
             </Button>
@@ -640,6 +689,18 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
             <p className="text-sm text-foreground leading-relaxed">
               {summaryData.summary.replace(/<\/?(?:med|symptom|condition)>/g, '').split(/(?<=[.!?])\s+/).slice(0, 3).join(' ')}
             </p>
+          </div>
+        )}
+
+        {/* Emotional context — generalised, sanitised output only. */}
+        {(emotional?.theme || emotional?.metaphysical_note) && (
+          <div className="mb-4 p-4 rounded-lg bg-orange-500/5 border border-orange-500/20 space-y-1">
+            {emotional?.theme && (
+              <p className="text-sm font-bold text-orange-600">{emotional.theme}</p>
+            )}
+            {emotional?.metaphysical_note && (
+              <p className="text-sm font-bold text-orange-600">{emotional.metaphysical_note}</p>
+            )}
           </div>
         )}
 
@@ -955,5 +1016,33 @@ export function PatientOverview({ patient, sessions, isSelfService = false }: Pa
         );
       })()}
     </div>
+  );
+}
+
+
+export function PatientOverview(props: PatientOverviewProps) {
+  return (
+    <Tabs defaultValue="physical" className="w-full">
+      <TabsList className="mb-4 bg-primary/10 p-1 rounded-full">
+        <TabsTrigger
+          value="physical"
+          className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white text-xs px-4"
+        >
+          Physical State
+        </TabsTrigger>
+        <TabsTrigger
+          value="emotional"
+          className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white text-xs px-4"
+        >
+          Emotional State
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="physical" className="mt-0">
+        <PhysicalOverview {...props} />
+      </TabsContent>
+      <TabsContent value="emotional" className="mt-0">
+        <EmotionalJournal patientId={props.patient.id} />
+      </TabsContent>
+    </Tabs>
   );
 }
