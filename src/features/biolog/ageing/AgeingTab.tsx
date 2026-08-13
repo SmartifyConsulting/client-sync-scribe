@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -24,7 +24,7 @@ import {
   trajectoryLabel,
   trajectoryState,
 } from "./ageingMath";
-import { DEFAULT_AGEING_CONFIG } from "./types";
+import { AGEING_MARKER_FIELDS, DEFAULT_AGEING_CONFIG } from "./types";
 
 const TIPS = {
   chronological: "Your age in calendar years, worked out from your date of birth.",
@@ -306,8 +306,8 @@ export function AgeingTab({ ownerUserId, readOnly = false }: { ownerUserId?: str
                     ([, v]) => String(v).trim() !== "",
                   );
                   return (
-                    <>
-                    <tr key={a.id} className="border-t">
+                    <Fragment key={a.id}>
+                    <tr className="border-t">
                       <td className="py-1.5 pr-3">{a.assessment_date}</td>
                       <td className="py-1.5 pr-3">{a.biological_age != null ? Number(a.biological_age).toFixed(1) : "—"}</td>
                       <td className="py-1.5 pr-3">{a.chronological_age != null ? Number(a.chronological_age).toFixed(1) : "—"}</td>
@@ -334,7 +334,7 @@ export function AgeingTab({ ownerUserId, readOnly = false }: { ownerUserId?: str
                       </td>
                     </tr>
                     {markerEntries.length > 0 && (
-                      <tr key={`${a.id}-markers`} className="border-t-0">
+                      <tr className="border-t-0">
                         <td colSpan={8} className="pb-2 pr-3">
                           <div className="flex flex-wrap gap-1.5">
                             {markerEntries.map(([key, value]) => {
@@ -354,7 +354,7 @@ export function AgeingTab({ ownerUserId, readOnly = false }: { ownerUserId?: str
                         </td>
                       </tr>
                     )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </tbody>
