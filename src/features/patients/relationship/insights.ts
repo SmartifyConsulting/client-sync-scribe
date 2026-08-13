@@ -330,3 +330,55 @@ export const LOW_CONFIDENCE_NOTE =
 
 export const ETHICAL_TOOLTIP =
   "Relationship insight — this information is intended to support rapport and communication. It is not a medical, psychological or diagnostic assessment and should not be used to make clinical decisions.";
+
+/** Close neighbouring patterns for each primary — internal, testing-facing only. */
+const SECONDARY_MAP: Record<number, number[]> = {
+  1: [3, 6],
+  2: [9, 4],
+  3: [1, 7],
+  4: [2, 5],
+  5: [4, 6],
+  6: [1, 9],
+  7: [3, 9],
+  8: [3, 6],
+  9: [2, 6],
+};
+
+export interface StructuredAssessment {
+  pattern: number;
+  secondary: number[];
+  confidence: Confidence;
+  evidence1: string | null;
+  evidence2: string | null;
+  confirm: string[];
+  insight: OverviewInsight | null;
+}
+
+const evidenceTitle = (setIdx: number, key?: Choice | null) => {
+  if (!key || key === "none") return null;
+  return QUESTION_SETS[setIdx].options.find((o) => o.key === key)?.title ?? null;
+};
+
+/**
+ * Full clinician-facing result for a completed profile: primary pattern,
+ * secondary candidates, confidence, the evidence behind each selection and the
+ * areas worth confirming in conversation.
+ */
+export function buildAssessment(
+  pattern: number | null,
+  confidence: Confidence | null,
+  responses?: Partial<Record<string, Choice>> | null,
+): StructuredAssessment | null {
+  if (!pattern) return null;
+  const lib = INSIGHT_LIBRARY[pattern];
+  return {
+    pattern,
+    secondary: SECONDARY_MAP[pattern] ?? [],
+    confidence: confidence ?? "Moderate",
+    evidence1: evidenceTitle(0, responses?.question_set_1),
+    evidence2: evidenceTitle(1, responses?.question_set_2),
+    confirm: lib ? [...lib.explore, lib.confidenceGuidance] : [],
+    insight: toOverviewInsight(pattern),
+  };
+}
+
