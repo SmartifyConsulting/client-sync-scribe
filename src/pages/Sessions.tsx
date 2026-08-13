@@ -464,8 +464,9 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  const createPrescriptionDocument = async (data: PrescriptionData): Promise<GeneratedDoc | null> => {
-    if (!patientId || !currentSessionIdRef.current) return null;
+  const createPrescriptionDocument = async (data: PrescriptionData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
+    const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
+    if (!patientId || !sessionIdForDoc) return null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
