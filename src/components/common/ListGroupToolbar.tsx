@@ -164,9 +164,9 @@ export function ListGroupToolbar<T>({
           className={frameless ? "space-y-2" : SECTION_FRAME_CLASS}
         >
           {groups.map(([label, entries]) => (
-            <AccordionItem key={label} value={label} className={SECTION_ITEM_CLASS}>
+            <AccordionItem key={label} value={label} className={frameless ? SECTION_ITEM_ROUNDED_CLASS : SECTION_ITEM_CLASS}>
               <AccordionTrigger
-                className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, frameless && "px-3 py-2")}
+                className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, frameless && cn(SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-2"))}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {HeaderIcon && <HeaderIcon className="h-3.5 w-3.5 text-primary shrink-0" />}
