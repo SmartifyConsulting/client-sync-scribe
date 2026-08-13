@@ -51,6 +51,8 @@ interface NavItem {
   labelKey: string;
   to: string;
   danger?: boolean;
+  /** Ask Maeve — yellow-orange accent, distinct from the red SOS control. */
+  accent?: boolean;
 }
 
 interface NavSection {
