@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 /** Voice input (Whisper) + spoken replies (TTS) for Ask Maeve. */
 export function useMaeveVoice() {
   const [recording, setRecording] = useState(false);
+  const [paused, setPaused] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -19,7 +20,30 @@ export function useMaeveVoice() {
     setSpeaking(false);
   }, []);
 
-  useEffect(() => () => stopSpeaking(), [stopSpeaking]);
+  /** Hard-releases the microphone: stops the recorder and every media track. */
+  const releaseMicrophone = useCallback(() => {
+    const recorder = recorderRef.current;
+    if (recorder) {
+      try {
+        if (recorder.state !== "inactive") recorder.stop();
+      } catch {
+        /* recorder already torn down */
+      }
+      recorder.stream.getTracks().forEach((t) => t.stop());
+      recorderRef.current = null;
+    }
+    setRecording(false);
+    setPaused(false);
+  }, []);
+
+  // Always release the mic and stop playback when the screen goes away.
+  useEffect(
+    () => () => {
+      stopSpeaking();
+      releaseMicrophone();
+    },
+    [stopSpeaking, releaseMicrophone],
+  );
 
   const speak = useCallback(
     async (text: string) => {
@@ -68,6 +92,7 @@ export function useMaeveVoice() {
       recorder.start();
       recorderRef.current = recorder;
       setRecording(true);
+      setPaused(false);
       return true;
     } catch {
       setRecording(false);
@@ -75,17 +100,51 @@ export function useMaeveVoice() {
     }
   }, [stopSpeaking]);
 
+  /** Pauses an in-flight recording and mutes the mic (audio already captured is kept). */
+  const pauseRecording = useCallback(() => {
+    const recorder = recorderRef.current;
+    if (!recorder || recorder.state !== "recording") return false;
+    try {
+      recorder.pause();
+    } catch {
+      return false;
+    }
+    recorder.stream.getAudioTracks().forEach((t) => (t.enabled = false));
+    setPaused(true);
+    return true;
+  }, []);
+
+  /** Resumes a paused recording exactly where it left off. */
+  const resumeRecording = useCallback(() => {
+    const recorder = recorderRef.current;
+    if (!recorder || recorder.state !== "paused") return false;
+    recorder.stream.getAudioTracks().forEach((t) => (t.enabled = true));
+    try {
+      recorder.resume();
+    } catch {
+      return false;
+    }
+    setPaused(false);
+    return true;
+  }, []);
+
   /** Stops recording and returns the transcript (empty string when nothing was heard). */
   const stopRecordingAndTranscribe = useCallback(async (): Promise<string> => {
     const recorder = recorderRef.current;
     if (!recorder) return "";
     const blob = await new Promise<Blob>((resolve) => {
       recorder.onstop = () => resolve(new Blob(chunksRef.current, { type: "audio/webm" }));
+      if (recorder.state === "paused") {
+        recorder.stream.getAudioTracks().forEach((t) => (t.enabled = true));
+        try { recorder.resume(); } catch { /* ignore */ }
+      }
       recorder.stop();
     });
+    // Release the microphone the moment recording ends.
     recorder.stream.getTracks().forEach((t) => t.stop());
     recorderRef.current = null;
     setRecording(false);
+    setPaused(false);
     if (blob.size < 1200) return "";
 
     setTranscribing(true);
@@ -108,5 +167,17 @@ export function useMaeveVoice() {
     }
   }, []);
 
-  return { recording, transcribing, speaking, speak, stopSpeaking, startRecording, stopRecordingAndTranscribe };
+  return {
+    recording,
+    paused,
+    transcribing,
+    speaking,
+    speak,
+    stopSpeaking,
+    startRecording,
+    pauseRecording,
+    resumeRecording,
+    releaseMicrophone,
+    stopRecordingAndTranscribe,
+  };
 }

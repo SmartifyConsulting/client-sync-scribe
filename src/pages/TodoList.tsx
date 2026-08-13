@@ -68,6 +68,7 @@ import { TodoRow } from "@/components/todos/TodoRow";
 import { UserPlus } from "lucide-react";
 import { AssignTaskDialog } from "@/components/tasks/AssignTaskDialog";
 import { getTodoDisplay } from "@/lib/todoDisplay";
+import { isClinicalObservationTask } from "@/lib/taskAssignee";
 
 interface TodoItem {
   id: string;
@@ -223,6 +224,8 @@ export default function TodoList() {
 
       setTodos((data || [])
         .filter((todo: any) => !(todo.document_id && sentDocs.has(todo.document_id)))
+        // Clinical observations ("monitor symptoms…") are notes, not tasks.
+        .filter((todo: any) => todo.task_type === 'document_review' || !isClinicalObservationTask(todo.title))
         .map((todo: any) => ({
         ...todo,
         completed: todo.status === 'completed',

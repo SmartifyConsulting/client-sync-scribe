@@ -53,9 +53,22 @@ export async function resolveDocumentPreviewContent(
 ): Promise<ResolvedDocumentPreview> {
   const original = doc.content || "";
 
+  // Documents created outside a session (or older rows) may not carry a
+  // patient_id — recover it from the linked session so certificates/invoices
+  // still resolve real patient details.
+  let patientId = doc.patient_id || null;
+  if (!patientId && doc.session_id) {
+    const { data: sessionRow } = await supabase
+      .from("sessions")
+      .select("patient_id")
+      .eq("id", doc.session_id)
+      .maybeSingle();
+    patientId = (sessionRow as any)?.patient_id || null;
+  }
+
   const [patientRes, profileRes] = await Promise.all([
-    doc.patient_id
-      ? supabase.from("patients").select("*").eq("id", doc.patient_id).maybeSingle()
+    patientId
+      ? supabase.from("patients").select("*").eq("id", patientId).maybeSingle()
       : Promise.resolve({ data: null } as any),
     doc.user_id
       ? supabase.from("profiles").select("*").eq("id", doc.user_id).maybeSingle()
@@ -65,14 +78,32 @@ export async function resolveDocumentPreviewContent(
   const patient = patientRes?.data || null;
   const profile = profileRes?.data || null;
 
-  // Invoice context — only when relevant.
+  // Invoice context — prefer the invoice raised for this session, then fall
+  // back to the patient's most recent invoice so standalone invoice documents
+  // still preview with real amounts instead of [Tokens].
   let invoice: FillContext["invoice"] = null;
-  if (isInvoiceTemplate(doc.template_name) && doc.session_id) {
-    const { data: invRow } = await supabase
-      .from("invoices")
-      .select("*")
-      .eq("session_id", doc.session_id)
-      .maybeSingle();
+  if (isInvoiceTemplate(doc.template_name)) {
+    let invRow: any = null;
+    if (doc.session_id) {
+      const { data } = await supabase
+        .from("invoices")
+        .select("*")
+        .eq("session_id", doc.session_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      invRow = data || null;
+    }
+    if (!invRow && patientId) {
+      const { data } = await supabase
+        .from("invoices")
+        .select("*")
+        .eq("patient_id", patientId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      invRow = data || null;
+    }
     if (invRow) {
       invoice = {
         invoice_number: invRow.invoice_number,
@@ -100,11 +131,11 @@ export async function resolveDocumentPreviewContent(
         .order("created_at", { ascending: true });
       rxRows = data || null;
     }
-    if ((!rxRows || rxRows.length === 0) && doc.patient_id) {
+    if ((!rxRows || rxRows.length === 0) && patientId) {
       const { data } = await supabase
         .from("prescriptions")
         .select("*")
-        .eq("patient_id", doc.patient_id)
+        .eq("patient_id", patientId)
         .order("created_at", { ascending: false })
         .limit(5);
       rxRows = data || null;
