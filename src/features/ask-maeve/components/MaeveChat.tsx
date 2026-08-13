@@ -25,6 +25,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SessionTitleEditor } from "./SessionTitleEditor";
+import { MaeveVoicePicker } from "./MaeveVoicePicker";
+
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 
 const logo = holarcLogoAsset.url;
@@ -41,7 +43,6 @@ const MODE_KEY = "maeve-mode";
 export function MaeveChat({ sessionId, initialMode }: Props) {
   const navigate = useNavigate();
   const { session, messages, loading, thinking, error, send, reload } = useMaeveSession(sessionId);
-  const voice = useMaeveVoice();
   const [input, setInput] = useState("");
   const [showWhat, setShowWhat] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -57,6 +58,10 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const openedRef = useRef(false);
   const spokenRef = useRef<string | null>(null);
+  const autoListenRef = useRef<() => void>(() => {});
+
+  // Hands-free: as soon as Maeve stops speaking, the microphone opens itself.
+  const voice = useMaeveVoice({ onSpeechEnd: () => autoListenRef.current() });
 
   const chooseMode = (next: MaeveMode) => {
     localStorage.setItem(MODE_KEY, next);
@@ -87,11 +92,16 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
   // Read Maeve's newest reply aloud in talk mode.
   useEffect(() => {
-    if (mode !== "talk" || muted || thinking) return;
+    if (mode !== "talk" || thinking) return;
     const last = messages[messages.length - 1];
     if (!last || last.role !== "assistant") return;
     if (spokenRef.current === last.id) return;
     spokenRef.current = last.id;
+    if (muted) {
+      // Muted: skip straight to listening so talk mode stays hands-free.
+      autoListenRef.current();
+      return;
+    }
     const body = looksLikeAdvice(last.content) ? CLIENT_FALLBACK : last.content;
     voice.speak(body);
   }, [messages, mode, muted, thinking, voice]);
@@ -114,6 +124,14 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     }
     await send(text);
   };
+
+  // Kept in a ref so the voice hook can trigger it without re-subscribing.
+  autoListenRef.current = () => {
+    if (mode !== "talk" || thinking || voice.recording || voice.transcribing) return;
+    if (session?.status === "closed") return;
+    void voice.startRecording();
+  };
+
 
   // Leaving the screen (tab hidden, window blurred, navigating away) pauses the
   // recording and mutes the microphone. The exploration stays open so the
@@ -317,17 +335,28 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
             {mode === "talk" ? "Type instead" : "Talk instead"}
           </button>
           {mode === "talk" && (
-            <button
-              onClick={() => {
-                if (!muted) voice.stopSpeaking();
-                setMuted((v) => !v);
-              }}
-              className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
-            >
-              {muted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
-              {muted ? "Muted" : "Voice on"}
-            </button>
+            <>
+              <MaeveVoicePicker
+                voiceId={voice.voiceId}
+                onChange={(id) => {
+                  voice.setVoiceId(id);
+                  voice.speak("This is how I'll sound.", id);
+                }}
+                onPreview={(id) => voice.speak("This is how I'll sound.", id)}
+              />
+              <button
+                onClick={() => {
+                  if (!muted) voice.stopSpeaking();
+                  setMuted((v) => !v);
+                }}
+                className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
+              >
+                {muted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+                {muted ? "Muted" : "Voice on"}
+              </button>
+            </>
           )}
+
         </div>
 
       </div>
@@ -540,15 +569,23 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
               <Square className="h-3.5 w-3.5" /> {closing ? "Stopping…" : "Stop"}
             </button>
           </div>
+          {voice.recording && voice.liveText && (
+            <p className="max-w-xl rounded-xl bg-muted/60 px-3 py-2 text-center text-[13px] italic leading-relaxed text-foreground">
+              {voice.liveText}
+            </p>
+          )}
           <p className="text-[11px] text-muted-foreground">
             {voice.transcribing
               ? "Listening back…"
               : voice.paused
                 ? "Paused — the microphone is off. Tap play to carry on."
                 : voice.recording
-                  ? "Tap send when you're done, or pause to step away"
-                  : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
+                  ? "I'm listening — tap send when you're done, or pause to step away"
+                  : voice.speaking
+                    ? "Maeve is speaking — the microphone opens as soon as she finishes."
+                    : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
           </p>
+
           {voice.speaking && (
             <button
               onClick={voice.stopSpeaking}
