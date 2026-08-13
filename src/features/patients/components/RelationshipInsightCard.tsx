@@ -4,10 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RelationshipAssessmentDetails } from "./RelationshipAssessmentDetails";
+import { useRelationshipEvidence } from "@/features/patients/relationship/useRelationshipEvidence";
 import {
   ETHICAL_TOOLTIP,
   buildAssessment,
 } from "@/features/patients/relationship/insights";
+
 
 
 /**
