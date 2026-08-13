@@ -6,6 +6,7 @@ import { BiologInsights } from "./BiologInsights";
 import { BiologProgrammes } from "./BiologProgrammes";
 import { BiologCustomise } from "./BiologCustomise";
 import { AgeingTab } from "./ageing/AgeingTab";
+import { BiologEmotionalState } from "@/features/patients/components/BiologEmotionalState";
 
 /**
  * Embeddable Biolog panel — used standalone on /biolog and inside a patient
@@ -26,6 +27,7 @@ export function BiologPanel({
     <Tabs value={tab} onValueChange={setTab} className="space-y-4">
       <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
         <TabsTrigger value="today" className={triggerClass}>Today</TabsTrigger>
+        <TabsTrigger value="emotional" className={triggerClass}>Emotional State</TabsTrigger>
         <TabsTrigger value="history" className={triggerClass}>History</TabsTrigger>
         <TabsTrigger value="insights" className={triggerClass}>Insights</TabsTrigger>
         <TabsTrigger value="programmes" className={triggerClass}>Programmes</TabsTrigger>
@@ -35,6 +37,9 @@ export function BiologPanel({
 
       <TabsContent value="today">
         <BiologToday ownerUserId={ownerUserId} readOnly={readOnly} />
+      </TabsContent>
+      <TabsContent value="emotional">
+        <BiologEmotionalState ownerUserId={ownerUserId} />
       </TabsContent>
       <TabsContent value="history">
         <BiologHistory ownerUserId={ownerUserId} />

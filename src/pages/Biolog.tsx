@@ -7,6 +7,7 @@ import { BiologInsights } from "@/features/biolog/BiologInsights";
 import { BiologProgrammes } from "@/features/biolog/BiologProgrammes";
 import { BiologCustomise } from "@/features/biolog/BiologCustomise";
 import { AgeingTab } from "@/features/biolog/ageing/AgeingTab";
+import { BiologEmotionalState } from "@/features/patients/components/BiologEmotionalState";
 
 /**
  * My Biolog — daily tracking, correlations and programmes.
@@ -45,6 +46,7 @@ export default function Biolog() {
       <Tabs value={tab} onValueChange={setTab} className="space-y-4">
         <TabsList className="flex w-full flex-nowrap overflow-x-auto bg-primary justify-start">
           <TabsTrigger value="today" className={tabTriggerClass}>Today</TabsTrigger>
+          <TabsTrigger value="emotional" className={tabTriggerClass}>Emotional State</TabsTrigger>
           <TabsTrigger value="history" className={tabTriggerClass}>History</TabsTrigger>
           <TabsTrigger value="insights" className={tabTriggerClass}>Insights</TabsTrigger>
           <TabsTrigger value="programmes" className={tabTriggerClass}>Programmes</TabsTrigger>
@@ -54,6 +56,9 @@ export default function Biolog() {
 
         <TabsContent value="today">
           <BiologToday ownerUserId={ownerUserId} readOnly={readOnly} />
+        </TabsContent>
+        <TabsContent value="emotional">
+          <BiologEmotionalState ownerUserId={ownerUserId} />
         </TabsContent>
         <TabsContent value="history">
           <BiologHistory ownerUserId={ownerUserId} />
