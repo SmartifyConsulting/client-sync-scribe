@@ -811,9 +811,9 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
         </div>
       )}
 
-      {/* Allergies / Conditions + DISC (doctor-only) */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="md:col-span-1 space-y-4">
+      {/* Clinical snapshot — four evenly sized cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-start">
+        <></>
           <Collapsible defaultOpen={false} className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
             <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
               <ChevronDown className="h-4 w-4 text-red-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
@@ -889,15 +889,6 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
               )}
             </CollapsibleContent>
           </Collapsible>
-        </div>
-
-        <div className="md:col-span-3">
-          <DiscPersonalityCard patientId={patient.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
-        </div>
-      </div>
-
-      {/* Medications and Symptoms */}
-      <div className="grid gap-4 md:grid-cols-2">
         <Collapsible defaultOpen={false} className="rounded-xl border border-primary bg-card p-5">
           <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
             <ChevronDown className="h-4 w-4 text-green-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
@@ -981,6 +972,12 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
             )}
           </CollapsibleContent>
         </Collapsible>
+      </div>
+
+      {/* DISC + relationship insight (doctor-only) */}
+      <div className="grid gap-4 md:grid-cols-2 items-start">
+        <DiscPersonalityCard patientId={patient.id} hasSessions={(sessions || []).some((s) => s.status === "completed")} />
+        <RelationshipInsightCard patientId={patient.id} />
       </div>
 
       {/* Chronic Medications — from the patient's own current_medications list (distinct shape from the AI-summarised Medications card above). */}
