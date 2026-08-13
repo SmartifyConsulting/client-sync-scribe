@@ -34,3 +34,12 @@ Fix:
 ## Technical notes
 
 Files touched: `src/pages/Sessions.tsx`, `src/features/sessions/components/PostSessionStepDialog.tsx`, `src/hooks/useSessions.ts`, a new `LiveClinicianPanel` component in `src/features/sessions/components/`, reusing `clinicianNotesSections`, `clinicianHighlights`, and `fillDocumentPlaceholders`. No database changes.
+
+## 5. Compact the Chronic frame and the four clinical cards
+
+On the patient Overview tab:
+- Shrink the Chronic Medication / adherence frame by roughly 70% in vertical footprint: tighter padding, smaller badge and streak visuals, condensed rows.
+- Apply the same compaction to the four cards below it (Allergies, Conditions, Medications, Symptoms) and keep them expanded by default so a clinician sees the contents without clicking.
+- Reduce the oversized heading and value typography to the standard compact clinical scale (12px bold labels, normal body text) used elsewhere in the patient record.
+
+Files touched: `src/features/patients/components/PatientOverview.tsx`.
