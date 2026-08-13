@@ -952,9 +952,12 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
             .eq('user_id', user.id)
             .neq('task_type', 'document_review')
             .ilike('title', '%invoice%');
-        } catch (invError) {
-          console.error('Error creating invoice document:', invError);
+        } catch (invError: any) {
+          if (invError?.message !== '__skip_invoice__') {
+            console.error('Error creating invoice document:', invError);
+          }
         }
+
       }
 
       // Auto-create patient task assignment document if detected
