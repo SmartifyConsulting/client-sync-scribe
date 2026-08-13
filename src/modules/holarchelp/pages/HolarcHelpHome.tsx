@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import logo from "@/assets/holarc-help-logo.png";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+
+const logo = holarcLogoAsset.url;
 
 type Coords = { lat: number; lng: number };
 
@@ -134,7 +136,7 @@ export default function HolarcHelpHome() {
     <div className="mx-auto flex min-h-[calc(100vh-9rem)] max-w-md flex-col px-5">
       {/* Header */}
       <div className="flex justify-center pt-6">
-        <img src={logo} alt="Holarc Help" className="h-24 w-auto" />
+        <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
       </div>
 
       {/* Title */}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Keyboard, Loader2, Mic, RotateCcw, Send, Sparkles, Square, Volume2, VolumeX } from "lucide-react";
+import { Download, Keyboard, Loader2, Mail, Mic, RotateCcw, Send, Share2, Sparkles, Square, Trash2, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,22 @@ import { useMaeveSession } from "../hooks/useMaeveSession";
 import { useMaeveVoice } from "../hooks/useMaeveVoice";
 import { processLabel, stateLabel } from "../lib/processes";
 import { CLIENT_FALLBACK, looksLikeAdvice } from "../lib/suggestionDetector";
+import { buildTranscript, downloadTranscript, shareTranscript, transcriptFileName } from "../lib/transcript";
+import { deleteMaeveSession } from "../lib/deleteSession";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+
+const logo = holarcLogoAsset.url;
 
 interface Props {
   sessionId: string;
@@ -29,6 +45,9 @@ export function MaeveChat({ sessionId }: Props) {
     () => (localStorage.getItem(MODE_KEY) as MaeveMode | null) ?? null,
   );
   const [muted, setMuted] = useState(false);
+  const [emailing, setEmailing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const openedRef = useRef(false);
@@ -111,6 +130,59 @@ export function MaeveChat({ sessionId }: Props) {
     await reload();
   };
 
+  const transcriptText = () => buildTranscript(session, messages);
+
+  const saveTranscript = () => {
+    if (messages.length === 0) return;
+    downloadTranscript(transcriptText(), transcriptFileName(session));
+    toast.success("Transcript saved to your device");
+  };
+
+  const share = async () => {
+    if (messages.length === 0) return;
+    const result = await shareTranscript(transcriptText(), session?.title || "Ask Maeve exploration");
+    if (result === "copied") toast.success("Transcript copied — paste it into WhatsApp, email or notes");
+    if (result === "failed") toast.error("Sharing isn't available here — try saving the transcript instead");
+  };
+
+  const emailTranscript = async () => {
+    if (messages.length === 0 || emailing) return;
+    setEmailing(true);
+    const { data } = await supabase.auth.getUser();
+    const to = data.user?.email;
+    if (!to) {
+      setEmailing(false);
+      toast.error("No email address on your account");
+      return;
+    }
+    const { error: err } = await safeInvoke("send-document-email", {
+      to,
+      subject: `Your Ask Maeve transcript — ${new Date(session?.created_at ?? Date.now()).toLocaleDateString()}`,
+      documentName: session?.title || "Ask Maeve exploration",
+      documentContent: transcriptText(),
+      senderName: "Ask Maeve",
+    });
+    setEmailing(false);
+    if (err) {
+      toast.error(err);
+      return;
+    }
+    toast.success(`Transcript emailed to ${to}`);
+  };
+
+  const removeSession = async () => {
+    setDeleting(true);
+    const ok = await deleteMaeveSession(sessionId);
+    setDeleting(false);
+    if (!ok) {
+      toast.error("Could not delete this exploration");
+      return;
+    }
+    setConfirmDelete(false);
+    toast.success("Exploration deleted");
+    navigate("/ask-maeve");
+  };
+
   const currentProcess = processLabel(
     [...messages].reverse().find((m) => m.process_key)?.process_key,
   );
@@ -119,6 +191,9 @@ export function MaeveChat({ sessionId }: Props) {
   if (!mode) {
     return (
       <div className="mx-auto w-full max-w-2xl px-1 py-8">
+        <div className="flex justify-center pb-5">
+          <img src={logo} alt="Holarc Health" className="h-14 w-auto" />
+        </div>
         <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
           <Sparkles className="h-5 w-5 text-maeve" />
           Ask Maeve
@@ -133,7 +208,9 @@ export function MaeveChat({ sessionId }: Props) {
           >
             <Keyboard className="h-6 w-6 text-maeve" />
             <p className="mt-3 text-sm font-semibold text-foreground">Type</p>
-            <p className="mt-1 text-xs text-muted-foreground">Write your answers in your own time.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Write your answers in your own time. Best when you have no privacy, or when you'd rather stay quiet.
+            </p>
           </button>
           <button
             onClick={() => chooseMode("talk")}
@@ -142,7 +219,9 @@ export function MaeveChat({ sessionId }: Props) {
             <Mic className="h-6 w-6 text-maeve" />
             <p className="mt-3 text-sm font-semibold text-foreground">Talk and listen</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Speak your answers and hear Maeve's questions read aloud.
+              Speak your answers and hear Maeve's questions read aloud. Audio lets you close your eyes and sink into
+              the process, so the conscious mind isn't distracted by a screen or keyboard. Because this work asks you
+              to imagine, remember and visualise, listening and speaking usually goes much deeper.
             </p>
           </button>
         </div>
@@ -152,6 +231,10 @@ export function MaeveChat({ sessionId }: Props) {
 
   return (
     <div className="mx-auto flex h-[calc(100vh-11rem)] w-full max-w-3xl flex-col">
+      <div className="flex justify-center pb-3">
+        <img src={logo} alt="Holarc Health" className="h-12 w-auto" />
+      </div>
+
       {/* Header */}
       <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
         <div>
@@ -296,6 +379,58 @@ export function MaeveChat({ sessionId }: Props) {
           All explorations
         </button>
       </div>
+
+      {/* Transcript actions */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <button
+          disabled={messages.length === 0}
+          onClick={saveTranscript}
+          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
+        >
+          <Download className="h-3 w-3" /> Save transcript
+        </button>
+        <button
+          disabled={messages.length === 0}
+          onClick={share}
+          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
+        >
+          <Share2 className="h-3 w-3" /> Share
+        </button>
+        <button
+          disabled={messages.length === 0 || emailing}
+          onClick={emailTranscript}
+          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
+        >
+          {emailing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />} Email to me
+        </button>
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-destructive hover:text-destructive"
+        >
+          <Trash2 className="h-3 w-3" /> Delete exploration
+        </button>
+        <span className="text-[11px] text-muted-foreground">
+          Once you share or email it, this conversation leaves your private space.
+        </span>
+      </div>
+
+      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this exploration?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The whole conversation will be permanently removed. Save or share the transcript first if you'd like to
+              keep it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Keep it</AlertDialogCancel>
+            <AlertDialogAction onClick={removeSession} disabled={deleting}>
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Failed opening — visible error with a retry instead of an empty screen */}
       {error && messages.length === 0 && !thinking && (
