@@ -17,13 +17,15 @@ export function useHospitalAffiliation() {
       const [a, b] = await Promise.all([
         supabase
           .from("doctor_hospital_affiliations")
-          .select("id")
+          // Inner-joining the hospital ignores rows pointing at hospitals that
+          // no longer exist (stale demo data).
+          .select("id, hospitals!inner(id)")
           .eq("doctor_id", user!.id)
           .eq("status", "active")
           .limit(1),
         supabase
           .from("hospital_doctor_affiliations")
-          .select("id")
+          .select("id, hospitals!inner(id)")
           .eq("doctor_id", user!.id)
           .eq("is_active", true)
           .limit(1),
