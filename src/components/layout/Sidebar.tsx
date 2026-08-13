@@ -289,10 +289,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             isItemActive
               ? item.danger
                 ? "bg-red-600 text-white shadow-sm"
-                : "bg-primary text-primary-foreground shadow-sm"
+                : item.accent
+                  ? "bg-maeve-dark text-maeve-foreground shadow-sm"
+                  : "bg-primary text-primary-foreground shadow-sm"
               : item.danger
                 ? "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:border-red-700"
-                : "text-foreground hover:border-primary",
+                : item.accent
+                  ? "bg-maeve text-maeve-foreground border-maeve hover:bg-maeve-dark hover:border-maeve-dark"
+                  : "text-foreground hover:border-primary",
           )
         }
       >
