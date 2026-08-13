@@ -51,6 +51,8 @@ import PatientAdmissions from "./pages/patient/PatientAdmissions";
 import PatientLabResults from "./pages/patient/PatientLabResults";
 import PatientWardAdmission from "./pages/patient/PatientWardAdmission";
 import Biolog from "./pages/Biolog";
+import AskMaeveHome from "./features/ask-maeve/pages/AskMaeveHome";
+import AskMaeveSession from "./features/ask-maeve/pages/AskMaeveSession";
 import PatientDocuments from "./pages/patient/PatientDocuments";
 import PatientRoundTable from "./pages/patient/PatientRoundTable";
 import MyDetails from "./pages/patient/MyDetails";
