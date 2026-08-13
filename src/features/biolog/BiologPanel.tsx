@@ -5,6 +5,7 @@ import { BiologHistory } from "./BiologHistory";
 import { BiologInsights } from "./BiologInsights";
 import { BiologProgrammes } from "./BiologProgrammes";
 import { BiologCustomise } from "./BiologCustomise";
+import { AgeingTab } from "./ageing/AgeingTab";
 
 /**
  * Embeddable Biolog panel — used standalone on /biolog and inside a patient
@@ -28,6 +29,7 @@ export function BiologPanel({
         <TabsTrigger value="history" className={triggerClass}>History</TabsTrigger>
         <TabsTrigger value="insights" className={triggerClass}>Insights</TabsTrigger>
         <TabsTrigger value="programmes" className={triggerClass}>Programmes</TabsTrigger>
+        <TabsTrigger value="ageing" className={triggerClass}>Ageing</TabsTrigger>
         {!readOnly && <TabsTrigger value="customise" className={triggerClass}>Customise</TabsTrigger>}
       </TabsList>
 
@@ -42,6 +44,9 @@ export function BiologPanel({
       </TabsContent>
       <TabsContent value="programmes">
         <BiologProgrammes ownerUserId={ownerUserId} />
+      </TabsContent>
+      <TabsContent value="ageing">
+        <AgeingTab ownerUserId={ownerUserId} readOnly={readOnly} />
       </TabsContent>
       {!readOnly && (
         <TabsContent value="customise">

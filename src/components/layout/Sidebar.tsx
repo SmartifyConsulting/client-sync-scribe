@@ -39,6 +39,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
+import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
@@ -168,6 +169,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
+  const { hasHospitalAffiliation } = useHospitalAffiliation();
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
@@ -193,13 +195,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
+  /** Doctors only see "My Shifts" once they're attached to a hospital. */
+  const hideMyShift = isDoctorMenu && !hasHospitalAffiliation;
+  const withShiftRule = (items: (NavItem & { tour?: string })[]) =>
+    hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
+
+  const doctorItems = withShiftRule(doctorModeItems);
+  const doctorSections = DOCTOR_SECTIONS.map((s) => ({ ...s, items: withShiftRule(s.items) }));
+
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems
     : isNurseMenu
       ? nurseNavItems
       : isPatientMenu
       ? patientNavItems
-      : doctorModeItems;
+      : doctorItems;
+
 
   // Practice Management Assistants keep their own (patient) menu plus the
   // practice-admin tools they are responsible for.
@@ -334,7 +345,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   renderNavLink(item),
                 )}
               </div>
-              {DOCTOR_SECTIONS.map((section) => {
+              {doctorSections.map((section) => {
                 const sectionItems = applyItemPreferences(section.items, preferences.item_order, preferences.hidden_items);
                 if (sectionItems.length === 0) return null;
                 return (
@@ -375,7 +386,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   </Button>
                 </div>
                 <div className="space-y-1">
-                  {doctorModeItems.map((item, i) => {
+                  {doctorItems.map((item, i) => {
                     const isHidden = preferences.hidden_items.includes(item.to);
                     return (
                       <div key={item.to} className="flex items-center justify-between gap-1 rounded-lg px-2 py-1.5 hover:bg-muted/50">
@@ -386,14 +397,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                           <button
                             className="p-1 rounded hover:bg-muted disabled:opacity-30"
                             disabled={i === 0}
-                            onClick={() => moveItem(doctorModeItems, item.to, -1)}
+                            onClick={() => moveItem(doctorItems, item.to, -1)}
                           >
                             <ChevronUp className="h-3.5 w-3.5" />
                           </button>
                           <button
                             className="p-1 rounded hover:bg-muted disabled:opacity-30"
-                            disabled={i === doctorModeItems.length - 1}
-                            onClick={() => moveItem(doctorModeItems, item.to, 1)}
+                            disabled={i === doctorItems.length - 1}
+                            onClick={() => moveItem(doctorItems, item.to, 1)}
                           >
                             <ChevronDown className="h-3.5 w-3.5" />
                           </button>

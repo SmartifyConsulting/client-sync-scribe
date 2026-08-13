@@ -6,6 +6,7 @@ import { BiologHistory } from "@/features/biolog/BiologHistory";
 import { BiologInsights } from "@/features/biolog/BiologInsights";
 import { BiologProgrammes } from "@/features/biolog/BiologProgrammes";
 import { BiologCustomise } from "@/features/biolog/BiologCustomise";
+import { AgeingTab } from "@/features/biolog/ageing/AgeingTab";
 
 /**
  * My Biolog — daily tracking, correlations and programmes.
@@ -47,6 +48,7 @@ export default function Biolog() {
           <TabsTrigger value="history" className={tabTriggerClass}>History</TabsTrigger>
           <TabsTrigger value="insights" className={tabTriggerClass}>Insights</TabsTrigger>
           <TabsTrigger value="programmes" className={tabTriggerClass}>Programmes</TabsTrigger>
+          <TabsTrigger value="ageing" className={tabTriggerClass}>Ageing</TabsTrigger>
           {!readOnly && <TabsTrigger value="customise" className={tabTriggerClass}>Customise</TabsTrigger>}
         </TabsList>
 
@@ -61,6 +63,9 @@ export default function Biolog() {
         </TabsContent>
         <TabsContent value="programmes">
           <BiologProgrammes ownerUserId={ownerUserId} />
+        </TabsContent>
+        <TabsContent value="ageing">
+          <AgeingTab ownerUserId={ownerUserId} readOnly={readOnly} />
         </TabsContent>
         {!readOnly && (
           <TabsContent value="customise">

@@ -879,6 +879,164 @@ export type Database = {
         }
         Relationships: []
       }
+      biolog_ageing_config: {
+        Row: {
+          created_at: string
+          healthspan_attention_delta: number
+          healthspan_improving_delta: number
+          id: string
+          max_days_high_quality: number
+          min_daily_entries_for_insights: number
+          min_days_between_assessments: number
+          pace_faster_above: number
+          pace_slower_below: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          healthspan_attention_delta?: number
+          healthspan_improving_delta?: number
+          id?: string
+          max_days_high_quality?: number
+          min_daily_entries_for_insights?: number
+          min_days_between_assessments?: number
+          pace_faster_above?: number
+          pace_slower_below?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          healthspan_attention_delta?: number
+          healthspan_improving_delta?: number
+          id?: string
+          max_days_high_quality?: number
+          min_daily_entries_for_insights?: number
+          min_days_between_assessments?: number
+          pace_faster_above?: number
+          pace_slower_below?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      biolog_ageing_insights: {
+        Row: {
+          assessment_id: string | null
+          confidence: string | null
+          created_at: string
+          description: string | null
+          evidence: Json
+          generated_at: string
+          id: string
+          insight_type: string
+          patient_user_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assessment_id?: string | null
+          confidence?: string | null
+          created_at?: string
+          description?: string | null
+          evidence?: Json
+          generated_at?: string
+          id?: string
+          insight_type?: string
+          patient_user_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assessment_id?: string | null
+          confidence?: string | null
+          created_at?: string
+          description?: string | null
+          evidence?: Json
+          generated_at?: string
+          id?: string
+          insight_type?: string
+          patient_user_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biolog_ageing_insights_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "biolog_biological_age_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      biolog_biological_age_assessments: {
+        Row: {
+          age_difference: number | null
+          ageing_pace: number | null
+          assessment_date: string
+          assessment_type: string
+          biological_age: number | null
+          chronological_age: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          laboratory_name: string | null
+          model_name: string | null
+          notes: string | null
+          patient_user_id: string
+          provider_name: string | null
+          reference_population: string | null
+          report_path: string | null
+          sample_type: string | null
+          source: string | null
+          updated_at: string
+        }
+        Insert: {
+          age_difference?: number | null
+          ageing_pace?: number | null
+          assessment_date: string
+          assessment_type?: string
+          biological_age?: number | null
+          chronological_age?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          laboratory_name?: string | null
+          model_name?: string | null
+          notes?: string | null
+          patient_user_id: string
+          provider_name?: string | null
+          reference_population?: string | null
+          report_path?: string | null
+          sample_type?: string | null
+          source?: string | null
+          updated_at?: string
+        }
+        Update: {
+          age_difference?: number | null
+          ageing_pace?: number | null
+          assessment_date?: string
+          assessment_type?: string
+          biological_age?: number | null
+          chronological_age?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          laboratory_name?: string | null
+          model_name?: string | null
+          notes?: string | null
+          patient_user_id?: string
+          provider_name?: string | null
+          reference_population?: string | null
+          report_path?: string | null
+          sample_type?: string | null
+          source?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       biolog_correlations: {
         Row: {
           created_at: string
