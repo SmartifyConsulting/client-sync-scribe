@@ -3,11 +3,12 @@ import { Handshake, Info, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { RelationshipAssessmentDetails } from "./RelationshipAssessmentDetails";
 import {
   ETHICAL_TOOLTIP,
-  LOW_CONFIDENCE_NOTE,
-  toOverviewInsight,
+  buildAssessment,
 } from "@/features/patients/relationship/insights";
+
 
 /**
  * "How to work with this patient" — a compact rapport aid shown to clinicians
