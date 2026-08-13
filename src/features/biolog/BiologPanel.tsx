@@ -45,6 +45,9 @@ export function BiologPanel({
       <TabsContent value="programmes">
         <BiologProgrammes ownerUserId={ownerUserId} />
       </TabsContent>
+      <TabsContent value="ageing">
+        <AgeingTab ownerUserId={ownerUserId} readOnly={readOnly} />
+      </TabsContent>
       {!readOnly && (
         <TabsContent value="customise">
           <BiologCustomise ownerUserId={ownerUserId} />
