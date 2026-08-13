@@ -43,6 +43,8 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
   const [editing, setEditing] = useState(false);
   const [reviewing, setReviewing] = useState(false);
   const [justFinished, setJustFinished] = useState(false);
+  const { evidence } = useRelationshipEvidence(patientId);
+
 
   const load = async () => {
     setLoading(true);
