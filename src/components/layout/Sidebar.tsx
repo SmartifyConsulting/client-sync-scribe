@@ -39,6 +39,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
+import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
