@@ -21,7 +21,7 @@ const doctorNavItems = [
   { icon: LayoutDashboard, labelKey: "nav.home", to: "/doctor-dashboard" },
   { icon: User, labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Briefcase, labelKey: "bottomNav.practice", to: "/practice" },
-  { icon: UserCog, labelKey: "nav.admin", to: "/admin" },
+  { icon: Sparkles, labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
@@ -29,6 +29,7 @@ const patientSections = [
   { icon: Handshake, labelKey: "nav.myHolarchy", section: "health", to: "/patient/details?section=health" },
   { icon: FolderOpen, labelKey: "bottomNav.myDesk", section: "admin", to: "/patient/details?section=admin" },
   { icon: Gift, labelKey: "nav.myRewards", section: "rewards", to: "/patient/rewards" },
+  { icon: Sparkles, labelKey: "nav.askMaeve", section: "maeve", to: "/ask-maeve", accent: true },
   { icon: Siren, labelKey: "nav.sos", section: "sos", to: "/patient/holarchelp", danger: true },
 ];
 
