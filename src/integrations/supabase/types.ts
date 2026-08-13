@@ -825,6 +825,437 @@ export type Database = {
         }
         Relationships: []
       }
+      ask_maeve_anchors: {
+        Row: {
+          anchor_description: string | null
+          created_at: string
+          id: string
+          patient_words: string | null
+          resource_label: string | null
+          session_id: string
+          tested: boolean
+          user_id: string
+        }
+        Insert: {
+          anchor_description?: string | null
+          created_at?: string
+          id?: string
+          patient_words?: string | null
+          resource_label?: string | null
+          session_id: string
+          tested?: boolean
+          user_id: string
+        }
+        Update: {
+          anchor_description?: string | null
+          created_at?: string
+          id?: string
+          patient_words?: string | null
+          resource_label?: string | null
+          session_id?: string
+          tested?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ask_maeve_anchors_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ask_maeve_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ask_maeve_messages: {
+        Row: {
+          content: string
+          conversation_state: string | null
+          created_at: string
+          id: string
+          is_safety_response: boolean
+          process_key: string | null
+          process_step: number | null
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_state?: string | null
+          created_at?: string
+          id?: string
+          is_safety_response?: boolean
+          process_key?: string | null
+          process_step?: number | null
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_state?: string | null
+          created_at?: string
+          id?: string
+          is_safety_response?: boolean
+          process_key?: string | null
+          process_step?: number | null
+          role?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ask_maeve_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ask_maeve_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ask_maeve_outcomes: {
+        Row: {
+          context: string | null
+          created_at: string
+          desired_state: string | null
+          ecology: string | null
+          evidence: string | null
+          id: string
+          patient_words: string | null
+          sensory_evidence: string | null
+          session_id: string
+          updated_at: string
+          user_id: string
+          value: string | null
+          within_control: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          desired_state?: string | null
+          ecology?: string | null
+          evidence?: string | null
+          id?: string
+          patient_words?: string | null
+          sensory_evidence?: string | null
+          session_id: string
+          updated_at?: string
+          user_id: string
+          value?: string | null
+          within_control?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          desired_state?: string | null
+          ecology?: string | null
+          evidence?: string | null
+          id?: string
+          patient_words?: string | null
+          sensory_evidence?: string | null
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+          value?: string | null
+          within_control?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ask_maeve_outcomes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ask_maeve_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ask_maeve_processes: {
+        Row: {
+          contraindications: Json
+          created_at: string
+          entry_conditions: Json
+          exit_conditions: Json
+          key: string
+          name: string
+          plain_language: string
+          purpose: string
+          requires_consent: boolean
+          requires_ecology_check: boolean
+          requires_future_pacing: boolean
+          steps: Json
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          contraindications?: Json
+          created_at?: string
+          entry_conditions?: Json
+          exit_conditions?: Json
+          key: string
+          name: string
+          plain_language: string
+          purpose: string
+          requires_consent?: boolean
+          requires_ecology_check?: boolean
+          requires_future_pacing?: boolean
+          steps?: Json
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          contraindications?: Json
+          created_at?: string
+          entry_conditions?: Json
+          exit_conditions?: Json
+          key?: string
+          name?: string
+          plain_language?: string
+          purpose?: string
+          requires_consent?: boolean
+          requires_ecology_check?: boolean
+          requires_future_pacing?: boolean
+          steps?: Json
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      ask_maeve_resources: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          patient_words: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          patient_words?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          patient_words?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ask_maeve_resources_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ask_maeve_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ask_maeve_response_validations: {
+        Row: {
+          action_taken: string
+          attempt: number
+          created_at: string
+          id: string
+          message_id: string | null
+          passed: boolean
+          rules_fired: Json
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action_taken: string
+          attempt?: number
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          passed: boolean
+          rules_fired?: Json
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action_taken?: string
+          attempt?: number
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          passed?: boolean
+          rules_fired?: Json
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ask_maeve_response_validations_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ask_maeve_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ask_maeve_safety_events: {
+        Row: {
+          action_taken: string
+          category: string
+          created_at: string
+          detail: string | null
+          id: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action_taken: string
+          category: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action_taken?: string
+          category?: string
+          created_at?: string
+          detail?: string | null
+          id?: string
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ask_maeve_safety_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ask_maeve_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ask_maeve_session_processes: {
+        Row: {
+          completed_at: string | null
+          consent_given: boolean
+          created_at: string
+          current_step: number
+          id: string
+          process_key: string
+          session_id: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          consent_given?: boolean
+          created_at?: string
+          current_step?: number
+          id?: string
+          process_key: string
+          session_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          consent_given?: boolean
+          created_at?: string
+          current_step?: number
+          id?: string
+          process_key?: string
+          session_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ask_maeve_session_processes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "ask_maeve_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ask_maeve_sessions: {
+        Row: {
+          closed_at: string | null
+          conversation_state: string
+          created_at: string
+          current_state_description: string | null
+          desired_outcome: string | null
+          ecology_observations: Json
+          future_pacing_observations: Json
+          id: string
+          longitudinal_consent: boolean
+          patient_defined_insights: Json
+          patient_language_patterns: Json
+          patient_observations: Json
+          safety_flagged: boolean
+          session_intention: string | null
+          session_summary: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+          well_formed_outcome: Json
+        }
+        Insert: {
+          closed_at?: string | null
+          conversation_state?: string
+          created_at?: string
+          current_state_description?: string | null
+          desired_outcome?: string | null
+          ecology_observations?: Json
+          future_pacing_observations?: Json
+          id?: string
+          longitudinal_consent?: boolean
+          patient_defined_insights?: Json
+          patient_language_patterns?: Json
+          patient_observations?: Json
+          safety_flagged?: boolean
+          session_intention?: string | null
+          session_summary?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          well_formed_outcome?: Json
+        }
+        Update: {
+          closed_at?: string | null
+          conversation_state?: string
+          created_at?: string
+          current_state_description?: string | null
+          desired_outcome?: string | null
+          ecology_observations?: Json
+          future_pacing_observations?: Json
+          id?: string
+          longitudinal_consent?: boolean
+          patient_defined_insights?: Json
+          patient_language_patterns?: Json
+          patient_observations?: Json
+          safety_flagged?: boolean
+          session_intention?: string | null
+          session_summary?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          well_formed_outcome?: Json
+        }
+        Relationships: []
+      }
       auth_recovery_attempts: {
         Row: {
           code_hash: string | null
