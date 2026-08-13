@@ -85,7 +85,4 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
       )}
     </div>
   );
-
-    </div>
-  );
 }
