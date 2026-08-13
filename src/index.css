@@ -81,6 +81,11 @@
     /* Guardian SOS */
     --sos: 354 84% 54%;
     --sos-foreground: 0 0% 100%;
+
+    /* Ask Maeve — yellow-orange facilitation accent */
+    --maeve: 33 94% 50%;
+    --maeve-foreground: 0 0% 100%;
+    --maeve-dark: 27 87% 38%;
     --gradient-sos: linear-gradient(135deg, hsl(354 84% 54%), hsl(0 75% 45%));
 
     /* Borders */
