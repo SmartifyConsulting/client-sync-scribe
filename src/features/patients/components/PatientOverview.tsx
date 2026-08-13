@@ -206,45 +206,45 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
   };
 
   return (
-    <div className="rounded-xl border border-terracotta/30 bg-terracotta/5 p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Pill className="h-5 w-5 text-terracotta" />
-          <span className="font-semibold text-foreground">Chronic Medication Patient</span>
-          <Badge className="bg-terracotta/10 text-terracotta border-terracotta/30">Chronic</Badge>
+    <div className="rounded-lg border border-terracotta/30 bg-terracotta/5 px-2 py-1.5 space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Pill className="h-3.5 w-3.5 text-terracotta shrink-0" />
+          <span className="text-xs font-bold text-foreground truncate">Chronic Medication Patient</span>
+          <Badge className="bg-terracotta/10 text-terracotta border-terracotta/30 text-[10px] px-1.5 py-0">
+            Chronic
+          </Badge>
         </div>
         {maxStreak >= 7 && (
           <Button
             onClick={handleCongratulate}
             disabled={congratulating}
             size="sm"
-            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+            className="h-6 gap-1 px-2 text-[11px] bg-emerald-600 hover:bg-emerald-700"
           >
             {congratulating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
-              <PartyPopper className="h-4 w-4" />
+              <PartyPopper className="h-3 w-3" />
             )}
-            Congratulate (+250 Ⓜ each)
+            Congratulate (+250 Ⓜ)
           </Button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">
-        This patient is on chronic medication and can earn adherence rewards for daily medication logging.
-      </p>
       {!loading && adherenceData.length > 0 && (
-        <div className="flex flex-wrap gap-3 pt-1">
+        <div className="flex flex-wrap gap-1.5">
           {adherenceData.map((d, i) => (
-            <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border">
-              <Flame className={`h-4 w-4 ${d.streak >= 7 ? "text-orange-500" : "text-muted-foreground"}`} />
-              <span className="text-sm font-medium">{d.prescription}</span>
-              <span className="text-sm font-bold text-foreground">{d.streak}d</span>
+            <div key={i} className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-card border border-border">
+              <Flame className={`h-3 w-3 ${d.streak >= 7 ? "text-orange-500" : "text-muted-foreground"}`} />
+              <span className="text-[11px] font-medium">{d.prescription}</span>
+              <span className="text-[11px] font-bold text-foreground">{d.streak}d</span>
             </div>
           ))}
         </div>
       )}
     </div>
   );
+
 }
 
 function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
