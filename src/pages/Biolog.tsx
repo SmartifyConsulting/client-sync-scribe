@@ -48,6 +48,7 @@ export default function Biolog() {
           <TabsTrigger value="history" className={tabTriggerClass}>History</TabsTrigger>
           <TabsTrigger value="insights" className={tabTriggerClass}>Insights</TabsTrigger>
           <TabsTrigger value="programmes" className={tabTriggerClass}>Programmes</TabsTrigger>
+          <TabsTrigger value="ageing" className={tabTriggerClass}>Ageing</TabsTrigger>
           {!readOnly && <TabsTrigger value="customise" className={tabTriggerClass}>Customise</TabsTrigger>}
         </TabsList>
 
