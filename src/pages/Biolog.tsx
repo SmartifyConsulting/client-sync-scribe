@@ -6,6 +6,7 @@ import { BiologHistory } from "@/features/biolog/BiologHistory";
 import { BiologInsights } from "@/features/biolog/BiologInsights";
 import { BiologProgrammes } from "@/features/biolog/BiologProgrammes";
 import { BiologCustomise } from "@/features/biolog/BiologCustomise";
+import { AgeingTab } from "@/features/biolog/ageing/AgeingTab";
 
 /**
  * My Biolog — daily tracking, correlations and programmes.
