@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Send, Sparkles } from "lucide-react";
+import { Keyboard, Loader2, Mic, RotateCcw, Send, Sparkles, Square, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { safeInvoke } from "@/services/edge/safeInvoke";
 import { useMaeveSession } from "../hooks/useMaeveSession";
+import { useMaeveVoice } from "../hooks/useMaeveVoice";
 import { processLabel, stateLabel } from "../lib/processes";
 import { CLIENT_FALLBACK, looksLikeAdvice } from "../lib/suggestionDetector";
 
@@ -14,35 +15,78 @@ interface Props {
   sessionId: string;
 }
 
+type MaeveMode = "type" | "talk";
+const MODE_KEY = "maeve-mode";
+
 export function MaeveChat({ sessionId }: Props) {
   const navigate = useNavigate();
   const { session, messages, loading, thinking, error, send, reload } = useMaeveSession(sessionId);
+  const voice = useMaeveVoice();
   const [input, setInput] = useState("");
   const [showWhat, setShowWhat] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [mode, setMode] = useState<MaeveMode | null>(
+    () => (localStorage.getItem(MODE_KEY) as MaeveMode | null) ?? null,
+  );
+  const [muted, setMuted] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const openedRef = useRef(false);
+  const spokenRef = useRef<string | null>(null);
+
+  const chooseMode = (next: MaeveMode) => {
+    localStorage.setItem(MODE_KEY, next);
+    setMode(next);
+  };
+
+  const startOpening = useCallback(() => {
+    openedRef.current = true;
+    send("", true);
+  }, [send]);
 
   useEffect(() => {
-    if (loading || openedRef.current) return;
-    if (messages.length === 0) {
-      openedRef.current = true;
-      send("", true);
-    }
-  }, [loading, messages.length, send]);
+    if (loading || openedRef.current || !mode) return;
+    if (messages.length === 0) startOpening();
+  }, [loading, messages.length, mode, startOpening]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, thinking]);
 
   useEffect(() => {
-    if (!thinking) inputRef.current?.focus();
-  }, [thinking, sessionId]);
+    if (!thinking && mode === "type") inputRef.current?.focus();
+  }, [thinking, sessionId, mode]);
 
   useEffect(() => {
     if (error) toast.error(error);
   }, [error]);
+
+  // Read Maeve's newest reply aloud in talk mode.
+  useEffect(() => {
+    if (mode !== "talk" || muted || thinking) return;
+    const last = messages[messages.length - 1];
+    if (!last || last.role !== "assistant") return;
+    if (spokenRef.current === last.id) return;
+    spokenRef.current = last.id;
+    const body = looksLikeAdvice(last.content) ? CLIENT_FALLBACK : last.content;
+    voice.speak(body);
+  }, [messages, mode, muted, thinking, voice]);
+
+  const handleMic = async () => {
+    if (thinking || voice.transcribing) return;
+    if (!voice.recording) {
+      const ok = await voice.startRecording();
+      if (!ok) toast.error("Microphone unavailable — you can keep typing instead.");
+      return;
+    }
+    const text = await voice.stopRecordingAndTranscribe();
+    if (!text) {
+      toast.error("I didn't catch that — try again.");
+      return;
+    }
+    await send(text);
+  };
+
 
   const submit = async () => {
     const text = input.trim();
