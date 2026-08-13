@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "SOS в реальном времени"
+    "liveSOS": "SOS в реальном времени",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Сообщить об ошибке",

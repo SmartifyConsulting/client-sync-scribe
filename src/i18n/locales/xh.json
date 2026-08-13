@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "I-SOS Bhanyabhanya"
+    "liveSOS": "I-SOS Bhanyabhanya",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Xela Impazamo",

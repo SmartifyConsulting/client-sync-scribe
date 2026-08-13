@@ -63,7 +63,8 @@
     "activeIncidents": "Active Incidents",
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
-    "liveSOS": "SOS Ndụ"
+    "liveSOS": "SOS Ndụ",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Kọọ Nsogbu",

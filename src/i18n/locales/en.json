@@ -93,7 +93,8 @@
     "operationsDashboard": "Operations Dashboard",
     "vehicles": "Vehicles",
     "crews": "Crews",
-    "reports": "Reports"
+    "reports": "Reports",
+    "askMaeve": "Ask Maeve"
   },
   "topbar": {
     "reportBug": "Report Bug/Fix",
