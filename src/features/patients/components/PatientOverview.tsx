@@ -10,6 +10,8 @@ import type { Session } from "@/hooks/useSessions";
 import { medicationSyncBus } from "@/lib/utils";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmotionalJournal } from "@/features/patients/components/overview/EmotionalJournal";
 
 interface PatientOverviewProps {
   patient: {
@@ -690,6 +692,18 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
           </div>
         )}
 
+        {/* Emotional context — generalised, sanitised output only. */}
+        {(emotional?.theme || emotional?.metaphysical_note) && (
+          <div className="mb-4 p-4 rounded-lg bg-orange-500/5 border border-orange-500/20 space-y-1">
+            {emotional?.theme && (
+              <p className="text-sm font-bold text-orange-600">{emotional.theme}</p>
+            )}
+            {emotional?.metaphysical_note && (
+              <p className="text-sm font-bold text-orange-600">{emotional.metaphysical_note}</p>
+            )}
+          </div>
+        )}
+
         {/* Timeline breakdown */}
         <div className="prose prose-sm max-w-none">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">{t("patientProfile.aiSummarySectionTimeline")}</h4>
@@ -1002,5 +1016,33 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
         );
       })()}
     </div>
+  );
+}
+
+
+export function PatientOverview(props: PatientOverviewProps) {
+  return (
+    <Tabs defaultValue="physical" className="w-full">
+      <TabsList className="mb-4 bg-primary/10 p-1 rounded-full">
+        <TabsTrigger
+          value="physical"
+          className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white text-xs px-4"
+        >
+          Physical State
+        </TabsTrigger>
+        <TabsTrigger
+          value="emotional"
+          className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-white text-xs px-4"
+        >
+          Emotional State
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="physical" className="mt-0">
+        <PhysicalOverview {...props} />
+      </TabsContent>
+      <TabsContent value="emotional" className="mt-0">
+        <EmotionalJournal patientId={props.patient.id} />
+      </TabsContent>
+    </Tabs>
   );
 }
