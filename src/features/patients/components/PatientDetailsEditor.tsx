@@ -2493,6 +2493,13 @@ export function PatientDetailsEditor({
 
             <div className="patient-section-frame rounded-xl border border-neutral-400 bg-white overflow-hidden divide-y divide-white">
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
+              <SectionHeader icon={Sparkles} label="About Me" />
+              <CollapsibleContent className="p-3">
+                <RelationshipProfileExercise patientId={patientId} />
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={User} label="Personal Information" />
               <CollapsibleContent className="p-3">
                 {/* Horizontal label/field rows: bold, one size smaller labels */}
