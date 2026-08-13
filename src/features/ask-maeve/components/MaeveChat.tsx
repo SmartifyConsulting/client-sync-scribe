@@ -24,18 +24,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { SessionTitleEditor } from "./SessionTitleEditor";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 
 const logo = holarcLogoAsset.url;
 
 interface Props {
   sessionId: string;
+  /** Skips the mode picker when the patient already chose how to continue. */
+  initialMode?: "type" | "talk";
 }
 
 type MaeveMode = "type" | "talk";
 const MODE_KEY = "maeve-mode";
 
-export function MaeveChat({ sessionId }: Props) {
+export function MaeveChat({ sessionId, initialMode }: Props) {
   const navigate = useNavigate();
   const { session, messages, loading, thinking, error, send, reload } = useMaeveSession(sessionId);
   const voice = useMaeveVoice();
@@ -43,7 +46,7 @@ export function MaeveChat({ sessionId }: Props) {
   const [showWhat, setShowWhat] = useState(false);
   const [closing, setClosing] = useState(false);
   const [mode, setMode] = useState<MaeveMode | null>(
-    () => (localStorage.getItem(MODE_KEY) as MaeveMode | null) ?? null,
+    () => initialMode ?? (localStorage.getItem(MODE_KEY) as MaeveMode | null) ?? null,
   );
   const [muted, setMuted] = useState(false);
   const [emailing, setEmailing] = useState(false);
@@ -287,6 +290,9 @@ export function MaeveChat({ sessionId }: Props) {
             <Sparkles className="h-5 w-5 text-maeve" />
             Ask Maeve
           </h1>
+          <div className="mt-1">
+            <SessionTitleEditor sessionId={sessionId} title={session?.title} onRenamed={() => reload()} />
+          </div>
           <p className="text-xs text-muted-foreground">
             {session?.status === "closed" ? "Exploration closed" : "Exploration in progress"}
           </p>

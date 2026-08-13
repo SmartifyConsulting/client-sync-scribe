@@ -25,7 +25,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { session_id: sessionId } = await req.json().catch(() => ({}));
+    const { session_id: sessionId, mode } = await req.json().catch(() => ({}));
+    const recap = mode === "recap";
     if (typeof sessionId !== "string" || !sessionId) {
       return new Response(JSON.stringify({ error: "session_id is required" }), {
         status: 400,
@@ -69,8 +70,13 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "system",
-            content:
-              "Write a short closing reflection of an NLP facilitation conversation, addressed to the person. " +
+            content: recap
+              ? "Write a short overarching recap of an NLP facilitation conversation, addressed to the person, so they " +
+                "can pick the exploration up again later. Rules: use only the person's own words and what they explored. " +
+                "No advice, no suggestions, no next steps, no interpretation, no diagnosis, no praise. Plain British " +
+                "English, 3-5 short sentences, no lists. Cover what they came with, what they explored and where the " +
+                "conversation had reached."
+              : "Write a short closing reflection of an NLP facilitation conversation, addressed to the person. " +
               "Rules: use only the person's own words and what they explored. No advice, no suggestions, no next steps, " +
               "no interpretation, no diagnosis, no praise. Plain British English, 3–5 short sentences, no lists. " +
               'End with exactly this question on its own line: "What, if anything, would you like to explore from here?"',
@@ -94,7 +100,11 @@ Deno.serve(async (req) => {
 
     await admin
       .from("ask_maeve_sessions")
-      .update({ session_summary: summary, status: "closed", closed_at: new Date().toISOString() })
+      .update(
+        recap
+          ? { session_summary: summary }
+          : { session_summary: summary, status: "closed", closed_at: new Date().toISOString() },
+      )
       .eq("id", sessionId);
 
     return new Response(JSON.stringify({ summary }), {

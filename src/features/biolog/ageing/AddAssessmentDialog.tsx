@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { uploadAgeingReport } from "./useAgeing";
-import { AGEING_MODELS, SAMPLE_TYPES, type BiologicalAgeAssessment } from "./types";
+import { AGEING_MARKER_GROUPS, AGEING_MODELS, SAMPLE_TYPES, type BiologicalAgeAssessment } from "./types";
 import { chronologicalAge } from "./ageingMath";
 
 interface Props {
@@ -41,6 +41,9 @@ export function AddAssessmentDialog({ open, onOpenChange, dob, onSave }: Props) 
     notes: "",
   });
   const [file, setFile] = useState<File | null>(null);
+  const [markers, setMarkers] = useState<Record<string, string>>({});
+
+  const setMarker = (key: string, value: string) => setMarkers((m) => ({ ...m, [key]: value }));
 
   const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -66,6 +69,9 @@ export function AddAssessmentDialog({ open, onOpenChange, dob, onSave }: Props) 
         reference_population: form.reference_population || null,
         source: form.source || null,
         notes: form.notes || null,
+        markers: Object.fromEntries(
+          Object.entries(markers).filter(([, v]) => v.trim() !== ""),
+        ) as Record<string, string>,
         report_path,
       });
       toast.success("Assessment saved.");
@@ -81,7 +87,7 @@ export function AddAssessmentDialog({ open, onOpenChange, dob, onSave }: Props) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add DNA methylation assessment</DialogTitle>
+          <DialogTitle>Add biological-age assessment</DialogTitle>
           <DialogDescription className="text-xs">
             Enter the results exactly as they appear on your laboratory report. Holarc Health stores the values as
             supplied and never calculates a biological age of its own.
@@ -146,6 +152,40 @@ export function AddAssessmentDialog({ open, onOpenChange, dob, onSave }: Props) 
           <div className="space-y-1.5 sm:col-span-2">
             <Label className={labelClass}>Notes</Label>
             <Textarea rows={3} value={form.notes} onChange={(e) => set("notes", e.target.value)} />
+          </div>
+        </div>
+
+
+        {/* Supporting clinical markers */}
+        <div className="mt-5 rounded-xl border border-border p-4">
+          <p className="text-xs font-bold text-foreground">Supporting clinical markers</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            Optional. Enter values exactly as they appear on the report — nothing is calculated from them.
+          </p>
+          <div className="mt-3 space-y-4">
+            {AGEING_MARKER_GROUPS.map((group) => (
+              <div key={group.title}>
+                <p className="text-xs font-bold text-foreground">
+                  {group.title}
+                  <span className="ml-2 font-normal text-[11px] text-muted-foreground">{group.reflects}</span>
+                </p>
+                <div className="mt-1.5 grid gap-3 sm:grid-cols-2">
+                  {group.fields.map((f) => (
+                    <div key={f.key} className="space-y-1">
+                      <Label className={labelClass}>
+                        {f.label}
+                        {f.unit ? <span className="ml-1 font-normal text-muted-foreground">({f.unit})</span> : null}
+                      </Label>
+                      <Input
+                        value={markers[f.key] ?? ""}
+                        onChange={(e) => setMarker(f.key, e.target.value)}
+                        placeholder={f.unit ?? ""}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

@@ -1414,6 +1414,7 @@ export type Database = {
           created_by: string | null
           id: string
           laboratory_name: string | null
+          markers: Json
           model_name: string | null
           notes: string | null
           patient_user_id: string
@@ -1435,6 +1436,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           laboratory_name?: string | null
+          markers?: Json
           model_name?: string | null
           notes?: string | null
           patient_user_id: string
@@ -1456,6 +1458,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           laboratory_name?: string | null
+          markers?: Json
           model_name?: string | null
           notes?: string | null
           patient_user_id?: string

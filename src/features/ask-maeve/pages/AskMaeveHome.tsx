@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { createMaeveSession, type MaeveMessage, type MaeveSessionRow } from "../hooks/useMaeveSession";
+import { SessionTitleEditor } from "../components/SessionTitleEditor";
 import { deleteMaeveSession } from "../lib/deleteSession";
 import { buildTranscript, downloadTranscript, transcriptFileName } from "../lib/transcript";
 import { downloadTranscriptPdf } from "../lib/maevePdf";
@@ -83,7 +84,7 @@ export default function AskMaeveHome() {
       toast.error("Could not start an exploration");
       return;
     }
-    navigate(`/ask-maeve/${id}`);
+    navigate(`/ask-maeve/${id}`, { state: { fresh: true } });
   };
 
   const confirmDelete = async () => {
@@ -143,12 +144,21 @@ export default function AskMaeveHome() {
               key={s.id}
               className="flex items-center gap-2 rounded-xl border border-border px-4 py-3 transition hover:border-maeve"
             >
-              <button onClick={() => navigate(`/ask-maeve/${s.id}`)} className="min-w-0 flex-1 text-left">
-                <p className="truncate text-sm font-semibold text-foreground">{s.title || "New exploration"}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(s.created_at).toLocaleDateString()} · {s.status === "closed" ? "Closed" : "In progress"}
-                </p>
-              </button>
+              <div className="min-w-0 flex-1">
+                <SessionTitleEditor
+                  sessionId={s.id}
+                  title={s.title}
+                  onTitleClick={() => navigate(`/ask-maeve/${s.id}`)}
+                  onRenamed={(title) =>
+                    setSessions((prev) => prev.map((x) => (x.id === s.id ? { ...x, title } : x)))
+                  }
+                />
+                <button onClick={() => navigate(`/ask-maeve/${s.id}`)} className="block w-full text-left">
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(s.created_at).toLocaleDateString()} · {s.status === "closed" ? "Closed" : "In progress"}
+                  </p>
+                </button>
+              </div>
               <button
                 aria-label="Download transcript"
                 title="Download transcript"

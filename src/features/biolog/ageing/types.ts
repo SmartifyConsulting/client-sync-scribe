@@ -17,6 +17,7 @@ export interface BiologicalAgeAssessment {
   source: string | null;
   report_path: string | null;
   notes: string | null;
+  markers?: AgeingMarkers | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -67,3 +68,94 @@ export const AGEING_MODELS = [
 ];
 
 export const SAMPLE_TYPES = ["Blood", "Saliva", "Buccal swab", "Other"];
+
+/** Supporting clinical markers captured alongside an epigenetic-age result. */
+export type AgeingMarkers = Record<string, string>;
+
+export interface AgeingMarkerField {
+  key: string;
+  label: string;
+  unit?: string;
+  reflects: string;
+}
+
+export interface AgeingMarkerGroup {
+  title: string;
+  reflects: string;
+  fields: AgeingMarkerField[];
+}
+
+export const AGEING_MARKER_GROUPS: AgeingMarkerGroup[] = [
+  {
+    title: "HbA1c",
+    reflects: "Long-term blood glucose / metabolic health",
+    fields: [{ key: "hba1c", label: "HbA1c", unit: "%", reflects: "Long-term blood glucose" }],
+  },
+  {
+    title: "Lipid panel",
+    reflects: "Cardiovascular / metabolic risk",
+    fields: [
+      { key: "total_cholesterol", label: "Total cholesterol", unit: "mmol/L", reflects: "Cardiovascular risk" },
+      { key: "ldl", label: "LDL", unit: "mmol/L", reflects: "Cardiovascular risk" },
+      { key: "hdl", label: "HDL", unit: "mmol/L", reflects: "Cardiovascular risk" },
+      { key: "triglycerides", label: "Triglycerides", unit: "mmol/L", reflects: "Metabolic risk" },
+    ],
+  },
+  {
+    title: "hs-CRP",
+    reflects: "Systemic inflammation",
+    fields: [{ key: "hs_crp", label: "hs-CRP", unit: "mg/L", reflects: "Systemic inflammation" }],
+  },
+  {
+    title: "Blood pressure",
+    reflects: "Cardiovascular health",
+    fields: [
+      { key: "bp_systolic", label: "Systolic", unit: "mmHg", reflects: "Cardiovascular health" },
+      { key: "bp_diastolic", label: "Diastolic", unit: "mmHg", reflects: "Cardiovascular health" },
+    ],
+  },
+  {
+    title: "Kidney function",
+    reflects: "Kidney health",
+    fields: [
+      { key: "egfr", label: "eGFR", unit: "mL/min/1.73m²", reflects: "Kidney health" },
+      { key: "creatinine", label: "Creatinine", unit: "µmol/L", reflects: "Kidney health" },
+    ],
+  },
+  {
+    title: "Liver function",
+    reflects: "Liver / metabolic health",
+    fields: [
+      { key: "alt", label: "ALT", unit: "U/L", reflects: "Liver health" },
+      { key: "ast", label: "AST", unit: "U/L", reflects: "Liver health" },
+      { key: "ggt", label: "GGT", unit: "U/L", reflects: "Liver health" },
+    ],
+  },
+  {
+    title: "Full blood count",
+    reflects: "General physiological health",
+    fields: [
+      { key: "haemoglobin", label: "Haemoglobin", unit: "g/dL", reflects: "General physiological health" },
+      { key: "white_cell_count", label: "White cell count", unit: "10⁹/L", reflects: "Immune status" },
+      { key: "platelets", label: "Platelets", unit: "10⁹/L", reflects: "General physiological health" },
+    ],
+  },
+  {
+    title: "Weight + waist circumference",
+    reflects: "Body composition / metabolic risk",
+    fields: [
+      { key: "weight_kg", label: "Weight", unit: "kg", reflects: "Body composition" },
+      { key: "waist_cm", label: "Waist circumference", unit: "cm", reflects: "Metabolic risk" },
+    ],
+  },
+  {
+    title: "Fitness",
+    reflects: "Cardiorespiratory fitness",
+    fields: [
+      { key: "vo2max", label: "VO₂max or equivalent", unit: "mL/kg/min", reflects: "Cardiorespiratory fitness" },
+    ],
+  },
+];
+
+/** Flat lookup of every marker field, for rendering saved values. */
+export const AGEING_MARKER_FIELDS: AgeingMarkerField[] = AGEING_MARKER_GROUPS.flatMap((g) => g.fields);

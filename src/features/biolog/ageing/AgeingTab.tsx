@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -24,7 +24,7 @@ import {
   trajectoryLabel,
   trajectoryState,
 } from "./ageingMath";
-import { DEFAULT_AGEING_CONFIG } from "./types";
+import { AGEING_MARKER_FIELDS, DEFAULT_AGEING_CONFIG } from "./types";
 
 const TIPS = {
   chronological: "Your age in calendar years, worked out from your date of birth.",
@@ -302,8 +302,12 @@ export function AgeingTab({ ownerUserId, readOnly = false }: { ownerUserId?: str
                   const priorRow = arr[i + 1] || null;
                   const transition =
                     priorRow && a.model_name && priorRow.model_name && a.model_name !== priorRow.model_name;
+                  const markerEntries = Object.entries((a.markers ?? {}) as Record<string, string>).filter(
+                    ([, v]) => String(v).trim() !== "",
+                  );
                   return (
-                    <tr key={a.id} className="border-t">
+                    <Fragment key={a.id}>
+                    <tr className="border-t">
                       <td className="py-1.5 pr-3">{a.assessment_date}</td>
                       <td className="py-1.5 pr-3">{a.biological_age != null ? Number(a.biological_age).toFixed(1) : "—"}</td>
                       <td className="py-1.5 pr-3">{a.chronological_age != null ? Number(a.chronological_age).toFixed(1) : "—"}</td>
@@ -329,6 +333,28 @@ export function AgeingTab({ ownerUserId, readOnly = false }: { ownerUserId?: str
                         </TooltipProvider>
                       </td>
                     </tr>
+                    {markerEntries.length > 0 && (
+                      <tr className="border-t-0">
+                        <td colSpan={8} className="pb-2 pr-3">
+                          <div className="flex flex-wrap gap-1.5">
+                            {markerEntries.map(([key, value]) => {
+                              const field = AGEING_MARKER_FIELDS.find((f) => f.key === key);
+                              return (
+                                <span
+                                  key={key}
+                                  className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-foreground"
+                                  title={field?.reflects}
+                                >
+                                  <span className="font-bold">{field?.label ?? key}</span> {value}
+                                  {field?.unit ? ` ${field.unit}` : ""}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   );
                 })}
               </tbody>

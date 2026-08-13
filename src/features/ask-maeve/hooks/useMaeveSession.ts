@@ -98,3 +98,17 @@ export async function createMaeveSession(): Promise<string | null> {
   }
   return (data as any).id as string;
 }
+
+/** Renames an exploration. Empty titles fall back to the auto-generated name. */
+export async function renameMaeveSession(sessionId: string, title: string): Promise<boolean> {
+  const clean = title.trim();
+  const { error } = await supabase
+    .from("ask_maeve_sessions" as any)
+    .update({ title: clean || null } as any)
+    .eq("id", sessionId);
+  if (error) {
+    console.error("renameMaeveSession failed", error);
+    return false;
+  }
+  return true;
+}
