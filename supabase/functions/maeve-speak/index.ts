@@ -40,7 +40,9 @@ serve(async (req) => {
       });
     }
 
-    const elevenKey = Deno.env.get("ELEVENLABS_API_KEY");
+    // "nova" is the default voice and lives on the OpenAI engine, so skip ElevenLabs for it.
+    const useEleven = typeof voiceId !== "string" || voiceId !== "nova";
+    const elevenKey = useEleven ? Deno.env.get("ELEVENLABS_API_KEY") : null;
     if (elevenKey) {
       const id = typeof voiceId === "string" && voiceId ? voiceId : "EXAVITQu4vr4xnSDxMaL"; // Sarah
       const res = await fetch(
@@ -72,7 +74,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "tts-1",
         input: text,
-        voice: fallbackVoice || "shimmer",
+        voice: fallbackVoice || "nova",
         response_format: "mp3",
         speed: 1.05,
       }),
