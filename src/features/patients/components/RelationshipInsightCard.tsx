@@ -39,22 +39,20 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
 
   if (roleLoading || !isDoctor) return null;
 
-  const insight = row?.pattern ? toOverviewInsight(row.pattern) : null;
-  const confidence = row?.confidence as string | null;
-
-  const Line = ({ label, value }: { label: string; value: string }) => (
-    <div>
-      <p className="text-xs font-bold text-foreground">{label}</p>
-      <p className="text-sm text-muted-foreground leading-relaxed">{value}</p>
-    </div>
-  );
+  const assessment = buildAssessment(row?.pattern ?? null, row?.confidence ?? null, row?.responses);
 
   return (
     <div className="rounded-xl border border-primary/40 bg-card p-5 h-full">
       <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Handshake className="h-4 w-4 text-primary" />
           <h4 className="font-medium text-foreground">How to work with this patient</h4>
+          {/* TESTING ONLY — internal pattern number */}
+          {assessment && (
+            <span className="rounded-full border border-amber-400/60 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+              Type {assessment.pattern}
+            </span>
+          )}
         </div>
         <TooltipProvider>
           <Tooltip>
@@ -74,7 +72,7 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading…
         </div>
-      ) : !insight ? (
+      ) : !assessment ? (
         <p className="text-sm text-muted-foreground italic">
           {row?.status === "insufficient_information"
             ? "The patient felt none of the descriptions fitted. Consider exploring communication preferences directly."
@@ -83,20 +81,11 @@ export function RelationshipInsightCard({ patientId }: { patientId: string }) {
             : "Available once the patient completes the short About Me exercise on their profile."}
         </p>
       ) : (
-        <div className="space-y-3">
-          <Line label="What may motivate them" value={insight.motivates} />
-          <Line label="Communication" value={insight.communication} />
-          <Line label="Builds trust" value={insight.trust} />
-          <Line label="Be mindful of" value={insight.mindful} />
-          <Line label="Useful approach" value={insight.approach} />
-          {confidence && (
-            <p className="text-xs text-muted-foreground pt-1">
-              Profile confidence: {confidence}
-              {confidence === "Emerging" ? ` · ${LOW_CONFIDENCE_NOTE}` : ""}
-            </p>
-          )}
-        </div>
+        <RelationshipAssessmentDetails assessment={assessment} />
       )}
+    </div>
+  );
+
     </div>
   );
 }
