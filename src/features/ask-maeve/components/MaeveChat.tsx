@@ -41,7 +41,6 @@ const MODE_KEY = "maeve-mode";
 export function MaeveChat({ sessionId, initialMode }: Props) {
   const navigate = useNavigate();
   const { session, messages, loading, thinking, error, send, reload } = useMaeveSession(sessionId);
-  const voice = useMaeveVoice();
   const [input, setInput] = useState("");
   const [showWhat, setShowWhat] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -57,6 +56,10 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const openedRef = useRef(false);
   const spokenRef = useRef<string | null>(null);
+  const autoListenRef = useRef<() => void>(() => {});
+
+  // Hands-free: as soon as Maeve stops speaking, the microphone opens itself.
+  const voice = useMaeveVoice({ onSpeechEnd: () => autoListenRef.current() });
 
   const chooseMode = (next: MaeveMode) => {
     localStorage.setItem(MODE_KEY, next);
@@ -87,11 +90,16 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
   // Read Maeve's newest reply aloud in talk mode.
   useEffect(() => {
-    if (mode !== "talk" || muted || thinking) return;
+    if (mode !== "talk" || thinking) return;
     const last = messages[messages.length - 1];
     if (!last || last.role !== "assistant") return;
     if (spokenRef.current === last.id) return;
     spokenRef.current = last.id;
+    if (muted) {
+      // Muted: skip straight to listening so talk mode stays hands-free.
+      autoListenRef.current();
+      return;
+    }
     const body = looksLikeAdvice(last.content) ? CLIENT_FALLBACK : last.content;
     voice.speak(body);
   }, [messages, mode, muted, thinking, voice]);
@@ -114,6 +122,14 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     }
     await send(text);
   };
+
+  // Kept in a ref so the voice hook can trigger it without re-subscribing.
+  autoListenRef.current = () => {
+    if (mode !== "talk" || thinking || voice.recording || voice.transcribing) return;
+    if (session?.status === "closed") return;
+    void voice.startRecording();
+  };
+
 
   // Leaving the screen (tab hidden, window blurred, navigating away) pauses the
   // recording and mutes the microphone. The exploration stays open so the
