@@ -42,8 +42,8 @@ Today the whole summary — timeline included — is regenerated on every visit 
 ## Technical notes
 
 - **Migration**
-  - `patient_emotional_journal` — patient-owned entries (`entry_date`, `body`). RLS: the owning patient only, for select/insert/update/delete. No doctor policy at all; grants to `authenticated` and `service_role` only.
-  - `patient_emotional_insights` — derived, sanitised output (`theme`, `metaphysical_note`, `generated_at`, `source_entry_count`). Readable by the patient and by clinicians who already hold access to the patient record; written only by the edge function via service role.
+  - `patient_emotional_journal` — patient-owned entries (`entry_date`, `body`, `font_key`). RLS: the owning patient only, for select/insert/update/delete. No doctor policy at all; grants to `authenticated` and `service_role` only.
+  - `patient_emotional_insights` — derived, sanitised output per entry and per period (`entry_id`, `summation`, `theme`, `metaphysical_note`, `generated_at`, `source_entry_count`). Readable by the patient and by clinicians who already hold access to the patient record; written only by the edge function via service role. The per-entry `summation` is what the doctor sees on a collapsed accordion row.
   - `patient_history_timelines` — cached timeline (`patient_id`, `timeline` jsonb/text, `source_fingerprint`, `generated_at`) using the same access rules as the patient record.
 - **Edge function `analyze-emotional-journal`** — validates the caller's JWT, reads that user's own journal rows with the service role, calls Lovable AI (`google/gemini-2.5-flash`, JSON output) with a strict system prompt: abstract to a theme, no names/events/quotes, tentative wording, no diagnosis, return nothing when the material is thin. Writes only the sanitised row to `patient_emotional_insights`.
 - **`summarize-patient-history`** — takes an optional `cachedTimeline`. When the fingerprint matches, it skips timeline generation and regenerates only the narrative summary; otherwise it regenerates the timeline and stores the new fingerprint. The emotional theme and metaphysical note are passed in as pre-sanitised strings, never the journal.
