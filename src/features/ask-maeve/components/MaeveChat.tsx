@@ -258,7 +258,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     return (
       <div className="mx-auto w-full max-w-2xl px-1 py-8">
         <div className="flex justify-center pb-5">
-          <img src={logo} alt="Holarc Health" className="h-14 w-auto" />
+          <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
         </div>
         <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
           <Sparkles className="h-5 w-5 text-maeve" />
@@ -298,7 +298,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   return (
     <div className="mx-auto flex h-[calc(100vh-11rem)] w-full max-w-3xl flex-col">
       <div className="flex justify-center pb-3">
-        <img src={logo} alt="Holarc Health" className="h-12 w-auto" />
+        <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
       </div>
 
       {/* Header */}
@@ -338,8 +338,8 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
             <>
               <MaeveVoicePicker
                 voiceId={voice.voiceId}
-                onChange={(id) => {
-                  voice.setVoiceId(id);
+                onChange={(id, label) => {
+                  voice.setVoiceId(id, label);
                   voice.speak("This is how I'll sound.", id);
                 }}
                 onPreview={(id) => voice.speak("This is how I'll sound.", id)}
@@ -392,7 +392,13 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         ) : (
           messages.map((m) => {
             const isMaeve = m.role === "assistant";
-            const body = isMaeve && looksLikeAdvice(m.content) ? CLIENT_FALLBACK : m.content;
+            const full = isMaeve && looksLikeAdvice(m.content) ? CLIENT_FALLBACK : m.content;
+            // While Maeve is speaking, her words type themselves onto the
+            // screen in time with the audio.
+            const isBeingSpoken = isMaeve && voice.speaking && voice.speakingText === full;
+            const body = isBeingSpoken
+              ? full.slice(0, Math.max(1, Math.round(full.length * voice.speechProgress)))
+              : full;
             return (
               <div key={m.id} className={cn("flex", isMaeve ? "justify-start" : "justify-end")}>
                 <div

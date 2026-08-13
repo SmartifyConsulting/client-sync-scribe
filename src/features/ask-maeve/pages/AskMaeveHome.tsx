@@ -104,7 +104,7 @@ export default function AskMaeveHome() {
   return (
     <div className="mx-auto w-full max-w-3xl px-1">
       <div className="flex justify-center pb-4 pt-2">
-        <img src={logo} alt="Holarc Health" className="h-16 w-auto" />
+        <img src={logo} alt="Holarc Health" className="h-24 w-auto" />
       </div>
 
       <div className="flex items-center gap-2">

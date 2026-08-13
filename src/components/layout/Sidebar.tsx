@@ -178,7 +178,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { t } = useTranslation();
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
-  const { hasHospitalAffiliation } = useHospitalAffiliation();
+  const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
@@ -205,7 +205,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
-  const hideMyShift = isDoctorMenu && !hasHospitalAffiliation;
+  const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
   const withShiftRule = (items: (NavItem & { tour?: string })[]) =>
     hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
 

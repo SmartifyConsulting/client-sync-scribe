@@ -223,6 +223,49 @@ export function usePractice() {
     [user, practice, fetchAll],
   );
 
+  /** Re-sends the invitation email for a still-pending invite. */
+  const resendInvitation = useCallback(
+    async (invitationId: string, email: string) => {
+      if (!practice) return;
+      try {
+        await supabase.functions.invoke("send-user-invitation", {
+          body: {
+            recipientEmail: email,
+            senderName: "A colleague",
+            message: `You have been invited to share a practice calendar on Holarc Health (${practice.name}).`,
+            isPracticePartner: true,
+            partnerName: email,
+          },
+        });
+        await supabase
+          .from("practice_invitations")
+          .update({ status: "pending" })
+          .eq("id", invitationId);
+        toast.success(`Invitation re-sent to ${email}`);
+      } catch {
+        toast.error("Could not re-send the invitation");
+      }
+    },
+    [practice],
+  );
+
+  /** Switches a member between assistant and full practice member. */
+  const updateMemberRole = useCallback(
+    async (memberId: string, role: "member" | "assistant") => {
+      const { error } = await supabase
+        .from("practice_members")
+        .update({ role })
+        .eq("id", memberId);
+      if (error) {
+        toast.error("Could not update this member");
+        return;
+      }
+      toast.success("Member updated");
+      await fetchAll();
+    },
+    [fetchAll],
+  );
+
   const revokeInvitation = useCallback(
     async (invitationId: string) => {
       const { error } = await supabase
@@ -330,6 +373,8 @@ export function usePractice() {
     refresh: fetchAll,
     createPractice,
     inviteMember,
+    resendInvitation,
+    updateMemberRole,
     revokeInvitation,
     acceptInvitation,
     declineInvitation,
