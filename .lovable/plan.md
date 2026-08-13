@@ -36,3 +36,6 @@ Previewing an invoice or medical certificate from the To-Do list shows unresolve
 ## Technical notes
 - Files: `src/index.css` (tokens), `src/features/ask-maeve/hooks/useMaeveVoice.ts`, `src/features/ask-maeve/components/MaeveChat.tsx`, `src/features/ask-maeve/pages/AskMaeveHome.tsx`, `src/lib/taskAssignee.ts`, To-Do list views, `src/features/documents/lib/resolveDocumentPreviewContent.ts`, plus mic-release cleanup in the clinical session recorder.
 - No database schema changes required.
+
+## 6. Task count pill readable on hover
+The count pill on accordion headers loses its number on hover (white/low-contrast text on a light pill). Force the pill's number to black in both the resting and hover states, on collapsed and expanded (green) headers, so the count is always visible.
