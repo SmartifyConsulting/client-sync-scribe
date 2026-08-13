@@ -29,6 +29,7 @@ export function BiologPanel({
         <TabsTrigger value="history" className={triggerClass}>History</TabsTrigger>
         <TabsTrigger value="insights" className={triggerClass}>Insights</TabsTrigger>
         <TabsTrigger value="programmes" className={triggerClass}>Programmes</TabsTrigger>
+        <TabsTrigger value="ageing" className={triggerClass}>Ageing</TabsTrigger>
         {!readOnly && <TabsTrigger value="customise" className={triggerClass}>Customise</TabsTrigger>}
       </TabsList>
 
