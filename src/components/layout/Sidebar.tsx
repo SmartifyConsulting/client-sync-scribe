@@ -345,7 +345,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   renderNavLink(item),
                 )}
               </div>
-              {DOCTOR_SECTIONS.map((section) => {
+              {doctorSections.map((section) => {
                 const sectionItems = applyItemPreferences(section.items, preferences.item_order, preferences.hidden_items);
                 if (sectionItems.length === 0) return null;
                 return (
@@ -386,7 +386,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                   </Button>
                 </div>
                 <div className="space-y-1">
-                  {doctorModeItems.map((item, i) => {
+                  {doctorItems.map((item, i) => {
                     const isHidden = preferences.hidden_items.includes(item.to);
                     return (
                       <div key={item.to} className="flex items-center justify-between gap-1 rounded-lg px-2 py-1.5 hover:bg-muted/50">
@@ -397,14 +397,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                           <button
                             className="p-1 rounded hover:bg-muted disabled:opacity-30"
                             disabled={i === 0}
-                            onClick={() => moveItem(doctorModeItems, item.to, -1)}
+                            onClick={() => moveItem(doctorItems, item.to, -1)}
                           >
                             <ChevronUp className="h-3.5 w-3.5" />
                           </button>
                           <button
                             className="p-1 rounded hover:bg-muted disabled:opacity-30"
-                            disabled={i === doctorModeItems.length - 1}
-                            onClick={() => moveItem(doctorModeItems, item.to, 1)}
+                            disabled={i === doctorItems.length - 1}
+                            onClick={() => moveItem(doctorItems, item.to, 1)}
                           >
                             <ChevronDown className="h-3.5 w-3.5" />
                           </button>
