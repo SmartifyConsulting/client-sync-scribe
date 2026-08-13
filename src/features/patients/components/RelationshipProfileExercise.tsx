@@ -3,11 +3,13 @@ import { Check, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { RelationshipAssessmentDetails } from "./RelationshipAssessmentDetails";
 import {
   Choice,
   ENGINE_VERSION,
   NONE_LABEL,
   QUESTION_SETS,
+  buildAssessment,
   derive,
 } from "@/features/patients/relationship/insights";
 
