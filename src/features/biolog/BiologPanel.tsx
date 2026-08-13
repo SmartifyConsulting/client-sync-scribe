@@ -5,6 +5,7 @@ import { BiologHistory } from "./BiologHistory";
 import { BiologInsights } from "./BiologInsights";
 import { BiologProgrammes } from "./BiologProgrammes";
 import { BiologCustomise } from "./BiologCustomise";
+import { AgeingTab } from "./ageing/AgeingTab";
 
 /**
  * Embeddable Biolog panel — used standalone on /biolog and inside a patient
