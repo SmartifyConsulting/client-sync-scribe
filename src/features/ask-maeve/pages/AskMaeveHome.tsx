@@ -1,10 +1,24 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Plus, Sparkles } from "lucide-react";
+import { Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { createMaeveSession, type MaeveSessionRow } from "../hooks/useMaeveSession";
+import { deleteMaeveSession } from "../lib/deleteSession";
+import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 import { toast } from "sonner";
+
+const logo = holarcLogoAsset.url;
 
 export default function AskMaeveHome() {
   const navigate = useNavigate();
@@ -12,6 +26,8 @@ export default function AskMaeveHome() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [startError, setStartError] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<MaeveSessionRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     supabase
@@ -37,8 +53,26 @@ export default function AskMaeveHome() {
     navigate(`/ask-maeve/${id}`);
   };
 
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    const ok = await deleteMaeveSession(pendingDelete.id);
+    setDeleting(false);
+    if (!ok) {
+      toast.error("Could not delete that exploration");
+      return;
+    }
+    setSessions((prev) => prev.filter((s) => s.id !== pendingDelete.id));
+    setPendingDelete(null);
+    toast.success("Exploration deleted");
+  };
+
   return (
     <div className="mx-auto w-full max-w-3xl px-1">
+      <div className="flex justify-center pb-4 pt-2">
+        <img src={logo} alt="Holarc Health" className="h-16 w-auto" />
+      </div>
+
       <div className="flex items-center gap-2">
         <Sparkles className="h-6 w-6 text-maeve" />
         <h1 className="font-display text-2xl font-bold text-foreground">Ask Maeve</h1>
@@ -72,22 +106,46 @@ export default function AskMaeveHome() {
           <p className="py-8 text-center text-sm text-muted-foreground">No explorations yet.</p>
         ) : (
           sessions.map((s) => (
-            <button
+            <div
               key={s.id}
-              onClick={() => navigate(`/ask-maeve/${s.id}`)}
-              className="flex w-full items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 text-left transition hover:border-maeve"
+              className="flex items-center gap-2 rounded-xl border border-border px-4 py-3 transition hover:border-maeve"
             >
-              <div className="min-w-0">
+              <button onClick={() => navigate(`/ask-maeve/${s.id}`)} className="min-w-0 flex-1 text-left">
                 <p className="truncate text-sm font-semibold text-foreground">{s.title || "New exploration"}</p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(s.created_at).toLocaleDateString()} · {s.status === "closed" ? "Closed" : "In progress"}
                 </p>
-              </div>
+              </button>
+              <button
+                aria-label="Delete exploration"
+                onClick={() => setPendingDelete(s)}
+                className="rounded-full p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
               <span className="text-maeve">→</span>
-            </button>
+            </div>
           ))
         )}
       </div>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this exploration?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The whole conversation will be permanently removed. If you'd like to keep it, save or share the
+              transcript first.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Keep it</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} disabled={deleting}>
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
