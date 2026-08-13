@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { getStoredVoiceId, storeVoiceId, voiceById } from "../lib/voices";
+import { getStoredVoiceId, phoneticForSpeech, storeVoiceId, voiceById } from "../lib/voices";
 
 interface Options {
   /** Called when Maeve finishes speaking (used to auto-open the mic in talk mode). */
@@ -13,6 +13,10 @@ export function useMaeveVoice(options: Options = {}) {
   const [paused, setPaused] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  // Text currently being spoken plus how far through it the audio is, so the
+  // words can be typed on screen in time with Maeve's voice.
+  const [speakingText, setSpeakingText] = useState("");
+  const [speechProgress, setSpeechProgress] = useState(0);
   const [liveText, setLiveText] = useState("");
   const [voiceId, setVoiceIdState] = useState<string>(() => getStoredVoiceId());
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -24,8 +28,8 @@ export function useMaeveVoice(options: Options = {}) {
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
-  const setVoiceId = useCallback((id: string) => {
-    storeVoiceId(id);
+  const setVoiceId = useCallback((id: string, label?: string) => {
+    storeVoiceId(id, label);
     setVoiceIdState(id);
   }, []);
 
@@ -37,6 +41,8 @@ export function useMaeveVoice(options: Options = {}) {
       audioRef.current = null;
     }
     setSpeaking(false);
+    setSpeakingText("");
+    setSpeechProgress(0);
   }, []);
 
   const stopRecognition = useCallback(() => {
@@ -94,25 +100,42 @@ export function useMaeveVoice(options: Options = {}) {
             Authorization: `Bearer ${session.access_token}`,
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
-          body: JSON.stringify({ text, voiceId: chosen.id, fallbackVoice: chosen.fallback }),
+          body: JSON.stringify({
+            // "Maeve" is pronounced MEEV — only the spoken copy is respelled.
+            text: phoneticForSpeech(text),
+            voiceId: chosen.id,
+            fallbackVoice: chosen.fallback,
+          }),
         });
         if (!res.ok) throw new Error("speech failed");
         const url = URL.createObjectURL(await res.blob());
         const audio = new Audio(url);
         audioRef.current = audio;
         setSpeaking(true);
+        setSpeakingText(text);
+        setSpeechProgress(0);
+        audio.ontimeupdate = () => {
+          if (!audio.duration || !isFinite(audio.duration)) return;
+          setSpeechProgress(Math.min(1, audio.currentTime / audio.duration));
+        };
         audio.onended = () => {
           URL.revokeObjectURL(url);
           setSpeaking(false);
+          setSpeechProgress(1);
+          setSpeakingText("");
           optionsRef.current.onSpeechEnd?.();
         };
         audio.onerror = () => {
           setSpeaking(false);
+          setSpeakingText("");
+          setSpeechProgress(1);
           optionsRef.current.onSpeechEnd?.();
         };
         await audio.play();
       } catch {
         setSpeaking(false);
+        setSpeakingText("");
+        setSpeechProgress(1);
         optionsRef.current.onSpeechEnd?.();
       }
     },
@@ -263,6 +286,8 @@ export function useMaeveVoice(options: Options = {}) {
     paused,
     transcribing,
     speaking,
+    speakingText,
+    speechProgress,
     liveText,
     voiceId,
     setVoiceId,
