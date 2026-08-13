@@ -145,17 +145,14 @@ export default function AskMaeveHome() {
               className="flex items-center gap-2 rounded-xl border border-border px-4 py-3 transition hover:border-maeve"
             >
               <div className="min-w-0 flex-1">
-                <div className="flex min-w-0 items-center gap-1.5">
-                  <button onClick={() => navigate(`/ask-maeve/${s.id}`)} className="min-w-0 flex-1 text-left">
-                    <SessionTitleEditor
-                      sessionId={s.id}
-                      title={s.title}
-                      onRenamed={(title) =>
-                        setSessions((prev) => prev.map((x) => (x.id === s.id ? { ...x, title } : x)))
-                      }
-                    />
-                  </button>
-                </div>
+                <SessionTitleEditor
+                  sessionId={s.id}
+                  title={s.title}
+                  onTitleClick={() => navigate(`/ask-maeve/${s.id}`)}
+                  onRenamed={(title) =>
+                    setSessions((prev) => prev.map((x) => (x.id === s.id ? { ...x, title } : x)))
+                  }
+                />
                 <button onClick={() => navigate(`/ask-maeve/${s.id}`)} className="block w-full text-left">
                   <p className="text-xs text-muted-foreground">
                     {new Date(s.created_at).toLocaleDateString()} · {s.status === "closed" ? "Closed" : "In progress"}

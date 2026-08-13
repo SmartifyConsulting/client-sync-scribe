@@ -9,11 +9,13 @@ interface Props {
   sessionId: string;
   title: string | null | undefined;
   onRenamed?: (title: string | null) => void;
+  /** Makes the title itself clickable (e.g. to open the exploration). */
+  onTitleClick?: () => void;
   className?: string;
 }
 
 /** Inline rename control for an Ask Maeve exploration. */
-export function SessionTitleEditor({ sessionId, title, onRenamed, className }: Props) {
+export function SessionTitleEditor({ sessionId, title, onRenamed, onTitleClick, className }: Props) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(title ?? "");
   const [saving, setSaving] = useState(false);
@@ -82,7 +84,13 @@ export function SessionTitleEditor({ sessionId, title, onRenamed, className }: P
 
   return (
     <div className={cn("flex min-w-0 items-center gap-1.5", className)}>
-      <span className="truncate text-sm font-semibold text-foreground">{title || "New exploration"}</span>
+      {onTitleClick ? (
+        <button onClick={onTitleClick} className="min-w-0 truncate text-left text-sm font-semibold text-foreground">
+          {title || "New exploration"}
+        </button>
+      ) : (
+        <span className="truncate text-sm font-semibold text-foreground">{title || "New exploration"}</span>
+      )}
       <button
         aria-label="Rename exploration"
         title="Rename exploration"
