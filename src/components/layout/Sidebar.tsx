@@ -99,7 +99,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
 ];
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: Sparkles, label: "Ask Maeve", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true } as any,
+  { icon: Sparkles, label: "Ask Maeve", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
 
