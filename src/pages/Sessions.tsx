@@ -474,7 +474,7 @@ export default function Sessions() {
         await supabase.from('prescriptions').insert({
           patient_id: patientId,
           doctor_id: user.id,
-          session_id: currentSessionIdRef.current,
+          session_id: sessionIdForDoc,
           medication: med.medication,
           dosage: med.dosage,
           frequency: med.frequency,
@@ -501,8 +501,9 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  const createInvoiceDocument = async (data: InvoiceData): Promise<GeneratedDoc | null> => {
-    if (!patientId || !currentSessionIdRef.current) return null;
+  const createInvoiceDocument = async (data: InvoiceData, sessionIdArg?: string | null): Promise<GeneratedDoc | null> => {
+    const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
+    if (!patientId || !sessionIdForDoc) return null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
@@ -512,7 +513,7 @@ export default function Sessions() {
       const { data: inv } = await supabase.from('invoices').insert({
         patient_id: patientId,
         doctor_id: user.id,
-        session_id: currentSessionIdRef.current,
+        session_id: sessionIdForDoc,
         invoice_number: invoiceNumber,
         description,
         amount: total,
@@ -527,7 +528,7 @@ export default function Sessions() {
         .select('id, content')
         .eq('user_id', user.id)
         .eq('patient_id', patientId)
-        .eq('session_id', currentSessionIdRef.current)
+        .eq('session_id', sessionIdForDoc)
         .ilike('template_name', '%invoice%')
         .order('created_at', { ascending: false })
         .limit(1)
@@ -539,7 +540,7 @@ export default function Sessions() {
           user_id: user.id,
           patient_id: patientId,
           patient_name: currentPatient?.name || null,
-          session_id: currentSessionIdRef.current,
+          session_id: sessionIdForDoc,
           name: `Invoice ${invoiceNumber}`,
           content,
           template_name: 'Invoice',
@@ -604,11 +605,15 @@ export default function Sessions() {
     prescription?: PrescriptionData | null;
     invoice?: InvoiceData | null;
     referral?: ReferralData | null;
+    sessionId?: string | null;
   }) => {
     const medCert = payload?.medCert ?? extractedMedCert;
     const prescriptionData = payload?.prescription ?? extractedPrescription;
     let invoiceData = payload?.invoice ?? extractedInvoice;
     const referralData = payload?.referral ?? extractedReferral;
+    // Never rely on currentSessionIdRef here — it is only synced by an effect
+    // on the next render, so it can still be null in this same tick.
+    const sessionIdForDocs = payload?.sessionId ?? currentSessionIdRef.current;
 
     // Every consultation is billable — if the AI didn't pick up explicit billing
     // talk, raise a standard consultation invoice (single source of truth).
@@ -624,7 +629,7 @@ export default function Sessions() {
     // Create documents in the review order: prescription → med cert → referral → invoice.
     const results: GeneratedDoc[] = [];
     if (prescriptionData) {
-      const d = await createPrescriptionDocument(prescriptionData);
+      const d = await createPrescriptionDocument(prescriptionData, sessionIdForDocs);
       if (d) results.push(d);
     }
     if (medCert) {
@@ -636,7 +641,7 @@ export default function Sessions() {
       if (d) results.push(d);
     }
     if (invoiceData) {
-      const d = await createInvoiceDocument(invoiceData);
+      const d = await createInvoiceDocument(invoiceData, sessionIdForDocs);
       if (d) results.push(d);
     }
     setGeneratedDocs(results);
@@ -650,7 +655,9 @@ export default function Sessions() {
       const key = d.key as PostSessionStepType;
       if (!steps.includes(key) && key !== "invoice") steps.push(key);
     }
-    steps.push("schedule", "invoice", "vula");
+    steps.push("schedule");
+    if (results.some((d) => d.key === "invoice")) steps.push("invoice");
+    steps.push("vula");
     setPostSessionQueue(steps);
     setPostSessionIndex(0);
     setShowPostSessionFlow(true);
@@ -688,6 +695,7 @@ export default function Sessions() {
       
       if (result) {
         setCurrentSessionId(result.id);
+        currentSessionIdRef.current = result.id;
         setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
         // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
@@ -712,6 +720,7 @@ export default function Sessions() {
           prescription: prescriptionData,
           invoice: invoiceData,
           referral: referralData,
+          sessionId: result.id,
         });
 
       } else {
