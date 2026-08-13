@@ -3,11 +3,13 @@ import { Check, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { RelationshipAssessmentDetails } from "./RelationshipAssessmentDetails";
 import {
   Choice,
   ENGINE_VERSION,
   NONE_LABEL,
   QUESTION_SETS,
+  buildAssessment,
   derive,
 } from "@/features/patients/relationship/insights";
 
@@ -151,15 +153,15 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
 
   const completed = row?.status === "completed" || row?.status === "insufficient_information";
 
-  // ---- Clinician view: status and selections only, no exercise ----
+  // ---- Clinician view: status + structured summary, no exercise ----
   if (!isOwner) {
-    const labelFor = (setIdx: number, key?: Choice) => {
-      if (!key) return "Not answered";
-      if (key === "none") return NONE_LABEL;
-      return QUESTION_SETS[setIdx].options.find((o) => o.key === key)?.title ?? "—";
-    };
+    const assessment = buildAssessment(
+      row?.pattern ?? null,
+      (row?.confidence as any) ?? null,
+      row?.responses,
+    );
     return (
-      <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-2">
+      <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-3">
         <p className="text-xs font-bold text-foreground">Help us understand you</p>
         <p className="text-xs text-muted-foreground">
           {completed
@@ -170,21 +172,11 @@ export function RelationshipProfileExercise({ patientId }: { patientId: string }
             ? "Started but not yet finished."
             : "Not started yet — the patient can complete this from their own profile."}
         </p>
-        {(row?.responses?.question_set_1 || row?.responses?.question_set_2) && (
-          <ul className="space-y-1 pt-1">
-            <li className="text-xs text-foreground">
-              <span className="text-muted-foreground">Chose: </span>
-              {labelFor(0, row?.responses?.question_set_1)}
-            </li>
-            <li className="text-xs text-foreground">
-              <span className="text-muted-foreground">Chose: </span>
-              {labelFor(1, row?.responses?.question_set_2)}
-            </li>
-          </ul>
-        )}
+        {assessment && <RelationshipAssessmentDetails assessment={assessment} compact />}
       </div>
     );
   }
+
 
   // ---- Patient view ----
   if (completed && !editing) {

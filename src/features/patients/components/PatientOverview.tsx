@@ -458,6 +458,18 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
 
     const sortedYears = Object.keys(yearGroups).sort((a, b) => parseInt(b) - parseInt(a));
 
+    // Parse a loose date string to a timestamp for sorting / month bucketing.
+    const tsOf = (d: string | null) => {
+      if (!d) return 0;
+      const parsed = Date.parse(d);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    };
+    const monthKeyOf = (item: TimelineItem) => {
+      const ts = tsOf(item.date);
+      if (!ts) return "Undated";
+      return new Date(ts).toLocaleString(undefined, { month: "long" });
+    };
+
     return (
       <div className="space-y-4">
         {sortedYears.map((yearStr, yearIndex) => {
@@ -465,10 +477,23 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
           const isCurrentYear = year === currentYear;
           const colorClass = YEAR_COLORS[yearIndex % YEAR_COLORS.length];
           const dotColor = YEAR_DOT_COLORS[yearIndex % YEAR_DOT_COLORS.length];
-          const items = yearGroups[yearStr];
+          // Most recent first within the year
+          const items = [...yearGroups[yearStr]].sort((a, b) => tsOf(b.date) - tsOf(a.date));
+
+          // Group into months, preserving the newest-first order
+          const monthOrder: string[] = [];
+          const monthGroups: Record<string, TimelineItem[]> = {};
+          items.forEach((item) => {
+            const key = monthKeyOf(item);
+            if (!monthGroups[key]) {
+              monthGroups[key] = [];
+              monthOrder.push(key);
+            }
+            monthGroups[key].push(item);
+          });
 
           return (
-            <Collapsible key={yearStr} defaultOpen={isCurrentYear}>
+            <Collapsible key={yearStr} defaultOpen={yearIndex === 0 || isCurrentYear}>
               <CollapsibleTrigger className={`flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors font-semibold text-sm ${colorClass}`}>
                 <ChevronDown className="h-4 w-4 transition-transform data-[state=closed]:rotate-[-90deg]" />
                 <span className={`w-3 h-3 rounded-full ${dotColor}`} />
@@ -476,23 +501,43 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
                 <Badge variant="secondary" className="ml-auto text-xs">{items.length} event{items.length !== 1 ? 's' : ''}</Badge>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="space-y-3 ml-4 mt-2 pl-4 border-l-2" style={{ borderColor: `var(--${yearIndex === 0 ? 'primary' : 'border'})` }}>
-                  {items.map((item, i) => (
-                    <div key={i} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div className={`w-2.5 h-2.5 rounded-full ${dotColor} mt-1.5 shrink-0`} />
-                        {i < items.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
-                      </div>
-                      <div className="pb-2">
-                        {item.date && (
-                          <p className={`text-xs font-bold mb-0.5 ${colorClass.split(' ')[0]}`}>{item.date}</p>
-                        )}
-                        {item.lines.map((line, j) => (
-                          <p key={j} className="text-sm text-foreground leading-relaxed">{line}</p>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-2 ml-4 mt-2">
+                  {monthOrder.map((monthLabel, monthIndex) => {
+                    const monthItems = monthGroups[monthLabel];
+                    // Only the most recent month of the most recent year opens by default
+                    const openByDefault = yearIndex === 0 && monthIndex === 0;
+                    return (
+                      <Collapsible key={monthLabel} defaultOpen={openByDefault}>
+                        <CollapsibleTrigger className="flex items-center gap-2 w-full text-left px-2 py-1 rounded-lg hover:bg-muted/50 transition-colors text-xs font-semibold text-muted-foreground">
+                          <ChevronDown className="h-3.5 w-3.5 transition-transform data-[state=closed]:rotate-[-90deg]" />
+                          {monthLabel}
+                          <Badge variant="secondary" className="ml-auto text-[10px]">
+                            {monthItems.length}
+                          </Badge>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="space-y-3 mt-2 pl-4 border-l-2 border-border">
+                            {monthItems.map((item, i) => (
+                              <div key={i} className="flex gap-3">
+                                <div className="flex flex-col items-center">
+                                  <div className={`w-2.5 h-2.5 rounded-full ${dotColor} mt-1.5 shrink-0`} />
+                                  {i < monthItems.length - 1 && <div className="w-0.5 flex-1 bg-border mt-1" />}
+                                </div>
+                                <div className="pb-2">
+                                  {item.date && (
+                                    <p className={`text-xs font-bold mb-0.5 ${colorClass.split(' ')[0]}`}>{item.date}</p>
+                                  )}
+                                  {item.lines.map((line, j) => (
+                                    <p key={j} className="text-sm text-foreground leading-relaxed">{line}</p>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    );
+                  })}
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -500,6 +545,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
         })}
       </div>
     );
+
   };
 
   // Render inline highlighted elements
