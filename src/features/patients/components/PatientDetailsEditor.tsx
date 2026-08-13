@@ -5,6 +5,7 @@ import { LANGUAGES } from "@/lib/languages";
 import { PatientSessionRecorder } from "@/features/patients/components/PatientSessionRecorder";
 import { EmergencyContactsInline } from "@/features/patients/components/EmergencyContactsInline";
 import { DailyMedsInline } from "@/features/patients/components/DailyMedsInline";
+import { RelationshipProfileExercise } from "@/features/patients/components/RelationshipProfileExercise";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn, emitMedicationsUpdated } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -2495,7 +2496,7 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
               <SectionHeader icon={Sparkles} label="About Me" />
               <CollapsibleContent className="p-3">
-                <RelationshipProfileExercise patientId={patientId} />
+                <RelationshipProfileExercise patientId={patient.id} />
               </CollapsibleContent>
             </Collapsible>
 
