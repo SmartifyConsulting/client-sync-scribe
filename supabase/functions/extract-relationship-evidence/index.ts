@@ -141,9 +141,9 @@ serve(async (req) => {
     const verified = rows.filter((r) => haystack.includes(norm(r.quote)));
     if (verified.length === 0) return json({ inserted: 0, reason: "no verbatim match" });
 
-    const { error } = await supa
-      .from("patient_relationship_evidence")
-      .upsert(verified, { onConflict: "patient_id,session_id,quote", ignoreDuplicates: true });
+    // Re-running for a session replaces its previous evidence.
+    await supa.from("patient_relationship_evidence").delete().eq("session_id", session.id);
+    const { error } = await supa.from("patient_relationship_evidence").insert(verified);
     if (error) console.error("insert error", error);
 
     return json({ inserted: verified.length });
