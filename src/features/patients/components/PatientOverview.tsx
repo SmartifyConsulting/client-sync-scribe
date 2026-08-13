@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Loader2, Sparkles, Pill, HeartPulse, RefreshCw, Activity, AlertTriangle, Check, X, ChevronDown, ChevronRight, Flame, PartyPopper, Droplets, ShieldAlert, Phone, Mail } from "lucide-react";
 import { DiscPersonalityCard } from "@/features/patients/components/DiscPersonalityCard";
+import { RelationshipInsightCard } from "@/features/patients/components/RelationshipInsightCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -813,7 +814,7 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
 
       {/* Clinical snapshot — four evenly sized cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-start">
-        <></>
+        
           <Collapsible defaultOpen={false} className="rounded-xl border border-red-500/30 bg-red-500/5 p-5">
             <CollapsibleTrigger className="flex items-center gap-2 w-full text-left">
               <ChevronDown className="h-4 w-4 text-red-600 transition-transform data-[state=closed]:rotate-[-90deg]" />
