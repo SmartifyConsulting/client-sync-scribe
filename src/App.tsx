@@ -225,6 +225,8 @@ const App = () => (
             <Route path="/patient/ward-admission/:incidentId" element={<PatientWardAdmission />} />
             <Route path="/patient/lab-results" element={<PatientLabResults />} />
             <Route path="/biolog" element={<Biolog />} />
+            <Route path="/ask-maeve" element={<AskMaeveHome />} />
+            <Route path="/ask-maeve/:sessionId" element={<AskMaeveSession />} />
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
