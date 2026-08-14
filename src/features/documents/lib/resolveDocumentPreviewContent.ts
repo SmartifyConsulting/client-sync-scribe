@@ -171,7 +171,8 @@ export async function resolveDocumentPreviewContent(
         .maybeSingle();
       sess = data || null;
     }
-    const when = sess?.started_at || sess?.created_at || doc.created_at || new Date().toISOString();
+    const when =
+      sess?.started_at || sess?.created_at || (doc as any).created_at || new Date().toISOString();
     const nature =
       (sess?.diagnosis && String(sess.diagnosis).trim()) ||
       (sess?.summary ? String(sess.summary).split("\n").find((l: string) => l.trim())?.trim() : "") ||
