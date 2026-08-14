@@ -52,6 +52,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const [muted, setMuted] = useState(false);
   const [emailing, setEmailing] = useState(false);
   const [makingPdf, setMakingPdf] = useState(false);
+  const [savingDoc, setSavingDoc] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmMessageId, setConfirmMessageId] = useState<string | null>(null);
