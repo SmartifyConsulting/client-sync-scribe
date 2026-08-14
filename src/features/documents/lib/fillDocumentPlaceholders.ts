@@ -169,7 +169,18 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     Today: todayLong,
     PrescriptionDate: todayLong,
     SignatureDate: todayLong,
-    ConsultationDate: todayLong,
+    ConsultationDate: certificate?.consultation_date
+      ? fmtDateLong(certificate.consultation_date)
+      : todayLong,
+
+    // Medical certificate / sick note details
+    ConsultationTime: certificate?.consultation_time || "",
+    NatureOfIllness: certificate?.nature_of_illness || "",
+    SickLeaveFrom: certificate?.sick_leave_from ? fmtDateLong(certificate.sick_leave_from) : "",
+    SickLeaveUntil: certificate?.sick_leave_until ? fmtDateLong(certificate.sick_leave_until) : "",
+    Inclusive: certificate?.inclusive || "(both days inclusive)",
+    OtherRecommendations: certificate?.other_recommendations || "",
+
     ReferralDate: todayLong,
     AdmissionDate: todayLong,
 
