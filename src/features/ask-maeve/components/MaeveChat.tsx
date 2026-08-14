@@ -184,9 +184,11 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     }
     await reload();
     if (messages.length > 0) {
+      const { saveExplorationDocument } = await import("../lib/transcriptDocument");
+      await saveExplorationDocument(session, messages);
       const ok = await downloadTranscriptPdf(session, messages);
       toast[ok ? "success" : "error"](
-        ok ? "Exploration closed — PDF saved to your device" : "Exploration closed, but the PDF could not be created",
+        ok ? "Exploration closed — saved to your documents and a PDF to your device" : "Exploration closed, but the PDF could not be created",
       );
     }
   };
