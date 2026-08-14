@@ -3,18 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { getStoredVoiceId, loadProfileVoice, phoneticForSpeech, saveProfileVoice, storeVoiceId, voiceById } from "../lib/voices";
 
 interface Options {
-  /** Called when Maeve finishes speaking (used to auto-open the mic in talk mode). */
+  /** Called when Angel finishes speaking (used to auto-open the mic in talk mode). */
   onSpeechEnd?: () => void;
 }
 
-/** Voice input (live words + Whisper) and spoken replies (ElevenLabs) for Ask Maeve. */
+/** Voice input (live words + Whisper) and spoken replies (ElevenLabs) for Ask Angel. */
 export function useMaeveVoice(options: Options = {}) {
   const [recording, setRecording] = useState(false);
   const [paused, setPaused] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   // Text currently being spoken plus how far through it the audio is, so the
-  // words can be typed on screen in time with Maeve's voice.
+  // words can be typed on screen in time with Angel's voice.
   const [speakingText, setSpeakingText] = useState("");
   const [speechProgress, setSpeechProgress] = useState(0);
   const [liveText, setLiveText] = useState("");
@@ -117,7 +117,7 @@ export function useMaeveVoice(options: Options = {}) {
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({
-            // "Maeve" is pronounced MEEV — only the spoken copy is respelled.
+            // "Angel" is pronounced MEEV — only the spoken copy is respelled.
             text: phoneticForSpeech(text),
             voiceId: chosen.id,
             fallbackVoice: chosen.fallback,

@@ -37,7 +37,7 @@ const AUTONOMY_LAYER = `LAYER 3 — AUTONOMY.
 - One question at a time. Silence and short replies are fine.`;
 
 const PERSONALITY_LAYER = `LAYER 7 — VOICE.
-- You are Maeve: a warm, articulate British woman. Measured, curious, quietly playful, never gushing, never clinical, never coach-y.
+- You are Angel: a warm, articulate British woman. Measured, curious, quietly playful, never gushing, never clinical, never coach-y.
 - Short paragraphs. Plain, elegant English. British spelling.
 - No emojis, no bullet lists, no headings, no exclamation marks. Usually 1–4 short sentences, ending in a single question.`;
 
@@ -78,7 +78,7 @@ ${JSON.stringify(memory)}`;
 
 function buildSystemPrompt(state: string, processKey: string | null, memory: Record<string, unknown>) {
   return [
-    "You are Maeve, an NLP conversational facilitator inside a health application.",
+    "You are Angel, an NLP conversational facilitator inside a health application.",
     SAFETY_LAYER,
     NON_SUGGESTION_LAYER,
     AUTONOMY_LAYER,
@@ -225,7 +225,7 @@ Deno.serve(async (req) => {
     ];
     chatMessages.push({
       role: "user",
-      content: userMessage || "[The person has just opened the conversation. Greet them as Maeve.]",
+      content: userMessage || "[The person has just opened the conversation. Greet them as Angel.]",
     });
 
     // --- Generate, then govern ------------------------------------------

@@ -1,21 +1,21 @@
 import type { MaeveMessage, MaeveSessionRow } from "../hooks/useMaeveSession";
 import { CLIENT_FALLBACK, looksLikeAdvice } from "./suggestionDetector";
 
-/** Build a clean, readable transcript of a Maeve exploration. */
+/** Build a clean, readable transcript of a Angel exploration. */
 export function buildTranscript(session: MaeveSessionRow | null, messages: MaeveMessage[]): string {
-  const title = session?.title || "Ask Maeve exploration";
+  const title = session?.title || "Ask Angel exploration";
   const date = session?.created_at ? new Date(session.created_at).toLocaleString() : new Date().toLocaleString();
 
   const lines: string[] = [
     `${title}`,
-    `Ask Maeve — ${date}`,
+    `Ask Angel — ${date}`,
     "",
     "----------------------------------------",
     "",
   ];
 
   for (const m of messages) {
-    const who = m.role === "assistant" ? "Maeve" : "You";
+    const who = m.role === "assistant" ? "Angel" : "You";
     const body = m.role === "assistant" && looksLikeAdvice(m.content) ? CLIENT_FALLBACK : m.content;
     const time = new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     lines.push(`${who} · ${time}`, body.trim(), "");
@@ -27,7 +27,7 @@ export function buildTranscript(session: MaeveSessionRow | null, messages: Maeve
 
   lines.push(
     "----------------------------------------",
-    "Maeve is a facilitation tool, not a clinician. Nothing here is advice or a diagnosis.",
+    "Angel is a facilitation tool, not a clinician. Nothing here is advice or a diagnosis.",
   );
 
   return lines.join("\n");

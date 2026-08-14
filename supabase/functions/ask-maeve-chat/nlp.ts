@@ -1,7 +1,7 @@
 /**
- * Ask Maeve — NLP process library and conversation states.
+ * Ask Angel — NLP process library and conversation states.
  *
- * The library is defined here, in code, and versioned. Maeve may only run a
+ * The library is defined here, in code, and versioned. Angel may only run a
  * process that exists in this list; she never invents one.
  */
 

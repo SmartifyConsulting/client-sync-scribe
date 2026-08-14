@@ -83,7 +83,7 @@ export function MaeveRecap({ sessionId, onContinue }: Props) {
         <div className="min-w-0">
           <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
             <Sparkles className="h-5 w-5 text-maeve" />
-            Ask Maeve
+            Ask Angel
           </h1>
           <div className="mt-1">
             <SessionTitleEditor sessionId={sessionId} title={session?.title} onRenamed={() => reload()} />
@@ -152,7 +152,7 @@ export function MaeveRecap({ sessionId, onContinue }: Props) {
                       )}
                     >
                       <span className="block text-[10px] font-bold uppercase tracking-wider opacity-70">
-                        {isMaeve ? "Maeve" : "You"} · {new Date(m.created_at).toLocaleDateString()}
+                        {isMaeve ? "Angel" : "You"} · {new Date(m.created_at).toLocaleDateString()}
                       </span>
                       {body}
                     </div>
@@ -177,7 +177,7 @@ export function MaeveRecap({ sessionId, onContinue }: Props) {
             <Mic className="h-6 w-6 text-maeve" />
             <p className="mt-3 text-sm font-semibold text-foreground">Continue with voice</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Speak your answers and hear Maeve read hers aloud. Your microphone is only asked for when you tap this.
+              Speak your answers and hear Angel read hers aloud. Your microphone is only asked for when you tap this.
             </p>
           </button>
           <button
