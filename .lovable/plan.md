@@ -11,6 +11,7 @@
 
 - When an Angel exploration ends (or on demand via "Save as document"), the transcript is written into the documents store as a normal document with type "Exploration Transcript", linked to the patient.
 - It then appears alongside the auto-generated session documents, with the same preview, download, email and share behaviour.
+- The same applies to consultation recordings: when a session's transcription is finalised, the transcript is saved as a document (type "Session Transcript", linked to the patient and that session) so it sits with the other auto-generated session documents and can be previewed, downloaded, emailed and shared.
 
 ## 3. Medical Certificate preview shows real data
 
