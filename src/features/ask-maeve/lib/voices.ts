@@ -80,14 +80,7 @@ export function voiceById(id: string): MaeveVoice {
   };
 }
 
-/**
- * Angel is pronounced "MEEV". Text-to-speech engines often say "may-v", so the
- * spoken copy uses a phonetic spelling. Only the audio changes — the words on
- * screen still read "Angel".
- */
+/** "Angel" needs no phonetic respelling — speech engines say it correctly. */
 export function phoneticForSpeech(text: string): string {
-  return text.replace(/\bMaeve('s|s)?\b/gi, (match) => {
-    const suffix = match.toLowerCase().endsWith("'s") ? "'s" : match.toLowerCase().endsWith("s") ? "s" : "";
-    return `Meev${suffix}`;
-  });
+  return text;
 }
