@@ -155,11 +155,40 @@ export async function resolveDocumentPreviewContent(
     }
   }
 
+  // Medical certificate context — consultation date/time come from the linked
+  // session, the nature of illness from its summary/diagnosis.
+  let certificate: FillContext["certificate"] = null;
+  if (isCertificateTemplate(doc.template_name)) {
+    let sess: any = null;
+    if (doc.session_id) {
+      const { data } = await supabase
+        .from("sessions")
+        .select("created_at, started_at, summary, diagnosis")
+        .eq("id", doc.session_id)
+        .maybeSingle();
+      sess = data || null;
+    }
+    const when = sess?.started_at || sess?.created_at || doc.created_at || new Date().toISOString();
+    const nature =
+      (sess?.diagnosis && String(sess.diagnosis).trim()) ||
+      (sess?.summary ? String(sess.summary).split("\n").find((l: string) => l.trim())?.trim() : "") ||
+      "";
+    certificate = {
+      consultation_date: when,
+      consultation_time: new Date(when).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      nature_of_illness: nature,
+    };
+  }
+
   const filled = fillDocumentPlaceholders(original, {
     patient,
     profile,
     invoice,
     prescription,
+    certificate,
   });
 
   let content = filled.content;
