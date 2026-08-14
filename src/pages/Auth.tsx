@@ -19,6 +19,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable/index";
+
 import { TrialSignupSection } from "@/components/auth/TrialSignupSection";
 import { Footer } from "@/components/layout/Footer";
 import { Progress } from "@/components/ui/progress";
