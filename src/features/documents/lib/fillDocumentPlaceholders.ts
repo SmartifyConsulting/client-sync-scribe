@@ -82,11 +82,23 @@ export interface FillPrescription {
   notes?: string | null;
 }
 
+/** Consultation details used by medical certificates and sick notes. */
+export interface FillCertificate {
+  consultation_date?: string | null;
+  consultation_time?: string | null;
+  nature_of_illness?: string | null;
+  sick_leave_from?: string | null;
+  sick_leave_until?: string | null;
+  inclusive?: string | null;
+  other_recommendations?: string | null;
+}
+
 export interface FillContext {
   patient?: FillPatient | null;
   profile?: FillProfile | null;
   invoice?: FillInvoice | null;
   prescription?: FillPrescription | null;
+  certificate?: FillCertificate | null;
   today?: Date;
   /** Render results for a raw text surface: no HTML markup for signatures or blanks. */
   plainText?: boolean;
