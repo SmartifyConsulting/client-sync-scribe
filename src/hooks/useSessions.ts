@@ -291,6 +291,20 @@ const completeSession = async (
         return [transformedData, ...prev];
       });
 
+      // The transcript itself becomes a document alongside the generated ones.
+      if (sessionId && (content || '').trim()) {
+        const { saveSessionTranscriptDocument } = await import('@/features/sessions/lib/transcriptDocument');
+        await saveSessionTranscriptDocument({
+          userId: user.id,
+          sessionId,
+          patientId: patientId || null,
+          patientName: resultData?.patient?.name || null,
+          transcript: content,
+          sessionTitle: sessionRecord.title,
+          sessionDate: startedAt,
+        });
+      }
+
       // Rapport evidence from the transcript — fire-and-forget, never blocks the session flow.
       if (sessionId && (content || '').trim().length > 200) {
         supabase.functions

@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Delete a Maeve exploration and everything hanging off it.
+ * Delete a Angel exploration and everything hanging off it.
  * Row-level rules already restrict every one of these tables to the owner.
  */
 export async function deleteMaeveSession(sessionId: string): Promise<boolean> {

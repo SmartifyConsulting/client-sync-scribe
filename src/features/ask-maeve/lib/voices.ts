@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-/** Voices Maeve can speak with. The live list comes from the connected
+/** Voices Angel can speak with. The live list comes from the connected
  *  ElevenLabs account; this curated set is the fallback when it can't load. */
 export interface MaeveVoice {
   id: string;
@@ -10,7 +10,7 @@ export interface MaeveVoice {
   fallback?: string;
 }
 
-/** Nova is Maeve's default voice for every profile. It is spoken by the
+/** Nova is Angel's default voice for every profile. It is spoken by the
  *  fallback speech engine, so the sentinel id tells the server to use it. */
 export const NOVA_VOICE_ID = "nova";
 
@@ -34,7 +34,7 @@ export function getStoredVoiceId(): string {
 }
 
 /**
- * The voice saved on the signed-in person's Ask Maeve preferences, so their
+ * The voice saved on the signed-in person's Ask Angel preferences, so their
  * choice follows them to any device. Falls back to Nova.
  */
 export async function loadProfileVoice(): Promise<{ id: string; label: string | null }> {
@@ -51,7 +51,7 @@ export async function loadProfileVoice(): Promise<{ id: string; label: string | 
   return { id: data.voice_id, label: data.voice_label ?? null };
 }
 
-/** Saves the chosen voice to the person's Ask Maeve preferences. */
+/** Saves the chosen voice to the person's Ask Angel preferences. */
 export async function saveProfileVoice(id: string, label?: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
@@ -80,14 +80,7 @@ export function voiceById(id: string): MaeveVoice {
   };
 }
 
-/**
- * Maeve is pronounced "MEEV". Text-to-speech engines often say "may-v", so the
- * spoken copy uses a phonetic spelling. Only the audio changes — the words on
- * screen still read "Maeve".
- */
+/** "Angel" needs no phonetic respelling — speech engines say it correctly. */
 export function phoneticForSpeech(text: string): string {
-  return text.replace(/\bMaeve('s|s)?\b/gi, (match) => {
-    const suffix = match.toLowerCase().endsWith("'s") ? "'s" : match.toLowerCase().endsWith("s") ? "s" : "";
-    return `Meev${suffix}`;
-  });
+  return text;
 }

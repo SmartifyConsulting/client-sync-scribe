@@ -1,8 +1,8 @@
 /**
- * Ask Maeve — response governor.
+ * Ask Angel — response governor.
  *
  * Deterministic detection of advice, suggestion, diagnosis, prediction and
- * interpretation in Maeve's replies. Runs on every reply before it can reach
+ * interpretation in Angel's replies. Runs on every reply before it can reach
  * the person. Legitimate process-facilitation language is allowlisted when a
  * process the person consented to is running.
  */

@@ -52,6 +52,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const [muted, setMuted] = useState(false);
   const [emailing, setEmailing] = useState(false);
   const [makingPdf, setMakingPdf] = useState(false);
+  const [savingDoc, setSavingDoc] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmMessageId, setConfirmMessageId] = useState<string | null>(null);
@@ -62,7 +63,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const spokenRef = useRef<string | null>(null);
   const autoListenRef = useRef<() => void>(() => {});
 
-  // Hands-free: as soon as Maeve stops speaking, the microphone opens itself.
+  // Hands-free: as soon as Angel stops speaking, the microphone opens itself.
   const voice = useMaeveVoice({ onSpeechEnd: () => autoListenRef.current() });
 
   const chooseMode = (next: MaeveMode) => {
@@ -92,7 +93,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     if (error) toast.error(error);
   }, [error]);
 
-  // Read Maeve's newest reply aloud in talk mode.
+  // Read Angel's newest reply aloud in talk mode.
   useEffect(() => {
     if (mode !== "talk" || thinking) return;
     const last = messages[messages.length - 1];
@@ -183,9 +184,11 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     }
     await reload();
     if (messages.length > 0) {
+      const { saveExplorationDocument } = await import("../lib/transcriptDocument");
+      await saveExplorationDocument(session, messages);
       const ok = await downloadTranscriptPdf(session, messages);
       toast[ok ? "success" : "error"](
-        ok ? "Exploration closed — PDF saved to your device" : "Exploration closed, but the PDF could not be created",
+        ok ? "Exploration closed — saved to your documents and a PDF to your device" : "Exploration closed, but the PDF could not be created",
       );
     }
   };
@@ -198,6 +201,17 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     toast.success("Transcript saved to your device");
   };
 
+  const saveAsDocument = async () => {
+    if (messages.length === 0 || savingDoc) return;
+    setSavingDoc(true);
+    const { saveExplorationDocument } = await import("../lib/transcriptDocument");
+    const ok = await saveExplorationDocument(session, messages);
+    setSavingDoc(false);
+    toast[ok ? "success" : "error"](
+      ok ? "Saved to your documents" : "Could not save this exploration as a document",
+    );
+  };
+
   const savePdf = async () => {
     if (messages.length === 0 || makingPdf) return;
     setMakingPdf(true);
@@ -208,7 +222,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
   const share = async () => {
     if (messages.length === 0) return;
-    const result = await shareTranscript(transcriptText(), session?.title || "Ask Maeve exploration");
+    const result = await shareTranscript(transcriptText(), session?.title || "Ask Angel exploration");
     if (result === "copied") toast.success("Transcript copied — paste it into WhatsApp, email or notes");
     if (result === "failed") toast.error("Sharing isn't available here — try saving the transcript instead");
   };
@@ -225,10 +239,10 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     }
     const { error: err } = await safeInvoke("send-document-email", {
       to,
-      subject: `Your Ask Maeve transcript — ${new Date(session?.created_at ?? Date.now()).toLocaleDateString()}`,
-      documentName: session?.title || "Ask Maeve exploration",
+      subject: `Your Ask Angel transcript — ${new Date(session?.created_at ?? Date.now()).toLocaleDateString()}`,
+      documentName: session?.title || "Ask Angel exploration",
       documentContent: transcriptText(),
-      senderName: "Ask Maeve",
+      senderName: "Ask Angel",
     });
     setEmailing(false);
     if (err) {
@@ -277,7 +291,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         </div>
         <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
           <Sparkles className="h-5 w-5 text-maeve" />
-          Ask Maeve
+          Ask Angel
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           How would you like to explore today? You can change this at any time.
@@ -300,7 +314,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
             <Mic className="h-6 w-6 text-maeve" />
             <p className="mt-3 text-sm font-semibold text-foreground">Talk and listen</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Speak your answers and hear Maeve's questions read aloud. Audio lets you close your eyes and sink into
+              Speak your answers and hear Angel's questions read aloud. Audio lets you close your eyes and sink into
               the process, so the conscious mind isn't distracted by a screen or keyboard. Because this work asks you
               to imagine, remember and visualise, listening and speaking usually goes much deeper.
             </p>
@@ -321,7 +335,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         <div>
           <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
             <Sparkles className="h-5 w-5 text-maeve" />
-            Ask Maeve
+            Ask Angel
           </h1>
           <div className="mt-1">
             <div className="flex items-center gap-1.5">
@@ -387,7 +401,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
       {/* Disclaimer */}
       <p className="mt-2 rounded-lg bg-muted/60 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        Maeve is a facilitation tool, not a clinician. She asks questions and reflects your own words — she does not
+        Angel is a facilitation tool, not a clinician. She asks questions and reflects your own words — she does not
         give advice, opinions or diagnoses. Anything clinical belongs with your healthcare professional. This
         conversation is private to you.
       </p>
@@ -417,7 +431,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
           messages.map((m) => {
             const isMaeve = m.role === "assistant";
             const full = isMaeve && looksLikeAdvice(m.content) ? CLIENT_FALLBACK : m.content;
-            // While Maeve is speaking, her words type themselves onto the
+            // While Angel is speaking, her words type themselves onto the
             // screen in time with the audio.
             const isBeingSpoken = isMaeve && voice.speaking && voice.speakingText === full;
             const body = isBeingSpoken
@@ -521,6 +535,13 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
           <Download className="h-3 w-3" /> Save transcript
         </button>
         <button
+          disabled={messages.length === 0 || savingDoc}
+          onClick={saveAsDocument}
+          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
+        >
+          {savingDoc ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />} Save as document
+        </button>
+        <button
           disabled={messages.length === 0 || makingPdf}
           onClick={savePdf}
           className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
@@ -599,7 +620,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
       {/* Failed opening — visible error with a retry instead of an empty screen */}
       {error && messages.length === 0 && !thinking && (
         <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2">
-          <p className="text-xs text-foreground">Maeve could not start this exploration.</p>
+          <p className="text-xs text-foreground">Angel could not start this exploration.</p>
           <Button size="sm" variant="outline" onClick={startOpening} className="h-7 gap-1 text-xs">
             <RotateCcw className="h-3 w-3" /> Try again
           </Button>
@@ -659,7 +680,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
                 : voice.recording
                   ? "I'm listening — tap send when you're done, or pause to step away"
                   : voice.speaking
-                    ? "Maeve is speaking — the microphone opens as soon as she finishes."
+                    ? "Angel is speaking — the microphone opens as soon as she finishes."
                     : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
           </p>
 
