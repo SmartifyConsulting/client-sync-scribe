@@ -199,6 +199,17 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     toast.success("Transcript saved to your device");
   };
 
+  const saveAsDocument = async () => {
+    if (messages.length === 0 || savingDoc) return;
+    setSavingDoc(true);
+    const { saveExplorationDocument } = await import("../lib/transcriptDocument");
+    const ok = await saveExplorationDocument(session, messages);
+    setSavingDoc(false);
+    toast[ok ? "success" : "error"](
+      ok ? "Saved to your documents" : "Could not save this exploration as a document",
+    );
+  };
+
   const savePdf = async () => {
     if (messages.length === 0 || makingPdf) return;
     setMakingPdf(true);
