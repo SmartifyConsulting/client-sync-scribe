@@ -48,6 +48,9 @@ const isInvoiceTemplate = (name?: string | null) =>
 const isPrescriptionTemplate = (name?: string | null) =>
   !!name && /prescription/i.test(name);
 
+const isCertificateTemplate = (name?: string | null) =>
+  !!name && /(certificate|sick\s*note)/i.test(name);
+
 export async function resolveDocumentPreviewContent(
   doc: PreviewDocumentInput,
 ): Promise<ResolvedDocumentPreview> {
