@@ -521,6 +521,13 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
           <Download className="h-3 w-3" /> Save transcript
         </button>
         <button
+          disabled={messages.length === 0 || savingDoc}
+          onClick={saveAsDocument}
+          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
+        >
+          {savingDoc ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />} Save as document
+        </button>
+        <button
           disabled={messages.length === 0 || makingPdf}
           onClick={savePdf}
           className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
