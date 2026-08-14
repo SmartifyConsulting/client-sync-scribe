@@ -110,6 +110,27 @@ export default function Auth() {
   const [accountCreated, setAccountCreated] = useState(false);
   const [createdUserId, setCreatedUserId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast({ title: "Google sign-in failed", description: result.error.message, variant: "destructive" });
+        return;
+      }
+      if (result.redirected) return;
+      navigate("/dashboard");
+    } catch (e) {
+      toast({ title: "Google sign-in failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   const [breachedPassword, setBreachedPassword] = useState(false);
   const [useOtp, setUseOtp] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
