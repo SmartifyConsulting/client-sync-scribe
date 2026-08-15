@@ -74,6 +74,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
 export default function PatientProfile() {
+  const { v2Demo } = useV2Demo();
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

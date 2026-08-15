@@ -396,6 +396,7 @@ export function PatientDetailsEditor({
   rewardsLoading = false,
   section,
 }: PatientDetailsEditorProps) {
+  const { v2Demo } = useV2Demo();
   const { t } = useTranslation();
   const { toast } = useToast();
   const isMobile = useIsMobile();

@@ -249,6 +249,7 @@ function ChronicAdherenceSection({ patientId, patientName }: { patientId: string
 }
 
 function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientOverviewProps) {
+  const { v2Demo } = useV2Demo();
   const { toast } = useToast();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
