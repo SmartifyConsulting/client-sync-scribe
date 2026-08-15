@@ -102,3 +102,6 @@ verify_jwt = false
 
 [functions.live-diagnostic-hint]
 verify_jwt = false
+
+[functions.notify-admin-auth-event]
+verify_jwt = false
