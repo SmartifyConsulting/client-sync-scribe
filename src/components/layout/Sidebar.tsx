@@ -179,6 +179,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
+  const { v2Demo } = useV2Demo();
+
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
