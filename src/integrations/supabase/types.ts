@@ -6017,6 +6017,7 @@ export type Database = {
         Row: {
           address: string | null
           allergies: string | null
+          allergies_structured: Json | null
           blood_type: string | null
           chronic_medications: string | null
           claims_email: string | null
@@ -6081,6 +6082,7 @@ export type Database = {
         Insert: {
           address?: string | null
           allergies?: string | null
+          allergies_structured?: Json | null
           blood_type?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
@@ -6145,6 +6147,7 @@ export type Database = {
         Update: {
           address?: string | null
           allergies?: string | null
+          allergies_structured?: Json | null
           blood_type?: string | null
           chronic_medications?: string | null
           claims_email?: string | null
