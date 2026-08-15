@@ -544,7 +544,7 @@ Signature: ___________________
               documentLabel="Prescription"
               getContent={generateContent}
               preferredField="pharmacy_email"
-              insuranceOverrideField="claims_email"
+              pharmacyMode
               headerFooter={headerFooter}
               fontFamily={headerFooter?.font_family || undefined}
               logoUrl={profile?.logo_url || undefined}

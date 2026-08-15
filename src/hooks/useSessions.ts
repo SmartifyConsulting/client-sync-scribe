@@ -187,11 +187,12 @@ export function useSessions(patientId?: string) {
   };
 
 const completeSession = async (
-    id: string | null, 
-    content: string, 
-    additionalNotes?: string, 
+    id: string | null,
+    content: string,
+    additionalNotes?: string,
     visitCategory?: string,
-    creationData?: { patient_id: string; title: string; started_at: string; audio_url?: string }
+    creationData?: { patient_id: string; title: string; started_at: string; audio_url?: string },
+    privateNotes?: string,
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -237,6 +238,7 @@ const completeSession = async (
         title: creationData?.title || `Session - ${new Date().toLocaleDateString()}`,
         transcript: content,
         notes: additionalNotes || null,
+        private_notes: privateNotes || null,
         status: 'completed',
         started_at: startedAt,
         ended_at: now,

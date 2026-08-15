@@ -24,6 +24,7 @@ export interface Profile {
   narration_voice: string | null;
   chronic_med_notification_frequency: string | null;
   practice_color: string | null;
+  banking_details: string | null;
   created_at: string;
   updated_at: string;
 }

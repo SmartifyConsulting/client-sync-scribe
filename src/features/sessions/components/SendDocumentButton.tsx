@@ -1,10 +1,19 @@
 import { useState } from "react";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { buildDocumentEmailHtml } from "@/features/documents/utils/documentEmailHtml";
 import { buildDocumentPdfBase64, pdfFileName } from "@/features/documents/utils/documentPdf";
+
+interface PharmacyOption {
+  id: string;
+  name: string;
+  email: string;
+  branch?: string;
+  is_primary?: boolean;
+}
 
 interface SendDocumentButtonProps {
   patientId: string;
@@ -21,10 +30,17 @@ interface SendDocumentButtonProps {
   /**
    * If the patient has a value in this field, it takes priority over
    * `preferredField` as the "to" recipient, and the patient's own email
-   * (if on file) is automatically cc'd. Used e.g. by prescriptions so a
-   * specified medical insurance gets the send and the patient stays looped in.
+   * (if on file) is automatically cc'd.
    */
   insuranceOverrideField?: "claims_email";
+  /**
+   * Prescriptions: email the patient's pharmacy instead of `preferredField`.
+   * If the patient has multiple pharmacies on file, the doctor is asked to
+   * pick one (defaulting to whichever is marked primary) before sending.
+   * The patient is always cc'd in this mode. Falls back to the legacy
+   * pharmacy_name/pharmacy_email fields when no `pharmacies` entries exist.
+   */
+  pharmacyMode?: boolean;
   /** Existing document row to stamp as sent. */
   documentId?: string | null;
   /** Letterhead used by the editor so the email matches the template exactly. */
@@ -49,6 +65,7 @@ export function SendDocumentButton({
   getContent,
   preferredField = "email",
   insuranceOverrideField,
+  pharmacyMode,
   documentId,
   headerFooter,
   fontFamily,
@@ -57,31 +74,24 @@ export function SendDocumentButton({
   disabled,
 }: SendDocumentButtonProps) {
   const [sending, setSending] = useState(false);
+  const [pharmacyOptions, setPharmacyOptions] = useState<PharmacyOption[]>([]);
+  const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(null);
+  const [showPharmacyPicker, setShowPharmacyPicker] = useState(false);
+  const [patientCcEmail, setPatientCcEmail] = useState<string | undefined>(undefined);
   const { toast } = useToast();
 
-  const handleSend = async () => {
+  const deliver = async (recipient: string, ccPatient?: string) => {
+    if (!recipient) {
+      toast({
+        title: "No recipient email",
+        description: `Add an email address for ${patientName} before sending.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSending(true);
     try {
-      const { data: patient } = await supabase
-        .from("patients")
-        .select("email, pharmacy_email, claims_email, reporting_to_email")
-        .eq("id", patientId)
-        .maybeSingle();
-
-      const insuranceEmail = insuranceOverrideField ? (patient as any)?.[insuranceOverrideField] : "";
-      const recipient =
-        insuranceEmail || (patient as any)?.[preferredField] || (patient as any)?.email || "";
-      const ccPatient = insuranceEmail && (patient as any)?.email ? (patient as any).email : undefined;
-
-      if (!recipient) {
-        toast({
-          title: "No recipient email",
-          description: `Add an email address for ${patientName} before sending.`,
-          variant: "destructive",
-        });
-        return;
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       let senderName = "Your healthcare provider";
       if (user) {
@@ -131,6 +141,7 @@ export function SendDocumentButton({
         title: `${documentLabel} sent`,
         description: ccPatient ? `Emailed to ${recipient}, cc ${ccPatient}` : `Emailed to ${recipient}`,
       });
+      setShowPharmacyPicker(false);
       onSent?.();
     } catch (err: any) {
       toast({
@@ -143,15 +154,118 @@ export function SendDocumentButton({
     }
   };
 
+  const handleSend = async () => {
+    if (pharmacyMode) {
+      setSending(true);
+      try {
+        const { data: patient } = await supabase
+          .from("patients")
+          .select("email, pharmacy_name, pharmacy_email, pharmacies")
+          .eq("id", patientId)
+          .maybeSingle();
+
+        const patientEmail = (patient as any)?.email || undefined;
+        const pharmacies: PharmacyOption[] = Array.isArray((patient as any)?.pharmacies)
+          ? (patient as any).pharmacies
+          : [];
+
+        if (pharmacies.length > 1) {
+          setPharmacyOptions(pharmacies);
+          setPatientCcEmail(patientEmail);
+          const primary = pharmacies.find((p) => p.is_primary) || pharmacies[0];
+          setSelectedPharmacyId(primary?.id ?? null);
+          setShowPharmacyPicker(true);
+          setSending(false);
+          return;
+        }
+
+        const single = pharmacies[0];
+        const recipient = single?.email || (patient as any)?.pharmacy_email || "";
+        setSending(false);
+        await deliver(recipient, patientEmail);
+      } catch (err: any) {
+        setSending(false);
+        toast({
+          title: "Send failed",
+          description: err?.message || "Could not look up the pharmacy",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    const { data: patient } = await supabase
+      .from("patients")
+      .select("email, pharmacy_email, claims_email, reporting_to_email")
+      .eq("id", patientId)
+      .maybeSingle();
+
+    const insuranceEmail = insuranceOverrideField ? (patient as any)?.[insuranceOverrideField] : "";
+    const recipient =
+      insuranceEmail || (patient as any)?.[preferredField] || (patient as any)?.email || "";
+    const ccPatient = insuranceEmail && (patient as any)?.email ? (patient as any).email : undefined;
+
+    await deliver(recipient, ccPatient);
+  };
+
+  const selectedPharmacy = pharmacyOptions.find((p) => p.id === selectedPharmacyId);
+
   return (
-    <Button
-      variant="outline"
-      onClick={handleSend}
-      className="gap-2"
-      disabled={sending || disabled}
-    >
-      {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-      Send
-    </Button>
+    <>
+      <Button
+        variant="outline"
+        onClick={handleSend}
+        className="gap-2"
+        disabled={sending || disabled}
+      >
+        {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        Send
+      </Button>
+
+      <Dialog open={showPharmacyPicker} onOpenChange={setShowPharmacyPicker}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send prescription to which pharmacy?</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {pharmacyOptions.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedPharmacyId(p.id)}
+                className={`w-full flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition-colors ${
+                  selectedPharmacyId === p.id
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:bg-muted/50"
+                }`}
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                    {p.name}
+                    {p.is_primary && (
+                      <span className="text-[10px] font-medium text-primary uppercase tracking-wide">Primary</span>
+                    )}
+                  </p>
+                  {p.branch && <p className="text-xs text-muted-foreground">{p.branch}</p>}
+                  <p className="text-xs text-muted-foreground truncate">{p.email}</p>
+                </div>
+                {selectedPharmacyId === p.id && <Check className="h-4 w-4 text-primary shrink-0" />}
+              </button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPharmacyPicker(false)}>Cancel</Button>
+            <Button
+              disabled={!selectedPharmacy || sending}
+              onClick={() => selectedPharmacy && deliver(selectedPharmacy.email, patientCcEmail)}
+              className="gap-2"
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              Send
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

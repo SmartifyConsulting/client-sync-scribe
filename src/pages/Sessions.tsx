@@ -217,6 +217,9 @@ export default function Sessions() {
   const [showHospitalAdmissionEditor, setShowHospitalAdmissionEditor] = useState(false);
   const [selectedDocType, setSelectedDocType] = useState<string>("");
   const notesRef = useRef<string>("");
+  const personalNotesRef = useRef<string>("");
+  const personalNotesSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const personalNotesHasLoaded = useRef(false);
   const sessionStartTimeRef = useRef<Date | null>(null);
 
   // AI-extracted document state
@@ -407,6 +410,27 @@ export default function Sessions() {
   useEffect(() => {
     notesRef.current = notes;
   }, [notes]);
+
+  // Personal Notes autosave — persisted as a draft (per-patient) so a refresh
+  // mid-session never loses what the doctor typed, with a reassuring toast.
+  // The draft is folded into sessions.private_notes once the session
+  // completes (see handleSessionComplete's completeSession call) and cleared.
+  useEffect(() => {
+    personalNotesRef.current = personalNotes;
+    if (!personalNotesHasLoaded.current || !patientId) return;
+    if (personalNotesSaveTimer.current) clearTimeout(personalNotesSaveTimer.current);
+    personalNotesSaveTimer.current = setTimeout(() => {
+      try {
+        localStorage.setItem(`session-personal-notes-draft:${patientId}`, personalNotes);
+        toast({ title: "Notes saved", description: "Your personal notes are saved for this session." });
+      } catch {
+        toast({ title: "Error", description: "Failed to save personal notes", variant: "destructive" });
+      }
+    }, 1200);
+    return () => {
+      if (personalNotesSaveTimer.current) clearTimeout(personalNotesSaveTimer.current);
+    };
+  }, [personalNotes, patientId]);
 
   // Advance to the next step in the sequential post-session queue, closing the
   // flow once every step (documents → schedule → invoice → vula) has run.
@@ -694,12 +718,16 @@ export default function Sessions() {
           title: `Session - ${new Date().toLocaleDateString()}`,
           started_at: sessionStartTimeRef.current?.toISOString() || new Date().toISOString(),
           audio_url: savedAudioUrlRef.current || undefined,
-        }
+        },
+        personalNotesRef.current,
       );
-      
+
       if (result) {
         setCurrentSessionId(result.id);
         currentSessionIdRef.current = result.id;
+        if (patientId) {
+          try { localStorage.removeItem(`session-personal-notes-draft:${patientId}`); } catch { /* best effort */ }
+        }
         setSummary(result.summary || "");
         setActionPoints(result.action_points || []);
         // No automatic AI assessment — the doctor triggers it manually via "AI Consult".
@@ -965,6 +993,14 @@ export default function Sessions() {
     setInvoice(null);
     setAiDiagnosis(null);
     setCurrentSessionId(crypto.randomUUID());
+    personalNotesHasLoaded.current = false;
+    try {
+      const draft = patientId ? localStorage.getItem(`session-personal-notes-draft:${patientId}`) : null;
+      setPersonalNotes(draft || "");
+    } catch {
+      setPersonalNotes("");
+    }
+    personalNotesHasLoaded.current = true;
     clearTranscript();
     hintImpressionRef.current = "";
     hintLinesRef.current.clear();
@@ -1310,12 +1346,12 @@ export default function Sessions() {
               <div className="px-3 py-2 border-b bg-primary/5">
                 <h3 className="text-sm font-semibold text-foreground">Past Sessions</h3>
               </div>
-              <div className="divide-y divide-border">
+              <div className="space-y-2 p-2">
                 {pastPatientSessions.length === 0 ? (
                   <p className="p-3 text-xs text-muted-foreground">No previous sessions</p>
                 ) : (
                   pastPatientSessions.map((s: any) => (
-                    <div key={s.id} className="p-3 hover:bg-muted/50 transition-colors">
+                    <div key={s.id} className="rounded-lg border border-border p-3 hover:bg-muted/50 transition-colors">
                       <button
                         onClick={() => navigate(`/sessions/${s.id}`)}
                         className="text-xs font-bold text-primary underline underline-offset-2 hover:text-primary/80"

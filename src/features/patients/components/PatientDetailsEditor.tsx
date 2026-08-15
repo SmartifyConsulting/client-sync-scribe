@@ -3149,19 +3149,6 @@ export function PatientDetailsEditor({
                           ))}
                         </div>
                       )}
-                      <div className="pt-2 border-t border-border/40">
-                        <Label htmlFor="allergies" className="text-xs text-muted-foreground">
-                          Additional notes (legacy free-text)
-                        </Label>
-                        <Textarea
-                          id="allergies"
-                          className="text-xs mt-1"
-                          value={formData.allergies}
-                          onChange={(e) => updateFormData({ allergies: e.target.value })}
-                          placeholder="Any older free-text allergy notes"
-                          rows={2}
-                        />
-                      </div>
                     </div>
 
                     {/* Medication */}
