@@ -382,9 +382,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 );
               })}
               <div className="space-y-1.5">
-                {applyItemPreferences(DOCTOR_BOTTOM_ITEMS, preferences.item_order, preferences.hidden_items).map((item) =>
+                {applyItemPreferences(withShiftRule(DOCTOR_BOTTOM_ITEMS), preferences.item_order, preferences.hidden_items).map((item) =>
                   renderNavLink(item),
                 )}
+
               </div>
             </>
           ) : (
