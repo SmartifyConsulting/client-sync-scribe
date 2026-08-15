@@ -902,7 +902,9 @@ export default function Sessions() {
 
     const composed = [
       hintImpressionRef.current ? `WORKING IMPRESSION\n${hintImpressionRef.current}` : null,
-      s.alerts.length ? `SAFETY CHECKS\n${s.alerts.map((a) => `• ${a}`).join("\n")}` : null,
+      s.alerts.length
+        ? `SAFETY CHECKS — ${format(new Date(), "MMM d, yyyy · h:mm a")}\n${s.alerts.map((a) => `• ${a}`).join("\n")}`
+        : null,
       s.differentials.length ? `DIFFERENTIALS\n${s.differentials.map((d) => `• ${d}`).join("\n")}` : null,
       s.investigations.length ? `SUGGESTED CHECKS\n${s.investigations.map((i) => `• ${i}`).join("\n")}` : null,
     ]
@@ -1376,7 +1378,7 @@ export default function Sessions() {
         {/* Centred progress box — replaces the old status strip and toasts. */}
         <SessionProcessingDialog open={sessionState === "processing" || isTranscribing} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,2fr)_minmax(280px,1fr)] gap-4 items-start">
           {/* Record Session — column 1, full height (rows 1-3) */}
           <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 self-start">
             {/* Patient Info */}
@@ -1480,8 +1482,8 @@ export default function Sessions() {
 
           </div>
 
-          {/* Column 2 — Patient Overview (DISC at top), Live AI Clinician, then AI Clinician Notes. */}
-          <div className="flex flex-col gap-4 order-2">
+          {/* Patient Overview spans the wider centre workspace. */}
+          <div className="flex flex-col gap-4 order-2 min-w-0">
             {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
               <SessionPatientOverview
@@ -1492,12 +1494,9 @@ export default function Sessions() {
             </div>
 
           </div>
-        </div>
 
-        {/* Live AI Clinician — full width, rendered with the exact same
-            colour-coded sections the saved notes use. */}
-        {aiConsultEnabled && (isRecording || notes) && (
-          <div className="mt-4 rounded-xl border border-primary bg-primary/5 p-3">
+          {/* Live AI Clinician — the third workspace column. */}
+          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -1505,7 +1504,11 @@ export default function Sessions() {
               </div>
               {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
             </div>
-            <ClinicianNotesAccordion notes={notes} />
+            {aiConsultEnabled && (isRecording || notes) ? (
+              <ClinicianNotesAccordion notes={notes} />
+            ) : (
+              <p className="text-xs text-muted-foreground">Live AI Clinician is not active for this session.</p>
+            )}
             <p className="mt-2 text-xs text-muted-foreground leading-snug">
               <span className="font-semibold text-foreground">
                 Private — not shared with the patient.
@@ -1514,7 +1517,7 @@ export default function Sessions() {
               treating clinician.
             </p>
           </div>
-        )}
+        </div>
 
         <div className="mt-4">
             <Tabs defaultValue="personal">
