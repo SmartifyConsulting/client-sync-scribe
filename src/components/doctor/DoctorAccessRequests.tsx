@@ -144,11 +144,15 @@ export function DoctorAccessRequests() {
       if (updateError) throw updateError;
 
       const patientUserId = request.patient_user_id;
+      // Reuse ANY existing (non-archived) record for this patient account —
+      // creating a second one splits their session/document history in two.
       const { data: existingPatient } = await supabase
         .from("patients")
         .select("id")
-        .eq("user_id", user.id)
         .eq("patient_user_id", patientUserId)
+        .neq("status", "archived")
+        .order("created_at", { ascending: true })
+        .limit(1)
         .maybeSingle();
 
       if (!existingPatient) {
