@@ -395,7 +395,27 @@ export default function SessionDetail() {
       </div>
 
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,2fr)_minmax(280px,1fr)] gap-4 items-start">
+        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+          <div className="flex items-center gap-3 border-b p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
+              <User className="h-5 w-5 text-accent-foreground" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">{session.patient?.name || "Recorded Session"}</p>
+              <p className="text-xs text-muted-foreground">{session.duration_minutes || 0} minutes</p>
+            </div>
+          </div>
+          <div className="p-4">
+            <p className="text-xs font-semibold text-foreground">Recording complete</p>
+            <p className="mt-1 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
+            {signedAudioUrl && (
+              <audio controls className="mt-3 h-8 w-full" src={signedAudioUrl}>
+                Your browser does not support audio playback.
+              </audio>
+            )}
+          </div>
+        </div>
         <SessionPatientOverview patient={session.patient} currentMedications={currentMedications} />
         <div className="rounded-xl border border-primary bg-primary/5 p-3">
           <div className="mb-2 flex items-center gap-1.5">
