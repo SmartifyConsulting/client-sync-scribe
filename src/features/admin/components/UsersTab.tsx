@@ -156,6 +156,8 @@ export default function UsersTab({ kind }: UsersTabProps) {
       const merged = baseUsers.map((u) => ({
         ...u,
         holarchelp_enabled: helpMap.get(u.user_id) || false,
+        v2_demo: v2Map.get(u.user_id) || false,
+
         country: countryMap.get(u.user_id) ?? null,
         phone: phoneMap.get(u.user_id) ?? null,
         company: u.role === "doctor" ? docCompanyMap.get(u.user_id) || null : null,
