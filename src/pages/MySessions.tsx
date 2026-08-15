@@ -106,6 +106,7 @@ export default function MySessions() {
   const { isDoctor, role } = useUserRole();
   const isHospitalUser = role === "emergency";
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [ownerFilter, setOwnerFilter] = useState<"mine" | "all">("all");
 
@@ -115,10 +116,18 @@ export default function MySessions() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data: myPatients } = await supabase
+      setLoadError(null);
+      const { data: myPatients, error: patientsError } = await supabase
         .from("patients")
         .select("id")
         .eq("patient_user_id", user.id);
+      if (patientsError) {
+        if (!cancelled) {
+          setLoadError(t("mySessions.loadError", "Could not load sessions."));
+          setLoading(false);
+        }
+        return;
+      }
       const patientIds = (myPatients ?? []).map((p: any) => p.id);
 
       let q = supabase
@@ -130,7 +139,14 @@ export default function MySessions() {
         ? q.or(`user_id.eq.${user.id},patient_id.in.(${patientIds.join(",")})`)
         : q.eq("user_id", user.id);
 
-      const { data } = await q;
+      const { data, error: sessionsError } = await q;
+      if (sessionsError) {
+        if (!cancelled) {
+          setLoadError(t("mySessions.loadError", "Could not load sessions."));
+          setLoading(false);
+        }
+        return;
+      }
       const rows = ((data as any[]) || []).filter(
         (r, i, arr) => arr.findIndex((x) => x.id === r.id) === i,
       );
@@ -142,7 +158,7 @@ export default function MySessions() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, t]);
 
   const visibleSessions = useMemo(
     () =>
@@ -203,6 +219,10 @@ export default function MySessions() {
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           {t("common.loading", "Loading…")}
+        </div>
+      ) : loadError ? (
+        <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          {loadError}
         </div>
       ) : (
         <ListGroupToolbar
