@@ -4,6 +4,8 @@ export interface ClinicianNoteSection {
   items: string[];
   /** Free prose (used for the working impression). */
   text?: string;
+  /** Dated groups are used by Safety Checks so updates retain visit context. */
+  groups?: Array<{ label: string; items: string[] }>;
 }
 
 const KNOWN_TITLES = [
@@ -63,7 +65,8 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
   const lines = notes.split("\n");
   const sections: ClinicianNoteSection[] = [];
   let current: ClinicianNoteSection | null = null;
-  const seen = new Set<string>();
+  let currentGroup: { label: string; items: string[] } | null = null;
+  const seenByContext = new Map<string, Set<string>>();
 
   const pushLine = (line: string) => {
     const clean = line
@@ -83,13 +86,17 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
 
     const key = fuzzyKey(clean);
+    const contextKey = `${current?.title || "Clinical Notes"}:${currentGroup?.label || "default"}`;
+    const seen = seenByContext.get(contextKey) || new Set<string>();
     if (!key || seen.has(key)) return;
     seen.add(key);
+    seenByContext.set(contextKey, seen);
     if (!current) {
       current = { title: "Clinical Notes", items: [] };
       sections.push(current);
     }
-    current.items.push(clean);
+    if (currentGroup) currentGroup.items.push(clean);
+    else current.items.push(clean);
   };
 
 
@@ -97,10 +104,23 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
     // Headings often arrive as "**Safety Checks:**" or "## Differentials".
     const line = raw.trim().replace(/^#{1,6}\s*/, "").replace(/^\*{1,2}\s*|\s*\*{1,2}$/g, "").trim();
     if (!line) continue;
+    const datedSafety = line.match(/^SAFETY CHECKS\s*(?:—|-|\[)\s*([^\]]+)\]?\s*:?'?$/i);
+    if (datedSafety) {
+      let safety = sections.find((section) => section.title.toLowerCase() === "safety checks");
+      if (!safety) {
+        safety = { title: "Safety Checks", items: [], groups: [] };
+        sections.push(safety);
+      }
+      current = safety;
+      currentGroup = { label: datedSafety[1].trim(), items: [] };
+      safety.groups = [...(safety.groups || []), currentGroup];
+      continue;
+    }
     const upper = line.replace(/[:\s]+$/, "").toUpperCase();
     if (KNOWN_TITLES.includes(upper) || (/^[A-Z0-9 &/()-]{4,40}$/.test(line) && !line.includes("."))) {
       current = { title: titleCase(upper), items: [] };
       sections.push(current);
+      currentGroup = null;
       continue;
     }
     pushLine(line);
@@ -109,7 +129,7 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
   // Working impression reads better as prose than as a bullet.
   return sections
-    .filter((s) => s.items.length > 0)
+    .filter((s) => s.items.length > 0 || s.groups?.some((group) => group.items.length > 0))
     .map((s) =>
       s.title.toLowerCase() === "working impression"
         ? { ...s, text: s.items.join(" "), items: [] }
@@ -120,6 +140,9 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 /** Flattens parsed sections back into clean text (for prescriptions / emails). */
 export function cleanClinicianNotes(notes?: string | null): string {
   return parseClinicianNotes(notes)
-    .map((s) => `${s.title}\n${s.text ? s.text : s.items.map((i) => `• ${i}`).join("\n")}`)
+    .map((s) => {
+      const grouped = s.groups?.map((group) => `${group.label}\n${group.items.map((item) => `• ${item}`).join("\n")}`).join("\n") || "";
+      return `${s.title}\n${s.text ? s.text : [s.items.map((i) => `• ${i}`).join("\n"), grouped].filter(Boolean).join("\n")}`;
+    })
     .join("\n\n");
 }

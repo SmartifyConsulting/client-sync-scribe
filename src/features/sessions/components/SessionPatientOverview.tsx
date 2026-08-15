@@ -172,7 +172,7 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
             {data.headline && (
               <p className="text-xs leading-relaxed text-foreground">{data.headline}</p>
             )}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Column label="Conditions" items={data.conditions} />
               <Column label="Current meds" items={data.medications} />
               <Column label="Allergies" items={data.allergies} tone="danger" />
