@@ -42,6 +42,8 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
+import { useV2Demo } from "@/hooks/useV2Demo";
+
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
