@@ -1,5 +1,6 @@
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BiologPanel } from "@/features/biolog/BiologPanel";
+import { useV2Demo } from "@/hooks/useV2Demo";
 import { PatientProgrammesTab } from "@/features/programmes/components/PatientProgrammesTab";
 
 import { useTranslation } from "react-i18next";
@@ -540,7 +541,7 @@ export default function PatientProfile() {
 
         {/* Biolog Tab — the care team reviews the patient's own Biolog */}
         <TabsContent value="biolog">
-          {(patient as any).patient_user_id ? (
+          {!v2Demo ? null : (patient as any).patient_user_id ? (
             <BiologPanel ownerUserId={(patient as any).patient_user_id} readOnly />
           ) : (
             <div className="rounded-2xl bg-card p-6 text-sm text-muted-foreground shadow-card">
