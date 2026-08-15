@@ -57,6 +57,7 @@ interface UserRecord {
   created_at: string;
   status: string;
   holarchelp_enabled?: boolean;
+  v2_demo?: boolean;
   company?: string | null;
   country?: string | null;
   phone?: string | null;
@@ -113,7 +114,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
 
     if (ids.length) {
       const [profsRes, doctorPracticeRes, hospitalsRes, hospMembersRes, ambProvRes] = await Promise.all([
-        supabase.from("profiles").select("id, holarchelp_enabled, specialty, country, mobile_number" as any).in("id", ids),
+        supabase.from("profiles").select("id, holarchelp_enabled, v2_demo, specialty, country, mobile_number" as any).in("id", ids),
         supabase.from("practice_members" as any).select("doctor_id, practices(name)").in("doctor_id", ids),
         supabase.from("holarchelp_hospitals" as any).select("owner_id, address, city, country, status").in("owner_id", ids),
         supabase.from("holarchelp_hospital_members" as any).select("user_id, hospital_id, holarchelp_hospitals(address, city, country)").in("user_id", ids),
@@ -127,12 +128,14 @@ export default function UsersTab({ kind }: UsersTabProps) {
 
 
       const helpMap = new Map<string, boolean>();
+      const v2Map = new Map<string, boolean>();
       const countryMap = new Map<string, string | null>();
       const phoneMap = new Map<string, string | null>();
       const docCompanyMap = new Map<string, string>();
       const hospitalAddrMap = new Map<string, string>();
       (profsRes.data || []).forEach((p: any) => {
         helpMap.set(p.id, !!p.holarchelp_enabled);
+        v2Map.set(p.id, !!p.v2_demo);
         countryMap.set(p.id, p.country ?? null);
         phoneMap.set(p.id, p.mobile_number ?? null);
         if (p.specialty) docCompanyMap.set(p.id, p.specialty);
@@ -223,6 +226,19 @@ export default function UsersTab({ kind }: UsersTabProps) {
     }
     setUsers((prev) => prev.map((u) => (u.user_id === userId ? { ...u, holarchelp_enabled: !current } : u)));
     toast({ title: !current ? "HolarcHelp enabled" : "HolarcHelp disabled" });
+  };
+
+  const toggleV2Demo = async (userId: string, current: boolean) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ v2_demo: !current } as any)
+      .eq("id", userId);
+    if (error) {
+      toast({ title: "Failed to toggle v2.0 demo", description: error.message, variant: "destructive" });
+      return;
+    }
+    setUsers((prev) => prev.map((u) => (u.user_id === userId ? { ...u, v2_demo: !current } : u)));
+    toast({ title: !current ? "v2.0 demo enabled" : "v2.0 demo disabled" });
   };
 
   const splitName = (fullName: string | null) => {
@@ -369,6 +385,7 @@ export default function UsersTab({ kind }: UsersTabProps) {
             <TableHead>
               <span className="inline-flex items-center gap-1.5"><Shield className="h-3 w-3" />HolarcHelp</span>
             </TableHead>
+            <TableHead>v2.0 demo</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Joined</TableHead>
             <TableHead className="w-[110px] text-right">Actions</TableHead>
@@ -436,6 +453,14 @@ export default function UsersTab({ kind }: UsersTabProps) {
                     checked={!!u.holarchelp_enabled}
                     onCheckedChange={() => toggleHolarcHelp(u.user_id, !!u.holarchelp_enabled)}
                     aria-label="Toggle HolarcHelp module"
+                    className="scale-90"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Switch
+                    checked={!!u.v2_demo}
+                    onCheckedChange={() => toggleV2Demo(u.user_id, !!u.v2_demo)}
+                    aria-label="Toggle version 2.0 demo features"
                     className="scale-90"
                   />
                 </TableCell>
