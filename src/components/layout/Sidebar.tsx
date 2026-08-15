@@ -42,6 +42,8 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
+import { useV2Demo } from "@/hooks/useV2Demo";
+
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
 
@@ -179,6 +181,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { role, loading: roleLoading, isPatient, isAdmin } = useUserRole();
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
+  const { v2Demo } = useV2Demo();
+
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
@@ -206,19 +210,26 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
-  const withShiftRule = (items: (NavItem & { tour?: string })[]) =>
-    hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
+  /** Version 2.0 features stay hidden unless the account is a v2 demo profile. */
+  const V2_PATHS = ["/biolog", "/ask-maeve"];
+  const withShiftRule = (items: (NavItem & { tour?: string })[]) => {
+    let next = hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
+    if (!v2Demo) next = next.filter((i) => !V2_PATHS.includes(i.to));
+    return next;
+  };
 
   const doctorItems = withShiftRule(doctorModeItems);
-  const doctorSections = DOCTOR_SECTIONS.map((s) => ({ ...s, items: withShiftRule(s.items) }));
+  const doctorSections = DOCTOR_SECTIONS.map((s) => ({ ...s, items: withShiftRule(s.items) }))
+    .filter((s) => s.items.length > 0);
 
   const baseNav = isOnAdminRoute && isAdmin
     ? adminNavItems
     : isNurseMenu
-      ? nurseNavItems
+      ? withShiftRule(nurseNavItems)
       : isPatientMenu
-      ? patientNavItems
+      ? withShiftRule(patientNavItems)
       : doctorItems;
+
 
 
   // Practice Management Assistants keep their own (patient) menu plus the
