@@ -91,16 +91,29 @@ export function ClinicianNotesAccordion({
               {section.text ? (
                 <p className="text-xs leading-relaxed text-foreground">{renderClinicianHighlights(section.text)}</p>
               ) : (
-                <ul className="space-y-1.5">
-                  {section.items.map((item, i) => (
-                    <li
-                      key={i}
-                      className={cn("text-xs leading-relaxed text-foreground pl-3 border-l-2", tone.bullet)}
-                    >
-                      {renderClinicianHighlights(item)}
-                    </li>
+                <div className="space-y-3">
+                  {section.groups?.map((group) => (
+                    <div key={group.label}>
+                      <p className="mb-1.5 text-xs font-bold text-foreground">{group.label}</p>
+                      <ul className="space-y-1.5">
+                        {group.items.map((item, i) => (
+                          <li key={i} className={cn("text-xs leading-relaxed text-foreground pl-3 border-l-2", tone.bullet)}>
+                            {renderClinicianHighlights(item)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                  {section.items.length > 0 && (
+                    <ul className="space-y-1.5">
+                      {section.items.map((item, i) => (
+                        <li key={i} className={cn("text-xs leading-relaxed text-foreground pl-3 border-l-2", tone.bullet)}>
+                          {renderClinicianHighlights(item)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               )}
             </AccordionContent>
           </AccordionItem>

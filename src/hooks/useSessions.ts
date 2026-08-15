@@ -16,6 +16,7 @@ export interface Session {
   private_notes: string | null;
   transcript: string | null;
   summary: string | null;
+  ai_diagnosis: string | null;
   action_points: string[];
   audio_url: string | null;
   duration_minutes: number | null;
@@ -27,6 +28,9 @@ export interface Session {
   patient?: {
     id: string;
     name: string;
+    allergies?: string | null;
+    current_medications?: Json | null;
+    conditions_diagnoses?: Json | null;
   };
 }
 
@@ -97,7 +101,7 @@ export function useSessions(patientId?: string) {
         .from('sessions')
         .select(`
           *,
-          patient:patients(id, name)
+          patient:patients(id, name, allergies, current_medications, conditions_diagnoses)
         `)
         .order('started_at', { ascending: false });
 
@@ -1216,7 +1220,7 @@ export function useSession(id: string) {
           .from('sessions')
           .select(`
             *,
-            patient:patients(id, name)
+            patient:patients(id, name, allergies, current_medications, conditions_diagnoses)
           `)
           .eq('id', id)
           .maybeSingle();

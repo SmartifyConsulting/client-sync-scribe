@@ -25,6 +25,7 @@ import {
   Edit3,
   Send,
   Lock,
+  MoreHorizontal,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
@@ -60,6 +61,14 @@ import { useSessions } from "@/hooks/useSessions";
 import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
 
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
+import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+import { ClinicianNotesAccordion } from "@/features/sessions/components/ClinicianNotesAccordion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
@@ -105,6 +114,7 @@ export default function SessionDetail() {
   const [privateNotesDraft, setPrivateNotesDraft] = useState("");
   const [savingPrivateNotes, setSavingPrivateNotes] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<any | null>(null);
+  const [currentMedications, setCurrentMedications] = useState<Array<{ medication: string; dosage: string; frequency: string }>>([]);
 
 
   // Fetch doctor name
@@ -119,6 +129,16 @@ export default function SessionDetail() {
     if (!session?.audio_url) { setSignedAudioUrl(null); return; }
     getSignedAudioUrl(session.audio_url).then(url => setSignedAudioUrl(url));
   }, [session?.audio_url]);
+
+  useEffect(() => {
+    if (!session?.patient_id) return;
+    supabase
+      .from("prescriptions")
+      .select("medication, dosage, frequency")
+      .eq("patient_id", session.patient_id)
+      .eq("status", "active")
+      .then(({ data }) => setCurrentMedications(data || []));
+  }, [session?.patient_id]);
 
   // Fetch session documents
   useEffect(() => {
@@ -325,6 +345,25 @@ export default function SessionDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {session.status === "completed" && session.patient && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <MoreHorizontal className="h-4 w-4" />
+                  Quick Actions
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Invoice</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Medical Certificate</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setShowHospitalAdmissionEditor(true)}><Hospital className="mr-2 h-4 w-4" />Hospital Admission</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           {isAdmin ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -356,63 +395,36 @@ export default function SessionDetail() {
       </div>
 
 
-      {/* Quick Actions */}
-      {session.status === "completed" && session.patient && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <h2 className="text-base font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
-            <Button
-              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
-              onClick={() => setShowPrescriptionEditor(true)}
-            >
-              <Pill className="h-4 w-4 shrink-0" />
-              <span className="truncate">Prescription</span>
-            </Button>
-            <Button
-              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
-              onClick={() => setShowInvoiceEditor(true)}
-            >
-              <Receipt className="h-4 w-4 shrink-0" />
-              <span className="truncate">Invoice</span>
-            </Button>
-            <Button
-              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
-              onClick={() => setShowMedicalCertificateEditor(true)}
-            >
-              <FileBadge className="h-4 w-4 shrink-0" />
-              <span className="truncate">Medical Certificate</span>
-            </Button>
-            <Button
-              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
-              onClick={() => setShowReferralLetterEditor(true)}
-            >
-              <FileText className="h-4 w-4 shrink-0" />
-              <span className="truncate">Referral Letter</span>
-            </Button>
-            <Button
-              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
-              onClick={() => setShowGeneralLetterEditor(true)}
-            >
-              <FileEdit className="h-4 w-4 shrink-0" />
-              <span className="truncate">General Letter</span>
-            </Button>
-            <Button
-              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
-              onClick={() => setShowDrawingPad(true)}
-            >
-              <PenTool className="h-4 w-4 shrink-0" />
-              <span className="truncate">Drawing Pad</span>
-            </Button>
-            <Button
-              className="gap-1.5 text-sm h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/80"
-              onClick={() => setShowHospitalAdmissionEditor(true)}
-            >
-              <Hospital className="h-4 w-4 shrink-0" />
-              <span className="truncate">Hospital Admission</span>
-            </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,2fr)_minmax(280px,1fr)] gap-4 items-start">
+        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+          <div className="flex items-center gap-3 border-b p-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
+              <User className="h-5 w-5 text-accent-foreground" />
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-foreground">{session.patient?.name || "Recorded Session"}</p>
+              <p className="text-xs text-muted-foreground">{session.duration_minutes || 0} minutes</p>
+            </div>
+          </div>
+          <div className="p-4">
+            <p className="text-xs font-semibold text-foreground">Recording complete</p>
+            <p className="mt-1 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
+            {signedAudioUrl && (
+              <audio controls className="mt-3 h-8 w-full" src={signedAudioUrl}>
+                Your browser does not support audio playback.
+              </audio>
+            )}
           </div>
         </div>
-      )}
+        <SessionPatientOverview patient={session.patient} currentMedications={currentMedications} />
+        <div className="rounded-xl border border-primary bg-primary/5 p-3">
+          <div className="mb-2 flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground">AI Clinician Notes</h2>
+          </div>
+          <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
+        </div>
+      </div>
 
       {/* Session results — same layout as the screen shown right after a recording ends */}
       <SessionResultPanels
@@ -450,7 +462,7 @@ export default function SessionDetail() {
           </Select>
         }
         actionPoints={session.action_points || []}
-        clinicianNotes={(session as any).ai_diagnosis || session.notes}
+        clinicianNotes={null}
         sessionDate={session.started_at}
         showRetentionNotice={!!(session.audio_url || session.transcript)}
         showTodoHint={false}
