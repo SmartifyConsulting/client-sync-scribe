@@ -126,6 +126,7 @@ export function SessionResultPanels({
       </div>
 
       {/* AI Clinician Decision Support */}
+      {(clinicianNotes || clinicianActions) && (
       <div className="rounded-xl border border-primary/30 bg-card p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
@@ -150,6 +151,7 @@ export function SessionResultPanels({
 
 
       </div>
+      )}
     </div>
   );
 }

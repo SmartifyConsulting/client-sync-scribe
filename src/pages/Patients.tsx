@@ -181,9 +181,20 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
   // Auto-create "ME" patient record for doctors who don't have one
   useEffect(() => {
     if (loading || !user?.email || meAutoCreated.current) return;
-    const hasMe = patients.some(p => p.email?.toLowerCase() === user.email?.toLowerCase());
-    if (!hasMe) {
-      meAutoCreated.current = true;
+    meAutoCreated.current = true;
+    let cancelled = false;
+
+    const ensureSelfRecord = async () => {
+      const { data: existing } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user.id)
+        .neq("status", "archived")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (cancelled || existing) return;
       // Format as "Surname, FirstNames" from profile name
       const profileName = profile?.full_name || user.user_metadata?.full_name || '';
       let formattedName = profileName || user.email?.split('@')[0] || 'Me';
@@ -195,7 +206,7 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
           formattedName = `${surname}, ${firstNames}`;
         }
       }
-      createPatient({
+      await createPatient({
         name: formattedName,
         email: user.email || null,
         phone: null,
@@ -242,7 +253,10 @@ export default function Patients({ hideHeader = false }: { hideHeader?: boolean 
         current_medications: null,
         patient_user_id: user.id,
       }, { silent: true });
-    }
+    };
+
+    void ensureSelfRecord();
+    return () => { cancelled = true; };
   }, [loading, user, patients, profile]);
 
   const filteredPatients = patients.filter((patient) => {

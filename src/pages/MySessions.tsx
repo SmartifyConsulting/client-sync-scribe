@@ -70,17 +70,18 @@ function CountPill({ count }: { count: number }) {
 
 function SessionCard({ s, t }: { s: SessionRow; t: any }) {
   return (
-    <Link to={`/sessions/${s.id}`}>
-      <Card className="p-3 hover:bg-accent/40 transition-colors">
+    <Link to={`/sessions/${s.id}`} className="block">
+      <Card className="px-3 py-2 hover:bg-accent/40 transition-colors">
         <div className="flex items-center justify-between gap-3">
-          <p className="font-medium truncate flex items-center gap-1.5 min-w-0">
-            <FileText className="h-4 w-4 text-primary shrink-0" />
+          <p className="text-sm font-medium truncate flex items-center gap-1.5 min-w-0">
+            <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
             <span className="truncate">
               {s.patient?.name || t("mySessions.noPatient", "No patient")} — {format(new Date(s.started_at), "MMMM d, yyyy")}
             </span>
           </p>
           <div className="flex items-center gap-3 shrink-0">
             {s.duration_minutes ? <span className="text-xs text-muted-foreground">{s.duration_minutes} min</span> : null}
+
             <span
               className={cn(
                 "text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full shrink-0",

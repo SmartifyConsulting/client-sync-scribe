@@ -241,7 +241,6 @@ export function usePatients() {
       const { data, error } = await supabase
         .from('patients')
         .select('*')
-        .neq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -306,6 +305,19 @@ export function usePatients() {
 
       const dbPatient = toDbPatient(patient as Partial<Patient>);
 
+      if (patient.patient_user_id) {
+        const { data: existing, error: existingError } = await supabase
+          .from('patients')
+          .select('*')
+          .eq('patient_user_id', patient.patient_user_id)
+          .neq('status', 'archived')
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+        if (existingError) throw existingError;
+        if (existing) return toPatient(existing);
+      }
+
       const { data, error } = await supabase
         .from('patients')
         .insert({
@@ -316,7 +328,20 @@ export function usePatients() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505' && patient.patient_user_id) {
+          const { data: existing } = await supabase
+            .from('patients')
+            .select('*')
+            .eq('patient_user_id', patient.patient_user_id)
+            .neq('status', 'archived')
+            .order('created_at', { ascending: true })
+            .limit(1)
+            .maybeSingle();
+          if (existing) return toPatient(existing);
+        }
+        throw error;
+      }
       const typedPatient = toPatient(data);
       setPatients((prev) => [typedPatient, ...prev]);
       if (!opts?.silent) toast({ title: 'Success', description: 'Patient added successfully' });
