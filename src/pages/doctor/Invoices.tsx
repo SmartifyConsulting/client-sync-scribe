@@ -75,6 +75,7 @@ import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { buildPaidInvoiceHtml } from "@/lib/paidInvoice";
 import { buildInvoiceHtml } from "@/lib/invoiceHtml";
+import { buildDocumentPdfBase64, pdfFileName } from "@/features/documents/utils/documentPdf";
 import { DocumentPreview } from "@/components/sessions/DocumentPreview";
 import { Eye } from "lucide-react";
 
@@ -283,7 +284,7 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       // Pull patient details + linked patient profile (for auto-email toggle).
       const { data: patientData } = await supabase
         .from("patients")
-        .select("id, name, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email, patient_user_id")
+        .select("id, name, email, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member, claims_email, patient_user_id")
         .eq("id", invoice.patient.id)
         .maybeSingle();
 
@@ -348,14 +349,20 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         console.error("Error persisting paid invoice document:", docErr);
       }
 
+      const pdfBase64 = await buildDocumentPdfBase64(html);
+
       const { error: emailErr } = await supabase.functions.invoke("send-document-email", {
         body: {
           to: patientData.claims_email,
+          cc: patientData.email || undefined,
           subject: `Invoice ${invoice.invoice_number} (PAID) - ${patientData.name}`,
           documentName: `Invoice ${invoice.invoice_number} — PAID`,
           documentHtml: html,
           senderName: profile?.full_name || "Doctor",
           practiceName: profile?.practice_number || undefined,
+          attachments: pdfBase64
+            ? [{ filename: pdfFileName(`Invoice-${invoice.invoice_number}-PAID`), content: pdfBase64 }]
+            : undefined,
         },
       });
 
@@ -363,7 +370,9 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
 
       toast({
         title: "Sent to Medical Aid",
-        description: `Paid invoice emailed to ${patientData.claims_email}`,
+        description: patientData.email
+          ? `Paid invoice emailed to ${patientData.claims_email}, cc ${patientData.email}`
+          : `Paid invoice emailed to ${patientData.claims_email}`,
       });
       return true;
     } catch (err: any) {
@@ -376,6 +385,77 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
         });
       }
       return false;
+    }
+  };
+
+  // Email the invoice straight to the patient. Never CCs / sends to the
+  // medical aid — that only happens once the invoice is stamped paid
+  // (see sendPaidInvoiceToMedicalAid above).
+  const sendInvoiceToPatient = async (invoice: Invoice) => {
+    if (!invoice.patient?.id) return;
+    setUpdatingId(invoice.id);
+    try {
+      const { data: patientData } = await supabase
+        .from("patients")
+        .select("id, name, email, physical_address, postal_address, address, medical_aid, medical_aid_number, primary_member")
+        .eq("id", invoice.patient.id)
+        .maybeSingle();
+
+      if (!patientData?.email) {
+        toast({
+          title: "No Patient Email",
+          description: "Add an email address on the patient profile to send invoices.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const isPaid = getInvoiceStatus(invoice) === "paid";
+      const html = await buildInvoiceHtml({
+        invoice: {
+          id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          description: invoice.description,
+          amount: invoice.amount,
+          due_date: invoice.due_date,
+          created_at: invoice.created_at,
+          paid_at: invoice.paid_at,
+          session_id: invoice.session_id ?? null,
+          patient: invoice.patient,
+        },
+        patient: patientData as any,
+        profile: profile as any,
+        currency: invoiceCurrency,
+        paid: isPaid,
+      });
+
+      const pdfBase64 = await buildDocumentPdfBase64(html);
+
+      const { error: emailErr } = await supabase.functions.invoke("send-document-email", {
+        body: {
+          to: patientData.email,
+          subject: `Invoice ${invoice.invoice_number}${isPaid ? " (PAID)" : ""} - ${patientData.name}`,
+          documentName: `Invoice ${invoice.invoice_number}`,
+          documentHtml: html,
+          senderName: profile?.full_name || "Doctor",
+          practiceName: profile?.practice_number || undefined,
+          attachments: pdfBase64
+            ? [{ filename: pdfFileName(`Invoice-${invoice.invoice_number}`), content: pdfBase64 }]
+            : undefined,
+        },
+      });
+      if (emailErr) throw emailErr;
+
+      toast({ title: "Invoice Sent", description: `Emailed to ${patientData.email}` });
+    } catch (err: any) {
+      console.error("Error sending invoice to patient:", err);
+      toast({
+        title: "Send Failed",
+        description: err.message || "Failed to send invoice to patient",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -1570,6 +1650,24 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
                           <Pencil className="h-4 w-4" />
                         </Button>
 
+                        {/* Send to patient — never CCs / goes to the medical aid; that only happens once paid */}
+                        {status !== "archived" && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() => sendInvoiceToPatient(invoice)}
+                            disabled={updatingId === invoice.id}
+                            title="Email invoice to patient"
+                          >
+                            {updatingId === invoice.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Mail className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+
                         {status !== "paid" && status !== "archived" && (
                           <Button
                             size="sm"
@@ -1772,7 +1870,14 @@ export default function DoctorInvoices({ hideHeader = false }: { hideHeader?: bo
       {/* View Invoice Modal - Template Format */}
       {viewingInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-primary bg-card shadow-lg animate-fade-in">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-primary bg-card shadow-lg animate-fade-in">
+            {getInvoiceStatus(viewingInvoice) === "paid" && (
+              <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+                <div className="-rotate-[25deg] rounded-md border-4 border-red-600 px-8 py-2 text-5xl font-black tracking-[0.2em] text-red-600 opacity-30">
+                  PAID
+                </div>
+              </div>
+            )}
             {/* Invoice Template Header */}
             <div className="bg-primary text-primary-foreground p-6">
               <div className="flex items-center justify-between">

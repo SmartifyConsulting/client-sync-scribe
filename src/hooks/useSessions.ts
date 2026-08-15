@@ -940,8 +940,9 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
           logger.debug('Invoice document auto-created');
 
           // Also create a real invoices row for the Invoices admin page
+          let newInvoiceRow: { id: string } | null = null;
           try {
-            await supabase.from('invoices').insert({
+            const { data: insertedInvoice } = await supabase.from('invoices').insert({
               doctor_id: user.id,
               patient_id: patientId,
               session_id: sessionId,
@@ -950,7 +951,8 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
               amount: computedTotal || 0,
               due_date: dueDateISO,
               status: 'pending',
-            } as any);
+            } as any).select('id').single();
+            newInvoiceRow = insertedInvoice as any;
           } catch (invRowError) {
             console.error('Error creating invoice row:', invRowError);
           }
@@ -962,6 +964,7 @@ ${sessionSignature ? `<br/><div>${sessionSignature}</div><div style="border-top:
               patient_id: patientId,
               title: `Review Invoice - ${patientName}`,
               document_id: invoiceDoc.id,
+              invoice_id: newInvoiceRow?.id ?? null,
               task_type: 'document_review',
               priority: 'high',
               status: 'pending',

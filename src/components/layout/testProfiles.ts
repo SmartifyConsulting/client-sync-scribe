@@ -11,6 +11,7 @@ export const ADMIN_EMAIL = "info@georgiaadams.co.za";
 
 export const TEST_PROFILES: TestProfile[] = [
   { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
+  { email: "georgia.adams@smartify.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
   { email: "sme@smartify.co.za", name: "Dean Allie", role: "Doctor", icon: Stethoscope },
   
   { email: "projectmanager@smartify.co.za", name: "Shannon Kennedy", role: "Patient", icon: HeartPulse },

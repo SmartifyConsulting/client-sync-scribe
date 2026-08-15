@@ -30,6 +30,7 @@ serve(async (req) => {
     let documentContent = body.documentContent;
     const documentHtml: string | undefined = body.documentHtml;
     const replyTo: string | undefined = body.replyTo;
+    const cc: string | string[] | undefined = body.cc;
     const rawAttachments = Array.isArray(body.attachments) ? body.attachments : [];
     const attachments = rawAttachments
       .filter((a: any) => a && typeof a.filename === "string" && typeof a.content === "string")
@@ -163,6 +164,7 @@ serve(async (req) => {
 
     const result = await sendEmail({
       to,
+      cc,
       subject,
       html: htmlContent,
       replyTo,

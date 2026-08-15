@@ -13,6 +13,7 @@ import {
   type FillProfile,
 } from "@/lib/fillDocumentPlaceholders";
 import { renderSignatureHtml } from "@/lib/signature";
+import { HOLARC_EMAIL_LOGO_URL } from "@/features/documents/utils/documentEmailHtml";
 
 export interface BuildInvoiceArgs {
   invoice: {
@@ -208,6 +209,9 @@ export async function buildInvoiceHtml(args: BuildInvoiceArgs): Promise<string> 
 </head>
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
   <div style="position:relative;max-width:820px;margin:0 auto;background:#fff;border:1px solid #e5e5e5;overflow:hidden;">
+    <div style="text-align:center;padding:20px 24px 0;">
+      <img src="${HOLARC_EMAIL_LOGO_URL}" alt="Holarc Health" style="width:33%;max-width:180px;height:auto;object-fit:contain;" />
+    </div>
     <div style="position:relative;">
       ${body}
       ${stamp}

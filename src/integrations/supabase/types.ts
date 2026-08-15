@@ -7414,6 +7414,7 @@ export type Database = {
           document_id: string | null
           due_date: string | null
           id: string
+          invoice_id: string | null
           is_auto_executed: boolean | null
           patient_id: string | null
           priority: string
@@ -7436,6 +7437,7 @@ export type Database = {
           document_id?: string | null
           due_date?: string | null
           id?: string
+          invoice_id?: string | null
           is_auto_executed?: boolean | null
           patient_id?: string | null
           priority?: string
@@ -7458,6 +7460,7 @@ export type Database = {
           document_id?: string | null
           due_date?: string | null
           id?: string
+          invoice_id?: string | null
           is_auto_executed?: boolean | null
           patient_id?: string | null
           priority?: string
@@ -7471,6 +7474,13 @@ export type Database = {
           vulas_reward?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "todos_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "todos_patient_id_fkey"
             columns: ["patient_id"]

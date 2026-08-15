@@ -128,9 +128,9 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
                   </div>
 
                   <div className="grid gap-4 lg:grid-cols-2">
-                    <div>
-                      <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">Admitted patients</p>
-                      <ul className="divide-y rounded-xl border">
+                    <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
+                      <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">Admitted patients</div>
+                      <ul className="divide-y">
                         {patients.map((p) => (
                           <li key={p.id} className="flex items-center justify-between px-3 py-2 text-xs">
                             <span className="font-semibold">{p.patient_name}</span>
@@ -140,9 +140,9 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
                         {!patients.length && <li className="px-3 py-4 text-center text-xs text-muted-foreground">No patients in this ward</li>}
                       </ul>
                     </div>
-                    <div>
-                      <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">On shift now</p>
-                      <ul className="divide-y rounded-xl border">
+                    <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
+                      <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">On shift now</div>
+                      <ul className="divide-y">
                         {staff.map((s) => (
                           <li key={s.id} className="flex items-center justify-between px-3 py-2 text-xs">
                             <span className="font-semibold">{s.staff_name}</span>

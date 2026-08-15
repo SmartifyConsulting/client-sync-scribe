@@ -18,6 +18,13 @@ interface SendDocumentButtonProps {
    * own email address when the preferred field is empty.
    */
   preferredField?: "email" | "pharmacy_email" | "claims_email" | "reporting_to_email";
+  /**
+   * If the patient has a value in this field, it takes priority over
+   * `preferredField` as the "to" recipient, and the patient's own email
+   * (if on file) is automatically cc'd. Used e.g. by prescriptions so a
+   * specified medical insurance gets the send and the patient stays looped in.
+   */
+  insuranceOverrideField?: "claims_email";
   /** Existing document row to stamp as sent. */
   documentId?: string | null;
   /** Letterhead used by the editor so the email matches the template exactly. */
@@ -41,6 +48,7 @@ export function SendDocumentButton({
   documentLabel,
   getContent,
   preferredField = "email",
+  insuranceOverrideField,
   documentId,
   headerFooter,
   fontFamily,
@@ -60,8 +68,10 @@ export function SendDocumentButton({
         .eq("id", patientId)
         .maybeSingle();
 
+      const insuranceEmail = insuranceOverrideField ? (patient as any)?.[insuranceOverrideField] : "";
       const recipient =
-        (patient as any)?.[preferredField] || (patient as any)?.email || "";
+        insuranceEmail || (patient as any)?.[preferredField] || (patient as any)?.email || "";
+      const ccPatient = insuranceEmail && (patient as any)?.email ? (patient as any).email : undefined;
 
       if (!recipient) {
         toast({
@@ -97,6 +107,7 @@ export function SendDocumentButton({
       const { error } = await supabase.functions.invoke("send-document-email", {
         body: {
           to: recipient,
+          cc: ccPatient,
           subject: `${documentLabel} for ${patientName}`,
           documentName: `${documentLabel} - ${patientName}`,
           documentContent: content,
@@ -116,7 +127,10 @@ export function SendDocumentButton({
           .eq("id", documentId);
       }
 
-      toast({ title: `${documentLabel} sent`, description: `Emailed to ${recipient}` });
+      toast({
+        title: `${documentLabel} sent`,
+        description: ccPatient ? `Emailed to ${recipient}, cc ${ccPatient}` : `Emailed to ${recipient}`,
+      });
       onSent?.();
     } catch (err: any) {
       toast({

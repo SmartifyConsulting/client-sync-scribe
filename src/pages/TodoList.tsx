@@ -82,6 +82,7 @@ interface TodoItem {
   patient_name?: string | null;
   session_id?: string | null;
   document_id?: string | null;
+  invoice_id?: string | null;
   is_auto_executed?: boolean;
   task_type?: string;
 }
@@ -461,6 +462,30 @@ export default function TodoList() {
     } catch { toast({ title: "Send failed", variant: "destructive" }); } finally { setSendingDocId(null); }
   };
 
+  const [markingInvoicePaidId, setMarkingInvoicePaidId] = useState<string | null>(null);
+
+  const markInvoicePaid = async (todo: TodoItem) => {
+    if (!todo.invoice_id) return;
+    setMarkingInvoicePaidId(todo.invoice_id);
+    try {
+      const paidAtIso = new Date().toISOString();
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'paid', paid_at: paidAtIso })
+        .eq('id', todo.invoice_id);
+      if (error) throw error;
+
+      await supabase.from('todos').update({ status: 'completed', completed_at: paidAtIso }).eq('id', todo.id);
+      setTodos(todos.map((t) => t.id === todo.id ? { ...t, completed: true } : t));
+
+      toast({ title: "Invoice marked as paid" });
+    } catch {
+      toast({ title: "Error", description: "Failed to mark invoice as paid", variant: "destructive" });
+    } finally {
+      setMarkingInvoicePaidId(null);
+    }
+  };
+
   const toggleDateCollapse = (dateKey: string) => {
     setCollapsedDates(prev => {
       const next = new Set(prev);
@@ -560,6 +585,8 @@ export default function TodoList() {
       onEditAppointment={(t) => navigate(`/calendar${(t as any).due_date ? `?date=${(t as any).due_date}` : ""}`)}
       onSetPriority={updatePriority}
       onAssign={(t) => { setAssignTask(t); setShowAssignTask(true); }}
+      onMarkInvoicePaid={(t) => markInvoicePaid(t as any)}
+      markingInvoicePaid={markingInvoicePaidId !== null && markingInvoicePaidId === (todo as any).invoice_id}
       isEditing={editingId === todo.id}
       editText={editText}
       setEditText={setEditText}

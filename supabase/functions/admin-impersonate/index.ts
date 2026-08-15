@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
     const REVERSE_ADMIN_EMAIL = "info@georgiaadams.co.za";
     const SEEDED_EMAILS = new Set([
       "info@georgiaadams.co.za",
+      "georgia.adams@smartify.co.za",
       "sme@smartify.co.za",
       "dean.allie@gmail.com",
       "projectmanager@smartify.co.za",
