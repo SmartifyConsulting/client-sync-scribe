@@ -6697,6 +6697,7 @@ export type Database = {
           tour_completed_at: string | null
           tour_skipped_at: string | null
           updated_at: string
+          v2_demo: boolean
         }
         Insert: {
           about_me?: string | null
@@ -6739,6 +6740,7 @@ export type Database = {
           tour_completed_at?: string | null
           tour_skipped_at?: string | null
           updated_at?: string
+          v2_demo?: boolean
         }
         Update: {
           about_me?: string | null
@@ -6781,6 +6783,7 @@ export type Database = {
           tour_completed_at?: string | null
           tour_skipped_at?: string | null
           updated_at?: string
+          v2_demo?: boolean
         }
         Relationships: []
       }
