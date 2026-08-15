@@ -455,11 +455,12 @@ export function usePatient(id: string) {
   const updatePatient = async (updates: Partial<Patient>) => {
     try {
       const dbUpdates = toDbPatient(updates);
+      const patientId = patient?.id || id;
 
       const { data, error } = await supabase
         .from('patients')
         .update(dbUpdates)
-        .eq('id', id)
+        .eq('id', patientId)
         .select()
         .single();
 

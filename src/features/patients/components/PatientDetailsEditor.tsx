@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AddressAutocomplete } from "@/components/patients/AddressAutocomplete";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useSessions } from "@/hooks/useSessions";
 import {
   Pencil,
   Save,
@@ -403,6 +404,9 @@ export function PatientDetailsEditor({
   const navigate = useNavigate();
   const { isDoctor } = useUserRole();
   const queryClient = useQueryClient();
+  const { sessions: patientSessions, loading: patientSessionsLoading } = useSessions(
+    isSelfService ? patient.id : undefined,
+  );
   const [isEditing, setIsEditing] = useState(true);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [activeParentTab, setActiveParentTab] = useState<string | null>(null);
@@ -3965,7 +3969,22 @@ export function PatientDetailsEditor({
                   </div>
                 }
               >
-                <SessionHistoryTableLazy sessions={[]} patientId={patient.id} patientName={patient.name} />
+                {patientSessionsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : patientSessions.length > 0 ? (
+                  <SessionHistoryTableLazy
+                    sessions={patientSessions}
+                    patientId={patient.id}
+                    patientName={patient.name}
+                    allergies={patient.allergies}
+                  />
+                ) : (
+                  <div className="py-12 text-center text-sm text-muted-foreground">
+                    No sessions yet.
+                  </div>
+                )}
               </Suspense>
             </TabsContent>
           )}
