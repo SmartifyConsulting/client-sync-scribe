@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useV2Demo } from "@/hooks/useV2Demo";
 import { useTranslation } from "react-i18next";
 
 const doctorNavItems = [
@@ -46,6 +47,7 @@ export function BottomNav() {
   const { t } = useTranslation();
   const { isPatient, isDoctor, loading } = useUserRole();
   const { isAdmin } = useIsAdmin();
+  const { v2Demo } = useV2Demo();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -98,7 +100,7 @@ export function BottomNav() {
     return (
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-area-pb font-size-preserve md:hidden">
         <div className="flex items-center justify-around px-2 py-2">
-          {doctorNavItems.map((item) => {
+          {doctorNavItems.filter((i) => v2Demo || i.to !== "/ask-maeve").map((item) => {
             const isActive = location.pathname.startsWith(item.to);
             const danger = (item as any).danger;
             if (danger) {
@@ -153,7 +155,7 @@ export function BottomNav() {
   const currentSection = searchParams.get("section") || "health";
   const isOnDetails = location.pathname === "/patient/details";
 
-  const items = patientSections;
+  const items = patientSections.filter((i) => v2Demo || i.to !== "/ask-maeve");
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-area-pb font-size-preserve md:hidden">

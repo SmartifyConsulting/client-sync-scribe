@@ -51,6 +51,7 @@ import PatientAdmissions from "./pages/patient/PatientAdmissions";
 import PatientLabResults from "./pages/patient/PatientLabResults";
 import PatientWardAdmission from "./pages/patient/PatientWardAdmission";
 import Biolog from "./pages/Biolog";
+import { V2Route } from "@/components/V2Route";
 import AskMaeveHome from "./features/ask-maeve/pages/AskMaeveHome";
 import AskMaeveSession from "./features/ask-maeve/pages/AskMaeveSession";
 import PatientDocuments from "./pages/patient/PatientDocuments";
@@ -226,9 +227,9 @@ const App = () => (
             <Route path="/patient/admissions" element={<PatientAdmissions />} />
             <Route path="/patient/ward-admission/:incidentId" element={<PatientWardAdmission />} />
             <Route path="/patient/lab-results" element={<PatientLabResults />} />
-            <Route path="/biolog" element={<Biolog />} />
-            <Route path="/ask-maeve" element={<AskMaeveHome />} />
-            <Route path="/ask-maeve/:sessionId" element={<AskMaeveSession />} />
+            <Route path="/biolog" element={<V2Route><Biolog /></V2Route>} />
+            <Route path="/ask-maeve" element={<V2Route><AskMaeveHome /></V2Route>} />
+            <Route path="/ask-maeve/:sessionId" element={<V2Route><AskMaeveSession /></V2Route>} />
             <Route path="/patient/documents" element={<PatientDocuments />} />
             <Route path="/patient/round-table" element={<PatientRoundTable />} />
             <Route path="/patient/details" element={<MyDetails />} />
@@ -256,9 +257,9 @@ const App = () => (
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/:id" element={<PatientProfile />} />
             <Route path="/admissions" element={<DoctorAdmissions />} />
-            <Route path="/biolog" element={<Biolog />} />
-            <Route path="/ask-maeve" element={<AskMaeveHome />} />
-            <Route path="/ask-maeve/:sessionId" element={<AskMaeveSession />} />
+            <Route path="/biolog" element={<V2Route><Biolog /></V2Route>} />
+            <Route path="/ask-maeve" element={<V2Route><AskMaeveHome /></V2Route>} />
+            <Route path="/ask-maeve/:sessionId" element={<V2Route><AskMaeveSession /></V2Route>} />
             <Route path="/doctor/sessions" element={<DoctorSessions />} />
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/todos" element={<TodoList />} />
