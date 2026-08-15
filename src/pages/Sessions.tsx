@@ -870,8 +870,8 @@ export default function Sessions() {
   // the note stays readable and free of repetition.
   const hintImpressionRef = useRef<string>("");
   const hintLinesRef = useRef<Set<string>>(new Set());
-  const hintSectionsRef = useRef<{ alerts: string[]; differentials: string[]; investigations: string[] }>({
-    alerts: [],
+  const hintSectionsRef = useRef<{ alertGroups: Array<{ label: string; items: string[] }>; differentials: string[]; investigations: string[] }>({
+    alertGroups: [],
     differentials: [],
     investigations: [],
   });
@@ -890,21 +890,23 @@ export default function Sessions() {
     };
 
     if (liveHint.suggestion?.trim()) hintImpressionRef.current = liveHint.suggestion.trim();
+    const nextAlerts: string[] = [];
     addAll(
-      s.alerts,
+      nextAlerts,
       (liveHint.alerts || []).map(
         (a) => `[${a.severity === "critical" ? "CRITICAL" : a.severity === "caution" ? "CAUTION" : "NOTE"}] ${a.message}`,
       ),
     );
-    addAll(s.alerts, (liveHint.red_flags || []).map((r) => `[CAUTION] Rule out: ${r}`));
+    addAll(nextAlerts, (liveHint.red_flags || []).map((r) => `[CAUTION] Rule out: ${r}`));
+    if (nextAlerts.length) {
+      s.alertGroups.push({ label: format(new Date(), "MMM d, yyyy · h:mm a"), items: nextAlerts });
+    }
     addAll(s.differentials, liveHint.differentials);
     addAll(s.investigations, liveHint.suggested_investigations);
 
     const composed = [
       hintImpressionRef.current ? `WORKING IMPRESSION\n${hintImpressionRef.current}` : null,
-      s.alerts.length
-        ? `SAFETY CHECKS — ${format(new Date(), "MMM d, yyyy · h:mm a")}\n${s.alerts.map((a) => `• ${a}`).join("\n")}`
-        : null,
+      ...s.alertGroups.map((group) => `SAFETY CHECKS — ${group.label}\n${group.items.map((item) => `• ${item}`).join("\n")}`),
       s.differentials.length ? `DIFFERENTIALS\n${s.differentials.map((d) => `• ${d}`).join("\n")}` : null,
       s.investigations.length ? `SUGGESTED CHECKS\n${s.investigations.map((i) => `• ${i}`).join("\n")}` : null,
     ]
@@ -1006,7 +1008,7 @@ export default function Sessions() {
     clearTranscript();
     hintImpressionRef.current = "";
     hintLinesRef.current.clear();
-    hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
+    hintSectionsRef.current = { alertGroups: [], differentials: [], investigations: [] };
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
