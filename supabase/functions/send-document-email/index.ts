@@ -160,7 +160,7 @@ serve(async (req) => {
     }
 
     const documentUrl = body.documentId
-      ? `${APP_URL}${recipientIsPatient ? "/patient/documents" : "/documents"}?doc=${body.documentId}`
+      ? `${APP_URL}${recipientIsPatient ? `/patient/documents?doc=${body.documentId}` : `/documents?view=${body.documentId}`}`
       : null;
 
     const greetingHtml = greeting

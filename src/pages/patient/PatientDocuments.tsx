@@ -260,6 +260,18 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
     if (user) fetchAll();
   }, [user]);
 
+  // Auto-open a document when arriving from an email deep link (?doc=<id>)
+  useEffect(() => {
+    const docId = searchParams.get("doc");
+    if (!docId || docs.length === 0) return;
+    const match = docs.find((d) => d.id === docId);
+    if (match) {
+      setPreviewDoc(match);
+      searchParams.delete("doc");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [docs, searchParams, setSearchParams]);
+
   async function fetchAll() {
     if (!user) return;
     setLoading(true);
