@@ -2381,7 +2381,13 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
               <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
               <CollapsibleContent className="p-3">
+                {insuranceCaptured && !formData.employer?.trim() && (
+                  <p className="mb-2 text-xs text-destructive">
+                    Employer details are required when medical insurance is captured.
+                  </p>
+                )}
                 <div className={FIELD_GRID_2_CLASS}>
+
                   <div className="space-y-1.5">
                     <Label>Insurance Provider</Label>
                     <Input
