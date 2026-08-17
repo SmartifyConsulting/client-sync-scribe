@@ -4322,6 +4322,62 @@ export type Database = {
           },
         ]
       }
+      hospital_inpatient_vitals: {
+        Row: {
+          admission_id: string
+          bp_diastolic: number | null
+          bp_systolic: number | null
+          created_at: string
+          heart_rate: number | null
+          id: string
+          notes: string | null
+          recorded_at: string
+          recorded_by: string | null
+          recorded_by_name: string | null
+          respiratory_rate: number | null
+          spo2: number | null
+          temperature_c: number | null
+        }
+        Insert: {
+          admission_id: string
+          bp_diastolic?: number | null
+          bp_systolic?: number | null
+          created_at?: string
+          heart_rate?: number | null
+          id?: string
+          notes?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+          recorded_by_name?: string | null
+          respiratory_rate?: number | null
+          spo2?: number | null
+          temperature_c?: number | null
+        }
+        Update: {
+          admission_id?: string
+          bp_diastolic?: number | null
+          bp_systolic?: number | null
+          created_at?: string
+          heart_rate?: number | null
+          id?: string
+          notes?: string | null
+          recorded_at?: string
+          recorded_by?: string | null
+          recorded_by_name?: string | null
+          respiratory_rate?: number | null
+          spo2?: number | null
+          temperature_c?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hospital_inpatient_vitals_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_inpatient_admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hospital_nurse_assignments: {
         Row: {
           admission_id: string
