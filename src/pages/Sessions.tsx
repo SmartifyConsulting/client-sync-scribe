@@ -58,7 +58,7 @@ import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
 import { PostSessionStepDialog, type PostSessionStepType } from "@/features/sessions/components/PostSessionStepDialog";
-import { cleanClinicianNotes } from "@/features/sessions/utils/clinicianNotesSections";
+import { cleanClinicianNotes, fuzzyKey } from "@/features/sessions/utils/clinicianNotesSections";
 import { SessionGeneratedDocuments } from "@/features/sessions/components/SessionGeneratedDocuments";
 import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
 import { renderClinicalHighlights } from "@/features/sessions/lib/clinicalHighlights";
