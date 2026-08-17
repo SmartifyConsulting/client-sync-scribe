@@ -101,7 +101,11 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
   const sections: ClinicianNoteSection[] = [];
   let current: ClinicianNoteSection | null = null;
   let currentGroup: { label: string; items: string[] } | null = null;
-  const seenByContext = new Map<string, Set<string>>();
+  // Kept bullets per section, so a re-phrased repeat merges into the first one.
+  const keptByContext = new Map<
+    string,
+    Array<{ tokens: string[]; arr: string[]; index: number }>
+  >();
 
   const pushLine = (line: string) => {
     const clean = line
@@ -119,21 +123,33 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
       .trim();
     if (!clean || isCaution(clean)) return;
 
+    const tokens = normaliseTokens(clean);
+    if (tokens.length === 0) return;
 
-    const key = fuzzyKey(clean);
     // De-duplicate per section (not per dated group) so a point repeated by a
     // later live hint collapses into the first occurrence.
     const contextKey = current?.title || "Clinical Notes";
-    const seen = seenByContext.get(contextKey) || new Set<string>();
-    if (!key || seen.has(key)) return;
-    seen.add(key);
-    seenByContext.set(contextKey, seen);
+    const kept = keptByContext.get(contextKey) || [];
+    for (const entry of kept) {
+      if (similarity(entry.tokens, tokens) >= 0.6 || isSubset(entry.tokens, tokens)) {
+        // Same point re-phrased — keep the richer wording in place.
+        if (clean.length > entry.arr[entry.index].length) {
+          entry.arr[entry.index] = clean;
+          entry.tokens = tokens;
+        }
+        return;
+      }
+    }
+
     if (!current) {
       current = { title: "Clinical Notes", items: [] };
       sections.push(current);
     }
-    if (currentGroup) currentGroup.items.push(clean);
-    else current.items.push(clean);
+    const target = currentGroup ? currentGroup.items : current.items;
+    target.push(clean);
+    kept.push({ tokens, arr: target, index: target.length - 1 });
+    keptByContext.set(contextKey, kept);
+
   };
 
 
