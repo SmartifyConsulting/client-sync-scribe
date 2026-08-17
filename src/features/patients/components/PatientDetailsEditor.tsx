@@ -2550,7 +2550,7 @@ export function PatientDetailsEditor({
                 </div>
               }
             >
-              <MyDoctors hideHeader />
+              <MyDoctors hideHeader showAccessReminder />
             </Suspense>
           </TabsContent>
 

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star, EyeOff, Eye } from "lucide-react";
+import { Loader2, Stethoscope, Search, Lock, UserMinus, MoreVertical, Building2, Ambulance, Star, EyeOff, Eye, Info } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -56,7 +56,7 @@ interface DoctorAccess {
   doctor?: DoctorProfile;
 }
 
-export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean }) {
+export default function MyDoctors({ hideHeader = false, showAccessReminder = false }: { hideHeader?: boolean; showAccessReminder?: boolean }) {
   const [nameQuery, setNameQuery] = useState("");
   const [specialtyQuery, setSpecialtyQuery] = useState<string>("any");
   const [languageQuery, setLanguageQuery] = useState<string>("any");
@@ -405,6 +405,21 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             <h1 className="text-3xl font-bold text-foreground">My Healthcare Providers</h1>
             <p className="text-muted-foreground text-xs">
               Healthcare providers with access to your profile
+            </p>
+          </div>
+        </div>
+      )}
+
+      {showAccessReminder && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+          <div className="flex items-start gap-2">
+            <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <p className="text-xs text-foreground leading-relaxed">
+              <span className="font-semibold">A reminder for each provider listed below:</span>{" "}
+              you can see session summaries, medical overview, prescriptions, referral letters, hospital
+              admission forms, admissions, and images, videos, lab results and scans from hospital
+              admissions. You cannot see full transcriptions, raw audio recordings, AI diagnostics,
+              clinical drawings, invoices and billing, or medical certificates.
             </p>
           </div>
         </div>
