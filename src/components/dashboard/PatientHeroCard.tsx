@@ -71,7 +71,7 @@ export function PatientHeroCard({
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, loading: profileLoading } = useProfile();
   const { toast } = useToast();
   const { lollipopCount, loading: rewardsLoading } = useMyRewards();
 
@@ -83,7 +83,7 @@ export function PatientHeroCard({
     if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
   }, [profile?.avatar_url]);
 
-  const fullName = profile?.full_name || user?.email?.split("@")[0] || "";
+  const fullName = profile?.full_name || (profileLoading ? "" : user?.email?.split("@")[0] || "");
   const firstName = fullName.split(" ")[0] || "";
   const initials =
     fullName

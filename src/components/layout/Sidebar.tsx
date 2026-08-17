@@ -129,7 +129,7 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
  *  that ward's board, admissions, their shifts and their own profile. */
 const NURSE_SECTIONS: NavSection[] = [
   {
-    title: "My Patients",
+    title: "My Work",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.nurseDashboard", to: "/provider/hospital/nurse-dashboard" },
       { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/nurse-profile" },
