@@ -151,29 +151,18 @@ function RoleBasedRedirect() {
   }
 
   // Provider routing wins when the user is solely a provider (hospital/ambulance staff).
-  // Admins who are also providers fall through to /doctor-dashboard via the catch-all,
+  // Admins who are also providers fall through to /my-dashboard via the catch-all,
   // and can still reach the provider portal via the profile switcher.
   if (providerType && !hasDoctorRole && !hasPatientRole) {
     return <Navigate to="/provider" replace />;
-  }
-
-  if (isAdmin) {
-    return <Navigate to="/doctor-dashboard" replace />;
-  }
-
-  if (isNurse) {
-    return <Navigate to="/my-shift" replace />;
-  }
-
-  if (isPatient) {
-    return <Navigate to="/patient/details" replace />;
   }
 
   if (isEmergency && !hasDoctorRole && !hasPatientRole) {
     return <Navigate to="/provider" replace />;
   }
 
-  return <Navigate to="/doctor-dashboard" replace />;
+  // My Dashboard is now the default landing screen for every role.
+  return <Navigate to="/my-dashboard" replace />;
 }
 
 const App = () => (

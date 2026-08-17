@@ -109,7 +109,7 @@ export default function AskMaeveHome() {
 
       <div className="flex items-center gap-2">
         <Sparkles className="h-6 w-6 text-maeve" />
-        <h1 className="font-display text-2xl font-bold text-foreground">Ask Angel</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground">Ask Holarc</h1>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
         A quiet space to explore something in your own words. Angel asks the questions — every answer, and every

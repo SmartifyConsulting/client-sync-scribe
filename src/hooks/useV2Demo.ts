@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Version 2.0 demo gate. Features still in v2 development (Biolog, Ask Angel,
+ * Version 2.0 demo gate. Features still in v2 development (Biolog, Ask Holarc,
  * the Enneagram relationship profile) are only visible to accounts whose
  * profile has `v2_demo` switched on by an admin.
  */

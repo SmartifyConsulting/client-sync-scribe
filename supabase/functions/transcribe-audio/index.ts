@@ -67,7 +67,8 @@ Rules:
 3. Each speaker's turn should start on a new line with their label
 4. Preserve all the original content - do not summarize or remove anything
 5. If you cannot determine speaker changes, use your best judgment based on conversational flow
-6. Add line breaks between speaker turns for readability`,
+6. Add line breaks between speaker turns for readability
+7. The patient's correct name is "${patientName}". Speech-to-text often mishears names — if the transcript body contains a phonetically similar variant or misspelling of this name (e.g. a different transliteration or a name that sounds alike but isn't a real dictionary word), correct it to "${patientName}" exactly, everywhere it appears in the text. Do not alter any other names, and don't "correct" a name that is clearly a different, unrelated person.`,
           },
           {
             role: "user",

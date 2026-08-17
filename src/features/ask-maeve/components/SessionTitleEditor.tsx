@@ -14,7 +14,7 @@ interface Props {
   className?: string;
 }
 
-/** Inline rename control for an Ask Angel exploration. */
+/** Inline rename control for an Ask Holarc exploration. */
 export function SessionTitleEditor({ sessionId, title, onRenamed, onTitleClick, className }: Props) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(title ?? "");

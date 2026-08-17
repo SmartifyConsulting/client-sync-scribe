@@ -1,4 +1,4 @@
-// Renders an Ask Angel transcript as a printable HTML document and downloads it
+// Renders an Ask Holarc transcript as a printable HTML document and downloads it
 // as a PDF using the shared document PDF renderer.
 import { buildDocumentPdfBase64, pdfFileName } from "@/features/documents/utils/documentPdf";
 import type { MaeveMessage, MaeveSessionRow } from "../hooks/useMaeveSession";
@@ -8,7 +8,7 @@ const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export function buildTranscriptHtml(session: MaeveSessionRow | null, messages: MaeveMessage[]): string {
-  const title = session?.title || "Ask Angel exploration";
+  const title = session?.title || "Ask Holarc exploration";
   const date = new Date(session?.created_at ?? Date.now()).toLocaleString();
 
   const rows = messages
@@ -37,7 +37,7 @@ export function buildTranscriptHtml(session: MaeveSessionRow | null, messages: M
     <div id="holarc-document" style="width:794px;padding:48px 56px;background:#fff;font-family:Manrope,Arial,sans-serif;">
       <div style="border-bottom:2px solid #F97316;padding-bottom:10px;margin-bottom:18px;">
         <div style="font-size:20px;font-weight:800;color:#111;">${escapeHtml(title)}</div>
-        <div style="font-size:12px;color:#666;margin-top:2px;">Ask Angel · ${escapeHtml(date)}</div>
+        <div style="font-size:12px;color:#666;margin-top:2px;">Ask Holarc · ${escapeHtml(date)}</div>
       </div>
       ${rows}
       ${summary}

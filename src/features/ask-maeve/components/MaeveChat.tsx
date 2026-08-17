@@ -222,7 +222,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
   const share = async () => {
     if (messages.length === 0) return;
-    const result = await shareTranscript(transcriptText(), session?.title || "Ask Angel exploration");
+    const result = await shareTranscript(transcriptText(), session?.title || "Ask Holarc exploration");
     if (result === "copied") toast.success("Transcript copied — paste it into WhatsApp, email or notes");
     if (result === "failed") toast.error("Sharing isn't available here — try saving the transcript instead");
   };
@@ -239,10 +239,10 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     }
     const { error: err } = await safeInvoke("send-document-email", {
       to,
-      subject: `Your Ask Angel transcript — ${new Date(session?.created_at ?? Date.now()).toLocaleDateString()}`,
-      documentName: session?.title || "Ask Angel exploration",
+      subject: `Your Ask Holarc transcript — ${new Date(session?.created_at ?? Date.now()).toLocaleDateString()}`,
+      documentName: session?.title || "Ask Holarc exploration",
       documentContent: transcriptText(),
-      senderName: "Ask Angel",
+      senderName: "Ask Holarc",
     });
     setEmailing(false);
     if (err) {
@@ -291,7 +291,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         </div>
         <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
           <Sparkles className="h-5 w-5 text-maeve" />
-          Ask Angel
+          Ask Holarc
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           How would you like to explore today? You can change this at any time.
@@ -335,7 +335,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         <div>
           <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
             <Sparkles className="h-5 w-5 text-maeve" />
-            Ask Angel
+            Ask Holarc
           </h1>
           <div className="mt-1">
             <div className="flex items-center gap-1.5">

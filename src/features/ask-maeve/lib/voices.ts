@@ -34,7 +34,7 @@ export function getStoredVoiceId(): string {
 }
 
 /**
- * The voice saved on the signed-in person's Ask Angel preferences, so their
+ * The voice saved on the signed-in person's Ask Holarc preferences, so their
  * choice follows them to any device. Falls back to Nova.
  */
 export async function loadProfileVoice(): Promise<{ id: string; label: string | null }> {
@@ -51,7 +51,7 @@ export async function loadProfileVoice(): Promise<{ id: string; label: string | 
   return { id: data.voice_id, label: data.voice_label ?? null };
 }
 
-/** Saves the chosen voice to the person's Ask Angel preferences. */
+/** Saves the chosen voice to the person's Ask Holarc preferences. */
 export async function saveProfileVoice(id: string, label?: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;

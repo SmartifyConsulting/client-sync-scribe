@@ -3,12 +3,12 @@ import { CLIENT_FALLBACK, looksLikeAdvice } from "./suggestionDetector";
 
 /** Build a clean, readable transcript of a Angel exploration. */
 export function buildTranscript(session: MaeveSessionRow | null, messages: MaeveMessage[]): string {
-  const title = session?.title || "Ask Angel exploration";
+  const title = session?.title || "Ask Holarc exploration";
   const date = session?.created_at ? new Date(session.created_at).toLocaleString() : new Date().toLocaleString();
 
   const lines: string[] = [
     `${title}`,
-    `Ask Angel — ${date}`,
+    `Ask Holarc — ${date}`,
     "",
     "----------------------------------------",
     "",

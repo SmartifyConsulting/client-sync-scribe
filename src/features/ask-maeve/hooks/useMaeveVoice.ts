@@ -7,7 +7,7 @@ interface Options {
   onSpeechEnd?: () => void;
 }
 
-/** Voice input (live words + Whisper) and spoken replies (ElevenLabs) for Ask Angel. */
+/** Voice input (live words + Whisper) and spoken replies (ElevenLabs) for Ask Holarc. */
 export function useMaeveVoice(options: Options = {}) {
   const [recording, setRecording] = useState(false);
   const [paused, setPaused] = useState(false);

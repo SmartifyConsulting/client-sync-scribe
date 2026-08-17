@@ -83,7 +83,7 @@ export function MaeveRecap({ sessionId, onContinue }: Props) {
         <div className="min-w-0">
           <h1 className="flex items-center gap-2 font-display text-xl font-bold text-foreground">
             <Sparkles className="h-5 w-5 text-maeve" />
-            Ask Angel
+            Ask Holarc
           </h1>
           <div className="mt-1">
             <SessionTitleEditor sessionId={sessionId} title={session?.title} onRenamed={() => reload()} />

@@ -1,5 +1,5 @@
 /**
- * Saves an Ask Angel exploration transcript into the documents store so it
+ * Saves an Ask Holarc exploration transcript into the documents store so it
  * appears alongside the other documents for that person.
  */
 
@@ -34,7 +34,7 @@ export async function saveExplorationDocument(
 
     const text = buildTranscript(session, messages);
     const created = session?.created_at ?? new Date().toISOString();
-    const name = `Ask Angel — ${session?.title?.trim() || new Date(created).toLocaleDateString()}`;
+    const name = `Ask Holarc — ${session?.title?.trim() || new Date(created).toLocaleDateString()}`;
 
     const payload = {
       user_id: user.id,

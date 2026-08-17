@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import { useV2Demo } from "@/hooks/useV2Demo";
 
 /**
- * Guards routes that belong to the version 2.0 demo (Biolog, Ask Angel).
+ * Guards routes that belong to the version 2.0 demo (Biolog, Ask Holarc).
  * Accounts without the v2 demo flag are sent back to their dashboard.
  */
 export function V2Route({ children }: { children: ReactNode }) {
