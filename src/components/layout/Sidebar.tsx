@@ -299,7 +299,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       return (
         <div
           key={item.to}
-          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-muted-foreground cursor-not-allowed"
+          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-[14px] font-semibold text-muted-foreground cursor-not-allowed"
           title="Coming soon — preview only"
         >
           <item.icon className="h-5 w-5 text-muted-foreground" />
