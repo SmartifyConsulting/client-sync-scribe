@@ -311,7 +311,7 @@ export function BiologToday({ ownerUserId, readOnly }: Props) {
                     value={slot}
                     className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
                   >
-                    <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+                    <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
                       <div className="flex flex-1 items-center justify-between pr-2">
                         <span className={LABEL}>{label}</span>
                         <span className="text-[11px] text-muted-foreground">

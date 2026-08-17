@@ -599,7 +599,7 @@ export function CompactTodoList() {
                               value={`${b.key}-${patientName}`}
                               className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
                             >
-                              <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+                              <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
                                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}

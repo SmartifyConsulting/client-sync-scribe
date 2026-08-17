@@ -102,7 +102,7 @@ When a group of records inside an already-collapsible group (e.g. sessions group
 ```jsx
 <Accordion type="multiple" className="space-y-3">
   <AccordionItem value={key} className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden">
-    <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+    <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
       <div className="flex items-center justify-between w-full pr-2">
         <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
           <User className="h-3.5 w-3.5 text-muted-foreground" />
@@ -119,6 +119,7 @@ When a group of records inside an already-collapsible group (e.g. sessions group
 ```
 
 - **Header colour: light grey (`bg-muted/30`)** — not `bg-primary` (top-level tabs), not `bg-neutral-600` (sub-tabs), and not `SECTION_TRIGGER_ALWAYS_GREEN_CLASS`'s green (used by the *parent* accordion's own header, e.g. the month header in Sessions/My Sessions). The light-grey `bg-muted/30` is precisely what signals "this accordion is nested one level inside another," distinct from every other accordion-trigger colour in the app.
+- **Critical — the trigger itself needs `bg-transparent`, not just the item.** The base `AccordionTrigger` component (`src/components/ui/accordion.tsx`) ships with an opaque `bg-white` baked into its default className. Setting `bg-muted/30` only on the `AccordionItem` wrapper is not enough — the trigger button sits on top and its own `bg-white` paints over the item's background completely, so the "light grey" never actually renders (the row looks plain white). Always add `bg-transparent` explicitly to the `AccordionTrigger`'s own className so it stops covering the item's background. This exact bug shipped across every nested-sub-accordion instance in the app the first time this pattern was introduced — don't repeat it.
 - **Trigger text:** `text-xs font-medium text-foreground`, with a small leading icon in `text-muted-foreground` where one applies (e.g. a `User` icon for a per-patient sub-group).
 - **Shape:** `rounded-lg` (one step down from the `rounded-xl` used by top-level record cards/frames), `overflow-hidden`, no visible border (`border-0`).
 - **Collapsed by default** — nested sub-accordions should NOT be expanded on load (unlike the parent group, which is often open-by-default); the user drills down intentionally.
@@ -176,6 +177,6 @@ When styling or reviewing a screen, check each element type present against this
 - [ ] Record/accordion cards use `rounded-xl border border-primary bg-card p-5` (or the red-tinted danger variant where semantically appropriate)
 - [ ] Records inside any concertina/accordion have visible padding/spacing between them, not a bare flush `divide-y` hairline
 - [ ] Record row height elsewhere is ~50% of the Documents screen's reference row height (~36px vs. ~72px), unless it genuinely is the Documents screen
-- [ ] Nested sub-accordions (an accordion within an accordion, e.g. patients within a month) use the light-grey `bg-muted/30` trigger, `rounded-lg`, collapsed by default — never green, never `bg-neutral-600`, never the parent's own header colour
+- [ ] Nested sub-accordions (an accordion within an accordion, e.g. patients within a month) use the light-grey `bg-muted/30` on the item AND `bg-transparent` on the trigger itself (the trigger's own default `bg-white` otherwise covers the item's colour completely — check the rendered background is actually grey, not just the className), `rounded-lg`, collapsed by default — never green, never `bg-neutral-600`, never the parent's own header colour
 - [ ] Record rows *inside* a nested sub-accordion match the Sessions reference height exactly — `px-3 py-2`, `text-sm font-medium` label (see `SessionCard` in `src/pages/MySessions.tsx`) — regardless of what row height the screen's top-level (non-nested) accordion uses
 - [ ] No raw/arbitrary colors introduced where a token or an established pattern above already covers the case

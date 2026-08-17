@@ -9,6 +9,9 @@ export type TestProfile = {
 
 export const ADMIN_EMAIL = "info@georgiaadams.co.za";
 
+/** The only two system admin accounts — used to gate V2-preview features. */
+export const SYSTEM_ADMIN_EMAILS = [ADMIN_EMAIL, "georgia.adams@smartify.co.za"];
+
 export const TEST_PROFILES: TestProfile[] = [
   { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
   { email: "georgia.adams@smartify.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },

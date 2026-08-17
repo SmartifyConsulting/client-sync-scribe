@@ -30,6 +30,7 @@ import {
   FlaskConical,
   Activity,
   Sparkles,
+  Lock,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -55,6 +56,8 @@ interface NavItem {
   danger?: boolean;
   /** Ask Holarc — yellow-orange accent, distinct from the red SOS control. */
   accent?: boolean;
+  /** V2 preview feature the current account can't open (see useV2Demo). */
+  v2Locked?: boolean;
 }
 
 interface NavSection {
@@ -213,11 +216,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
-  /** Version 2.0 features stay hidden unless the account is a v2 demo profile. */
+  /** Version 2.0 features (Biolog, Ask Holarc) show for everyone as a greyed-out
+   *  preview; only the system admin accounts (useV2Demo) can actually open them. */
   const V2_PATHS = ["/biolog", "/ask-maeve"];
   const withShiftRule = (items: (NavItem & { tour?: string })[]) => {
     let next = hideMyShift ? items.filter((i) => i.to !== "/my-shift") : items;
-    if (!v2Demo) next = next.filter((i) => !V2_PATHS.includes(i.to));
+    if (!v2Demo) next = next.map((i) => (V2_PATHS.includes(i.to) ? { ...i, v2Locked: true } : i));
     return next;
   };
 
@@ -290,6 +294,20 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           !navItems.some(
             (n) => n.to.includes(`${itemPath}?`) && location.search === `?${n.to.split("?")[1]}`,
           ));
+
+    if (item.v2Locked) {
+      return (
+        <div
+          key={item.to}
+          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-muted-foreground opacity-60 cursor-not-allowed"
+          title="Coming soon — preview only"
+        >
+          <item.icon className="h-5 w-5" />
+          <span className="flex-1">{t(item.labelKey, item.label)}</span>
+          <Lock className="h-3.5 w-3.5 shrink-0" />
+        </div>
+      );
+    }
 
     return (
       <NavLink

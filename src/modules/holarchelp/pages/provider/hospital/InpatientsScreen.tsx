@@ -152,7 +152,7 @@ export default function InpatientsScreen() {
                         value={p.id}
                         className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
                       >
-                        <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+                        <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none bg-transparent hover:no-underline hover:bg-muted/50">
                           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pr-2 text-left">
                             <span className="text-xs font-medium text-foreground tracking-wide">
                               {wardName(p.ward_id)} · Bed {p.bed_number || "—"}
