@@ -57,19 +57,13 @@ const handler = async (req: Request): Promise<Response> => {
       )
       .join("");
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Invoice Report</title>
-      </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1f2937; margin-bottom: 5px;">Invoice Report</h1>
-          <p style="color: #6b7280; margin: 0;">${doctorName}</p>
-          ${practiceNumber ? `<p style="color: #6b7280; margin: 0; font-size: 14px;">Practice No: ${practiceNumber}</p>` : ""}
+    const reportBody = `
+        <div style="background: #f9fafb; border-radius: 8px; padding: 15px; margin-bottom: 24px; text-align: center;">
+          <p style="margin: 0; color: #6b7280; font-size: 14px;">
+            Report Period: <strong>${dateFrom}</strong> to <strong>${dateTo}</strong>
+          </p>
         </div>
+
 
         <div style="background: #f9fafb; border-radius: 8px; padding: 15px; margin-bottom: 30px; text-align: center;">
           <p style="margin: 0; color: #6b7280; font-size: 14px;">
