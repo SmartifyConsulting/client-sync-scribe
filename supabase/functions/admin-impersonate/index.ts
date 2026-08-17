@@ -46,13 +46,15 @@ Deno.serve(async (req) => {
 
       "2348167581572@phone.holarc.local",
     ]);
-    const callerIsSeeded = SEEDED_EMAILS.has(callerEmail);
+    // The profile switcher only ever offers seeded demo accounts, and a caller
+    // who is already signed in as one of them (or was switched into a real
+    // account from one) must be able to hop back. So: any switch whose TARGET
+    // is a seeded demo account is allowed; anything else needs the admin role.
     const targetIsSeeded = SEEDED_EMAILS.has(email);
-    const isSeededSwitch = callerIsSeeded && targetIsSeeded;
 
-    if (!isSeededSwitch) {
+    if (!targetIsSeeded) {
       const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
-      if (!isAdmin) throw new Error("Admin role required");
+      if (!isAdmin) throw new Error(`Admin role required (signed in as ${callerEmail || "unknown"})`);
     }
 
     // Some seeded test accounts (added to the profile switcher before their
