@@ -124,6 +124,12 @@ export default function SessionDetail() {
       .then(({ data }) => { if (data?.full_name) setDoctorName(data.full_name); });
   }, [session?.user_id]);
 
+  // Log this record view for the patient's "My Views" list
+  useEffect(() => {
+    if (!session?.patient_id) return;
+    logProfileView(session.patient_id, "Session Detail");
+  }, [session?.patient_id]);
+
   // Resolve signed audio URL
   useEffect(() => {
     if (!session?.audio_url) { setSignedAudioUrl(null); return; }
