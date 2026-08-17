@@ -7,6 +7,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 import { TEST_PROFILES, ADMIN_EMAIL } from "./testProfiles";
+import { useSeededProfileNames } from "./useSeededProfileNames";
 import { useImpersonate } from "./useImpersonate";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +16,8 @@ export function ProviderProfileMenu() {
   const { profile } = useProfile();
   const { isAdmin } = useIsAdmin();
   const { impersonate, switching } = useImpersonate();
+  const liveNames = useSeededProfileNames();
+
 
   const { data: currentEmail = "" } = useQuery({
     queryKey: ["auth-email-provider"],
