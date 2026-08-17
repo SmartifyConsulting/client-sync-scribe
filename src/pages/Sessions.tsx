@@ -1528,7 +1528,8 @@ export default function Sessions() {
                 {/* Pause / Resume button — only while recording */}
                 {isRecording && !isTranscribing && (
                   <button
-                    onClick={() => (isPaused ? resumeRecording() : pauseRecording())}
+                    onClick={handlePauseToggle}
+                    disabled={isSavingPause}
                     aria-label={isPaused ? "Resume recording" : "Pause recording"}
                     className={cn(
                       "flex h-12 items-center justify-center gap-2 rounded-full px-4 transition-all duration-300 border-2 text-sm font-medium",
