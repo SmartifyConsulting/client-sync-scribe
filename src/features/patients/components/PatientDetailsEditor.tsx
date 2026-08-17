@@ -1677,7 +1677,7 @@ export function PatientDetailsEditor({
     const showTabs = true;
     return (
       <div className="space-y-0">
-        {showFullBanner && <ProfileBanner />}
+        {/* Hero banner now lives on My Dashboard */}
         {showCompactBanner && <CompactBanner />}
         <div className="rounded-xl border border-primary bg-card p-2 md:p-6 space-y-2 md:space-y-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
