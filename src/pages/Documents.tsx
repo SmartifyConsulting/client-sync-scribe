@@ -560,8 +560,10 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {filteredHFTemplates.flatMap((template) => ([
+                hfSideHasContent(template.header) ? (
                 <div
                   key={`${template.id}-header`}
+
                   className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
