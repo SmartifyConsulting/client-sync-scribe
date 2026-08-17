@@ -1018,7 +1018,7 @@ export default function Sessions() {
     clearTranscript();
     hintImpressionRef.current = "";
     hintLinesRef.current.clear();
-    hintSectionsRef.current = { alertGroups: [], differentials: [], investigations: [] };
+    hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
     sessionStartTimeRef.current = new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
