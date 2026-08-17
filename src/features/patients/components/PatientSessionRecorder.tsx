@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useNavigate } from "react-router-dom";
+import { ListGroupToolbar } from "@/components/common/ListGroupToolbar";
 
 interface Props {
   patientId: string;
@@ -147,18 +148,22 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
         <div className="flex justify-center py-8">
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
         </div>
-      ) : sessions.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-6">
-          No sessions yet. Tap "New session" to record one with your doctor.
-        </p>
       ) : (
-        <div className="rounded-xl border border-primary bg-card divide-y">
-          {sessions.map((s) => (
+        <ListGroupToolbar
+          storageKey="patient-sessions"
+          items={sessions.map((s) => ({
+            item: s,
+            date: s.started_at,
+            search: [s.external_doctor_name, s.external_doctor_specialty, s.summary].filter(Boolean).join(" "),
+          }))}
+          searchPlaceholder="Search sessions..."
+          emptyLabel='No sessions yet. Tap "New session" to record one with your doctor.'
+          renderItem={(s) => (
             <button
               key={s.id}
               type="button"
               onClick={() => navigate(`/sessions/${s.id}`)}
-              className="w-full text-left p-3 hover:bg-muted/50 flex items-start gap-3"
+              className="w-full text-left p-3 rounded-lg border border-border bg-card hover:bg-muted/50 flex items-start gap-3"
             >
               <Clock className="h-4 w-4 text-primary mt-0.5" />
               <div className="flex-1 min-w-0">
@@ -176,8 +181,8 @@ export function PatientSessionRecorder({ patientId, patientName }: Props) {
               )}
               <Eye className="h-4 w-4 text-muted-foreground" />
             </button>
-          ))}
-        </div>
+          )}
+        />
       )}
 
       <Dialog open={open} onOpenChange={(v) => !isRecording && setOpen(v)}>
