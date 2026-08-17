@@ -458,9 +458,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             </>
           ) : (
             <div className="space-y-1.5">
-              {visibleItems.map((item) => renderNavLink(item))}
               {isDoctor && profileToggle}
+              {visibleItems.map((item) => renderNavLink(item))}
             </div>
+
 
           )}
         </nav>
