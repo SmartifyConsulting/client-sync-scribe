@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -225,6 +226,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   const { user } = useAuth();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<UnifiedDocument[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [storageMB, setStorageMB] = useState(0);
   const [filter, setFilter] = useState<DocType | "all">("all");
@@ -259,6 +261,18 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
   useEffect(() => {
     if (user) fetchAll();
   }, [user]);
+
+  // Auto-open a document when arriving from an email deep link (?doc=<id>)
+  useEffect(() => {
+    const docId = searchParams.get("doc");
+    if (!docId || documents.length === 0) return;
+    const match = documents.find((d) => d.id === docId);
+    if (match) {
+      setPreviewDoc(match);
+      searchParams.delete("doc");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [documents, searchParams, setSearchParams]);
 
   async function fetchAll() {
     if (!user) return;

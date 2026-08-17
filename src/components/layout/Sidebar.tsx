@@ -1,4 +1,6 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+
 import { useTranslation } from "react-i18next";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
 const holarcLogo = holarcLogoAsset.url;
@@ -98,15 +100,19 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
       { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
       { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
+      { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
+      { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
+      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks" },
       { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
+      { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
     ],
   },
 ];
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
+
 
 /** Flat view of the doctor menu, used for preference-based reordering/hiding
  *  and the "Customise menu" popover, which don't need to know about sections. */
@@ -189,6 +195,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
+  const navigate = useNavigate();
+
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
   const isOnAdminRoute = location.pathname.startsWith("/admin");
 
@@ -207,12 +215,25 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const isDoctor = role === "doctor";
   const isNurseMenu = role === "nurse";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
-  const isPatientMenu = !isDoctor && !isNurseMenu && (isPatient || routeSaysPatient);
+
+  /** Doctors can flip the sidebar between their practice menu and their own
+   *  patient menu with the badge next to Dashboard. The choice persists. */
+  const [profileMode, setProfileMode] = useState<"doctor" | "patient">(() =>
+    (localStorage.getItem("sidebarProfileMode") as "doctor" | "patient") || "doctor",
+  );
+  useEffect(() => {
+    localStorage.setItem("sidebarProfileMode", profileMode);
+  }, [profileMode]);
+  const doctorInPatientMode = isDoctor && profileMode === "patient";
+
+  const isPatientMenu =
+    doctorInPatientMode || (!isDoctor && !isNurseMenu && (isPatient || routeSaysPatient));
 
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
+
   /** Version 2.0 features (Biolog, Ask Holarc) show for everyone as a greyed-out
    *  preview; only the system admin accounts (useV2Demo) can actually open them. */
   const V2_PATHS = ["/biolog", "/ask-maeve"];
@@ -367,7 +388,34 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     refetchInterval: 30000,
   });
 
+  /** Doctor | Patient pill shown next to Dashboard so doctors can switch the
+   *  sidebar between their practice tools and their own patient profile. */
+  const profileToggle = (
+    <div className="mx-1 mt-1 flex items-center gap-1 rounded-full bg-muted/60 p-0.5">
+      {(["doctor", "patient"] as const).map((mode) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => {
+            setProfileMode(mode);
+            navigate(mode === "patient" ? "/my-dashboard" : "/doctor-dashboard");
+            onNavigate?.();
+          }}
+          className={cn(
+            "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
+            profileMode === mode
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {mode}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
+
     <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
@@ -386,7 +434,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 {applyItemPreferences(DOCTOR_TOP_ITEMS, preferences.item_order, preferences.hidden_items).map((item) =>
                   renderNavLink(item),
                 )}
+                {isDoctor && profileToggle}
               </div>
+
               {doctorSections.map((section) => {
                 const sectionItems = applyItemPreferences(section.items, preferences.item_order, preferences.hidden_items);
                 if (sectionItems.length === 0) return null;
@@ -407,7 +457,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               </div>
             </>
           ) : (
-            <div className="space-y-1.5">{visibleItems.map((item) => renderNavLink(item))}</div>
+            <div className="space-y-1.5">
+              {isDoctor && profileToggle}
+              {visibleItems.map((item) => renderNavLink(item))}
+            </div>
+
+
           )}
         </nav>
 

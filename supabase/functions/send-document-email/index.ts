@@ -2,6 +2,9 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/email.ts";
 import { brandedEmail, escapeHtml } from "../_shared/brandEmail.ts";
+import { renderSignatureHtml, buildGreeting } from "../_shared/signature.ts";
+
+const APP_URL = "https://holarchealth.com";
 
 /** Pull the inner markup out of a full HTML document so it can be re-wrapped. */
 function extractBody(html: string): string {
@@ -84,11 +87,11 @@ serve(async (req) => {
       : [];
     let attachedDocs: Array<{ name: string; content: string }> = [];
     if (attachedDocumentIds.length > 0) {
-      const admin = createClient(
+      const attachAdmin = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       );
-      const { data: rows, error: attachError } = await admin
+      const { data: rows, error: attachError } = await attachAdmin
         .from("documents")
         .select("name, content")
         .in("id", attachedDocumentIds.slice(0, 20));
@@ -101,6 +104,68 @@ serve(async (req) => {
         }));
       }
     }
+
+    // ---- Sender signature, recipient greeting and app deep link ----
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    let signatureHtml = "";
+    try {
+      const { data: senderProfile } = await admin
+        .from("profiles")
+        .select(
+          "full_name, signature_url, signature_font, signature_color, signature_font_size, signature_bold, signature_italic",
+        )
+        .eq("id", user.id)
+        .maybeSingle();
+      if (senderProfile) {
+        signatureHtml = renderSignatureHtml(senderProfile as any);
+        senderName = body.senderName || (senderProfile as any).full_name || senderName;
+      }
+      if (!practiceName) {
+        const { data: practice } = await admin
+          .from("practices")
+          .select("name")
+          .eq("owner_id", user.id)
+          .maybeSingle();
+        practiceName = (practice as any)?.name || practiceName;
+      }
+    } catch (e) {
+      console.error("Signature lookup failed", e);
+    }
+
+    // Resolve the recipient's real name so we never greet "Dear Colleague".
+    let greeting: string | null = typeof body.greeting === "string" ? body.greeting : null;
+    let recipientIsPatient = false;
+    if (!greeting && to) {
+      try {
+        const { data: pt } = await admin
+          .from("patients")
+          .select("name")
+          .ilike("email", String(to))
+          .limit(1)
+          .maybeSingle();
+        if ((pt as any)?.name) {
+          recipientIsPatient = true;
+          greeting = buildGreeting({ fullName: (pt as any).name });
+        }
+      } catch (e) {
+        console.error("Recipient lookup failed", e);
+      }
+    }
+    if (!greeting && body.recipientName) {
+      greeting = buildGreeting({ fullName: body.recipientName, isPractitioner: true });
+    }
+
+    const documentUrl = body.documentId
+      ? `${APP_URL}${recipientIsPatient ? `/patient/documents?doc=${body.documentId}` : `/documents?view=${body.documentId}`}`
+      : null;
+
+    const greetingHtml = greeting
+      ? `<p style="margin:0 0 14px 0;">${escapeHtml(greeting)},</p>`
+      : "";
 
     if (!to || !subject || (!documentContent && !documentHtml)) {
       throw new Error("Missing required fields: to, subject, documentContent or documentHtml");
@@ -117,7 +182,9 @@ serve(async (req) => {
         subtitle: practiceName,
         senderName,
         practiceName,
-        bodyHtml: `<div style="border:1px solid #e5e7eb;border-radius:10px;padding:20px;background:#ffffff;">${inner}</div>`,
+        documentUrl,
+        signatureHtml,
+        bodyHtml: `${greetingHtml}<div style="border:1px solid #e5e7eb;border-radius:10px;padding:20px;background:#ffffff;">${inner}</div>`,
       });
     } else {
       // Format document content as HTML (legacy text path)
@@ -150,7 +217,9 @@ serve(async (req) => {
         subtitle: practiceName,
         senderName,
         practiceName,
-        bodyHtml: `<div style="white-space:pre-wrap;">${formattedContent}</div>${attachmentsHtml}`,
+        documentUrl,
+        signatureHtml,
+        bodyHtml: `${greetingHtml}<div style="white-space:pre-wrap;">${formattedContent}</div>${attachmentsHtml}`,
       });
     }
 

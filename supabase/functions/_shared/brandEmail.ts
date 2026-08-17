@@ -7,7 +7,7 @@
  */
 
 export const HOLARC_LOGO_URL =
-  "https://holarchealth.com/__l5e/assets-v1/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png";
+  "https://www.holarchealth.com/__l5e/assets-v1/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png";
 
 /** Brand tokens mirrored from the app's design system. */
 const TEAL = "#2AA79E";
@@ -32,6 +32,10 @@ export interface BrandEmailOptions {
   practiceName?: string | null;
   /** Optional extra footer note (defaults to the confidentiality notice). */
   footerNote?: string | null;
+  /** Deep link back to this document inside the app. */
+  documentUrl?: string | null;
+  /** Pre-rendered signature markup (image or typed) shown above the sender line. */
+  signatureHtml?: string | null;
 }
 
 export function brandedEmail({
@@ -41,6 +45,8 @@ export function brandedEmail({
   senderName,
   practiceName,
   footerNote,
+  documentUrl,
+  signatureHtml,
 }: BrandEmailOptions): string {
   const from = [senderName, practiceName].filter(Boolean).join(" · ");
   const note =
@@ -62,7 +68,7 @@ export function brandedEmail({
           <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
             <tr>
               <td style="border-top:4px solid ${RED};padding:20px 28px 12px 28px;">
-                <img src="${HOLARC_LOGO_URL}" alt="Holarc Health" style="height:44px;width:auto;display:block;" />
+                <a href="https://www.holarchealth.com" style="text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;"><img src="${HOLARC_LOGO_URL}" alt="Holarc Health" width="176" height="44" style="height:44px;width:176px;max-width:176px;display:block;border:0;outline:none;text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;" /></a>
               </td>
             </tr>
             <tr>
@@ -75,10 +81,16 @@ export function brandedEmail({
             <tr>
               <td style="padding:16px 28px 24px 28px;font-size:14px;line-height:1.6;color:${INK};">
                 ${bodyHtml}
+                ${documentUrl ? `
+                <div style="margin-top:24px;">
+                  <a href="${documentUrl}" style="display:inline-block;background:${TEAL};color:#ffffff;font-family:${HEADING_FONT};font-weight:600;font-size:14px;text-decoration:none;padding:11px 20px;border-radius:8px;">View this document in Holarc Health</a>
+                  <p style="margin:8px 0 0 0;font-size:12px;color:${MUTED};word-break:break-all;">${escapeHtml(documentUrl)}</p>
+                </div>` : ""}
               </td>
             </tr>
             <tr>
               <td style="padding:16px 28px 24px 28px;border-top:1px solid #e5e7eb;font-size:12px;color:${MUTED};">
+                ${signatureHtml ? `<div style="margin:0 0 10px 0;">${signatureHtml}</div>` : ""}
                 ${from ? `<p style="margin:0 0 6px 0;font-weight:600;color:${INK};">Sent by ${escapeHtml(from)}</p>` : ""}
                 <p style="margin:0 0 6px 0;">${escapeHtml(note)}</p>
                 <p style="margin:0;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:600;">Holarc Health</p>
