@@ -98,49 +98,70 @@ export function PermissionTransparencyModal({
   const sharedList = isDoctorMode ? getDoctorSharedItems(t) : getSharedItems(t);
   const privateList = isDoctorMode ? getDoctorPrivateItems(t) : getPrivateItems(t);
 
+  const RowList = ({
+    allowed,
+    denied,
+  }: {
+    allowed: PermissionItem[];
+    denied: PermissionItem[];
+  }) => (
+    <ul className="space-y-1.5 text-xs text-foreground">
+      {allowed.map((item) => (
+        <li key={`ok-${item.label}`}>
+          <div className="flex items-start gap-2">
+            <CheckCircle className="h-3.5 w-3.5 text-green-600 mt-0.5 shrink-0" />
+            <span>{item.label}</span>
+          </div>
+          {item.subItems && (
+            <ul className="mt-1 space-y-1 pl-5">
+              {item.subItems.map((sub) => (
+                <li key={sub} className="flex items-start gap-2 text-muted-foreground">
+                  <CheckCircle className="h-3 w-3 text-green-600 mt-0.5 shrink-0" />
+                  <span>{sub}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+      {denied.map((item) => (
+        <li key={`no-${item.label}`} className="flex items-start gap-2">
+          <XCircle className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
+          <span>{item.label}</span>
+        </li>
+      ))}
+    </ul>
+  );
+
   const content = (
-    <div className="space-y-4">
+    <div className="space-y-4 rounded-lg border-2 border-dark-orange p-4">
       {isDoctorMode && (
         <p className="text-xs text-muted-foreground">
           {t("dialogs.otherDoctorsWillSee")}
         </p>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Column 1: Shared Items */}
+        {/* Column 1: what is shared / not shared with the care team */}
         <div>
           <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-600" />
             {sharedHeading}
           </h4>
-          <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs text-foreground">
-            {sharedList.map((item) => (
-              <li key={item.label}>
-                {item.label}
-                {item.subItems && (
-                  <ul className="list-disc list-outside pl-4 mt-1 space-y-1 text-muted-foreground">
-                    {item.subItems.map((sub) => (
-                      <li key={sub}>{sub}</li>
-                    ))}
-                  </ul>
-                )}
-              </li>
-            ))}
-          </ul>
+          <RowList allowed={sharedList} denied={privateList} />
         </div>
 
-        {/* Column 2: Private Items */}
+        {/* Column 2: what other practitioners can access */}
         <div>
-          <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-            <XCircle className="h-4 w-4 text-destructive" />
-            {privateHeading}
+          <h4 className="text-sm font-semibold text-foreground mb-2">
+            {t(
+              "dialogs.otherPractitionersAccess",
+              "What other practitioners can access from your session",
+            )}
           </h4>
-          <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs text-foreground">
-            {privateList.map((item) => (
-              <li key={item.label}>{item.label}</li>
-            ))}
-          </ul>
+          <RowList allowed={getDoctorSharedItems(t)} denied={getDoctorPrivateItems(t)} />
         </div>
       </div>
+
 
       {/* Patient-facing holistic nudge */}
       {isPatientFacing && !isDoctorMode && (
