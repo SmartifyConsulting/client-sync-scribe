@@ -581,8 +581,13 @@ export function CompactTodoList() {
               );
               const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
               if (buckets.length === 0) return null;
+              // LOCKED LAYOUT — see mem://design/todo-accordion-and-row-spec.
+              // Date accordion (always-green bar + calendar icon + count pill) wrapping
+              // muted patient sub-accordions wrapping TodoRow cards. Do not restructure
+              // or restyle without updating that memory rule first.
               return (
                 <Accordion type="multiple" defaultValue={[buckets[0].key]} className="space-y-2">
+
                   {buckets.map((b) => (
                     <AccordionItem key={b.key} value={b.key} className={SECTION_ITEM_ROUNDED_CLASS}>
                       <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-2")}>

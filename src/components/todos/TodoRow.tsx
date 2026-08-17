@@ -144,6 +144,9 @@ export function TodoRow({
     );
   }
 
+  // LOCKED LAYOUT — see mem://design/todo-accordion-and-row-spec.
+  // Do not restyle the grouped ("insideGroup") row card or its font sizes without
+  // updating that memory rule first; this has been re-litigated several times.
   return (
     <TooltipProvider delayDuration={300}>
       <div
@@ -152,7 +155,7 @@ export function TodoRow({
           insideGroup
             ? cn(
                 "flex items-center rounded-xl border border-border bg-card cursor-default transition-colors hover:bg-muted/50",
-                compact ? "gap-2 py-1 px-2" : "gap-3 py-2 px-3",
+                compact ? "gap-2.5 py-1.5 px-2.5" : "gap-3 py-2 px-3",
                 todo.completed && "bg-muted/20",
               )
             : cn(
@@ -177,10 +180,10 @@ export function TodoRow({
           <div
             className={cn(
               "flex items-center justify-center rounded-full bg-primary/10 shrink-0",
-              compact ? "h-6 w-6" : "h-10 w-10",
+              compact ? "h-7 w-7" : "h-10 w-10",
             )}
           >
-            <Icon className={compact ? "h-3 w-3 text-primary" : "h-5 w-5 text-primary"} />
+            <Icon className={compact ? "h-3.5 w-3.5 text-primary" : "h-5 w-5 text-primary"} />
           </div>
         ) : (
           <Icon className="h-4 w-4 text-primary shrink-0" />
@@ -192,7 +195,7 @@ export function TodoRow({
               <p
                 className={cn(
                   "font-medium text-black truncate",
-                  compact ? "text-xs" : "text-sm",
+                  compact ? "text-sm" : "text-base",
                   todo.completed && "line-through text-muted-foreground",
                 )}
               >
@@ -200,11 +203,12 @@ export function TodoRow({
               </p>
             </div>
             {(display.date || display.time || display.duration) && (
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-sm text-muted-foreground truncate">
                 {[display.date, display.time, display.duration].filter(Boolean).join(" · ")}
               </p>
             )}
           </div>
+
         ) : (
           <>
             {/* Label */}

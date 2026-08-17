@@ -15,7 +15,10 @@ export const SYSTEM_ADMIN_EMAILS = [ADMIN_EMAIL, "georgia.adams@smartify.co.za"]
 export const TEST_PROFILES: TestProfile[] = [
   { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
   { email: "georgia.adams@smartify.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
-  { email: "sme@smartify.co.za", name: "Dean Allie", role: "Doctor", icon: Stethoscope },
+  // `name` is only a fallback label — the switcher shows the live profiles.full_name
+  // via useSeededProfileNames(), so renames in the app update the menu automatically.
+  { email: "sme@smartify.co.za", name: "Dean Peterson", role: "Doctor", icon: Stethoscope },
+
   
   { email: "projectmanager@smartify.co.za", name: "Sharon Kennedy", role: "Patient", icon: HeartPulse },
   { email: "hospital.test@holarchealth.com", name: "Holarc General Hospital", role: "Hospital", icon: Building2 },

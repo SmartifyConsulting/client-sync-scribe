@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { Settings, LogOut, Share2, Stethoscope, HeartPulse, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES } from "./testProfiles";
+import { useSeededProfileNames } from "./useSeededProfileNames";
+
 import { useImpersonate } from "./useImpersonate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -41,18 +43,8 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: liveNames = {} } = useQuery({
-    queryKey: ["seeded-profile-names"],
-    queryFn: async () => {
-      const { data } = await (supabase.rpc as any)("get_seeded_profile_names");
-      const map: Record<string, string> = {};
-      ((data || []) as any[]).forEach((r) => {
-        if (r.email && r.full_name) map[String(r.email).toLowerCase()] = r.full_name as string;
-      });
-      return map;
-    },
-    staleTime: 60 * 1000,
-  });
+  const liveNames = useSeededProfileNames();
+
 
   return (
     <Popover>
