@@ -52,20 +52,18 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
       <PopoverContent className="p-1.5 w-[calc(var(--sidebar-width)_-_16px)]" align={align} alignOffset={alignOffset} sideOffset={8}>
         {/* Profile switcher */}
         {isDoctor && (
-          <div className="border-b border-border mb-1 space-y-1 pb-1">
+          <div className="border-b border-border mb-1 space-y-1">
             <button
               onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
               className={cn(
-                "flex items-center gap-2 px-2.5 py-1.5 w-full rounded-full transition-colors",
-                isOnPatientRoute
-                  ? "bg-pill-grey text-pill-grey-foreground hover:bg-pill-grey/80"
-                  : "bg-dark-orange text-dark-orange-foreground hover:bg-dark-orange/90",
+                "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
+                "bg-primary/10"
               )}
             >
-              <Stethoscope className="h-3.5 w-3.5 shrink-0" />
+              <Stethoscope className="h-3.5 w-3.5 text-primary" />
               <div className="text-left">
-                <p className="text-xs font-semibold">{profile?.full_name || "User"}</p>
-                <p className="text-xs opacity-80">{t("topbar.doctor")}</p>
+                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+                <p className="text-xs text-muted-foreground">{t("topbar.doctor")}</p>
               </div>
             </button>
           </div>
@@ -81,11 +79,9 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                 ? t("topbar.er")
                 : t("topbar.patient");
           return (
-            <div className="border-b border-border mb-1 pb-1">
-              <div className="px-2.5 py-1.5 w-full rounded-full bg-dark-orange text-dark-orange-foreground">
-                <p className="text-xs font-semibold">{profile?.full_name || "User"}</p>
-                <p className="text-xs opacity-80">{roleLabel}</p>
-              </div>
+            <div className="px-2 py-1.5 border-b border-border mb-1">
+              <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
+              <p className="text-xs text-muted-foreground">{roleLabel}</p>
             </div>
           );
         })()}
