@@ -35,6 +35,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { getTodoDisplay, type TodoDisplayInput } from "@/lib/todoDisplay";
+import { isDocumentTodoKind } from "@/lib/resolveTodoDocumentId";
 
 export interface TodoRowItem extends TodoDisplayInput {
   id: string;
