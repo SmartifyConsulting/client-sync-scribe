@@ -86,7 +86,9 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
 
     const key = fuzzyKey(clean);
-    const contextKey = `${current?.title || "Clinical Notes"}:${currentGroup?.label || "default"}`;
+    // De-duplicate per section (not per dated group) so a point repeated by a
+    // later live hint collapses into the first occurrence.
+    const contextKey = current?.title || "Clinical Notes";
     const seen = seenByContext.get(contextKey) || new Set<string>();
     if (!key || seen.has(key)) return;
     seen.add(key);
