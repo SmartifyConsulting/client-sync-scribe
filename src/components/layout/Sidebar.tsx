@@ -90,7 +90,6 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
-      { icon: Eye, label: "My Views", labelKey: "nav.myViews", to: "/my-views" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
   },
@@ -117,19 +116,35 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
+  { icon: Eye, label: "My Views", labelKey: "nav.myViews", to: "/my-views" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
   { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
-/** Nurses on duty get a lean menu focused on their shift and their patients. */
-const nurseNavItems: (NavItem & { tour?: string })[] = [
-  { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
-  { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-  { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/provider/hospital/inpatients" },
+/** Nurses work inside one hospital and one ward, so their menu is limited to
+ *  that ward's board, admissions, their shifts and their own profile. */
+const NURSE_SECTIONS: NavSection[] = [
+  {
+    title: "My Patients",
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.nurseDashboard", to: "/provider/hospital/nurse-dashboard" },
+      { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
+      { icon: BedDouble, label: "Ward Board", labelKey: "nav.wardBoard", to: "/provider/hospital/ward-board" },
+      { icon: Users, label: "Admissions", labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
+    ],
+  },
+];
+
+const NURSE_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
+];
+
+const nurseNavItems: (NavItem & { tour?: string })[] = [
+  ...NURSE_SECTIONS.flatMap((s) => s.items),
+  ...NURSE_BOTTOM_ITEMS,
 ];
 
 /** Extra tools for a Practice Management Assistant, appended to their own menu. */
