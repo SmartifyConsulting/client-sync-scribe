@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -44,10 +45,6 @@ import {
   GREETING_LINE,
   wellbeingDescriptor,
 } from "@/lib/emotionalState";
-
-// V2 preview — visible to everyone as a greyed-out preview, but only
-// interactive for this account so it can be demoed before wider rollout.
-const V2_DEMO_EMAIL = "georgia.adams@smartify.co.za";
 
 interface DashboardTile {
   icon: LucideIcon;
@@ -149,7 +146,9 @@ export default function MyPersonalDashboard() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  const unlocked = user?.email === V2_DEMO_EMAIL;
+  const { isAdmin } = useIsAdmin();
+  const unlocked = true;
+  const biologUnlocked = isAdmin;
 
   const { data: patientIds = [] } = useQuery({
     queryKey: ["dashboard-patient-ids", user?.id],
@@ -248,48 +247,77 @@ export default function MyPersonalDashboard() {
       {/* Hero: photo, greeting, Vulas, appointments */}
       <PatientHeroCard emotionalLine={GREETING_LINE[state]} />
 
-      {/* Our Observations — overall summary, above Biolog Updates and What's Happening */}
-      <Panel unlocked={unlocked}>
-        <div className="flex items-start gap-3">
-          <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-            <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
-          </span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">🌱 My Journey</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              See how your choices, patterns and wellbeing are evolving.
-            </p>
-            <ul className="mt-2 space-y-1.5">
-              {INSIGHTS.map((i) => (
-                <li key={i} className="text-xs text-muted-foreground">{i}</li>
-              ))}
-            </ul>
+      {/* My Journey (overall summary) + My Wellbeing — same row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <Panel unlocked={unlocked}>
+          <div className="flex items-start gap-3">
+            <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
+              <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">🌱 My Journey</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                See how your choices, patterns and wellbeing are evolving.
+              </p>
+              <ul className="mt-2 space-y-1.5">
+                {INSIGHTS.map((i) => (
+                  <li key={i} className="text-xs text-muted-foreground">{i}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </div>
-      </Panel>
+        </Panel>
+
+        <Panel title="My Wellbeing" icon={Sparkles} unlocked={unlocked} onClick={() => navigate("/ask-maeve")}>
+          <EmotionalHeadline
+            emoji="✨"
+            title="You don't have to figure it out alone"
+            sub="Something on your mind?"
+            muted={!unlocked}
+          />
+          <button
+            type="button"
+            onClick={() => navigate("/ask-maeve")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold",
+              unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
+            )}
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Ask Holarc
+          </button>
+          <p className="mt-2 text-xs text-muted-foreground leading-snug">
+            A place to slow down, explore what's on your mind and find your own way forward.
+          </p>
+        </Panel>
+      </div>
 
       {/* Daily summary (half width) + Quick View dropdown on the same row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-        <Panel unlocked>
+        <Panel unlocked={biologUnlocked}>
           <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Leaf className="h-5 w-5 text-primary" />
+            <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", biologUnlocked ? "bg-primary/10" : "bg-muted")}>
+              <Leaf className={cn("h-5 w-5", biologUnlocked ? "text-primary" : "text-muted-foreground")} />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">🌱 Your Biolog Updates</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-foreground">🌱 Your Biolog Updates</p>
+                {!biologUnlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+              </div>
               <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                Wellbeing +8% this month. Everything you've logged is feeding your longer-term picture.
+                {biologUnlocked
+                  ? "Wellbeing +8% this month. Everything you've logged is feeding your longer-term picture."
+                  : "Coming soon — this feature hasn't been introduced yet."}
               </p>
               <EmotionalHeadline
                 emoji="❤️"
                 title={EMOTIONAL_HEADLINE[state]}
                 sub={wellbeingDescriptor(state)}
-                muted={!unlocked}
+                muted={!biologUnlocked}
               />
               <div className="grid grid-cols-2 gap-3">
                 {VITALS.map((v) => (
                   <div key={v.label} className="flex items-start gap-2">
-                    <v.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
+                    <v.icon className={cn("h-4 w-4 mt-0.5", biologUnlocked ? "text-primary" : "text-muted-foreground")} />
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{v.label}</p>
                       <p className="text-sm font-semibold text-foreground">{v.value}</p>
@@ -298,38 +326,44 @@ export default function MyPersonalDashboard() {
                 ))}
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="outline" className="h-9 text-xs gap-1.5" onClick={() => navigate("/biolog")}>
+                <Button size="sm" variant="outline" className="h-9 text-xs gap-1.5" onClick={() => navigate("/biolog")} disabled={!biologUnlocked}>
                   <TrendingUp className="h-3.5 w-3.5" /> Open Biolog
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-9 gap-2 text-xs">
-                      <FolderOpen className="h-3.5 w-3.5" />
-                      Quick View
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-64 bg-popover z-50">
-                    {TILES.map((tile) => (
-                      <DropdownMenuItem key={tile.to} asChild>
-                        <Link to={tile.to} className="flex items-start gap-2">
-                          <tile.icon className="h-4 w-4 mt-0.5 text-primary" />
-                          <span className="min-w-0">
-                            <span className="block text-xs font-semibold text-foreground">{tile.label}</span>
-                            <span className="block text-[10px] text-muted-foreground">{tile.description}</span>
-                          </span>
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
           </div>
         </Panel>
 
-        {/* What's Happening — renamed from My Care: calendar content, then medications/results, then what needs your attention */}
-        <Panel title="What's Happening" icon={CalendarDays} unlocked={unlocked}>
+        {/* What's Happening — renamed from My Care: calendar content, then medications/results (Tasks, in teal, no hyperlink), then what needs your attention */}
+        <Panel
+          title="What's Happening"
+          icon={CalendarDays}
+          unlocked={unlocked}
+          action={
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                  <FolderOpen className="h-3.5 w-3.5" />
+                  Quick View
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64 bg-popover z-50">
+                {TILES.map((tile) => (
+                  <DropdownMenuItem key={tile.to} asChild>
+                    <Link to={tile.to} className="flex items-start gap-2">
+                      <tile.icon className="h-4 w-4 mt-0.5 text-primary" />
+                      <span className="min-w-0">
+                        <span className="block text-xs font-semibold text-foreground">{tile.label}</span>
+                        <span className="block text-[10px] text-muted-foreground">{tile.description}</span>
+                      </span>
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          }
+        >
           <EmotionalHeadline
             emoji="📅"
             title="You're in the loop"
@@ -339,31 +373,28 @@ export default function MyPersonalDashboard() {
           <div className="grid grid-cols-2 gap-4">
             <ul className="space-y-2">
               {HAPPENING.map((h) => (
-                <li key={h.title}>
-                  <Link to={h.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
-                    <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-                      <h.icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground">{h.title}</p>
-                      <p className="text-[10px] text-muted-foreground">{h.detail}</p>
-                    </div>
-                  </Link>
+                <li key={h.title} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5">
+                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
+                    <h.icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground">{h.title}</p>
+                    <p className="text-[10px] text-muted-foreground">{h.detail}</p>
+                  </div>
                 </li>
               ))}
             </ul>
 
             <div className="space-y-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Tasks</p>
               <ul className="space-y-2">
                 {CARE_ITEMS.filter((c) => c.label === "Medication" || c.label === "Results").map((c) => (
-                  <li key={c.label}>
-                    <Link to={c.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
-                      <c.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-foreground">{c.label}</p>
-                        <p className="text-xs text-muted-foreground">{c.value}</p>
-                      </div>
-                    </Link>
+                  <li key={c.label} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5">
+                    <c.icon className="h-4 w-4 mt-0.5 text-primary" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-primary">{c.label}</p>
+                      <p className="text-xs text-muted-foreground">{c.value}</p>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -387,49 +418,7 @@ export default function MyPersonalDashboard() {
             <PeopleICareFor unlocked={unlocked} />
           </Panel>
 
-          {/* Three summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            <Panel title="My Wellbeing" icon={Sparkles} unlocked={unlocked} onClick={() => navigate("/ask-maeve")}>
-              <EmotionalHeadline
-                emoji="✨"
-                title="You don't have to figure it out alone"
-                sub="Something on your mind?"
-                muted={!unlocked}
-              />
-              <button
-                type="button"
-                onClick={() => navigate("/ask-maeve")}
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold",
-                  unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
-                )}
-              >
-                <Sparkles className="h-3.5 w-3.5" /> Ask Holarc
-              </button>
-              <p className="mt-2 text-xs text-muted-foreground leading-snug">
-                A place to slow down, explore what's on your mind and find your own way forward.
-              </p>
-            </Panel>
-
-            <Panel title="My Journey" icon={TrendingUp} unlocked={unlocked} onClick={() => navigate("/biolog")}>
-              <EmotionalHeadline
-                emoji="🌱"
-                title="You're moving in the right direction"
-                sub="See how your choices, patterns and wellbeing are evolving."
-                muted={!unlocked}
-              />
-              <div className={cn("h-12 rounded-md", unlocked ? "bg-primary/10" : "bg-muted")} />
-              <div className="mt-3 flex items-center gap-2">
-                <Leaf className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
-                <div>
-                  <p className="text-xs font-semibold text-foreground">+8%</p>
-                  <p className="text-[10px] text-muted-foreground">Wellbeing this month</p>
-                </div>
-              </div>
-              <CardFooterLink label="Open my journey" onClick={() => navigate("/biolog")} />
-            </Panel>
-
-            <Panel
+          <Panel
               title="My Round Tables"
               icon={MessageSquare}
               unlocked
@@ -475,7 +464,6 @@ export default function MyPersonalDashboard() {
                 </ul>
               )}
             </Panel>
-          </div>
 
           {/* My Holarcy — its own row at the bottom */}
           <Panel title="My Holarcy" icon={HeartHandshake} unlocked={unlocked}>
