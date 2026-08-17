@@ -189,7 +189,7 @@ export default function NurseProfile() {
             <AvatarFallback>{(nurse.full_name ?? "N").slice(0, 1)}</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-bold text-foreground">
+            <h1 className="truncate text-3xl font-bold text-foreground">
               Good day, Nurse {surname || nurse.full_name}
             </h1>
             <p className="text-xs text-muted-foreground">
@@ -366,17 +366,17 @@ export default function NurseProfile() {
               Your clinical permissions determine which clinical functions and patient information you can access
               within Holarc. They are set by your hospital administrator and are read-only here.
             </p>
-            <div className="overflow-hidden rounded-lg border border-neutral-300">
-              <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2 text-xs">
-                <span className="font-bold">Role</span>
+            <div className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
+              <div className="flex items-center justify-between border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">
+                <span>Role</span>
                 <span>{nurse.role_title || nurse.nursing_category || "Nurse"}</span>
               </div>
-              <ul className="divide-y">
+              <ul className="space-y-2 p-2">
                 {PERMISSION_KEYS.map(({ key, label }) => {
                   const row = perms.find((p) => p.permission_key === key);
                   const pill = permissionPill(row?.status ?? "not_authorised");
                   return (
-                    <li key={key} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-xs">
+                    <li key={key} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/30 px-3 py-2 text-xs">
                       <span className="font-medium text-foreground">{label}</span>
                       <span className="flex items-center gap-2">
                         {row?.notes && <span className="text-muted-foreground">{row.notes}</span>}
@@ -401,7 +401,7 @@ export default function NurseProfile() {
                 {certs.map((c) => {
                   const s = certStatus(c.expires_on);
                   return (
-                    <Card key={c.id} className="rounded-xl border border-primary p-3">
+                    <Card key={c.id} className="rounded-xl border border-primary bg-card p-5">
                       <div className="flex items-start justify-between gap-2">
                         <p className="flex items-center gap-1.5 text-sm font-semibold">
                           <Award className="h-3.5 w-3.5 text-primary" /> {c.name}
@@ -445,7 +445,7 @@ export default function NurseProfile() {
                   value: String(wardPatients.filter((p: any) => p.priority === "high" || p.requires_attention).length),
                 },
               ].map((s) => (
-                <Card key={s.label} className="rounded-xl border border-primary p-3">
+                <Card key={s.label} className="rounded-xl border border-primary bg-card p-5">
                   <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                     <Clock className="h-3 w-3" /> {s.label}
                   </p>
