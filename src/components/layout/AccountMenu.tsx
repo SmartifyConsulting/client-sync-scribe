@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Settings, LogOut, Share2, Stethoscope, HeartPulse, Gift, UserCog, ShieldCheck, Loader2 } from "lucide-react";
+import { Settings, LogOut, Share2, Stethoscope, HeartPulse, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES } from "./testProfiles";
 import { useImpersonate } from "./useImpersonate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -41,6 +41,19 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: liveNames = {} } = useQuery({
+    queryKey: ["seeded-profile-names"],
+    queryFn: async () => {
+      const { data } = await (supabase.rpc as any)("get_seeded_profile_names");
+      const map: Record<string, string> = {};
+      ((data || []) as any[]).forEach((r) => {
+        if (r.email && r.full_name) map[String(r.email).toLowerCase()] = r.full_name as string;
+      });
+      return map;
+    },
+    staleTime: 60 * 1000,
+  });
+
   return (
     <Popover>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
@@ -80,11 +93,6 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
             </div>
           );
         })()}
-        {isDoctor && !isOnPatientRoute && (
-          <Link to="/doctor/rewards" className="flex items-center gap-2 px-2 py-1.5 text-xs rounded-md hover:bg-accent transition-colors">
-            <Gift className="h-3.5 w-3.5" /> {t("topbar.myRewards")}
-          </Link>
-        )}
         {(isAdmin || TEST_PROFILES.some((p) => p.email === currentEmail)) && (
           <div className="border-t border-border mt-1 pt-1">
             <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -108,7 +116,7 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                   >
                     {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{p.name}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{liveNames[p.email] || p.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{p.role} · {p.email}</p>
                     </div>
                   </button>

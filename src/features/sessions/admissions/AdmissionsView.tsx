@@ -266,51 +266,49 @@ function AdmissionDetail({
   return (
     <Card className="overflow-hidden border-2 border-primary/20 p-0">
       {/* === Admission Banner === */}
-      <div className="bg-primary/5 border-b border-primary/20 p-2 space-y-1.5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-2 min-w-0">
-            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <Hospital className="h-4 w-4 text-primary-foreground" />
+      <div className="bg-primary/5 border-b border-primary/20 p-1 space-y-1">
+        <div className="flex items-start justify-between gap-1.5">
+          <div className="flex items-start gap-1.5 min-w-0">
+            <div className="h-4 w-4 rounded bg-primary flex items-center justify-center shrink-0">
+              <Hospital className="h-2.5 w-2.5 text-primary-foreground" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-sm font-bold text-primary-dark truncate uppercase tracking-wide">
+              <h2 className="text-xs font-bold text-primary-dark truncate uppercase tracking-wide">
                 {admission.hospital || "Hospital"}
               </h2>
-              <p className="text-xs font-medium text-foreground truncate">
+              <p className="text-[10px] font-medium text-foreground truncate">
                 {(admission as any).title || admission.diagnosis || "Admission"}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground">
                 Admitted {format(new Date(admission.admission_date), "dd MMM yyyy")}
                 {admission.discharge_date && ` · Discharged ${format(new Date(admission.discharge_date), "dd MMM yyyy")}`}
               </p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <div className="flex items-center gap-2">
-              <Badge
-                variant={admission.status === "admitted" ? "default" : "secondary"}
-                className="uppercase tracking-wide text-xs"
-              >
-                ● {admission.status}
-              </Badge>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => setExpanded((v) => !v)}
-                aria-label={expanded ? "Collapse admission" : "Expand admission"}
-              >
-                <ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "" : "-rotate-90"}`} />
-              </Button>
-            </div>
+          <div className="flex items-center gap-1.5 shrink-0">
             {wristbandQr && (
               <img
                 src={wristbandQr}
                 alt="Wristband QR — Name, allergies, procedure, doctor, admission date"
                 title="Scan for wristband details: Name, Allergies, Procedure, Doctor, Admission Date"
-                style={{ width: "1.6cm", height: "1.6cm" }}
+                style={{ width: "0.9cm", height: "0.9cm" }}
               />
             )}
+            <Badge
+              variant={admission.status === "admitted" ? "default" : "secondary"}
+              className="uppercase tracking-wide text-[10px] px-1.5 py-0"
+            >
+              ● {admission.status}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5"
+              onClick={() => setExpanded((v) => !v)}
+              aria-label={expanded ? "Collapse admission" : "Expand admission"}
+            >
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${expanded ? "" : "-rotate-90"}`} />
+            </Button>
           </div>
         </div>
 

@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
       "er.test@holarchealth.com",
       "ifeanyi.okoli@greenoriagroup.com",
       "dr.buttons@smartify.co.za",
+      "dr.gianna.buttons@smartify.co.za",
       "nurse.test@holarchealth.com",
 
       "2348167581572@phone.holarc.local",
