@@ -233,6 +233,7 @@ export default function MySessions() {
           searchPlaceholder={t("mySessions.search", "Search sessions...")}
           emptyLabel={t("mySessions.empty", "No sessions in this period.")}
           renderItem={(s: SessionRow) => <SessionCard s={s} t={t} />}
+          subGroupByPatient
         />
       )}
     </div>

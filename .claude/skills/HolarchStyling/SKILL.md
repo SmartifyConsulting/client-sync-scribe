@@ -95,6 +95,35 @@ Reference: `src/pages/Documents.tsx`'s document rows inside its accordion conten
 - **Padding between records.** Records inside any accordion's content must have visible spacing between them — don't rely on a bare `divide-y` hairline with the rows flush against each other (that's the current app-wide default and is NOT the standard going forward: e.g. `divide-y divide-border` wrapping rows with no `space-y-*`/gap, as seen in `Documents.tsx`, `PatientTasks.tsx`, and elsewhere). Add real spacing between individual records — e.g. `space-y-2` (or equivalent gap) on the row list, or padding-driven separation — so records don't sit edge-to-edge.
 - **Record height elsewhere = 50% of the Documents reference.** Any other accordion's individual records (not the Documents screen itself, which stays at its current ~72px/`p-4` reference size) should target roughly HALF that height (~36px) — i.e. lighter padding than `p-4`, closer to `py-2` or similar, keeping the same `text-sm` text size. This keeps compact record lists (task rows, medication rows, etc.) visually lighter than the Documents screen's fuller document rows, rather than everything defaulting to the same dense `p-4` sizing.
 
+## 6. Nested sub-accordion (an accordion within an accordion)
+
+When a group of records inside an already-collapsible group (e.g. sessions grouped by month) is itself further split into a collapsible sub-group (e.g. patients within that month), the sub-accordion must read as visually "one level down" from its parent. Reference: `src/pages/TodoList.tsx`'s patient sub-groups nested inside each date-bucket accordion (`renderTodoRow` callers around `patientSubGroups(g.items)`):
+
+```jsx
+<Accordion type="multiple" className="space-y-3">
+  <AccordionItem value={key} className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden">
+    <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+      <div className="flex items-center justify-between w-full pr-2">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+          <User className="h-3.5 w-3.5 text-muted-foreground" />
+          {label}
+        </span>
+        <SectionCountPill count={items.length} />
+      </div>
+    </AccordionTrigger>
+    <AccordionContent className="pt-2 pb-2">
+      <div className="space-y-2">{/* rows */}</div>
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+- **Header colour: light grey (`bg-muted/30`)** — not `bg-primary` (top-level tabs), not `bg-neutral-600` (sub-tabs), and not `SECTION_TRIGGER_ALWAYS_GREEN_CLASS`'s green (used by the *parent* accordion's own header, e.g. the month header in Sessions/My Sessions). The light-grey `bg-muted/30` is precisely what signals "this accordion is nested one level inside another," distinct from every other accordion-trigger colour in the app.
+- **Trigger text:** `text-xs font-medium text-foreground`, with a small leading icon in `text-muted-foreground` where one applies (e.g. a `User` icon for a per-patient sub-group).
+- **Shape:** `rounded-lg` (one step down from the `rounded-xl` used by top-level record cards/frames), `overflow-hidden`, no visible border (`border-0`).
+- **Collapsed by default** — nested sub-accordions should NOT be expanded on load (unlike the parent group, which is often open-by-default); the user drills down intentionally.
+- **Example — Sessions list (`src/pages/MySessions.tsx` via `ListGroupToolbar`):** when grouped by date, each month is the (green-header) parent accordion; within it, sessions are further split into one light-grey sub-accordion per patient, collapsed by default. This is the canonical example to copy for any future "records grouped by date, then by patient" screen.
+
 ---
 
 ## Underlying design tokens
@@ -126,4 +155,5 @@ When styling or reviewing a screen, check each element type present against this
 - [ ] Record/accordion cards use `rounded-xl border border-primary bg-card p-5` (or the red-tinted danger variant where semantically appropriate)
 - [ ] Records inside any concertina/accordion have visible padding/spacing between them, not a bare flush `divide-y` hairline
 - [ ] Record row height elsewhere is ~50% of the Documents screen's reference row height (~36px vs. ~72px), unless it genuinely is the Documents screen
+- [ ] Nested sub-accordions (an accordion within an accordion, e.g. patients within a month) use the light-grey `bg-muted/30` trigger, `rounded-lg`, collapsed by default — never green, never `bg-neutral-600`, never the parent's own header colour
 - [ ] No raw/arbitrary colors introduced where a token or an established pattern above already covers the case

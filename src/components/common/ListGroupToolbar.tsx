@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Search } from "lucide-react";
+import { Search, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
@@ -66,6 +66,13 @@ interface Props<T> {
   frameless?: boolean;
   /** Optional icon rendered before each group heading label. */
   headerIcon?: React.ComponentType<{ className?: string }>;
+  /**
+   * When grouping by date, further split each date group into a collapsed
+   * light-grey sub-accordion per patient (see HolarchStyling skill §6).
+   * Ignored when groupBy is "patient" or "hospital" — there's nothing left
+   * to nest by in that case.
+   */
+  subGroupByPatient?: boolean;
 }
 
 export function ListGroupToolbar<T>({
@@ -80,6 +87,7 @@ export function ListGroupToolbar<T>({
   hideControls = false,
   frameless = false,
   headerIcon: HeaderIcon,
+  subGroupByPatient = false,
 }: Props<T>) {
 
   const prefKey = `listGroupBy:${storageKey}`;
@@ -130,6 +138,19 @@ export function ListGroupToolbar<T>({
     return arr;
   }, [filtered, groupBy]);
 
+  const patientSubGroups = React.useCallback((entries: GroupableItem<T>[]) => {
+    const map = new Map<string, GroupableItem<T>[]>();
+    for (const entry of entries) {
+      const key = entry.patient?.trim() || "Unassigned";
+      const list = map.get(key) || [];
+      list.push(entry);
+      map.set(key, list);
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => (a[0] === "Unassigned" ? 1 : b[0] === "Unassigned" ? -1 : a[0].localeCompare(b[0])))
+      .map(([key, items]) => ({ key, items }));
+  }, []);
+
   return (
     <div className="space-y-3">
       {!hideControls && (
@@ -178,11 +199,40 @@ export function ListGroupToolbar<T>({
               </AccordionTrigger>
 
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <div className="space-y-4 py-1">
-                  {entries.map((e, idx) => (
-                    <React.Fragment key={idx}>{renderItem(e.item)}</React.Fragment>
-                  ))}
-                </div>
+                {subGroupByPatient && groupBy === "date" ? (
+                  <Accordion type="multiple" className="space-y-2 py-1">
+                    {patientSubGroups(entries).map((sub) => (
+                      <AccordionItem
+                        key={sub.key}
+                        value={`${label}-${sub.key}`}
+                        className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                      >
+                        <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+                          <div className="flex items-center justify-between w-full pr-2">
+                            <span className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                              <User className="h-3.5 w-3.5 text-muted-foreground" />
+                              {sub.key}
+                            </span>
+                            <SectionCountPill count={sub.items.length} />
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pt-2 pb-2">
+                          <div className="space-y-4">
+                            {sub.items.map((e, idx) => (
+                              <React.Fragment key={idx}>{renderItem(e.item)}</React.Fragment>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                ) : (
+                  <div className="space-y-4 py-1">
+                    {entries.map((e, idx) => (
+                      <React.Fragment key={idx}>{renderItem(e.item)}</React.Fragment>
+                    ))}
+                  </div>
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
