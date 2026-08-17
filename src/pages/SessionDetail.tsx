@@ -25,7 +25,7 @@ import {
   Edit3,
   Send,
   Lock,
-  MoreHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
