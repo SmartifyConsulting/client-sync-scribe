@@ -1556,7 +1556,7 @@ export function PatientDetailsEditor({
           )}
           {show("documents") && (
             <TabsTrigger value="documents" className={triggerClass}>
-              {t("nav.myDocuments", "My Documents")}
+              Documents
             </TabsTrigger>
           )}
           {show("labresults") && (
@@ -4090,7 +4090,7 @@ export function PatientDetailsEditor({
           {isSelfService && (
             <TabsContent value="documents" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Documents</h2>
+                <h2 className="text-[18px] font-semibold text-primary-dark">Documents</h2>
                 <p className="text-xs text-muted-foreground">
                   All your prescriptions, invoices, certificates and uploaded files
                 </p>
