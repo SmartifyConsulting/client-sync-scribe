@@ -24,6 +24,19 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
+import { ChevronDown, MessageSquare } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
+
 
 // V2 preview — visible to everyone as a greyed-out preview, but only
 // interactive for this account so it can be demoed before wider rollout.
@@ -40,8 +53,8 @@ const TILES: DashboardTile[] = [
   { icon: FolderOpen, label: "My Documents", description: "All generated and uploaded documents", to: "/documents" },
   { icon: FlaskConical, label: "Lab Results", description: "Lab requests and results", to: "/patient/lab-results" },
   { icon: ListChecks, label: "My Tasks", description: "To-dos and reminders", to: "/todos" },
-  { icon: Users2, label: "My Round Tables", description: "Shared notes with other specialists", to: "/doctor/round-tables" },
   { icon: BedDouble, label: "My Admissions", description: "Hospital admissions", to: "/admissions" },
+
 ];
 
 const SUMMARY_LINES = [
@@ -138,25 +151,60 @@ function Panel({
 
 export default function MyPersonalDashboard() {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  useProfile();
   const unlocked = user?.email === V2_DEMO_EMAIL;
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const firstName = profile?.full_name?.split(" ")[0] ?? "";
+  const { data: roundTableNotes = [], isLoading: roundTableLoading } = useQuery({
+    queryKey: ["dashboard-round-table-notes", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data: patients } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user!.id);
+      if (!patients?.length) return [];
+      const { data } = await supabase
+        .from("round_table_notes")
+        .select("id, doctor_name, content, created_at")
+        .in("patient_id", patients.map((p) => p.id))
+        .order("created_at", { ascending: false })
+        .limit(4);
+      return data || [];
+    },
+  });
+
+
 
   return (
     <div className="container mx-auto p-4 max-w-7xl space-y-4">
-      {/* Greeting */}
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold text-foreground">
-          {greeting}{firstName ? `, ${firstName}` : ""}
-        </h1>
-        <p className="text-muted-foreground text-xs">
-          Here's what matters today.
-          {!unlocked && " These sections are in preview and not yet available."}
-        </p>
-      </div>
+      {/* Hero: photo, greeting, Vulas, appointments + quick access */}
+      <PatientHeroCard
+        action={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-2 text-xs">
+                <FolderOpen className="h-3.5 w-3.5" />
+                Quick access
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64 bg-popover z-50">
+              {TILES.map((tile) => (
+                <DropdownMenuItem key={tile.to} asChild>
+                  <Link to={tile.to} className="flex items-start gap-2">
+                    <tile.icon className="h-4 w-4 mt-0.5 text-primary" />
+                    <span className="min-w-0">
+                      <span className="block text-xs font-semibold text-foreground">{tile.label}</span>
+                      <span className="block text-[10px] text-muted-foreground">{tile.description}</span>
+                    </span>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
+
 
       {/* Daily summary strip */}
       <Panel unlocked={unlocked}>
@@ -283,47 +331,43 @@ export default function MyPersonalDashboard() {
               </ul>
             </Panel>
 
-            <Panel title="Quick access" icon={FolderOpen} unlocked={unlocked}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {TILES.map((tile) => {
-                  const Icon = tile.icon;
-                  const card = (
-                    <div
-                      className={cn(
-                        "rounded-lg border p-3 transition-colors h-full",
-                        unlocked
-                          ? "border-primary bg-card hover:bg-primary/5 cursor-pointer"
-                          : "border-border bg-muted/30 opacity-60 cursor-not-allowed",
-                      )}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-                          <Icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
-                        </div>
-                        {!unlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-                      </div>
-                      <p className="mt-2 text-xs font-semibold text-foreground">{tile.label}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{tile.description}</p>
-                      {!unlocked && (
-                        <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          Coming soon
+            <Panel
+              title="My Round Tables"
+              icon={MessageSquare}
+              unlocked
+              action={
+                <Link to="/patient/round-table" className="inline-flex items-center gap-1 text-xs text-primary font-semibold">
+                  View all <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              }
+            >
+              {roundTableLoading ? (
+                <p className="text-xs text-muted-foreground">Loading your round table notes…</p>
+              ) : roundTableNotes.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border bg-background/40 p-4 text-center">
+                  <MessageSquare className="mx-auto h-6 w-6 text-muted-foreground/50" />
+                  <p className="mt-1.5 text-xs font-semibold text-foreground">No round table notes yet</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    When your doctors share notes about your care, they'll appear here.
+                  </p>
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {roundTableNotes.map((note) => (
+                    <li key={note.id} className="rounded-lg border border-border bg-background/60 p-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-foreground truncate">{note.doctor_name || "Doctor"}</p>
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {format(new Date(note.created_at), "MMM d")}
                         </span>
-                      )}
-                    </div>
-                  );
-
-                  return unlocked ? (
-                    <Link key={tile.to} to={tile.to} className="block h-full">
-                      {card}
-                    </Link>
-                  ) : (
-                    <div key={tile.to} aria-disabled="true">
-                      {card}
-                    </div>
-                  );
-                })}
-              </div>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">{note.content}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Panel>
+
           </div>
         </div>
 
