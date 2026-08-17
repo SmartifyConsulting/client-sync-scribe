@@ -64,7 +64,9 @@
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
     "liveSOS": "ライブSOS",
-    "askMaeve": "Ask Holarc"
+    "askMaeve": "Ask Holarc",
+    "wardBoard": "Ward Board",
+    "nurseDashboard": "Dashboard"
   },
   "topbar": {
     "reportBug": "バグ報告",

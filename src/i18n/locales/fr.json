@@ -64,7 +64,9 @@
     "providerProfile": "Profil Prestataire",
     "backToAdmin": "Retour Admin",
     "liveSOS": "SOS en direct",
-    "askMaeve": "Ask Holarc"
+    "askMaeve": "Ask Holarc",
+    "wardBoard": "Ward Board",
+    "nurseDashboard": "Dashboard"
   },
   "topbar": {
     "reportBug": "Signaler un bug",

@@ -64,7 +64,9 @@
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
     "liveSOS": "SOS Yepamhepo",
-    "askMaeve": "Ask Holarc"
+    "askMaeve": "Ask Holarc",
+    "wardBoard": "Ward Board",
+    "nurseDashboard": "Dashboard"
   },
   "topbar": {
     "reportBug": "Shuma Dambudziko",
