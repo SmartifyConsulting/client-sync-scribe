@@ -37,6 +37,104 @@ const TONES: Record<string, { frame: string; bullet: string }> = {
 };
 
 
+const COLUMN_ORDER = ["working impression", "safety checks", "differentials", "suggested checks"];
+
+const TITLES: Record<string, string> = {
+  "working impression": "Working Impression",
+  "safety checks": "Safety Checks",
+  differentials: "Differentials",
+  "suggested checks": "Suggested Checks",
+};
+
+function SectionBody({
+  section,
+  bullet,
+}: {
+  section: ReturnType<typeof parseClinicianNotes>[number];
+  bullet: string;
+}) {
+  if (section.text) {
+    return <p className="text-xs leading-relaxed text-foreground">{renderClinicianHighlights(section.text)}</p>;
+  }
+  return (
+    <div className="space-y-3">
+      {section.groups?.map((group) => (
+        <div key={group.label}>
+          <p className="mb-1.5 text-xs font-bold text-foreground">{group.label}</p>
+          <ul className="space-y-1.5">
+            {group.items.map((item, i) => (
+              <li key={i} className={cn("text-xs leading-relaxed text-foreground pl-3 border-l-2", bullet)}>
+                {renderClinicianHighlights(item)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {section.items.length > 0 && (
+        <ul className="space-y-1.5">
+          {section.items.map((item, i) => (
+            <li key={i} className={cn("text-xs leading-relaxed text-foreground pl-3 border-l-2", bullet)}>
+              {renderClinicianHighlights(item)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Four fixed columns — Working Impression, Safety Checks, Differentials,
+ * Suggested Checks — for the live session workspace. Extra sections render
+ * full width underneath so nothing is lost.
+ */
+export function ClinicianNotesColumns({
+  notes,
+  className,
+}: {
+  notes?: string | null;
+  className?: string;
+}) {
+  const sections = parseClinicianNotes(notes);
+  const byKey = new Map(sections.map((s) => [s.title.toLowerCase(), s]));
+  const extras = sections.filter((s) => !COLUMN_ORDER.includes(s.title.toLowerCase()));
+
+  return (
+    <div className={cn("space-y-3", className)}>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 items-start">
+        {COLUMN_ORDER.map((key) => {
+          const section = byKey.get(key);
+          const Icon = ICONS[key] || Brain;
+          const isSafety = key === "safety checks";
+          const tone = TONES[key];
+          const count = section ? section.items.length + (section.groups?.reduce((n, g) => n + g.items.length, 0) || 0) : 0;
+          return (
+            <div key={key} className={cn("rounded-lg border p-3 min-w-0", tone.frame)}>
+              <div className="mb-2 flex items-center gap-2 text-xs font-bold text-foreground">
+                <Icon className={cn("h-4 w-4 shrink-0", isSafety ? "text-destructive" : "text-primary")} />
+                <span className="truncate">{TITLES[key]}</span>
+                {count > 0 && <span className="font-normal text-muted-foreground">({count})</span>}
+              </div>
+              {section ? (
+                <SectionBody section={section} bullet={tone.bullet} />
+              ) : (
+                <p className="text-xs text-muted-foreground">None yet.</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {extras.map((section) => (
+        <div key={section.title} className="rounded-lg border border-border bg-card p-3">
+          <p className="mb-2 text-xs font-bold text-foreground">{section.title}</p>
+          <SectionBody section={section} bullet="border-primary/40" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
 /**
  * Renders finalised AI Clinician notes as collapsible sections
  * (Working Impression, Safety Checks, Differentials, Suggested Checks) with
