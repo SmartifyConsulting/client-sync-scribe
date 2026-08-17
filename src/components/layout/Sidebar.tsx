@@ -195,6 +195,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const loading = roleLoading;
   const { profile } = useProfile();
   const location = useLocation();
+  const navigate = useNavigate();
+
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
   const isOnAdminRoute = location.pathname.startsWith("/admin");
 
