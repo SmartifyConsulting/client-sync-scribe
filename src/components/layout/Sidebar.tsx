@@ -45,6 +45,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
 import { useV2Demo } from "@/hooks/useV2Demo";
+import { useSignatureBackfill } from "@/hooks/useSignatureBackfill";
 
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
@@ -194,6 +195,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const { v2Demo } = useV2Demo();
+  // Ensures a doctor's typed signature exists as a PNG for outbound email.
+  useSignatureBackfill();
 
   const loading = roleLoading;
   const { profile } = useProfile();
