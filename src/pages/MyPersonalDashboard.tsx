@@ -269,22 +269,24 @@ export default function MyPersonalDashboard() {
               </p>
               <dl className="mt-3 space-y-2">
                 <div>
-                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">What matters to me</dt>
+                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">What Matters to You</dt>
                   <dd className="text-xs font-medium text-foreground">{(relationshipValues?.length ? relationshipValues : ["Family", "Independence", "Health"]).join(" · ")}</dd>
                 </div>
                 <div>
-                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">How I like to communicate</dt>
+                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">How You Like to Communicate</dt>
                   <dd className="text-xs font-medium text-foreground">Straightforward · Detailed</dd>
                 </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Our Observations</dt>
+                  <dd className="text-xs font-medium text-foreground">
+                    <ul className="space-y-1.5">
+                      {INSIGHTS.map((i) => (
+                        <li key={i}>{i}</li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
               </dl>
-              <div className="mt-3">
-                <p className="text-xs font-semibold text-foreground">Our Observations</p>
-                <ul className="mt-1 space-y-1.5">
-                  {INSIGHTS.map((i) => (
-                    <li key={i} className="text-xs text-muted-foreground">{i}</li>
-                  ))}
-                </ul>
-              </div>
               <CardFooterLink label="View my profile" onClick={() => navigate("/patient/details")} />
             </div>
           </div>
