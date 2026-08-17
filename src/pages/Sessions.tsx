@@ -50,6 +50,12 @@ import { SessionPatientOverview } from "@/features/sessions/components/SessionPa
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { SessionProcessingDialog } from "@/features/sessions/components/SessionProcessingDialog";
 import { SessionTranscriptAccordion } from "@/features/sessions/components/SessionTranscriptAccordion";
+import {
+  savePausedSession,
+  fetchPausedSession,
+  deletePausedSession,
+  type PausedSessionSnapshot,
+} from "@/features/sessions/utils/pausedSession";
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
