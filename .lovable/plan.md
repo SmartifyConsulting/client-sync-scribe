@@ -30,9 +30,22 @@ Fix, applied **before saving**:
 
 Rewrite the stored notes for the August 13, 2026 3:52 PM session through the same de-duplication so it can be used to verify the result, and check the rendered page afterwards.
 
+## 5. New "My Views" nav item
+
+- Add "My Views" to the **My Patients** section of the doctor sidebar, directly under Documents, with its own route and page.
+- The page lists every access event on the doctor's own records/profile: who viewed, which screen they viewed it on, and when.
+- Default grouping: **Date** first, then **user name** within each date.
+- A "Create Grouping" control lets the user switch to grouping by **screen** first, then by user.
+- Each row shows viewer name, their role, the screen/section, and the timestamp; empty state when nothing has been viewed yet.
+
+Currently the view log only records viewer, patient and time — it has no screen and is written from a single place. The work adds a screen/section label to the log and records views from the profile, sessions, documents, admissions and Round Table screens, so the list is complete rather than partial.
+
 ## Technical notes
 
 - `src/pages/SessionDetail.tsx` — Quick Actions relocation and styling, disclaimer placement.
 - `src/pages/Sessions.tsx` (live hint merge effect) — fuzzy de-duplication and single Safety Checks list before the note is saved.
 - `src/features/sessions/utils/clinicianNotesSections.ts` — export the existing fuzzy key helper so the merge and the parser share one rule.
 - One data update for the example session's `ai_diagnosis`.
+- Migration: add a `screen` column to `profile_view_log` (plus index on viewed_at) and a read policy so a record owner can see who viewed their record.
+- New page + route for "My Views" and a small shared `logProfileView(screen)` helper called from the viewer screens; sidebar entry added under Documents.
+
