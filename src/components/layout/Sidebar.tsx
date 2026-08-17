@@ -467,10 +467,25 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
               </div>
             </>
+          ) : isNurseMenu ? (
+            <>
+              <div className="space-y-1.5">{profileToggle}</div>
+              {NURSE_SECTIONS.map((section) => (
+                <div key={section.title} className="space-y-1.5">
+                  <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+                    {section.title}
+                  </p>
+                  {section.items.map((item) => renderNavLink(item))}
+                </div>
+              ))}
+              <div className="space-y-1.5">
+                {withShiftRule(NURSE_BOTTOM_ITEMS).map((item) => renderNavLink(item))}
+              </div>
+            </>
           ) : (
             <div className="space-y-1.5">
-              {isDoctor && profileToggle}
-              {doctorInPatientMode && (
+              {(isDoctor || isNurse) && profileToggle}
+              {(doctorInPatientMode || nurseInPatientMode) && (
                 <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
                   My Holarchy
                 </p>
