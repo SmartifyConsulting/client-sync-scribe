@@ -1,4 +1,7 @@
 import { ProviderAppLayout } from "@/components/layout/ProviderAppLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { useNurseWard } from "../../../hooks/useNurseWard";
+import { Loader2 } from "lucide-react";
 import { useProviderAccess } from "../../../components/ProviderGate";
 import { useHospitalOpsStats } from "../../../hooks/useHospitalOpsStats";
 import { useHospitalRole, ROLE_LABEL, ROLE_TONE } from "../../../hooks/useHospitalRole";
@@ -51,5 +54,20 @@ function HospitalStatsStrip() {
 }
 
 export default function HospitalOpsLayout() {
+  /** Nurses are rostered to a single ward — they get the normal nurse app chrome
+   *  (nurse sidebar only) instead of the full hospital operations portal, so a
+   *  screen like Admissions never exposes hospital-wide navigation or stats. */
+  const { assignment, loading } = useNurseWard();
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (assignment) return <AppLayout />;
+
   return <ProviderAppLayout portal="hospital" statsStrip={<HospitalStatsStrip />} />;
 }

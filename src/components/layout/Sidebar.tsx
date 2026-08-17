@@ -424,10 +424,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             className={cn(
               "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
               active
-                ? isProfessional
-                  ? "bg-red-800 text-white"
-                  : "bg-neutral-600 text-white"
-                : "text-muted-foreground hover:text-foreground",
+                ? "bg-sos text-sos-foreground"
+                : "bg-neutral-400/60 text-white hover:bg-neutral-500",
             )}
           >
             {mode}
