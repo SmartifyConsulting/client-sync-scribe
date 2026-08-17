@@ -44,6 +44,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
+import { useNurseWard } from "@/modules/holarchelp/hooks/useNurseWard";
 import { useV2Demo } from "@/hooks/useV2Demo";
 import { useSignatureBackfill } from "@/hooks/useSignatureBackfill";
 
@@ -195,6 +196,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const { v2Demo } = useV2Demo();
+  const { assignment: nurseAssignment } = useNurseWard();
   // Ensures a doctor's typed signature exists as a PNG for outbound email.
   useSignatureBackfill();
 
@@ -218,8 +220,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // "My Profile" (/patient/details) — the route alone must not flip the nav.
   // While the role is still resolving we must NOT fall back to the route-based
   // guess, otherwise a doctor sees the patient nav for one frame.
-  const isDoctor = role === "doctor";
-  const isNurse = role === "nurse";
+  // A user with a hospital nursing roster record is treated as a nurse even if
+  // their account also carries another clinician role.
+  const isNurse = role === "nurse" || (!!nurseAssignment && role !== "doctor");
+  const isDoctor = role === "doctor" && !isNurse;
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
   /** Doctors and nurses can flip the sidebar between their professional menu
