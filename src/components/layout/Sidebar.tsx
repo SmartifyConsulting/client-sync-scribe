@@ -79,6 +79,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
     title: "My Holarprac",
     items: [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
+      { icon: User, label: "My Profile", labelKey: "nav.myHolarchy", to: "/patient/details?section=health", tour: "patient-holarchy" },
       { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
@@ -86,7 +87,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: "My Patients",
+    title: "My Work",
     items: [
       { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
@@ -131,6 +132,7 @@ const NURSE_SECTIONS: NavSection[] = [
     title: "My Patients",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.nurseDashboard", to: "/provider/hospital/nurse-dashboard" },
+      { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/nurse-profile" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: BedDouble, label: "Ward Board", labelKey: "nav.wardBoard", to: "/provider/hospital/ward-board" },
       { icon: Users, label: "Admissions", labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
@@ -139,8 +141,6 @@ const NURSE_SECTIONS: NavSection[] = [
 ];
 
 const NURSE_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/nurse-profile" },
-  { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
 ];
 
