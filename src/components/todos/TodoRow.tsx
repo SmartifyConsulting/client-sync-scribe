@@ -150,7 +150,8 @@ export function TodoRow({
           "group text-sm",
           insideGroup
             ? cn(
-                "flex items-center gap-3 py-2 px-3 rounded-xl border border-border bg-card cursor-default transition-colors hover:bg-muted/50",
+                "flex items-center rounded-xl border border-border bg-card cursor-default transition-colors hover:bg-muted/50",
+                compact ? "gap-2 py-1 px-2" : "gap-3 py-2 px-3",
                 todo.completed && "bg-muted/20",
               )
             : cn(
@@ -172,8 +173,13 @@ export function TodoRow({
 
         {/* Kind icon */}
         {insideGroup ? (
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-            <Icon className="h-5 w-5 text-primary" />
+          <div
+            className={cn(
+              "flex items-center justify-center rounded-full bg-primary/10 shrink-0",
+              compact ? "h-6 w-6" : "h-10 w-10",
+            )}
+          >
+            <Icon className={compact ? "h-3 w-3 text-primary" : "h-5 w-5 text-primary"} />
           </div>
         ) : (
           <Icon className="h-4 w-4 text-primary shrink-0" />
@@ -184,7 +190,8 @@ export function TodoRow({
             <div className="flex items-center gap-2">
               <p
                 className={cn(
-                  "font-medium text-sm text-foreground truncate",
+                  "font-medium text-foreground truncate",
+                  compact ? "text-xs" : "text-sm",
                   todo.completed && "line-through text-muted-foreground",
                 )}
               >

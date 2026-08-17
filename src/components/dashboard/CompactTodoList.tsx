@@ -603,7 +603,7 @@ export function CompactTodoList() {
                                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                   <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}
-                                  <span className="text-xs font-medium text-foreground truncate text-left">{patientName}</span>
+                                  <span className="text-sm font-medium text-foreground truncate text-left">{patientName}</span>
                                   <SectionCountPill count={items.length} className="ml-auto mr-1" />
                                 </div>
                               </AccordionTrigger>
