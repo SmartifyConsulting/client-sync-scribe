@@ -6640,19 +6640,25 @@ export type Database = {
       profile_view_log: {
         Row: {
           id: string
+          owner_id: string | null
           patient_id: string
+          screen: string | null
           viewed_at: string | null
           viewer_id: string
         }
         Insert: {
           id?: string
+          owner_id?: string | null
           patient_id: string
+          screen?: string | null
           viewed_at?: string | null
           viewer_id: string
         }
         Update: {
           id?: string
+          owner_id?: string | null
           patient_id?: string
+          screen?: string | null
           viewed_at?: string | null
           viewer_id?: string
         }
