@@ -332,7 +332,7 @@
       "labelClaimsEmail": "Claims Email",
       "claimsEmailPlaceholder": "claims@insurance.com",
       "sectionMedical": "Medical Information",
-      "labelGP": "General Practitioner",
+      "labelGP": "Family Doctor",
       "gpPlaceholder": "GP name",
       "labelReferredBy": "Referred By",
       "referralPlaceholder": "Referral source",
