@@ -8116,6 +8116,17 @@ export type Database = {
         Args: { _incident_id: string }
         Returns: Json
       }
+      get_my_profile_views: {
+        Args: never
+        Returns: {
+          id: string
+          screen: string
+          viewed_at: string
+          viewer_id: string
+          viewer_name: string
+          viewer_role: string
+        }[]
+      }
       get_patient_document_alias: {
         Args: { _patient_id: string }
         Returns: string
