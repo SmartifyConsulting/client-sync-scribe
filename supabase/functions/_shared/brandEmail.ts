@@ -120,3 +120,32 @@ export function escapeHtml(value: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+/** Downloads an image and returns it as a base64 inline (cid) attachment. */
+export async function fetchInlineAttachment(
+  url: string,
+  filename: string,
+  contentId: string,
+): Promise<{ filename: string; content: string; contentType: string; contentId: string } | null> {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) {
+      console.error("[email] inline image fetch failed", url, resp.status);
+      return null;
+    }
+    const buf = new Uint8Array(await resp.arrayBuffer());
+    let binary = "";
+    for (let i = 0; i < buf.length; i += 0x8000) {
+      binary += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+    }
+    return {
+      filename,
+      content: btoa(binary),
+      contentType: resp.headers.get("content-type") || "image/png",
+      contentId,
+    };
+  } catch (e) {
+    console.error("[email] inline image error", url, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
