@@ -16,7 +16,6 @@ import {
   Activity,
   CalendarDays,
   ChevronRight,
-  Lightbulb,
   Leaf,
   ChevronDown,
   MessageSquare,
@@ -265,7 +264,7 @@ export default function MyPersonalDashboard() {
               <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">🫶 We see you</p>
+              <p className="text-sm font-semibold text-foreground">🫶 We See You</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 Your care team knows more than your medical history.
               </p>
@@ -278,11 +277,15 @@ export default function MyPersonalDashboard() {
                   <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">How I like to communicate</dt>
                   <dd className="text-xs font-medium text-foreground">Straightforward · Detailed</dd>
                 </div>
-                <div>
-                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">My preferences</dt>
-                  <dd className="text-xs font-medium text-foreground">My story · My personality</dd>
-                </div>
               </dl>
+              <div className="mt-3">
+                <p className="text-xs font-semibold text-foreground">Our Observations</p>
+                <ul className="mt-1 space-y-1.5">
+                  {INSIGHTS.map((i) => (
+                    <li key={i} className="text-xs text-muted-foreground">{i}</li>
+                  ))}
+                </ul>
+              </div>
               <CardFooterLink label="View my profile" onClick={() => navigate("/patient/details")} />
             </div>
           </div>
@@ -548,21 +551,6 @@ export default function MyPersonalDashboard() {
               muted={!unlocked}
             />
             <PeopleICareFor unlocked={unlocked} />
-          </Panel>
-
-          <Panel title="We've noticed" icon={Lightbulb} unlocked={unlocked} onClick={() => navigate("/biolog")}>
-            <EmotionalHeadline
-              emoji="💡"
-              title="A few patterns worth knowing"
-              sub="Observations from what you've logged — not diagnoses."
-              muted={!unlocked}
-            />
-            <ul className="space-y-1.5">
-              {INSIGHTS.map((i) => (
-                <li key={i} className="text-xs text-muted-foreground">{i}</li>
-              ))}
-            </ul>
-            <CardFooterLink label="See what's behind this" onClick={() => navigate("/biolog")} />
           </Panel>
         </div>
 
