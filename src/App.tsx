@@ -261,6 +261,7 @@ const App = () => (
 
 
             <Route path="/documents" element={<DoctorDocumentsPage />} />
+            <Route path="/my-views" element={<MyViews />} />
             <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/practice" element={<MyPractice />} />
