@@ -216,18 +216,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // While the role is still resolving we must NOT fall back to the route-based
   // guess, otherwise a doctor sees the patient nav for one frame.
   const isDoctor = role === "doctor";
-  const isNurseMenu = role === "nurse";
+  const isNurse = role === "nurse";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
-  /** Doctors can flip the sidebar between their practice menu and their own
-   *  patient menu with the badge next to the dashboard. Doctor mode is always
-   *  the starting point for a fresh entry into the app. */
+  /** Doctors and nurses can flip the sidebar between their professional menu
+   *  and their own patient menu with the badge next to the dashboard. The
+   *  professional mode is always the starting point for a fresh entry. */
   const [profileMode, setProfileMode] = useState<"doctor" | "patient">("doctor");
 
   const doctorInPatientMode = isDoctor && profileMode === "patient";
+  const nurseInPatientMode = isNurse && profileMode === "patient";
+  const isNurseMenu = isNurse && !nurseInPatientMode;
 
   const isPatientMenu =
-    doctorInPatientMode || (!isDoctor && !isNurseMenu && (isPatient || routeSaysPatient));
+    doctorInPatientMode ||
+    nurseInPatientMode ||
+    (!isDoctor && !isNurse && (isPatient || routeSaysPatient));
 
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
