@@ -53,7 +53,7 @@ import { SessionTranscriptAccordion } from "@/features/sessions/components/Sessi
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
-import { ClinicianNotesAccordion } from "@/features/sessions/components/ClinicianNotesAccordion";
+import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
