@@ -604,8 +604,10 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                 </div>
                 ) : null,
 
+                hfSideHasContent(template.footer) ? (
                 <div
                   key={`${template.id}-footer`}
+
                   className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
