@@ -61,7 +61,14 @@ function uploadErrorMessage(err: unknown): string {
   return raw ? `We couldn't save your photo: ${raw}` : "We couldn't save your photo. Please try again.";
 }
 
-export function PatientHeroCard({ action }: { action?: React.ReactNode }) {
+export function PatientHeroCard({
+  action,
+  emotionalLine,
+}: {
+  action?: React.ReactNode;
+  /** Dynamic, data-derived sentence shown under the greeting. */
+  emotionalLine?: string;
+}) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -205,8 +212,11 @@ export function PatientHeroCard({ action }: { action?: React.ReactNode }) {
             {greeting}
             {firstName ? `, ${firstName}` : ""}
           </h1>
+          {emotionalLine && (
+            <p className="text-sm text-foreground mt-0.5">{emotionalLine}</p>
+          )}
           <p className="text-muted-foreground text-xs">
-            Here's what's happening today, {format(new Date(), "EEEE, MMMM d, yyyy")}
+            {format(new Date(), "EEEE, MMMM d, yyyy")}
           </p>
           {action && <div className="mt-3">{action}</div>}
         </div>
