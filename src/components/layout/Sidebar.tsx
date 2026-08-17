@@ -386,7 +386,34 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     refetchInterval: 30000,
   });
 
+  /** Doctor | Patient pill shown next to Dashboard so doctors can switch the
+   *  sidebar between their practice tools and their own patient profile. */
+  const profileToggle = (
+    <div className="mx-1 mt-1 flex items-center gap-1 rounded-full bg-muted/60 p-0.5">
+      {(["doctor", "patient"] as const).map((mode) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => {
+            setProfileMode(mode);
+            navigate(mode === "patient" ? "/my-dashboard" : "/doctor-dashboard");
+            onNavigate?.();
+          }}
+          className={cn(
+            "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
+            profileMode === mode
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {mode}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
+
     <aside className="fixed left-0 top-0 z-40 h-screen w-[252px] bg-sidebar">
       <div className="flex h-full flex-col">
         <div className="flex h-24 items-center gap-3 px-6">
