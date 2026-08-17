@@ -1986,7 +1986,8 @@ export function PatientDetailsEditor({
                               <div key={a.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-foreground">{a.name}</p>
+                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">{a.name}</span>
+
                                     {(a.reaction || a.date_identified) && (
                                       <p className="text-xs text-muted-foreground">
                                         {a.reaction || ""}
