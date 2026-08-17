@@ -112,12 +112,12 @@ export function PermissionTransparencyModal({
             <CheckCircle className="h-4 w-4 text-green-600" />
             {sharedHeading}
           </h4>
-          <ul className="list-disc list-inside space-y-1 text-xs text-foreground">
+          <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs text-foreground">
             {sharedList.map((item) => (
               <li key={item.label}>
                 {item.label}
                 {item.subItems && (
-                  <ul className="list-disc list-inside ml-4 mt-0.5 space-y-0.5 text-muted-foreground">
+                  <ul className="list-disc list-outside pl-4 mt-1 space-y-1 text-muted-foreground">
                     {item.subItems.map((sub) => (
                       <li key={sub}>{sub}</li>
                     ))}
@@ -134,7 +134,7 @@ export function PermissionTransparencyModal({
             <XCircle className="h-4 w-4 text-destructive" />
             {privateHeading}
           </h4>
-          <ul className="list-disc list-inside space-y-1 text-xs text-foreground">
+          <ul className="list-disc list-outside pl-4 space-y-1.5 text-xs text-foreground">
             {privateList.map((item) => (
               <li key={item.label}>{item.label}</li>
             ))}

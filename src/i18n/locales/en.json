@@ -2169,5 +2169,43 @@
       "detailsUpdated": "Your details have been updated",
       "recordSetupMessage": "We are setting up your patient record. Please check back in a moment."
     }
+  },
+  "dialogs": {
+    "sharedWithCareTeam": "Shared with the Care Team",
+    "privateNotShared": "Not Shared with Care Team",
+    "sharedWithPatientCareTeam": "Shared with the Patient's Care Team",
+    "privateToYourPractice": "Private to Your Practice",
+    "otherDoctorsWillSee": "Other doctors on this patient's care team will be able to see the items listed below.",
+    "dataSharing": "Data Sharing",
+    "iUnderstand": "I Understand",
+    "holisticHealthSharing": "Better care through shared context",
+    "holisticHealthDescription": "Sharing more of your health history helps every doctor on your care team give you safer, more informed treatment.",
+    "limitingAccessWarning": "Limiting what your care team can see may mean a doctor is missing important context for your treatment."
+  },
+  "permissions": {
+    "aiSessionSummaries": "AI Session Summaries",
+    "patientInformation": "Patient Information",
+    "medicalOverview": "Medical Overview",
+    "documents": "Documents",
+    "prescriptions": "Prescriptions",
+    "hospitalAdmissions": "Hospital Admissions",
+    "patientImages": "Patient Images",
+    "patientVideos": "Patient Videos",
+    "testResults": "Test Results",
+    "scans": "Scans",
+    "fullTranscriptions": "Full Session Transcriptions",
+    "rawAudioRecordings": "Raw Audio Recordings",
+    "aiDiagnostics": "AI Diagnostics",
+    "clinicalDrawings": "Clinical Drawings",
+    "invoicesAndBilling": "Invoices and Billing",
+    "medicalCertificates": "Medical Certificates",
+    "doctorContribution": "This Doctor's Contribution",
+    "visitSummary": "Visit Summary",
+    "issuedPrescriptions": "Issued Prescriptions",
+    "medicalHistory": "Medical History",
+    "credentials": "Credentials",
+    "aboutMe": "About Me",
+    "sessionHistory": "Session History",
+    "draftNotes": "Draft Notes"
   }
 }

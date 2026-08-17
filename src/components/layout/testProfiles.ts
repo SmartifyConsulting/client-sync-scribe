@@ -22,7 +22,7 @@ export const TEST_PROFILES: TestProfile[] = [
   { email: "renken@smartify.co.za", name: "Renken", role: "ER Provider", icon: Ambulance },
   { email: "er.test@holarchealth.com", name: "ER Provider (Test)", role: "ER Provider", icon: Ambulance },
   
-  { email: "dr.buttons@smartify.co.za", name: "Dr Gianna Buttons", role: "Doctor", icon: Stethoscope },
+  { email: "dr.buttons@smartify.co.za", name: "Matthew Buttons", role: "Doctor", icon: Stethoscope },
   { email: "2348167581572@phone.holarc.local", name: "Samuel 0koli", role: "Patient", icon: HeartPulse },
   { email: "nurse.test@holarchealth.com", name: "Nomvula Dlamini", role: "Nurse", icon: Syringe },
 ];
