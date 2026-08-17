@@ -53,3 +53,13 @@ If the patient has an insurance provider / insurance number filled in but the Em
 ## Technical notes
 
 - `src/features/patients/components/PatientDetailsEditor.tsx`: two-column grid for the next-of-kin fields; derive `insuranceCaptured = !!(medical_aid || medical_aid_number)` and gate save on `employer` when true, surfacing the error via the existing form error/toast pattern.
+
+---
+
+# Allergies, Medication and Conditions as green badges
+
+In the patient details health section, display each allergy, current medication and chronic condition as its own green badge with white text, instead of plain comma-separated text.
+
+- Green background using the existing success/green token, white label text, rounded pill shape, wrapping across lines.
+- Applies to the read-only view of Allergies, Current Medication and Chronic Conditions; edit mode keeps the existing inputs.
+- Empty lists keep showing the current "not recorded" placeholder.
