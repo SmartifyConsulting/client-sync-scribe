@@ -4401,6 +4401,7 @@ export type Database = {
           role_title: string | null
           status: string
           updated_at: string
+          ward_id: string | null
         }
         Insert: {
           created_at?: string
@@ -4416,6 +4417,7 @@ export type Database = {
           role_title?: string | null
           status?: string
           updated_at?: string
+          ward_id?: string | null
         }
         Update: {
           created_at?: string
@@ -4431,6 +4433,7 @@ export type Database = {
           role_title?: string | null
           status?: string
           updated_at?: string
+          ward_id?: string | null
         }
         Relationships: [
           {
@@ -4452,6 +4455,13 @@ export type Database = {
             columns: ["linked_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hospital_nurses_ward_id_fkey"
+            columns: ["ward_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_wards"
             referencedColumns: ["id"]
           },
         ]
@@ -8063,6 +8073,10 @@ export type Database = {
         Args: { _patient_id: string }
         Returns: boolean
       }
+      can_see_ward: {
+        Args: { _hospital_id: string; _user_id: string; _ward_id: string }
+        Returns: boolean
+      }
       can_upload_holarchelp_incident: {
         Args: { _incident_id: string }
         Returns: boolean
@@ -8355,6 +8369,10 @@ export type Database = {
         Args: { _hospital_id: string; _user_id: string }
         Returns: boolean
       }
+      is_hospital_nurse: {
+        Args: { _hospital_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_hospital_role: {
         Args: { _hospital_id: string; _role: string; _user_id: string }
         Returns: boolean
@@ -8374,6 +8392,10 @@ export type Database = {
         Returns: boolean
       }
       norm_text: { Args: { _t: string }; Returns: string }
+      nurse_ward_id: {
+        Args: { _hospital_id: string; _user_id: string }
+        Returns: string
+      }
       patient_admitted_at_my_hospital: {
         Args: { _patient_id: string }
         Returns: boolean
