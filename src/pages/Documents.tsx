@@ -598,10 +598,12 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   </div>
                   <h3 className="text-sm font-semibold text-foreground mb-1">Header</h3>
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {template.name}
+                    From: {template.name}
                   </p>
                   <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
-                </div>,
+                </div>
+                ) : null,
+
                 <div
                   key={`${template.id}-footer`}
                   className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
