@@ -98,15 +98,19 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
       { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
       { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
+      { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
+      { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
+      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks" },
       { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
+      { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
     ],
   },
 ];
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
 ];
+
 
 /** Flat view of the doctor menu, used for preference-based reordering/hiding
  *  and the "Customise menu" popover, which don't need to know about sections. */
