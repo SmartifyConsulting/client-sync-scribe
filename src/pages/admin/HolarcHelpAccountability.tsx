@@ -140,13 +140,17 @@ export function AccountabilityPanel() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-0 border-t border-border/50">
-                <Accordion type="multiple" className="divide-y divide-border/50">
+                <Accordion type="multiple" className="space-y-2 py-1">
                   {[
                     { key: "approved", label: "Approved", items: approved, dot: "bg-emerald-500" },
                     { key: "unapproved", label: "Unapproved", items: unapproved, dot: "bg-amber-500" },
                   ].map(({ key, label, items, dot }) => (
-                    <AccordionItem key={key} value={key} className="border-0">
-                      <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-muted/30">
+                    <AccordionItem
+                      key={key}
+                      value={key}
+                      className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                    >
+                      <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                         <div className="flex items-center gap-2">
                           <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
                           <span className="text-xs font-medium text-primary-dark">{label}</span>

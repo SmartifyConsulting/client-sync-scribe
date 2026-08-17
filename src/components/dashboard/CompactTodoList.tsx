@@ -592,18 +592,22 @@ export function CompactTodoList() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
-                        <Accordion type="multiple" className="space-y-3">
+                        <Accordion type="multiple" className="space-y-2">
                           {patientGroups(grouped[b.key]).map(([patientName, items]) => (
-                            <AccordionItem key={`${b.key}-${patientName}`} value={`${b.key}-${patientName}`} className={SECTION_ITEM_ROUNDED_CLASS}>
-                              <AccordionTrigger className={cn(SECTION_TRIGGER_CLASS, SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-1.5")}>
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <UserIcon className="h-4 w-4 text-primary shrink-0" />
+                            <AccordionItem
+                              key={`${b.key}-${patientName}`}
+                              value={`${b.key}-${patientName}`}
+                              className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                            >
+                              <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                  <UserIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                   {isSamplePatient({ name: patientName }) && <SampleBadge />}
-                                  <span className="text-base font-semibold truncate text-left">{patientName}</span>
+                                  <span className="text-xs font-medium text-foreground truncate text-left">{patientName}</span>
                                   <SectionCountPill count={items.length} className="ml-auto mr-1" />
                                 </div>
                               </AccordionTrigger>
-                              <AccordionContent className="px-3 pt-3 pb-3">
+                              <AccordionContent className="pt-2 pb-2">
                                 <div className="space-y-2">
                                   {items.map(renderTodoRow)}
                                 </div>

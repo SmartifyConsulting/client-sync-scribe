@@ -300,14 +300,18 @@ export function BiologToday({ ownerUserId, readOnly }: Props) {
             </span>
           </AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
-            <Accordion type="multiple" className="divide-y divide-neutral-200 border-t border-b border-neutral-200">
+            <Accordion type="multiple" className="space-y-2 py-1">
               {MEAL_SLOTS.map(({ slot, label }) => {
                 const slotFoods = mealFoods(slot);
                 const slotKj = slotFoods.reduce((sum, name) => sum + (foods.find((f) => f.name === name)?.kilojoules ?? 0), 0);
                 const slotKcal = slotFoods.reduce((sum, name) => sum + (foods.find((f) => f.name === name)?.calories ?? 0), 0);
                 return (
-                  <AccordionItem key={slot} value={slot} className="border-0">
-                    <AccordionTrigger className="px-1 py-2 hover:no-underline hover:bg-muted/50">
+                  <AccordionItem
+                    key={slot}
+                    value={slot}
+                    className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                  >
+                    <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                       <div className="flex flex-1 items-center justify-between pr-2">
                         <span className={LABEL}>{label}</span>
                         <span className="text-[11px] text-muted-foreground">

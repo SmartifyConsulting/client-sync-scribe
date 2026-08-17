@@ -257,7 +257,7 @@ export default function DoctorDocumentsTab() {
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
                 {groupMode === "date" ? (
-                  <Accordion type="multiple" className="divide-y divide-border">
+                  <Accordion type="multiple" className="space-y-2 py-1">
                     {Array.from(
                       g.rows.reduce((map, d) => {
                         const name = d.patient_name || "No patient";
@@ -268,17 +268,21 @@ export default function DoctorDocumentsTab() {
                     )
                       .sort(([a], [b]) => getSurname(a).localeCompare(getSurname(b)))
                       .map(([patientName, rows]) => (
-                        <AccordionItem key={patientName} value={patientName} className="border-0">
-                          <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30">
+                        <AccordionItem
+                          key={patientName}
+                          value={patientName}
+                          className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                        >
+                          <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                             <div className="flex items-center justify-between w-full pr-2">
-                              <span className="text-sm font-semibold flex items-center gap-1.5">
-                                <User className="h-3.5 w-3.5 text-primary" />
+                              <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
+                                <User className="h-3.5 w-3.5 text-muted-foreground" />
                                 {patientName}
                               </span>
                               <SectionCountPill count={rows.length} />
                             </div>
                           </AccordionTrigger>
-                          <AccordionContent className="pt-0 pb-0">
+                          <AccordionContent className="pt-2 pb-2">
                             <div className="divide-y divide-border">
                               {rows.map((d) => (
                                 <div key={d.id} className="px-4 py-3">

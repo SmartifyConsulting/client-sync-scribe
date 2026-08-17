@@ -841,16 +841,20 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                     {group.items.length === 0 ? (
                       <p className="text-xs text-muted-foreground px-4 py-3">No documents in this group.</p>
                     ) : groupBy === "date" ? (
-                      <Accordion type="multiple" className="divide-y divide-border">
+                      <Accordion type="multiple" className="space-y-2 py-1">
                         {patientGroups(group.items).map(([patientName, items]) => (
-                          <AccordionItem key={patientName} value={patientName} className="border-0">
-                            <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30">
+                          <AccordionItem
+                            key={patientName}
+                            value={patientName}
+                            className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                          >
+                            <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                               <div className="flex items-center justify-between w-full pr-2">
-                                <span className="text-sm font-semibold">{patientName}</span>
+                                <span className="text-xs font-medium text-foreground">{patientName}</span>
                                 <SectionCountPill count={items.length} />
                               </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pt-0 pb-0">
+                            <AccordionContent className="pt-2 pb-2">
                               <div className="divide-y divide-border">
                                 {items.map((doc) => renderDocRow(doc))}
                               </div>

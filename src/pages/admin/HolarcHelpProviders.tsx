@@ -254,10 +254,14 @@ export default function HolarcHelpProviders() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3">
-                <Accordion type="multiple" className="space-y-2">
+                <Accordion type="multiple" className="space-y-2 py-1">
                   {TIER_ORDER.filter((t) => tiers[t]?.length).map((t) => (
-                    <AccordionItem key={t} value={t} className="border rounded-xl overflow-hidden">
-                      <AccordionTrigger className="px-3 hover:no-underline">
+                    <AccordionItem
+                      key={t}
+                      value={t}
+                      className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                    >
+                      <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                         <div className="flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded-full text-sm font-semibold border ${TIER_CHIP[t]}`}>
                             {t.replace("_", " ").replace("tier", "Tier")}

@@ -143,17 +143,21 @@ export default function InpatientsScreen() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <Accordion type="multiple" className={SECTION_FRAME_CLASS}>
+                <Accordion type="multiple" className="space-y-2 py-1">
                   {group.rows.map((p) => {
                     const href = recordLink(p);
                     return (
-                      <AccordionItem key={p.id} value={p.id} className={SECTION_ITEM_CLASS}>
-                        <AccordionTrigger className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, "py-3")}>
+                      <AccordionItem
+                        key={p.id}
+                        value={p.id}
+                        className="border-0 !border-b-0 rounded-lg bg-muted/30 overflow-hidden"
+                      >
+                        <AccordionTrigger className="px-4 py-1.5 border-0 rounded-none hover:no-underline hover:bg-muted/50">
                           <div className="flex flex-1 flex-wrap items-center justify-between gap-2 pr-2 text-left">
-                            <span className="text-xs font-semibold tracking-wide">
+                            <span className="text-xs font-medium text-foreground tracking-wide">
                               {wardName(p.ward_id)} · Bed {p.bed_number || "—"}
                             </span>
-                            <span className="text-xs">
+                            <span className="text-xs text-muted-foreground">
                               <span className="capitalize">{p.status}</span> · {new Date(p.admitted_at).toLocaleString()}
                             </span>
                           </div>
