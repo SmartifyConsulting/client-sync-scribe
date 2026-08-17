@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { SECTION_FRAME_CLASS, SECTION_ITEM_CLASS, SECTION_TRIGGER_CLASS } from "@/components/ui/section-accordion";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useNurseWard } from "../../../hooks/useNurseWard";
 import { BedDouble, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -79,12 +81,19 @@ function WardForm({ hospitalId, onSaved, defaultWardType }: { hospitalId: string
 export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: string; title?: string } = {}) {
   const { providerId } = useProviderAccess();
   const { toast } = useToast();
-  const { wards: allWards, totals: allTotals, reload } = useHospitalWards(providerId);
+  const { isNurse } = useUserRole();
+  const { assignment: nurseAssignment } = useNurseWard();
+  const { wards: allWardsUnscoped, totals: allTotals, reload } = useHospitalWards(providerId);
   const { inpatients } = useHospitalInpatients(providerId);
   const { onShiftNow } = useHospitalShifts(providerId);
 
+  // Nurses only ever see the single ward they're rostered to, not the whole hospital.
+  const allWards = isNurse && nurseAssignment?.wardId
+    ? allWardsUnscoped.filter((w) => w.id === nurseAssignment.wardId)
+    : allWardsUnscoped;
+
   const wards = wardType ? allWards.filter((w) => w.ward_type === wardType) : allWards;
-  const totals = wardType
+  const totals = (wardType || isNurse)
     ? wards.reduce((acc, w) => ({ capacity: acc.capacity + (w.bed_capacity || 0), occupied: acc.occupied + w.occupied }), { capacity: 0, occupied: 0 })
     : allTotals;
 

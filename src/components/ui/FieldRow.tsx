@@ -22,7 +22,7 @@ interface FieldRowProps {
 export function FieldRow({ label, children, wide, className, htmlFor }: FieldRowProps) {
   return (
     <div className={cn("flex items-center gap-2", wide && "sm:col-span-2", className)}>
-      <Label htmlFor={htmlFor} className="w-28 shrink-0 text-xs font-bold">
+      <Label htmlFor={htmlFor} className="w-28 shrink-0 text-sm font-medium">
         {label}
       </Label>
       <div className="min-w-0 flex-1">{children}</div>

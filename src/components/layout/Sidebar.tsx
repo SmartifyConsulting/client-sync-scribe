@@ -314,7 +314,15 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     const itemPath = hasQuery ? item.to.split("?")[0] : item.to;
     const itemSearch = hasQuery ? item.to.split("?")[1] : "";
 
-    const isItemActive = hasQuery
+    // "My Dashboard" is the universal post-login landing page (see
+    // RoleBasedRedirect in App.tsx) but isn't itself a nav item — treat it as
+    // the doctor Dashboard link's route too, so Dashboard highlights on landing
+    // instead of nothing being highlighted at all.
+    const isDashboardLandingAlias = itemPath === "/doctor-dashboard" && location.pathname === "/my-dashboard";
+
+    const isItemActive = isDashboardLandingAlias
+      ? true
+      : hasQuery
       ? location.pathname === itemPath &&
         (location.search === `?${itemSearch}` ||
           (!location.search && itemSearch === "section=health"))

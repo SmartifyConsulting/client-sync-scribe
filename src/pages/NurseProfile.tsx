@@ -208,7 +208,7 @@ export default function NurseProfile() {
       <Accordion type="multiple" defaultValue={["about"]} className={SECTION_FRAME_CLASS}>
         {/* About Me */}
         <AccordionItem value="about" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>About Me</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">About Me</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <Textarea
               rows={4}
@@ -224,7 +224,7 @@ export default function NurseProfile() {
 
         {/* Personal Information */}
         <AccordionItem value="personal" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Personal Information</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Personal Information</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className={FIELD_GRID_CLASS}>
               <FieldRow label="Full name">
@@ -270,7 +270,7 @@ export default function NurseProfile() {
 
         {/* Professional Information */}
         <AccordionItem value="professional" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Professional Information</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Professional Information</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className="mb-3 flex items-center gap-2">
               <span className="text-xs font-bold">Registration status</span>
@@ -324,7 +324,7 @@ export default function NurseProfile() {
 
         {/* Employment */}
         <AccordionItem value="employment" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Employment</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Employment</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className={FIELD_GRID_CLASS}>
               <FieldRow label="Facility">
@@ -359,7 +359,7 @@ export default function NurseProfile() {
 
         {/* Clinical Permissions */}
         <AccordionItem value="permissions" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Clinical Permissions</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Clinical Permissions</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <p className="mb-3 flex items-start gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
@@ -392,7 +392,7 @@ export default function NurseProfile() {
 
         {/* Certifications & Training */}
         <AccordionItem value="certifications" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Certifications &amp; Training</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Certifications &amp; Training</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             {certs.length === 0 ? (
               <p className="text-xs text-muted-foreground">No certifications captured yet.</p>
@@ -428,7 +428,7 @@ export default function NurseProfile() {
 
         {/* Current Assignment */}
         <AccordionItem value="assignment" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Current Assignment</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Current Assignment</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className="grid gap-2 sm:grid-cols-3">
               {[
@@ -463,7 +463,7 @@ export default function NurseProfile() {
 
         {/* Preferences */}
         <AccordionItem value="preferences" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Preferences</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Preferences</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className={FIELD_GRID_CLASS}>
               <FieldRow label="Language">
@@ -486,7 +486,7 @@ export default function NurseProfile() {
 
         {/* Security & Access */}
         <AccordionItem value="security" className={SECTION_ITEM_CLASS}>
-          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}>Security &amp; Access</AccordionTrigger>
+          <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">Security &amp; Access</h3></AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
             <div className={FIELD_GRID_CLASS}>
               <FieldRow label="Last login">

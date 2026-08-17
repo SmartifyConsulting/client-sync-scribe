@@ -97,14 +97,14 @@ export default function ProviderProfile() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-extrabold">{t("providerProfile.title")}</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-3xl font-bold text-foreground">{t("providerProfile.title")}</h1>
+        <p className="text-muted-foreground text-xs">
           {t("providerProfile.status")}: <span className="font-semibold">{row.status}</span> · {t("providerProfile.tier")}: <span className="font-semibold">{row.tier}</span>
           {" · "}{t("providerProfile.subscription")}: <span className="font-semibold">{row.subscription_status}</span>
         </p>
       </div>
 
-      <div className="grid gap-3 rounded-2xl border bg-card p-4">
+      <div className="grid gap-3 rounded-xl border border-primary bg-card p-5">
         {providerType === "hospital" ? (
           <>
             <Field label={t("providerProfile.hospitalName")} value={row.name} onChange={(v) => setRow({ ...row, name: v })} />
@@ -120,7 +120,7 @@ export default function ProviderProfile() {
         )}
 
         <div className="grid gap-1.5">
-          <Label className="text-xs">
+          <Label>
             {providerType === "hospital" ? t("providerProfile.address") : t("providerProfile.baseAddress")}
             {geocoding && <Loader2 className="inline ml-2 h-3 w-3 animate-spin text-muted-foreground" />}
           </Label>
@@ -213,8 +213,8 @@ const CapabilityToggle = ({ label, checked, onChange }: { label: string; checked
 
 const Field = ({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) => (
   <div className="grid gap-1.5">
-    <Label className="text-xs">{label}</Label>
-    <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="rounded-xl" />
+    <Label>{label}</Label>
+    <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} />
   </div>
 );
 

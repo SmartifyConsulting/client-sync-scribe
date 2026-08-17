@@ -14,6 +14,7 @@ import DischargesScreen from "./pages/provider/hospital/DischargesScreen";
 
 import HospitalOpsLayout from "./pages/provider/hospital/HospitalOpsLayout";
 import EmergencyHubScreen from "./pages/provider/hospital/EmergencyHubScreen";
+import HospitalIndexScreen from "./pages/provider/hospital/HospitalIndexScreen";
 import AdmissionsScreen from "./pages/provider/hospital/AdmissionsScreen";
 import HospitalPatientRecordScreen from "./pages/provider/hospital/HospitalPatientRecordScreen";
 
@@ -128,7 +129,7 @@ export default function ProviderRoutes() {
       <Route path="er/*" element={<Navigate to="/provider/ambulance" replace />} />
       <Route path="hospital" element={<ProviderShell><HospitalOpsLayout /></ProviderShell>}>
         {/* Emergency module */}
-        <Route index element={<EmergencyHubScreen />} />
+        <Route index element={<HospitalIndexScreen />} />
         <Route path="er" element={<EmergencyCapability><ErCoordinationScreen /></EmergencyCapability>} />
         <Route path="incoming" element={<EmergencyCapability><IncomingAmbulancesScreen /></EmergencyCapability>} />
         <Route path="triage" element={<EmergencyCapability><TriageScreen /></EmergencyCapability>} />
