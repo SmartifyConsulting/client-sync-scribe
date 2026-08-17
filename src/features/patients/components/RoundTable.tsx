@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Users, Send, Loader2, Trash2, MessageCircle, Plus, Circle } from "lucide-react";
+import { Users, Send, Loader2, Trash2, MessageCircle, Plus, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ interface RTMessage {
   doctor_name: string;
   content: string;
   created_at: string;
+  edited_at?: string | null;
 }
 
 /** Deterministic soft tint per doctor so a doctor keeps the same colour everywhere. */
@@ -68,6 +69,9 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [chatInput, setChatInput] = useState<Record<string, string>>({});
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
   const presenceRef = useRef<any>(null);
 
   useEffect(() => {
@@ -156,8 +160,40 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
   };
 
   const deleteTopic = async (id: string) => {
-    await supabase.from('round_table_topics').delete().eq('id', id);
+    if (!window.confirm("Delete this topic and its whole discussion? This cannot be undone.")) return;
+    const { error } = await supabase.from('round_table_topics').delete().eq('id', id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     loadTopics();
+  };
+
+  const cancelEdit = () => { setEditingMsgId(null); setEditingTopicId(null); setEditingText(""); };
+
+  const saveTopicEdit = async (topicId: string) => {
+    const text = editingText.trim();
+    if (!text) return;
+    const { error } = await supabase.from('round_table_topics').update({ body: text }).eq('id', topicId);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    cancelEdit();
+    loadTopics();
+  };
+
+  const saveMessageEdit = async (m: RTMessage) => {
+    const text = editingText.trim();
+    if (!text) return;
+    const { error } = await supabase
+      .from('round_table_messages')
+      .update({ content: text, edited_at: new Date().toISOString() })
+      .eq('id', m.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    cancelEdit();
+    loadMessages(m.topic_id);
+  };
+
+  const deleteMessage = async (m: RTMessage) => {
+    if (!window.confirm("Delete this message?")) return;
+    const { error } = await supabase.from('round_table_messages').delete().eq('id', m.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    loadMessages(m.topic_id);
   };
 
   if (loading) {
@@ -218,7 +254,53 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                 </div>
               </AccordionTrigger>
               <AccordionContent className="space-y-3">
-                <p className="whitespace-pre-wrap text-xs text-foreground">{t.body}</p>
+                {/* Opening message from the doctor who started the round table */}
+                <div className="flex items-end gap-2">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-[10px] font-semibold text-primary">
+                    {initials(t.doctor_name)}
+                  </div>
+                  <div className="relative max-w-[78%] rounded-2xl rounded-bl-sm bg-primary px-3 py-2 text-xs text-primary-foreground">
+                    <div className="mb-0.5 flex items-center gap-1">
+                      <span className="text-xs font-semibold">{t.doctor_name}</span>
+                      <span className="ml-auto pl-2 text-[10px] opacity-80">
+                        {format(new Date(t.created_at), "MMM d, h:mm a")}
+                      </span>
+                    </div>
+                    {editingTopicId === t.id ? (
+                      <div className="space-y-1">
+                        <Textarea
+                          value={editingText}
+                          onChange={(e) => setEditingText(e.target.value)}
+                          className="min-h-[70px] bg-background text-xs text-foreground"
+                        />
+                        <div className="flex justify-end gap-1">
+                          <Button size="sm" variant="ghost" className="h-6 text-[11px] text-primary-foreground hover:text-primary-foreground" onClick={cancelEdit}>Cancel</Button>
+                          <Button size="sm" variant="secondary" className="h-6 text-[11px]" onClick={() => saveTopicEdit(t.id)}>Save</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{t.body}</p>
+                    )}
+                    {t.doctor_id === currentUserId && editingTopicId !== t.id && (
+                      <div className="mt-1 flex justify-end gap-1">
+                        <button
+                          className="rounded p-0.5 opacity-80 hover:opacity-100"
+                          aria-label="Edit opening message"
+                          onClick={() => { setEditingTopicId(t.id); setEditingMsgId(null); setEditingText(t.body); }}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                        <button
+                          className="rounded p-0.5 opacity-80 hover:opacity-100"
+                          aria-label="Delete topic"
+                          onClick={() => deleteTopic(t.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="border-t pt-3 space-y-2">
                   <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                     <MessageCircle className="h-4 w-4" /> Live discussion
@@ -228,7 +310,7 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                       const mine = m.doctor_id === currentUserId;
                       const tone = bubbleTone(m.doctor_id);
                       return (
-                        <div key={m.id} className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}>
+                        <div key={m.id} className={`group flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}>
                           <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${tone.avatar}`}>
                             {initials(m.doctor_name)}
                           </div>
@@ -242,14 +324,48 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                               {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
                               <span className="ml-auto pl-2 text-[10px] opacity-70">
                                 {format(new Date(m.created_at), "MMM d, h:mm a")}
+                                {m.edited_at ? " · edited" : ""}
                               </span>
                             </div>
-                            <p className="whitespace-pre-wrap">{m.content}</p>
+                            {editingMsgId === m.id ? (
+                              <div className="space-y-1">
+                                <Textarea
+                                  value={editingText}
+                                  onChange={(e) => setEditingText(e.target.value)}
+                                  className="min-h-[60px] bg-background text-xs"
+                                />
+                                <div className="flex justify-end gap-1">
+                                  <Button size="sm" variant="ghost" className="h-6 text-[11px]" onClick={cancelEdit}>Cancel</Button>
+                                  <Button size="sm" className="h-6 text-[11px]" onClick={() => saveMessageEdit(m)}>Save</Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="whitespace-pre-wrap">{m.content}</p>
+                            )}
+                            {mine && editingMsgId !== m.id && (
+                              <div className="mt-1 flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                <button
+                                  className="rounded p-0.5 text-muted-foreground hover:text-foreground"
+                                  aria-label="Edit message"
+                                  onClick={() => { setEditingMsgId(m.id); setEditingTopicId(null); setEditingText(m.content); }}
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </button>
+                                <button
+                                  className="rounded p-0.5 text-destructive hover:opacity-80"
+                                  aria-label="Delete message"
+                                  onClick={() => deleteMessage(m)}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
                     })}
                   </div>
+
                   <div className="flex gap-1">
                     <Input
                       placeholder="Reply..."
@@ -262,11 +378,6 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                       <Send className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                  {t.doctor_id === currentUserId && (
-                    <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs" onClick={() => deleteTopic(t.id)}>
-                      <Trash2 className="h-4 w-4 mr-1" /> Delete topic
-                    </Button>
-                  )}
                 </div>
               </AccordionContent>
             </AccordionItem>
