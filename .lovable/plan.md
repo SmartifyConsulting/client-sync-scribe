@@ -35,6 +35,7 @@ Checked current state: the recording screen at `/sessions` sits behind a sign-in
 - Verify the Family Doctor label in both display and edit modes.
 - Deploy the updated email function, send a fresh test invoice to `georgia.adams@smartify.co.za`, and confirm the provider accepts it.
 - Verify the generated email HTML contains the supplied logo URL and the invoice deep link; final inbox rendering and link opening can then be confirmed from the received email.
+- Sign in as a patient-only account, open the recording screen directly, and confirm the redirect; confirm a patient-issued session creation is rejected; confirm a doctor can still start, record and finalise a session normally.
 
 ## Technical Notes
 - The current sidebar stores the selected profile mode in local storage, which can reopen a doctor in Patient mode; the default-state handling will be adjusted so Doctor mode is authoritative on initial doctor entry.
