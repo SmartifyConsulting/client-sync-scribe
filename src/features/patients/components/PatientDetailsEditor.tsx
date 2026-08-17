@@ -2033,9 +2033,12 @@ export function PatientDetailsEditor({
                                 <Pill className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-medium text-foreground">
-                                    {m.name}
-                                    {m.dosage ? ` — ${m.dosage}` : ""}
+                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">
+                                      {m.name}
+                                      {m.dosage ? ` — ${m.dosage}` : ""}
+                                    </span>
                                   </p>
+
                                   {(m.start_date || m.end_date) && (
                                     <p className="text-xs text-muted-foreground">
                                       {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} —{" "}
