@@ -587,7 +587,7 @@ export function CompactTodoList() {
                   previewing={loadingPreview === todo.id}
                 />
               );
-              const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
+              const buckets = DATE_BUCKETS.filter((b) => b.key === "today" || grouped[b.key].length > 0);
               if (buckets.length === 0) return null;
               // LOCKED LAYOUT — see mem://design/todo-accordion-and-row-spec.
               // Date accordion (always-green bar + calendar icon + count pill) wrapping
@@ -607,6 +607,9 @@ export function CompactTodoList() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className={SECTION_CONTENT_CLASS}>
+                        {b.key === "today" && grouped[b.key].length === 0 ? (
+                          <p className="px-1 py-2 text-xs text-muted-foreground">Nothing due today.</p>
+                        ) : (
                         <Accordion type="multiple" className="space-y-2">
                           {patientGroups(grouped[b.key]).map(([patientName, items]) => (
                             <AccordionItem
@@ -630,6 +633,7 @@ export function CompactTodoList() {
                             </AccordionItem>
                           ))}
                         </Accordion>
+                        )}
                       </AccordionContent>
                     </AccordionItem>
                   ))}
