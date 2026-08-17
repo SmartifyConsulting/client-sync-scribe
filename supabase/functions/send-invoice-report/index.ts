@@ -65,11 +65,6 @@ const handler = async (req: Request): Promise<Response> => {
         </div>
 
 
-        <div style="background: #f9fafb; border-radius: 8px; padding: 15px; margin-bottom: 30px; text-align: center;">
-          <p style="margin: 0; color: #6b7280; font-size: 14px;">
-            Report Period: <strong>${dateFrom}</strong> to <strong>${dateTo}</strong>
-          </p>
-        </div>
 
         <h2 style="color: #1f2937; font-size: 18px; margin-bottom: 15px;">Summary</h2>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
