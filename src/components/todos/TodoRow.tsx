@@ -254,7 +254,7 @@ export function TodoRow({
 
         {/* Actions */}
         <div className="flex items-center gap-0.5 shrink-0">
-          {!isAppointment && (todo.document_id || isDocumentTodoKind(display.kind)) && onPreview && (
+          {!isAppointment && onPreview && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -267,7 +267,7 @@ export function TodoRow({
                   {previewing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4 text-primary" />}
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Preview</TooltipContent>
+              <TooltipContent>{todo.document_id || isDocumentTodoKind(display.kind) ? "Preview" : "View task"}</TooltipContent>
             </Tooltip>
           )}
 

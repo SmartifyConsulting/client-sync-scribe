@@ -20,6 +20,7 @@ import {
   MessageSquare,
   type LucideIcon,
   HeartHandshake,
+  Users2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -394,7 +395,10 @@ export default function MyPersonalDashboard() {
           {/* My Round Tables — folded into the whitespace at the bottom */}
           <div className="mt-4 border-t border-border pt-3">
             <div className="flex items-center justify-between gap-2 mb-2">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">My Round Tables</p>
+              <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-primary font-bold">
+                <Users2 className="h-3.5 w-3.5" />
+                My Round Tables
+              </p>
               <Link to="/patient/round-table" className="inline-flex items-center gap-1 text-xs text-primary font-semibold">
                 View all <ChevronRight className="h-3.5 w-3.5" />
               </Link>

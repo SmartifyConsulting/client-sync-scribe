@@ -37,6 +37,7 @@ import { getTodoDisplay } from "@/lib/todoDisplay";
 import { resolveTodoDocumentId } from "@/lib/resolveTodoDocumentId";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight, User as UserIcon, CalendarDays } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
@@ -112,12 +113,17 @@ export function CompactTodoList() {
   const [sendingDocId, setSendingDocId] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<{ content: string; title: string; logoUrl?: string; fontFamily?: string; userId?: string; templateName?: string } | null>(null);
   const [loadingPreview, setLoadingPreview] = useState<string | null>(null);
+  const [viewTask, setViewTask] = useState<TodoItem | null>(null);
 
   const { headerFooter } = useDocumentHeaderFooter(
     previewDoc ? { user_id: previewDoc.userId, template_name: previewDoc.templateName } : null
   );
 
   const handlePreviewDoc = async (todo: TodoItem) => {
+    if (!todo.document_id && !isDocumentTodoKind(getTodoDisplay(todo as any).kind)) {
+      setViewTask(todo);
+      return;
+    }
     setLoadingPreview(todo.id);
     try {
       const docId = await resolveTodoDocumentId(todo as any, getTodoDisplay(todo as any).kind);
@@ -648,6 +654,30 @@ export function CompactTodoList() {
           onClose={() => setPreviewDoc(null)}
         />
       )}
+
+      {/* View Task Modal — for tasks with no linked document to preview */}
+      <Dialog open={!!viewTask} onOpenChange={(o) => { if (!o) setViewTask(null); }}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Task</DialogTitle>
+          </DialogHeader>
+          {viewTask && (
+            <div className="space-y-2 text-sm">
+              <p className="font-medium text-foreground">{viewTask.title}</p>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <Badge className={priorityColors[viewTask.priority]}>{viewTask.priority}</Badge>
+                {viewTask.patient_name && (
+                  <span className="flex items-center gap-1">
+                    <UserIcon className="h-3.5 w-3.5" />
+                    {viewTask.patient_name}
+                  </span>
+                )}
+                <span>{viewTask.completed ? "Completed" : "Active"}</span>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

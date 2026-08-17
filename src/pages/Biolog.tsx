@@ -1,6 +1,8 @@
 import { useSearchParams } from "react-router-dom";
+import { Lock } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { BiologToday } from "@/features/biolog/BiologToday";
 import { BiologHistory } from "@/features/biolog/BiologHistory";
 import { BiologInsights } from "@/features/biolog/BiologInsights";
@@ -19,6 +21,7 @@ export default function Biolog() {
   const { role } = useUserRole();
   const isDoctor = role === "doctor";
   const readOnly = !!ownerUserId;
+  const { isAdmin } = useIsAdmin();
 
   const tab = params.get("tab") || "today";
   const setTab = (value: string) => {
@@ -49,7 +52,15 @@ export default function Biolog() {
           <TabsTrigger value="emotional" className={tabTriggerClass}>Emotional State</TabsTrigger>
           <TabsTrigger value="history" className={tabTriggerClass}>History</TabsTrigger>
           <TabsTrigger value="insights" className={tabTriggerClass}>Insights</TabsTrigger>
-          <TabsTrigger value="programmes" className={tabTriggerClass}>Programmes</TabsTrigger>
+          <TabsTrigger
+            value="programmes"
+            className={tabTriggerClass}
+            disabled={!isAdmin}
+            aria-disabled={!isAdmin}
+          >
+            {!isAdmin && <Lock className="h-3 w-3 mr-1" />}
+            Programmes
+          </TabsTrigger>
           <TabsTrigger value="ageing" className={tabTriggerClass}>Ageing</TabsTrigger>
           {!readOnly && <TabsTrigger value="customise" className={tabTriggerClass}>Customise</TabsTrigger>}
         </TabsList>
@@ -67,7 +78,15 @@ export default function Biolog() {
           <BiologInsights ownerUserId={ownerUserId} readOnly={readOnly} />
         </TabsContent>
         <TabsContent value="programmes">
-          <BiologProgrammes ownerUserId={ownerUserId} />
+          {isAdmin ? (
+            <BiologProgrammes ownerUserId={ownerUserId} />
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 py-12 text-center">
+              <Lock className="h-6 w-6 text-muted-foreground" />
+              <p className="text-sm font-medium text-muted-foreground">Programmes isn't available yet</p>
+              <p className="text-xs text-muted-foreground">This feature is currently limited to system administrators.</p>
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="ageing">
           <AgeingTab ownerUserId={ownerUserId} readOnly={readOnly} />
