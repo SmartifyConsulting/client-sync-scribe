@@ -152,9 +152,9 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
 
             <div className="pt-1">
               <p className="text-xs font-bold mb-1.5">
-                What {c.name?.trim() || "this person"} Can See
+                What {c.name?.trim() || "this person"} can see
               </p>
-              <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-1.5 sm:grid-cols-2 sm:grid-rows-7 sm:grid-flow-col lg:grid-cols-3 lg:grid-rows-5">
                 {CARE_TEAM_PERMISSIONS.map((p) => (
                   <label key={p.id} className="flex items-start gap-2 text-xs">
                     <Checkbox
