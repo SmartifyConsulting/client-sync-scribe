@@ -222,7 +222,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // guess, otherwise a doctor sees the patient nav for one frame.
   // A user with a hospital nursing roster record is treated as a nurse even if
   // their account also carries another clinician role.
-  const isNurse = role === "nurse" || (!!nurseAssignment && role !== "doctor");
+  const isNurse = role === "nurse" || !!nurseAssignment;
   const isDoctor = role === "doctor" && !isNurse;
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
