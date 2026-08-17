@@ -67,8 +67,8 @@ export default function MyViews() {
             <SelectValue placeholder="Grouping" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date-user">Group by Date, then User</SelectItem>
-            <SelectItem value="screen-user">Group by Screen, then User</SelectItem>
+            <SelectItem value="date-user">Group by Date</SelectItem>
+            <SelectItem value="screen-user">Group by Screen</SelectItem>
           </SelectContent>
         </Select>
       </div>

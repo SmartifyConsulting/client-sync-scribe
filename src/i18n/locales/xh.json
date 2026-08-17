@@ -64,7 +64,9 @@
     "providerProfile": "Provider Profile",
     "backToAdmin": "Back to Admin",
     "liveSOS": "I-SOS Bhanyabhanya",
-    "askMaeve": "Ask Holarc"
+    "askMaeve": "Ask Holarc",
+    "wardBoard": "Ward Board",
+    "nurseDashboard": "Dashboard"
   },
   "topbar": {
     "reportBug": "Xela Impazamo",

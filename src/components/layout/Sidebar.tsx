@@ -45,6 +45,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { usePracticeAssistant } from "@/hooks/usePracticeAssistant";
 import { useHospitalAffiliation } from "@/hooks/useHospitalAffiliation";
 import { useV2Demo } from "@/hooks/useV2Demo";
+import { useSignatureBackfill } from "@/hooks/useSignatureBackfill";
 
 import { AccountMenu } from "@/components/layout/AccountMenu";
 import { INTAKE_EMAIL_DOMAIN } from "@/lib/mailboxDomain";
@@ -90,7 +91,6 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
-      { icon: Eye, label: "My Views", labelKey: "nav.myViews", to: "/my-views" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
   },
@@ -117,19 +117,35 @@ const patientNavItems: (NavItem & { tour?: string })[] = [
   { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
   { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
   { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks", tour: "patient-tasks" },
+  { icon: Eye, label: "My Views", labelKey: "nav.myViews", to: "/my-views" },
   { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/patient/rewards" },
   { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true, tour: "patient-sos" },
 ];
 
-/** Nurses on duty get a lean menu focused on their shift and their patients. */
-const nurseNavItems: (NavItem & { tour?: string })[] = [
-  { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
-  { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-  { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/provider/hospital/inpatients" },
+/** Nurses work inside one hospital and one ward, so their menu is limited to
+ *  that ward's board, admissions, their shifts and their own profile. */
+const NURSE_SECTIONS: NavSection[] = [
+  {
+    title: "My Patients",
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.nurseDashboard", to: "/provider/hospital/nurse-dashboard" },
+      { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
+      { icon: BedDouble, label: "Ward Board", labelKey: "nav.wardBoard", to: "/provider/hospital/ward-board" },
+      { icon: Users, label: "Admissions", labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
+    ],
+  },
+];
+
+const NURSE_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
   { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
+];
+
+const nurseNavItems: (NavItem & { tour?: string })[] = [
+  ...NURSE_SECTIONS.flatMap((s) => s.items),
+  ...NURSE_BOTTOM_ITEMS,
 ];
 
 /** Extra tools for a Practice Management Assistant, appended to their own menu. */
@@ -179,6 +195,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { isAssistant } = usePracticeAssistant();
   const { hasHospitalAffiliation, loading: affiliationLoading } = useHospitalAffiliation();
   const { v2Demo } = useV2Demo();
+  // Ensures a doctor's typed signature exists as a PNG for outbound email.
+  useSignatureBackfill();
 
   const loading = roleLoading;
   const { profile } = useProfile();
@@ -201,18 +219,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   // While the role is still resolving we must NOT fall back to the route-based
   // guess, otherwise a doctor sees the patient nav for one frame.
   const isDoctor = role === "doctor";
-  const isNurseMenu = role === "nurse";
+  const isNurse = role === "nurse";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
-  /** Doctors can flip the sidebar between their practice menu and their own
-   *  patient menu with the badge next to the dashboard. Doctor mode is always
-   *  the starting point for a fresh entry into the app. */
+  /** Doctors and nurses can flip the sidebar between their professional menu
+   *  and their own patient menu with the badge next to the dashboard. The
+   *  professional mode is always the starting point for a fresh entry. */
   const [profileMode, setProfileMode] = useState<"doctor" | "patient">("doctor");
 
   const doctorInPatientMode = isDoctor && profileMode === "patient";
+  const nurseInPatientMode = isNurse && profileMode === "patient";
+  const isNurseMenu = isNurse && !nurseInPatientMode;
 
   const isPatientMenu =
-    doctorInPatientMode || (!isDoctor && !isNurseMenu && (isPatient || routeSaysPatient));
+    doctorInPatientMode ||
+    nurseInPatientMode ||
+    (!isDoctor && !isNurse && (isPatient || routeSaysPatient));
 
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
@@ -373,29 +395,36 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     refetchInterval: 30000,
   });
 
-  /** Doctor | Patient pill shown next to Dashboard so doctors can switch the
-   *  sidebar between their practice tools and their own patient profile. */
+  /** Doctor|Patient (or Nurse|Patient) pill shown next to Dashboard so a
+   *  clinician can switch the sidebar between their professional tools and
+   *  their own patient profile. */
+  const professionalMode = isNurse ? "nurse" : "doctor";
+  const professionalHome = isNurse ? "/provider/hospital/nurse-dashboard" : "/doctor-dashboard";
   const profileToggle = (
     <div className="mx-1 mt-1 flex items-center gap-1 rounded-full bg-muted/60 p-0.5">
-      {(["doctor", "patient"] as const).map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          onClick={() => {
-            setProfileMode(mode);
-            navigate(mode === "patient" ? "/my-dashboard" : "/doctor-dashboard");
-            onNavigate?.();
-          }}
-          className={cn(
-            "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
-            profileMode === mode
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {mode}
-        </button>
-      ))}
+      {([professionalMode, "patient"] as const).map((mode) => {
+        const isProfessional = mode !== "patient";
+        const active = isProfessional ? profileMode === "doctor" : profileMode === "patient";
+        return (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => {
+              setProfileMode(isProfessional ? "doctor" : "patient");
+              navigate(isProfessional ? professionalHome : "/my-dashboard");
+              onNavigate?.();
+            }}
+            className={cn(
+              "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
+              active
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {mode}
+          </button>
+        );
+      })}
     </div>
   );
 
@@ -441,10 +470,25 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
               </div>
             </>
+          ) : isNurseMenu ? (
+            <>
+              <div className="space-y-1.5">{profileToggle}</div>
+              {NURSE_SECTIONS.map((section) => (
+                <div key={section.title} className="space-y-1.5">
+                  <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-600 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+                    {section.title}
+                  </p>
+                  {section.items.map((item) => renderNavLink(item))}
+                </div>
+              ))}
+              <div className="space-y-1.5">
+                {withShiftRule(NURSE_BOTTOM_ITEMS).map((item) => renderNavLink(item))}
+              </div>
+            </>
           ) : (
             <div className="space-y-1.5">
-              {isDoctor && profileToggle}
-              {doctorInPatientMode && (
+              {(isDoctor || isNurse) && profileToggle}
+              {(doctorInPatientMode || nurseInPatientMode) && (
                 <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
                   My Holarchy
                 </p>

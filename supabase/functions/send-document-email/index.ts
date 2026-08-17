@@ -19,6 +19,55 @@ function extractBody(html: string): string {
   return match ? match[1] : html;
 }
 
+/**
+ * Document content is stored as a mix of plain text and light HTML. Escaping it
+ * wholesale printed literal `<br>` tags in the inbox, so convert the structural
+ * markup to real line breaks, drop any remaining tags, then escape what's left
+ * and re-introduce `<br/>` for the newlines.
+ */
+function normaliseDocumentContent(raw: string): string {
+  const withBreaks = raw
+    .replace(/\r\n/g, "\n")
+    .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+    .replace(/<\s*\/\s*(p|div|li|tr|h[1-6])\s*>/gi, "\n")
+    .replace(/<\s*(p|div|li|tr|h[1-6])[^>]*>/gi, "")
+    .replace(/<\s*\/?\s*(ul|ol|table|tbody|thead|span|font)[^>]*>/gi, "");
+
+  // Preserve simple inline emphasis, escape everything else.
+  const placeholders: Record<string, string> = {
+    "\u0001b\u0002": "<b>",
+    "\u0001/b\u0002": "</b>",
+    "\u0001i\u0002": "<i>",
+    "\u0001/i\u0002": "</i>",
+    "\u0001u\u0002": "<u>",
+    "\u0001/u\u0002": "</u>",
+  };
+  let working = withBreaks
+    .replace(/<\s*(b|strong)\s*>/gi, "\u0001b\u0002")
+    .replace(/<\s*\/\s*(b|strong)\s*>/gi, "\u0001/b\u0002")
+    .replace(/<\s*(i|em)\s*>/gi, "\u0001i\u0002")
+    .replace(/<\s*\/\s*(i|em)\s*>/gi, "\u0001/i\u0002")
+    .replace(/<\s*u\s*>/gi, "\u0001u\u0002")
+    .replace(/<\s*\/\s*u\s*>/gi, "\u0001/u\u0002")
+    // Anything still tag-shaped is stray markup — remove it.
+    .replace(/<[^>]+>/g, "");
+
+  working = working
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  for (const [token, tag] of Object.entries(placeholders)) {
+    working = working.split(token).join(tag);
+  }
+
+  return working
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\n/g, "<br/>");
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -217,27 +266,16 @@ serve(async (req) => {
         bodyHtml: `${greetingHtml}<div style="border:1px solid #e5e7eb;border-radius:10px;padding:20px;background:#ffffff;">${inner}</div>`,
       });
     } else {
-      // Format document content as HTML (legacy text path)
-      const formattedContent = (documentContent as string)
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/&lt;b&gt;/g, "<b>")
-        .replace(/&lt;\/b&gt;/g, "</b>")
-        .replace(/&lt;i&gt;/g, "<i>")
-        .replace(/&lt;\/i&gt;/g, "</i>")
-        .replace(/&lt;u&gt;/g, "<u>")
-        .replace(/&lt;\/u&gt;/g, "</u>")
-        .replace(/\n/g, "<br/>");
+      // Format document content as HTML (legacy text path). Content may already
+      // contain light markup, so normalise it instead of escaping blindly.
+      const formattedContent = normaliseDocumentContent(documentContent as string);
 
       const attachmentsHtml = attachedDocs
         .map(
           (d) => `
             <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;">
               <div style="font-weight:600;margin-bottom:8px;">Attachment: ${escapeHtml(d.name)}</div>
-              <div style="white-space:pre-wrap;">${d.content
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\n/g, "<br/>")}</div>
+              <div style="white-space:pre-wrap;">${normaliseDocumentContent(d.content || "")}</div>
             </div>`,
         )
         .join("");

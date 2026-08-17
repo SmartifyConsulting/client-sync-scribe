@@ -64,7 +64,9 @@ export function renderSignatureHtml(
   const name = (profile.full_name || "").trim();
   if (!name) return "";
 
-  const fontFamily = FONTS[profile.signature_font || "allura"] || FONTS.allura;
+  // Unknown/legacy values (e.g. "sans") must not degrade to a generic cursive —
+  // mail clients render that as Comic Sans. Fall back to a script face instead.
+  const fontFamily = FONTS[profile.signature_font || ""] || FONTS["great-vibes"];
   const color = COLORS[profile.signature_color || "black"] || "#000000";
   const size = profile.signature_font_size ?? 24;
   const weight = profile.signature_bold ? "bold" : "normal";

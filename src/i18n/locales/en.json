@@ -95,7 +95,9 @@
     "vehicles": "Vehicles",
     "crews": "Crews",
     "reports": "Reports",
-    "askMaeve": "Ask Holarc"
+    "askMaeve": "Ask Holarc",
+    "wardBoard": "Ward Board",
+    "nurseDashboard": "Dashboard"
   },
   "topbar": {
     "reportBug": "Report Bug/Fix",
