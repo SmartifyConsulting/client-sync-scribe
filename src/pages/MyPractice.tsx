@@ -726,7 +726,11 @@ export default function MyPractice() {
       } else {
         setSavedStatus("saved");
         setTimeout(() => setSavedStatus("idle"), 2000);
+        // Render the typed signature to a PNG so outbound emails show the exact
+        // handwriting font (email clients strip web fonts).
+        void syncSignatureRender();
       }
+
     }, 1500);
     return () => {
       if (sigDebounceTimer.current) clearTimeout(sigDebounceTimer.current);
