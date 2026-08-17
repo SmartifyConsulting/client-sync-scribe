@@ -515,8 +515,10 @@ export function CompactTodoList() {
           </div>
         )}
 
-        {/* Task list — grouped by date, then patient */}
-        <div className="max-h-48 overflow-y-auto">
+        {/* Task list — grouped by date, then patient. Grows to fit its content;
+            Round Tables below caps its own height instead so it doesn't get
+            pushed past the bottom of Recent Activity in the left column. */}
+        <div>
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />

@@ -358,7 +358,7 @@ export default function Dashboard() {
                   <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="p-3 space-y-3">
+                <div className="p-3 space-y-3 max-h-[360px] overflow-y-auto">
                   <DoctorRoundTables compact />
                 </div>
               </div>
@@ -374,7 +374,7 @@ export default function Dashboard() {
                   <h3 className="text-sm font-semibold text-primary-foreground">{t("doctorDashboard.myRoundTables")}</h3>
                   <MessageSquare className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <div className="p-3 space-y-3">
+                <div className="p-3 space-y-3 max-h-[360px] overflow-y-auto">
                   <DoctorRoundTables compact />
                 </div>
               </div>
