@@ -53,7 +53,7 @@ import { SessionTranscriptAccordion } from "@/features/sessions/components/Sessi
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
-import { ClinicianNotesAccordion } from "@/features/sessions/components/ClinicianNotesAccordion";
+import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import { DrawingPad } from "@/components/drawings/DrawingPad";
 import type { MedCertData, PrescriptionData, InvoiceData, ReferralData } from "@/components/sessions/TranscriptionReviewDialogs";
 import { GeneratedDocumentsDialog, type GeneratedDoc, type GeneratedDocKey } from "@/features/sessions/components/GeneratedDocumentsDialog";
@@ -1495,7 +1495,7 @@ export default function Sessions() {
           </div>
 
           {/* Patient Overview — wide band spanning the workspace beside the recorder. */}
-          <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+          <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1">
             {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
               <SessionPatientOverview
@@ -1508,7 +1508,7 @@ export default function Sessions() {
           </div>
 
           {/* Live AI Clinician — directly below the Session Recorder frame. */}
-          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3 lg:col-start-1 lg:row-start-2">
+          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3 lg:col-span-2 lg:col-start-1 lg:row-start-2">
 
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
@@ -1518,7 +1518,8 @@ export default function Sessions() {
               {liveHintLoading && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
             </div>
             {aiConsultEnabled && (isRecording || notes) ? (
-              <ClinicianNotesAccordion notes={notes} />
+              <ClinicianNotesColumns notes={notes} />
+
             ) : (
               <p className="text-xs text-muted-foreground">Live AI Clinician is not active for this session.</p>
             )}

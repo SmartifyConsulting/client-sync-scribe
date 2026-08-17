@@ -38,13 +38,48 @@ const STOP_WORDS = new Set([
  * "Trismus (difficulty opening mouth)") collapse into one bullet.
  */
 export const fuzzyKey = (line: string) =>
+  normaliseTokens(line).sort().join(" ");
+
+/** Date fragments ("on April 8, 2026", "since 08/04/2026") carry no meaning for matching. */
+const stripDates = (line: string) =>
   line
+    .replace(
+      /\b(?:on|since|from|first recorded(?:\s+on)?|recorded(?:\s+on)?|dated)?\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s*\d{2,4}\b/gi,
+      " ",
+    )
+    .replace(/\b\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}\b/g, " ")
+    .replace(/\b(?:on|since|from)\s+\d{4}\b/gi, " ");
+
+/** Meaningful, comparable words for a bullet (prefix, dates and filler removed). */
+const normaliseTokens = (line: string): string[] =>
+  stripDates(line)
     .toLowerCase()
+    // "Rule out: X" and "Consider X" are framing, not content.
+    .replace(/^\s*(?:rule\s*out|consider|monitor for|watch for|check for)\s*[:\-–]?\s*/i, "")
     .replace(/[^a-z0-9]+/g, " ")
     .split(" ")
-    .filter((w) => w && !STOP_WORDS.has(w))
-    .sort()
-    .join(" ");
+    .filter((w) => w && !STOP_WORDS.has(w));
+
+/** Jaccard overlap of two token sets. */
+const similarity = (a: string[], b: string[]) => {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  if (setA.size === 0 || setB.size === 0) return 0;
+  let shared = 0;
+  setA.forEach((w) => {
+    if (setB.has(w)) shared += 1;
+  });
+  return shared / (setA.size + setB.size - shared);
+};
+
+/** True when every meaningful word of the smaller line appears in the larger one. */
+const isSubset = (a: string[], b: string[]) => {
+  const [small, large] = a.length <= b.length ? [a, b] : [b, a];
+  if (small.length === 0) return false;
+  const set = new Set(large);
+  return small.every((w) => set.has(w));
+};
+
 
 
 const titleCase = (raw: string) =>
@@ -66,7 +101,11 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
   const sections: ClinicianNoteSection[] = [];
   let current: ClinicianNoteSection | null = null;
   let currentGroup: { label: string; items: string[] } | null = null;
-  const seenByContext = new Map<string, Set<string>>();
+  // Kept bullets per section, so a re-phrased repeat merges into the first one.
+  const keptByContext = new Map<
+    string,
+    Array<{ tokens: string[]; arr: string[]; index: number }>
+  >();
 
   const pushLine = (line: string) => {
     const clean = line
@@ -84,21 +123,33 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
       .trim();
     if (!clean || isCaution(clean)) return;
 
+    const tokens = normaliseTokens(clean);
+    if (tokens.length === 0) return;
 
-    const key = fuzzyKey(clean);
     // De-duplicate per section (not per dated group) so a point repeated by a
     // later live hint collapses into the first occurrence.
     const contextKey = current?.title || "Clinical Notes";
-    const seen = seenByContext.get(contextKey) || new Set<string>();
-    if (!key || seen.has(key)) return;
-    seen.add(key);
-    seenByContext.set(contextKey, seen);
+    const kept = keptByContext.get(contextKey) || [];
+    for (const entry of kept) {
+      if (similarity(entry.tokens, tokens) >= 0.6 || isSubset(entry.tokens, tokens)) {
+        // Same point re-phrased — keep the richer wording in place.
+        if (clean.length > entry.arr[entry.index].length) {
+          entry.arr[entry.index] = clean;
+          entry.tokens = tokens;
+        }
+        return;
+      }
+    }
+
     if (!current) {
       current = { title: "Clinical Notes", items: [] };
       sections.push(current);
     }
-    if (currentGroup) currentGroup.items.push(clean);
-    else current.items.push(clean);
+    const target = currentGroup ? currentGroup.items : current.items;
+    target.push(clean);
+    kept.push({ tokens, arr: target, index: target.length - 1 });
+    keptByContext.set(contextKey, kept);
+
   };
 
 
