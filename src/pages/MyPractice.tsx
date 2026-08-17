@@ -637,6 +637,12 @@ export default function MyPractice() {
         sigIsSettingFromProfile.current = false;
       });
 
+      // Backfill the rendered signature image for profiles saved before we
+      // started storing one — emails need it to show the real font.
+      if (!(profile as any).signature_url && !(profile as any).signature_render_url) {
+        void syncSignatureRender(newSigData);
+      }
+
       // Sync voice state
       setLocalVoice((profile as any).narration_voice || "shimmer");
 
@@ -705,16 +711,17 @@ export default function MyPractice() {
 
   /** Renders the typed signature to a PNG and stores it on the profile so that
    *  outbound emails can embed the doctor's real signature font. */
-  const syncSignatureRender = async () => {
+  const syncSignatureRender = async (override?: typeof sigFormData) => {
     if (!user) return;
+    const sig = override || sigFormData;
     try {
       const base64 = await renderSignaturePngBase64({
         full_name: profile?.full_name,
-        signature_font: sigFormData.signature_font,
-        signature_color: sigFormData.signature_color,
-        signature_font_size: sigFormData.signature_font_size,
-        signature_bold: sigFormData.signature_bold,
-        signature_italic: sigFormData.signature_italic,
+        signature_font: sig.signature_font,
+        signature_color: sig.signature_color,
+        signature_font_size: sig.signature_font_size,
+        signature_bold: sig.signature_bold,
+        signature_italic: sig.signature_italic,
       });
       if (!base64) return;
       const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
