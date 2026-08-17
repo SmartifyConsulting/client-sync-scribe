@@ -1380,9 +1380,10 @@ export default function Sessions() {
         {/* Centred progress box — replaces the old status strip and toasts. */}
         <SessionProcessingDialog open={sessionState === "processing" || isTranscribing} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,2fr)_minmax(280px,1fr)] gap-4 items-start">
-          {/* Record Session — column 1, full height (rows 1-3) */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 self-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-4 items-start">
+          {/* Record Session — column 1, row 1 */}
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 self-start lg:col-start-1 lg:row-start-1">
+
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -1484,8 +1485,8 @@ export default function Sessions() {
 
           </div>
 
-          {/* Patient Overview spans the wider centre workspace. */}
-          <div className="flex flex-col gap-4 order-2 min-w-0">
+          {/* Patient Overview — wide band spanning the workspace beside the recorder. */}
+          <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
             {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
               <SessionPatientOverview
@@ -1497,8 +1498,9 @@ export default function Sessions() {
 
           </div>
 
-          {/* Live AI Clinician — the third workspace column. */}
-          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3">
+          {/* Live AI Clinician — directly below the Session Recorder frame. */}
+          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3 lg:col-start-1 lg:row-start-2">
+
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-primary" />

@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { sendEmail } from "../_shared/email.ts";
+import { brandedEmail } from "../_shared/brandEmail.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,25 +59,14 @@ const handler = async (req: Request): Promise<Response> => {
       )
       .join("");
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Invoice Report</title>
-      </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1f2937; margin-bottom: 5px;">Invoice Report</h1>
-          <p style="color: #6b7280; margin: 0;">${doctorName}</p>
-          ${practiceNumber ? `<p style="color: #6b7280; margin: 0; font-size: 14px;">Practice No: ${practiceNumber}</p>` : ""}
-        </div>
-
-        <div style="background: #f9fafb; border-radius: 8px; padding: 15px; margin-bottom: 30px; text-align: center;">
+    const reportBody = `
+        <div style="background: #f9fafb; border-radius: 8px; padding: 15px; margin-bottom: 24px; text-align: center;">
           <p style="margin: 0; color: #6b7280; font-size: 14px;">
             Report Period: <strong>${dateFrom}</strong> to <strong>${dateTo}</strong>
           </p>
         </div>
+
+
 
         <h2 style="color: #1f2937; font-size: 18px; margin-bottom: 15px;">Summary</h2>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
@@ -120,13 +111,19 @@ const handler = async (req: Request): Promise<Response> => {
           </tbody>
         </table>
 
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
-          <p>This report was generated automatically by Holarc Health.</p>
-          <p>Generated on ${new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-        </div>
-      </body>
-      </html>
+        <p style="margin-top: 24px; color: #9ca3af; font-size: 12px;">
+          Generated on ${new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+        </p>
     `;
+
+    const html = brandedEmail({
+      title: "Invoice Report",
+      subtitle: practiceNumber ? `${doctorName} · Practice No: ${practiceNumber}` : doctorName,
+      senderName: doctorName,
+      bodyHtml: reportBody,
+      footerNote: "This report was generated automatically by Holarc Health.",
+    });
+
 
     const emailResponse = await sendEmail({
       to: email,

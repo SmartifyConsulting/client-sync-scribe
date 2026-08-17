@@ -1,6 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/email.ts";
+import { brandedEmail, escapeHtml } from "../_shared/brandEmail.ts";
+
+/** Pull the inner markup out of a full HTML document so it can be re-wrapped. */
+function extractBody(html: string): string {
+  const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  return match ? match[1] : html;
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -101,8 +109,16 @@ serve(async (req) => {
     let htmlContent: string;
     if (documentHtml) {
       // Caller supplied a fully-rendered HTML document (e.g. PAID invoice).
-      // Use as-is so visual layout (watermark, letterhead, etc.) is preserved.
-      htmlContent = documentHtml;
+      // Keep the document markup exactly as rendered on screen, but drop it
+      // inside the Holarc Health branded shell.
+      const inner = extractBody(documentHtml);
+      htmlContent = brandedEmail({
+        title: documentName,
+        subtitle: practiceName,
+        senderName,
+        practiceName,
+        bodyHtml: `<div style="border:1px solid #e5e7eb;border-radius:10px;padding:20px;background:#ffffff;">${inner}</div>`,
+      });
     } else {
       // Format document content as HTML (legacy text path)
       const formattedContent = (documentContent as string)
@@ -116,51 +132,28 @@ serve(async (req) => {
         .replace(/&lt;\/u&gt;/g, "</u>")
         .replace(/\n/g, "<br/>");
 
-      htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .document-container { 
-              max-width: 800px; 
-              margin: 0 auto; 
-              padding: 40px; 
-              background: #fff;
-              border: 1px solid #e5e5e5;
-            }
-            .header { margin-bottom: 20px; color: #666; font-size: 12px; }
-            .content { white-space: pre-wrap; }
-            .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
-          </style>
-        </head>
-        <body>
-          <div class="document-container">
-            <div class="header">
-              <strong>${documentName}</strong>
-              ${practiceName ? `<br/>From: ${practiceName}` : ""}
-            </div>
-            <div class="content">${formattedContent}</div>
-            ${attachedDocs
-              .map(
-                (d) => `
-              <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e5e5;">
-                <div style="font-weight:bold;margin-bottom:8px;">Attachment: ${d.name}</div>
-                <div style="white-space:pre-wrap;">${d.content
-                  .replace(/</g, "&lt;")
-                  .replace(/>/g, "&gt;")
-                  .replace(/\n/g, "<br/>")}</div>
-              </div>`,
-              )
-              .join("")}
-            <div class="footer">
-              Sent by ${senderName}${practiceName ? ` - ${practiceName}` : ""}
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
+      const attachmentsHtml = attachedDocs
+        .map(
+          (d) => `
+            <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;">
+              <div style="font-weight:600;margin-bottom:8px;">Attachment: ${escapeHtml(d.name)}</div>
+              <div style="white-space:pre-wrap;">${d.content
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\n/g, "<br/>")}</div>
+            </div>`,
+        )
+        .join("");
+
+      htmlContent = brandedEmail({
+        title: documentName,
+        subtitle: practiceName,
+        senderName,
+        practiceName,
+        bodyHtml: `<div style="white-space:pre-wrap;">${formattedContent}</div>${attachmentsHtml}`,
+      });
     }
+
 
     const result = await sendEmail({
       to,

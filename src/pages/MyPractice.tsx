@@ -686,7 +686,12 @@ export default function MyPractice() {
       } as any);
       if (error) {
         setSavedStatus("idle");
-        toast({ title: "Error", description: "Failed to save", variant: "destructive" });
+        toast({
+          title: "Couldn't save your practice details",
+          description: (error as any)?.message || "Please check your connection and try again.",
+          variant: "destructive",
+        });
+
       } else {
         setSavedStatus("saved");
         setTimeout(() => setSavedStatus("idle"), 2000);
@@ -1804,55 +1809,34 @@ export default function MyPractice() {
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
                 <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bank_account_name">Account Name</Label>
-                    <Input
-                      id="bank_account_name"
-                      value={formData.bank_account_name}
-                      onChange={(e) => setFormData({ ...formData, bank_account_name: e.target.value })}
-                      placeholder="e.g. Dr J Smith Inc"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bank_name">Bank Name</Label>
-                    <Input
-                      id="bank_name"
-                      value={formData.bank_name}
-                      onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
-                      placeholder="e.g. Standard Bank"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bank_account_type">Account Type</Label>
-                    <Input
-                      id="bank_account_type"
-                      value={formData.bank_account_type}
-                      onChange={(e) => setFormData({ ...formData, bank_account_type: e.target.value })}
-                      placeholder="e.g. Cheque / Current"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bank_account_number">Account Number</Label>
-                    <Input
-                      id="bank_account_number"
-                      value={formData.bank_account_number}
-                      onChange={(e) => setFormData({ ...formData, bank_account_number: e.target.value })}
-                      placeholder="e.g. 123456789"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="bank_swift_code">SWIFT Code</Label>
-                    <Input
-                      id="bank_swift_code"
-                      value={formData.bank_swift_code}
-                      onChange={(e) => setFormData({ ...formData, bank_swift_code: e.target.value })}
-                      placeholder="e.g. SBZAZAJJ"
-                    />
+                  {/* Horizontal label/field rows, two per line to save space. */}
+                  <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                    {[
+                      { id: "bank_account_name", label: "Account Name", placeholder: "e.g. Dr J Smith Inc" },
+                      { id: "bank_name", label: "Bank Name", placeholder: "e.g. Standard Bank" },
+                      { id: "bank_account_type", label: "Account Type", placeholder: "e.g. Cheque / Current" },
+                      { id: "bank_account_number", label: "Account Number", placeholder: "e.g. 123456789" },
+                      { id: "bank_swift_code", label: "SWIFT Code", placeholder: "e.g. SBZAZAJJ" },
+                    ].map((f) => (
+                      <div key={f.id} className="flex items-center gap-3">
+                        <Label htmlFor={f.id} className="w-32 shrink-0 text-xs font-bold text-foreground">
+                          {f.label}
+                        </Label>
+                        <Input
+                          id={f.id}
+                          className="h-8 flex-1 text-xs"
+                          value={(formData as any)[f.id]}
+                          onChange={(e) => setFormData({ ...formData, [f.id]: e.target.value })}
+                          placeholder={f.placeholder}
+                        />
+                      </div>
+                    ))}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Used on invoices so patients know where to pay.
                   </p>
                 </div>
+
               </AccordionContent>
             </AccordionItem>
 
