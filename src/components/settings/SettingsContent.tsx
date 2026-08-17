@@ -406,7 +406,7 @@ export function SettingsContent() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-foreground">Alert my Emergency Contacts if I miss medication</p>
+                  <p className="font-medium text-foreground">Alert my Holarc Care Team if I miss medication</p>
                   <p className="text-sm text-muted-foreground">Master switch — per-contact and per-medication opt-ins must also be on.</p>
                 </div>
                 <Switch
@@ -420,7 +420,7 @@ export function SettingsContent() {
               <Separator />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-foreground">Alert my Emergency Contacts when I take medication</p>
+                  <p className="font-medium text-foreground">Alert my Holarc Care Team when I take medication</p>
                   <p className="text-sm text-muted-foreground">Only contacts you've opted in for each medication will be notified.</p>
                 </div>
                 <Switch
