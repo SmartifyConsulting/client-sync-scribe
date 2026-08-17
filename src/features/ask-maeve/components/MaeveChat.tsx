@@ -63,7 +63,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const spokenRef = useRef<string | null>(null);
   const autoListenRef = useRef<() => void>(() => {});
 
-  // Hands-free: as soon as Angel stops speaking, the microphone opens itself.
+  // Hands-free: as soon as Holarc stops speaking, the microphone opens itself.
   const voice = useMaeveVoice({ onSpeechEnd: () => autoListenRef.current() });
 
   const chooseMode = (next: MaeveMode) => {
@@ -93,7 +93,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     if (error) toast.error(error);
   }, [error]);
 
-  // Read Angel's newest reply aloud in talk mode.
+  // Read Holarc's newest reply aloud in talk mode.
   useEffect(() => {
     if (mode !== "talk" || thinking) return;
     const last = messages[messages.length - 1];
@@ -314,7 +314,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
             <Mic className="h-6 w-6 text-maeve" />
             <p className="mt-3 text-sm font-semibold text-foreground">Talk and listen</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Speak your answers and hear Angel's questions read aloud. Audio lets you close your eyes and sink into
+              Speak your answers and hear Holarc's questions read aloud. Audio lets you close your eyes and sink into
               the process, so the conscious mind isn't distracted by a screen or keyboard. Because this work asks you
               to imagine, remember and visualise, listening and speaking usually goes much deeper.
             </p>
@@ -401,7 +401,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
       {/* Disclaimer */}
       <p className="mt-2 rounded-lg bg-muted/60 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        Angel is a facilitation tool, not a clinician. She asks questions and reflects your own words — she does not
+        Holarc is a facilitation tool, not a clinician. She asks questions and reflects your own words — she does not
         give advice, opinions or diagnoses. Anything clinical belongs with your healthcare professional. This
         conversation is private to you.
       </p>
@@ -431,7 +431,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
           messages.map((m) => {
             const isMaeve = m.role === "assistant";
             const full = isMaeve && looksLikeAdvice(m.content) ? CLIENT_FALLBACK : m.content;
-            // While Angel is speaking, her words type themselves onto the
+            // While Holarc is speaking, her words type themselves onto the
             // screen in time with the audio.
             const isBeingSpoken = isMaeve && voice.speaking && voice.speakingText === full;
             const body = isBeingSpoken
@@ -620,7 +620,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
       {/* Failed opening — visible error with a retry instead of an empty screen */}
       {error && messages.length === 0 && !thinking && (
         <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2">
-          <p className="text-xs text-foreground">Angel could not start this exploration.</p>
+          <p className="text-xs text-foreground">Holarc could not start this exploration.</p>
           <Button size="sm" variant="outline" onClick={startOpening} className="h-7 gap-1 text-xs">
             <RotateCcw className="h-3 w-3" /> Try again
           </Button>
@@ -680,7 +680,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
                 : voice.recording
                   ? "I'm listening — tap send when you're done, or pause to step away"
                   : voice.speaking
-                    ? "Angel is speaking — the microphone opens as soon as she finishes."
+                    ? "Holarc is speaking — the microphone opens as soon as she finishes."
                     : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
           </p>
 

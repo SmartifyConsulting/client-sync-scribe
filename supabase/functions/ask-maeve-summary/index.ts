@@ -55,14 +55,14 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: true });
 
     // The summary is about the person, so their own words carry the transcript and
-    // Angel's turns are only thin context.
+    // Holarc's turns are only thin context.
     const rows = messages ?? [];
     const personTurns = rows.filter((m: any) => m.role === "user");
     const transcript = rows
       .map((m: any) =>
         m.role === "user"
           ? `Person: ${m.content}`
-          : `(context — do not summarise) Angel: ${String(m.content).slice(0, 200)}`,
+          : `(context — do not summarise) Holarc: ${String(m.content).slice(0, 200)}`,
       )
       .join("\n");
     const hasPersonWords = personTurns.length > 0;
@@ -82,13 +82,13 @@ Deno.serve(async (req) => {
             content: recap
               ? "Write a short recap of what the PERSON said in an NLP facilitation conversation, addressed to them, " +
                 "so they can pick it up again later. Summarise only their own words: what they came with, what they " +
-                "said, felt and wanted, and where they had got to. Never describe Angel, her questions, her techniques " +
+                "said, felt and wanted, and where they had got to. Never describe Holarc, her questions, her techniques " +
                 "or the process — the lines marked as context exist only so the summary reads coherently. No advice, " +
                 "no suggestions, no next steps, no interpretation, no diagnosis, no praise. Plain British English, " +
                 "3-5 short sentences, no lists."
               : "Write a short closing reflection of what the PERSON said in an NLP facilitation conversation, " +
               "addressed to them. Summarise only their own words: what they brought, what they said, felt and wanted, " +
-              "and what shifted for them. Never describe Angel, her questions, her techniques or the process — the " +
+              "and what shifted for them. Never describe Holarc, her questions, her techniques or the process — the " +
               "lines marked as context exist only so the reflection reads coherently. No advice, no suggestions, " +
               "no next steps, no interpretation, no diagnosis, no praise. Plain British English, 3–5 short sentences, no lists. " +
               'End with exactly this question on its own line: "What, if anything, would you like to explore from here?"',

@@ -81,7 +81,7 @@ const CARE_ITEMS = [
 const CARE_CIRCLE = [
   { name: "Dr Sarah", role: "GP", to: "/patient/doctors" },
   { name: "Dr James", role: "Cardiologist", to: "/patient/doctors" },
-  { name: "Angel", role: "AI Wellbeing Companion", to: "/ask-maeve" },
+  { name: "Holarc", role: "AI Wellbeing Companion", to: "/ask-maeve" },
   { name: "Susan", role: "Physiotherapist", to: "/patient/doctors" },
   { name: "Mum", role: "Family", to: "/patient/round-table" },
 ];
@@ -366,7 +366,7 @@ export default function MyPersonalDashboard() {
                   unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
                 )}
               >
-                <Sparkles className="h-3.5 w-3.5" /> Ask Angel
+                <Sparkles className="h-3.5 w-3.5" /> Ask Holarc
               </button>
               <p className="mt-2 text-xs text-muted-foreground leading-snug">
                 A place to slow down, explore what's on your mind and find your own way forward.

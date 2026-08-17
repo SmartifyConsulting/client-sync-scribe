@@ -112,11 +112,11 @@ export default function AskMaeveHome() {
         <h1 className="font-display text-2xl font-bold text-foreground">Ask Holarc</h1>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        A quiet space to explore something in your own words. Angel asks the questions — every answer, and every
+        A quiet space to explore something in your own words. Holarc asks the questions — every answer, and every
         meaning, is yours.
       </p>
       <p className="mt-3 rounded-lg bg-muted/60 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        Angel is a facilitation tool, not a clinician. She gives no advice, opinions or diagnoses. These
+        Holarc is a facilitation tool, not a clinician. She gives no advice, opinions or diagnoses. These
         conversations are private to you — your clinicians cannot see them.
       </p>
 
@@ -127,7 +127,7 @@ export default function AskMaeveHome() {
 
       {startError && (
         <p className="mt-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-foreground">
-          Angel could not open a new exploration just now. Tap "Start an exploration" to try again.
+          Holarc could not open a new exploration just now. Tap "Start an exploration" to try again.
         </p>
       )}
 
