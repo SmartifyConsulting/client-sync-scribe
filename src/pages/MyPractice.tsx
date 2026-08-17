@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { renderSignaturePngBase64 } from "@/lib/signatureImage";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
