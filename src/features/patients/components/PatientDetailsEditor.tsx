@@ -1773,6 +1773,35 @@ export function PatientDetailsEditor({
                 <MyDoctors hideHeader />
               </Suspense>
             </TabsContent>
+
+            {/* === MY HOLARC CARE TEAM SUB-TAB === */}
+            <TabsContent value="careteam" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Care Team</h2>
+                <p className="text-xs text-muted-foreground">
+                  Friends and family you choose to share parts of your profile with
+                </p>
+              </div>
+              {isSelfService && emergencyContacts && onEmergencyContactsChange ? (
+                <EmergencyContactsInline
+                  patientId={patient.id}
+                  bare
+                  contacts={emergencyContacts}
+                  onChange={onEmergencyContactsChange}
+                  nokMembers={nokMembers}
+                  legacyNok={{
+                    name: formData.next_of_kin_name,
+                    phone: formData.next_of_kin_phone,
+                    email: formData.next_of_kin_email,
+                    relationship: formData.next_of_kin_relationship,
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  Only the patient can manage their Holarc Care Team.
+                </p>
+              )}
+            </TabsContent>
               </Tabs>
             </TabsContent>
 
@@ -2524,6 +2553,35 @@ export function PatientDetailsEditor({
               <MyDoctors hideHeader />
             </Suspense>
           </TabsContent>
+
+            {/* === MY HOLARC CARE TEAM SUB-TAB === */}
+            <TabsContent value="careteam" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Care Team</h2>
+                <p className="text-xs text-muted-foreground">
+                  Friends and family you choose to share parts of your profile with
+                </p>
+              </div>
+              {isSelfService && emergencyContacts && onEmergencyContactsChange ? (
+                <EmergencyContactsInline
+                  patientId={patient.id}
+                  bare
+                  contacts={emergencyContacts}
+                  onChange={onEmergencyContactsChange}
+                  nokMembers={nokMembers}
+                  legacyNok={{
+                    name: formData.next_of_kin_name,
+                    phone: formData.next_of_kin_phone,
+                    email: formData.next_of_kin_email,
+                    relationship: formData.next_of_kin_relationship,
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  Only the patient can manage their Holarc Care Team.
+                </p>
+              )}
+            </TabsContent>
               </Tabs>
             </TabsContent>
 
