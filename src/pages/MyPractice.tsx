@@ -702,6 +702,41 @@ export default function MyPractice() {
     };
   }, [formData]);
 
+  /** Renders the typed signature to a PNG and stores it on the profile so that
+   *  outbound emails can embed the doctor's real signature font. */
+  const syncSignatureRender = async () => {
+    if (!user) return;
+    try {
+      const base64 = await renderSignaturePngBase64({
+        full_name: profile?.full_name,
+        signature_font: sigFormData.signature_font,
+        signature_color: sigFormData.signature_color,
+        signature_font_size: sigFormData.signature_font_size,
+        signature_bold: sigFormData.signature_bold,
+        signature_italic: sigFormData.signature_italic,
+      });
+      if (!base64) return;
+      const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const path = `${user.id}/signature.png`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, new Blob([bytes], { type: "image/png" }), {
+          upsert: true,
+          contentType: "image/png",
+        });
+      if (upErr) {
+        console.error("Signature render upload failed", upErr.message);
+        return;
+      }
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      await updateProfile({
+        signature_render_url: `${data.publicUrl}?t=${Date.now()}`,
+      } as any);
+    } catch (e) {
+      console.error("Signature render failed", e);
+    }
+  };
+
   // ── Auto-save signature debounce ──
   useEffect(() => {
     if (!sigHasInitialized.current || !user || sigIsSettingFromProfile.current) return;
