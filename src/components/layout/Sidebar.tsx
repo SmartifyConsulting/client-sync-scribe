@@ -299,12 +299,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       return (
         <div
           key={item.to}
-          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-[14px] font-semibold text-muted-foreground cursor-not-allowed"
+          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-[14px] font-semibold text-muted-foreground/60 cursor-not-allowed"
           title="Coming soon — preview only"
         >
-          <item.icon className="h-5 w-5 text-muted-foreground" />
+          <item.icon className="h-5 w-5 text-muted-foreground/60" />
           <span className="flex-1">{t(item.labelKey, item.label)}</span>
-          <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
         </div>
       );
     }

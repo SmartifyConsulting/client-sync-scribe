@@ -427,7 +427,7 @@ export function PatientDetailsEditor({
       if (!user) return [];
       const { data, error } = await supabase
         .from("appointment_requests")
-        .select("*, profiles:doctor_id(full_name, specialty)")
+        .select("*")
         .eq("patient_user_id", user.id)
         .in("status", ["approved", "pending"])
         .order("requested_start", { ascending: true })
@@ -436,7 +436,18 @@ export function PatientDetailsEditor({
         console.error(error);
         return [];
       }
-      return (data || []).filter((a: any) => {
+      const rows = data || [];
+      const doctorIds = [...new Set(rows.map((r: any) => r.doctor_id).filter(Boolean))];
+      let doctorMap: Record<string, { full_name: string | null; specialty: string | null }> = {};
+      if (doctorIds.length) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, specialty")
+          .in("id", doctorIds);
+        (profiles || []).forEach((p: any) => { doctorMap[p.id] = { full_name: p.full_name, specialty: p.specialty }; });
+      }
+      const withProfiles = rows.map((a: any) => ({ ...a, profiles: doctorMap[a.doctor_id] }));
+      return withProfiles.filter((a: any) => {
         const start = a.proposed_start || a.requested_start;
         return start && isAfter(parseISO(start), new Date());
       });

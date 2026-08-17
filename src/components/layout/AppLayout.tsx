@@ -27,8 +27,11 @@ export function AppLayout() {
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   // Patients should be redirected to their layout, UNLESS they also hold the
-  // admin role and are visiting an admin route — admins use this layout.
-  if (!roleLoading && isPatient && !(isAdmin && isAdminRoute)) {
+  // admin role and are visiting an admin route — admins use this layout —
+  // or they're on My Dashboard, which is shared across every role and lives
+  // in this layout's route group regardless of who's viewing it.
+  const isSharedDashboard = location.pathname === "/my-dashboard";
+  if (!roleLoading && isPatient && !(isAdmin && isAdminRoute) && !isSharedDashboard) {
     return <Navigate to="/patient/details" replace />;
   }
 
