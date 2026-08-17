@@ -16,6 +16,8 @@ export interface EmergencyContact {
   phone: string;
   email?: string;
   relationship?: string;
+  /** What this care team member can see — see careTeamPermissions.ts */
+  permissions?: string[];
   can_view_profile?: boolean;
   can_view_live_tracking?: boolean;
   notify_on_missed_medication?: boolean;
