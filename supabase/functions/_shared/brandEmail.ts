@@ -7,7 +7,7 @@
  */
 
 export const HOLARC_LOGO_URL =
-  "https://www.holarchealth.com/__l5e/assets-v1/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png";
+  "https://www.holarchealth.com/__l5e/assets-v1/b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e/holarc-email-logo.png";
 
 /** Brand tokens mirrored from the app's design system. */
 const TEAL = "#2AA79E";
