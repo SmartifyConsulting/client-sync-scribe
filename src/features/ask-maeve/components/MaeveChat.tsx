@@ -399,11 +399,60 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
       </div>
 
+      {/* Transcript actions — in line with the exploration heading, at the top */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <button
+          disabled={messages.length === 0}
+          onClick={saveTranscript}
+          className="flex items-center gap-1 rounded-full border border-maeve bg-maeve/10 px-3 py-1 text-xs font-semibold text-maeve-dark transition hover:bg-maeve/20 disabled:opacity-50"
+        >
+          <Download className="h-3 w-3" /> Save transcript
+        </button>
+        <button
+          disabled={messages.length === 0 || savingDoc}
+          onClick={saveAsDocument}
+          className="flex items-center gap-1 rounded-full border border-maeve bg-maeve/10 px-3 py-1 text-xs font-semibold text-maeve-dark transition hover:bg-maeve/20 disabled:opacity-50"
+        >
+          {savingDoc ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />} Save as document
+        </button>
+        <button
+          disabled={messages.length === 0 || makingPdf}
+          onClick={savePdf}
+          className="flex items-center gap-1 rounded-full border border-maeve bg-maeve/10 px-3 py-1 text-xs font-semibold text-maeve-dark transition hover:bg-maeve/20 disabled:opacity-50"
+        >
+          {makingPdf ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />} Save PDF
+        </button>
+        <button
+          disabled={messages.length === 0}
+          onClick={share}
+          className="flex items-center gap-1 rounded-full border border-maeve bg-maeve/10 px-3 py-1 text-xs font-semibold text-maeve-dark transition hover:bg-maeve/20 disabled:opacity-50"
+        >
+          <Share2 className="h-3 w-3" /> Share
+        </button>
+        <button
+          disabled={messages.length === 0 || emailing}
+          onClick={emailTranscript}
+          className="flex items-center gap-1 rounded-full border border-maeve bg-maeve/10 px-3 py-1 text-xs font-semibold text-maeve-dark transition hover:bg-maeve/20 disabled:opacity-50"
+        >
+          {emailing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />} Email to me
+        </button>
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="flex items-center gap-1 rounded-full border border-destructive bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive transition hover:bg-destructive/20"
+        >
+          <Trash2 className="h-3 w-3" /> Delete exploration
+        </button>
+      </div>
+      <p className="text-[11px] text-muted-foreground">
+        Once you share or email it, this conversation leaves your private space.
+      </p>
+
       {/* Disclaimer */}
       <p className="mt-2 rounded-lg bg-muted/60 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        Holarc is a facilitation tool, not a clinician. It asks questions and reflects your own words — it does not
-        give advice, opinions or diagnoses. Anything clinical belongs with your healthcare professional. This
-        conversation is private to you.
+        Holarc is a facilitation tool, not a clinician. It uses <span className="font-bold text-destructive">SMART</span> goal
+        questioning to help you explore a thought process. It asks questions and reflects your own words — it{" "}
+        <span className="font-bold">does not give advice</span>, opinions or diagnoses. Anything clinical belongs with
+        your healthcare professional. This conversation is private to you.
       </p>
 
       {/* What are we doing? */}
@@ -453,7 +502,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
                 )}
                 <div
                   className={cn(
-                    "max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-[15px] leading-relaxed",
+                    "max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm leading-snug",
                     isMaeve
                       ? m.is_safety_response
                         ? "border border-destructive/40 bg-destructive/5 text-foreground"
@@ -478,7 +527,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         )}
         {thinking && (
           <div className="flex justify-start">
-            <div className="flex items-center gap-1.5 rounded-2xl border border-maeve/30 bg-maeve/5 px-4 py-3">
+            <div className="flex items-center gap-1.5 rounded-xl border border-maeve/30 bg-maeve/5 px-3 py-2">
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-maeve" />
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-maeve [animation-delay:150ms]" />
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-maeve [animation-delay:300ms]" />
@@ -493,85 +542,6 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Controls */}
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {[
-          { label: "Pause", text: "I'd like to pause for a moment." },
-          { label: "Change direction", text: "I'd like to change direction." },
-          { label: "I'd rather not answer that", text: "I'd rather not answer that." },
-          { label: "Start again", text: "I'd like to start again." },
-        ].map((c) => (
-          <button
-            key={c.label}
-            disabled={thinking}
-            onClick={() => control(c.text)}
-            className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
-          >
-            {c.label}
-          </button>
-        ))}
-        <button
-          disabled={thinking || closing}
-          onClick={closeSession}
-          className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
-        >
-          {closing ? "Closing…" : "Stop and close (saves PDF)"}
-        </button>
-        <button
-          onClick={() => navigate("/ask-maeve")}
-          className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark"
-        >
-          All explorations
-        </button>
-      </div>
-
-      {/* Transcript actions */}
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        <button
-          disabled={messages.length === 0}
-          onClick={saveTranscript}
-          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
-        >
-          <Download className="h-3 w-3" /> Save transcript
-        </button>
-        <button
-          disabled={messages.length === 0 || savingDoc}
-          onClick={saveAsDocument}
-          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
-        >
-          {savingDoc ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />} Save as document
-        </button>
-        <button
-          disabled={messages.length === 0 || makingPdf}
-          onClick={savePdf}
-          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
-        >
-          {makingPdf ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileText className="h-3 w-3" />} Save PDF
-        </button>
-        <button
-          disabled={messages.length === 0}
-          onClick={share}
-          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
-        >
-          <Share2 className="h-3 w-3" /> Share
-        </button>
-        <button
-          disabled={messages.length === 0 || emailing}
-          onClick={emailTranscript}
-          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-maeve hover:text-maeve-dark disabled:opacity-50"
-        >
-          {emailing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />} Email to me
-        </button>
-        <button
-          onClick={() => setConfirmDelete(true)}
-          className="flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground transition hover:border-destructive hover:text-destructive"
-        >
-          <Trash2 className="h-3 w-3" /> Delete exploration
-        </button>
-        <span className="text-[11px] text-muted-foreground">
-          Once you share or email it, this conversation leaves your private space.
-        </span>
-      </div>
 
       <AlertDialog
         open={confirmMessageId !== null}
@@ -715,6 +685,37 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         </div>
       )}
 
+      {/* Controls — under the text/voice entry */}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {[
+          { label: "Pause", text: "I'd like to pause for a moment." },
+          { label: "Change direction", text: "I'd like to change direction." },
+          { label: "I'd rather not answer that", text: "I'd rather not answer that." },
+          { label: "Start again", text: "I'd like to start again." },
+        ].map((c) => (
+          <button
+            key={c.label}
+            disabled={thinking}
+            onClick={() => control(c.text)}
+            className="rounded-full border border-maeve bg-maeve/10 px-3 py-1 text-xs font-semibold text-maeve-dark transition hover:bg-maeve/20 disabled:opacity-50"
+          >
+            {c.label}
+          </button>
+        ))}
+        <button
+          disabled={thinking || closing}
+          onClick={closeSession}
+          className="rounded-full border border-destructive bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive transition hover:bg-destructive/20 disabled:opacity-50"
+        >
+          {closing ? "Closing…" : "Stop and close (saves PDF)"}
+        </button>
+        <button
+          onClick={() => navigate("/ask-maeve")}
+          className="rounded-full border border-primary bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition hover:bg-primary/20"
+        >
+          All explorations
+        </button>
+      </div>
     </div>
   );
 }
