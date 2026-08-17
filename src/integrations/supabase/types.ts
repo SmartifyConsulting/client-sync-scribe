@@ -6699,6 +6699,7 @@ export type Database = {
           signature_font: string | null
           signature_font_size: number | null
           signature_italic: boolean | null
+          signature_render_url: string | null
           signature_url: string | null
           specialty: string | null
           status: string | null
@@ -6747,6 +6748,7 @@ export type Database = {
           signature_font?: string | null
           signature_font_size?: number | null
           signature_italic?: boolean | null
+          signature_render_url?: string | null
           signature_url?: string | null
           specialty?: string | null
           status?: string | null
@@ -6795,6 +6797,7 @@ export type Database = {
           signature_font?: string | null
           signature_font_size?: number | null
           signature_italic?: boolean | null
+          signature_render_url?: string | null
           signature_url?: string | null
           specialty?: string | null
           status?: string | null
