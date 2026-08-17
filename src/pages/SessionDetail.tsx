@@ -377,10 +377,37 @@ export default function SessionDetail() {
       </div>
 
 
+      {/* Quick Actions — green dropdown, right-aligned directly above Patient Overview */}
+      {session.status === "completed" && session.patient && (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-success bg-success px-3 text-sm font-medium text-success-foreground shadow-sm transition-colors hover:bg-success/90"
+              >
+                Quick Actions
+                <ChevronDown className="h-4 w-4 opacity-80" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Invoice</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Medical Certificate</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowHospitalAdmissionEditor(true)}><Hospital className="mr-2 h-4 w-4" />Hospital Admission</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       {/* Same frame arrangement as the live recording screen:
           recorder frame top-left, AI Clinician Notes beneath it,
           Patient Overview as the wide band alongside. */}
       <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-4 items-start">
+
         <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden lg:col-start-1 lg:row-start-1">
           <div className="flex items-center gap-3 border-b p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
