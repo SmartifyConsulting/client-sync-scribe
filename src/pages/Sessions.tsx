@@ -1552,7 +1552,11 @@ export default function Sessions() {
                   : isTranscribing
                     ? "Transcribing..."
                     : isRecording
-                      ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
+                      ? (isSavingPause
+                          ? "Saving paused session..."
+                          : isPaused
+                            ? "Paused and saved — tap play to resume, or come back later"
+                            : "Recording... Tap to stop")
                       : "Tap to record"}
               </p>
               <p className="text-xs text-muted-foreground/60 text-center mt-1 px-2 leading-snug">
