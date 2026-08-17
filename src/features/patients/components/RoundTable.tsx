@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Users, Send, Loader2, Trash2, MessageCircle, Plus, Circle } from "lucide-react";
+import { Users, Send, Loader2, Trash2, MessageCircle, Plus, Circle, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ interface RTMessage {
   doctor_name: string;
   content: string;
   created_at: string;
+  edited_at?: string | null;
 }
 
 /** Deterministic soft tint per doctor so a doctor keeps the same colour everywhere. */
@@ -68,6 +69,9 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [chatInput, setChatInput] = useState<Record<string, string>>({});
+  const [editingMsgId, setEditingMsgId] = useState<string | null>(null);
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState("");
   const presenceRef = useRef<any>(null);
 
   useEffect(() => {
@@ -156,8 +160,40 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
   };
 
   const deleteTopic = async (id: string) => {
-    await supabase.from('round_table_topics').delete().eq('id', id);
+    if (!window.confirm("Delete this topic and its whole discussion? This cannot be undone.")) return;
+    const { error } = await supabase.from('round_table_topics').delete().eq('id', id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     loadTopics();
+  };
+
+  const cancelEdit = () => { setEditingMsgId(null); setEditingTopicId(null); setEditingText(""); };
+
+  const saveTopicEdit = async (topicId: string) => {
+    const text = editingText.trim();
+    if (!text) return;
+    const { error } = await supabase.from('round_table_topics').update({ body: text }).eq('id', topicId);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    cancelEdit();
+    loadTopics();
+  };
+
+  const saveMessageEdit = async (m: RTMessage) => {
+    const text = editingText.trim();
+    if (!text) return;
+    const { error } = await supabase
+      .from('round_table_messages')
+      .update({ content: text, edited_at: new Date().toISOString() })
+      .eq('id', m.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    cancelEdit();
+    loadMessages(m.topic_id);
+  };
+
+  const deleteMessage = async (m: RTMessage) => {
+    if (!window.confirm("Delete this message?")) return;
+    const { error } = await supabase.from('round_table_messages').delete().eq('id', m.id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    loadMessages(m.topic_id);
   };
 
   if (loading) {
