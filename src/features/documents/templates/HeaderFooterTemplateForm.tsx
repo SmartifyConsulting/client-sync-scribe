@@ -177,17 +177,21 @@ export function HeaderFooterTemplateForm({
         </div>
       )}
 
-      {/* Name & Font — one compact row */}
+      {/* Name & Font — one compact row. The name belongs to the whole
+          letterhead, so editing only one side must not rename it. */}
       <div className="grid gap-2 sm:grid-cols-2">
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
-          <Input
-            placeholder="e.g., Practice Letterhead"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="h-8 flex-1 text-sm"
-          />
-        </div>
+        {!isPartialEdit && (
+          <div className="flex items-center gap-1.5">
+            <label className="text-xs font-medium text-foreground shrink-0 w-14">Name *</label>
+            <Input
+              placeholder="e.g., Practice Letterhead"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="h-8 flex-1 text-sm"
+            />
+          </div>
+        )}
+
         <div className="flex items-center gap-1.5">
           <label className="text-xs font-medium text-foreground shrink-0 w-14">Font</label>
           <Select value={selectedFont} onValueChange={setSelectedFont}>
