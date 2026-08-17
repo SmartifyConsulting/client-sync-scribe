@@ -74,6 +74,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { logProfileView } from "@/lib/logProfileView";
 import { getSignedAudioUrl } from "@/utils/audioUrl";
 
 const LANGUAGES = [
