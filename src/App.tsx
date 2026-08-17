@@ -18,6 +18,7 @@ import CalendarView from "./pages/CalendarView";
 import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
 import MySessions from "./pages/MySessions";
+import MyPersonalDashboard from "./pages/MyPersonalDashboard";
 import MyShiftScreen from "./modules/holarchelp/pages/provider/hospital/MyShiftScreen";
 
 
@@ -265,6 +266,7 @@ const App = () => (
             <Route path="/todos" element={<TodoList />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/my-sessions" element={<MySessions />} />
+            <Route path="/my-dashboard" element={<MyPersonalDashboard />} />
             <Route path="/my-shift" element={<MyShiftScreen />} />
             <Route path="/sessions/:id" element={<SessionDetail />} />
 

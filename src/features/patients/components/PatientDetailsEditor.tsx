@@ -1532,7 +1532,7 @@ export function PatientDetailsEditor({
           )}
           {show("overview") && (
             <TabsTrigger value="overview" className={triggerClass}>
-              My Holarchy
+              My Care Circle
             </TabsTrigger>
           )}
           {show("history") && (

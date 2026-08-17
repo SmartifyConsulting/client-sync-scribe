@@ -94,6 +94,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
   {
     title: "My Holarchy",
     items: [
+      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
       { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
       { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
     ],
