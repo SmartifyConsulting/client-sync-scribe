@@ -228,6 +228,13 @@ export default function Sessions() {
   const personalNotesHasLoaded = useRef(false);
   const sessionStartTimeRef = useRef<Date | null>(null);
 
+  // Resumable sessions: a paused consultation is persisted as a `paused` session
+  // row so it survives reloads and can be resumed later.
+  const [pausedDraft, setPausedDraft] = useState<PausedSessionSnapshot | null>(null);
+  const [isSavingPause, setIsSavingPause] = useState(false);
+  const resumedTranscriptRef = useRef<string>("");
+  const pausedSessionIdRef = useRef<string | null>(null);
+
   // AI-extracted document state
   const [extractedMedCert, setExtractedMedCert] = useState<MedCertData | null>(null);
   const [extractedPrescription, setExtractedPrescription] = useState<PrescriptionData | null>(null);
