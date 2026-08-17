@@ -37,7 +37,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
-import { EmotionalHeadline, CardFooterLink } from "@/components/dashboard/EmotionalHeadline";
+import { EmotionalHeadline } from "@/components/dashboard/EmotionalHeadline";
 import { PeopleICareFor } from "@/components/dashboard/PeopleICareFor";
 import {
   derivePatientState,
@@ -247,20 +247,24 @@ export default function MyPersonalDashboard() {
       {/* Hero: photo, greeting, Vulas, appointments */}
       <PatientHeroCard emotionalLine={GREETING_LINE[state]} />
 
-      {/* Ask Holarc — top frame */}
-      <div className={cn("rounded-lg border p-3 flex items-center gap-3", unlocked ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30")}>
-        <Sparkles className={cn("h-5 w-5 shrink-0", unlocked ? "text-primary" : "text-muted-foreground")} />
+      {/* Ask Holarc — top frame, admin-only until launched */}
+      <div className={cn("rounded-lg border p-3 flex items-center gap-3", isAdmin ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30")}>
+        <Sparkles className={cn("h-5 w-5 shrink-0", isAdmin ? "text-primary" : "text-muted-foreground")} />
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold text-foreground">You don't have to figure it out alone</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-foreground">You don't have to figure it out alone</p>
+            {!isAdmin && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+          </div>
           <p className="text-[10px] text-muted-foreground">Something on your mind? A place to slow down and find your own way forward.</p>
           <p className="text-[10px] text-muted-foreground italic">Holarc does not dispense advice — only questions.</p>
         </div>
         <button
           type="button"
           onClick={() => navigate("/ask-maeve")}
+          disabled={!isAdmin}
           className={cn(
             "shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold",
-            unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
+            isAdmin ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
           )}
         >
           <Sparkles className="h-3.5 w-3.5" /> Ask Holarc
@@ -368,7 +372,7 @@ export default function MyPersonalDashboard() {
 
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">My To Do List</p>
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Today's To Do List</p>
                 <Button size="sm" variant="outline" className="h-6 gap-1 text-[10px] px-2" onClick={() => navigate("/todos")}>
                   <ListChecks className="h-3 w-3" /> Record Task
                 </Button>
@@ -384,7 +388,6 @@ export default function MyPersonalDashboard() {
                   </li>
                 ))}
               </ul>
-              <CardFooterLink label="See what needs your attention" onClick={() => navigate("/todos")} />
             </div>
           </div>
 

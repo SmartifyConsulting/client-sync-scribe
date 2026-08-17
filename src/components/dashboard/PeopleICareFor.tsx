@@ -164,7 +164,7 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 items-stretch">
         {people.map((p) => {
           const well = p.medicationConfirmed;
           return (
@@ -172,7 +172,7 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
               key={p.id}
               type="button"
               onClick={() => setOpenPerson(p)}
-              className="rounded-lg border border-border bg-background/60 p-3 text-left transition-colors hover:border-primary hover:bg-primary/5"
+              className="h-full flex flex-col rounded-lg border border-border bg-background/60 p-3 text-left transition-colors hover:border-primary hover:bg-primary/5"
             >
               <div className="flex items-center gap-2">
                 <span
