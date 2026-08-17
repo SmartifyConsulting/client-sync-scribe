@@ -35,3 +35,13 @@ Fully responsive: single column stacking on mobile, two-column field grids from 
 - Current Assignment reads existing ward/admission/task queries already used by `NurseDashboardScreen` via `useNurseWard`.
 - Security & Access reuses the existing auth/MFA helpers; "sign out other devices" calls the global sign-out scope.
 - New i18n keys under `nurseProfile.*` in `en.json`.
+
+## 3. Two-column, horizontal-label forms (doctor and nurse)
+
+All form capture on the doctor (My Holarprac) and nurse (My Profile) screens matches the patient "My Personal Information" layout:
+
+- Label sits to the left of the input on one line (not stacked above it), bold, fixed-width, right-hand input filling the rest of the row.
+- Fields lay out in two columns on desktop and tablet, collapsing to a single column on mobile.
+- Same compact control sizing as the patient editor, so the three profiles read identically.
+
+Technical: extract the patient editor's row pattern (`Label w-28 shrink-0 text-xs font-bold` + control, from `PatientDetailsEditor.tsx`) into a shared `FieldRow` component under `src/components/ui/`, and use it for every field in `NurseProfile.tsx` and in the MyPractice personal/practice accordions, wrapping each group in a `grid gap-x-4 gap-y-2 sm:grid-cols-2`. Full-width fields (About Me, addresses, long text) keep a `sm:col-span-2` span.
