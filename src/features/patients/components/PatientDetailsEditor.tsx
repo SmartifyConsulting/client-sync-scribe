@@ -2999,7 +2999,9 @@ export function PatientDetailsEditor({
               <CollapsibleContent className="p-3">
                 <div className={FIELD_GRID_2_CLASS}>
                   <div className="space-y-1.5">
-                    <Label htmlFor="employer">Employer</Label>
+                    <Label htmlFor="employer">
+                      Employer{insuranceCaptured ? " *" : ""}
+                    </Label>
                     <Input
                       id="employer"
                       className="text-sm"
@@ -3007,7 +3009,13 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ employer: e.target.value })}
                       placeholder="Company name"
                     />
+                    {insuranceCaptured && !formData.employer?.trim() && (
+                      <p className="text-xs text-destructive">
+                        Employer details are required when medical insurance is captured.
+                      </p>
+                    )}
                   </div>
+
                   <div className="space-y-1.5">
                     <Label htmlFor="occupation">Occupation</Label>
                     <Input
