@@ -24,13 +24,17 @@ interface AccountMenuProps {
 export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: AccountMenuProps) {
   const { t } = useTranslation();
   const { profile } = useProfile();
-  const { isDoctor, isEmergency } = useUserRole();
+  const { isDoctor, isEmergency, isNurse } = useUserRole();
   const location = useLocation();
   const navigate = useNavigate();
   const isOnPatientRoute = location.pathname.startsWith("/patient/");
   const isOnHospitalRoute = location.pathname.startsWith("/provider/hospital");
   const isOnAmbulanceRoute = location.pathname.startsWith("/provider/ambulance");
-  const providerProfilePath = isOnHospitalRoute ? "/provider/hospital/profile" : "/provider/ambulance/profile";
+  const providerProfilePath = isNurse
+    ? "/nurse-profile"
+    : isOnHospitalRoute
+      ? "/provider/hospital/profile"
+      : "/provider/ambulance/profile";
   const { isAdmin } = useIsAdmin();
   const { impersonate, switching } = useImpersonate();
 
