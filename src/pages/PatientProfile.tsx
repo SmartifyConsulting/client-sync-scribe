@@ -43,6 +43,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { logProfileView } from "@/lib/logProfileView";
 import { useSessions } from "@/hooks/useSessions";
 import { usePatientRewards } from "@/hooks/usePatientRewards";
 import { format } from "date-fns";
