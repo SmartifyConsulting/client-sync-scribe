@@ -131,7 +131,8 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
   // Working impression reads better as prose than as a bullet.
   return sections
-    .filter((s) => s.items.length > 0 || s.groups?.some((group) => group.items.length > 0))
+    .map((s) => (s.groups ? { ...s, groups: s.groups.filter((g) => g.items.length > 0) } : s))
+    .filter((s) => s.items.length > 0 || (s.groups?.length ?? 0) > 0)
     .map((s) =>
       s.title.toLowerCase() === "working impression"
         ? { ...s, text: s.items.join(" "), items: [] }
