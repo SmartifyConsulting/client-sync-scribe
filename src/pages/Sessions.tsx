@@ -869,44 +869,54 @@ export default function Sessions() {
   // running, de-duplicated clinical note instead of being appended verbatim, so
   // the note stays readable and free of repetition.
   const hintImpressionRef = useRef<string>("");
-  const hintLinesRef = useRef<Set<string>>(new Set());
-  const hintSectionsRef = useRef<{ alertGroups: Array<{ label: string; items: string[] }>; differentials: string[]; investigations: string[] }>({
-    alertGroups: [],
+  const hintLinesRef = useRef<Map<string, { bucket: "alerts" | "differentials" | "investigations"; index: number }>>(new Map());
+  const hintSectionsRef = useRef<{ alerts: string[]; differentials: string[]; investigations: string[] }>({
+    alerts: [],
     differentials: [],
     investigations: [],
   });
   useEffect(() => {
     if (!liveHint) return;
     const s = hintSectionsRef.current;
-    const addAll = (bucket: string[], items?: string[]) => {
+    const severityRank = (line: string) =>
+      /^\[CRITICAL\]/i.test(line) ? 2 : /^\[CAUTION\]/i.test(line) ? 1 : 0;
+    const addAll = (bucketName: "alerts" | "differentials" | "investigations", items?: string[]) => {
+      const bucket = s[bucketName];
       (items || []).forEach((raw) => {
         const item = String(raw).trim();
         if (!item) return;
-        const key = item.toLowerCase();
-        if (hintLinesRef.current.has(key)) return;
-        hintLinesRef.current.add(key);
+        // Fuzzy key so reworded repeats ("Check vital signs immediately" vs
+        // "Check current vital signs") collapse into the first phrasing.
+        const key = fuzzyKey(item.replace(/^\[[A-Z]+\]\s*/i, ""));
+        if (!key) return;
+        const existing = hintLinesRef.current.get(key);
+        if (existing) {
+          // Keep the most severe marker when the same safety point recurs.
+          const prev = s[existing.bucket][existing.index];
+          if (prev && severityRank(item) > severityRank(prev)) {
+            s[existing.bucket][existing.index] = item;
+          }
+          return;
+        }
+        hintLinesRef.current.set(key, { bucket: bucketName, index: bucket.length });
         bucket.push(item);
       });
     };
 
     if (liveHint.suggestion?.trim()) hintImpressionRef.current = liveHint.suggestion.trim();
-    const nextAlerts: string[] = [];
     addAll(
-      nextAlerts,
+      "alerts",
       (liveHint.alerts || []).map(
         (a) => `[${a.severity === "critical" ? "CRITICAL" : a.severity === "caution" ? "CAUTION" : "NOTE"}] ${a.message}`,
       ),
     );
-    addAll(nextAlerts, (liveHint.red_flags || []).map((r) => `[CAUTION] Rule out: ${r}`));
-    if (nextAlerts.length) {
-      s.alertGroups.push({ label: format(new Date(), "MMM d, yyyy · h:mm a"), items: nextAlerts });
-    }
-    addAll(s.differentials, liveHint.differentials);
-    addAll(s.investigations, liveHint.suggested_investigations);
+    addAll("alerts", (liveHint.red_flags || []).map((r) => `[CAUTION] Rule out: ${r}`));
+    addAll("differentials", liveHint.differentials);
+    addAll("investigations", liveHint.suggested_investigations);
 
     const composed = [
       hintImpressionRef.current ? `WORKING IMPRESSION\n${hintImpressionRef.current}` : null,
-      ...s.alertGroups.map((group) => `SAFETY CHECKS — ${group.label}\n${group.items.map((item) => `• ${item}`).join("\n")}`),
+      s.alerts.length ? `SAFETY CHECKS\n${s.alerts.map((a) => `• ${a}`).join("\n")}` : null,
       s.differentials.length ? `DIFFERENTIALS\n${s.differentials.map((d) => `• ${d}`).join("\n")}` : null,
       s.investigations.length ? `SUGGESTED CHECKS\n${s.investigations.map((i) => `• ${i}`).join("\n")}` : null,
     ]
