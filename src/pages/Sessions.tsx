@@ -1411,8 +1411,31 @@ export default function Sessions() {
             </div>
           )}
           
+          {/* Resume a consultation that was paused earlier (persisted draft). */}
+          {pausedDraft && currentPatient && (
+            <div className="w-full max-w-md rounded-lg border-2 border-warning bg-warning/10 p-4 text-left space-y-2">
+              <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                <Pause className="h-4 w-4" />
+                Paused session with {currentPatient.name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Paused {format(new Date(pausedDraft.pausedAt), "d MMM yyyy, HH:mm")} ·{" "}
+                {formatDuration(pausedDraft.elapsedSeconds)} recorded
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button size="sm" className="gap-2" onClick={() => startSession(pausedDraft)}>
+                  <Play className="h-4 w-4" />
+                  Resume session
+                </Button>
+                <Button size="sm" variant="ghost" onClick={discardPausedDraft}>
+                  Discard
+                </Button>
+              </div>
+            </div>
+          )}
+
           <Button 
-            onClick={startSession} 
+            onClick={() => startSession()} 
             size="lg" 
             className="gap-2"
             disabled={!currentPatient}
@@ -1420,6 +1443,7 @@ export default function Sessions() {
             <Play className="h-5 w-5" />
             Start New Session
           </Button>
+
 
           {/* Past Sessions — quick recap of this patient's previous consultations. */}
           {currentPatient && (
