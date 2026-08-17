@@ -717,12 +717,16 @@ export default function Sessions() {
     setSessionState("processing");
     
     const currentNotes = notesRef.current;
+    // A resumed consultation carries the transcript captured before the pause.
+    const fullTranscript = [resumedTranscriptRef.current, transcriptText || ""]
+      .filter((part) => part && part.trim())
+      .join("\n\n");
 
     let hasDocs = false;
     try {
       const result = await completeSession(
         null,
-        transcriptText || '',
+        fullTranscript,
         currentNotes,
         visitCategories?.[0] || undefined,
         {
@@ -737,6 +741,12 @@ export default function Sessions() {
       if (result) {
         setCurrentSessionId(result.id);
         currentSessionIdRef.current = result.id;
+        // The paused draft has now been folded into the finished session.
+        if (pausedSessionIdRef.current) {
+          await deletePausedSession(pausedSessionIdRef.current);
+          pausedSessionIdRef.current = null;
+          resumedTranscriptRef.current = "";
+        }
         if (patientId) {
           try { localStorage.removeItem(`session-personal-notes-draft:${patientId}`); } catch { /* best effort */ }
         }
