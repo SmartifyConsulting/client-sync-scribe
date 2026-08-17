@@ -593,9 +593,10 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setEditingHFTemplate(template)}>
+                        <DropdownMenuItem onClick={() => { setEditingHFTemplate(template); setEditingHFMode("header-only"); }}>
                           <Edit3 className="h-4 w-4 mr-2" />
-                          Edit
+                          Edit Header Template
+
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
