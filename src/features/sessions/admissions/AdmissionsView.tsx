@@ -266,26 +266,26 @@ function AdmissionDetail({
   return (
     <Card className="overflow-hidden border-2 border-primary/20 p-0">
       {/* === Admission Banner === */}
-      <div className="bg-primary/5 border-b border-primary/20 p-4 space-y-3">
+      <div className="bg-primary/5 border-b border-primary/20 p-2 space-y-1.5">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="h-11 w-11 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <Hospital className="h-6 w-6 text-primary-foreground" />
+          <div className="flex items-start gap-2 min-w-0">
+            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
+              <Hospital className="h-4 w-4 text-primary-foreground" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg font-bold text-primary-dark truncate uppercase tracking-wide">
+              <h2 className="text-sm font-bold text-primary-dark truncate uppercase tracking-wide">
                 {admission.hospital || "Hospital"}
               </h2>
-              <p className="text-sm font-medium text-foreground truncate">
+              <p className="text-xs font-medium text-foreground truncate">
                 {(admission as any).title || admission.diagnosis || "Admission"}
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-muted-foreground">
                 Admitted {format(new Date(admission.admission_date), "dd MMM yyyy")}
                 {admission.discharge_date && ` · Discharged ${format(new Date(admission.discharge_date), "dd MMM yyyy")}`}
               </p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <div className="flex flex-col items-end gap-1 shrink-0">
             <div className="flex items-center gap-2">
               <Badge
                 variant={admission.status === "admitted" ? "default" : "secondary"}
@@ -296,7 +296,7 @@ function AdmissionDetail({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-6 w-6"
                 onClick={() => setExpanded((v) => !v)}
                 aria-label={expanded ? "Collapse admission" : "Expand admission"}
               >
