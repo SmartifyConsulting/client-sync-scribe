@@ -72,7 +72,7 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
 
         visitLabels = (sessions || []).slice(0, 3).map((s: any) => {
           const d = s.started_at ? new Date(s.started_at).toLocaleDateString() : "Visit";
-          const gist = stripTags(String(s.summary || "")).slice(0, 90);
+          const gist = summariseVisit(stripTags(String(s.summary || "")), patient?.name);
           return gist ? `${d} — ${gist}` : d;
         });
 
