@@ -34,7 +34,7 @@ import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewConte
 import { TodoRow } from "@/components/todos/TodoRow";
 import { AssignTaskDialog } from "@/components/tasks/AssignTaskDialog";
 import { getTodoDisplay } from "@/lib/todoDisplay";
-import { resolveTodoDocumentId } from "@/lib/resolveTodoDocumentId";
+import { resolveTodoDocumentId, isDocumentTodoKind } from "@/lib/resolveTodoDocumentId";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronRight, User as UserIcon, CalendarDays } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
