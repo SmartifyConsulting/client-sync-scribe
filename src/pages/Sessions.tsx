@@ -1006,38 +1006,42 @@ export default function Sessions() {
     startSession();
   }, [searchParams, patientId, currentPatient]);
 
-  const startSession = async () => {
+  const startSession = async (resume?: PausedSessionSnapshot) => {
     // Guard against double-invocation (e.g. a stray duplicate click/effect)
     // firing the About/AI-Consult prompts twice.
     if (sessionState === "active" || showAboutRecordingDialog || showAiConsultPrompt) return;
     setSessionState("active");
-    setNotes("");
+    setNotes(resume?.notes || "");
     setSummary("");
     setActionPoints([]);
-    setSessionDuration(0);
+    setSessionDuration(resume?.elapsedSeconds ?? 0);
     setPrescription(null);
     setInvoice(null);
     setAiDiagnosis(null);
-    setCurrentSessionId(crypto.randomUUID());
+    setCurrentSessionId(resume?.id || crypto.randomUUID());
+    // Everything captured before the pause is replayed into the finished session.
+    resumedTranscriptRef.current = resume?.transcript || "";
+    pausedSessionIdRef.current = resume?.id || null;
+    setPausedDraft(null);
     personalNotesHasLoaded.current = false;
     try {
       const draft = patientId ? localStorage.getItem(`session-personal-notes-draft:${patientId}`) : null;
-      setPersonalNotes(draft || "");
+      setPersonalNotes(resume?.privateNotes || draft || "");
     } catch {
-      setPersonalNotes("");
+      setPersonalNotes(resume?.privateNotes || "");
     }
     personalNotesHasLoaded.current = true;
     clearTranscript();
     hintImpressionRef.current = "";
     hintLinesRef.current.clear();
     hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
-    sessionStartTimeRef.current = new Date();
+    sessionStartTimeRef.current = resume?.startedAt ? new Date(resume.startedAt) : new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
 
     // Give immediate feedback — the mic permission / setup gap is otherwise silent.
     setIsPreparingSession(true);
-    setPreparingMessage("Setting up your session...");
+    setPreparingMessage(resume ? "Resuming your session..." : "Setting up your session...");
     setTimeout(() => setPreparingMessage("Requesting microphone access..."), 400);
     // Safety net — if mic access fails/is denied, don't leave the UI stuck "preparing".
     setTimeout(() => setIsPreparingSession(false), 8000);
@@ -1045,6 +1049,57 @@ export default function Sessions() {
     // Recording only actually starts once the doctor has acknowledged the
     // About the Session Recording notice and answered the AI Consult prompt.
     setShowAboutRecordingDialog(true);
+  };
+
+  // Look for a paused consultation for this patient whenever the page is idle.
+  useEffect(() => {
+    if (!patientId || sessionState !== "idle") {
+      if (sessionState !== "idle") setPausedDraft(null);
+      return;
+    }
+    let cancelled = false;
+    fetchPausedSession(patientId).then((draft) => {
+      if (!cancelled) setPausedDraft(draft);
+    });
+    return () => { cancelled = true; };
+  }, [patientId, sessionState]);
+
+  /** Pause → persist a resumable draft. Resume → carry on recording. */
+  const handlePauseToggle = async () => {
+    if (isPaused) {
+      resumeRecording();
+      return;
+    }
+    pauseRecording();
+    if (!patientId || !currentSessionId) return;
+    setIsSavingPause(true);
+    const liveText = latestTranscriptRef.current || liveTranscript || transcript || "";
+    const combined = [resumedTranscriptRef.current, liveText].filter(Boolean).join("\n\n");
+    const saved = await savePausedSession({
+      sessionId: currentSessionId,
+      patientId,
+      transcript: combined,
+      notes: notesRef.current || notes || "",
+      privateNotes: personalNotesRef.current || personalNotes || "",
+      elapsedSeconds: sessionDuration,
+      startedAt: sessionStartTimeRef.current?.toISOString() || new Date().toISOString(),
+    });
+    if (saved) pausedSessionIdRef.current = currentSessionId;
+    setIsSavingPause(false);
+    toast({
+      title: saved ? "Session paused and saved" : "Session paused",
+      description: saved
+        ? "You can safely leave this page and resume this consultation later."
+        : "The pause could not be saved to your records — keep this page open.",
+      variant: saved ? undefined : "destructive",
+    });
+  };
+
+  const discardPausedDraft = async () => {
+    if (!pausedDraft) return;
+    await deletePausedSession(pausedDraft.id);
+    setPausedDraft(null);
+    toast({ title: "Paused session discarded" });
   };
 
   const handleAboutRecordingAck = () => {
