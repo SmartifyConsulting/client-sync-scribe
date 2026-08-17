@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { Settings, LogOut, Share2, Stethoscope, HeartPulse, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES } from "./testProfiles";
+import { useSeededProfileNames } from "./useSeededProfileNames";
+
 import { useImpersonate } from "./useImpersonate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Link, useLocation, useNavigate } from "react-router-dom";
