@@ -17,6 +17,36 @@ const firstSentences = (s: string, count = 2) => {
   return parts.slice(0, count).join(" ");
 };
 
+/**
+ * Condense a session summary into a short "what was presented" clause:
+ * drops the patient's name and leading pronoun/verb phrasing, and never cuts mid-word.
+ */
+const summariseVisit = (summary: string, patientName?: string | null) => {
+  let text = (summary || "").trim();
+  if (!text) return "";
+  // First sentence only.
+  text = (text.match(/[^.!?]+[.!?]?/) || [text])[0].trim();
+  if (patientName) {
+    const names = patientName.split(/\s+/).filter((n) => n.length > 2).map((n) => n.replace(/[^\w]/g, ""));
+    for (const n of names) text = text.replace(new RegExp(`\\b${n}\\b`, "gi"), "").trim();
+  }
+  text = text
+    .replace(/^(the\s+)?(patient|pt|he|she|they|mr\.?|mrs\.?|ms\.?|dr\.?)\b/i, "")
+    .replace(/^[\s,'’]*s\b/i, "")
+    .replace(/^\s*(who\s+)?(presented|presents|complained|complains|reported|reports|attended|came in|was seen|is|was|has|had)\s*(with|of|for|to)?\s*/i, "")
+    .replace(/^[\s,;:.-]+/, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/[.\s]+$/, "")
+    .trim();
+  if (!text) return "";
+  if (text.length > 80) {
+    const cut = text.slice(0, 80);
+    const boundary = Math.max(cut.lastIndexOf(","), cut.lastIndexOf(" "));
+    text = `${cut.slice(0, boundary > 40 ? boundary : 80).replace(/[,\s]+$/, "")}…`;
+  }
+  return text.charAt(0).toLowerCase() + text.slice(1);
+};
+
 interface OverviewData {
   headline: string;
   conditions: string[];
