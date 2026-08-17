@@ -7,10 +7,29 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
+  Check,
+  X,
   Calendar as CalendarIcon,
   FileText,
   Pill,
 } from "lucide-react";
+
+const GRANTED_ACCESS = [
+  "Patient profile & contact details",
+  "Appointments and calendar with this patient",
+  "Session summaries and clinical notes",
+  "Prescription history and repeats",
+  "Documents the patient has shared",
+  "Adding tasks, prescriptions and documents",
+];
+
+const DENIED_ACCESS = [
+  "Private Emotional Journal / Ask Holarc chats",
+  "Records from practitioners not shared with you",
+  "The patient's billing and subscription details",
+  "Editing or deleting another doctor's records",
+];
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
