@@ -253,6 +253,7 @@ export default function MyPersonalDashboard() {
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold text-foreground">You don't have to figure it out alone</p>
           <p className="text-[10px] text-muted-foreground">Something on your mind? A place to slow down and find your own way forward.</p>
+          <p className="text-[10px] text-muted-foreground italic">Holarc does not dispense advice — only questions.</p>
         </div>
         <button
           type="button"
@@ -386,6 +387,46 @@ export default function MyPersonalDashboard() {
               <CardFooterLink label="See what needs your attention" onClick={() => navigate("/todos")} />
             </div>
           </div>
+
+          {/* My Round Tables — folded into the whitespace at the bottom */}
+          <div className="mt-4 border-t border-border pt-3">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">My Round Tables</p>
+              <Link to="/patient/round-table" className="inline-flex items-center gap-1 text-xs text-primary font-semibold">
+                View all <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+            {roundTableLoading ? (
+              <p className="text-xs text-muted-foreground">Loading your round table notes…</p>
+            ) : roundTableNotes.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border bg-background/40 p-3 text-center">
+                <MessageSquare className="mx-auto h-5 w-5 text-muted-foreground/50" />
+                <p className="mt-1 text-xs font-semibold text-foreground">No round table notes yet</p>
+                <p className="text-[10px] text-muted-foreground">
+                  When your doctors share notes about your care, they'll appear here.
+                </p>
+              </div>
+            ) : (
+              <ul className="space-y-1.5">
+                {roundTableNotes.map((note) => (
+                  <li key={note.id}>
+                    <Link
+                      to="/patient/round-table"
+                      className="block rounded-lg border border-border bg-background/60 p-2 hover:border-primary"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-foreground truncate">{note.doctor_name || "Doctor"}</p>
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {format(new Date(note.created_at), "MMM d")}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-2">{note.content}</p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </Panel>
       </div>
 
@@ -402,53 +443,6 @@ export default function MyPersonalDashboard() {
             />
             <PeopleICareFor unlocked={unlocked} />
           </Panel>
-
-          <Panel
-              title="My Round Tables"
-              icon={MessageSquare}
-              unlocked
-              action={
-                <Link to="/patient/round-table" className="inline-flex items-center gap-1 text-xs text-primary font-semibold">
-                  View all <ChevronRight className="h-3.5 w-3.5" />
-                </Link>
-              }
-            >
-              <EmotionalHeadline
-                emoji="🫶"
-                title="Your team is talking to each other"
-                sub="What your doctors share about your care lands here."
-              />
-              {roundTableLoading ? (
-                <p className="text-xs text-muted-foreground">Loading your round table notes…</p>
-              ) : roundTableNotes.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border bg-background/40 p-4 text-center">
-                  <MessageSquare className="mx-auto h-6 w-6 text-muted-foreground/50" />
-                  <p className="mt-1.5 text-xs font-semibold text-foreground">No round table notes yet</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    When your doctors share notes about your care, they'll appear here.
-                  </p>
-                </div>
-              ) : (
-                <ul className="space-y-2">
-                  {roundTableNotes.map((note) => (
-                    <li key={note.id}>
-                      <Link
-                        to="/patient/round-table"
-                        className="block rounded-lg border border-border bg-background/60 p-2.5 hover:border-primary"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-xs font-semibold text-foreground truncate">{note.doctor_name || "Doctor"}</p>
-                          <span className="text-[10px] text-muted-foreground shrink-0">
-                            {format(new Date(note.created_at), "MMM d")}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">{note.content}</p>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Panel>
 
           {/* My Holarcy — its own row at the bottom */}
           <Panel title="My Holarcy" icon={HeartHandshake} unlocked={unlocked}>

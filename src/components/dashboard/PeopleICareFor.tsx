@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, Plus } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -236,12 +236,6 @@ export function PeopleICareFor({ unlocked }: { unlocked: boolean }) {
             </button>
           );
         })}
-
-        <div className="rounded-lg border border-dashed border-border bg-background/40 p-3 flex flex-col items-center justify-center text-center">
-          <Plus className="h-5 w-5 text-muted-foreground" />
-          <p className="mt-1 text-xs font-semibold text-foreground">Add someone</p>
-          <p className="text-[10px] text-muted-foreground">Keep the people you love close</p>
-        </div>
       </div>
 
       {allWell ? (
