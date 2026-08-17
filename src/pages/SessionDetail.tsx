@@ -25,7 +25,7 @@ import {
   Edit3,
   Send,
   Lock,
-  MoreHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { HospitalAdmissionEditor } from "@/components/sessions/HospitalAdmissionEditor";
@@ -74,6 +74,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { PrivacyBadge } from "@/components/permissions/PrivacyBadge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { logProfileView } from "@/lib/logProfileView";
 import { getSignedAudioUrl } from "@/utils/audioUrl";
 
 const LANGUAGES = [
@@ -123,6 +124,12 @@ export default function SessionDetail() {
     supabase.from('profiles').select('full_name').eq('id', session.user_id).maybeSingle()
       .then(({ data }) => { if (data?.full_name) setDoctorName(data.full_name); });
   }, [session?.user_id]);
+
+  // Log this record view for the patient's "My Views" list
+  useEffect(() => {
+    if (!session?.patient_id) return;
+    logProfileView(session.patient_id, "Session Detail");
+  }, [session?.patient_id]);
 
   // Resolve signed audio URL
   useEffect(() => {
@@ -345,25 +352,7 @@ export default function SessionDetail() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {session.status === "completed" && session.patient && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <MoreHorizontal className="h-4 w-4" />
-                  Quick Actions
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Invoice</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Medical Certificate</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setShowHospitalAdmissionEditor(true)}><Hospital className="mr-2 h-4 w-4" />Hospital Admission</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+
           {isAdmin ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -395,10 +384,37 @@ export default function SessionDetail() {
       </div>
 
 
+      {/* Quick Actions — green dropdown, right-aligned directly above Patient Overview */}
+      {session.status === "completed" && session.patient && (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-success bg-success px-3 text-sm font-medium text-success-foreground shadow-sm transition-colors hover:bg-success/90"
+              >
+                Quick Actions
+                <ChevronDown className="h-4 w-4 opacity-80" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onSelect={() => setShowPrescriptionEditor(true)}><Pill className="mr-2 h-4 w-4" />Prescription</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowInvoiceEditor(true)}><Receipt className="mr-2 h-4 w-4" />Invoice</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowMedicalCertificateEditor(true)}><FileBadge className="mr-2 h-4 w-4" />Medical Certificate</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowReferralLetterEditor(true)}><FileText className="mr-2 h-4 w-4" />Referral Letter</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowGeneralLetterEditor(true)}><FileEdit className="mr-2 h-4 w-4" />General Letter</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowDrawingPad(true)}><PenTool className="mr-2 h-4 w-4" />Drawing Pad</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShowHospitalAdmissionEditor(true)}><Hospital className="mr-2 h-4 w-4" />Hospital Admission</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
       {/* Same frame arrangement as the live recording screen:
           recorder frame top-left, AI Clinician Notes beneath it,
           Patient Overview as the wide band alongside. */}
       <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-4 items-start">
+
         <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden lg:col-start-1 lg:row-start-1">
           <div className="flex items-center gap-3 border-b p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
@@ -426,15 +442,15 @@ export default function SessionDetail() {
 
       {/* AI Clinician Notes — full-width band, same placement as the live "Live AI Clinician" frame */}
       <div className="rounded-xl border border-primary bg-primary/5 p-4">
-        <div className="mb-3 flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-semibold text-foreground">AI Clinician Notes</h2>
         </div>
-        <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-1 mb-3 text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">Private — not shared with the patient.</span>{" "}
           AI-generated clinical notes are decision support only and must be reviewed by the treating clinician.
         </p>
+        <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
       </div>
 
 

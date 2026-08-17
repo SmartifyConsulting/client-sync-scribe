@@ -6640,19 +6640,25 @@ export type Database = {
       profile_view_log: {
         Row: {
           id: string
+          owner_id: string | null
           patient_id: string
+          screen: string | null
           viewed_at: string | null
           viewer_id: string
         }
         Insert: {
           id?: string
+          owner_id?: string | null
           patient_id: string
+          screen?: string | null
           viewed_at?: string | null
           viewer_id: string
         }
         Update: {
           id?: string
+          owner_id?: string | null
           patient_id?: string
+          screen?: string | null
           viewed_at?: string | null
           viewer_id?: string
         }
@@ -8109,6 +8115,17 @@ export type Database = {
       get_emergency_patient_context: {
         Args: { _incident_id: string }
         Returns: Json
+      }
+      get_my_profile_views: {
+        Args: never
+        Returns: {
+          id: string
+          screen: string
+          viewed_at: string
+          viewer_id: string
+          viewer_name: string
+          viewer_role: string
+        }[]
       }
       get_patient_document_alias: {
         Args: { _patient_id: string }

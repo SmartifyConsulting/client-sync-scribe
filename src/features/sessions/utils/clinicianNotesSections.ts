@@ -37,7 +37,7 @@ const STOP_WORDS = new Set([
  * near-duplicate lines ("Trismus (difficulty opening the mouth)" vs
  * "Trismus (difficulty opening mouth)") collapse into one bullet.
  */
-const fuzzyKey = (line: string) =>
+export const fuzzyKey = (line: string) =>
   line
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
@@ -86,7 +86,9 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
 
     const key = fuzzyKey(clean);
-    const contextKey = `${current?.title || "Clinical Notes"}:${currentGroup?.label || "default"}`;
+    // De-duplicate per section (not per dated group) so a point repeated by a
+    // later live hint collapses into the first occurrence.
+    const contextKey = current?.title || "Clinical Notes";
     const seen = seenByContext.get(contextKey) || new Set<string>();
     if (!key || seen.has(key)) return;
     seen.add(key);
@@ -129,7 +131,8 @@ export function parseClinicianNotes(notes?: string | null): ClinicianNoteSection
 
   // Working impression reads better as prose than as a bullet.
   return sections
-    .filter((s) => s.items.length > 0 || s.groups?.some((group) => group.items.length > 0))
+    .map((s) => (s.groups ? { ...s, groups: s.groups.filter((g) => g.items.length > 0) } : s))
+    .filter((s) => s.items.length > 0 || (s.groups?.length ?? 0) > 0)
     .map((s) =>
       s.title.toLowerCase() === "working impression"
         ? { ...s, text: s.items.join(" "), items: [] }

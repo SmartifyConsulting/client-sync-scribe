@@ -19,6 +19,7 @@ import Sessions from "./pages/Sessions";
 import SessionDetail from "./pages/SessionDetail";
 import MySessions from "./pages/MySessions";
 import MyPersonalDashboard from "./pages/MyPersonalDashboard";
+import MyViews from "./pages/MyViews";
 import MyShiftScreen from "./modules/holarchelp/pages/provider/hospital/MyShiftScreen";
 
 
@@ -261,6 +262,7 @@ const App = () => (
 
 
             <Route path="/documents" element={<DoctorDocumentsPage />} />
+            <Route path="/my-views" element={<MyViews />} />
             <Route path="/doctor/round-tables" element={<DoctorRoundTablesPage />} />
             <Route path="/invoices" element={<DoctorInvoices />} />
             <Route path="/practice" element={<MyPractice />} />
