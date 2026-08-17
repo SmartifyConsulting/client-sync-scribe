@@ -16,6 +16,7 @@ export default function WardBoardScreen() {
     <div className="space-y-4">
       <header>
         <h1 className="text-3xl font-bold text-foreground">Ward Board</h1>
+        <p className="text-muted-foreground text-xs">Trauma bays, wards, ICU, theatre and high care in one place</p>
       </header>
 
       <Tabs defaultValue={initialTab}>

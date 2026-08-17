@@ -139,9 +139,9 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
                   <div className="grid gap-4 lg:grid-cols-2">
                     <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
                       <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">Admitted patients</div>
-                      <ul className="divide-y">
+                      <ul className="space-y-1.5 p-2">
                         {patients.map((p) => (
-                          <li key={p.id} className="flex items-center justify-between px-3 py-2 text-xs">
+                          <li key={p.id} className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-xs">
                             <span className="font-semibold">{p.patient_name}</span>
                             <span className="text-muted-foreground">Bed {p.bed_number || "—"}</span>
                           </li>
@@ -151,9 +151,9 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
                     </div>
                     <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
                       <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">On shift now</div>
-                      <ul className="divide-y">
+                      <ul className="space-y-1.5 p-2">
                         {staff.map((s) => (
-                          <li key={s.id} className="flex items-center justify-between px-3 py-2 text-xs">
+                          <li key={s.id} className="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-xs">
                             <span className="font-semibold">{s.staff_name}</span>
                             <span className="capitalize text-muted-foreground">{s.staff_role} · {s.shift_type.replace(/_/g, "-")}</span>
                           </li>

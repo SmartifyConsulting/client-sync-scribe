@@ -133,7 +133,7 @@ export default function ProviderRoutes() {
         <Route path="er" element={<EmergencyCapability><ErCoordinationScreen /></EmergencyCapability>} />
         <Route path="incoming" element={<EmergencyCapability><IncomingAmbulancesScreen /></EmergencyCapability>} />
         <Route path="triage" element={<EmergencyCapability><TriageScreen /></EmergencyCapability>} />
-        <Route path="ward-board" element={<EmergencyCapability><WardBoardScreen /></EmergencyCapability>} />
+        <Route path="ward-board" element={<WardBoardScreen />} />
         <Route path="trauma-bays" element={<Navigate to="/provider/hospital/ward-board" replace />} />
         <Route path="wards" element={<Navigate to="/provider/hospital/ward-board?tab=wards" replace />} />
         <Route path="inpatients" element={<Navigate to="/provider/hospital/admissions?tab=inpatients" replace />} />
