@@ -21,6 +21,7 @@ import {
   ChevronDown,
   MessageSquare,
   type LucideIcon,
+  HeartHandshake,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { resolvePermissions } from "@/features/patients/lib/careTeamPermissions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -81,9 +83,7 @@ const CARE_ITEMS = [
 const CARE_CIRCLE = [
   { name: "Dr Sarah", role: "GP", to: "/patient/doctors" },
   { name: "Dr James", role: "Cardiologist", to: "/patient/doctors" },
-  { name: "Angel", role: "AI Wellbeing Companion", to: "/ask-maeve" },
   { name: "Susan", role: "Physiotherapist", to: "/patient/doctors" },
-  { name: "Mum", role: "Family", to: "/patient/round-table" },
 ];
 
 const HAPPENING = [
@@ -161,6 +161,20 @@ export default function MyPersonalDashboard() {
     queryFn: async () => {
       const { data } = await supabase.from("patients").select("id").eq("patient_user_id", user!.id);
       return (data || []).map((p) => p.id);
+    },
+  });
+
+  const { data: careTeam = [] } = useQuery({
+    queryKey: ["dashboard-care-team", patientIds],
+    enabled: patientIds.length > 0,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("patients")
+        .select("emergency_contacts")
+        .in("id", patientIds)
+        .limit(1)
+        .maybeSingle();
+      return ((data?.emergency_contacts as any[]) || []).slice(0, 5);
     },
   });
 
@@ -366,7 +380,7 @@ export default function MyPersonalDashboard() {
                   unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
                 )}
               >
-                <Sparkles className="h-3.5 w-3.5" /> Ask Angel
+                <Sparkles className="h-3.5 w-3.5" /> Ask Holarc
               </button>
               <p className="mt-2 text-xs text-muted-foreground leading-snug">
                 A place to slow down, explore what's on your mind and find your own way forward.
@@ -473,11 +487,11 @@ export default function MyPersonalDashboard() {
         <div className="lg:col-span-1 space-y-4">
           <YouAreKnownCard values={relationshipValues} />
 
-          <Panel title="My Care Circle" icon={Users2} unlocked={unlocked} onClick={() => navigate("/patient/doctors")}>
+          <Panel title="My Holarc Medical Team" icon={Users2} unlocked={unlocked} onClick={() => navigate("/patient/doctors")}>
             <EmotionalHeadline
               emoji="❤️"
               title="You're not looking after yourself alone"
-              sub="The people looking out for you"
+              sub="The practitioners looking after you"
               muted={!unlocked}
             />
             <ul className="space-y-2">
@@ -504,6 +518,50 @@ export default function MyPersonalDashboard() {
               )}
             >
               View my Round Table →
+            </Link>
+          </Panel>
+
+          <Panel
+            title="My Holarc Care Team"
+            icon={HeartHandshake}
+            unlocked={unlocked}
+            onClick={() => navigate("/patient/details?section=personal")}
+          >
+            <EmotionalHeadline
+              emoji="❤️"
+              title="They're close, even when they're far away"
+              sub="The friends and family you share parts of your profile with"
+              muted={!unlocked}
+            />
+            {careTeam.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                No one added yet. Your Next of Kin is listed here by default.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {careTeam.map((c: any) => (
+                  <li key={c.id} className="flex items-center gap-2">
+                    <span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                      {(c.name || "?").slice(0, 2).toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-foreground truncate">{c.name || "Unnamed"}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {c.relationship || "Care team"} · {resolvePermissions(c).length} areas shared
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link
+              to="/patient/details?section=personal"
+              className={cn(
+                "mt-3 block rounded-lg px-3 py-2 text-center text-xs font-semibold",
+                unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
+              )}
+            >
+              Manage my Care Team →
             </Link>
           </Panel>
 

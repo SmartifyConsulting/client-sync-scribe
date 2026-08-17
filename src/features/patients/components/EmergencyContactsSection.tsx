@@ -16,6 +16,8 @@ export interface EmergencyContact {
   phone: string;
   email?: string;
   relationship?: string;
+  /** What this care team member can see — see careTeamPermissions.ts */
+  permissions?: string[];
   can_view_profile?: boolean;
   can_view_live_tracking?: boolean;
   notify_on_missed_medication?: boolean;
@@ -76,10 +78,10 @@ export function EmergencyContactsSection({ patientId, contacts, onChange }: Prop
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base text-primary">
           <ShieldAlert className="h-5 w-5 text-primary" />
-          Emergency Contacts
+          My Holarc Care Team
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Notified by default when you trigger an SOS. Toggle whether they can view your profile or live tracking, or get alerted on missed/taken medication.
+          Friends and family you share parts of your profile with. Notified by default when you trigger an SOS. Toggle whether they can view your profile or live tracking, or get alerted on missed/taken medication.
         </p>
       </CardHeader>
       <CardContent className="space-y-3">

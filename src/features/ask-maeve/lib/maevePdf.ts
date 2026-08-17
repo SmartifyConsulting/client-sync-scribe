@@ -19,7 +19,7 @@ export function buildTranscriptHtml(session: MaeveSessionRow | null, messages: M
       return `
         <div style="margin:0 0 14px 0;">
           <div style="font-size:11px;font-weight:700;color:${isMaeve ? "#C2410C" : "#0F766E"};text-transform:uppercase;letter-spacing:.06em;">
-            ${isMaeve ? "Angel" : "You"} · ${escapeHtml(time)}
+            ${isMaeve ? "Holarc" : "You"} · ${escapeHtml(time)}
           </div>
           <div style="font-size:13px;line-height:1.6;color:#111;white-space:pre-wrap;margin-top:3px;">${escapeHtml(body.trim())}</div>
         </div>`;
@@ -42,7 +42,7 @@ export function buildTranscriptHtml(session: MaeveSessionRow | null, messages: M
       ${rows}
       ${summary}
       <div style="margin-top:24px;border-top:1px solid #E5E5E5;padding-top:10px;font-size:10px;color:#888;">
-        Angel is a facilitation tool, not a clinician. Nothing here is advice or a diagnosis.
+        Holarc is a facilitation tool, not a clinician. Nothing here is advice or a diagnosis.
       </div>
     </div>`;
 }

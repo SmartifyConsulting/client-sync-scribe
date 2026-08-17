@@ -152,7 +152,7 @@ export function MaeveRecap({ sessionId, onContinue }: Props) {
                       )}
                     >
                       <span className="block text-[10px] font-bold uppercase tracking-wider opacity-70">
-                        {isMaeve ? "Angel" : "You"} · {new Date(m.created_at).toLocaleDateString()}
+                        {isMaeve ? "Holarc" : "You"} · {new Date(m.created_at).toLocaleDateString()}
                       </span>
                       {body}
                     </div>
@@ -177,7 +177,7 @@ export function MaeveRecap({ sessionId, onContinue }: Props) {
             <Mic className="h-6 w-6 text-maeve" />
             <p className="mt-3 text-sm font-semibold text-foreground">Continue with voice</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Speak your answers and hear Angel read hers aloud. Your microphone is only asked for when you tap this.
+              Speak your answers and hear Holarc read its questions aloud. Your microphone is only asked for when you tap this.
             </p>
           </button>
           <button

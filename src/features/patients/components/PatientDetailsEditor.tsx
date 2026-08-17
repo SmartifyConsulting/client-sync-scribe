@@ -1546,7 +1546,7 @@ export function PatientDetailsEditor({
           )}
           {show("overview") && (
             <TabsTrigger value="overview" className={triggerClass}>
-              My Care Circle
+              My Holarchy
             </TabsTrigger>
           )}
           {show("history") && (
@@ -1687,7 +1687,8 @@ export function PatientDetailsEditor({
             <TabsContent value="overview" className="space-y-4 mt-4">
               <Tabs defaultValue="team">
                 <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
+                  <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Medical Team</TabsTrigger>
+                  <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Care Team</TabsTrigger>
                   <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                   <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
                   <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
@@ -1759,8 +1760,8 @@ export function PatientDetailsEditor({
             {/* === MY HOLARC TEAM SUB-TAB (view) === */}
             <TabsContent value="team" className="mt-4">
               <div className="mb-4">
-                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Team</h2>
-                <p className="text-xs text-muted-foreground">Healthcare providers with access to your profile</p>
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Medical Team</h2>
+                <p className="text-xs text-muted-foreground">Your medical practitioners — the clinicians with access to your profile</p>
               </div>
               <Suspense
                 fallback={
@@ -1771,6 +1772,35 @@ export function PatientDetailsEditor({
               >
                 <MyDoctors hideHeader />
               </Suspense>
+            </TabsContent>
+
+            {/* === MY HOLARC CARE TEAM SUB-TAB === */}
+            <TabsContent value="careteam" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Care Team</h2>
+                <p className="text-xs text-muted-foreground">
+                  Friends and family you choose to share parts of your profile with
+                </p>
+              </div>
+              {isSelfService && emergencyContacts && onEmergencyContactsChange ? (
+                <EmergencyContactsInline
+                  patientId={patient.id}
+                  bare
+                  contacts={emergencyContacts}
+                  onChange={onEmergencyContactsChange}
+                  nokMembers={nokMembers}
+                  legacyNok={{
+                    name: formData.next_of_kin_name,
+                    phone: formData.next_of_kin_phone,
+                    email: formData.next_of_kin_email,
+                    relationship: formData.next_of_kin_relationship,
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  Only the patient can manage their Holarc Care Team.
+                </p>
+              )}
             </TabsContent>
               </Tabs>
             </TabsContent>
@@ -2309,7 +2339,8 @@ export function PatientDetailsEditor({
           <TabsContent value="overview" className="space-y-4 mt-4">
             <Tabs defaultValue="team">
               <TabsList className="bg-neutral-600 flex-nowrap overflow-x-auto scrollbar-hide w-full justify-start">
-                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Team</TabsTrigger>
+                <TabsTrigger value="team" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Medical Team</TabsTrigger>
+                  <TabsTrigger value="careteam" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">My Holarc Care Team</TabsTrigger>
                 <TabsTrigger value="insurance" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Insurance</TabsTrigger>
                 <TabsTrigger value="pharmacies" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Pharmacies</TabsTrigger>
                 <TabsTrigger value="hospitals" className="whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5 text-white data-[state=active]:bg-white data-[state=active]:text-black">Hospitals</TabsTrigger>
@@ -2522,6 +2553,35 @@ export function PatientDetailsEditor({
               <MyDoctors hideHeader />
             </Suspense>
           </TabsContent>
+
+            {/* === MY HOLARC CARE TEAM SUB-TAB === */}
+            <TabsContent value="careteam" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-[18px] font-semibold text-primary-dark">My Holarc Care Team</h2>
+                <p className="text-xs text-muted-foreground">
+                  Friends and family you choose to share parts of your profile with
+                </p>
+              </div>
+              {isSelfService && emergencyContacts && onEmergencyContactsChange ? (
+                <EmergencyContactsInline
+                  patientId={patient.id}
+                  bare
+                  contacts={emergencyContacts}
+                  onChange={onEmergencyContactsChange}
+                  nokMembers={nokMembers}
+                  legacyNok={{
+                    name: formData.next_of_kin_name,
+                    phone: formData.next_of_kin_phone,
+                    email: formData.next_of_kin_email,
+                    relationship: formData.next_of_kin_relationship,
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  Only the patient can manage their Holarc Care Team.
+                </p>
+              )}
+            </TabsContent>
               </Tabs>
             </TabsContent>
 

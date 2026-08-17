@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-/** Voices Angel can speak with. The live list comes from the connected
+/** Voices Holarc can speak with. The live list comes from the connected
  *  ElevenLabs account; this curated set is the fallback when it can't load. */
 export interface MaeveVoice {
   id: string;
@@ -10,7 +10,7 @@ export interface MaeveVoice {
   fallback?: string;
 }
 
-/** Nova is Angel's default voice for every profile. It is spoken by the
+/** Nova is Holarc's default voice for every profile. It is spoken by the
  *  fallback speech engine, so the sentinel id tells the server to use it. */
 export const NOVA_VOICE_ID = "nova";
 
@@ -80,7 +80,7 @@ export function voiceById(id: string): MaeveVoice {
   };
 }
 
-/** "Angel" needs no phonetic respelling — speech engines say it correctly. */
+/** "Holarc" needs no phonetic respelling — speech engines say it correctly. */
 export function phoneticForSpeech(text: string): string {
   return text;
 }
