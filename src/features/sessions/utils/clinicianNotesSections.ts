@@ -37,7 +37,7 @@ const STOP_WORDS = new Set([
  * near-duplicate lines ("Trismus (difficulty opening the mouth)" vs
  * "Trismus (difficulty opening mouth)") collapse into one bullet.
  */
-const fuzzyKey = (line: string) =>
+export const fuzzyKey = (line: string) =>
   line
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
