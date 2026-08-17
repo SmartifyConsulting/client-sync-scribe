@@ -116,14 +116,21 @@ serve(async (req) => {
       const { data: senderProfile } = await admin
         .from("profiles")
         .select(
-          "full_name, signature_url, signature_font, signature_color, signature_font_size, signature_bold, signature_italic, practice_name",
+          "full_name, signature_url, signature_font, signature_color, signature_font_size, signature_bold, signature_italic",
         )
         .eq("id", user.id)
         .maybeSingle();
       if (senderProfile) {
         signatureHtml = renderSignatureHtml(senderProfile as any);
         senderName = body.senderName || (senderProfile as any).full_name || senderName;
-        practiceName = practiceName || (senderProfile as any).practice_name || null;
+      }
+      if (!practiceName) {
+        const { data: practice } = await admin
+          .from("practices")
+          .select("name")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        practiceName = (practice as any)?.name || practiceName;
       }
     } catch (e) {
       console.error("Signature lookup failed", e);
@@ -134,28 +141,15 @@ serve(async (req) => {
     let recipientIsPatient = false;
     if (!greeting && to) {
       try {
-        const { data: rp } = await admin
-          .from("profiles")
-          .select("full_name, role")
-          .eq("email", String(to).toLowerCase())
+        const { data: pt } = await admin
+          .from("patients")
+          .select("name")
+          .ilike("email", String(to))
+          .limit(1)
           .maybeSingle();
-        if (rp) {
-          recipientIsPatient = (rp as any).role === "patient";
-          greeting = buildGreeting({
-            fullName: (rp as any).full_name,
-            isPractitioner: !recipientIsPatient,
-          });
-        } else {
-          const { data: pt } = await admin
-            .from("patients")
-            .select("name")
-            .eq("email", String(to).toLowerCase())
-            .limit(1)
-            .maybeSingle();
-          if (pt?.name) {
-            recipientIsPatient = true;
-            greeting = buildGreeting({ fullName: (pt as any).name });
-          }
+        if ((pt as any)?.name) {
+          recipientIsPatient = true;
+          greeting = buildGreeting({ fullName: (pt as any).name });
         }
       } catch (e) {
         console.error("Recipient lookup failed", e);
