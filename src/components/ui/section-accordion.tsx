@@ -36,6 +36,19 @@ export const SECTION_TRIGGER_ALWAYS_GREEN_CLASS = cn(
   "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-black",
 );
 
+/**
+ * Medium-light grey date bar — used ONLY for the date-level headers on the
+ * Dashboard To-Do List card and the My Round Tables card.
+ * LOCKED — see mem://design/todo-accordion-and-row-spec.
+ */
+export const SECTION_TRIGGER_GREY_CLASS = cn(
+  "group px-4 py-2 hover:no-underline border-0 rounded-none",
+  "!bg-neutral-200 hover:!bg-neutral-300 !text-neutral-900",
+  "[&_*:not(.section-count-pill)]:!text-neutral-900",
+  "[&>svg]:!text-neutral-700",
+  "[&_.section-count-pill]:!bg-white [&_.section-count-pill]:!text-black",
+);
+
 
 /** Padding for accordion content so sub-rows aren't flush against the header. */
 export const SECTION_CONTENT_CLASS = "px-4 pt-3 pb-3 space-y-2";

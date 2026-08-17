@@ -23,6 +23,18 @@ const GRANTED_ACCESS = [
   "Adding tasks, prescriptions and documents",
 ];
 
+// What OTHER practitioners on the patient's panel can / cannot see.
+const OTHER_PRACTITIONER_ACCESS: { label: string; allowed: boolean }[] = [
+  { label: "Round Table notes and shared care-team discussions", allowed: true },
+  { label: "Sessions the patient has explicitly shared with them", allowed: true },
+  { label: "Documents the patient has shared with them", allowed: true },
+  { label: "Medication, allergy and condition lists", allowed: true },
+  { label: "Your private clinical notes not shared to the care team", allowed: false },
+  { label: "The patient's Emotional Journal / Ask Holarc chats", allowed: false },
+  { label: "Records from practitioners not shared with them", allowed: false },
+  { label: "The patient's billing and subscription details", allowed: false },
+];
+
 const DENIED_ACCESS = [
   "Private Emotional Journal / Ask Holarc chats",
   "Records from practitioners not shared with you",
@@ -308,8 +320,6 @@ export function DoctorAccessRequests() {
                         <span>{item}</span>
                       </li>
                     ))}
-                  </ul>
-                  <ul className="space-y-1">
                     {DENIED_ACCESS.map((item) => (
                       <li key={item} className="flex items-start gap-1.5 text-xs text-muted-foreground">
                         <X className="h-3.5 w-3.5 shrink-0 mt-0.5 text-crimson" />
@@ -317,11 +327,29 @@ export function DoctorAccessRequests() {
                       </li>
                     ))}
                   </ul>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground mb-2">
+                      What other practitioners can access
+                    </p>
+                    <ul className="space-y-1">
+                      {OTHER_PRACTITIONER_ACCESS.map((item) => (
+                        <li
+                          key={item.label}
+                          className={`flex items-start gap-1.5 text-xs ${item.allowed ? "text-foreground/80" : "text-muted-foreground"}`}
+                        >
+                          {item.allowed ? (
+                            <Check className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
+                          ) : (
+                            <X className="h-3.5 w-3.5 shrink-0 mt-0.5 text-crimson" />
+                          )}
+                          <span>{item.label}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
                 <p className="text-[11px] leading-relaxed text-muted-foreground mt-3 border-t border-border pt-2">
-                  <span className="font-medium text-foreground/80">Other practitioners on this patient's panel:</span>{" "}
-                  each doctor only sees what the patient has explicitly shared with them, granted per invitation and
-                  revocable by the patient at any time. Round Table notes are visible to every connected practitioner.
+                  Access is granted per invitation and is revocable by the patient at any time.
                 </p>
               </div>
 

@@ -155,6 +155,7 @@ export function DoctorRoundTables({ compact = false }: { compact?: boolean } = {
       hideControls={compact}
       frameless={compact}
       headerIcon={compact ? CalendarDays : undefined}
+      headerTone={compact ? "grey" : "green"}
 
       actions={
         compact ? undefined : (
