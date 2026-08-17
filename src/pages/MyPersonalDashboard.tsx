@@ -320,43 +320,94 @@ export default function MyPersonalDashboard() {
             sub="Nothing important is getting lost."
             muted={!unlocked}
           />
-          <ul className="space-y-2">
-            {HAPPENING.map((h) => (
-              <li key={h.title}>
-                <Link to={h.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
-                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-                    <h.icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-foreground">{h.title}</p>
-                    <p className="text-[10px] text-muted-foreground">{h.detail}</p>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="grid grid-cols-2 gap-4">
+            <ul className="space-y-2">
+              {HAPPENING.map((h) => (
+                <li key={h.title}>
+                  <Link to={h.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
+                    <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
+                      <h.icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground">{h.title}</p>
+                      <p className="text-[10px] text-muted-foreground">{h.detail}</p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
 
-          <ul className="mt-3 space-y-2 border-t border-border pt-3">
-            {CARE_ITEMS.filter((c) => c.label === "Medication" || c.label === "Results").map((c) => (
-              <li key={c.label}>
-                <Link to={c.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
-                  <c.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-foreground">{c.label}</p>
-                    <p className="text-xs text-muted-foreground">{c.value}</p>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <CardFooterLink label="See what needs your attention" onClick={() => navigate("/todos")} />
+            <div className="space-y-2">
+              <ul className="space-y-2">
+                {CARE_ITEMS.filter((c) => c.label === "Medication" || c.label === "Results").map((c) => (
+                  <li key={c.label}>
+                    <Link to={c.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
+                      <c.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground">{c.label}</p>
+                        <p className="text-xs text-muted-foreground">{c.value}</p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <CardFooterLink label="See what needs your attention" onClick={() => navigate("/todos")} />
+            </div>
+          </div>
         </Panel>
       </div>
 
       <div className="space-y-4">
         {/* Main column */}
         <div className="space-y-4">
+          {/* People I care for + We See You — same row, right under the hero row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          <Panel title="People I care for" icon={Heart} unlocked={unlocked}>
+            <EmotionalHeadline
+              emoji="❤️"
+              title="They're okay."
+              sub="The people you're looking out for"
+              muted={!unlocked}
+            />
+            <PeopleICareFor unlocked={unlocked} />
+          </Panel>
+
+          <Panel unlocked={unlocked}>
+            <div className="flex items-start gap-3">
+              <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
+                <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">🫶 We See You</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Your care team knows more than your medical history.
+                </p>
+                <dl className="mt-3 space-y-2">
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">What Matters to You</dt>
+                    <dd className="text-xs font-medium text-foreground">{(relationshipValues?.length ? relationshipValues : ["Family", "Independence", "Health"]).join(" · ")}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">How You Like to Communicate</dt>
+                    <dd className="text-xs font-medium text-foreground">Straightforward · Detailed</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Our Observations</dt>
+                    <dd className="text-xs font-medium text-foreground">
+                      <ul className="space-y-1.5">
+                        {INSIGHTS.map((i) => (
+                          <li key={i}>{i}</li>
+                        ))}
+                      </ul>
+                    </dd>
+                  </div>
+                </dl>
+                <CardFooterLink label="View my profile" onClick={() => navigate("/patient/details")} />
+              </div>
+            </div>
+          </Panel>
+          </div>
+
           {/* Three summary cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             <Panel title="My Wellbeing" icon={Sparkles} unlocked={unlocked} onClick={() => navigate("/ask-maeve")}>
@@ -447,8 +498,7 @@ export default function MyPersonalDashboard() {
             </Panel>
           </div>
 
-          {/* My Holarcy + What's happening — same row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          {/* My Holarcy — its own row at the bottom */}
           <Panel title="My Holarcy" icon={HeartHandshake} unlocked={unlocked}>
             <div className="space-y-1">
               <p className="text-xs font-semibold text-foreground">Personal Care Circle</p>
@@ -516,55 +566,6 @@ export default function MyPersonalDashboard() {
               </ul>
             </div>
           </Panel>
-
-          <Panel unlocked={unlocked}>
-            <div className="flex items-start gap-3">
-              <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-                <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground">🫶 We See You</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Your care team knows more than your medical history.
-                </p>
-                <dl className="mt-3 space-y-2">
-                  <div>
-                    <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">What Matters to You</dt>
-                    <dd className="text-xs font-medium text-foreground">{(relationshipValues?.length ? relationshipValues : ["Family", "Independence", "Health"]).join(" · ")}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">How You Like to Communicate</dt>
-                    <dd className="text-xs font-medium text-foreground">Straightforward · Detailed</dd>
-                  </div>
-                  <div>
-                    <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">Our Observations</dt>
-                    <dd className="text-xs font-medium text-foreground">
-                      <ul className="space-y-1.5">
-                        {INSIGHTS.map((i) => (
-                          <li key={i}>{i}</li>
-                        ))}
-                      </ul>
-                    </dd>
-                  </div>
-                </dl>
-                <CardFooterLink label="View my profile" onClick={() => navigate("/patient/details")} />
-              </div>
-            </div>
-          </Panel>
-          </div>
-
-          {/* People I care for */}
-          <div className="grid grid-cols-1 gap-4 items-start">
-            <Panel title="People I care for" icon={Heart} unlocked={unlocked}>
-              <EmotionalHeadline
-                emoji="❤️"
-                title="They're okay."
-                sub="The people you're looking out for"
-                muted={!unlocked}
-              />
-              <PeopleICareFor unlocked={unlocked} />
-            </Panel>
-          </div>
         </div>
       </div>
     </div>
