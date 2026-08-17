@@ -148,14 +148,14 @@ export default function Landing() {
               <InstallAppButton variant="compact" className="hidden sm:inline-flex" />
 
               <Button
-                size="lg"
-                variant="ghost"
+                size="sm"
+                variant="outline"
                 onClick={() => navigate("/auth?mode=login")}
-                className="btn-pill text-base text-muted-foreground hover:text-foreground"
+                className="btn-pill text-muted-foreground hover:text-foreground"
               >
                 {t("landing.nav.login")}
               </Button>
-              <Button size="lg" onClick={() => setShowRoleDialog(true)} className="btn-pill text-sm">
+              <Button size="sm" onClick={() => setShowRoleDialog(true)} className="btn-pill">
                 {t("landing.nav.getStarted")}
               </Button>
             </div>
