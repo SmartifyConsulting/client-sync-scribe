@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { format, parseISO } from "date-fns";
-import { Calendar, Camera, CheckSquare, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Camera, Loader2 } from "lucide-react";
 
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -69,7 +65,6 @@ export function PatientHeroCard({
   /** Dynamic, data-derived sentence shown under the greeting. */
   emotionalLine?: string;
 }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const { toast } = useToast();
@@ -92,34 +87,6 @@ export function PatientHeroCard({
       .join("")
       .toUpperCase()
       .slice(0, 2) || "?";
-
-  const { data: appointments = [] } = useQuery({
-    queryKey: ["hero-appointments", user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("appointment_requests")
-        .select("*")
-        .eq("patient_user_id", user!.id)
-        .in("status", ["approved", "pending"])
-        .order("requested_start", { ascending: true })
-        .limit(3);
-      if (error) return [];
-      const rows = data || [];
-      const doctorIds = [...new Set(rows.map((r: any) => r.doctor_id).filter(Boolean))];
-      const doctorMap: Record<string, { full_name: string | null; specialty: string | null }> = {};
-      if (doctorIds.length) {
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, specialty")
-          .in("id", doctorIds as string[]);
-        (profiles || []).forEach((p: any) => {
-          doctorMap[p.id] = { full_name: p.full_name, specialty: p.specialty };
-        });
-      }
-      return rows.map((r: any) => ({ ...r, profiles: doctorMap[r.doctor_id] || null }));
-    },
-  });
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -231,43 +198,6 @@ export function PatientHeroCard({
         )}
       </div>
 
-      <div className="mt-4 border-t border-border pt-3">
-        <div className="flex items-center gap-1.5 mb-2">
-          <Calendar className="h-3.5 w-3.5 text-primary" />
-          <span className="text-xs font-semibold text-foreground">Upcoming Appointments</span>
-        </div>
-        {appointments.length > 0 ? (
-          <div className="space-y-1.5">
-            {appointments.map((appt: any) => {
-              const start = appt.proposed_start || appt.requested_start;
-              const doctorProfile = appt.profiles as any;
-              return (
-                <div
-                  key={appt.id}
-                  className="flex items-center justify-between text-xs bg-muted/50 rounded-md px-2.5 py-1.5"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="font-medium text-foreground truncate">
-                      {doctorProfile?.full_name || "Doctor"}
-                    </span>
-                    {doctorProfile?.specialty && (
-                      <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 shrink-0">
-                        {doctorProfile.specialty}
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="text-muted-foreground shrink-0 ml-2">
-                    {start ? format(parseISO(start), "MMM d, h:mm a") : "Date to confirm"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">No upcoming appointments.</p>
-        )}
-      </div>
-
       {!rewardsLoading && (
         <div className="mt-3 border-t border-border pt-3 lg:hidden">
           <div className="flex items-center justify-center gap-2">
@@ -278,26 +208,6 @@ export function PatientHeroCard({
           </div>
         </div>
       )}
-
-      <div className="mt-3 grid grid-cols-2 gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full h-9 text-xs gap-1.5"
-          onClick={() => navigate("/patient/details?section=admin")}
-        >
-          <Calendar className="h-3.5 w-3.5" />
-          Calendar
-        </Button>
-        <Button
-          size="sm"
-          className="w-full h-9 text-xs gap-1.5"
-          onClick={() => navigate("/patient/details?section=admin")}
-        >
-          <CheckSquare className="h-3.5 w-3.5" />
-          Record Task
-        </Button>
-      </div>
     </section>
   );
 }

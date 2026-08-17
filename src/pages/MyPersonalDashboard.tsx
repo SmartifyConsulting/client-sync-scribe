@@ -366,7 +366,12 @@ export default function MyPersonalDashboard() {
             </ul>
 
             <div className="space-y-1">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Tasks</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">My To Do List</p>
+                <Button size="sm" variant="outline" className="h-6 gap-1 text-[10px] px-2" onClick={() => navigate("/todos")}>
+                  <ListChecks className="h-3 w-3" /> Record Task
+                </Button>
+              </div>
               <ul className="space-y-1">
                 {CARE_ITEMS.filter((c) => c.label === "Medication" || c.label === "Results").map((c) => (
                   <li key={c.label} className="flex items-start gap-1.5 rounded-md -mx-1 px-1 py-0.5">
