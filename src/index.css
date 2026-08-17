@@ -55,6 +55,10 @@
     --destructive: 0 64% 50%;        /* #D32F2F */
     --destructive-foreground: 0 0% 100%;
 
+    --crimson: 348 83% 42%;          /* #C4102F invitation accent */
+    --crimson-foreground: 0 0% 100%;
+
+
     --success: 152 69% 45%;
     --success-foreground: 0 0% 100%;
 
@@ -148,6 +152,10 @@
 
     --destructive: 356 67% 50%;
     --destructive-foreground: 0 0% 100%;
+
+    --crimson: 348 78% 52%;
+    --crimson-foreground: 0 0% 100%;
+
 
     --success: 152 55% 50%;
     --success-foreground: 0 0% 100%;

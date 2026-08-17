@@ -48,6 +48,11 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        crimson: {
+          DEFAULT: "hsl(var(--crimson))",
+          foreground: "hsl(var(--crimson-foreground))",
+        },
+
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",

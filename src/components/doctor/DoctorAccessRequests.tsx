@@ -7,10 +7,29 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
+  Check,
+  X,
   Calendar as CalendarIcon,
   FileText,
   Pill,
 } from "lucide-react";
+
+const GRANTED_ACCESS = [
+  "Patient profile & contact details",
+  "Appointments and calendar with this patient",
+  "Session summaries and clinical notes",
+  "Prescription history and repeats",
+  "Documents the patient has shared",
+  "Adding tasks, prescriptions and documents",
+];
+
+const DENIED_ACCESS = [
+  "Private Emotional Journal / Ask Holarc chats",
+  "Records from practitioners not shared with you",
+  "The patient's billing and subscription details",
+  "Editing or deleting another doctor's records",
+];
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -256,7 +275,7 @@ export function DoctorAccessRequests() {
           return (
             <div
               key={request.id}
-              className="rounded-2xl border-2 border-green-500 bg-card shadow-sm p-4 space-y-3"
+              className="rounded-2xl border-2 border-crimson bg-card shadow-sm p-4 space-y-3"
             >
               <div className="flex items-start gap-3">
                 <Avatar className="h-12 w-12 shrink-0">
@@ -275,32 +294,62 @@ export function DoctorAccessRequests() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2 pt-1">
+
+              {/* What this invitation grants — explicit, so the practitioner knows the scope */}
+              <div className="rounded-xl border border-border bg-muted/30 p-3">
+                <p className="text-xs font-semibold text-foreground mb-2">
+                  What you will be able to access
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <ul className="space-y-1">
+                    {GRANTED_ACCESS.map((item) => (
+                      <li key={item} className="flex items-start gap-1.5 text-xs text-foreground/80">
+                        <Check className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <ul className="space-y-1">
+                    {DENIED_ACCESS.map((item) => (
+                      <li key={item} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                        <X className="h-3.5 w-3.5 shrink-0 mt-0.5 text-crimson" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <p className="text-[11px] leading-relaxed text-muted-foreground mt-3 border-t border-border pt-2">
+                  <span className="font-medium text-foreground/80">Other practitioners on this patient's panel:</span>{" "}
+                  each doctor only sees what the patient has explicitly shared with them, granted per invitation and
+                  revocable by the patient at any time. Round Table notes are visible to every connected practitioner.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="flex-1 rounded-xl text-xs"
+                  className="rounded-xl"
                   onClick={() => handleDeclineRequest(request)}
                   disabled={busy}
                 >
-                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                  <XCircle className="h-4 w-4 mr-2" />
                   Decline
                 </Button>
                 <Button
-                  size="sm"
-                  className="flex-1 rounded-xl text-xs"
+                  className="rounded-xl bg-crimson text-crimson-foreground hover:bg-crimson/90"
                   onClick={() => handleAcceptRequest(request)}
                   disabled={busy}
                 >
                   {busy ? (
-                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                    <CheckCircle className="h-4 w-4 mr-2" />
                   )}
                   Accept
                 </Button>
               </div>
             </div>
+
           );
         })}
       </div>
