@@ -58,6 +58,13 @@
     --crimson: 348 83% 42%;          /* #C4102F invitation accent */
     --crimson-foreground: 0 0% 100%;
 
+    --dark-orange: 24 90% 38%;       /* #B84B0A sharing panel border / active role pill */
+    --dark-orange-foreground: 0 0% 100%;
+    --pill-grey: 0 0% 78%;           /* darker grey for unselected patient pill */
+    --pill-grey-foreground: 0 0% 15%;
+
+
+
 
     --success: 152 69% 45%;
     --success-foreground: 0 0% 100%;
