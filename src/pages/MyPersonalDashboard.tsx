@@ -186,7 +186,7 @@ export default function MyPersonalDashboard() {
       const nowIso = new Date().toISOString();
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
 
-      const [todosRes, apptRes, biologRes] = await Promise.all([
+      const [todosRes, apptRes] = await Promise.all([
         supabase
           .from("todos")
           .select("id, due_date, status")
@@ -198,14 +198,17 @@ export default function MyPersonalDashboard() {
           .eq("patient_user_id", user!.id)
           .in("status", ["approved", "pending"])
           .gte("requested_start", nowIso),
-        patientIds.length
-          ? (supabase
-              .from("biolog_entries")
-              .select("id")
-              .in("patient_id", patientIds)
-              .gte("created_at", weekAgo) as unknown as Promise<{ data: { id: string }[] | null }>)
-          : Promise.resolve({ data: [] as { id: string }[] }),
       ]);
+
+      let recentBiologEntries = 0;
+      if (patientIds.length) {
+        const biologRes: any = await (supabase as any)
+          .from("biolog_entries")
+          .select("id")
+          .in("patient_id", patientIds)
+          .gte("created_at", weekAgo);
+        recentBiologEntries = (biologRes?.data || []).length;
+      }
 
       const todos = todosRes.data || [];
       return {
@@ -213,7 +216,7 @@ export default function MyPersonalDashboard() {
         overdueTasks: todos.filter((t: any) => t.due_date && t.due_date < nowIso).length,
         upcomingAppointments: (apptRes.data || []).length,
         medicationDue: 0,
-        recentBiologEntries: ((biologRes as any).data || []).length,
+        recentBiologEntries,
         newResults: 0,
       };
     },
