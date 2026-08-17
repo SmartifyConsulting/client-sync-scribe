@@ -1380,9 +1380,10 @@ export default function Sessions() {
         {/* Centred progress box — replaces the old status strip and toasts. */}
         <SessionProcessingDialog open={sessionState === "processing" || isTranscribing} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,2fr)_minmax(280px,1fr)] gap-4 items-start">
-          {/* Record Session — column 1, full height (rows 1-3) */}
-          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 self-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-4 items-start">
+          {/* Record Session — column 1, row 1 */}
+          <div className="rounded-xl border border-primary bg-card shadow-sm flex flex-col order-1 self-start lg:col-start-1 lg:row-start-1">
+
             {/* Patient Info */}
             <div className="flex items-center gap-3 p-4 border-b">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
