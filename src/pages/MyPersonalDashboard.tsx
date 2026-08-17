@@ -151,12 +151,29 @@ function Panel({
 
 export default function MyPersonalDashboard() {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  useProfile();
   const unlocked = user?.email === V2_DEMO_EMAIL;
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const firstName = profile?.full_name?.split(" ")[0] ?? "";
+  const { data: roundTableNotes = [], isLoading: roundTableLoading } = useQuery({
+    queryKey: ["dashboard-round-table-notes", user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data: patients } = await supabase
+        .from("patients")
+        .select("id")
+        .eq("patient_user_id", user!.id);
+      if (!patients?.length) return [];
+      const { data } = await supabase
+        .from("round_table_notes")
+        .select("id, doctor_name, content, created_at")
+        .in("patient_id", patients.map((p) => p.id))
+        .order("created_at", { ascending: false })
+        .limit(4);
+      return data || [];
+    },
+  });
+
+
 
   return (
     <div className="container mx-auto p-4 max-w-7xl space-y-4">
