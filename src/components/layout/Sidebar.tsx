@@ -70,14 +70,13 @@ interface NavSection {
  *  practice-facing tools, "My Holarchy" for their own profile — with SOS
  *  standalone above/below both, matching the heading pattern already used
  *  for hospital/ER provider sidebars. */
-const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
-];
+const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [];
 
 const DOCTOR_SECTIONS: NavSection[] = [
   {
     title: "My Holarprac",
     items: [
+      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
       { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
@@ -94,20 +93,8 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
   },
-  {
-    title: "My Holarchy",
-    items: [
-      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
-      { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
-      { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
-      { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
-      { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
-      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks" },
-      { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
-      { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
-    ],
-  },
 ];
+
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
