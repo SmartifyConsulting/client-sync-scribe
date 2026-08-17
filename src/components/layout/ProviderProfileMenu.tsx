@@ -7,6 +7,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 import { TEST_PROFILES, ADMIN_EMAIL } from "./testProfiles";
+import { useSeededProfileNames } from "./useSeededProfileNames";
 import { useImpersonate } from "./useImpersonate";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +16,8 @@ export function ProviderProfileMenu() {
   const { profile } = useProfile();
   const { isAdmin } = useIsAdmin();
   const { impersonate, switching } = useImpersonate();
+  const liveNames = useSeededProfileNames();
+
 
   const { data: currentEmail = "" } = useQuery({
     queryKey: ["auth-email-provider"],
@@ -72,7 +75,7 @@ export function ProviderProfileMenu() {
                   >
                     {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /> : <Icon className="h-3.5 w-3.5 text-primary shrink-0" />}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{p.name}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{liveNames[p.email] || p.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{p.role} · {p.email}</p>
                     </div>
                   </button>

@@ -55,6 +55,17 @@
     --destructive: 0 64% 50%;        /* #D32F2F */
     --destructive-foreground: 0 0% 100%;
 
+    --crimson: 348 83% 42%;          /* #C4102F invitation accent */
+    --crimson-foreground: 0 0% 100%;
+
+    --dark-orange: 24 90% 38%;       /* #B84B0A sharing panel border / active role pill */
+    --dark-orange-foreground: 0 0% 100%;
+    --pill-grey: 0 0% 78%;           /* darker grey for unselected patient pill */
+    --pill-grey-foreground: 0 0% 15%;
+
+
+
+
     --success: 152 69% 45%;
     --success-foreground: 0 0% 100%;
 
@@ -148,6 +159,17 @@
 
     --destructive: 356 67% 50%;
     --destructive-foreground: 0 0% 100%;
+
+    --crimson: 348 78% 52%;
+    --crimson-foreground: 0 0% 100%;
+
+    --dark-orange: 24 85% 45%;
+    --dark-orange-foreground: 0 0% 100%;
+    --pill-grey: 0 0% 28%;
+    --pill-grey-foreground: 0 0% 92%;
+
+
+
 
     --success: 152 55% 50%;
     --success-foreground: 0 0% 100%;

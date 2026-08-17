@@ -1351,20 +1351,32 @@ export default function Sessions() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0 bg-popover z-50" align="center">
-                  <Command>
-                    <CommandInput placeholder="Search by name..." />
-                    <CommandList>
+                <PopoverContent
+                  className="w-[--radix-popover-trigger-width] min-w-[16rem] p-0 bg-popover z-50 rounded-xl border border-border shadow-lg overflow-hidden"
+                  align="center"
+                >
+                  <Command className="bg-transparent">
+                    <CommandInput
+                      placeholder="Search by name..."
+                      className="h-11 text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <CommandList className="max-h-[280px]">
                       <CommandEmpty>
                         {patientsLoading ? (
-                          <div className="flex items-center justify-center py-4">
+                          <div className="flex items-center justify-center py-6">
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                           </div>
                         ) : (
-                          "No patients found."
+                          <div className="flex flex-col items-center gap-1 py-6 px-4 text-center">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                              <Users className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground">No patients found</p>
+                            <p className="text-xs text-muted-foreground">Try a different name or add a patient first.</p>
+                          </div>
                         )}
                       </CommandEmpty>
-                      <CommandGroup>
+                      <CommandGroup className="p-1.5">
                         {[...patients].sort((a, b) => {
                           const surnameA = a.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
                           const surnameB = b.name.trim().split(/\s+/).pop()?.toLowerCase() || '';
@@ -1374,23 +1386,27 @@ export default function Sessions() {
                           const displayName = parts.length > 1
                             ? `${parts[parts.length - 1]}, ${parts.slice(0, -1).join(' ')}`
                             : patient.name;
+                          const initials = parts.slice(0, 2).map(p => p[0]).join('').toUpperCase();
                           return (
                           <CommandItem
                             key={patient.id}
                             value={patient.name}
+                            className="flex h-11 items-center gap-2.5 rounded-lg px-2 text-sm cursor-pointer data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
                             onSelect={() => {
                               handlePatientSelect(patient.id);
                               setPatientSelectorOpen(false);
                             }}
                           >
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
+                              {initials || "?"}
+                            </span>
+                            <span className="flex-1 truncate text-left">{displayName}</span>
                             <Check
                               className={cn(
-                                "mr-2 h-4 w-4",
+                                "h-4 w-4 shrink-0 text-primary",
                                 selectedPatientId === patient.id ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {displayName}
                           </CommandItem>
                           );
                         })}
@@ -1398,6 +1414,7 @@ export default function Sessions() {
                     </CommandList>
                   </Command>
                 </PopoverContent>
+
               </Popover>
             </div>
           )}

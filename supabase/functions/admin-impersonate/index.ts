@@ -41,42 +41,20 @@ Deno.serve(async (req) => {
       "er.test@holarchealth.com",
       "ifeanyi.okoli@greenoriagroup.com",
       "dr.buttons@smartify.co.za",
-      "dr.gianna.buttons@smartify.co.za",
+      "ga@firstserve.co.za",
       "nurse.test@holarchealth.com",
 
       "2348167581572@phone.holarc.local",
     ]);
-    const callerIsSeeded = SEEDED_EMAILS.has(callerEmail);
+    // The profile switcher only ever offers seeded demo accounts, and a caller
+    // who is already signed in as one of them (or was switched into a real
+    // account from one) must be able to hop back. So: any switch whose TARGET
+    // is a seeded demo account is allowed; anything else needs the admin role.
     const targetIsSeeded = SEEDED_EMAILS.has(email);
-    const isSeededSwitch = callerIsSeeded && targetIsSeeded;
 
-    if (!isSeededSwitch) {
+    if (!targetIsSeeded) {
       const { data: isAdmin } = await sb.rpc("has_role", { _user_id: callerId, _role: "admin" });
-      if (!isAdmin) throw new Error("Admin role required");
-    }
-
-    // Some seeded test accounts (added to the profile switcher before their
-    // login was ever provisioned) don't exist yet — self-heal by creating
-    // them on first switch attempt instead of requiring a separate deploy.
-    const AUTO_PROVISION: Record<string, { full_name: string; role: string }> = {
-      "dr.gianna.buttons@smartify.co.za": { full_name: "Dr Gianna Buttons", role: "doctor" },
-    };
-    if (AUTO_PROVISION[email]) {
-      const { data: existing } = await sb.auth.admin.listUsers({ page: 1, perPage: 500 });
-      const found = existing?.users?.find((u) => u.email?.toLowerCase() === email);
-      if (!found) {
-        const info = AUTO_PROVISION[email];
-        const created = await sb.auth.admin.createUser({
-          email,
-          password: crypto.randomUUID(),
-          email_confirm: true,
-          user_metadata: { full_name: info.full_name },
-        });
-        const newUserId = created.data?.user?.id;
-        if (created.error || !newUserId) throw new Error(created.error?.message ?? "Could not provision account");
-        await sb.from("profiles").upsert({ id: newUserId, full_name: info.full_name, country: "South Africa" } as any, { onConflict: "id" });
-        await sb.from("user_roles").upsert({ user_id: newUserId, role: info.role } as any, { onConflict: "user_id,role" });
-      }
+      if (!isAdmin) throw new Error(`Admin role required (signed in as ${callerEmail || "unknown"})`);
     }
 
     const { data, error } = await sb.auth.admin.generateLink({ type: "magiclink", email });

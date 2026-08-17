@@ -79,7 +79,13 @@ export function PatientHeroCard({
   }, [profile?.avatar_url]);
 
   const fullName = profile?.full_name || (profileLoading ? "" : user?.email?.split("@")[0] || "");
-  const firstName = fullName.split(" ")[0] || "";
+  // Strip an honorific ("Dr", "Prof", "Mr"…) so "Dr Gianna Buttons" greets "Gianna", not "Dr".
+  const firstName =
+    fullName
+      .replace(/^(dr|prof|mr|mrs|ms|miss|sr|snr)\.?\s+/i, "")
+      .trim()
+      .split(/\s+/)[0] || "";
+
   const initials =
     fullName
       .split(" ")

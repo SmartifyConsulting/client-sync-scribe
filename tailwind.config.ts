@@ -48,6 +48,21 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        crimson: {
+          DEFAULT: "hsl(var(--crimson))",
+          foreground: "hsl(var(--crimson-foreground))",
+        },
+        "dark-orange": {
+          DEFAULT: "hsl(var(--dark-orange))",
+          foreground: "hsl(var(--dark-orange-foreground))",
+        },
+        "pill-grey": {
+          DEFAULT: "hsl(var(--pill-grey))",
+          foreground: "hsl(var(--pill-grey-foreground))",
+        },
+
+
+
         success: {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",

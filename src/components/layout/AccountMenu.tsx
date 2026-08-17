@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { Settings, LogOut, Share2, Stethoscope, HeartPulse, UserCog, ShieldCheck, Loader2 } from "lucide-react";
 import { TEST_PROFILES } from "./testProfiles";
+import { useSeededProfileNames } from "./useSeededProfileNames";
+
 import { useImpersonate } from "./useImpersonate";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -41,18 +43,8 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: liveNames = {} } = useQuery({
-    queryKey: ["seeded-profile-names"],
-    queryFn: async () => {
-      const { data } = await (supabase.rpc as any)("get_seeded_profile_names");
-      const map: Record<string, string> = {};
-      ((data || []) as any[]).forEach((r) => {
-        if (r.email && r.full_name) map[String(r.email).toLowerCase()] = r.full_name as string;
-      });
-      return map;
-    },
-    staleTime: 60 * 1000,
-  });
+  const liveNames = useSeededProfileNames();
+
 
   return (
     <Popover>
@@ -60,18 +52,20 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
       <PopoverContent className="p-1.5 w-[calc(var(--sidebar-width)_-_16px)]" align={align} alignOffset={alignOffset} sideOffset={8}>
         {/* Profile switcher */}
         {isDoctor && (
-          <div className="border-b border-border mb-1 space-y-1">
+          <div className="border-b border-border mb-1 space-y-1 pb-1">
             <button
               onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
               className={cn(
-                "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
-                "bg-primary/10"
+                "flex items-center gap-2 px-2.5 py-1.5 w-full rounded-full transition-colors",
+                isOnPatientRoute
+                  ? "bg-pill-grey text-pill-grey-foreground hover:bg-pill-grey/80"
+                  : "bg-dark-orange text-dark-orange-foreground hover:bg-dark-orange/90",
               )}
             >
-              <Stethoscope className="h-3.5 w-3.5 text-primary" />
+              <Stethoscope className="h-3.5 w-3.5 shrink-0" />
               <div className="text-left">
-                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{t("topbar.doctor")}</p>
+                <p className="text-xs font-semibold">{profile?.full_name || "User"}</p>
+                <p className="text-xs opacity-80">{t("topbar.doctor")}</p>
               </div>
             </button>
           </div>
@@ -87,12 +81,15 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                 ? t("topbar.er")
                 : t("topbar.patient");
           return (
-            <div className="px-2 py-1.5 border-b border-border mb-1">
-              <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-              <p className="text-xs text-muted-foreground">{roleLabel}</p>
+            <div className="border-b border-border mb-1 pb-1">
+              <div className="px-2.5 py-1.5 w-full rounded-full bg-dark-orange text-dark-orange-foreground">
+                <p className="text-xs font-semibold">{profile?.full_name || "User"}</p>
+                <p className="text-xs opacity-80">{roleLabel}</p>
+              </div>
             </div>
           );
         })()}
+
         {(isAdmin || TEST_PROFILES.some((p) => p.email === currentEmail)) && (
           <div className="border-t border-border mt-1 pt-1">
             <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

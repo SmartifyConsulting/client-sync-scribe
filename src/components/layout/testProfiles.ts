@@ -15,7 +15,10 @@ export const SYSTEM_ADMIN_EMAILS = [ADMIN_EMAIL, "georgia.adams@smartify.co.za"]
 export const TEST_PROFILES: TestProfile[] = [
   { email: "info@georgiaadams.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
   { email: "georgia.adams@smartify.co.za", name: "Georgia Adams", role: "Admin", icon: ShieldCheck },
-  { email: "sme@smartify.co.za", name: "Dean Allie", role: "Doctor", icon: Stethoscope },
+  // `name` is only a fallback label — the switcher shows the live profiles.full_name
+  // via useSeededProfileNames(), so renames in the app update the menu automatically.
+  { email: "sme@smartify.co.za", name: "Dean Peterson", role: "Doctor", icon: Stethoscope },
+
   
   { email: "projectmanager@smartify.co.za", name: "Sharon Kennedy", role: "Patient", icon: HeartPulse },
   { email: "hospital.test@holarchealth.com", name: "Holarc General Hospital", role: "Hospital", icon: Building2 },
@@ -23,7 +26,7 @@ export const TEST_PROFILES: TestProfile[] = [
   { email: "er.test@holarchealth.com", name: "ER Provider (Test)", role: "ER Provider", icon: Ambulance },
   
   { email: "dr.buttons@smartify.co.za", name: "Matthew Buttons", role: "Doctor", icon: Stethoscope },
-  { email: "dr.gianna.buttons@smartify.co.za", name: "Dr Gianna Buttons", role: "Doctor", icon: Stethoscope },
+  { email: "ga@firstserve.co.za", name: "Dr Gianna Buttons", role: "Doctor", icon: Stethoscope },
   { email: "2348167581572@phone.holarc.local", name: "Samuel 0koli", role: "Patient", icon: HeartPulse },
   { email: "nurse.test@holarchealth.com", name: "Nomvula Dlamini", role: "Nurse", icon: Syringe },
 ];

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   SECTION_TRIGGER_ALWAYS_GREEN_CLASS,
+  SECTION_TRIGGER_GREY_CLASS,
   SECTION_CONTENT_CLASS,
   SECTION_FRAME_CLASS,
   SECTION_ITEM_CLASS,
@@ -66,6 +67,8 @@ interface Props<T> {
   frameless?: boolean;
   /** Optional icon rendered before each group heading label. */
   headerIcon?: React.ComponentType<{ className?: string }>;
+  /** Group heading bar tone: green (default) or medium-light grey. */
+  headerTone?: "green" | "grey";
   /**
    * When grouping by date, further split each date group into a collapsed
    * light-grey sub-accordion per patient (see HolarchStyling skill §6).
@@ -73,8 +76,6 @@ interface Props<T> {
    * to nest by in that case.
    */
   subGroupByPatient?: boolean;
-  /** Overrides the group heading's default teal background (e.g. dashboard widgets that want a quieter grey). */
-  triggerClassName?: string;
 }
 
 export function ListGroupToolbar<T>({
@@ -89,8 +90,8 @@ export function ListGroupToolbar<T>({
   hideControls = false,
   frameless = false,
   headerIcon: HeaderIcon,
+  headerTone = "green",
   subGroupByPatient = false,
-  triggerClassName,
 }: Props<T>) {
 
   const prefKey = `listGroupBy:${storageKey}`;
@@ -192,11 +193,11 @@ export function ListGroupToolbar<T>({
           {groups.map(([label, entries]) => (
             <AccordionItem key={label} value={label} className={frameless ? SECTION_ITEM_ROUNDED_CLASS : SECTION_ITEM_CLASS}>
               <AccordionTrigger
-                className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, frameless && cn(SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-2"), triggerClassName)}
+                className={cn(headerTone === "grey" ? SECTION_TRIGGER_GREY_CLASS : SECTION_TRIGGER_ALWAYS_GREEN_CLASS, frameless && cn(SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-2"))}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {HeaderIcon && <HeaderIcon className="h-3.5 w-3.5 text-primary shrink-0" />}
-                  <span className="text-sm font-semibold truncate text-left">{label}</span>
+                  <span className="text-sm font-medium truncate text-left">{label}</span>
                   <SectionCountPill count={entries.length} className="ml-auto mr-1" />
                 </div>
               </AccordionTrigger>
