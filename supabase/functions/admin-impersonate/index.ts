@@ -55,6 +55,30 @@ Deno.serve(async (req) => {
       if (!isAdmin) throw new Error("Admin role required");
     }
 
+    // Some seeded test accounts (added to the profile switcher before their
+    // login was ever provisioned) don't exist yet — self-heal by creating
+    // them on first switch attempt instead of requiring a separate deploy.
+    const AUTO_PROVISION: Record<string, { full_name: string; role: string }> = {
+      "dr.gianna.buttons@smartify.co.za": { full_name: "Dr Gianna Buttons", role: "doctor" },
+    };
+    if (AUTO_PROVISION[email]) {
+      const { data: existing } = await sb.auth.admin.listUsers({ page: 1, perPage: 500 });
+      const found = existing?.users?.find((u) => u.email?.toLowerCase() === email);
+      if (!found) {
+        const info = AUTO_PROVISION[email];
+        const created = await sb.auth.admin.createUser({
+          email,
+          password: crypto.randomUUID(),
+          email_confirm: true,
+          user_metadata: { full_name: info.full_name },
+        });
+        const newUserId = created.data?.user?.id;
+        if (created.error || !newUserId) throw new Error(created.error?.message ?? "Could not provision account");
+        await sb.from("profiles").upsert({ id: newUserId, full_name: info.full_name, country: "South Africa" } as any, { onConflict: "id" });
+        await sb.from("user_roles").upsert({ user_id: newUserId, role: info.role } as any, { onConflict: "user_id,role" });
+      }
+    }
+
     const { data, error } = await sb.auth.admin.generateLink({ type: "magiclink", email });
     if (error) throw error;
 
