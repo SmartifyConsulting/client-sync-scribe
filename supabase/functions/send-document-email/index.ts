@@ -1,6 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/email.ts";
+import { brandedEmail, escapeHtml } from "../_shared/brandEmail.ts";
+
+/** Pull the inner markup out of a full HTML document so it can be re-wrapped. */
+function extractBody(html: string): string {
+  const match = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  return match ? match[1] : html;
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
