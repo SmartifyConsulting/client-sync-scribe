@@ -38,13 +38,48 @@ const STOP_WORDS = new Set([
  * "Trismus (difficulty opening mouth)") collapse into one bullet.
  */
 export const fuzzyKey = (line: string) =>
+  normaliseTokens(line).sort().join(" ");
+
+/** Date fragments ("on April 8, 2026", "since 08/04/2026") carry no meaning for matching. */
+const stripDates = (line: string) =>
   line
+    .replace(
+      /\b(?:on|since|from|first recorded(?:\s+on)?|recorded(?:\s+on)?|dated)?\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s*\d{2,4}\b/gi,
+      " ",
+    )
+    .replace(/\b\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4}\b/g, " ")
+    .replace(/\b(?:on|since|from)\s+\d{4}\b/gi, " ");
+
+/** Meaningful, comparable words for a bullet (prefix, dates and filler removed). */
+const normaliseTokens = (line: string): string[] =>
+  stripDates(line)
     .toLowerCase()
+    // "Rule out: X" and "Consider X" are framing, not content.
+    .replace(/^\s*(?:rule\s*out|consider|monitor for|watch for|check for)\s*[:\-–]?\s*/i, "")
     .replace(/[^a-z0-9]+/g, " ")
     .split(" ")
-    .filter((w) => w && !STOP_WORDS.has(w))
-    .sort()
-    .join(" ");
+    .filter((w) => w && !STOP_WORDS.has(w));
+
+/** Jaccard overlap of two token sets. */
+const similarity = (a: string[], b: string[]) => {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  if (setA.size === 0 || setB.size === 0) return 0;
+  let shared = 0;
+  setA.forEach((w) => {
+    if (setB.has(w)) shared += 1;
+  });
+  return shared / (setA.size + setB.size - shared);
+};
+
+/** True when every meaningful word of the smaller line appears in the larger one. */
+const isSubset = (a: string[], b: string[]) => {
+  const [small, large] = a.length <= b.length ? [a, b] : [b, a];
+  if (small.length === 0) return false;
+  const set = new Set(large);
+  return small.every((w) => set.has(w));
+};
+
 
 
 const titleCase = (raw: string) =>
