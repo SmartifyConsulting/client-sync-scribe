@@ -266,27 +266,16 @@ serve(async (req) => {
         bodyHtml: `${greetingHtml}<div style="border:1px solid #e5e7eb;border-radius:10px;padding:20px;background:#ffffff;">${inner}</div>`,
       });
     } else {
-      // Format document content as HTML (legacy text path)
-      const formattedContent = (documentContent as string)
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/&lt;b&gt;/g, "<b>")
-        .replace(/&lt;\/b&gt;/g, "</b>")
-        .replace(/&lt;i&gt;/g, "<i>")
-        .replace(/&lt;\/i&gt;/g, "</i>")
-        .replace(/&lt;u&gt;/g, "<u>")
-        .replace(/&lt;\/u&gt;/g, "</u>")
-        .replace(/\n/g, "<br/>");
+      // Format document content as HTML (legacy text path). Content may already
+      // contain light markup, so normalise it instead of escaping blindly.
+      const formattedContent = normaliseDocumentContent(documentContent as string);
 
       const attachmentsHtml = attachedDocs
         .map(
           (d) => `
             <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;">
               <div style="font-weight:600;margin-bottom:8px;">Attachment: ${escapeHtml(d.name)}</div>
-              <div style="white-space:pre-wrap;">${d.content
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\n/g, "<br/>")}</div>
+              <div style="white-space:pre-wrap;">${normaliseDocumentContent(d.content || "")}</div>
             </div>`,
         )
         .join("");
