@@ -62,6 +62,7 @@ import { DocumentPreviewWithLetterhead } from "@/features/documents/components/D
 
 import { SessionResultPanels, AISummaryCard } from "@/features/sessions/components/SessionResultPanels";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
+import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { ClinicianNotesAccordion } from "@/features/sessions/components/ClinicianNotesAccordion";
 import {
   DropdownMenu,
@@ -499,7 +500,11 @@ export default function SessionDetail() {
           </div>
         </div>
         <div className="min-w-0 lg:col-start-2 lg:row-start-1">
-          <SessionPatientOverview patient={session.patient} currentMedications={currentMedications} />
+          <SessionPatientOverview
+            patient={session.patient}
+            currentMedications={currentMedications}
+            discSlot={<SessionDiscStrip patientId={session.patient?.id} inline />}
+          />
         </div>
       </div>
 
@@ -523,6 +528,7 @@ export default function SessionDetail() {
       <SessionResultPanels
         transcript={session.transcript}
         doctorName={doctorName}
+        sessionId={session.id}
         hideSummary
         leftSlot={
           <div className="rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-3 shadow-sm">

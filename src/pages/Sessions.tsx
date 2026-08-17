@@ -1603,6 +1603,7 @@ export default function Sessions() {
             summary={summary}
             audioUrl={audioUrl}
             actionPoints={actionPoints}
+            sessionId={currentSessionId}
             clinicianNotes={showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis}
             clinicianActions={
               <div className="flex items-center gap-2">

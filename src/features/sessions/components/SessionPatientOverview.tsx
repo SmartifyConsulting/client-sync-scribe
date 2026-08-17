@@ -47,14 +47,26 @@ const summariseVisit = (summary: string, patientName?: string | null) => {
   return text.charAt(0).toLowerCase() + text.slice(1);
 };
 
+interface DatedItem {
+  text: string;
+  date?: string;
+}
+
 interface OverviewData {
   headline: string;
-  conditions: string[];
-  medications: string[];
+  conditions: DatedItem[];
+  medications: DatedItem[];
   allergies: string[];
   symptoms: string[];
   visits: string[];
 }
+
+/** "Nov 2024" / "2024-11-03" → "2024"; falls back to the raw string if no year is found. */
+const extractYear = (dateStr?: string) => {
+  if (!dateStr) return undefined;
+  const match = String(dateStr).match(/\b(19|20)\d{2}\b/);
+  return match ? match[0] : dateStr;
+};
 
 /**
  * Patient Overview — a read-only recap of the last 6 months presented as short,
@@ -66,12 +78,14 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
   const [data, setData] = useState<OverviewData | null>(null);
 
   const fallbackData = (visits: string[] = []): OverviewData => {
-    const conditions = (patient?.conditions_diagnoses || [])
-      .map((c: any) => c?.name || c?.condition)
-      .filter(Boolean);
-    const meds = currentMedications.length
-      ? currentMedications.map((m) => `${m.medication}${m.dosage ? ` ${m.dosage}` : ""}`)
-      : (patient?.current_medications || []).map((m: any) => m?.name || m?.medication).filter(Boolean);
+    const conditions: DatedItem[] = (patient?.conditions_diagnoses || [])
+      .map((c: any) => ({ text: c?.name || c?.condition, date: c?.date || c?.diagnosed_date }))
+      .filter((c: DatedItem) => c.text);
+    const meds: DatedItem[] = currentMedications.length
+      ? currentMedications.map((m) => ({ text: `${m.medication}${m.dosage ? ` ${m.dosage}` : ""}` }))
+      : (patient?.current_medications || [])
+          .map((m: any) => ({ text: m?.name || m?.medication, date: m?.date || m?.start_date }))
+          .filter((m: DatedItem) => m.text);
     return {
       headline: `${patient?.name || "This patient"} — key points from the last 6 months.`,
       conditions,
@@ -114,11 +128,13 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
         const summary = stripTags(String(res?.summary || ""));
         const next: OverviewData = {
           headline: firstSentences(summary) || fallbackData().headline,
-          conditions: (res?.conditions || []).map((c: any) => c?.name || c).filter(Boolean),
+          conditions: (res?.conditions || [])
+            .map((c: any) => ({ text: c?.name || (typeof c === "string" ? c : ""), date: c?.date }))
+            .filter((c: DatedItem) => c.text),
           medications: (res?.medications || [])
             .filter((m: any) => m?.status !== "inactive")
-            .map((m: any) => [m?.name, m?.dosage].filter(Boolean).join(" "))
-            .filter(Boolean),
+            .map((m: any) => ({ text: [m?.name, m?.dosage].filter(Boolean).join(" "), date: m?.date }))
+            .filter((m: DatedItem) => m.text),
           allergies: (res?.allergies || [])
             .map((a: any) => (typeof a === "string" ? a : a?.name))
             .filter(Boolean),
@@ -150,21 +166,26 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
     tone = "default",
   }: {
     label: string;
-    items: string[];
+    items: (string | DatedItem)[];
     tone?: "default" | "danger";
   }) => (
     <div className="min-w-0">
       <p className="text-xs font-bold text-foreground mb-1">{label}</p>
       {items.length ? (
         <ul className="space-y-0.5">
-          {items.slice(0, 6).map((item, i) => (
-            <li
-              key={i}
-              className={`text-xs leading-relaxed ${tone === "danger" ? "text-destructive font-medium" : "text-foreground"}`}
-            >
-              {item}
-            </li>
-          ))}
+          {items.slice(0, 6).map((item, i) => {
+            const text = typeof item === "string" ? item : item.text;
+            const year = typeof item === "string" ? undefined : extractYear(item.date);
+            return (
+              <li
+                key={i}
+                className={`text-xs leading-relaxed ${tone === "danger" ? "text-destructive font-medium" : "text-foreground"}`}
+              >
+                {text}
+                {year && <span className="text-muted-foreground"> ({year})</span>}
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <span className="text-xs text-muted-foreground">None recorded</span>
@@ -202,7 +223,7 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
             {data.headline && (
               <p className="text-xs leading-relaxed text-foreground">{data.headline}</p>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Column label="Conditions" items={data.conditions} />
               <Column label="Current meds" items={data.medications} />
               <Column label="Allergies" items={data.allergies} tone="danger" />

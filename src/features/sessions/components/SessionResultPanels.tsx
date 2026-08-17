@@ -1,5 +1,7 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AlertCircle, Brain, CheckCircle, Sparkles, Volume2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
 import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
 
@@ -12,6 +14,8 @@ interface SessionResultPanelsProps {
   /** Playable (signed) audio URL for the recording. */
   audioUrl?: string | null;
   actionPoints?: string[];
+  /** Session id — used to look up whether each action point's linked to-do is done. */
+  sessionId?: string | null;
   /** AI Clinician decision-support write-up. */
   clinicianNotes?: string | null;
   /** Buttons rendered inside the AI Clinician header (translate / narrate). */
@@ -84,6 +88,7 @@ export function SessionResultPanels({
   audioUrl,
   audioActions,
   actionPoints = [],
+  sessionId,
   clinicianNotes,
   clinicianActions,
   summaryActions,
@@ -101,6 +106,29 @@ export function SessionResultPanels({
   const notesExpired = sessionDate
     ? Date.now() - new Date(sessionDate).getTime() > SEVEN_DAYS_MS
     : false;
+
+  // Best-effort "Done" status per action point: todos created from a session's
+  // action points don't reliably preserve the exact wording (an AI rewrite
+  // step may reword the title), so match by exact text first and fall back to
+  // matching by list position among that session's todos.
+  const [sessionTodos, setSessionTodos] = useState<{ title: string; status: string }[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    if (!sessionId) { setSessionTodos([]); return; }
+    supabase
+      .from("todos")
+      .select("title, status")
+      .eq("session_id", sessionId)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => { if (!cancelled) setSessionTodos(data || []); });
+    return () => { cancelled = true; };
+  }, [sessionId]);
+
+  const isPointDone = (point: string, index: number) => {
+    const exact = sessionTodos.find((t) => t.title === point);
+    if (exact) return exact.status === "completed";
+    return sessionTodos[index]?.status === "completed";
+  };
 
   return (
     <div className="space-y-6">
@@ -137,7 +165,10 @@ export function SessionResultPanels({
                 {actionPoints.map((point, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm">
                     <CheckCircle className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                    <span className="text-foreground">{point}</span>
+                    <span className="text-foreground flex-1">{point}</span>
+                    {isPointDone(point, index) && (
+                      <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0 shrink-0">Done</Badge>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -28,7 +28,7 @@ serve(async (req) => {
     if (authError || !user) throw new Error("Unauthorized");
 
     const body = await req.json();
-    const { text } = body;
+    const { text, session_id: sessionId } = body;
     if (!text || typeof text !== "string" || text.trim().length === 0) {
       throw new Error("Text input is required");
     }
@@ -240,6 +240,7 @@ Rules:
             is_auto_executed: false,
             patient_id: patientId,
             assignee: manualOwner,
+            session_id: sessionId || null,
           });
 
           // Notify the patient if the task is assigned to one
@@ -432,6 +433,7 @@ Rules:
             is_auto_executed: true,
             patient_id: patientId,
             assignee: autoOwner,
+            session_id: sessionId || null,
           });
         }
 
@@ -448,6 +450,7 @@ Rules:
             status: "pending",
             is_auto_executed: false,
             assignee: fallbackOwner,
+            session_id: sessionId || null,
           });
         }
 

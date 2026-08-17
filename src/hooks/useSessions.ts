@@ -327,7 +327,7 @@ const completeSession = async (
         
         try {
           const { data: processResult, error: processError } = await supabase.functions.invoke('process-todo-actions', {
-            body: { text: actionPointsText, ...dateCtx },
+            body: { text: actionPointsText, session_id: sessionId, ...dateCtx },
           });
           
           if (processError) {
