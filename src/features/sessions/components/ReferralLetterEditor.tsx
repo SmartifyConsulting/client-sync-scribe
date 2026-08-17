@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { buildGreeting } from "@/lib/greeting";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useTemplateWithHeaderFooter } from "@/hooks/useTemplateWithHeaderFooter";
@@ -181,6 +182,7 @@ export function ReferralLetterEditor({
       .replace(/\[PracticeAddress\]/g, practiceAddress)
       .replace(/\[DOCTOR_NUMBER\]/g, doctorNumber)
       .replace(/\[DoctorNumber\]/g, doctorNumber)
+      .replace(/\[GREETING\]/g, buildGreeting({ fullName: referredTo, isPractitioner: true }))
       .replace("[REFERRED_TO]", referredTo)
       .replace("[REFERRAL_CONTENT]", generateReferralContent());
   };
