@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImportNursesDialog } from "./ImportNursesDialog";
 import { Plus, UserPlus, Gift, Star } from "lucide-react";
 import { toast } from "sonner";
@@ -21,24 +22,32 @@ type Nurse = {
   mobile_number: string | null;
   nurse_registration_number: string | null;
   linked_user_id: string | null;
+  ward_id: string | null;
 };
+
+type Ward = { id: string; name: string; ward_type: string | null };
+
+const NO_WARD = "__none__";
 
 export default function NursesScreen() {
   const { providerId } = useProviderAccess();
   const [nurses, setNurses] = useState<Nurse[]>([]);
   const [pendingTotals, setPendingTotals] = useState<Record<string, number>>({});
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [wards, setWards] = useState<Ward[]>([]);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     if (!providerId) return;
     setLoading(true);
-    const [nursesRes, vulasRes, ratingsRes] = await Promise.all([
+    const [nursesRes, vulasRes, ratingsRes, wardsRes] = await Promise.all([
       supabase.from("hospital_nurses" as any).select("*").eq("hospital_id", providerId).order("full_name"),
       supabase.from("nurse_pending_vulas" as any).select("hospital_nurse_id, vulas_count, claimed_at"),
       supabase.from("nurse_record_ratings" as any).select("nurse_id, rating"),
+      supabase.from("hospital_wards" as any).select("id, name, ward_type").eq("hospital_id", providerId).order("name"),
     ]);
     setNurses(((nursesRes.data as any) ?? []) as Nurse[]);
+    setWards(((wardsRes.data as any) ?? []) as Ward[]);
 
     const totals: Record<string, number> = {};
     ((vulasRes.data as any) ?? []).forEach((v: any) => {
@@ -72,7 +81,7 @@ export default function NursesScreen() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {providerId && <AddNurseDialog hospitalId={providerId} onAdded={load} />}
+          {providerId && <AddNurseDialog hospitalId={providerId} wards={wards} onAdded={load} />}
           {providerId && <ImportNursesDialog hospitalId={providerId} onImported={load} />}
         </div>
       </header>
@@ -98,6 +107,30 @@ export default function NursesScreen() {
                 {n.nurse_registration_number && ` · #${n.nurse_registration_number}`}
               </p>
             </div>
+            <div className="shrink-0 w-48">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Assigned ward</p>
+              <Select
+                value={n.ward_id ?? NO_WARD}
+                onValueChange={async (value) => {
+                  const ward_id = value === NO_WARD ? null : value;
+                  const { error } = await supabase
+                    .from("hospital_nurses" as any)
+                    .update({ ward_id })
+                    .eq("id", n.id);
+                  if (error) { toastError(error, "We couldn't update the ward."); return; }
+                  toast.success("Ward assignment saved");
+                  load();
+                }}
+              >
+                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Not assigned" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NO_WARD}>Not assigned</SelectItem>
+                  {wards.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="text-right shrink-0">
               <p className="text-xs uppercase tracking-wider text-muted-foreground">Pending Vulas</p>
               <p className="text-sm font-bold inline-flex items-center gap-1">
@@ -116,13 +149,14 @@ export default function NursesScreen() {
   );
 }
 
-function AddNurseDialog({ hospitalId, onAdded }: { hospitalId: string; onAdded: () => void }) {
+function AddNurseDialog({ hospitalId, wards, onAdded }: { hospitalId: string; wards: Ward[]; onAdded: () => void }) {
   const [open, setOpen] = useState(false);
   const [full_name, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [role_title, setRoleTitle] = useState("");
   const [mobile_number, setMobile] = useState("");
   const [nurse_registration_number, setRegNo] = useState("");
+  const [wardId, setWardId] = useState<string>(NO_WARD);
   const [busy, setBusy] = useState(false);
 
   const save = async () => {
@@ -138,6 +172,7 @@ function AddNurseDialog({ hospitalId, onAdded }: { hospitalId: string; onAdded: 
       role_title: role_title.trim() || null,
       mobile_number: mobile_number.trim() || null,
       nurse_registration_number: nurse_registration_number.trim() || null,
+      ward_id: wardId === NO_WARD ? null : wardId,
       status: "inactive",
     });
     setBusy(false);
@@ -146,7 +181,7 @@ function AddNurseDialog({ hospitalId, onAdded }: { hospitalId: string; onAdded: 
       return;
     }
     toast.success("Nurse added");
-    setFullName(""); setEmail(""); setRoleTitle(""); setMobile(""); setRegNo("");
+    setFullName(""); setEmail(""); setRoleTitle(""); setMobile(""); setRegNo(""); setWardId(NO_WARD);
     setOpen(false);
     onAdded();
   };
@@ -167,6 +202,21 @@ function AddNurseDialog({ hospitalId, onAdded }: { hospitalId: string; onAdded: 
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-sm">Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
             <div><Label className="text-sm">Mobile</Label><Input value={mobile_number} onChange={(e) => setMobile(e.target.value)} /></div>
+          </div>
+          <div>
+            <Label className="text-sm">Assigned ward</Label>
+            <Select value={wardId} onValueChange={setWardId}>
+              <SelectTrigger><SelectValue placeholder="Not assigned" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_WARD}>Not assigned</SelectItem>
+                {wards.map((w) => (
+                  <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Nurses only see patients in the ward they are assigned to.
+            </p>
           </div>
         </div>
         <DialogFooter>
