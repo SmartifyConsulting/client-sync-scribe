@@ -116,7 +116,7 @@ export default function AskMaeveHome() {
         meaning, is yours.
       </p>
       <p className="mt-3 rounded-lg bg-muted/60 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        Holarc is a facilitation tool, not a clinician. She gives no advice, opinions or diagnoses. These
+        Holarc is a facilitation tool, not a clinician. It gives no advice, opinions or diagnoses. These
         conversations are private to you — your clinicians cannot see them.
       </p>
 

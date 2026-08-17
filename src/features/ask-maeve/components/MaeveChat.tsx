@@ -401,7 +401,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
 
       {/* Disclaimer */}
       <p className="mt-2 rounded-lg bg-muted/60 px-3 py-2 text-[11px] leading-relaxed text-muted-foreground">
-        Holarc is a facilitation tool, not a clinician. She asks questions and reflects your own words — she does not
+        Holarc is a facilitation tool, not a clinician. It asks questions and reflects your own words — it does not
         give advice, opinions or diagnoses. Anything clinical belongs with your healthcare professional. This
         conversation is private to you.
       </p>
@@ -431,7 +431,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
           messages.map((m) => {
             const isMaeve = m.role === "assistant";
             const full = isMaeve && looksLikeAdvice(m.content) ? CLIENT_FALLBACK : m.content;
-            // While Holarc is speaking, her words type themselves onto the
+            // While Holarc is speaking, its words type themselves onto the
             // screen in time with the audio.
             const isBeingSpoken = isMaeve && voice.speaking && voice.speakingText === full;
             const body = isBeingSpoken
@@ -680,7 +680,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
                 : voice.recording
                   ? "I'm listening — tap send when you're done, or pause to step away"
                   : voice.speaking
-                    ? "Holarc is speaking — the microphone opens as soon as she finishes."
+                    ? "Holarc is speaking — the microphone opens as soon as it finishes."
                     : "Tap to speak. Stop ends the exploration, saves the PDF and releases the microphone."}
           </p>
 
