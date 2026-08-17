@@ -51,10 +51,10 @@ Each contact gets a checkbox group, "What <name> can see", replacing the current
 10. My documents
 11. My calendar
 12. My tasks
-12. My Biolog
-13. My Round Table
+13. My Biolog
+14. My Round Table
 
-Notes: checking "Hospital admissions (with medical information)" implies the "without" level; nothing is checked by default except SOS/live tracking so sharing stays opt-in.
+Notes: checking "Hospital admissions (with medical information)" implies the "without" level; nothing is checked by default except SOS alerts and SOS live tracking so sharing stays opt-in.
 
 ## 5. Patient dashboard
 
