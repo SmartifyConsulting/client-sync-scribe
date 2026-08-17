@@ -797,7 +797,17 @@ export function PatientDetailsEditor({
         toast({ title: "Cannot save without a patient record", variant: "destructive" });
         return;
       }
+      // Employer becomes compulsory once medical insurance has been captured.
+      if ((data.medical_aid?.trim() || data.medical_aid_number?.trim()) && !data.employer?.trim()) {
+        toast({
+          title: "Employer required",
+          description: "Employer details are required when medical insurance is captured.",
+          variant: "destructive",
+        });
+        return;
+      }
       const fullName = `${data.first_name.trim()} ${data.last_name.trim()}`.trim();
+
       const isChronic = currentMedications.some((m) => m.is_chronic);
       setSaving(true);
       await onSave({
