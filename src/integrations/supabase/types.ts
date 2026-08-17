@@ -8281,6 +8281,13 @@ export type Database = {
         Args: { _patient_id: string }
         Returns: string
       }
+      get_seeded_profile_names: {
+        Args: { _emails: string[] }
+        Returns: {
+          email: string
+          full_name: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
