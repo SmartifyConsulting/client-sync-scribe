@@ -3,7 +3,7 @@ import { AlertCircle, Brain, CheckCircle, Sparkles, Volume2 } from "lucide-react
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { SessionTranscriptAccordion } from "./SessionTranscriptAccordion";
-import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
+import { ClinicianNotesColumns } from "./ClinicianNotesAccordion";
 
 
 interface SessionResultPanelsProps {
@@ -16,6 +16,8 @@ interface SessionResultPanelsProps {
   actionPoints?: string[];
   /** Session id — used to look up whether each action point's linked to-do is done. */
   sessionId?: string | null;
+  /** Shown as the assignee for action points whose linked to-do is assigned to the patient. */
+  patientName?: string | null;
   /** AI Clinician decision-support write-up. */
   clinicianNotes?: string | null;
   /** Buttons rendered inside the AI Clinician header (translate / narrate). */
@@ -57,19 +59,19 @@ export function AISummaryCard({
       </div>
       {audioUrl && (
         <div className="mt-2 pt-2 border-t border-border">
-          <audio controls className="w-full h-8" src={audioUrl}>
-            Your browser does not support audio playback.
-          </audio>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2">
+            <audio controls className="w-full h-8" src={audioUrl}>
+              Your browser does not support audio playback.
+            </audio>
             {audioActions}
-            {showRetentionNotice && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <Volume2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                Voice recordings and transcriptions are automatically deleted after 7 days. AI
-                summaries remain permanently.
-              </p>
-            )}
           </div>
+          {showRetentionNotice && (
+            <p className="mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+              <Volume2 className="h-3.5 w-3.5 text-primary shrink-0" />
+              Voice recordings and transcriptions are automatically deleted after 7 days. AI
+              summaries remain permanently.
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -89,6 +91,7 @@ export function SessionResultPanels({
   audioActions,
   actionPoints = [],
   sessionId,
+  patientName,
   clinicianNotes,
   clinicianActions,
   summaryActions,
@@ -107,27 +110,31 @@ export function SessionResultPanels({
     ? Date.now() - new Date(sessionDate).getTime() > SEVEN_DAYS_MS
     : false;
 
-  // Best-effort "Done" status per action point: todos created from a session's
-  // action points don't reliably preserve the exact wording (an AI rewrite
-  // step may reword the title), so match by exact text first and fall back to
-  // matching by list position among that session's todos.
-  const [sessionTodos, setSessionTodos] = useState<{ title: string; status: string }[]>([]);
+  // Done status per action point: only an exact title match to a linked
+  // to-do counts, since an AI rewrite step can reword titles and a
+  // position-based guess could show "Done" for the wrong task. The to-do's
+  // own RLS only lets its assignee mark it completed, so an exact match's
+  // "completed" status already reflects it being done by the assignee.
+  const [sessionTodos, setSessionTodos] = useState<{ title: string; status: string; assignee: string }[]>([]);
   useEffect(() => {
     let cancelled = false;
     if (!sessionId) { setSessionTodos([]); return; }
     supabase
       .from("todos")
-      .select("title, status")
+      .select("title, status, assignee")
       .eq("session_id", sessionId)
       .order("created_at", { ascending: true })
-      .then(({ data }) => { if (!cancelled) setSessionTodos(data || []); });
+      .then(({ data }) => { if (!cancelled) setSessionTodos((data || []) as any); });
     return () => { cancelled = true; };
   }, [sessionId]);
 
-  const isPointDone = (point: string, index: number) => {
-    const exact = sessionTodos.find((t) => t.title === point);
-    if (exact) return exact.status === "completed";
-    return sessionTodos[index]?.status === "completed";
+  const matchedTodo = (point: string) => sessionTodos.find((t) => t.title === point);
+  const isPointDone = (point: string) => matchedTodo(point)?.status === "completed";
+  const assigneeLabel = (point: string) => {
+    const todo = matchedTodo(point);
+    if (!todo) return null;
+    if (todo.assignee === "patient") return patientName || "Patient";
+    return doctorName || "Doctor";
   };
 
   return (
@@ -162,15 +169,21 @@ export function SessionResultPanels({
           <div className="max-h-[150px] overflow-y-auto">
             {actionPoints.length > 0 ? (
               <ul className="space-y-1.5">
-                {actionPoints.map((point, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                    <span className="text-foreground flex-1">{point}</span>
-                    {isPointDone(point, index) && (
-                      <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0 shrink-0">Done</Badge>
-                    )}
-                  </li>
-                ))}
+                {actionPoints.map((point, index) => {
+                  const assignee = assigneeLabel(point);
+                  return (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                      <span className="text-foreground flex-1">
+                        {point}
+                        {assignee && <span className="ml-1.5 text-xs text-muted-foreground">— {assignee}</span>}
+                      </span>
+                      {isPointDone(point) && (
+                        <Badge className="bg-success text-success-foreground text-[10px] px-1.5 py-0 shrink-0">Done</Badge>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-sm text-muted-foreground">No action points generated.</p>
@@ -207,7 +220,7 @@ export function SessionResultPanels({
               session.
             </p>
           ) : (
-            <ClinicianNotesAccordion notes={clinicianNotes} />
+            <ClinicianNotesColumns notes={clinicianNotes} />
           )}
         </div>
 

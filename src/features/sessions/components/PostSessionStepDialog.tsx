@@ -13,7 +13,7 @@ import {
 import type { GeneratedDoc } from "./GeneratedDocumentsDialog";
 import { FollowUpAppointmentDialog } from "./FollowUpAppointmentDialog";
 import { VisitCategoryDialog } from "./VisitCategoryDialog";
-import { ClinicianNotesAccordion } from "./ClinicianNotesAccordion";
+import { ClinicianNotesColumns } from "./ClinicianNotesAccordion";
 import { DocumentPreview } from "./DocumentPreview";
 import { useProfile } from "@/hooks/useProfile";
 import { useHeaderFooterTemplates } from "@/hooks/useHeaderFooterTemplates";
@@ -265,7 +265,7 @@ function DocStepDialog({
       )}
 
       <Dialog open={showNotes} onOpenChange={setShowNotes}>
-        <DialogContent className="sm:max-w-[640px]">
+        <DialogContent className="sm:max-w-[1152px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Brain className="h-5 w-5 text-primary" />
@@ -275,8 +275,8 @@ function DocStepDialog({
               Review before finalising the prescription. Decision support only.
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto">
-            <ClinicianNotesAccordion notes={clinicianNotes} />
+          <div className="max-h-[75vh] overflow-y-auto">
+            <ClinicianNotesColumns notes={clinicianNotes} />
           </div>
         </DialogContent>
       </Dialog>

@@ -63,7 +63,7 @@ import { DocumentPreviewWithLetterhead } from "@/features/documents/components/D
 import { SessionResultPanels, AISummaryCard } from "@/features/sessions/components/SessionResultPanels";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
-import { ClinicianNotesAccordion } from "@/features/sessions/components/ClinicianNotesAccordion";
+import { ClinicianNotesColumns } from "@/features/sessions/components/ClinicianNotesAccordion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -295,33 +295,16 @@ export default function SessionDetail() {
   }
 
   const audioActionsMenu = (
-    <Select
-      onValueChange={(value) => {
-        if (value === "audio") handleDownloadAudio();
-        else if (value === "transcript" && session.transcript) {
-          const blob = new Blob([session.transcript], { type: "text/plain" });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = `transcript-${format(new Date(session.started_at), "yyyy-MM-dd")}.txt`;
-          link.click();
-          URL.revokeObjectURL(url);
-        }
-      }}
+    <Button
+      size="icon"
+      variant="ghost"
+      className="h-8 w-8 shrink-0"
+      title="Download audio"
+      disabled={!session.audio_url}
+      onClick={handleDownloadAudio}
     >
-      <SelectTrigger className="w-[160px] h-8 text-sm">
-        <Download className="h-3.5 w-3.5 mr-1.5" />
-        <SelectValue placeholder="Download..." />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
-          Download audio
-        </SelectItem>
-        <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
-          Download transcript
-        </SelectItem>
-      </SelectContent>
-    </Select>
+      <Download className="h-4 w-4" />
+    </Button>
   );
 
   const summaryActionsMenu = (
@@ -473,42 +456,26 @@ export default function SessionDetail() {
         </div>
       )}
 
-      {/* Same frame arrangement as the live recording screen:
-          recorder frame top-left, AI Clinician Notes beneath it,
-          Patient Overview as the wide band alongside. */}
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-4 items-start">
+      {/* Patient Overview — full width */}
+      <SessionPatientOverview
+        patient={session.patient}
+        currentMedications={currentMedications}
+        discSlot={<SessionDiscStrip patientId={session.patient?.id} inline />}
+      />
 
-        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden lg:col-start-1 lg:row-start-1">
-          <div className="flex items-center gap-3 border-b p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
-              <User className="h-5 w-5 text-accent-foreground" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-foreground">{session.patient?.name || "Recorded Session"}</p>
-              <p className="text-xs text-muted-foreground">{session.duration_minutes || 0} minutes</p>
-            </div>
-          </div>
-          <div className="p-4">
-            <p className="mb-3 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
-            <AISummaryCard
-              summary={translatedSummary || session.summary}
-              audioUrl={signedAudioUrl}
-              audioActions={audioActionsMenu}
-              summaryActions={summaryActionsMenu}
-              showRetentionNotice={!!(session.audio_url || session.transcript)}
-            />
-          </div>
-        </div>
-        <div className="min-w-0 lg:col-start-2 lg:row-start-1">
-          <SessionPatientOverview
-            patient={session.patient}
-            currentMedications={currentMedications}
-            discSlot={<SessionDiscStrip patientId={session.patient?.id} inline />}
-          />
-        </div>
+      {/* AI Summary — directly underneath Patient Overview, no outer frame */}
+      <div>
+        <p className="mb-2 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
+        <AISummaryCard
+          summary={translatedSummary || session.summary}
+          audioUrl={signedAudioUrl}
+          audioActions={audioActionsMenu}
+          summaryActions={summaryActionsMenu}
+          showRetentionNotice={!!session.audio_url}
+        />
       </div>
 
-      {/* AI Clinician Notes — full-width band, same placement as the live "Live AI Clinician" frame */}
+      {/* AI Clinician Notes — full-width band, in columns */}
       <div className="rounded-xl border border-primary bg-primary/5 p-4">
         <div className="flex items-center gap-1.5">
           <Sparkles className="h-4 w-4 text-primary" />
@@ -518,16 +485,15 @@ export default function SessionDetail() {
           <span className="font-semibold text-foreground">Private — Only visible to you. Not shared with the patient or other doctors.</span>{" "}
           AI-generated clinical notes are decision support only and must be reviewed by the treating clinician.
         </p>
-        <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
+        <ClinicianNotesColumns notes={session.ai_diagnosis || session.notes} />
       </div>
 
 
-      {/* Session results — same layout as the screen shown right after a recording ends.
-          AI Summary now lives in the top-left card above; this slot instead shows
-          Private Notes alongside Action Points. */}
+      {/* Session results — Session transcript removed; the transcription is
+          available for download from Session Documents below instead. */}
       <SessionResultPanels
-        transcript={session.transcript}
         doctorName={doctorName}
+        patientName={session.patient?.name}
         sessionId={session.id}
         hideSummary
         leftSlot={

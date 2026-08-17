@@ -50,7 +50,7 @@ export async function saveSessionTranscriptDocument({
   const text = (transcript || "").trim();
   if (!text) return null;
 
-  const dateLabel = new Date(sessionDate || Date.now()).toLocaleDateString();
+  const dateLabel = new Date(sessionDate || Date.now()).toISOString().split("T")[0];
   const name = `Session Transcript — ${sessionTitle?.trim() || dateLabel}`;
 
   try {

@@ -578,7 +578,7 @@ export default function Sessions() {
           patient_id: patientId,
           patient_name: currentPatient?.name || null,
           session_id: sessionIdForDoc,
-          name: `Invoice ${invoiceNumber}`,
+          name: `Invoice ${invoiceNumber} - ${currentPatient?.name || ''} - ${new Date().toISOString().split('T')[0]}`,
           content,
           template_name: 'Invoice',
         }).select('id').single();
@@ -1712,6 +1712,8 @@ export default function Sessions() {
             audioUrl={audioUrl}
             actionPoints={actionPoints}
             sessionId={currentSessionId}
+            doctorName={doctorName}
+            patientName={currentPatient?.name}
             clinicianNotes={showTranslated && translatedDiagnosis ? translatedDiagnosis : aiDiagnosis}
             clinicianActions={
               <div className="flex items-center gap-2">
