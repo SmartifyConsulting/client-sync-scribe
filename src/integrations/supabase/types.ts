@@ -7317,6 +7317,7 @@ export type Database = {
           audio_url: string | null
           created_at: string
           duration_minutes: number | null
+          elapsed_seconds: number | null
           ended_at: string | null
           external_doctor_name: string | null
           external_doctor_practice: string | null
@@ -7324,6 +7325,7 @@ export type Database = {
           id: string
           notes: string | null
           patient_id: string
+          paused_at: string | null
           private_notes: string | null
           started_at: string
           status: string
@@ -7340,6 +7342,7 @@ export type Database = {
           audio_url?: string | null
           created_at?: string
           duration_minutes?: number | null
+          elapsed_seconds?: number | null
           ended_at?: string | null
           external_doctor_name?: string | null
           external_doctor_practice?: string | null
@@ -7347,6 +7350,7 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id: string
+          paused_at?: string | null
           private_notes?: string | null
           started_at?: string
           status?: string
@@ -7363,6 +7367,7 @@ export type Database = {
           audio_url?: string | null
           created_at?: string
           duration_minutes?: number | null
+          elapsed_seconds?: number | null
           ended_at?: string | null
           external_doctor_name?: string | null
           external_doctor_practice?: string | null
@@ -7370,6 +7375,7 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id?: string
+          paused_at?: string | null
           private_notes?: string | null
           started_at?: string
           status?: string

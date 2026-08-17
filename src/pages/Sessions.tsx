@@ -50,6 +50,12 @@ import { SessionPatientOverview } from "@/features/sessions/components/SessionPa
 import { SessionDiscStrip } from "@/features/sessions/components/SessionDiscStrip";
 import { SessionProcessingDialog } from "@/features/sessions/components/SessionProcessingDialog";
 import { SessionTranscriptAccordion } from "@/features/sessions/components/SessionTranscriptAccordion";
+import {
+  savePausedSession,
+  fetchPausedSession,
+  deletePausedSession,
+  type PausedSessionSnapshot,
+} from "@/features/sessions/utils/pausedSession";
 
 import { SessionDiagnosticsModal } from "@/components/sessions/SessionDiagnosticsModal";
 
@@ -221,6 +227,13 @@ export default function Sessions() {
   const personalNotesSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const personalNotesHasLoaded = useRef(false);
   const sessionStartTimeRef = useRef<Date | null>(null);
+
+  // Resumable sessions: a paused consultation is persisted as a `paused` session
+  // row so it survives reloads and can be resumed later.
+  const [pausedDraft, setPausedDraft] = useState<PausedSessionSnapshot | null>(null);
+  const [isSavingPause, setIsSavingPause] = useState(false);
+  const resumedTranscriptRef = useRef<string>("");
+  const pausedSessionIdRef = useRef<string | null>(null);
 
   // AI-extracted document state
   const [extractedMedCert, setExtractedMedCert] = useState<MedCertData | null>(null);
@@ -704,12 +717,16 @@ export default function Sessions() {
     setSessionState("processing");
     
     const currentNotes = notesRef.current;
+    // A resumed consultation carries the transcript captured before the pause.
+    const fullTranscript = [resumedTranscriptRef.current, transcriptText || ""]
+      .filter((part) => part && part.trim())
+      .join("\n\n");
 
     let hasDocs = false;
     try {
       const result = await completeSession(
         null,
-        transcriptText || '',
+        fullTranscript,
         currentNotes,
         visitCategories?.[0] || undefined,
         {
@@ -724,6 +741,12 @@ export default function Sessions() {
       if (result) {
         setCurrentSessionId(result.id);
         currentSessionIdRef.current = result.id;
+        // The paused draft has now been folded into the finished session.
+        if (pausedSessionIdRef.current) {
+          await deletePausedSession(pausedSessionIdRef.current);
+          pausedSessionIdRef.current = null;
+          resumedTranscriptRef.current = "";
+        }
         if (patientId) {
           try { localStorage.removeItem(`session-personal-notes-draft:${patientId}`); } catch { /* best effort */ }
         }
@@ -993,38 +1016,42 @@ export default function Sessions() {
     startSession();
   }, [searchParams, patientId, currentPatient]);
 
-  const startSession = async () => {
+  const startSession = async (resume?: PausedSessionSnapshot) => {
     // Guard against double-invocation (e.g. a stray duplicate click/effect)
     // firing the About/AI-Consult prompts twice.
     if (sessionState === "active" || showAboutRecordingDialog || showAiConsultPrompt) return;
     setSessionState("active");
-    setNotes("");
+    setNotes(resume?.notes || "");
     setSummary("");
     setActionPoints([]);
-    setSessionDuration(0);
+    setSessionDuration(resume?.elapsedSeconds ?? 0);
     setPrescription(null);
     setInvoice(null);
     setAiDiagnosis(null);
-    setCurrentSessionId(crypto.randomUUID());
+    setCurrentSessionId(resume?.id || crypto.randomUUID());
+    // Everything captured before the pause is replayed into the finished session.
+    resumedTranscriptRef.current = resume?.transcript || "";
+    pausedSessionIdRef.current = resume?.id || null;
+    setPausedDraft(null);
     personalNotesHasLoaded.current = false;
     try {
       const draft = patientId ? localStorage.getItem(`session-personal-notes-draft:${patientId}`) : null;
-      setPersonalNotes(draft || "");
+      setPersonalNotes(resume?.privateNotes || draft || "");
     } catch {
-      setPersonalNotes("");
+      setPersonalNotes(resume?.privateNotes || "");
     }
     personalNotesHasLoaded.current = true;
     clearTranscript();
     hintImpressionRef.current = "";
     hintLinesRef.current.clear();
     hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
-    sessionStartTimeRef.current = new Date();
+    sessionStartTimeRef.current = resume?.startedAt ? new Date(resume.startedAt) : new Date();
     savedAudioUrlRef.current = null;
     completionRanRef.current = false;
 
     // Give immediate feedback — the mic permission / setup gap is otherwise silent.
     setIsPreparingSession(true);
-    setPreparingMessage("Setting up your session...");
+    setPreparingMessage(resume ? "Resuming your session..." : "Setting up your session...");
     setTimeout(() => setPreparingMessage("Requesting microphone access..."), 400);
     // Safety net — if mic access fails/is denied, don't leave the UI stuck "preparing".
     setTimeout(() => setIsPreparingSession(false), 8000);
@@ -1032,6 +1059,57 @@ export default function Sessions() {
     // Recording only actually starts once the doctor has acknowledged the
     // About the Session Recording notice and answered the AI Consult prompt.
     setShowAboutRecordingDialog(true);
+  };
+
+  // Look for a paused consultation for this patient whenever the page is idle.
+  useEffect(() => {
+    if (!patientId || sessionState !== "idle") {
+      if (sessionState !== "idle") setPausedDraft(null);
+      return;
+    }
+    let cancelled = false;
+    fetchPausedSession(patientId).then((draft) => {
+      if (!cancelled) setPausedDraft(draft);
+    });
+    return () => { cancelled = true; };
+  }, [patientId, sessionState]);
+
+  /** Pause → persist a resumable draft. Resume → carry on recording. */
+  const handlePauseToggle = async () => {
+    if (isPaused) {
+      resumeRecording();
+      return;
+    }
+    pauseRecording();
+    if (!patientId || !currentSessionId) return;
+    setIsSavingPause(true);
+    const liveText = latestTranscriptRef.current || liveTranscript || transcript || "";
+    const combined = [resumedTranscriptRef.current, liveText].filter(Boolean).join("\n\n");
+    const saved = await savePausedSession({
+      sessionId: currentSessionId,
+      patientId,
+      transcript: combined,
+      notes: notesRef.current || notes || "",
+      privateNotes: personalNotesRef.current || personalNotes || "",
+      elapsedSeconds: sessionDuration,
+      startedAt: sessionStartTimeRef.current?.toISOString() || new Date().toISOString(),
+    });
+    if (saved) pausedSessionIdRef.current = currentSessionId;
+    setIsSavingPause(false);
+    toast({
+      title: saved ? "Session paused and saved" : "Session paused",
+      description: saved
+        ? "You can safely leave this page and resume this consultation later."
+        : "The pause could not be saved to your records — keep this page open.",
+      variant: saved ? undefined : "destructive",
+    });
+  };
+
+  const discardPausedDraft = async () => {
+    if (!pausedDraft) return;
+    await deletePausedSession(pausedDraft.id);
+    setPausedDraft(null);
+    toast({ title: "Paused session discarded" });
   };
 
   const handleAboutRecordingAck = () => {
@@ -1343,8 +1421,31 @@ export default function Sessions() {
             </div>
           )}
           
+          {/* Resume a consultation that was paused earlier (persisted draft). */}
+          {pausedDraft && currentPatient && (
+            <div className="w-full max-w-md rounded-lg border-2 border-warning bg-warning/10 p-4 text-left space-y-2">
+              <p className="text-sm font-medium text-foreground flex items-center gap-2">
+                <Pause className="h-4 w-4" />
+                Paused session with {currentPatient.name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Paused {format(new Date(pausedDraft.pausedAt), "d MMM yyyy, HH:mm")} ·{" "}
+                {formatDuration(pausedDraft.elapsedSeconds)} recorded
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button size="sm" className="gap-2" onClick={() => startSession(pausedDraft)}>
+                  <Play className="h-4 w-4" />
+                  Resume session
+                </Button>
+                <Button size="sm" variant="ghost" onClick={discardPausedDraft}>
+                  Discard
+                </Button>
+              </div>
+            </div>
+          )}
+
           <Button 
-            onClick={startSession} 
+            onClick={() => startSession()} 
             size="lg" 
             className="gap-2"
             disabled={!currentPatient}
@@ -1352,6 +1453,7 @@ export default function Sessions() {
             <Play className="h-5 w-5" />
             Start New Session
           </Button>
+
 
           {/* Past Sessions — quick recap of this patient's previous consultations. */}
           {currentPatient && (
@@ -1436,7 +1538,8 @@ export default function Sessions() {
                 {/* Pause / Resume button — only while recording */}
                 {isRecording && !isTranscribing && (
                   <button
-                    onClick={() => (isPaused ? resumeRecording() : pauseRecording())}
+                    onClick={handlePauseToggle}
+                    disabled={isSavingPause}
                     aria-label={isPaused ? "Resume recording" : "Pause recording"}
                     className={cn(
                       "flex h-12 items-center justify-center gap-2 rounded-full px-4 transition-all duration-300 border-2 text-sm font-medium",
@@ -1459,7 +1562,11 @@ export default function Sessions() {
                   : isTranscribing
                     ? "Transcribing..."
                     : isRecording
-                      ? (isPaused ? "Paused — tap play to resume" : "Recording... Tap to stop")
+                      ? (isSavingPause
+                          ? "Saving paused session..."
+                          : isPaused
+                            ? "Paused and saved — tap play to resume, or come back later"
+                            : "Recording... Tap to stop")
                       : "Tap to record"}
               </p>
               <p className="text-xs text-muted-foreground/60 text-center mt-1 px-2 leading-snug">

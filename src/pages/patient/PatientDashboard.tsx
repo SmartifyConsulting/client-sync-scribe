@@ -230,6 +230,7 @@ export default function PatientDashboard() {
       const { data: sessions } = await supabase
         .from("sessions")
         .select("started_at, summary, transcript, status")
+        .neq("status", "paused")
         .order("started_at", { ascending: false })
         .limit(20);
 

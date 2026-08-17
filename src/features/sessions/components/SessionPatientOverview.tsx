@@ -111,6 +111,7 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
           .select("started_at, summary, transcript, status")
           .eq("patient_id", patient.id)
           .gte("started_at", sixMonthsAgo.toISOString())
+          .neq("status", "paused")
           .order("started_at", { ascending: false })
           .limit(20);
 
