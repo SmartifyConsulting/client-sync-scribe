@@ -24,6 +24,19 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
+import { ChevronDown, MessageSquare } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
+
 
 // V2 preview — visible to everyone as a greyed-out preview, but only
 // interactive for this account so it can be demoed before wider rollout.
