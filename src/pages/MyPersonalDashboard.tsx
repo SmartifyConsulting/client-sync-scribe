@@ -1,6 +1,28 @@
 import { Link } from "react-router-dom";
-import { FolderOpen, FlaskConical, ListChecks, Users2, BedDouble, Lock, type LucideIcon } from "lucide-react";
+import {
+  FolderOpen,
+  FlaskConical,
+  ListChecks,
+  Users2,
+  BedDouble,
+  Lock,
+  Heart,
+  Pill,
+  Sparkles,
+  TrendingUp,
+  Smile,
+  Moon,
+  Zap,
+  Activity,
+  CalendarDays,
+  ChevronRight,
+  Lightbulb,
+  Plus,
+  Leaf,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { cn } from "@/lib/utils";
 
 // V2 preview — visible to everyone as a greyed-out preview, but only
@@ -22,58 +44,331 @@ const TILES: DashboardTile[] = [
   { icon: BedDouble, label: "My Admissions", description: "Hospital admissions", to: "/admissions" },
 ];
 
+const SUMMARY_LINES = [
+  "You slept 7h 42m last night.",
+  "Your activity is above your weekly average.",
+  "You have one medication due this morning.",
+  "You have a doctor's appointment tomorrow at 10:30.",
+];
+
+const VITALS = [
+  { icon: Smile, label: "Mood", value: "Good" },
+  { icon: Moon, label: "Sleep", value: "7h 42m" },
+  { icon: Zap, label: "Energy", value: "High" },
+  { icon: Activity, label: "Activity", value: "+12%" },
+];
+
+const CARE_ITEMS = [
+  { icon: Pill, label: "Medication", value: "1 due today" },
+  { icon: CalendarDays, label: "Appointments", value: "Tomorrow 10:30" },
+  { icon: FlaskConical, label: "Results", value: "1 new" },
+];
+
+const PEOPLE = [
+  { name: "Mum", relation: "Mother", status: "Doing well", lines: ["Medication taken", "Last check-in: 08:42", "No current concerns"] },
+  { name: "Dad", relation: "Father", status: "Doing well", lines: ["Medication taken", "Last activity: 07:51", "No current concerns"] },
+  { name: "Emma", relation: "Daughter, 15", status: "Doing well", lines: ["Sleep: 8h 12m", "Mood: Good", "No current concerns"] },
+];
+
+const CARE_CIRCLE = [
+  { name: "Dr Sarah", role: "GP" },
+  { name: "Dr James", role: "Cardiologist" },
+  { name: "Angel", role: "AI Wellbeing Companion" },
+  { name: "Susan", role: "Physiotherapist" },
+  { name: "Mum", role: "Family" },
+];
+
+const HAPPENING = [
+  { icon: CalendarDays, title: "Tomorrow 10:30", detail: "GP appointment" },
+  { icon: FlaskConical, title: "Blood results", detail: "Expected Friday" },
+  { icon: Activity, title: "Physio session", detail: "Monday 3:00 PM" },
+];
+
+const INSIGHTS = [
+  "Your sleep has been more consistent this week.",
+  "Your glucose levels are more stable on days you log meals.",
+  "Mum's medication was taken this morning.",
+];
+
+function Panel({
+  title,
+  icon: Icon,
+  unlocked,
+  action,
+  children,
+  className,
+}: {
+  title?: string;
+  icon?: LucideIcon;
+  unlocked: boolean;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={cn(
+        "rounded-xl border p-4 h-full",
+        unlocked ? "border-primary bg-card" : "border-border bg-muted/30 opacity-60",
+        className,
+      )}
+    >
+      {title && (
+        <header className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            {Icon && (
+              <span
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-lg",
+                  unlocked ? "bg-primary/10" : "bg-muted",
+                )}
+              >
+                <Icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
+              </span>
+            )}
+            <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+          </div>
+          {action ?? (unlocked ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <Lock className="h-3.5 w-3.5 text-muted-foreground" />)}
+        </header>
+      )}
+      {children}
+    </section>
+  );
+}
+
 export default function MyPersonalDashboard() {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const unlocked = user?.email === V2_DEMO_EMAIL;
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = profile?.full_name?.split(" ")[0] ?? "";
+
   return (
-    <div className="container mx-auto p-4 max-w-5xl">
-      <div className="mb-6 space-y-1">
-        <h1 className="text-3xl font-bold text-foreground">My Dashboard</h1>
+    <div className="container mx-auto p-4 max-w-7xl space-y-4">
+      {/* Greeting */}
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold text-foreground">
+          {greeting}{firstName ? `, ${firstName}` : ""}
+        </h1>
         <p className="text-muted-foreground text-xs">
-          A consolidated view of your documents, tasks, and care activity.
+          Here's what matters today.
           {!unlocked && " These sections are in preview and not yet available."}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {TILES.map((tile) => {
-          const Icon = tile.icon;
-          const card = (
-            <div
-              className={cn(
-                "rounded-xl border p-5 transition-colors h-full",
-                unlocked
-                  ? "border-primary bg-card hover:bg-primary/5 cursor-pointer"
-                  : "border-border bg-muted/30 opacity-60 cursor-not-allowed",
-              )}
-            >
-              <div className="flex items-start justify-between">
-                <div className={cn("flex h-10 w-10 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-                  <Icon className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
-                </div>
-                {!unlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-              </div>
-              <p className="mt-3 text-sm font-semibold text-foreground">{tile.label}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{tile.description}</p>
-              {!unlocked && (
-                <span className="mt-3 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Coming soon
-                </span>
-              )}
-            </div>
-          );
+      {/* Daily summary strip */}
+      <Panel unlocked={unlocked}>
+        <div className="flex items-start gap-3">
+          <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
+            <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
+          </span>
+          <ul className="flex-1 space-y-0.5">
+            {SUMMARY_LINES.map((line) => (
+              <li key={line} className="text-sm text-foreground">{line}</li>
+            ))}
+          </ul>
+          {unlocked ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+        </div>
+      </Panel>
 
-          return unlocked ? (
-            <Link key={tile.to} to={tile.to} className="block h-full">
-              {card}
-            </Link>
-          ) : (
-            <div key={tile.to} aria-disabled="true">
-              {card}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+        {/* Main column */}
+        <div className="lg:col-span-3 space-y-4">
+          {/* Four summary cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <Panel title="How I'm doing" icon={Heart} unlocked={unlocked}>
+              <div className="grid grid-cols-2 gap-3">
+                {VITALS.map((v) => (
+                  <div key={v.label} className="flex items-start gap-2">
+                    <v.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{v.label}</p>
+                      <p className="text-sm font-semibold text-foreground">{v.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+
+            <Panel title="My Care" icon={Pill} unlocked={unlocked}>
+              <ul className="space-y-2">
+                {CARE_ITEMS.map((c) => (
+                  <li key={c.label} className="flex items-start gap-2">
+                    <c.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground">{c.label}</p>
+                      <p className="text-xs text-muted-foreground">{c.value}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+
+            <Panel title="My Wellbeing" icon={Sparkles} unlocked={unlocked}>
+              <p className="text-sm text-foreground">Need to think something through?</p>
+              <div
+                className={cn(
+                  "mt-3 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold",
+                  unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+                )}
+              >
+                <Sparkles className="h-3.5 w-3.5" /> Ask Angel
+              </div>
+            </Panel>
+
+            <Panel title="My Journey" icon={TrendingUp} unlocked={unlocked}>
+              <p className="text-sm font-semibold text-foreground">Health on track</p>
+              <p className="text-xs text-muted-foreground">Longevity dashboard</p>
+              <div className={cn("mt-3 h-12 rounded-md", unlocked ? "bg-primary/10" : "bg-muted")} />
+              <div className="mt-3 flex items-center gap-2">
+                <Leaf className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
+                <div>
+                  <p className="text-xs font-semibold text-foreground">+8%</p>
+                  <p className="text-[10px] text-muted-foreground">Wellbeing this month</p>
+                </div>
+              </div>
+            </Panel>
+          </div>
+
+          {/* People I care for */}
+          <Panel
+            title="People I care for"
+            icon={Heart}
+            unlocked={unlocked}
+            action={
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                View everyone <ChevronRight className="h-3.5 w-3.5" />
+              </span>
+            }
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+              {PEOPLE.map((p) => (
+                <div key={p.name} className="rounded-lg border border-border bg-background/60 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className={cn("flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                      {p.name.slice(0, 2).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{p.relation}</p>
+                    </div>
+                  </div>
+                  <span className="mt-2 inline-flex rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                    {p.status}
+                  </span>
+                  <ul className="mt-2 space-y-0.5">
+                    {p.lines.map((l) => (
+                      <li key={l} className="text-[11px] text-muted-foreground">{l}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <div className="rounded-lg border border-dashed border-border bg-background/40 p-3 flex flex-col items-center justify-center text-center">
+                <Plus className="h-5 w-5 text-muted-foreground" />
+                <p className="mt-1 text-xs font-semibold text-foreground">Add someone</p>
+                <p className="text-[10px] text-muted-foreground">Keep the people you love close</p>
+              </div>
             </div>
-          );
-        })}
+          </Panel>
+
+          {/* Lower band: insights + quick access */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <Panel title="Things you should know" icon={Lightbulb} unlocked={unlocked}>
+              <ul className="space-y-1.5">
+                {INSIGHTS.map((i) => (
+                  <li key={i} className="text-xs text-muted-foreground">{i}</li>
+                ))}
+              </ul>
+            </Panel>
+
+            <Panel title="Quick access" icon={FolderOpen} unlocked={unlocked}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {TILES.map((tile) => {
+                  const Icon = tile.icon;
+                  const card = (
+                    <div
+                      className={cn(
+                        "rounded-lg border p-3 transition-colors h-full",
+                        unlocked
+                          ? "border-primary bg-card hover:bg-primary/5 cursor-pointer"
+                          : "border-border bg-muted/30 opacity-60 cursor-not-allowed",
+                      )}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
+                          <Icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
+                        </div>
+                        {!unlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                      </div>
+                      <p className="mt-2 text-xs font-semibold text-foreground">{tile.label}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{tile.description}</p>
+                      {!unlocked && (
+                        <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Coming soon
+                        </span>
+                      )}
+                    </div>
+                  );
+
+                  return unlocked ? (
+                    <Link key={tile.to} to={tile.to} className="block h-full">
+                      {card}
+                    </Link>
+                  ) : (
+                    <div key={tile.to} aria-disabled="true">
+                      {card}
+                    </div>
+                  );
+                })}
+              </div>
+            </Panel>
+          </div>
+        </div>
+
+        {/* Right rail */}
+        <div className="lg:col-span-1 space-y-4">
+          <Panel title="My Care Circle" icon={Users2} unlocked={unlocked}>
+            <p className="-mt-2 mb-2 text-[10px] text-muted-foreground">The people looking out for me.</p>
+            <ul className="space-y-2">
+              {CARE_CIRCLE.map((c) => (
+                <li key={c.name} className="flex items-center gap-2">
+                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                    {c.name.slice(0, 2).toUpperCase()}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-foreground truncate">{c.name}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{c.role}</p>
+                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                </li>
+              ))}
+            </ul>
+            <div className={cn("mt-3 rounded-lg px-3 py-2 text-center text-xs font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+              View my Round Table
+            </div>
+          </Panel>
+
+          <Panel title="What's happening?" icon={CalendarDays} unlocked={unlocked}>
+            <ul className="space-y-2">
+              {HAPPENING.map((h) => (
+                <li key={h.title} className="flex items-start gap-2">
+                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
+                    <h.icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground">{h.title}</p>
+                    <p className="text-[10px] text-muted-foreground">{h.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className={cn("mt-3 rounded-lg px-3 py-2 text-center text-xs font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+              View all appointments
+            </div>
+          </Panel>
+        </div>
       </div>
     </div>
   );
