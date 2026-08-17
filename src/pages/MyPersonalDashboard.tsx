@@ -255,9 +255,9 @@ export default function MyPersonalDashboard() {
             <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">🫶 Our Observations</p>
+            <p className="text-sm font-semibold text-foreground">🌱 My Journey</p>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Your care team knows more than your medical history.
+              See how your choices, patterns and wellbeing are evolving.
             </p>
             <ul className="mt-2 space-y-1.5">
               {INSIGHTS.map((i) => (
@@ -479,8 +479,8 @@ export default function MyPersonalDashboard() {
 
           {/* My Holarcy — its own row at the bottom */}
           <Panel title="My Holarcy" icon={HeartHandshake} unlocked={unlocked}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="space-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1 rounded-xl border border-border bg-background/40 p-4">
                 <p className="text-xs font-semibold text-foreground">My Holarc Medical Team</p>
                 <EmotionalHeadline
                   emoji="❤️"
@@ -506,7 +506,7 @@ export default function MyPersonalDashboard() {
                 </ul>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 rounded-xl border border-border bg-background/40 p-4">
                 <p className="text-xs font-semibold text-foreground">Personal Care Circle</p>
                 <EmotionalHeadline
                   emoji="❤️"
