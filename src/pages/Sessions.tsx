@@ -1485,8 +1485,8 @@ export default function Sessions() {
 
           </div>
 
-          {/* Patient Overview spans the wider centre workspace. */}
-          <div className="flex flex-col gap-4 order-2 min-w-0">
+          {/* Patient Overview — wide band spanning the workspace beside the recorder. */}
+          <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
             {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
               <SessionPatientOverview
@@ -1498,8 +1498,9 @@ export default function Sessions() {
 
           </div>
 
-          {/* Live AI Clinician — the third workspace column. */}
-          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3">
+          {/* Live AI Clinician — directly below the Session Recorder frame. */}
+          <div className="order-3 min-w-0 rounded-xl border border-primary bg-primary/5 p-3 lg:col-start-1 lg:row-start-2">
+
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-primary" />
