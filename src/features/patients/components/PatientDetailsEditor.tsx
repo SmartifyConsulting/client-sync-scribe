@@ -790,7 +790,13 @@ export function PatientDetailsEditor({
     [patient?.id, isDoctor, toast, queryClient],
   );
 
+  // Medical insurance makes employer details compulsory.
+  const insuranceCaptured = Boolean(
+    formData.medical_aid?.trim() || formData.medical_aid_number?.trim(),
+  );
+
   const performSave = useCallback(
+
     async (data: typeof formData, surgeriesData: Surgery[]) => {
       if (!data.first_name.trim() && !data.last_name.trim()) return;
       if (!patient?.id) {
