@@ -162,7 +162,7 @@ export default function InpatientsScreen() {
                             </span>
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="space-y-3 px-3 pb-3 pt-1">
+                        <AccordionContent className="space-y-3 px-3 pb-3 pt-1 bg-card">
                           <div className="flex flex-wrap items-center gap-2 text-xs">
                             {href ? (
                               <Link to={href} className="font-semibold text-primary hover:underline">

@@ -323,7 +323,7 @@ export function BiologToday({ ownerUserId, readOnly }: Props) {
                         </span>
                       </div>
                     </AccordionTrigger>
-                    <AccordionContent className="px-1 pb-3 pt-1 space-y-2">
+                    <AccordionContent className="px-1 pb-3 pt-1 space-y-2 bg-card">
                       {!readOnly && (
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] text-muted-foreground">Time eaten</span>

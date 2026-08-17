@@ -282,7 +282,7 @@ export default function DoctorDocumentsTab() {
                               <SectionCountPill count={rows.length} />
                             </div>
                           </AccordionTrigger>
-                          <AccordionContent className="pt-2 pb-2">
+                          <AccordionContent className="pt-2 pb-2 bg-card">
                             <div className="divide-y divide-border">
                               {rows.map((d) => (
                                 <div key={d.id} className="px-4 py-3">

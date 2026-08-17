@@ -269,7 +269,7 @@ export default function HolarcHelpProviders() {
                           <span className="text-xs text-muted-foreground">{tiers[t].length} {noun}</span>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="p-0">
+                      <AccordionContent className="p-0 bg-card">
                         <div className="overflow-x-auto">
                           <Table>
                             <TableHeader>

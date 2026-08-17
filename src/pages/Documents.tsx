@@ -854,7 +854,7 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                                 <SectionCountPill count={items.length} />
                               </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pt-2 pb-2">
+                            <AccordionContent className="pt-2 pb-2 bg-card">
                               <div className="divide-y divide-border">
                                 {items.map((doc) => renderDocRow(doc))}
                               </div>

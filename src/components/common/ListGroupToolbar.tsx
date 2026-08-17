@@ -216,7 +216,7 @@ export function ListGroupToolbar<T>({
                             <SectionCountPill count={sub.items.length} />
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="pt-2 pb-2">
+                        <AccordionContent className="pt-2 pb-2 bg-card">
                           <div className="space-y-4">
                             {sub.items.map((e, idx) => (
                               <React.Fragment key={idx}>{renderItem(e.item)}</React.Fragment>

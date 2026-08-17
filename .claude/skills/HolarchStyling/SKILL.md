@@ -111,7 +111,7 @@ When a group of records inside an already-collapsible group (e.g. sessions group
         <SectionCountPill count={items.length} />
       </div>
     </AccordionTrigger>
-    <AccordionContent className="pt-2 pb-2">
+    <AccordionContent className="pt-2 pb-2 bg-card">
       <div className="space-y-2">{/* rows */}</div>
     </AccordionContent>
   </AccordionItem>
@@ -120,6 +120,7 @@ When a group of records inside an already-collapsible group (e.g. sessions group
 
 - **Header colour: light grey (`bg-muted/30`)** — not `bg-primary` (top-level tabs), not `bg-neutral-600` (sub-tabs), and not `SECTION_TRIGGER_ALWAYS_GREEN_CLASS`'s green (used by the *parent* accordion's own header, e.g. the month header in Sessions/My Sessions). The light-grey `bg-muted/30` is precisely what signals "this accordion is nested one level inside another," distinct from every other accordion-trigger colour in the app.
 - **Critical — the trigger itself needs `bg-transparent`, not just the item.** The base `AccordionTrigger` component (`src/components/ui/accordion.tsx`) ships with an opaque `bg-white` baked into its default className. Setting `bg-muted/30` only on the `AccordionItem` wrapper is not enough — the trigger button sits on top and its own `bg-white` paints over the item's background completely, so the "light grey" never actually renders (the row looks plain white). Always add `bg-transparent` explicitly to the `AccordionTrigger`'s own className so it stops covering the item's background. This exact bug shipped across every nested-sub-accordion instance in the app the first time this pattern was introduced — don't repeat it.
+- **The grey stays on the header only — never on the expanded content.** The `AccordionItem` wrapper's `bg-muted/30` is a single background painted behind the whole item, header AND content alike. Left alone, that grey bleeds straight through into the expanded `AccordionContent` area too, turning the "light-grey header" into one continuous grey box behind the actual rows. Always give `AccordionContent` its own explicit `bg-card` (as in the reference snippet above) so the grey is visually confined to the collapsed header bar, and the expanded row list sits on the normal white/card surface.
 - **Trigger text:** `text-xs font-medium text-foreground`, with a small leading icon in `text-muted-foreground` where one applies (e.g. a `User` icon for a per-patient sub-group).
 - **Shape:** `rounded-lg` (one step down from the `rounded-xl` used by top-level record cards/frames), `overflow-hidden`, no visible border (`border-0`).
 - **Collapsed by default** — nested sub-accordions should NOT be expanded on load (unlike the parent group, which is often open-by-default); the user drills down intentionally.
@@ -178,5 +179,6 @@ When styling or reviewing a screen, check each element type present against this
 - [ ] Records inside any concertina/accordion have visible padding/spacing between them, not a bare flush `divide-y` hairline
 - [ ] Record row height elsewhere is ~50% of the Documents screen's reference row height (~36px vs. ~72px), unless it genuinely is the Documents screen
 - [ ] Nested sub-accordions (an accordion within an accordion, e.g. patients within a month) use the light-grey `bg-muted/30` on the item AND `bg-transparent` on the trigger itself (the trigger's own default `bg-white` otherwise covers the item's colour completely — check the rendered background is actually grey, not just the className), `rounded-lg`, collapsed by default — never green, never `bg-neutral-600`, never the parent's own header colour
+- [ ] The nested sub-accordion's `AccordionContent` has its own explicit `bg-card` — the grey must stay confined to the collapsed header bar, not bleed through as one continuous grey box behind the expanded rows
 - [ ] Record rows *inside* a nested sub-accordion match the Sessions reference height exactly — `px-3 py-2`, `text-sm font-medium` label (see `SessionCard` in `src/pages/MySessions.tsx`) — regardless of what row height the screen's top-level (non-nested) accordion uses
 - [ ] No raw/arbitrary colors introduced where a token or an established pattern above already covers the case

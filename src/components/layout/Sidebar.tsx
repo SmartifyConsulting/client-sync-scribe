@@ -89,7 +89,6 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
       { icon: Mic, label: "Sessions", labelKey: "nav.mySessions", to: "/my-sessions" },
-      { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
@@ -99,6 +98,7 @@ const DOCTOR_SECTIONS: NavSection[] = [
     items: [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
       { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+      { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
       { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
     ],
   },
@@ -299,12 +299,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       return (
         <div
           key={item.to}
-          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-muted-foreground opacity-60 cursor-not-allowed"
+          className="flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-muted-foreground cursor-not-allowed"
           title="Coming soon — preview only"
         >
-          <item.icon className="h-5 w-5" />
+          <item.icon className="h-5 w-5 text-muted-foreground" />
           <span className="flex-1">{t(item.labelKey, item.label)}</span>
-          <Lock className="h-3.5 w-3.5 shrink-0" />
+          <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         </div>
       );
     }

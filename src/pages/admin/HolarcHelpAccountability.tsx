@@ -157,7 +157,7 @@ export function AccountabilityPanel() {
                           <span className="text-sm text-muted-foreground">{items.length}</span>
                         </div>
                       </AccordionTrigger>
-                      <AccordionContent className="p-0">
+                      <AccordionContent className="p-0 bg-card">
                         {items.length === 0
                           ? <div className="px-4 py-3 text-sm text-muted-foreground">None.</div>
                           : renderRowsTable(items, kind)}

@@ -790,7 +790,7 @@ export default function TodoList() {
                             <SectionCountPill count={sub.items.length} />
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="pt-2 pb-2">
+                        <AccordionContent className="pt-2 pb-2 bg-card">
                           <div className="space-y-2">
                             {sub.items.map((todo) => renderTodoRow(todo))}
                           </div>

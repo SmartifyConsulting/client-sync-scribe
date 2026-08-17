@@ -514,7 +514,7 @@ export function CompactTodoList() {
         )}
 
         {/* Task list — grouped by date, then patient */}
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-48 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center py-4">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
@@ -587,7 +587,7 @@ export function CompactTodoList() {
 
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
-                          <span className="text-sm font-semibold truncate text-left">{b.label}</span>
+                          <span className="text-xs font-medium truncate text-left">{b.label}</span>
                           <SectionCountPill count={grouped[b.key].length} className="ml-auto mr-1" />
                         </div>
                       </AccordionTrigger>
@@ -607,7 +607,7 @@ export function CompactTodoList() {
                                   <SectionCountPill count={items.length} className="ml-auto mr-1" />
                                 </div>
                               </AccordionTrigger>
-                              <AccordionContent className="pt-2 pb-2">
+                              <AccordionContent className="pt-2 pb-2 bg-card">
                                 <div className="space-y-2">
                                   {items.map(renderTodoRow)}
                                 </div>
