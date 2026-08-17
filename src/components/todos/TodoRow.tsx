@@ -190,7 +190,7 @@ export function TodoRow({
             <div className="flex items-center gap-2">
               <p
                 className={cn(
-                  "font-medium text-foreground truncate",
+                  "font-medium text-black truncate",
                   compact ? "text-xs" : "text-sm",
                   todo.completed && "line-through text-muted-foreground",
                 )}
