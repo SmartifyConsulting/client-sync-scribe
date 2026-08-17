@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { HeartPulse, Plus, Loader2 } from "lucide-react";
+import { HeartPulse, Plus, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useInpatientVitals } from "../hooks/useInpatientVitals";
+import { supabase } from "@/integrations/supabase/client";
 
 /** Vitals chart for a single ward admission — the "clipboard" a nurse checks
  *  and updates for a patient on her ward. Read-only for anyone without write
@@ -31,6 +32,20 @@ export function InpatientVitalsPanel({ admissionId }: { admissionId: string | nu
   const [form, setForm] = useState({
     heart_rate: "", bp_systolic: "", bp_diastolic: "", spo2: "", temperature_c: "", respiratory_rate: "", notes: "",
   });
+  const [trendSummary, setTrendSummary] = useState<string | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
+
+  useEffect(() => {
+    if (vitals.length < 2) { setTrendSummary(null); return; }
+    let cancelled = false;
+    setSummarizing(true);
+    supabase.functions
+      .invoke("summarize-vitals-trend", { body: { readings: vitals.slice(0, 10) } })
+      .then(({ data }) => { if (!cancelled) setTrendSummary(data?.summary || null); })
+      .catch(() => { if (!cancelled) setTrendSummary(null); })
+      .finally(() => { if (!cancelled) setSummarizing(false); });
+    return () => { cancelled = true; };
+  }, [vitals]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -115,6 +130,20 @@ export function InpatientVitalsPanel({ admissionId }: { admissionId: string | nu
         ) : vitals.length === 0 ? (
           <p className="p-4 text-xs text-muted-foreground">No vitals recorded yet.</p>
         ) : (
+          <div>
+            {(summarizing || trendSummary) && (
+              <div className="mx-3 mt-3 flex items-start gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2">
+                <Sparkles className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">AI Summary</p>
+                  {summarizing ? (
+                    <p className="text-xs text-muted-foreground">Summarising trend…</p>
+                  ) : (
+                    <p className="text-xs text-foreground">{trendSummary}</p>
+                  )}
+                </div>
+              </div>
+            )}
           <div className="overflow-x-auto">
             <div className="min-w-[520px]">
               <div className="grid grid-cols-[1fr_60px_80px_60px_60px_60px] gap-2 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -146,6 +175,7 @@ export function InpatientVitalsPanel({ admissionId }: { admissionId: string | nu
                 ))}
               </div>
             </div>
+          </div>
           </div>
         )}
       </CardContent>

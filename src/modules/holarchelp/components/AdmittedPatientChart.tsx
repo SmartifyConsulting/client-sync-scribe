@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IncidentPhotos } from "./IncidentPhotos";
 import { PatientOverviewTabs } from "./PatientOverviewTabs";
 import { TestResultsPanel } from "./TestResultsPanel";
+import { InpatientVitalsPanel } from "./InpatientVitalsPanel";
 import {
   ClipboardList, HeartPulse, Pill, Stethoscope, NotebookPen, Droplet,
   Utensils, Activity, FlaskConical, Scan, ShieldAlert,
@@ -35,10 +35,6 @@ function Empty({ children = "No data recorded yet." }: { children?: React.ReactN
 
 const TAB_TRIGGER =
   "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
-
-const SUB_TAB_LIST = "bg-neutral-600 flex w-full flex-nowrap overflow-x-auto justify-start";
-const SUB_TAB_TRIGGER =
-  "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-1.5 py-1 sm:px-3 sm:py-1.5";
 
 /** "ambulance" source means the patient arrived via an emergency/SOS
  *  transport — labelled as an Emergency Admission rather than the raw
@@ -117,13 +113,22 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
       </div>
 
       <Tabs defaultValue="overview" className="rounded-2xl border-2 border-primary bg-card overflow-hidden">
-        <TabsList className="w-full flex-nowrap overflow-x-auto justify-start gap-1 bg-primary p-1.5 h-auto rounded-none border-b-2 border-primary">
+        <TabsList className="w-full flex-wrap h-auto overflow-x-auto justify-start gap-1 bg-primary p-1.5 rounded-none border-b-2 border-primary">
           <TabsTrigger value="overview" className={TAB_TRIGGER}><ClipboardList className="h-3.5 w-3.5" /> Overview</TabsTrigger>
-          <TabsTrigger value="vitals-obs" className={TAB_TRIGGER}><HeartPulse className="h-3.5 w-3.5" /> Vitals &amp; Observations</TabsTrigger>
-          <TabsTrigger value="meds-fluids" className={TAB_TRIGGER}><Pill className="h-3.5 w-3.5" /> Medications &amp; Fluids</TabsTrigger>
-          <TabsTrigger value="notes" className={TAB_TRIGGER}><NotebookPen className="h-3.5 w-3.5" /> Notes</TabsTrigger>
-          <TabsTrigger value="results" className={TAB_TRIGGER}><FlaskConical className="h-3.5 w-3.5" /> Results</TabsTrigger>
-          <TabsTrigger value="care" className={TAB_TRIGGER}><ShieldAlert className="h-3.5 w-3.5" /> Care Plan</TabsTrigger>
+          <TabsTrigger value="vitals" className={TAB_TRIGGER}><HeartPulse className="h-3.5 w-3.5" /> Vital Signs Chart</TabsTrigger>
+          <TabsTrigger value="observations" className={TAB_TRIGGER}><Activity className="h-3.5 w-3.5" /> Observation Charts</TabsTrigger>
+          <TabsTrigger value="mar" className={TAB_TRIGGER}><Pill className="h-3.5 w-3.5" /> Medication Administration</TabsTrigger>
+          <TabsTrigger value="fluid-balance" className={TAB_TRIGGER}><Droplet className="h-3.5 w-3.5" /> Fluid Balance</TabsTrigger>
+          <TabsTrigger value="nutrition" className={TAB_TRIGGER}><Utensils className="h-3.5 w-3.5" /> Intake &amp; Nutrition</TabsTrigger>
+          <TabsTrigger value="doctor-notes" className={TAB_TRIGGER}><Stethoscope className="h-3.5 w-3.5" /> Doctor's Progress Notes</TabsTrigger>
+          <TabsTrigger value="nursing-notes" className={TAB_TRIGGER}><NotebookPen className="h-3.5 w-3.5" /> Nursing Notes</TabsTrigger>
+          <TabsTrigger value="labs" className={TAB_TRIGGER}><FlaskConical className="h-3.5 w-3.5" /> Laboratory Results</TabsTrigger>
+          <TabsTrigger value="imaging" className={TAB_TRIGGER}><Scan className="h-3.5 w-3.5" /> Imaging</TabsTrigger>
+          <TabsTrigger value="care-activities" className={TAB_TRIGGER}><HeartHandshake className="h-3.5 w-3.5" /> Care Activities</TabsTrigger>
+          <TabsTrigger value="interventions" className={TAB_TRIGGER}><Activity className="h-3.5 w-3.5" /> Interventions</TabsTrigger>
+          <TabsTrigger value="referrals" className={TAB_TRIGGER}><Send className="h-3.5 w-3.5" /> Referrals</TabsTrigger>
+          <TabsTrigger value="handover" className={TAB_TRIGGER}><ArrowLeftRight className="h-3.5 w-3.5" /> Handover</TabsTrigger>
+          <TabsTrigger value="discharge" className={TAB_TRIGGER}><LogOut className="h-3.5 w-3.5" /> Discharge</TabsTrigger>
           <TabsTrigger value="orders-handover" className={TAB_TRIGGER}><FileText className="h-3.5 w-3.5" /> Orders</TabsTrigger>
         </TabsList>
 
@@ -131,70 +136,28 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
           <PatientOverviewTabs incidentId={incidentId} patientId={admission?.patient_id} patientName={admission?.patient_name} />
         </TabsContent>
 
-        <TabsContent value="vitals-obs" className="p-4 mt-0">
-          <Tabs defaultValue="vitals">
-            <TabsList className={SUB_TAB_LIST}>
-              <TabsTrigger value="vitals" className={SUB_TAB_TRIGGER}><HeartPulse className="h-3.5 w-3.5" /> Vital Signs Chart</TabsTrigger>
-              <TabsTrigger value="observations" className={SUB_TAB_TRIGGER}><Activity className="h-3.5 w-3.5" /> Observation Charts</TabsTrigger>
-            </TabsList>
-            <TabsContent value="vitals" className="mt-0"><Empty>No vitals recorded yet.</Empty></TabsContent>
-            <TabsContent value="observations" className="mt-0"><Empty>No specialised observation charts started yet.</Empty></TabsContent>
-          </Tabs>
+        <TabsContent value="vitals" className="p-4 mt-0">
+          <InpatientVitalsPanel admissionId={admission?.id ?? null} />
+        </TabsContent>
+        <TabsContent value="observations" className="p-4 mt-0"><Empty>No specialised observation charts started yet.</Empty></TabsContent>
+
+        <TabsContent value="mar" className="p-4 mt-0"><Empty>No medications administered yet.</Empty></TabsContent>
+        <TabsContent value="fluid-balance" className="p-4 mt-0"><Empty>No fluid balance entries yet.</Empty></TabsContent>
+        <TabsContent value="nutrition" className="p-4 mt-0"><Empty>No intake/nutrition data recorded yet.</Empty></TabsContent>
+
+        <TabsContent value="doctor-notes" className="p-4 mt-0"><Empty>No progress notes recorded yet.</Empty></TabsContent>
+        <TabsContent value="nursing-notes" className="p-4 mt-0"><Empty>No nursing notes recorded yet.</Empty></TabsContent>
+
+        <TabsContent value="labs" className="p-4 mt-0"><TestResultsPanel patientId={admission?.patient_id} /></TabsContent>
+        <TabsContent value="imaging" className="p-4 mt-0">
+          <IncidentPhotos incidentId={incidentId} readOnly />
         </TabsContent>
 
-        <TabsContent value="meds-fluids" className="p-4 mt-0">
-          <Tabs defaultValue="mar">
-            <TabsList className={SUB_TAB_LIST}>
-              <TabsTrigger value="mar" className={SUB_TAB_TRIGGER}><Pill className="h-3.5 w-3.5" /> Medication Administration</TabsTrigger>
-              <TabsTrigger value="fluid-balance" className={SUB_TAB_TRIGGER}><Droplet className="h-3.5 w-3.5" /> Fluid Balance</TabsTrigger>
-              <TabsTrigger value="nutrition" className={SUB_TAB_TRIGGER}><Utensils className="h-3.5 w-3.5" /> Intake &amp; Nutrition</TabsTrigger>
-            </TabsList>
-            <TabsContent value="mar" className="mt-0"><Empty>No medications administered yet.</Empty></TabsContent>
-            <TabsContent value="fluid-balance" className="mt-0"><Empty>No fluid balance entries yet.</Empty></TabsContent>
-            <TabsContent value="nutrition" className="mt-0"><Empty>No intake/nutrition data recorded yet.</Empty></TabsContent>
-          </Tabs>
-        </TabsContent>
-
-        <TabsContent value="notes" className="p-4 mt-0">
-          <Tabs defaultValue="doctor-notes">
-            <TabsList className={SUB_TAB_LIST}>
-              <TabsTrigger value="doctor-notes" className={SUB_TAB_TRIGGER}><Stethoscope className="h-3.5 w-3.5" /> Doctor's Progress Notes</TabsTrigger>
-              <TabsTrigger value="nursing-notes" className={SUB_TAB_TRIGGER}><NotebookPen className="h-3.5 w-3.5" /> Nursing Notes</TabsTrigger>
-            </TabsList>
-            <TabsContent value="doctor-notes" className="mt-0"><Empty>No progress notes recorded yet.</Empty></TabsContent>
-            <TabsContent value="nursing-notes" className="mt-0"><Empty>No nursing notes recorded yet.</Empty></TabsContent>
-          </Tabs>
-        </TabsContent>
-
-        <TabsContent value="results" className="p-4 mt-0">
-          <Tabs defaultValue="labs">
-            <TabsList className={SUB_TAB_LIST}>
-              <TabsTrigger value="labs" className={SUB_TAB_TRIGGER}><FlaskConical className="h-3.5 w-3.5" /> Laboratory Results</TabsTrigger>
-              <TabsTrigger value="imaging" className={SUB_TAB_TRIGGER}><Scan className="h-3.5 w-3.5" /> Imaging</TabsTrigger>
-            </TabsList>
-            <TabsContent value="labs" className="mt-0"><TestResultsPanel patientId={admission?.patient_id} /></TabsContent>
-            <TabsContent value="imaging" className="mt-0">
-              <IncidentPhotos incidentId={incidentId} readOnly />
-            </TabsContent>
-          </Tabs>
-        </TabsContent>
-
-        <TabsContent value="care" className="p-4 mt-0">
-          <Tabs defaultValue="care-activities">
-            <TabsList className={cn(SUB_TAB_LIST, "flex-wrap h-auto")}>
-              <TabsTrigger value="care-activities" className={SUB_TAB_TRIGGER}><HeartHandshake className="h-3.5 w-3.5" /> Care Activities</TabsTrigger>
-              <TabsTrigger value="interventions" className={SUB_TAB_TRIGGER}><Activity className="h-3.5 w-3.5" /> Interventions</TabsTrigger>
-              <TabsTrigger value="referrals" className={SUB_TAB_TRIGGER}><Send className="h-3.5 w-3.5" /> Referrals</TabsTrigger>
-              <TabsTrigger value="handover" className={SUB_TAB_TRIGGER}><ArrowLeftRight className="h-3.5 w-3.5" /> Handover</TabsTrigger>
-              <TabsTrigger value="discharge" className={SUB_TAB_TRIGGER}><LogOut className="h-3.5 w-3.5" /> Discharge</TabsTrigger>
-            </TabsList>
-            <TabsContent value="care-activities" className="mt-0"><Empty>No care activities recorded yet.</Empty></TabsContent>
-            <TabsContent value="interventions" className="mt-0"><Empty>No interventions recorded yet.</Empty></TabsContent>
-            <TabsContent value="referrals" className="mt-0"><Empty>No referrals made yet.</Empty></TabsContent>
-            <TabsContent value="handover" className="mt-0"><Empty>No handover notes recorded yet.</Empty></TabsContent>
-            <TabsContent value="discharge" className="mt-0"><Empty>No discharge planning started yet.</Empty></TabsContent>
-          </Tabs>
-        </TabsContent>
+        <TabsContent value="care-activities" className="p-4 mt-0"><Empty>No care activities recorded yet.</Empty></TabsContent>
+        <TabsContent value="interventions" className="p-4 mt-0"><Empty>No interventions recorded yet.</Empty></TabsContent>
+        <TabsContent value="referrals" className="p-4 mt-0"><Empty>No referrals made yet.</Empty></TabsContent>
+        <TabsContent value="handover" className="p-4 mt-0"><Empty>No handover notes recorded yet.</Empty></TabsContent>
+        <TabsContent value="discharge" className="p-4 mt-0"><Empty>No discharge planning started yet.</Empty></TabsContent>
 
         <TabsContent value="orders-handover" className="p-4 mt-0">
           <Empty>No outstanding orders.</Empty>
