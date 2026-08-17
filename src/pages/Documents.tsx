@@ -101,6 +101,18 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString();
 };
 
+/** True when a letterhead side (header or footer) has any text or image. */
+const hfSideHasContent = (side: any): boolean => {
+  if (!side) return false;
+  return ["left", "center", "right"].some((k) => {
+    const s = side[k];
+    if (!s) return false;
+    return Boolean((s.text || "").trim()) || Boolean(s.imageUrl);
+  });
+};
+
+
+
 
 export default function Documents({ hideHeader = false }: { hideHeader?: boolean }) {
   const { t } = useTranslation();
