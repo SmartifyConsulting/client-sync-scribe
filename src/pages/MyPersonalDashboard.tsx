@@ -507,7 +507,7 @@ export default function MyPersonalDashboard() {
             </Link>
           </Panel>
 
-          <Panel title="You're in the loop" icon={CalendarDays} unlocked={unlocked} onClick={() => navigate("/patient/calendar")}>
+          <Panel title="What's happening?" icon={CalendarDays} unlocked={unlocked} onClick={() => navigate("/patient/calendar")}>
             <EmotionalHeadline
               emoji="📅"
               title="You're in the loop"
