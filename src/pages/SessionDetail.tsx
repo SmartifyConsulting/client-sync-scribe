@@ -395,8 +395,11 @@ export default function SessionDetail() {
       </div>
 
 
-      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,2fr)_minmax(280px,1fr)] gap-4 items-start">
-        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+      {/* Same frame arrangement as the live recording screen:
+          recorder frame top-left, AI Clinician Notes beneath it,
+          Patient Overview as the wide band alongside. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] gap-4 items-start">
+        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden lg:col-start-1 lg:row-start-1">
           <div className="flex items-center gap-3 border-b p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent shrink-0">
               <User className="h-5 w-5 text-accent-foreground" />
@@ -416,8 +419,10 @@ export default function SessionDetail() {
             )}
           </div>
         </div>
-        <SessionPatientOverview patient={session.patient} currentMedications={currentMedications} />
-        <div className="rounded-xl border border-primary bg-primary/5 p-3">
+        <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+          <SessionPatientOverview patient={session.patient} currentMedications={currentMedications} />
+        </div>
+        <div className="rounded-xl border border-primary bg-primary/5 p-3 lg:col-start-1 lg:row-start-2">
           <div className="mb-2 flex items-center gap-1.5">
             <Sparkles className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">AI Clinician Notes</h2>
@@ -425,6 +430,7 @@ export default function SessionDetail() {
           <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
         </div>
       </div>
+
 
       {/* Session results — same layout as the screen shown right after a recording ends */}
       <SessionResultPanels
