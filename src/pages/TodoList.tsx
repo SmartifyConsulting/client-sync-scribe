@@ -161,10 +161,11 @@ export default function TodoList() {
   );
 
   const handlePreviewDoc = async (todo: TodoItem) => {
-    if (!todo.document_id) return;
-    setLoadingPreview(todo.document_id);
+    setLoadingPreview(todo.id);
     try {
-      const { data: doc } = await supabase.from('documents').select('*').eq('id', todo.document_id).maybeSingle();
+      const docId = await resolveTodoDocumentId(todo, getTodoDisplay(todo as any).kind);
+      if (!docId) throw new Error('Document not found');
+      const { data: doc } = await supabase.from('documents').select('*').eq('id', docId).maybeSingle();
       if (!doc) throw new Error('Document not found');
 
       const resolved = await resolveDocumentPreviewContent({
