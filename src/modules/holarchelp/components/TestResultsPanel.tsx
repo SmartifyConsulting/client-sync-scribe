@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { FlaskConical } from "lucide-react";
+import { format } from "date-fns";
 
 type LabResult = {
   id: string;
@@ -9,6 +10,7 @@ type LabResult = {
   units: string | null;
   reference_range: string | null;
   result_date: string;
+  lab: string;
 };
 
 /**
@@ -25,16 +27,21 @@ export function TestResultsPanel({ patientId }: { patientId: string | null | und
     (async () => {
       const { data: admissions } = await supabase
         .from("hospital_admissions" as any)
-        .select("id")
+        .select("id, hospital")
         .eq("patient_id", patientId);
-      const admissionIds = ((admissions as any) ?? []).map((a: any) => a.id);
+      const admissionRows = ((admissions as any) ?? []) as { id: string; hospital: string | null }[];
+      const admissionIds = admissionRows.map((a) => a.id);
       if (!admissionIds.length) { if (!cancelled) setResults([]); return; }
+      const hospitalByAdmission = new Map(admissionRows.map((a) => [a.id, a.hospital || "Unknown lab"]));
       const { data } = await supabase
         .from("admission_lab_results" as any)
-        .select("id, test_name, result_value, units, reference_range, result_date")
+        .select("id, test_name, result_value, units, reference_range, result_date, admission_id")
         .in("admission_id", admissionIds)
         .order("result_date", { ascending: false });
-      if (!cancelled) setResults(((data as any) ?? []) as LabResult[]);
+      const rows = ((data as any) ?? []) as (LabResult & { admission_id: string })[];
+      if (!cancelled) {
+        setResults(rows.map((r) => ({ ...r, lab: hospitalByAdmission.get(r.admission_id) || "Unknown lab" })));
+      }
     })();
     return () => { cancelled = true; };
   }, [patientId]);
@@ -52,28 +59,44 @@ export function TestResultsPanel({ patientId }: { patientId: string | null | und
     );
   }
 
+  const groups = new Map<string, LabResult[]>();
+  for (const r of results) {
+    const key = format(new Date(r.result_date), "MMMM yyyy");
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(r);
+  }
+
   return (
-    <div className="overflow-hidden rounded-xl border">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
-          <tr>
-            <th className="px-3 py-2 text-left">Test</th>
-            <th className="px-3 py-2 text-left">Result</th>
-            <th className="px-3 py-2 text-left">Reference Range</th>
-            <th className="px-3 py-2 text-right">Date</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
-          {results.map((r) => (
-            <tr key={r.id}>
-              <td className="px-3 py-2 font-semibold">{r.test_name}</td>
-              <td className="px-3 py-2">{r.result_value ?? "—"}{r.units ? ` ${r.units}` : ""}</td>
-              <td className="px-3 py-2 text-muted-foreground">{r.reference_range ?? "—"}</td>
-              <td className="px-3 py-2 text-right text-muted-foreground">{new Date(r.result_date).toLocaleDateString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-4">
+      {Array.from(groups.entries()).map(([month, rows]) => (
+        <div key={month} className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
+          <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">
+            {month}
+          </div>
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-3 py-2 text-left">Test</th>
+                <th className="px-3 py-2 text-left">Result</th>
+                <th className="px-3 py-2 text-left">Reference Range</th>
+                <th className="px-3 py-2 text-left">Lab</th>
+                <th className="px-3 py-2 text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {rows.map((r) => (
+                <tr key={r.id}>
+                  <td className="px-3 py-2 font-semibold">{r.test_name}</td>
+                  <td className="px-3 py-2">{r.result_value ?? "—"}{r.units ? ` ${r.units}` : ""}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.reference_range ?? "—"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{r.lab}</td>
+                  <td className="px-3 py-2 text-right text-muted-foreground">{new Date(r.result_date).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
 }

@@ -1368,7 +1368,7 @@ export function PatientDetailsEditor({
             <div className="relative">
               <Avatar className="h-20 w-20 border-2 border-primary">
                 {avatarUrl ? <AvatarImage src={avatarUrl} alt={patient.name} /> : null}
-                <AvatarFallback className="bg-primary text-primary text-xl font-semibold">{initials}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl font-semibold">{initials}</AvatarFallback>
               </Avatar>
               {/* Always-visible camera badge so users notice the upload affordance */}
               <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md border-2 border-background">

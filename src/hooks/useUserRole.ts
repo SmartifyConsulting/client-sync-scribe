@@ -12,7 +12,7 @@ const EMERGENCY_RAW: RawRole[] = ['hospital_staff', 'ambulance_staff', 'blood_ba
 const roleCache = new Map<string, { role: UserRole; availableRoles: ResolvedRole[] }>();
 
 export function useUserRole() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const cached = user ? roleCache.get(user.id) : undefined;
   const [role, setRole] = useState<UserRole>(cached?.role ?? null);
   const [availableRoles, setAvailableRoles] = useState<ResolvedRole[]>(cached?.availableRoles ?? []);
@@ -20,7 +20,14 @@ export function useUserRole() {
 
   useEffect(() => {
     async function fetchRole() {
+      // useAuth() has no cache of its own — every remount (e.g. crossing between
+      // layouts that structurally differ, like PatientAppLayout <-> AppLayout)
+      // resets it to user=null, loading=true while it re-checks the session.
+      // Treating that transient null the same as "signed out" would flash the
+      // wrong nav (defaulting to doctor) before the real user resolves a moment
+      // later. Only resolve to role=null once auth itself is done loading.
       if (!user) {
+        if (authLoading) return;
         setRole(null);
         setAvailableRoles([]);
         setLoading(false);
@@ -110,7 +117,7 @@ export function useUserRole() {
     }
 
     fetchRole();
-  }, [user]);
+  }, [user, authLoading]);
 
   return {
     role,
