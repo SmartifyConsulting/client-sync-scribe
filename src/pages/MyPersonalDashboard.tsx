@@ -199,11 +199,11 @@ export default function MyPersonalDashboard() {
           .in("status", ["approved", "pending"])
           .gte("requested_start", nowIso),
         patientIds.length
-          ? supabase
+          ? (supabase
               .from("biolog_entries")
               .select("id")
               .in("patient_id", patientIds)
-              .gte("created_at", weekAgo)
+              .gte("created_at", weekAgo) as unknown as Promise<{ data: { id: string }[] | null }>)
           : Promise.resolve({ data: [] as { id: string }[] }),
       ]);
 
