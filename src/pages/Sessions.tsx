@@ -1358,7 +1358,7 @@ export default function Sessions() {
                   <Command className="bg-transparent">
                     <CommandInput
                       placeholder="Search by name..."
-                      className="h-11 text-sm placeholder:text-muted-foreground"
+                      className="h-11 text-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     <CommandList className="max-h-[280px]">
                       <CommandEmpty>
