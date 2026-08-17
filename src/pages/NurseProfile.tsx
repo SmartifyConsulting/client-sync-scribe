@@ -205,7 +205,7 @@ export default function NurseProfile() {
         </div>
       </div>
 
-      <Accordion type="multiple" defaultValue={["about"]} className={SECTION_FRAME_CLASS}>
+      <Accordion type="multiple" defaultValue={[]} className={SECTION_FRAME_CLASS}>
         {/* About Me */}
         <AccordionItem value="about" className={SECTION_ITEM_CLASS}>
           <AccordionTrigger className={SECTION_TRIGGER_ALWAYS_GREEN_CLASS}><h3 className="text-xs font-semibold text-primary-dark">About Me</h3></AccordionTrigger>

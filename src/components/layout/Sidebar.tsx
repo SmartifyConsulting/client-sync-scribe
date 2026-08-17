@@ -129,8 +129,6 @@ const NURSE_SECTIONS: NavSection[] = [
       { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.nurseDashboard", to: "/provider/hospital/nurse-dashboard" },
       { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/nurse-profile" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-      { icon: BedDouble, label: "Ward Board", labelKey: "nav.wardBoard", to: "/provider/hospital/ward-board" },
-      { icon: Users, label: "Admissions", labelKey: "nav.admissions", to: "/provider/hospital/admissions" },
     ],
   },
 ];

@@ -9,6 +9,7 @@ export type NurseWardAssignment = {
   hospitalName: string | null;
   wardId: string | null;
   wardName: string | null;
+  wardBedCapacity: number | null;
 };
 
 /**
@@ -53,7 +54,7 @@ export function useNurseWard() {
           .eq("id", row.hospital_id)
           .maybeSingle(),
         row.ward_id
-          ? supabase.from("hospital_wards" as any).select("name").eq("id", row.ward_id).maybeSingle()
+          ? supabase.from("hospital_wards" as any).select("name, bed_capacity").eq("id", row.ward_id).maybeSingle()
           : Promise.resolve({ data: null } as any),
       ]);
 
@@ -65,6 +66,7 @@ export function useNurseWard() {
         hospitalName: (hospital as any)?.name ?? null,
         wardId: row.ward_id ?? null,
         wardName: (wardRes as any)?.data?.name ?? null,
+        wardBedCapacity: (wardRes as any)?.data?.bed_capacity ?? null,
       });
       setLoading(false);
     })();

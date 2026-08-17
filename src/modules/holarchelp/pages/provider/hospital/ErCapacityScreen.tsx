@@ -36,8 +36,10 @@ export default function ErCapacityScreen() {
   if (!h) return <div className="text-sm text-muted-foreground">{t("capacity.loading")}</div>;
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl font-bold text-foreground">{t("capacity.title")}</h1>
+    <div className="space-y-3">
+      {/* Embedded inside Trauma Bays / Emergency Hub — a sub-section heading,
+          not a full screen heading (this component is never routed to on its own). */}
+      <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("capacity.title")}</h2>
 
       <div className="grid gap-3 md:grid-cols-3">
         <Tile icon={Activity} label={t("capacity.status")}>
@@ -79,8 +81,8 @@ export default function ErCapacityScreen() {
 }
 
 const Tile = ({ icon: Icon, label, children }: any) => (
-  <div className="overflow-hidden rounded-xl border-2 border-primary bg-card">
-    <p className="flex items-center gap-1.5 bg-primary px-3 py-2 text-sm font-bold uppercase tracking-wider text-white">
+  <div className="overflow-hidden rounded-xl border border-primary bg-card">
+    <p className="flex items-center gap-1.5 bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white">
       <Icon className="h-3.5 w-3.5 text-white" /> {label}
     </p>
     <div className="p-3">{children}</div>

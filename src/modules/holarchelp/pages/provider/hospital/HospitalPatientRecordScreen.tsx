@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, User, HeartPulse, Pill, ShieldAlert, Phone, BedDouble } from "lucide-react";
+import { InpatientVitalsPanel } from "../../../components/InpatientVitalsPanel";
 
 type PatientRow = Record<string, any>;
 
@@ -140,6 +141,7 @@ export default function HospitalPatientRecordScreen() {
   }
 
   const patientAge = age(patient.dob);
+  const activeAdmission = admissions.find((a) => a.status === "admitted") || admissions[0];
 
   return (
     <div className="space-y-4">
@@ -178,6 +180,8 @@ export default function HospitalPatientRecordScreen() {
           ))}
         </CardContent>
       </Card>
+
+      <InpatientVitalsPanel admissionId={activeAdmission?.id ?? null} />
 
       <div className="grid gap-3 md:grid-cols-2">
         <Section icon={HeartPulse} title="Conditions & diagnoses" items={asList(patient.conditions_diagnoses)} />

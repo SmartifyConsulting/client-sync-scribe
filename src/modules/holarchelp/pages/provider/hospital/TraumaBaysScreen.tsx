@@ -50,7 +50,10 @@ export default function TraumaBaysScreen() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-bold text-foreground">Trauma Bays</h1>
+      <header>
+        <h1 className="text-3xl font-bold text-foreground">Trauma Bays</h1>
+        <p className="text-muted-foreground text-xs">Current bay assignments and incoming trauma cases</p>
+      </header>
 
       <div className="space-y-2">
         <p className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-muted-foreground">
