@@ -416,25 +416,47 @@ function AdmissionDetail({
             <SectionHeader icon={Activity} label="Vitals" extra={<SectionCountPill count={vitals.length} />} />
             <CollapsibleContent className="p-3">
               {canEdit && <Button size="sm" variant="outline" className="mb-2" onClick={() => setShowVitals(true)}><Plus className="h-4 w-4 mr-1" /> Add Vitals</Button>}
-              <div className="space-y-2">
-                {vitals.map((v: any) => (
-                  <div key={v.id} className="text-xs p-2 rounded bg-muted/40">
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(v.recorded_at), "dd MMM yyyy HH:mm")}
-                      {v.nurse_name_snapshot && <span> · Nurse: {v.nurse_name_snapshot}</span>}
-                    </p>
-                    <p>HR: {v.heart_rate || "-"} bpm · BP: {v.bp_systolic || "-"}/{v.bp_diastolic || "-"} · SpO₂: {v.spo2 || "-"}% · Temp: {v.temperature_c || "-"}°C · BMI: {v.bmi || "-"}</p>
-                    {v.notes && <p className="text-muted-foreground mt-1">{v.notes}</p>}
-                    <RateNurseControl
-                      admissionId={admission.id}
-                      recordTable="admission_vitals"
-                      recordId={v.id}
-                      nurseId={v.nurse_id ?? null}
-                      nurseName={v.nurse_name_snapshot}
-                    />
+              {vitals.length > 0 && (
+                <div className="overflow-x-auto">
+                  <div className="min-w-[560px]">
+                    <div className="grid grid-cols-[1fr_70px_90px_70px_70px_60px] gap-2 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <span>Recorded</span>
+                      <span>HR</span>
+                      <span>BP</span>
+                      <span>SpO₂</span>
+                      <span>Temp</span>
+                      <span>BMI</span>
+                    </div>
+                    <div className="space-y-1">
+                      {vitals.map((v: any) => (
+                        <div key={v.id} className="rounded bg-muted/40 p-2">
+                          <div className="grid grid-cols-[1fr_70px_90px_70px_70px_60px] gap-2 items-center text-xs whitespace-nowrap">
+                            <span className="text-muted-foreground truncate">
+                              {format(new Date(v.recorded_at), "dd MMM yyyy HH:mm")}
+                            </span>
+                            <span>{v.heart_rate || "-"} bpm</span>
+                            <span>{v.bp_systolic || "-"}/{v.bp_diastolic || "-"}</span>
+                            <span>{v.spo2 || "-"}%</span>
+                            <span>{v.temperature_c || "-"}°C</span>
+                            <span>{v.bmi || "-"}</span>
+                          </div>
+                          {v.nurse_name_snapshot && (
+                            <p className="text-xs text-muted-foreground mt-1">Nurse: {v.nurse_name_snapshot}</p>
+                          )}
+                          {v.notes && <p className="text-xs text-muted-foreground mt-0.5">{v.notes}</p>}
+                          <RateNurseControl
+                            admissionId={admission.id}
+                            recordTable="admission_vitals"
+                            recordId={v.id}
+                            nurseId={v.nurse_id ?? null}
+                            nurseName={v.nurse_name_snapshot}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </CollapsibleContent>
           </Collapsible>
 
