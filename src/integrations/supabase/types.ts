@@ -6936,6 +6936,7 @@ export type Database = {
           created_at: string
           doctor_id: string
           doctor_name: string
+          edited_at: string | null
           id: string
           topic_id: string
         }
@@ -6944,6 +6945,7 @@ export type Database = {
           created_at?: string
           doctor_id: string
           doctor_name: string
+          edited_at?: string | null
           id?: string
           topic_id: string
         }
@@ -6952,6 +6954,7 @@ export type Database = {
           created_at?: string
           doctor_id?: string
           doctor_name?: string
+          edited_at?: string | null
           id?: string
           topic_id?: string
         }
