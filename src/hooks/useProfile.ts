@@ -24,7 +24,11 @@ export interface Profile {
   narration_voice: string | null;
   chronic_med_notification_frequency: string | null;
   practice_color: string | null;
-  banking_details: string | null;
+  bank_account_name: string | null;
+  bank_name: string | null;
+  bank_account_type: string | null;
+  bank_account_number: string | null;
+  bank_swift_code: string | null;
   created_at: string;
   updated_at: string;
 }

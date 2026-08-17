@@ -124,6 +124,27 @@ When a group of records inside an already-collapsible group (e.g. sessions group
 - **Collapsed by default** — nested sub-accordions should NOT be expanded on load (unlike the parent group, which is often open-by-default); the user drills down intentionally.
 - **Example — Sessions list (`src/pages/MySessions.tsx` via `ListGroupToolbar`):** when grouped by date, each month is the (green-header) parent accordion; within it, sessions are further split into one light-grey sub-accordion per patient, collapsed by default. This is the canonical example to copy for any future "records grouped by date, then by patient" screen.
 
+### Row height inside a nested sub-accordion
+
+The individual record rows listed *inside* a nested sub-accordion's `AccordionContent` (not the sub-accordion's own header/trigger — that's covered above) must match the Sessions sub-accordion's record row exactly. Reference: `SessionCard` in `src/pages/MySessions.tsx`:
+
+```jsx
+<Card className="px-3 py-2 hover:bg-accent/40 transition-colors">
+  <div className="flex items-center justify-between gap-3">
+    <p className="text-sm font-medium truncate flex items-center gap-1.5 min-w-0">
+      {/* icon + label */}
+    </p>
+    {/* right-aligned meta/badge */}
+  </div>
+</Card>
+```
+
+- **Padding:** `px-3 py-2` — this is the reference height for any row living inside a nested sub-accordion, regardless of what screen it's on.
+- **Label text:** `text-sm font-medium` for the primary line.
+- **Row spacing:** rows stay separated by `space-y-2`/`space-y-4` on the containing list (per the spacing rule above) — not a flush `divide-y`.
+- This is a *different* size target from the "Record height elsewhere = 50% of the Documents reference" rule just above — that rule is for records sitting directly inside a normal (non-nested) accordion. Records inside a *nested sub-accordion* specifically always match the Sessions `px-3 py-2` height, even if the same screen's top-level accordion rows use a different size elsewhere.
+- **Exception: the Documents screen itself.** `Documents.tsx` is the source of the ~72px/`p-4` reference size (see above) and reuses the same `renderDocRow` for both its flat listing and its nested-by-patient sub-accordion — so its nested rows stay at the Documents `p-4` size rather than shrinking to `px-3 py-2`, to avoid two different row heights for the same row renderer on the same screen. Every other screen with a nested sub-accordion (including ones that also list documents, e.g. `DoctorDocumentsTab.tsx`) still targets the Sessions `px-3 py-2` height — this exception is Documents.tsx-specific, not "any document list."
+
 ---
 
 ## Underlying design tokens
@@ -156,4 +177,5 @@ When styling or reviewing a screen, check each element type present against this
 - [ ] Records inside any concertina/accordion have visible padding/spacing between them, not a bare flush `divide-y` hairline
 - [ ] Record row height elsewhere is ~50% of the Documents screen's reference row height (~36px vs. ~72px), unless it genuinely is the Documents screen
 - [ ] Nested sub-accordions (an accordion within an accordion, e.g. patients within a month) use the light-grey `bg-muted/30` trigger, `rounded-lg`, collapsed by default — never green, never `bg-neutral-600`, never the parent's own header colour
+- [ ] Record rows *inside* a nested sub-accordion match the Sessions reference height exactly — `px-3 py-2`, `text-sm font-medium` label (see `SessionCard` in `src/pages/MySessions.tsx`) — regardless of what row height the screen's top-level (non-nested) accordion uses
 - [ ] No raw/arbitrary colors introduced where a token or an established pattern above already covers the case

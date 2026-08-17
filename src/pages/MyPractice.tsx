@@ -442,7 +442,11 @@ export default function MyPractice() {
     specialty: "",
     mobile_number: "",
     country_code: "+27",
-    banking_details: "",
+    bank_account_name: "",
+    bank_name: "",
+    bank_account_type: "",
+    bank_account_number: "",
+    bank_swift_code: "",
   });
 
   // ── Signature form state (auto-save) ──
@@ -602,7 +606,11 @@ export default function MyPractice() {
         specialty: (profile as any).specialty || "",
         mobile_number: mobileNumber,
         country_code: countryCode,
-        banking_details: (profile as any).banking_details || "",
+        bank_account_name: (profile as any).bank_account_name || "",
+        bank_name: (profile as any).bank_name || "",
+        bank_account_type: (profile as any).bank_account_type || "",
+        bank_account_number: (profile as any).bank_account_number || "",
+        bank_swift_code: (profile as any).bank_swift_code || "",
       };
       isSettingFromProfile.current = true;
       profileLoadedData.current = newFormData;
@@ -670,7 +678,11 @@ export default function MyPractice() {
         practice_address: formData.practice_address,
         specialty: formData.specialty,
         mobile_number: fullMobileNumber,
-        banking_details: formData.banking_details,
+        bank_account_name: formData.bank_account_name,
+        bank_name: formData.bank_name,
+        bank_account_type: formData.bank_account_type,
+        bank_account_number: formData.bank_account_number,
+        bank_swift_code: formData.bank_swift_code,
       } as any);
       if (error) {
         setSavedStatus("idle");
@@ -1791,16 +1803,54 @@ export default function MyPractice() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className={SECTION_CONTENT_CLASS}>
-                <div className="space-y-1.5">
-                  <Label>Banking Details</Label>
-                  <Textarea
-                    value={formData.banking_details}
-                    onChange={(e) => setFormData({ ...formData, banking_details: e.target.value })}
-                    placeholder={"Bank Name:\nAccount Type:\nAccount Number:\nSWIFT Code:"}
-                    rows={4}
-                  />
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bank_account_name">Account Name</Label>
+                    <Input
+                      id="bank_account_name"
+                      value={formData.bank_account_name}
+                      onChange={(e) => setFormData({ ...formData, bank_account_name: e.target.value })}
+                      placeholder="e.g. Dr J Smith Inc"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bank_name">Bank Name</Label>
+                    <Input
+                      id="bank_name"
+                      value={formData.bank_name}
+                      onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                      placeholder="e.g. Standard Bank"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bank_account_type">Account Type</Label>
+                    <Input
+                      id="bank_account_type"
+                      value={formData.bank_account_type}
+                      onChange={(e) => setFormData({ ...formData, bank_account_type: e.target.value })}
+                      placeholder="e.g. Cheque / Current"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bank_account_number">Account Number</Label>
+                    <Input
+                      id="bank_account_number"
+                      value={formData.bank_account_number}
+                      onChange={(e) => setFormData({ ...formData, bank_account_number: e.target.value })}
+                      placeholder="e.g. 123456789"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="bank_swift_code">SWIFT Code</Label>
+                    <Input
+                      id="bank_swift_code"
+                      value={formData.bank_swift_code}
+                      onChange={(e) => setFormData({ ...formData, bank_swift_code: e.target.value })}
+                      placeholder="e.g. SBZAZAJJ"
+                    />
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Used on invoices so patients know where to pay. Stored as free text — enter whichever of Bank Name, Account Type, Account Number and SWIFT Code apply to you.
+                    Used on invoices so patients know where to pay.
                   </p>
                 </div>
               </AccordionContent>
