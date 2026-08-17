@@ -21,6 +21,7 @@ import {
   ChevronDown,
   MessageSquare,
   type LucideIcon,
+  HeartHandshake,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { resolvePermissions } from "@/features/patients/lib/careTeamPermissions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
