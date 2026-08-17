@@ -60,7 +60,7 @@ serve(async (req) => {
       to = body.recipientEmail;
     }
 
-    if (body.documentId && (!subject || !documentContent)) {
+    if (body.documentId && !documentHtml && (!subject || !documentContent)) {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabase = createClient(supabaseUrl, supabaseKey);

@@ -70,14 +70,13 @@ interface NavSection {
  *  practice-facing tools, "My Holarchy" for their own profile — with SOS
  *  standalone above/below both, matching the heading pattern already used
  *  for hospital/ER provider sidebars. */
-const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
-];
+const DOCTOR_TOP_ITEMS: (NavItem & { tour?: string })[] = [];
 
 const DOCTOR_SECTIONS: NavSection[] = [
   {
     title: "My Holarprac",
     items: [
+      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
       { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
       { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
@@ -94,20 +93,8 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
   },
-  {
-    title: "My Holarchy",
-    items: [
-      { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.myPersonalDashboard", to: "/my-dashboard" },
-      { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
-      { icon: Activity, label: "My Biolog", labelKey: "nav.myBiolog", to: "/biolog" },
-      { icon: BedDouble, label: "My Admissions", labelKey: "nav.myAdmissions", to: "/patient/admissions" },
-      { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/patient/calendar" },
-      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/patient/tasks" },
-      { icon: Gift, label: "My Rewards", labelKey: "nav.myRewards", to: "/doctor/rewards" },
-      { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
-    ],
-  },
 ];
+
 
 const DOCTOR_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/doctor/holarchelp", danger: true },
@@ -217,13 +204,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
   /** Doctors can flip the sidebar between their practice menu and their own
-   *  patient menu with the badge next to Dashboard. The choice persists. */
-  const [profileMode, setProfileMode] = useState<"doctor" | "patient">(() =>
-    (localStorage.getItem("sidebarProfileMode") as "doctor" | "patient") || "doctor",
-  );
-  useEffect(() => {
-    localStorage.setItem("sidebarProfileMode", profileMode);
-  }, [profileMode]);
+   *  patient menu with the badge next to the dashboard. Doctor mode is always
+   *  the starting point for a fresh entry into the app. */
+  const [profileMode, setProfileMode] = useState<"doctor" | "patient">("doctor");
+
   const doctorInPatientMode = isDoctor && profileMode === "patient";
 
   const isPatientMenu =
@@ -459,8 +443,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           ) : (
             <div className="space-y-1.5">
               {isDoctor && profileToggle}
+              {doctorInPatientMode && (
+                <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+                  My Holarchy
+                </p>
+              )}
               {visibleItems.map((item) => renderNavLink(item))}
             </div>
+
 
 
           )}

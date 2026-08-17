@@ -1,9 +1,9 @@
 import { renderFormattedContent } from "@/features/documents/utils/documentFormatting";
 import { getFontFamilyCss } from "@/features/documents/templates/fontOptions";
-import holarcLogo from "@/assets/holarc-health-logo.png.asset.json";
+import holarcLogo from "@/assets/holarc-email-logo.png.asset.json";
 
 /** Absolute URL of the Holarc Health logo so it renders inside email clients. */
-export const HOLARC_EMAIL_LOGO_URL = `https://holarchealth.com${holarcLogo.url}`;
+export const HOLARC_EMAIL_LOGO_URL = `https://www.holarchealth.com${holarcLogo.url}`;
 
 interface SectionCell {
   text?: string;

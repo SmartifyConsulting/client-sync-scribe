@@ -2192,9 +2192,9 @@ export function PatientDetailsEditor({
                   </Collapsible>
 
                   <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                    <SectionHeader icon={User} label="General Practitioner" />
+                    <SectionHeader icon={User} label="Family Doctor" />
                     <CollapsibleContent className="p-3">
-                      <ViewField label="General Practitioner" value={patient.general_practitioner} />
+                      <ViewField label="Family Doctor" value={patient.general_practitioner} />
                     </CollapsibleContent>
                   </Collapsible>
                 </div>
@@ -3906,10 +3906,10 @@ export function PatientDetailsEditor({
 
                 {/* GP Search */}
                 <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-                  <SectionHeader icon={User} label="General Practitioner" />
+                  <SectionHeader icon={User} label="Family Doctor" />
                   <CollapsibleContent className="p-3">
                     <div className="space-y-1.5 relative">
-                      <Label>General Practitioner</Label>
+                      <Label>Family Doctor</Label>
                       <Input
                         className="text-sm"
                         value={formData.general_practitioner}

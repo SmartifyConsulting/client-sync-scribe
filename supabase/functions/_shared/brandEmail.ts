@@ -7,7 +7,7 @@
  */
 
 export const HOLARC_LOGO_URL =
-  "https://www.holarchealth.com/__l5e/assets-v1/1e6552bc-8bfd-4710-a276-5405784abec3/holarc-health-logo.png";
+  "https://www.holarchealth.com/__l5e/assets-v1/b61ca18b-7d1a-4a2f-9445-cfbccf4c9b3e/holarc-email-logo.png";
 
 /** Brand tokens mirrored from the app's design system. */
 const TEAL = "#2AA79E";
@@ -68,7 +68,7 @@ export function brandedEmail({
           <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
             <tr>
               <td style="border-top:4px solid ${RED};padding:20px 28px 12px 28px;">
-                <a href="https://www.holarchealth.com" style="text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;"><img src="${HOLARC_LOGO_URL}" alt="Holarc Health" width="176" height="44" style="height:44px;width:176px;max-width:176px;display:block;border:0;outline:none;text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;" /></a>
+                <a href="https://www.holarchealth.com" style="text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;"><img src="${HOLARC_LOGO_URL}" alt="Holarc Health" width="200" height="79" style="height:79px;width:200px;max-width:200px;display:block;border:0;outline:none;text-decoration:none;color:${TEAL_DARK};font-family:${HEADING_FONT};font-weight:700;font-size:18px;" /></a>
               </td>
             </tr>
             <tr>
