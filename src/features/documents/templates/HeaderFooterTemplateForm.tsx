@@ -87,8 +87,16 @@ export function HeaderFooterTemplateForm({
     }
   }, [initialData]);
 
+  // Editing only the header or only the footer touches a shared letterhead
+  // record — keep its existing name instead of exposing a rename field.
+  const isPartialEdit = mode === "edit-header-only" || mode === "edit-footer-only";
+
   const handleSubmit = () => {
-    if (!formData.name.trim()) {
+    const resolvedName = isPartialEdit
+      ? (initialData?.name || formData.name)
+      : formData.name;
+
+    if (!resolvedName.trim()) {
       toast({
         title: "Error",
         description: "Template name is required",
@@ -99,7 +107,8 @@ export function HeaderFooterTemplateForm({
 
     onSubmit({
       id: initialData?.id,
-      name: formData.name,
+      name: resolvedName,
+
       description: formData.description,
       fontFamily: selectedFont,
       header,
