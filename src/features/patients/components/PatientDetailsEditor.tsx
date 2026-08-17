@@ -93,6 +93,9 @@ import { isValidOptionalEmail } from "@/lib/validation";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo.png";
 
 const PatientDocuments = lazy(() => import("@/pages/patient/PatientDocuments"));
+const TestResultsPanel = lazy(() =>
+  import("@/modules/holarchelp/components/TestResultsPanel").then((m) => ({ default: m.TestResultsPanel })),
+);
 const MyDoctors = lazy(() => import("@/pages/patient/MyDoctors"));
 const PatientRoundTable = lazy(() => import("@/pages/patient/PatientRoundTable"));
 const PatientCalendarLazy = lazy(() => import("@/pages/patient/PatientCalendar"));
@@ -381,7 +384,7 @@ function AnimatedCounter({ target }: { target: number }) {
 }
 
 const SECTION_TABS: Record<string, string[]> = {
-  health: ["personal", "medical", "overview", "history", "roundtable"],
+  health: ["personal", "medical", "overview", "history", "documents", "labresults", "roundtable"],
   admin: ["calendar", "tasks", "programmes", "documents"],
 };
 
@@ -1551,6 +1554,16 @@ export function PatientDetailsEditor({
               My Sessions
             </TabsTrigger>
           )}
+          {show("documents") && (
+            <TabsTrigger value="documents" className={triggerClass}>
+              {t("nav.myDocuments", "My Documents")}
+            </TabsTrigger>
+          )}
+          {show("labresults") && (
+            <TabsTrigger value="labresults" className={triggerClass}>
+              {t("nav.labResults", "Lab Results")}
+            </TabsTrigger>
+          )}
           {show("roundtable") && (
             <TabsTrigger value="roundtable" className={triggerClass}>
               {t("patientProfile.tabRoundTable")}
@@ -1569,11 +1582,6 @@ export function PatientDetailsEditor({
           {show("programmes") && (
             <TabsTrigger value="programmes" className={triggerClass}>
               Programmes
-            </TabsTrigger>
-          )}
-          {show("documents") && (
-            <TabsTrigger value="documents" className={triggerClass}>
-              {t("nav.myDocuments")}
             </TabsTrigger>
           )}
         </TabsList>
@@ -2226,6 +2234,24 @@ export function PatientDetailsEditor({
                   }
                 >
                   <PatientDocuments hideHeader={false} />
+                </Suspense>
+              </TabsContent>
+            )}
+
+            {isSelfService && (
+              <TabsContent value="labresults" className="mt-4">
+                <div className="mb-4">
+                  <h2 className="text-[18px] font-semibold text-primary-dark">Lab Results</h2>
+                  <p className="text-xs text-muted-foreground">Lab requests and results shared by your care team.</p>
+                </div>
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  }
+                >
+                  <TestResultsPanel patientId={patient.id} />
                 </Suspense>
               </TabsContent>
             )}
@@ -4017,6 +4043,24 @@ export function PatientDetailsEditor({
                 }
               >
                 <PatientDocuments hideHeader />
+              </Suspense>
+            </TabsContent>
+          )}
+
+          {isSelfService && (
+            <TabsContent value="labresults" className="mt-4">
+              <div className="mb-4">
+                <h2 className="text-[18px] font-semibold text-primary-dark">Lab Results</h2>
+                <p className="text-xs text-muted-foreground">Lab requests and results shared by your care team.</p>
+              </div>
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                }
+              >
+                <TestResultsPanel patientId={patient.id} />
               </Suspense>
             </TabsContent>
           )}
