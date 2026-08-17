@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, addDays, isSameDay } from "date-fns";
+import { DoctorProfileDialog } from "@/components/doctors/DoctorProfileDialog";
 
 
 interface RoundTableNote {
@@ -16,6 +17,7 @@ interface RoundTableNote {
 }
 
 interface LinkedDoctor {
+  id: string;
   name: string;
   specialty: string | null;
 }
@@ -38,6 +40,7 @@ export function TodaysBriefing() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [appointments, setAppointments] = useState<AppointmentWithHistory[]>([]);
+  const [viewDoctorId, setViewDoctorId] = useState<string | null>(null);
   const [translatedAppointments, setTranslatedAppointments] = useState<AppointmentWithHistory[] | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -201,8 +204,8 @@ export function TodaysBriefing() {
             conditions: null,
             lastPrescription: 'Sertraline 50mg daily',
             linkedDoctors: [
-              { name: 'Dr. Emily Roberts', specialty: 'Psychiatrist' },
-              { name: 'Dr. James Wilson', specialty: 'Cardiologist' }
+              { id: '', name: 'Dr. Emily Roberts', specialty: 'Psychiatrist' },
+              { id: '', name: 'Dr. James Wilson', specialty: 'Cardiologist' }
             ],
             unreadRoundTableNotes: [
               { patientName: realPatients?.[0]?.name || 'Sarah Johnson', doctorName: 'Dr. Emily Roberts', content: 'Patient mentioned considering alternative therapy options. Worth discussing in next session.' }
@@ -219,7 +222,7 @@ export function TodaysBriefing() {
             conditions: null,
             lastPrescription: 'Lisinopril 10mg daily',
             linkedDoctors: [
-              { name: 'Dr. Sarah Thompson', specialty: 'Nephrologist' }
+              { id: '', name: 'Dr. Sarah Thompson', specialty: 'Nephrologist' }
             ],
             unreadRoundTableNotes: [],
           },
@@ -312,9 +315,10 @@ export function TodaysBriefing() {
                 if (doctors) {
                   linkedDoctors = doctors
                     .filter(d => d.full_name)
-                    .map(d => ({ 
-                      name: d.full_name as string, 
-                      specialty: (d as any).specialty || null 
+                    .map(d => ({
+                      id: d.id,
+                      name: d.full_name as string,
+                      specialty: (d as any).specialty || null
                     }));
               }
             }
@@ -799,12 +803,26 @@ export function TodaysBriefing() {
                   )}
 
                   {apt.linkedDoctors.length > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs">
+                    <div className="flex items-center gap-1.5 text-xs flex-wrap">
                       <Users className="h-4 w-4 text-blue-600" />
                       <span className="text-muted-foreground">
-                        {apt.linkedDoctors.map(d => 
-                          d.specialty ? `${d.name} (${d.specialty})` : d.name
-                        ).join(', ')}
+                        {apt.linkedDoctors.map((d, i) => (
+                          <span key={d.id || d.name}>
+                            {i > 0 && ", "}
+                            {d.id ? (
+                              <button
+                                type="button"
+                                onClick={() => setViewDoctorId(d.id)}
+                                className="hover:underline hover:text-primary"
+                              >
+                                {d.name}
+                              </button>
+                            ) : (
+                              d.name
+                            )}
+                            {d.specialty ? ` (${d.specialty})` : ""}
+                          </span>
+                        ))}
                       </span>
                     </div>
                   )}
@@ -835,6 +853,8 @@ export function TodaysBriefing() {
           ))}
         </div>
       )}
+
+      <DoctorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InviteDoctorDialog } from "@/components/patient/InviteDoctorDialog";
+import { DoctorProfileDialog } from "@/components/doctors/DoctorProfileDialog";
 import { useToast } from "@/hooks/use-toast";
 import { LANGUAGES, COMMON_SPECIALTIES } from "@/lib/languages";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
   const [uninviteTarget, setUninviteTarget] = useState<DoctorAccess | null>(null);
   const [uninviteLoading, setUninviteLoading] = useState(false);
   const [detailsDoctor, setDetailsDoctor] = useState<ProviderResult | null>(null);
+  const [viewDoctorId, setViewDoctorId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -289,7 +291,11 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
 
     return (
       <div className="flex items-center justify-between gap-3 p-3">
-        <div className="flex items-center gap-3 min-w-0">
+        <button
+          type="button"
+          onClick={() => setViewDoctorId(doctor.id)}
+          className="flex items-center gap-3 min-w-0 text-left hover:opacity-80 transition-opacity"
+        >
           <Avatar className="h-10 w-10 shrink-0">
             <AvatarImage src={doctor.avatar_url || undefined} />
             <AvatarFallback className="bg-primary/10 text-primary text-sm">
@@ -297,7 +303,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col min-w-0">
-            <span className="font-medium text-sm text-foreground truncate">{doctor.full_name || "Unknown Doctor"}</span>
+            <span className="font-medium text-sm text-foreground truncate hover:underline">{doctor.full_name || "Unknown Doctor"}</span>
             <div className="flex items-center gap-1.5 flex-wrap">
               {doctor.specialty && (
                 <Badge className={`text-xs font-medium border-0 ${getSpecialtyColor(doctor.specialty)}`}>
@@ -317,7 +323,7 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
               </span>
             )}
           </div>
-        </div>
+        </button>
         <div className="flex items-center gap-2 shrink-0">
           {mode === "active" && (
             <TooltipProvider>
@@ -717,6 +723,8 @@ export default function MyDoctors({ hideHeader = false }: { hideHeader?: boolean
           </div>
         </DialogContent>
       </Dialog>
+
+      <DoctorProfileDialog doctorId={viewDoctorId} onOpenChange={(o) => !o && setViewDoctorId(null)} />
     </div>
   );
 }
