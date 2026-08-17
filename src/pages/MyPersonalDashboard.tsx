@@ -247,25 +247,24 @@ export default function MyPersonalDashboard() {
       {/* Hero: photo, greeting, Vulas, appointments */}
       <PatientHeroCard emotionalLine={GREETING_LINE[state]} />
 
-      {/* My Journey — overall summary */}
-      <Panel unlocked={unlocked}>
-        <div className="flex items-start gap-3">
-          <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-            <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
-          </span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">🌱 My Journey</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              See how your choices, patterns and wellbeing are evolving.
-            </p>
-            <ul className="mt-2 space-y-1.5">
-              {INSIGHTS.map((i) => (
-                <li key={i} className="text-xs text-muted-foreground">{i}</li>
-              ))}
-            </ul>
-          </div>
+      {/* Ask Holarc — top frame */}
+      <div className={cn("rounded-lg border p-3 flex items-center gap-3", unlocked ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30")}>
+        <Sparkles className={cn("h-5 w-5 shrink-0", unlocked ? "text-primary" : "text-muted-foreground")} />
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold text-foreground">You don't have to figure it out alone</p>
+          <p className="text-[10px] text-muted-foreground">Something on your mind? A place to slow down and find your own way forward.</p>
         </div>
-      </Panel>
+        <button
+          type="button"
+          onClick={() => navigate("/ask-maeve")}
+          className={cn(
+            "shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold",
+            unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
+          )}
+        >
+          <Sparkles className="h-3.5 w-3.5" /> Ask Holarc
+        </button>
+      </div>
 
       {/* Daily summary (half width) + Quick View dropdown on the same row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
@@ -301,6 +300,11 @@ export default function MyPersonalDashboard() {
                   </div>
                 ))}
               </div>
+              <ul className="mt-3 space-y-1.5">
+                {INSIGHTS.map((i) => (
+                  <li key={i} className="text-xs text-muted-foreground">{i}</li>
+                ))}
+              </ul>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Button size="sm" variant="outline" className="h-9 text-xs gap-1.5" onClick={() => navigate("/biolog")} disabled={!biologUnlocked}>
                   <TrendingUp className="h-3.5 w-3.5" /> Open Biolog
@@ -347,11 +351,11 @@ export default function MyPersonalDashboard() {
             muted={!unlocked}
           />
           <div className="grid grid-cols-2 gap-4">
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {HAPPENING.map((h) => (
-                <li key={h.title} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5">
-                  <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-                    <h.icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
+                <li key={h.title} className="flex items-start gap-1.5 rounded-md -mx-1 px-1 py-0.5">
+                  <span className={cn("flex h-6 w-6 items-center justify-center rounded-lg shrink-0", unlocked ? "bg-primary/10" : "bg-muted")}>
+                    <h.icon className={cn("h-3.5 w-3.5", unlocked ? "text-primary" : "text-muted-foreground")} />
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-foreground">{h.title}</p>
@@ -361,12 +365,12 @@ export default function MyPersonalDashboard() {
               ))}
             </ul>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">Tasks</p>
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 {CARE_ITEMS.filter((c) => c.label === "Medication" || c.label === "Results").map((c) => (
-                  <li key={c.label} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5">
-                    <c.icon className="h-4 w-4 mt-0.5 text-primary" />
+                  <li key={c.label} className="flex items-start gap-1.5 rounded-md -mx-1 px-1 py-0.5">
+                    <c.icon className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-primary">{c.label}</p>
                       <p className="text-xs text-muted-foreground">{c.value}</p>
@@ -376,25 +380,6 @@ export default function MyPersonalDashboard() {
               </ul>
               <CardFooterLink label="See what needs your attention" onClick={() => navigate("/todos")} />
             </div>
-          </div>
-
-          {/* My Wellbeing — folded in as an ad-style banner */}
-          <div className={cn("mt-4 rounded-lg border p-3 flex items-center gap-3", unlocked ? "border-primary/30 bg-primary/5" : "border-border bg-muted/30")}>
-            <Sparkles className={cn("h-5 w-5 shrink-0", unlocked ? "text-primary" : "text-muted-foreground")} />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-foreground">You don't have to figure it out alone</p>
-              <p className="text-[10px] text-muted-foreground">Something on your mind? A place to slow down and find your own way forward.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigate("/ask-maeve")}
-              className={cn(
-                "shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold",
-                unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
-              )}
-            >
-              <Sparkles className="h-3.5 w-3.5" /> Ask Holarc
-            </button>
           </div>
         </Panel>
       </div>
