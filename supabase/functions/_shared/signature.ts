@@ -27,6 +27,8 @@ const COLORS: Record<string, string> = {
 export interface SignatureProfileLike {
   full_name?: string | null;
   signature_url?: string | null;
+  /** PNG of the typed signature rendered in the app with the real font. */
+  signature_render_url?: string | null;
   signature_font?: string | null;
   signature_color?: string | null;
   signature_font_size?: number | null;
@@ -37,8 +39,23 @@ export interface SignatureProfileLike {
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-export function renderSignatureHtml(profile?: SignatureProfileLike | null): string {
+export function renderSignatureHtml(
+  profile?: SignatureProfileLike | null,
+  opts?: {
+    /** When set, the signature image is referenced as `cid:<inlineCid>` so it
+     *  renders even when the client blocks remote images. */
+    inlineCid?: string;
+  },
+): string {
   if (!profile) return "";
+
+  const imageUrl = profile.signature_url || profile.signature_render_url;
+  if (imageUrl && opts?.inlineCid) {
+    return `<img src="cid:${opts.inlineCid}" alt="Signature" style="max-height:64px;display:block;border:0;" />`;
+  }
+  if (imageUrl) {
+    return `<img src="${imageUrl}" alt="Signature" style="max-height:64px;display:block;border:0;" />`;
+  }
 
   if (profile.signature_url) {
     return `<img src="${profile.signature_url}" alt="Signature" style="max-height:56px;display:block;border:0;" />`;

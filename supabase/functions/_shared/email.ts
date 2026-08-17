@@ -20,8 +20,17 @@ export interface SendEmailInput {
   replyTo?: string | EmailAddressInput;
   cc?: string | string[] | EmailAddressInput | EmailAddressInput[];
   bcc?: string | string[] | EmailAddressInput | EmailAddressInput[];
-  /** Base64-encoded file attachments (no data-url prefix). */
-  attachments?: Array<{ filename: string; content: string; contentType?: string }>;
+  /**
+   * Base64-encoded file attachments (no data-url prefix).
+   * Set `contentId` to embed the file inline in the HTML via `cid:<contentId>`
+   * — inline images render without the recipient trusting remote images.
+   */
+  attachments?: Array<{
+    filename: string;
+    content: string;
+    contentType?: string;
+    contentId?: string;
+  }>;
 }
 
 export interface SendEmailResult {
@@ -90,6 +99,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
       filename: a.filename,
       content: a.content,
       ...(a.contentType ? { content_type: a.contentType } : {}),
+      ...(a.contentId ? { content_id: a.contentId, disposition: "inline" } : {}),
     }));
   }
   if (input.replyTo) {

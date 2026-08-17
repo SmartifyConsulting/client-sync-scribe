@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { renderSignaturePngBase64 } from "@/lib/signatureImage";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -636,6 +637,12 @@ export default function MyPractice() {
         sigIsSettingFromProfile.current = false;
       });
 
+      // Backfill the rendered signature image for profiles saved before we
+      // started storing one — emails need it to show the real font.
+      if (!(profile as any).signature_url && !(profile as any).signature_render_url) {
+        void syncSignatureRender(newSigData);
+      }
+
       // Sync voice state
       setLocalVoice((profile as any).narration_voice || "shimmer");
 
@@ -702,6 +709,42 @@ export default function MyPractice() {
     };
   }, [formData]);
 
+  /** Renders the typed signature to a PNG and stores it on the profile so that
+   *  outbound emails can embed the doctor's real signature font. */
+  const syncSignatureRender = async (override?: typeof sigFormData) => {
+    if (!user) return;
+    const sig = override || sigFormData;
+    try {
+      const base64 = await renderSignaturePngBase64({
+        full_name: profile?.full_name,
+        signature_font: sig.signature_font,
+        signature_color: sig.signature_color,
+        signature_font_size: sig.signature_font_size,
+        signature_bold: sig.signature_bold,
+        signature_italic: sig.signature_italic,
+      });
+      if (!base64) return;
+      const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const path = `${user.id}/signature.png`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, new Blob([bytes], { type: "image/png" }), {
+          upsert: true,
+          contentType: "image/png",
+        });
+      if (upErr) {
+        console.error("Signature render upload failed", upErr.message);
+        return;
+      }
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      await updateProfile({
+        signature_render_url: `${data.publicUrl}?t=${Date.now()}`,
+      } as any);
+    } catch (e) {
+      console.error("Signature render failed", e);
+    }
+  };
+
   // ── Auto-save signature debounce ──
   useEffect(() => {
     if (!sigHasInitialized.current || !user || sigIsSettingFromProfile.current) return;
@@ -726,7 +769,11 @@ export default function MyPractice() {
       } else {
         setSavedStatus("saved");
         setTimeout(() => setSavedStatus("idle"), 2000);
+        // Render the typed signature to a PNG so outbound emails show the exact
+        // handwriting font (email clients strip web fonts).
+        void syncSignatureRender();
       }
+
     }, 1500);
     return () => {
       if (sigDebounceTimer.current) clearTimeout(sigDebounceTimer.current);

@@ -1,7 +1,14 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { sendEmail } from "../_shared/email.ts";
-import { brandedEmail, escapeHtml } from "../_shared/brandEmail.ts";
+import {
+  brandedEmail,
+  escapeHtml,
+  fetchInlineAttachment,
+  HOLARC_LOGO_CID,
+  HOLARC_LOGO_URL,
+  HOLARC_SIGNATURE_CID,
+} from "../_shared/brandEmail.ts";
 import { renderSignatureHtml, buildGreeting } from "../_shared/signature.ts";
 
 const APP_URL = "https://holarchealth.com";
@@ -112,16 +119,31 @@ serve(async (req) => {
     );
 
     let signatureHtml = "";
+    let signatureAttachment: Awaited<ReturnType<typeof fetchInlineAttachment>> = null;
     try {
       const { data: senderProfile } = await admin
         .from("profiles")
         .select(
-          "full_name, signature_url, signature_font, signature_color, signature_font_size, signature_bold, signature_italic",
+          "full_name, signature_url, signature_render_url, signature_font, signature_color, signature_font_size, signature_bold, signature_italic",
         )
         .eq("id", user.id)
         .maybeSingle();
       if (senderProfile) {
-        signatureHtml = renderSignatureHtml(senderProfile as any);
+        // Embed the signature image inline when we have one, so the doctor's
+        // chosen handwriting font survives clients that block web fonts.
+        const sigUrl =
+          (senderProfile as any).signature_url || (senderProfile as any).signature_render_url;
+        if (sigUrl) {
+          signatureAttachment = await fetchInlineAttachment(
+            sigUrl,
+            "signature.png",
+            HOLARC_SIGNATURE_CID,
+          );
+        }
+        signatureHtml = renderSignatureHtml(
+          senderProfile as any,
+          signatureAttachment ? { inlineCid: HOLARC_SIGNATURE_CID } : undefined,
+        );
         senderName = body.senderName || (senderProfile as any).full_name || senderName;
       }
       if (!practiceName) {
@@ -171,6 +193,13 @@ serve(async (req) => {
       throw new Error("Missing required fields: to, subject, documentContent or documentHtml");
     }
 
+    // Inline the logo so recipients see it without trusting remote images.
+    const logoAttachment = await fetchInlineAttachment(
+      HOLARC_LOGO_URL,
+      "holarc-health.png",
+      HOLARC_LOGO_CID,
+    );
+
     let htmlContent: string;
     if (documentHtml) {
       // Caller supplied a fully-rendered HTML document (e.g. PAID invoice).
@@ -184,6 +213,7 @@ serve(async (req) => {
         practiceName,
         documentUrl,
         signatureHtml,
+        inlineLogo: !!logoAttachment,
         bodyHtml: `${greetingHtml}<div style="border:1px solid #e5e7eb;border-radius:10px;padding:20px;background:#ffffff;">${inner}</div>`,
       });
     } else {
@@ -219,6 +249,7 @@ serve(async (req) => {
         practiceName,
         documentUrl,
         signatureHtml,
+        inlineLogo: !!logoAttachment,
         bodyHtml: `${greetingHtml}<div style="white-space:pre-wrap;">${formattedContent}</div>${attachmentsHtml}`,
       });
     }
@@ -230,7 +261,12 @@ serve(async (req) => {
       subject,
       html: htmlContent,
       replyTo,
-      attachments: attachments.length ? attachments : undefined,
+      attachments: (() => {
+        const all = [...attachments];
+        if (logoAttachment) all.push(logoAttachment);
+        if (signatureAttachment) all.push(signatureAttachment);
+        return all.length ? all : undefined;
+      })(),
     });
 
     if (!result.ok) {
