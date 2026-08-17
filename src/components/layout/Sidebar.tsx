@@ -204,13 +204,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
   /** Doctors can flip the sidebar between their practice menu and their own
-   *  patient menu with the badge next to Dashboard. The choice persists. */
-  const [profileMode, setProfileMode] = useState<"doctor" | "patient">(() =>
-    (localStorage.getItem("sidebarProfileMode") as "doctor" | "patient") || "doctor",
-  );
-  useEffect(() => {
-    localStorage.setItem("sidebarProfileMode", profileMode);
-  }, [profileMode]);
+   *  patient menu with the badge next to the dashboard. Doctor mode is always
+   *  the starting point for a fresh entry into the app. */
+  const [profileMode, setProfileMode] = useState<"doctor" | "patient">("doctor");
+
   const doctorInPatientMode = isDoctor && profileMode === "patient";
 
   const isPatientMenu =
