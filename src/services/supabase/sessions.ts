@@ -15,6 +15,8 @@ export async function listSessions(patientId?: string) {
   let query = supabase
     .from("sessions")
     .select(WITH_PATIENT)
+    // Paused drafts are resumable work-in-progress, never session history.
+    .neq("status", "paused")
     .order("started_at", { ascending: false });
   if (patientId) query = query.eq("patient_id", patientId);
   const { data, error } = await query;

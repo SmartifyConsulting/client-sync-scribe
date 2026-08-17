@@ -104,6 +104,8 @@ export function useSessions(patientId?: string) {
           *,
           patient:patients(id, name, allergies, current_medications, conditions_diagnoses)
         `)
+        // Paused drafts are resumable work-in-progress, never session history.
+        .neq('status', 'paused')
         .order('started_at', { ascending: false });
 
       if (patientId) {
