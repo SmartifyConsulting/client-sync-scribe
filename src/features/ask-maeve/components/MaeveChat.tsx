@@ -6,14 +6,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { safeInvoke } from "@/services/edge/safeInvoke";
-import { useMaeveSession } from "../hooks/useMaeveSession";
+import { useMaeveSession, setMaeveMood, setMaeveFeedback } from "../hooks/useMaeveSession";
 import { useMaeveVoice } from "../hooks/useMaeveVoice";
 import { processLabel, stateLabel } from "../lib/processes";
 import { CLIENT_FALLBACK, looksLikeAdvice } from "../lib/suggestionDetector";
 import { buildTranscript, downloadTranscript, shareTranscript, transcriptFileName } from "../lib/transcript";
 import { downloadTranscriptPdf } from "../lib/maevePdf";
 import { deleteMaeveSession } from "../lib/deleteSession";
+import { logMoodToBiolog } from "../lib/logMoodToBiolog";
+import { MoodPicker } from "./MoodPicker";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,6 +66,12 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [confirmMessageId, setConfirmMessageId] = useState<string | null>(null);
   const [deletingMessage, setDeletingMessage] = useState(false);
+  const [showStartMood, setShowStartMood] = useState(false);
+  const [showEndMood, setShowEndMood] = useState(false);
+  const [endMood, setEndMood] = useState<number | null>(null);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [submittingClose, setSubmittingClose] = useState(false);
+  const startMoodPromptedRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const openedRef = useRef(false);
@@ -80,6 +95,23 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     if (loading || openedRef.current || !mode) return;
     if (messages.length === 0) startOpening();
   }, [loading, messages.length, mode, startOpening]);
+
+  // Ask how they're feeling right at the start, once per exploration, so we
+  // can measure the effect of the conversation later (mood_end - mood_start).
+  useEffect(() => {
+    if (loading || !session || startMoodPromptedRef.current) return;
+    if (session.mood_start != null) { startMoodPromptedRef.current = true; return; }
+    startMoodPromptedRef.current = true;
+    setShowStartMood(true);
+  }, [loading, session]);
+
+  const submitStartMood = async (mood: number) => {
+    setShowStartMood(false);
+    if (!sessionId) return;
+    await setMaeveMood(sessionId, "start", mood);
+    await logMoodToBiolog("before", mood);
+    reload();
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -171,6 +203,15 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
     await send(text);
   };
 
+  // Opens the "how are you feeling now" + feedback prompt; the actual close
+  // (and its side effects) only runs once that's submitted.
+  const requestClose = () => {
+    if (thinking || closing) return;
+    setEndMood(null);
+    setFeedbackText("");
+    setShowEndMood(true);
+  };
+
   const closeSession = async () => {
     setClosing(true);
     // Always release the microphone when the exploration ends.
@@ -191,6 +232,17 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         ok ? "Exploration closed — saved to your documents and a PDF to your device" : "Exploration closed, but the PDF could not be created",
       );
     }
+  };
+
+  const submitEndAndClose = async () => {
+    if (!sessionId || endMood == null) return;
+    setSubmittingClose(true);
+    await setMaeveMood(sessionId, "end", endMood);
+    await logMoodToBiolog("after", endMood);
+    await setMaeveFeedback(sessionId, endMood, feedbackText);
+    setSubmittingClose(false);
+    setShowEndMood(false);
+    await closeSession();
   };
 
   const transcriptText = () => buildTranscript(session, messages);
@@ -587,6 +639,44 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Mood check-in — start of exploration */}
+      <Dialog open={showStartMood} onOpenChange={(o) => { if (!o) setShowStartMood(false); }}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>How are you feeling right now?</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground text-center">
+            This helps us see how the conversation affects you. It's just for you.
+          </p>
+          <MoodPicker value={null} onChange={submitStartMood} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Mood check-in + feedback — end of exploration, before it actually closes */}
+      <Dialog open={showEndMood} onOpenChange={(o) => { if (!o && !submittingClose) setShowEndMood(false); }}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>How are you feeling now?</DialogTitle>
+          </DialogHeader>
+          <MoodPicker value={endMood} onChange={setEndMood} />
+          <Textarea
+            rows={3}
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            placeholder="Any feedback on this conversation? (optional)"
+            className="text-sm"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEndMood(false)} disabled={submittingClose}>
+              Cancel
+            </Button>
+            <Button onClick={submitEndAndClose} disabled={endMood == null || submittingClose || closing}>
+              {submittingClose || closing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Finish & close"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Failed opening — visible error with a retry instead of an empty screen */}
       {error && messages.length === 0 && !thinking && (
         <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2">
@@ -631,7 +721,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
             )}
             <button
               disabled={closing}
-              onClick={closeSession}
+              onClick={requestClose}
               className="flex items-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:border-destructive hover:text-destructive disabled:opacity-50"
             >
               <Square className="h-3.5 w-3.5" /> {closing ? "Stopping…" : "Stop"}
@@ -704,7 +794,7 @@ export function MaeveChat({ sessionId, initialMode }: Props) {
         ))}
         <button
           disabled={thinking || closing}
-          onClick={closeSession}
+          onClick={requestClose}
           className="rounded-full border border-destructive bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive transition hover:bg-destructive/20 disabled:opacity-50"
         >
           {closing ? "Closing…" : "Stop and close (saves PDF)"}

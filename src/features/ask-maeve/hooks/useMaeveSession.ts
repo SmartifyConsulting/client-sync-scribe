@@ -19,6 +19,10 @@ export interface MaeveSessionRow {
   conversation_state: string;
   session_summary: string | null;
   created_at: string;
+  mood_start: number | null;
+  mood_end: number | null;
+  feedback_rating: number | null;
+  feedback_text: string | null;
 }
 
 export function useMaeveSession(sessionId?: string) {
@@ -97,6 +101,32 @@ export async function createMaeveSession(): Promise<string | null> {
     return null;
   }
   return (data as any).id as string;
+}
+
+/** Records the mood picked at the start or end of an exploration. */
+export async function setMaeveMood(sessionId: string, which: "start" | "end", mood: number): Promise<boolean> {
+  const { error } = await supabase
+    .from("ask_maeve_sessions" as any)
+    .update({ [which === "start" ? "mood_start" : "mood_end"]: mood } as any)
+    .eq("id", sessionId);
+  if (error) {
+    console.error("setMaeveMood failed", error);
+    return false;
+  }
+  return true;
+}
+
+/** Records the closing feedback (star rating + free text) for an exploration. */
+export async function setMaeveFeedback(sessionId: string, rating: number | null, text: string): Promise<boolean> {
+  const { error } = await supabase
+    .from("ask_maeve_sessions" as any)
+    .update({ feedback_rating: rating, feedback_text: text || null } as any)
+    .eq("id", sessionId);
+  if (error) {
+    console.error("setMaeveFeedback failed", error);
+    return false;
+  }
+  return true;
 }
 
 /** Renames an exploration. Empty titles fall back to the auto-generated name. */
