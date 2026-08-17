@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { sendEmail } from "../_shared/email.ts";
+import { brandedEmail } from "../_shared/brandEmail.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
