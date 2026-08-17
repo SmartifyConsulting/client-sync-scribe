@@ -35,6 +35,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { getTodoDisplay, type TodoDisplayInput } from "@/lib/todoDisplay";
+import { isDocumentTodoKind } from "@/lib/resolveTodoDocumentId";
 
 export interface TodoRowItem extends TodoDisplayInput {
   id: string;
@@ -253,7 +254,7 @@ export function TodoRow({
 
         {/* Actions */}
         <div className="flex items-center gap-0.5 shrink-0">
-          {!isAppointment && todo.document_id && onPreview && (
+          {!isAppointment && (todo.document_id || isDocumentTodoKind(display.kind)) && onPreview && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

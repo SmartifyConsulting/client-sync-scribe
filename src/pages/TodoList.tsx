@@ -68,6 +68,7 @@ import { TodoRow } from "@/components/todos/TodoRow";
 import { UserPlus } from "lucide-react";
 import { AssignTaskDialog } from "@/components/tasks/AssignTaskDialog";
 import { getTodoDisplay } from "@/lib/todoDisplay";
+import { resolveTodoDocumentId } from "@/lib/resolveTodoDocumentId";
 import { isClinicalObservationTask } from "@/lib/taskAssignee";
 
 interface TodoItem {
@@ -161,10 +162,11 @@ export default function TodoList() {
   );
 
   const handlePreviewDoc = async (todo: TodoItem) => {
-    if (!todo.document_id) return;
-    setLoadingPreview(todo.document_id);
+    setLoadingPreview(todo.id);
     try {
-      const { data: doc } = await supabase.from('documents').select('*').eq('id', todo.document_id).maybeSingle();
+      const docId = await resolveTodoDocumentId(todo, getTodoDisplay(todo as any).kind);
+      if (!docId) throw new Error('Document not found');
+      const { data: doc } = await supabase.from('documents').select('*').eq('id', docId).maybeSingle();
       if (!doc) throw new Error('Document not found');
 
       const resolved = await resolveDocumentPreviewContent({
@@ -186,7 +188,7 @@ export default function TodoList() {
       });
     } catch (err) {
       console.error('Preview error:', err);
-      toast({ title: 'Preview failed', variant: 'destructive' });
+      toast({ title: 'Preview unavailable', description: 'The linked document could not be found.', variant: 'destructive' });
     } finally {
       setLoadingPreview(null);
     }
@@ -593,7 +595,7 @@ export default function TodoList() {
       saveEdit={saveEdit}
       cancelEdit={cancelEdit}
       sending={sendingDocId === todo.document_id}
-      previewing={loadingPreview === todo.document_id}
+      previewing={loadingPreview === todo.id}
     />
   );
 

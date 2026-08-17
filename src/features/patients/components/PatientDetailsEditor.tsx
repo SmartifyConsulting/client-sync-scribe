@@ -790,14 +790,30 @@ export function PatientDetailsEditor({
     [patient?.id, isDoctor, toast, queryClient],
   );
 
+  // Medical insurance makes employer details compulsory.
+  const insuranceCaptured = Boolean(
+    formData.medical_aid?.trim() || formData.medical_aid_number?.trim(),
+  );
+
   const performSave = useCallback(
+
     async (data: typeof formData, surgeriesData: Surgery[]) => {
       if (!data.first_name.trim() && !data.last_name.trim()) return;
       if (!patient?.id) {
         toast({ title: "Cannot save without a patient record", variant: "destructive" });
         return;
       }
+      // Employer becomes compulsory once medical insurance has been captured.
+      if ((data.medical_aid?.trim() || data.medical_aid_number?.trim()) && !data.employer?.trim()) {
+        toast({
+          title: "Employer required",
+          description: "Employer details are required when medical insurance is captured.",
+          variant: "destructive",
+        });
+        return;
+      }
       const fullName = `${data.first_name.trim()} ${data.last_name.trim()}`.trim();
+
       const isChronic = currentMedications.some((m) => m.is_chronic);
       setSaving(true);
       await onSave({
@@ -1898,7 +1914,8 @@ export function PatientDetailsEditor({
                       ))}
                     </div>
                   ) : (
-                    <div className={FIELD_GRID_4_CLASS}>
+                    <div className={FIELD_GRID_2_CLASS}>
+
                       <ViewField label="Name" value={patient.next_of_kin_name} />
                       <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
                       <ViewField label="Phone" value={stripDialCode(patient.next_of_kin_phone)} />
@@ -1986,7 +2003,8 @@ export function PatientDetailsEditor({
                               <div key={a.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-foreground">{a.name}</p>
+                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">{a.name}</span>
+
                                     {(a.reaction || a.date_identified) && (
                                       <p className="text-xs text-muted-foreground">
                                         {a.reaction || ""}
@@ -2032,9 +2050,12 @@ export function PatientDetailsEditor({
                                 <Pill className="h-4 w-4 text-muted-foreground shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-medium text-foreground">
-                                    {m.name}
-                                    {m.dosage ? ` — ${m.dosage}` : ""}
+                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">
+                                      {m.name}
+                                      {m.dosage ? ` — ${m.dosage}` : ""}
+                                    </span>
                                   </p>
+
                                   {(m.start_date || m.end_date) && (
                                     <p className="text-xs text-muted-foreground">
                                       {m.start_date ? format(new Date(m.start_date), "MMM yyyy") : "?"} —{" "}
@@ -2080,7 +2101,8 @@ export function PatientDetailsEditor({
                               <div key={c.id} className="p-1.5 rounded-lg bg-primary/5 border border-primary/20">
                                 <div className="flex items-center gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-foreground">{c.name}</p>
+                                    <span className="inline-flex items-center rounded-full bg-green-600 px-2 py-0.5 text-xs font-medium text-white">{c.name}</span>
+
                                     <p className="text-xs text-muted-foreground">
                                       {c.diagnosed_date
                                         ? format(new Date(c.diagnosed_date), "MMM d, yyyy")
@@ -2359,7 +2381,13 @@ export function PatientDetailsEditor({
             <Collapsible defaultOpen className="rounded-xl border border-neutral-400 bg-white overflow-hidden">
               <SectionHeader icon={ShieldCheck} label="Medical Insurance" />
               <CollapsibleContent className="p-3">
+                {insuranceCaptured && !formData.employer?.trim() && (
+                  <p className="mb-2 text-xs text-destructive">
+                    Employer details are required when medical insurance is captured.
+                  </p>
+                )}
                 <div className={FIELD_GRID_2_CLASS}>
+
                   <div className="space-y-1.5">
                     <Label>Insurance Provider</Label>
                     <Input
@@ -2795,7 +2823,7 @@ export function PatientDetailsEditor({
 
                 {/* Legacy single NOK if no members yet */}
                 {nokMembers.length === 0 && (
-                  <div className={FIELD_GRID_4_CLASS + " mb-3"}>
+                  <div className={FIELD_GRID_2_CLASS + " mb-3"}>
                     <div className="space-y-1.5">
                       <Label>Name</Label>
                       <Input
@@ -2983,7 +3011,9 @@ export function PatientDetailsEditor({
               <CollapsibleContent className="p-3">
                 <div className={FIELD_GRID_2_CLASS}>
                   <div className="space-y-1.5">
-                    <Label htmlFor="employer">Employer</Label>
+                    <Label htmlFor="employer">
+                      Employer{insuranceCaptured ? " *" : ""}
+                    </Label>
                     <Input
                       id="employer"
                       className="text-sm"
@@ -2991,7 +3021,13 @@ export function PatientDetailsEditor({
                       onChange={(e) => updateFormData({ employer: e.target.value })}
                       placeholder="Company name"
                     />
+                    {insuranceCaptured && !formData.employer?.trim() && (
+                      <p className="text-xs text-destructive">
+                        Employer details are required when medical insurance is captured.
+                      </p>
+                    )}
                   </div>
+
                   <div className="space-y-1.5">
                     <Label htmlFor="occupation">Occupation</Label>
                     <Input

@@ -101,6 +101,18 @@ const formatDate = (dateString: string): string => {
   return date.toLocaleDateString();
 };
 
+/** True when a letterhead side (header or footer) has any text or image. */
+const hfSideHasContent = (side: any): boolean => {
+  if (!side) return false;
+  return ["left", "center", "right"].some((k) => {
+    const s = side[k];
+    if (!s) return false;
+    return Boolean((s.text || "").trim()) || Boolean(s.imageUrl);
+  });
+};
+
+
+
 
 export default function Documents({ hideHeader = false }: { hideHeader?: boolean }) {
   const { t } = useTranslation();
@@ -560,8 +572,10 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {filteredHFTemplates.flatMap((template) => ([
+                hfSideHasContent(template.header) ? (
                 <div
                   key={`${template.id}-header`}
+
                   className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -579,9 +593,10 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                           <Eye className="h-4 w-4 mr-2" />
                           Preview
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setEditingHFTemplate(template)}>
+                        <DropdownMenuItem onClick={() => { setEditingHFTemplate(template); setEditingHFMode("header-only"); }}>
                           <Edit3 className="h-4 w-4 mr-2" />
-                          Edit
+                          Edit Header Template
+
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -596,12 +611,16 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   </div>
                   <h3 className="text-sm font-semibold text-foreground mb-1">Header</h3>
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {template.name}
+                    From: {template.name}
                   </p>
                   <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
-                </div>,
+                </div>
+                ) : null,
+
+                hfSideHasContent(template.footer) ? (
                 <div
                   key={`${template.id}-footer`}
+
                   className="group rounded-xl border border-primary bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -636,10 +655,12 @@ export default function Documents({ hideHeader = false }: { hideHeader?: boolean
                   </div>
                   <h3 className="text-sm font-semibold text-foreground mb-1">Footer</h3>
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {template.name}
+                    From: {template.name}
                   </p>
                   <span className="text-sm text-muted-foreground">{formatDate(template.updated_at)}</span>
-                </div>,
+                </div>
+                ) : null,
+
               ]))}
 
               {/* Add New Card */}

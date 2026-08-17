@@ -1,0 +1,1 @@
+UPDATE public.header_footer_templates SET name = 'Header and Footer' WHERE id = 'c41946d8-d3bc-4511-9940-3f8157a9b279';
