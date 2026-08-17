@@ -32,6 +32,7 @@ import {
   Activity,
   Sparkles,
   Lock,
+  Stethoscope,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -81,16 +82,12 @@ const DOCTOR_SECTIONS: NavSection[] = [
       { icon: LayoutDashboard, label: "My Dashboard", labelKey: "nav.dashboard", to: "/doctor-dashboard", tour: "doctor-home" },
       { icon: Settings2, label: "My Practice", labelKey: "nav.myPractice", to: "/practice", tour: "practice-settings" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
-      { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
-      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
-    ],
-  },
-  {
-    title: "My Work",
-    items: [
       { icon: Users, label: "My Patients", labelKey: "nav.myPatients", to: "/patients", tour: "import-patients" },
       { icon: BedDouble, label: "Admissions", labelKey: "nav.admissions", to: "/admissions" },
+      { icon: Stethoscope, label: "Sessions", labelKey: "nav.mySessions", to: "/sessions" },
       { icon: FolderOpen, label: "Documents", labelKey: "nav.allDocuments", to: "/documents" },
+      { icon: Calendar, label: "My Calendar", labelKey: "nav.myCalendar", to: "/calendar" },
+      { icon: ListChecks, label: "My Tasks", labelKey: "nav.myTasks", to: "/todos", tour: "doctor-tasks" },
       { icon: Users2, label: "Round Tables", labelKey: "nav.myRoundTables", to: "/doctor/round-tables" },
     ],
   },
