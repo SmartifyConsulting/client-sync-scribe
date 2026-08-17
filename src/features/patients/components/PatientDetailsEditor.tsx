@@ -2801,7 +2801,7 @@ export function PatientDetailsEditor({
 
                 {/* Legacy single NOK if no members yet */}
                 {nokMembers.length === 0 && (
-                  <div className={FIELD_GRID_4_CLASS + " mb-3"}>
+                  <div className={FIELD_GRID_2_CLASS + " mb-3"}>
                     <div className="space-y-1.5">
                       <Label>Name</Label>
                       <Input
