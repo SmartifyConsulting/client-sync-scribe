@@ -351,29 +351,11 @@ export default function MyPersonalDashboard() {
         </Panel>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+      <div className="space-y-4">
         {/* Main column */}
-        <div className="lg:col-span-3 space-y-4">
-          {/* Four summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <Panel title="My Care" icon={Pill} unlocked={unlocked} onClick={() => navigate("/patient/rewards")}>
-              <EmotionalHeadline emoji="💚" title={care.title} sub={care.sub} muted={!unlocked} />
-              <ul className="space-y-2">
-                {CARE_ITEMS.map((c) => (
-                  <li key={c.label}>
-                    <Link to={c.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
-                      <c.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-foreground">{c.label}</p>
-                        <p className="text-xs text-muted-foreground">{c.value}</p>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              <CardFooterLink label="See what needs your attention" onClick={() => navigate("/todos")} />
-            </Panel>
-
+        <div className="space-y-4">
+          {/* Three summary cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             <Panel title="My Wellbeing" icon={Sparkles} unlocked={unlocked} onClick={() => navigate("/ask-maeve")}>
               <EmotionalHeadline
                 emoji="✨"
@@ -462,7 +444,8 @@ export default function MyPersonalDashboard() {
             </Panel>
           </div>
 
-          {/* My Holarcy — Personal Care Circle, then Medical Team */}
+          {/* My Holarcy + What's happening — same row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
           <Panel title="My Holarcy" icon={HeartHandshake} unlocked={unlocked}>
             <div className="space-y-1">
               <p className="text-xs font-semibold text-foreground">Personal Care Circle</p>
@@ -531,20 +514,6 @@ export default function MyPersonalDashboard() {
             </div>
           </Panel>
 
-          {/* People I care for — its own row */}
-          <Panel title="People I care for" icon={Heart} unlocked={unlocked}>
-            <EmotionalHeadline
-              emoji="❤️"
-              title="They're okay."
-              sub="The people you're looking out for"
-              muted={!unlocked}
-            />
-            <PeopleICareFor unlocked={unlocked} />
-          </Panel>
-        </div>
-
-        {/* Right rail */}
-        <div className="lg:col-span-1 space-y-4">
           <Panel title="What's happening?" icon={CalendarDays} unlocked={unlocked} onClick={() => navigate("/patient/calendar")}>
             <EmotionalHeadline
               emoji="📅"
@@ -577,6 +546,38 @@ export default function MyPersonalDashboard() {
               View all care →
             </Link>
           </Panel>
+          </div>
+
+          {/* My Care + People I care for — same row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <Panel title="My Care" icon={Pill} unlocked={unlocked} onClick={() => navigate("/patient/rewards")}>
+              <EmotionalHeadline emoji="💚" title={care.title} sub={care.sub} muted={!unlocked} />
+              <ul className="space-y-2">
+                {CARE_ITEMS.map((c) => (
+                  <li key={c.label}>
+                    <Link to={c.to} className="flex items-start gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
+                      <c.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground">{c.label}</p>
+                        <p className="text-xs text-muted-foreground">{c.value}</p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <CardFooterLink label="See what needs your attention" onClick={() => navigate("/todos")} />
+            </Panel>
+
+            <Panel title="People I care for" icon={Heart} unlocked={unlocked}>
+              <EmotionalHeadline
+                emoji="❤️"
+                title="They're okay."
+                sub="The people you're looking out for"
+                muted={!unlocked}
+              />
+              <PeopleICareFor unlocked={unlocked} />
+            </Panel>
+          </div>
         </div>
       </div>
     </div>
