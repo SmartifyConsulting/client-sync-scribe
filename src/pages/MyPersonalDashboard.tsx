@@ -351,7 +351,7 @@ export default function MyPersonalDashboard() {
         {/* Main column */}
         <div className="lg:col-span-3 space-y-4">
           {/* Four summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <Panel title="My Care" icon={Pill} unlocked={unlocked} onClick={() => navigate("/patient/rewards")}>
               <EmotionalHeadline emoji="💚" title={care.title} sub={care.sub} muted={!unlocked} />
               <ul className="space-y-2">
@@ -409,35 +409,6 @@ export default function MyPersonalDashboard() {
               </div>
               <CardFooterLink label="Open my journey" onClick={() => navigate("/biolog")} />
             </Panel>
-          </div>
-
-          {/* People I care for */}
-          <Panel title="People I care for" icon={Heart} unlocked={unlocked}>
-            <EmotionalHeadline
-              emoji="❤️"
-              title="They're okay."
-              sub="The people you're looking out for"
-              muted={!unlocked}
-            />
-            <PeopleICareFor unlocked={unlocked} />
-          </Panel>
-
-          {/* Lower band: observations + round tables */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-            <Panel title="We've noticed" icon={Lightbulb} unlocked={unlocked} onClick={() => navigate("/biolog")}>
-              <EmotionalHeadline
-                emoji="💡"
-                title="A few patterns worth knowing"
-                sub="Observations from what you've logged — not diagnoses."
-                muted={!unlocked}
-              />
-              <ul className="space-y-1.5">
-                {INSIGHTS.map((i) => (
-                  <li key={i} className="text-xs text-muted-foreground">{i}</li>
-                ))}
-              </ul>
-              <CardFooterLink label="See what's behind this" onClick={() => navigate("/biolog")} />
-            </Panel>
 
             <Panel
               title="My Round Tables"
@@ -486,88 +457,117 @@ export default function MyPersonalDashboard() {
               )}
             </Panel>
           </div>
+
+          {/* My Holarc Medical Team + My Personal Care Circle — below My Care */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+            <Panel title="My Holarc Medical Team" icon={Users2} unlocked={unlocked} onClick={() => navigate("/patient/doctors")}>
+              <EmotionalHeadline
+                emoji="❤️"
+                title="You're not looking after yourself alone"
+                sub="The practitioners looking after you"
+                muted={!unlocked}
+              />
+              <ul className="space-y-2">
+                {CARE_CIRCLE.map((c) => (
+                  <li key={c.name}>
+                    <Link to={c.to} className="flex items-center gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
+                      <span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                        {c.name.slice(0, 2).toUpperCase()}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-foreground truncate">{c.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{c.role}</p>
+                      </div>
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                to="/patient/round-table"
+                className={cn(
+                  "mt-3 block rounded-lg px-3 py-2 text-center text-xs font-semibold",
+                  unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
+                )}
+              >
+                View my Round Table →
+              </Link>
+            </Panel>
+
+            <Panel
+              title="My Personal Care Circle"
+              icon={HeartHandshake}
+              unlocked={unlocked}
+              onClick={() => navigate("/patient/details?section=personal")}
+            >
+              <EmotionalHeadline
+                emoji="❤️"
+                title="They're close, even when they're far away"
+                sub="The friends and family you share parts of your profile with"
+                muted={!unlocked}
+              />
+              {careTeam.length === 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  No one added yet. Your Next of Kin is listed here by default.
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {careTeam.map((c: any) => (
+                    <li key={c.id} className="flex items-center gap-2">
+                      <span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
+                        {(c.name || "?").slice(0, 2).toUpperCase()}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold text-foreground truncate">{c.name || "Unnamed"}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {c.relationship || "Care team"} · {resolvePermissions(c).length} areas shared
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Link
+                to="/patient/details?section=personal"
+                className={cn(
+                  "mt-3 block rounded-lg px-3 py-2 text-center text-xs font-semibold",
+                  unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
+                )}
+              >
+                Manage my Care Team →
+              </Link>
+            </Panel>
+          </div>
+
+          {/* People I care for — its own row */}
+          <Panel title="People I care for" icon={Heart} unlocked={unlocked}>
+            <EmotionalHeadline
+              emoji="❤️"
+              title="They're okay."
+              sub="The people you're looking out for"
+              muted={!unlocked}
+            />
+            <PeopleICareFor unlocked={unlocked} />
+          </Panel>
+
+          <Panel title="We've noticed" icon={Lightbulb} unlocked={unlocked} onClick={() => navigate("/biolog")}>
+            <EmotionalHeadline
+              emoji="💡"
+              title="A few patterns worth knowing"
+              sub="Observations from what you've logged — not diagnoses."
+              muted={!unlocked}
+            />
+            <ul className="space-y-1.5">
+              {INSIGHTS.map((i) => (
+                <li key={i} className="text-xs text-muted-foreground">{i}</li>
+              ))}
+            </ul>
+            <CardFooterLink label="See what's behind this" onClick={() => navigate("/biolog")} />
+          </Panel>
         </div>
 
         {/* Right rail */}
         <div className="lg:col-span-1 space-y-4">
-          <Panel title="My Holarc Medical Team" icon={Users2} unlocked={unlocked} onClick={() => navigate("/patient/doctors")}>
-            <EmotionalHeadline
-              emoji="❤️"
-              title="You're not looking after yourself alone"
-              sub="The practitioners looking after you"
-              muted={!unlocked}
-            />
-            <ul className="space-y-2">
-              {CARE_CIRCLE.map((c) => (
-                <li key={c.name}>
-                  <Link to={c.to} className="flex items-center gap-2 rounded-md -mx-1 px-1 py-0.5 hover:bg-primary/5">
-                    <span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-                      {c.name.slice(0, 2).toUpperCase()}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-foreground truncate">{c.name}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{c.role}</p>
-                    </div>
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              to="/patient/round-table"
-              className={cn(
-                "mt-3 block rounded-lg px-3 py-2 text-center text-xs font-semibold",
-                unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
-              )}
-            >
-              View my Round Table →
-            </Link>
-          </Panel>
-
-          <Panel
-            title="My Holarc Care Team"
-            icon={HeartHandshake}
-            unlocked={unlocked}
-            onClick={() => navigate("/patient/details?section=personal")}
-          >
-            <EmotionalHeadline
-              emoji="❤️"
-              title="They're close, even when they're far away"
-              sub="The friends and family you share parts of your profile with"
-              muted={!unlocked}
-            />
-            {careTeam.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                No one added yet. Your Next of Kin is listed here by default.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {careTeam.map((c: any) => (
-                  <li key={c.id} className="flex items-center gap-2">
-                    <span className={cn("flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-semibold", unlocked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
-                      {(c.name || "?").slice(0, 2).toUpperCase()}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-foreground truncate">{c.name || "Unnamed"}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">
-                        {c.relationship || "Care team"} · {resolvePermissions(c).length} areas shared
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link
-              to="/patient/details?section=personal"
-              className={cn(
-                "mt-3 block rounded-lg px-3 py-2 text-center text-xs font-semibold",
-                unlocked ? "bg-primary/10 text-primary hover:bg-primary/15" : "bg-muted text-muted-foreground",
-              )}
-            >
-              Manage my Care Team →
-            </Link>
-          </Panel>
-
           <Panel title="What's happening?" icon={CalendarDays} unlocked={unlocked} onClick={() => navigate("/patient/calendar")}>
             <EmotionalHeadline
               emoji="📅"

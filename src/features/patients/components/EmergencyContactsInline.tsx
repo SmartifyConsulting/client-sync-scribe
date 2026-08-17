@@ -189,7 +189,7 @@ export function EmergencyContactsInline({ patientId, contacts, onChange, nokMemb
 
   return (
     <Collapsible defaultOpen={false} className="bg-white overflow-hidden">
-      <SectionHeader icon={HeartHandshake} label="My Holarc Care Team" />
+      <SectionHeader icon={HeartHandshake} label="My Personal Care Circle" />
       <CollapsibleContent>{body}</CollapsibleContent>
     </Collapsible>
   );
