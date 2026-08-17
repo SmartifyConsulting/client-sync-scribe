@@ -37,19 +37,20 @@ Behaviour changes:
 
 ## 4. Access checkboxes per care team member
 
-Each contact gets a checkbox group, "What <name> can see", replacing the current profile/live-tracking switches (SOS and live tracking become entries in the list). Logical order:
+Each contact gets a checkbox group, "What <name> can see", replacing the current profile/live-tracking switches. Logical order:
 
-1. SOS and live tracking
-2. Medical information
-3. Medication
-4. Chronic medication
-5. Hospital admissions (without medical information)
-6. Hospital admissions (with medical information)
-7. My lab results
-8. My sessions
-9. My documents
-10. My calendar
-11. My tasks
+1. SOS alerts
+2. SOS live tracking
+3. Medical information
+4. Medication
+5. Chronic medication
+6. Hospital admissions (without medical information)
+7. Hospital admissions (with medical information)
+8. My lab results
+9. My sessions
+10. My documents
+11. My calendar
+12. My tasks
 12. My Biolog
 13. My Round Table
 
