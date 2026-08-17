@@ -419,16 +419,22 @@ export default function SessionDetail() {
             )}
           </div>
         </div>
-        <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+        <div className="min-w-0 lg:col-start-2 lg:row-start-1">
           <SessionPatientOverview patient={session.patient} currentMedications={currentMedications} />
         </div>
-        <div className="rounded-xl border border-primary bg-primary/5 p-3 lg:col-start-1 lg:row-start-2">
-          <div className="mb-2 flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground">AI Clinician Notes</h2>
-          </div>
-          <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
+      </div>
+
+      {/* AI Clinician Notes — full-width band, same placement as the live "Live AI Clinician" frame */}
+      <div className="rounded-xl border border-primary bg-primary/5 p-4">
+        <div className="mb-3 flex items-center gap-1.5">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">AI Clinician Notes</h2>
         </div>
+        <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
+        <p className="mt-3 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Private — not shared with the patient.</span>{" "}
+          AI-generated clinical notes are decision support only and must be reviewed by the treating clinician.
+        </p>
       </div>
 
 
