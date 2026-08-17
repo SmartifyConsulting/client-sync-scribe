@@ -30,6 +30,48 @@ interface SessionResultPanelsProps {
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** The "AI Summary" card content, extracted so it can be placed independently
+ *  of the shared results grid (e.g. merged into SessionDetail's top-left card). */
+export function AISummaryCard({
+  summary,
+  audioUrl,
+  audioActions,
+  summaryActions,
+  showRetentionNotice = false,
+}: Pick<SessionResultPanelsProps, "summary" | "audioUrl" | "audioActions" | "summaryActions" | "showRetentionNotice">) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <h3 className="font-semibold text-sm text-foreground">AI Summary</h3>
+        {summaryActions && <div className="ml-auto flex items-center gap-2">{summaryActions}</div>}
+      </div>
+      <div className="max-h-[150px] overflow-y-auto">
+        <p className="text-sm text-foreground leading-relaxed">
+          {summary || "No summary generated for this session."}
+        </p>
+      </div>
+      {audioUrl && (
+        <div className="mt-2 pt-2 border-t border-border">
+          <audio controls className="w-full h-8" src={audioUrl}>
+            Your browser does not support audio playback.
+          </audio>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {audioActions}
+            {showRetentionNotice && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Volume2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                Voice recordings and transcriptions are automatically deleted after 7 days. AI
+                summaries remain permanently.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /**
  * The shared "session results" layout — transcript, AI summary, action points and
  * AI Clinician notes. Used both on the live Session screen after a recording ends
@@ -48,7 +90,14 @@ export function SessionResultPanels({
   showTodoHint = true,
   sessionDate,
   showRetentionNotice = false,
-}: SessionResultPanelsProps) {
+  hideSummary = false,
+  leftSlot,
+}: SessionResultPanelsProps & {
+  /** Omit the AI Summary card — used when the caller renders it elsewhere itself. */
+  hideSummary?: boolean;
+  /** Content to render in AI Summary's old grid position (paired with Action Points) when hideSummary is set. */
+  leftSlot?: ReactNode;
+}) {
   const notesExpired = sessionDate
     ? Date.now() - new Date(sessionDate).getTime() > SEVEN_DAYS_MS
     : false;
@@ -56,42 +105,24 @@ export function SessionResultPanels({
   return (
     <div className="space-y-6">
       {transcript ? (
-        <div className="rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
-          <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
-        </div>
+        <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
       ) : null}
 
       <div className="grid gap-3 lg:grid-cols-2">
-        {/* AI Summary */}
+        {/* AI Summary (or leftSlot replacement, e.g. Private Notes) */}
+        {hideSummary ? (
+          leftSlot
+        ) : (
         <div className="rounded-xl border border-primary bg-card p-3 shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm text-foreground">AI Summary</h3>
-            {summaryActions && <div className="ml-auto flex items-center gap-2">{summaryActions}</div>}
-          </div>
-          <div className="max-h-[150px] overflow-y-auto">
-            <p className="text-sm text-foreground leading-relaxed">
-              {summary || "No summary generated for this session."}
-            </p>
-          </div>
-          {audioUrl && (
-            <div className="mt-2 pt-2 border-t border-border">
-              <audio controls className="w-full h-8" src={audioUrl}>
-                Your browser does not support audio playback.
-              </audio>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                {audioActions}
-                {showRetentionNotice && (
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <Volume2 className="h-3.5 w-3.5 text-primary shrink-0" />
-                    Voice recordings and transcriptions are automatically deleted after 7 days. AI
-                    summaries remain permanently.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+          <AISummaryCard
+            summary={summary}
+            audioUrl={audioUrl}
+            audioActions={audioActions}
+            summaryActions={summaryActions}
+            showRetentionNotice={showRetentionNotice}
+          />
         </div>
+        )}
 
 
         {/* Action Points */}

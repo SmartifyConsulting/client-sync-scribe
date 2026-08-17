@@ -704,13 +704,12 @@ export default function Sessions() {
     setSessionState("processing");
     
     const currentNotes = notesRef.current;
-    const fullContent = [transcriptText, currentNotes].filter(Boolean).join('\n\n');
-    
+
     let hasDocs = false;
     try {
       const result = await completeSession(
         null,
-        fullContent || '',
+        transcriptText || '',
         currentNotes,
         visitCategories?.[0] || undefined,
         {
@@ -1475,7 +1474,7 @@ export default function Sessions() {
               )}
             </div>
 
-            {/* Transcript — collapsed accordion, only once transcription has finished.
+            {/* Transcript document — only shown once transcription has finished.
                 Nothing is streamed on screen while recording (the waveform above shows progress). */}
             <SessionTranscriptAccordion transcript={transcript} doctorName={doctorName} />
 
@@ -1525,7 +1524,7 @@ export default function Sessions() {
             )}
             <p className="mt-2 text-xs text-muted-foreground leading-snug">
               <span className="font-semibold text-foreground">
-                Private — not shared with the patient.
+                Private — Only visible to you. Not shared with the patient or other doctors.
               </span>{" "}
               AI-generated clinical notes are decision support only and must be reviewed by the
               treating clinician.

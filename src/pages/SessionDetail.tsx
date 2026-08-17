@@ -60,7 +60,7 @@ import {
 import { useSessions } from "@/hooks/useSessions";
 import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
 
-import { SessionResultPanels } from "@/features/sessions/components/SessionResultPanels";
+import { SessionResultPanels, AISummaryCard } from "@/features/sessions/components/SessionResultPanels";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
 import { ClinicianNotesAccordion } from "@/features/sessions/components/ClinicianNotesAccordion";
 import {
@@ -293,6 +293,68 @@ export default function SessionDetail() {
     );
   }
 
+  const audioActionsMenu = (
+    <Select
+      onValueChange={(value) => {
+        if (value === "audio") handleDownloadAudio();
+        else if (value === "transcript" && session.transcript) {
+          const blob = new Blob([session.transcript], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `transcript-${format(new Date(session.started_at), "yyyy-MM-dd")}.txt`;
+          link.click();
+          URL.revokeObjectURL(url);
+        }
+      }}
+    >
+      <SelectTrigger className="w-[160px] h-8 text-sm">
+        <Download className="h-3.5 w-3.5 mr-1.5" />
+        <SelectValue placeholder="Download..." />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
+          Download audio
+        </SelectItem>
+        <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
+          Download transcript
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
+  const summaryActionsMenu = (
+    <>
+      {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+      <Select value={selectedLanguage} onValueChange={handleTranslate}>
+        <SelectTrigger className="w-[150px] h-8 text-xs">
+          <Languages className="h-3.5 w-3.5 mr-1.5" />
+          <SelectValue placeholder="Translate..." />
+        </SelectTrigger>
+        <SelectContent>
+          {LANGUAGES.map((lang) => (
+            <SelectItem key={lang.code} value={lang.code} className="text-sm">
+              {lang.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {translatedSummary && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-xs h-8"
+          onClick={() => {
+            setTranslatedSummary(null);
+            setSelectedLanguage("");
+          }}
+        >
+          Original
+        </Button>
+      )}
+    </>
+  );
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Back Button */}
@@ -384,14 +446,14 @@ export default function SessionDetail() {
       </div>
 
 
-      {/* Quick Actions — green dropdown, right-aligned directly above Patient Overview */}
+      {/* Quick Actions — brand teal dropdown, right-aligned directly above Patient Overview */}
       {session.status === "completed" && session.patient && (
         <div className="flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-success bg-success px-3 text-sm font-medium text-success-foreground shadow-sm transition-colors hover:bg-success/90"
+                className="inline-flex h-9 items-center justify-between gap-2 rounded-md border border-primary bg-primary px-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
               >
                 Quick Actions
                 <ChevronDown className="h-4 w-4 opacity-80" />
@@ -426,13 +488,14 @@ export default function SessionDetail() {
             </div>
           </div>
           <div className="p-4">
-            <p className="text-xs font-semibold text-foreground">Recording complete</p>
-            <p className="mt-1 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
-            {signedAudioUrl && (
-              <audio controls className="mt-3 h-8 w-full" src={signedAudioUrl}>
-                Your browser does not support audio playback.
-              </audio>
-            )}
+            <p className="mb-3 text-xs text-muted-foreground">{format(new Date(session.started_at), "MMM d, yyyy · h:mm a")}</p>
+            <AISummaryCard
+              summary={translatedSummary || session.summary}
+              audioUrl={signedAudioUrl}
+              audioActions={audioActionsMenu}
+              summaryActions={summaryActionsMenu}
+              showRetentionNotice={!!(session.audio_url || session.transcript)}
+            />
           </div>
         </div>
         <div className="min-w-0 lg:col-start-2 lg:row-start-1">
@@ -447,171 +510,104 @@ export default function SessionDetail() {
           <h2 className="text-sm font-semibold text-foreground">AI Clinician Notes</h2>
         </div>
         <p className="mt-1 mb-3 text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">Private — not shared with the patient.</span>{" "}
+          <span className="font-semibold text-foreground">Private — Only visible to you. Not shared with the patient or other doctors.</span>{" "}
           AI-generated clinical notes are decision support only and must be reviewed by the treating clinician.
         </p>
         <ClinicianNotesAccordion notes={session.ai_diagnosis || session.notes} />
       </div>
 
 
-      {/* Session results — same layout as the screen shown right after a recording ends */}
+      {/* Session results — same layout as the screen shown right after a recording ends.
+          AI Summary now lives in the top-left card above; this slot instead shows
+          Private Notes alongside Action Points. */}
       <SessionResultPanels
         transcript={session.transcript}
         doctorName={doctorName}
-        summary={translatedSummary || session.summary}
-        audioUrl={signedAudioUrl}
-        audioActions={
-            <Select
-            onValueChange={(value) => {
-              if (value === "audio") handleDownloadAudio();
-              else if (value === "transcript" && session.transcript) {
-                const blob = new Blob([session.transcript], { type: "text/plain" });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = `transcript-${format(new Date(session.started_at), "yyyy-MM-dd")}.txt`;
-                link.click();
-                URL.revokeObjectURL(url);
-              }
-            }}
-          >
-            <SelectTrigger className="w-[160px] h-8 text-sm">
-              <Download className="h-3.5 w-3.5 mr-1.5" />
-              <SelectValue placeholder="Download..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="audio" disabled={!session.audio_url} className="text-sm">
-                Download audio
-              </SelectItem>
-              <SelectItem value="transcript" disabled={!session.transcript} className="text-sm">
-                Download transcript
-              </SelectItem>
-            </SelectContent>
-          </Select>
+        hideSummary
+        leftSlot={
+          <div className="rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-3 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-amber-600" />
+                <h3 className="font-semibold text-sm text-foreground">Private Notes</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {!editingPrivateNotes ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={() => {
+                      setPrivateNotesDraft((session as any).private_notes || "");
+                      setEditingPrivateNotes(true);
+                    }}
+                  >
+                    <Edit3 className="h-3.5 w-3.5 mr-1" />
+                    Edit
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs h-7"
+                      disabled={savingPrivateNotes}
+                      onClick={() => { setEditingPrivateNotes(false); setPrivateNotesDraft(""); }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="text-xs h-7"
+                      disabled={savingPrivateNotes}
+                      onClick={handleSavePrivateNotes}
+                    >
+                      {savingPrivateNotes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+            <p className="mb-2 text-xs text-muted-foreground">Only visible to you. Not shared with the patient or other doctors.</p>
+            <div className="max-h-[150px] overflow-y-auto">
+              {editingPrivateNotes ? (
+                <Textarea
+                  value={privateNotesDraft}
+                  onChange={(e) => setPrivateNotesDraft(e.target.value)}
+                  placeholder="Write notes only you can see…"
+                  className="text-sm min-h-[120px]"
+                />
+              ) : (session as any).private_notes ? (
+                <p className="text-sm whitespace-pre-wrap text-foreground">{(session as any).private_notes}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No private notes yet — click Edit to add notes only you can see.</p>
+              )}
+            </div>
+          </div>
         }
         actionPoints={session.action_points || []}
         clinicianNotes={null}
         sessionDate={session.started_at}
-        showRetentionNotice={!!(session.audio_url || session.transcript)}
         showTodoHint={false}
-
-        summaryActions={
-          <>
-            {isTranslating && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-            <Select value={selectedLanguage} onValueChange={handleTranslate}>
-              <SelectTrigger className="w-[150px] h-8 text-xs">
-                <Languages className="h-3.5 w-3.5 mr-1.5" />
-                <SelectValue placeholder="Translate..." />
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code} className="text-sm">
-                    {lang.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {translatedSummary && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs h-8"
-                onClick={() => {
-                  setTranslatedSummary(null);
-                  setSelectedLanguage("");
-                }}
-              >
-                Original
-              </Button>
-            )}
-          </>
-        }
       />
-
-      {/* Retention notice now sits beside the download control in the AI Summary card,
-          and session notes are folded into the AI Clinician Notes panel. */}
-
-
-      {/* Private Notes — doctor-only */}
-      <div className="rounded-xl border border-amber-500/40 bg-amber-50/30 dark:bg-amber-950/10 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/15">
-              <Lock className="h-4 w-4 text-amber-600" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-foreground">Private Notes</h2>
-              <p className="text-sm text-muted-foreground">Only visible to you. Not shared with the patient or other doctors.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {!editingPrivateNotes ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-sm h-8"
-                onClick={() => {
-                  setPrivateNotesDraft((session as any).private_notes || "");
-                  setEditingPrivateNotes(true);
-                }}
-              >
-                <Edit3 className="h-3.5 w-3.5 mr-1.5" />
-                Edit
-              </Button>
-            ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-sm h-8"
-                  disabled={savingPrivateNotes}
-                  onClick={() => { setEditingPrivateNotes(false); setPrivateNotesDraft(""); }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  className="text-sm h-8"
-                  disabled={savingPrivateNotes}
-                  onClick={handleSavePrivateNotes}
-                >
-                  {savingPrivateNotes ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-        {editingPrivateNotes ? (
-          <Textarea
-            value={privateNotesDraft}
-            onChange={(e) => setPrivateNotesDraft(e.target.value)}
-            placeholder="Write notes only you can see…"
-            className="text-sm min-h-[140px]"
-          />
-        ) : (session as any).private_notes ? (
-          <p className="text-sm whitespace-pre-wrap text-foreground">{(session as any).private_notes}</p>
-        ) : (
-          <p className="text-sm text-muted-foreground italic">No private notes yet — click Edit to add notes only you can see.</p>
-        )}
-      </div>
 
       {/* Session Documents */}
       {sessionDocs.length > 0 && (
-        <div className="rounded-xl border border-primary bg-card p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <FileText className="h-4 w-4 text-primary" />
+        <div className="rounded-xl border border-primary bg-card p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-3.5 w-3.5 text-primary" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-foreground">Session Documents</h2>
-              <p className="text-sm text-muted-foreground">Auto-generated documents from this session</p>
+              <h2 className="text-sm font-semibold text-foreground">Session Documents</h2>
+              <p className="text-xs text-muted-foreground">Auto-generated documents from this session</p>
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {sessionDocs.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                <FileText className="h-4 w-4 text-primary shrink-0" />
-                <span className="flex-1 text-sm font-semibold text-foreground truncate">{doc.name}</span>
+              <div key={doc.id} className="flex items-center gap-2 p-1.5 rounded-lg bg-muted/30">
+                <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
+                <span className="flex-1 text-xs font-semibold text-foreground truncate">{doc.name}</span>
                 {doc.is_draft && !doc.email_sent_at && (
                   <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-xs">
                     DRAFT
@@ -620,32 +616,32 @@ export default function SessionDetail() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-7 w-7"
+                  className="h-6 w-6"
                   title="Preview"
                   onClick={() => setPreviewDoc(doc)}
                 >
-                  <Eye className="h-3.5 w-3.5" />
+                  <Eye className="h-3 w-3" />
                 </Button>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="h-7 w-7"
+                  className="h-6 w-6"
                   title="Edit"
                   onClick={() => navigate(`/documents?edit=${doc.id}`)}
                 >
-                  <Edit3 className="h-3.5 w-3.5" />
+                  <Edit3 className="h-3 w-3" />
                 </Button>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className={`h-7 w-7 ${doc.email_sent_at ? 'text-muted-foreground' : 'text-green-600 hover:text-green-700'}`}
+                  className={`h-6 w-6 ${doc.email_sent_at ? 'text-muted-foreground' : 'text-green-600 hover:text-green-700'}`}
                   disabled={!!doc.email_sent_at || sendingDocId === doc.id}
                   onClick={() => handleSendDocument(doc)}
                 >
                   {sendingDocId === doc.id ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
-                    <Send className="h-3.5 w-3.5" />
+                    <Send className="h-3 w-3" />
                   )}
                 </Button>
               </div>
