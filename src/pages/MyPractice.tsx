@@ -686,7 +686,12 @@ export default function MyPractice() {
       } as any);
       if (error) {
         setSavedStatus("idle");
-        toast({ title: "Error", description: "Failed to save", variant: "destructive" });
+        toast({
+          title: "Couldn't save your practice details",
+          description: (error as any)?.message || "Please check your connection and try again.",
+          variant: "destructive",
+        });
+
       } else {
         setSavedStatus("saved");
         setTimeout(() => setSavedStatus("idle"), 2000);
