@@ -405,7 +405,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 {applyItemPreferences(DOCTOR_TOP_ITEMS, preferences.item_order, preferences.hidden_items).map((item) =>
                   renderNavLink(item),
                 )}
+                {isDoctor && profileToggle}
               </div>
+
               {doctorSections.map((section) => {
                 const sectionItems = applyItemPreferences(section.items, preferences.item_order, preferences.hidden_items);
                 if (sectionItems.length === 0) return null;
