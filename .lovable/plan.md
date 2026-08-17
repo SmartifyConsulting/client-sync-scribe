@@ -11,6 +11,11 @@
 - It will be rendered as a proper framed bubble in the app's green/primary tone with the starting doctor's initials avatar, name and timestamp, sitting at the top of the discussion thread so the conversation reads as one continuous thread.
 - The starting doctor can edit or delete their opening message using the same controls (deleting the opening message removes the whole topic, with a clear confirmation).
 
+## 2b. Notify the whole care team on every comment
+- When any doctor posts a comment (or a new topic) in a patient's round table, every other doctor with access to that patient's profile receives a notification.
+- Notifications name the patient, the topic and who commented, and open straight to that round table thread.
+- The author is never notified of their own message; edits and deletions do not re-notify.
+
 ## 3. Profile switcher cleanup
 - Remove the `Samuel Okoli (Okili)` email-based entry from the test profile switcher list.
 - Keep only the phone-registered `Samuel 0koli` entry, and relabel it simply as `Samuel 0koli`.
