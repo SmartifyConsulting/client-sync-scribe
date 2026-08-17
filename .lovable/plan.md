@@ -1,5 +1,8 @@
 # Nurse profile polish: avatar, red role pill, scoped Admissions
 
+## 0. Fix current build error
+`src/components/dashboard/CompactTodoList.tsx` uses `isDocumentTodoKind` without importing it. Add it to the existing `@/lib/resolveTodoDocumentId` import.
+
 ## 1. Nomvula Dlamini's profile picture
 Generate a new professional avatar (Black woman, nurse, clean studio-style headshot matching the other seeded avatars), store it as a project asset, and update her profile record's avatar so it shows everywhere (sidebar, switcher, ward board, shift lists).
 
