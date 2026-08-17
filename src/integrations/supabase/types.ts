@@ -4388,52 +4388,103 @@ export type Database = {
       }
       hospital_nurses: {
         Row: {
+          about_me: string | null
+          clinical_areas: string[] | null
           created_at: string
           created_by: string | null
+          department: string | null
           email: string | null
+          employment_start_date: string | null
+          employment_status: string | null
           full_name: string
           hospital_id: string
           id: string
+          languages: string[] | null
           linked_user_id: string | null
           mobile_number: string | null
           nurse_registration_number: string | null
+          nursing_category: string | null
           pending_payload: Json | null
+          position: string | null
+          preferred_name: string | null
+          professional_title: string | null
+          registration_authority: string | null
+          registration_expiry: string | null
+          reporting_manager: string | null
           role_title: string | null
+          scope_of_practice: string | null
+          specialisations: string[] | null
+          staff_id: string | null
           status: string
           updated_at: string
           ward_id: string | null
+          years_experience: number | null
         }
         Insert: {
+          about_me?: string | null
+          clinical_areas?: string[] | null
           created_at?: string
           created_by?: string | null
+          department?: string | null
           email?: string | null
+          employment_start_date?: string | null
+          employment_status?: string | null
           full_name: string
           hospital_id: string
           id?: string
+          languages?: string[] | null
           linked_user_id?: string | null
           mobile_number?: string | null
           nurse_registration_number?: string | null
+          nursing_category?: string | null
           pending_payload?: Json | null
+          position?: string | null
+          preferred_name?: string | null
+          professional_title?: string | null
+          registration_authority?: string | null
+          registration_expiry?: string | null
+          reporting_manager?: string | null
           role_title?: string | null
+          scope_of_practice?: string | null
+          specialisations?: string[] | null
+          staff_id?: string | null
           status?: string
           updated_at?: string
           ward_id?: string | null
+          years_experience?: number | null
         }
         Update: {
+          about_me?: string | null
+          clinical_areas?: string[] | null
           created_at?: string
           created_by?: string | null
+          department?: string | null
           email?: string | null
+          employment_start_date?: string | null
+          employment_status?: string | null
           full_name?: string
           hospital_id?: string
           id?: string
+          languages?: string[] | null
           linked_user_id?: string | null
           mobile_number?: string | null
           nurse_registration_number?: string | null
+          nursing_category?: string | null
           pending_payload?: Json | null
+          position?: string | null
+          preferred_name?: string | null
+          professional_title?: string | null
+          registration_authority?: string | null
+          registration_expiry?: string | null
+          reporting_manager?: string | null
           role_title?: string | null
+          scope_of_practice?: string | null
+          specialisations?: string[] | null
+          staff_id?: string | null
           status?: string
           updated_at?: string
           ward_id?: string | null
+          years_experience?: number | null
         }
         Relationships: [
           {
@@ -5134,6 +5185,85 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      nurse_certifications: {
+        Row: {
+          created_at: string
+          expires_on: string | null
+          id: string
+          issuer: string | null
+          name: string
+          nurse_id: string
+          obtained_on: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_on?: string | null
+          id?: string
+          issuer?: string | null
+          name: string
+          nurse_id: string
+          obtained_on?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_on?: string | null
+          id?: string
+          issuer?: string | null
+          name?: string
+          nurse_id?: string
+          obtained_on?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurse_certifications_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nurse_clinical_permissions: {
+        Row: {
+          id: string
+          notes: string | null
+          nurse_id: string
+          permission_key: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          nurse_id: string
+          permission_key: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          nurse_id?: string
+          permission_key?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nurse_clinical_permissions_nurse_id_fkey"
+            columns: ["nurse_id"]
+            isOneToOne: false
+            referencedRelation: "hospital_nurses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nurse_pending_vulas: {
         Row: {
@@ -8381,6 +8511,8 @@ export type Database = {
         Args: { _hospital_id: string; _user_id: string }
         Returns: boolean
       }
+      is_nurse_record_admin: { Args: { _nurse_id: string }; Returns: boolean }
+      is_own_nurse_record: { Args: { _nurse_id: string }; Returns: boolean }
       is_paramedic: { Args: { _user_id: string }; Returns: boolean }
       is_practice_assistant: { Args: { _user_id: string }; Returns: boolean }
       is_practice_member: {
@@ -8392,6 +8524,7 @@ export type Database = {
         Returns: boolean
       }
       norm_text: { Args: { _t: string }; Returns: string }
+      nurse_record_hospital: { Args: { _nurse_id: string }; Returns: string }
       nurse_ward_id: {
         Args: { _hospital_id: string; _user_id: string }
         Returns: string
