@@ -184,13 +184,13 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
       ) : (
         <Accordion type="multiple" className="space-y-2" defaultValue={topics.length > 0 ? [topics[0].id] : []}>
           {topics.map((t) => (
-            <AccordionItem key={t.id} value={t.id} className="rounded-lg border border-primary/30 bg-card px-3">
+            <AccordionItem key={t.id} value={t.id} className="border-0 bg-card px-3">
               <AccordionTrigger
                 onClick={() => { if (!messagesByTopic[t.id]) loadMessages(t.id); }}
                 className="hover:no-underline"
               >
                 <div className="flex flex-col items-start text-left">
-                  <span className="text-sm font-semibold">{t.subject}</span>
+                  <span className="text-sm font-semibold text-primary">{t.subject}</span>
                   <span className="text-xs text-muted-foreground">
                     {t.doctor_name} • {format(new Date(t.created_at), "MMM d, yyyy 'at' h:mm a")}
                   </span>
@@ -202,19 +202,32 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                   <div className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
                     <MessageCircle className="h-4 w-4" /> Live discussion
                   </div>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {(messagesByTopic[t.id] || []).map((m) => (
-                      <div key={m.id} className={`rounded-md p-2 text-xs ${m.doctor_id === currentUserId ? 'bg-primary/10 ml-6' : 'bg-muted mr-6'}`}>
-                        <div className="flex items-center gap-1 mb-0.5">
-                          <span className="font-semibold text-sm">{m.doctor_name}</span>
-                          {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
-                          <span className="text-xs text-muted-foreground ml-auto">
-                            {format(new Date(m.created_at), "MMM d, h:mm a")}
-                          </span>
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {(messagesByTopic[t.id] || []).map((m) => {
+                      const mine = m.doctor_id === currentUserId;
+                      const tone = bubbleTone(m.doctor_id);
+                      return (
+                        <div key={m.id} className={`flex items-end gap-2 ${mine ? "flex-row-reverse" : ""}`}>
+                          <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${tone.avatar}`}>
+                            {initials(m.doctor_name)}
+                          </div>
+                          <div
+                            className={`relative max-w-[78%] rounded-2xl px-3 py-2 text-xs ${tone.bubble} ${
+                              mine ? "rounded-br-sm" : "rounded-bl-sm"
+                            }`}
+                          >
+                            <div className="mb-0.5 flex items-center gap-1">
+                              <span className="text-xs font-semibold">{m.doctor_name}</span>
+                              {onlineDoctors[m.doctor_id] && <Circle className="h-1.5 w-1.5 fill-emerald-500 text-emerald-500" />}
+                              <span className="ml-auto pl-2 text-[10px] opacity-70">
+                                {format(new Date(m.created_at), "MMM d, h:mm a")}
+                              </span>
+                            </div>
+                            <p className="whitespace-pre-wrap">{m.content}</p>
+                          </div>
                         </div>
-                        <p className="whitespace-pre-wrap">{m.content}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   <div className="flex gap-1">
                     <Input
