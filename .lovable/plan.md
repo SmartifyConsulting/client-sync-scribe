@@ -42,7 +42,7 @@ Each contact gets a checkbox group, "What <name> can see", replacing the current
 1. SOS alerts
 2. SOS live tracking
 3. Medical information
-4. Medication
+4. All medication
 5. Chronic medication
 6. Hospital admissions (without medical information)
 7. Hospital admissions (with medical information)
