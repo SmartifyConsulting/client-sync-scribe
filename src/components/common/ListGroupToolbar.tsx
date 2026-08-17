@@ -73,6 +73,8 @@ interface Props<T> {
    * to nest by in that case.
    */
   subGroupByPatient?: boolean;
+  /** Overrides the group heading's default teal background (e.g. dashboard widgets that want a quieter grey). */
+  triggerClassName?: string;
 }
 
 export function ListGroupToolbar<T>({
@@ -88,6 +90,7 @@ export function ListGroupToolbar<T>({
   frameless = false,
   headerIcon: HeaderIcon,
   subGroupByPatient = false,
+  triggerClassName,
 }: Props<T>) {
 
   const prefKey = `listGroupBy:${storageKey}`;
@@ -189,7 +192,7 @@ export function ListGroupToolbar<T>({
           {groups.map(([label, entries]) => (
             <AccordionItem key={label} value={label} className={frameless ? SECTION_ITEM_ROUNDED_CLASS : SECTION_ITEM_CLASS}>
               <AccordionTrigger
-                className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, frameless && cn(SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-2"))}
+                className={cn(SECTION_TRIGGER_ALWAYS_GREEN_CLASS, frameless && cn(SECTION_TRIGGER_ROUNDED_CLASS, "px-3 py-2"), triggerClassName)}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {HeaderIcon && <HeaderIcon className="h-3.5 w-3.5 text-primary shrink-0" />}
