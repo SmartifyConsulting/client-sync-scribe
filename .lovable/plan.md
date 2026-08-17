@@ -22,20 +22,29 @@
 - Point that link to the patient Documents screen, where invoice IDs are already loaded and auto-opened in the document preview.
 - Keep the PDF attachment, personalised greeting, doctor signature, and sender attribution intact.
 
-## Session Recording Restricted to Doctors
-Checked current state: the recording screen at `/sessions` sits behind a sign-in-only guard with no role requirement, and the database insert rule for sessions allows any signed-in user to create a session for themselves. A patient is therefore not currently prevented from recording.
+## Consent-Gated Session Recording (Doctor or Patient)
+Checked current state: the recording screen sits behind a sign-in-only guard with no consent step, and any signed-in user can create a session for themselves. There is no consent request, notification, or block on starting a recording today.
 
-- Add a role guard to the recording route so patient-only accounts are redirected to their dashboard with a clear message rather than reaching the recorder.
-- Confirm no patient-facing navigation, dashboard tile, or quick action links to the recording screen; patients keep read-only access to their own past sessions.
-- Tighten the database rule so creating a session requires the doctor role, closing the direct-API path as well as the UI path.
-- Keep dual-role accounts (a doctor who is also a patient) able to record while in Doctor mode.
+Either party may initiate a recording, but recording cannot start until the other party consents.
+
+- **Initiate:** the initiator picks the other party and requests to record. The session is created in a "Awaiting consent" state with recording controls disabled and a clear on-screen explanation of the rule.
+- **Consent request:** the other party receives an in-app notification (plus email) with the requester's name, date/time and purpose, and two clear actions: **Allow recording** or **Decline**.
+- **Start gate:** recording controls only unlock once consent is granted. Attempting to start earlier shows a guiding message rather than a raw error.
+- **Decline / timeout:** a decline closes the request with a polite explanation to the initiator and an option to continue the consultation without recording. An unanswered request expires after a set window with the same guidance.
+- **Withdraw:** either party can stop the recording at any time; withdrawal ends capture immediately and is recorded on the session.
+- **Audit:** who consented, when, and through which channel is stored on the session so it can be shown in the session record.
+- **Guidance messages:** friendly, plain-language notices at each step — awaiting consent, consent granted, declined, expired, withdrawn, and "the other party is not on the app yet".
+- **Party not on the app:** if the other party has no account, the flow switches to an invitation — a sign-up link sent by email or WhatsApp — and the recording stays blocked until they join and consent.
+- Enforce the same rule server-side so recording cannot be started by bypassing the interface.
+
 
 ## Verification
 - Verify Doctor mode defaults to the doctor dashboard and Patient mode displays the charcoal **My Holarchy** heading with patient Dashboard selected.
 - Verify the Family Doctor label in both display and edit modes.
 - Deploy the updated email function, send a fresh test invoice to `georgia.adams@smartify.co.za`, and confirm the provider accepts it.
 - Verify the generated email HTML contains the supplied logo URL and the invoice deep link; final inbox rendering and link opening can then be confirmed from the received email.
-- Sign in as a patient-only account, open the recording screen directly, and confirm the redirect; confirm a patient-issued session creation is rejected; confirm a doctor can still start, record and finalise a session normally.
+- Confirm recording stays blocked until the other party consents, from both a doctor-initiated and a patient-initiated request, and that the consent notification arrives in-app and by email.
+- Confirm decline, expiry and withdrawal each show the intended guidance message, and that a request to someone without an account produces an email/WhatsApp sign-up invitation instead.
 
 ## Technical Notes
 - The current sidebar stores the selected profile mode in local storage, which can reopen a doctor in Patient mode; the default-state handling will be adjusted so Doctor mode is authoritative on initial doctor entry.
