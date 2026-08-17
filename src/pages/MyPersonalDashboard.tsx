@@ -40,7 +40,6 @@ import {
 import { PatientHeroCard } from "@/components/dashboard/PatientHeroCard";
 import { EmotionalHeadline, CardFooterLink } from "@/components/dashboard/EmotionalHeadline";
 import { PeopleICareFor } from "@/components/dashboard/PeopleICareFor";
-import { YouAreKnownCard } from "@/components/dashboard/YouAreKnownCard";
 import {
   derivePatientState,
   EMOTIONAL_HEADLINE,
@@ -266,15 +265,25 @@ export default function MyPersonalDashboard() {
               <Heart className={cn("h-5 w-5", unlocked ? "text-primary" : "text-muted-foreground")} />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">💚 Here's what we've noticed</p>
-              <p className="mt-1 text-sm text-foreground leading-relaxed">
-                You're looking after yourself well. Your sleep has been consistent this week, your
-                activity is above your usual level, and you have one medication due this morning.
+              <p className="text-sm font-semibold text-foreground">🫶 We see you</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Your care team knows more than your medical history.
               </p>
-              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                You also have a doctor's appointment tomorrow at 10:30.
-              </p>
-              <CardFooterLink label="See what's behind this" onClick={() => navigate("/biolog")} />
+              <dl className="mt-3 space-y-2">
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">What matters to me</dt>
+                  <dd className="text-xs font-medium text-foreground">{(relationshipValues?.length ? relationshipValues : ["Family", "Independence", "Health"]).join(" · ")}</dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">How I like to communicate</dt>
+                  <dd className="text-xs font-medium text-foreground">Straightforward · Detailed</dd>
+                </div>
+                <div>
+                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">My preferences</dt>
+                  <dd className="text-xs font-medium text-foreground">My story · My personality</dd>
+                </div>
+              </dl>
+              <CardFooterLink label="View my profile" onClick={() => navigate("/patient/details")} />
             </div>
           </div>
         </Panel>
@@ -285,10 +294,27 @@ export default function MyPersonalDashboard() {
               <Leaf className="h-5 w-5 text-primary" />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">🌱 Your Biolog is up to date</p>
+              <p className="text-sm font-semibold text-foreground">🌱 Your Biolog Updates</p>
               <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
                 Wellbeing +8% this month. Everything you've logged is feeding your longer-term picture.
               </p>
+              <EmotionalHeadline
+                emoji="❤️"
+                title={EMOTIONAL_HEADLINE[state]}
+                sub={wellbeingDescriptor(state)}
+                muted={!unlocked}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                {VITALS.map((v) => (
+                  <div key={v.label} className="flex items-start gap-2">
+                    <v.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{v.label}</p>
+                      <p className="text-sm font-semibold text-foreground">{v.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Button size="sm" variant="outline" className="h-9 text-xs gap-1.5" onClick={() => navigate("/biolog")}>
                   <TrendingUp className="h-3.5 w-3.5" /> Open Biolog
@@ -325,28 +351,7 @@ export default function MyPersonalDashboard() {
         {/* Main column */}
         <div className="lg:col-span-3 space-y-4">
           {/* Four summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <Panel title="How I'm doing" icon={Heart} unlocked={unlocked} onClick={() => navigate("/biolog")}>
-              <EmotionalHeadline
-                emoji="❤️"
-                title={EMOTIONAL_HEADLINE[state]}
-                sub={wellbeingDescriptor(state)}
-                muted={!unlocked}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                {VITALS.map((v) => (
-                  <div key={v.label} className="flex items-start gap-2">
-                    <v.icon className={cn("h-4 w-4 mt-0.5", unlocked ? "text-primary" : "text-muted-foreground")} />
-                    <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{v.label}</p>
-                      <p className="text-sm font-semibold text-foreground">{v.value}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <CardFooterLink label="See how this is tracking" onClick={() => navigate("/biolog")} />
-            </Panel>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             <Panel title="My Care" icon={Pill} unlocked={unlocked} onClick={() => navigate("/patient/rewards")}>
               <EmotionalHeadline emoji="💚" title={care.title} sub={care.sub} muted={!unlocked} />
               <ul className="space-y-2">
@@ -485,8 +490,6 @@ export default function MyPersonalDashboard() {
 
         {/* Right rail */}
         <div className="lg:col-span-1 space-y-4">
-          <YouAreKnownCard values={relationshipValues} />
-
           <Panel title="My Holarc Medical Team" icon={Users2} unlocked={unlocked} onClick={() => navigate("/patient/doctors")}>
             <EmotionalHeadline
               emoji="❤️"
