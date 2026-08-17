@@ -68,6 +68,7 @@ import { TodoRow } from "@/components/todos/TodoRow";
 import { UserPlus } from "lucide-react";
 import { AssignTaskDialog } from "@/components/tasks/AssignTaskDialog";
 import { getTodoDisplay } from "@/lib/todoDisplay";
+import { resolveTodoDocumentId } from "@/lib/resolveTodoDocumentId";
 import { isClinicalObservationTask } from "@/lib/taskAssignee";
 
 interface TodoItem {
@@ -187,7 +188,7 @@ export default function TodoList() {
       });
     } catch (err) {
       console.error('Preview error:', err);
-      toast({ title: 'Preview failed', variant: 'destructive' });
+      toast({ title: 'Preview unavailable', description: 'The linked document could not be found.', variant: 'destructive' });
     } finally {
       setLoadingPreview(null);
     }
@@ -594,7 +595,7 @@ export default function TodoList() {
       saveEdit={saveEdit}
       cancelEdit={cancelEdit}
       sending={sendingDocId === todo.document_id}
-      previewing={loadingPreview === todo.document_id}
+      previewing={loadingPreview === todo.id}
     />
   );
 

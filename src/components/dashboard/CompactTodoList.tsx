@@ -117,10 +117,11 @@ export function CompactTodoList() {
   );
 
   const handlePreviewDoc = async (todo: TodoItem) => {
-    if (!todo.document_id) return;
-    setLoadingPreview(todo.document_id);
+    setLoadingPreview(todo.id);
     try {
-      const { data: doc } = await supabase.from('documents').select('*').eq('id', todo.document_id).maybeSingle();
+      const docId = await resolveTodoDocumentId(todo as any, getTodoDisplay(todo as any).kind);
+      if (!docId) throw new Error('Document not found');
+      const { data: doc } = await supabase.from('documents').select('*').eq('id', docId).maybeSingle();
       if (!doc) throw new Error('Document not found');
 
       const resolved = await resolveDocumentPreviewContent({
@@ -142,7 +143,7 @@ export function CompactTodoList() {
       });
     } catch (err) {
       console.error('Preview error:', err);
-      toast({ title: 'Preview failed', variant: 'destructive' });
+      toast({ title: 'Preview unavailable', description: 'The linked document could not be found.', variant: 'destructive' });
     } finally {
       setLoadingPreview(null);
     }
@@ -574,7 +575,7 @@ export function CompactTodoList() {
                   saveEdit={saveEdit}
                   cancelEdit={() => { setEditingId(null); setEditText(""); }}
                   sending={sendingDocId === todo.document_id}
-                  previewing={loadingPreview === todo.document_id}
+                  previewing={loadingPreview === todo.id}
                 />
               );
               const buckets = DATE_BUCKETS.filter((b) => grouped[b.key].length > 0);
