@@ -27,6 +27,27 @@ interface RTMessage {
   created_at: string;
 }
 
+/** Deterministic soft tint per doctor so a doctor keeps the same colour everywhere. */
+const BUBBLE_TONES = [
+  { bubble: "bg-primary/10 text-foreground", avatar: "bg-primary/20 text-primary" },
+  { bubble: "bg-blue-500/10 text-foreground", avatar: "bg-blue-500/20 text-blue-700" },
+  { bubble: "bg-amber-500/10 text-foreground", avatar: "bg-amber-500/20 text-amber-700" },
+  { bubble: "bg-violet-500/10 text-foreground", avatar: "bg-violet-500/20 text-violet-700" },
+  { bubble: "bg-rose-500/10 text-foreground", avatar: "bg-rose-500/20 text-rose-700" },
+  { bubble: "bg-emerald-500/10 text-foreground", avatar: "bg-emerald-500/20 text-emerald-700" },
+];
+
+function bubbleTone(doctorId: string) {
+  let hash = 0;
+  for (let i = 0; i < (doctorId || "").length; i++) hash = (hash * 31 + doctorId.charCodeAt(i)) >>> 0;
+  return BUBBLE_TONES[hash % BUBBLE_TONES.length];
+}
+
+function initials(name?: string) {
+  const parts = (name || "").replace(/^(dr\.?|prof\.?)\s+/i, "").split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] || "") + (parts[1]?.[0] || "")).toUpperCase() || "?";
+}
+
 interface RoundTableProps {
   patientId: string;
   patientName: string;
