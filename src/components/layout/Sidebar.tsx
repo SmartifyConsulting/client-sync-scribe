@@ -138,7 +138,7 @@ const NURSE_SECTIONS: NavSection[] = [
 ];
 
 const NURSE_BOTTOM_ITEMS: (NavItem & { tour?: string })[] = [
-  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/patient/details?section=health" },
+  { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/nurse-profile" },
   { icon: Sparkles, label: "Ask Holarc", labelKey: "nav.askMaeve", to: "/ask-maeve", accent: true },
   { icon: Siren, label: "SOS", labelKey: "nav.sos", to: "/patient/holarchelp", danger: true },
 ];
