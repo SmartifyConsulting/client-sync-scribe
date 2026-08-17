@@ -378,11 +378,6 @@ export function RoundTable({ patientId, patientName, hideHeader = false }: Round
                       <Send className="h-3.5 w-3.5" />
                     </Button>
                   </div>
-                  {t.doctor_id === currentUserId && (
-                    <Button size="sm" variant="ghost" className="text-destructive h-7 text-xs" onClick={() => deleteTopic(t.id)}>
-                      <Trash2 className="h-4 w-4 mr-1" /> Delete topic
-                    </Button>
-                  )}
                 </div>
               </AccordionContent>
             </AccordionItem>
