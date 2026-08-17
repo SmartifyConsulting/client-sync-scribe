@@ -25,3 +25,31 @@ Your header content is still intact (practice names, MP numbers, cell numbers) â
 - `src/features/documents/templates/HeaderFooterTemplateForm.tsx`: hide the Name input for `edit-header-only` / `edit-footer-only`; keep `initialData.name` in the submitted payload. Keep the name input for `create-*-only` (new records still need a name).
 - `src/pages/Documents.tsx`: in the header/footer grid, only emit the Header card when the record's `header` has any non-empty left/center/right text or image, and only emit the Footer card when `footer` does. Adjust caption text.
 - One migration to set `name = 'Header and Footer'` on the affected letterhead record.
+
+---
+
+# Patient details: Next of Kin layout + Employer required with insurance
+
+## Next of Kin on two rows
+
+In the patient details editor (Next of Kin section, both view and edit modes), lay the fields out over two rows instead of a single long row:
+
+```text
+Row 1:  Name            Relationship
+Row 2:  Phone           Email
+```
+
+Same two-row grid for each additional next-of-kin member card, and it collapses to one column on mobile.
+
+## Employer becomes compulsory when Medical Insurance is captured
+
+If the patient has an insurance provider / insurance number filled in but the Employer field is empty:
+
+- Show an inline prompt on the Employer field: "Employer details are required when medical insurance is captured."
+- Mark the Employer field with a required indicator while insurance is present.
+- Saving with insurance present and no employer shows the validation message and keeps the section open instead of saving; the rest of the form is untouched when insurance is empty.
+- A small notice appears in the Insurance section too, so the patient knows why Employer is being asked for.
+
+## Technical notes
+
+- `src/features/patients/components/PatientDetailsEditor.tsx`: two-column grid for the next-of-kin fields; derive `insuranceCaptured = !!(medical_aid || medical_aid_number)` and gate save on `employer` when true, surfacing the error via the existing form error/toast pattern.
