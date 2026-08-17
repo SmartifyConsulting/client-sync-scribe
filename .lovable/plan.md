@@ -77,3 +77,20 @@ Currently the screen opens on "Admitted by me" only, and each row shows the pati
 - The "Admitted by Me" line reads "Admitted by you" so the two filters stay visually distinct.
 - Seed a small set of demo admissions for Dr Georgia Adams (patient, hospital, ward, admitting doctor, procedure/diagnosis, admission date, one discharged) so "Admitted by Me" is never empty in the demo, and a couple attributed to other doctors so the "Other Doctors" view shows the admitting doctor clearly.
 - Clicking a record continues to open that patient; drill-down lands on the specific admission.
+
+## 9. Admission drill-down opens the admission itself
+
+Today, clicking an admission record opens the patient's general profile, so the doctor never lands on the admission.
+
+- Clicking a record opens a dedicated admission view for that admission ID, showing what is happening in hospital: hospital, ward and bed, attending doctor(s) and nurses, admission/discharge dates and status, reason/procedure and diagnosis, plus the admission's vitals, medications, lab results, imaging, progress notes and transfers.
+- Sections stay read-only for doctors who are not the admitting doctor; the admitting doctor keeps the existing edit controls.
+- A back link returns to Admissions, and a link to the patient's full profile remains available.
+
+## 10. Review-document tasks: visible preview and editable template
+
+Some "Review document" tasks show no eye icon, and previewing is read-only.
+
+- Show the preview (eye) action on every task that has a linked document, and keep it disabled with a tooltip only when the document is genuinely missing, so the row never silently loses the action.
+- The preview dialog gains an **Edit** button. Switching to edit mode makes the rendered template editable in place, with the same layout, letterhead, logo and fonts as the preview.
+- Edits autosave a couple of seconds after typing stops (and on close), with a small "Saving… / Saved" indicator. No separate Save button needed.
+- The remaining actions (send/share, email, download/print) stay functional and always act on the latest saved version of the template.
