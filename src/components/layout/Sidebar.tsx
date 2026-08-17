@@ -392,29 +392,36 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     refetchInterval: 30000,
   });
 
-  /** Doctor | Patient pill shown next to Dashboard so doctors can switch the
-   *  sidebar between their practice tools and their own patient profile. */
+  /** Doctor|Patient (or Nurse|Patient) pill shown next to Dashboard so a
+   *  clinician can switch the sidebar between their professional tools and
+   *  their own patient profile. */
+  const professionalMode = isNurse ? "nurse" : "doctor";
+  const professionalHome = isNurse ? "/provider/hospital/nurse-dashboard" : "/doctor-dashboard";
   const profileToggle = (
     <div className="mx-1 mt-1 flex items-center gap-1 rounded-full bg-muted/60 p-0.5">
-      {(["doctor", "patient"] as const).map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          onClick={() => {
-            setProfileMode(mode);
-            navigate(mode === "patient" ? "/my-dashboard" : "/doctor-dashboard");
-            onNavigate?.();
-          }}
-          className={cn(
-            "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
-            profileMode === mode
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {mode}
-        </button>
-      ))}
+      {([professionalMode, "patient"] as const).map((mode) => {
+        const isProfessional = mode !== "patient";
+        const active = isProfessional ? profileMode === "doctor" : profileMode === "patient";
+        return (
+          <button
+            key={mode}
+            type="button"
+            onClick={() => {
+              setProfileMode(isProfessional ? "doctor" : "patient");
+              navigate(isProfessional ? professionalHome : "/my-dashboard");
+              onNavigate?.();
+            }}
+            className={cn(
+              "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
+              active
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {mode}
+          </button>
+        );
+      })}
     </div>
   );
 
