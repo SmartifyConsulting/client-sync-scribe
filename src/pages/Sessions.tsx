@@ -1495,7 +1495,7 @@ export default function Sessions() {
           </div>
 
           {/* Patient Overview — wide band spanning the workspace beside the recorder. */}
-          <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+          <div className="flex flex-col gap-4 order-2 min-w-0 lg:col-start-2 lg:row-start-1">
             {/* Patient Overview — AI recap of the last 6 months with DISC descriptors on top. */}
             <div className="min-h-[210px] flex flex-col">
               <SessionPatientOverview
