@@ -163,8 +163,19 @@ function RoleBasedRedirect() {
     return <Navigate to="/provider" replace />;
   }
 
-  // My Dashboard is now the default landing screen for every role.
+  // Nurses land on their ward dashboard, doctors on their clinical dashboard.
+  // /my-dashboard is the personal (patient) landing screen — only default there
+  // for accounts that are not practitioners.
+  if (isNurse) {
+    return <Navigate to="/provider/hospital/nurse-dashboard" replace />;
+  }
+
+  if (hasDoctorRole) {
+    return <Navigate to="/doctor-dashboard" replace />;
+  }
+
   return <Navigate to="/my-dashboard" replace />;
+
 }
 
 const App = () => (
