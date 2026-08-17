@@ -109,13 +109,19 @@ const handler = async (req: Request): Promise<Response> => {
           </tbody>
         </table>
 
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px;">
-          <p>This report was generated automatically by Holarc Health.</p>
-          <p>Generated on ${new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-        </div>
-      </body>
-      </html>
+        <p style="margin-top: 24px; color: #9ca3af; font-size: 12px;">
+          Generated on ${new Date().toLocaleDateString("en-ZA", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+        </p>
     `;
+
+    const html = brandedEmail({
+      title: "Invoice Report",
+      subtitle: practiceNumber ? `${doctorName} · Practice No: ${practiceNumber}` : doctorName,
+      senderName: doctorName,
+      bodyHtml: reportBody,
+      footerNote: "This report was generated automatically by Holarc Health.",
+    });
+
 
     const emailResponse = await sendEmail({
       to: email,
