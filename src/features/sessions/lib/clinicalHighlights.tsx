@@ -12,7 +12,7 @@ export function renderClinicalHighlights(text: string): ReactNode {
     const match = part.match(/^<(med|symptom|condition)>([\s\S]*?)<\/\1>$/);
     if (match) {
       return (
-        <strong key={i} className="font-bold text-foreground">
+        <strong key={i} className="font-bold text-destructive">
           {match[2]}
         </strong>
       );

@@ -1355,7 +1355,7 @@ export default function Sessions() {
 
           {/* Past Sessions — quick recap of this patient's previous consultations. */}
           {currentPatient && (
-            <div className="mt-6 w-full max-w-2xl text-left rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
+            <div className="mt-6 w-full max-w-[54.6rem] text-left rounded-xl border border-primary bg-card shadow-sm overflow-hidden">
               <div className="px-3 py-2 border-b bg-primary/5">
                 <h3 className="text-sm font-semibold text-foreground">Past Sessions</h3>
               </div>
