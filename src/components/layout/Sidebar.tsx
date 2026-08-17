@@ -211,12 +211,25 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const isDoctor = role === "doctor";
   const isNurseMenu = role === "nurse";
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
-  const isPatientMenu = !isDoctor && !isNurseMenu && (isPatient || routeSaysPatient);
+
+  /** Doctors can flip the sidebar between their practice menu and their own
+   *  patient menu with the badge next to Dashboard. The choice persists. */
+  const [profileMode, setProfileMode] = useState<"doctor" | "patient">(() =>
+    (localStorage.getItem("sidebarProfileMode") as "doctor" | "patient") || "doctor",
+  );
+  useEffect(() => {
+    localStorage.setItem("sidebarProfileMode", profileMode);
+  }, [profileMode]);
+  const doctorInPatientMode = isDoctor && profileMode === "patient";
+
+  const isPatientMenu =
+    doctorInPatientMode || (!isDoctor && !isNurseMenu && (isPatient || routeSaysPatient));
 
   const isDoctorMenu = !isOnAdminRoute && !isPatientMenu && !isNurseMenu && !(isAdmin && isOnAdminRoute);
 
   /** Doctors only see "My Shifts" once they're attached to a hospital. */
   const hideMyShift = isDoctorMenu && (affiliationLoading || !hasHospitalAffiliation);
+
   /** Version 2.0 features (Biolog, Ask Holarc) show for everyone as a greyed-out
    *  preview; only the system admin accounts (useV2Demo) can actually open them. */
   const V2_PATHS = ["/biolog", "/ask-maeve"];
