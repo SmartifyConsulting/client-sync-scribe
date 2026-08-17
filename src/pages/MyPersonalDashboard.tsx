@@ -147,16 +147,34 @@ export default function MyPersonalDashboard() {
 
   return (
     <div className="container mx-auto p-4 max-w-7xl space-y-4">
-      {/* Greeting */}
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold text-foreground">
-          {greeting}{firstName ? `, ${firstName}` : ""}
-        </h1>
-        <p className="text-muted-foreground text-xs">
-          Here's what matters today.
-          {!unlocked && " These sections are in preview and not yet available."}
-        </p>
-      </div>
+      {/* Hero: photo, greeting, Vulas, appointments + quick access */}
+      <PatientHeroCard
+        action={
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-2 text-xs">
+                <FolderOpen className="h-3.5 w-3.5" />
+                Quick access
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64 bg-popover z-50">
+              {TILES.map((tile) => (
+                <DropdownMenuItem key={tile.to} asChild>
+                  <Link to={tile.to} className="flex items-start gap-2">
+                    <tile.icon className="h-4 w-4 mt-0.5 text-primary" />
+                    <span className="min-w-0">
+                      <span className="block text-xs font-semibold text-foreground">{tile.label}</span>
+                      <span className="block text-[10px] text-muted-foreground">{tile.description}</span>
+                    </span>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        }
+      />
+
 
       {/* Daily summary strip */}
       <Panel unlocked={unlocked}>
