@@ -222,9 +222,13 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const routeSaysPatient = isOnPatientRoute && !roleLoading && role !== null;
 
   /** Doctors and nurses can flip the sidebar between their professional menu
-   *  and their own patient menu with the badge next to the dashboard. The
-   *  professional mode is always the starting point for a fresh entry. */
-  const [profileMode, setProfileMode] = useState<"doctor" | "patient">("doctor");
+   *  and their own patient menu with the badge next to the dashboard. Derived
+   *  from the current route (rather than local state) so the active pill
+   *  stays correct even if the sidebar remounts on navigation — local state
+   *  was resetting to "doctor" on every route change, leaving the pill stuck
+   *  showing the wrong side as active. */
+  const isOnMyDashboardRoute = location.pathname.startsWith("/my-dashboard");
+  const profileMode: "doctor" | "patient" = (isOnPatientRoute || isOnMyDashboardRoute) ? "patient" : "doctor";
 
   const doctorInPatientMode = isDoctor && profileMode === "patient";
   const nurseInPatientMode = isNurse && profileMode === "patient";
@@ -417,7 +421,6 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             key={mode}
             type="button"
             onClick={() => {
-              setProfileMode(isProfessional ? "doctor" : "patient");
               navigate(isProfessional ? professionalHome : "/my-dashboard");
               onNavigate?.();
             }}
