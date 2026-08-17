@@ -254,7 +254,7 @@ export function TodoRow({
 
         {/* Actions */}
         <div className="flex items-center gap-0.5 shrink-0">
-          {!isAppointment && todo.document_id && onPreview && (
+          {!isAppointment && (todo.document_id || isDocumentTodoKind(display.kind)) && onPreview && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
