@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { buildGreeting } from '@/lib/greeting';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/services/logger';
 import { useToast } from '@/hooks/use-toast';
@@ -746,7 +747,7 @@ const completeSession = async (
 <br/>
 <p><strong>To:</strong> ${ref.referred_to || 'Specialist'}</p>
 <br/>
-<p>Dear Colleague,</p>
+<p>${buildGreeting({ fullName: ref.referred_to, isPractitioner: true })},</p>
 <p>I am referring <strong>${patientRecord?.name || 'the patient'}</strong> for your expert opinion regarding:</p>
 <p>${ref.reason || ref.diagnosis || 'As discussed during consultation'}</p>
 <br/>

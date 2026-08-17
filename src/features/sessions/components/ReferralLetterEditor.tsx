@@ -39,7 +39,7 @@ Referring Doctor: [DOCTOR_NAME]
 
 ─────────────────────────────────────
 
-Dear Colleague,
+[GREETING],
 
 I am referring the above-named patient for your expert opinion and management.
 
