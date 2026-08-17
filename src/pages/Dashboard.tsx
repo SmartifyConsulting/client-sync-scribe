@@ -1,4 +1,4 @@
-import { Users, Calendar, TrendingUp, Award, MessageSquare } from "lucide-react";
+import { Users, Calendar, TrendingUp, Clock, MessageSquare } from "lucide-react";
 import vulaVouchersLogo from "@/assets/vula-vouchers-logo-v3.png";
 import { CompactTodoList } from "@/components/dashboard/CompactTodoList";
 import { Link, Navigate, useNavigate } from "react-router-dom";
@@ -221,6 +221,28 @@ export default function Dashboard() {
     refetchInterval: 60000,
   });
 
+  // Query for time saved this week by automating admin (auto-executed todos,
+  // e.g. auto-created prescriptions/certificates/invoices from a session).
+  const { data: timeSavedHours = 0 } = useQuery({
+    queryKey: ["doctor-time-saved-dashboard"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
+      if (!user) return 0;
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { count, error } = await supabase
+        .from("todos")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("is_auto_executed", true)
+        .gte("created_at", weekAgo);
+      if (error) return 0;
+      // ~8 minutes saved per automated admin action (drafting a document, filing a task, etc.)
+      return Math.round(((count || 0) * 8 / 60) * 10) / 10;
+    },
+    refetchInterval: 60000,
+  });
+
   const displayName = (() => {
     if (profileLoading || roleLoading) return '';
     if (!profile?.full_name) return isDoctor ? 'Doctor' : '';
@@ -313,14 +335,12 @@ export default function Dashboard() {
         />
         {isDoctor && (
           <StatsCard
-            title={t("doctorDashboard.vulaVouchers")}
-            value={doctorVulas + patientVulas}
-            change={undefined}
+            title="Time Saved This Week"
+            value={`${timeSavedHours} hrs`}
+            change="By automating admin"
             trend="up"
-            icon={Award}
-            imageUrl={vulaVouchersLogo}
-            iconSize="large"
-            href="/doctor/rewards"
+            icon={Clock}
+            href="/todos"
           />
         )}
         {isDoctor && (
@@ -329,6 +349,7 @@ export default function Dashboard() {
             className="col-span-2 h-full flex flex-col items-center justify-center gap-1 rounded-2xl border-2 border-primary bg-white p-2 md:p-3 text-center shadow-card hover:shadow-card-hover transition-all duration-300"
           >
             <img src={vulaVouchersLogo} alt="Vulas" className="h-7 w-auto md:h-8 object-contain shrink-0" />
+            <p className="text-xl md:text-2xl font-bold text-foreground">{doctorVulas + patientVulas}</p>
             <div className="min-w-0">
               <p className="text-xs md:text-sm font-bold text-foreground leading-tight">
                 Vulas reward you for doing and being better.

@@ -424,7 +424,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             className={cn(
               "flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize transition-colors",
               active
-                ? "bg-primary text-primary-foreground"
+                ? isProfessional
+                  ? "bg-red-800 text-white"
+                  : "bg-neutral-600 text-white"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
