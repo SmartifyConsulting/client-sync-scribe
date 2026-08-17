@@ -56,14 +56,16 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
             <button
               onClick={() => { if (isOnPatientRoute) navigate("/dashboard"); }}
               className={cn(
-                "flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
-                "bg-primary/10"
+                "flex items-center gap-2 px-2 py-1.5 w-full rounded-full transition-colors",
+                isOnPatientRoute
+                  ? "bg-pill-grey text-pill-grey-foreground"
+                  : "bg-dark-orange text-dark-orange-foreground",
               )}
             >
-              <Stethoscope className="h-3.5 w-3.5 text-primary" />
+              <Stethoscope className={cn("h-3.5 w-3.5", isOnPatientRoute ? "text-pill-grey-foreground" : "text-dark-orange-foreground")} />
               <div className="text-left">
-                <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{t("topbar.doctor")}</p>
+                <p className="text-xs font-semibold">{profile?.full_name || "User"}</p>
+                <p className="text-xs opacity-80">{t("topbar.doctor")}</p>
               </div>
             </button>
           </div>
@@ -79,12 +81,18 @@ export function AccountMenu({ trigger, align = "end", alignOffset = 0 }: Account
                 ? t("topbar.er")
                 : t("topbar.patient");
           return (
-            <div className="px-2 py-1.5 border-b border-border mb-1">
-              <p className="text-xs font-semibold text-foreground">{profile?.full_name || "User"}</p>
-              <p className="text-xs text-muted-foreground">{roleLabel}</p>
+            <div className="px-1 py-1.5 border-b border-border mb-1">
+              <div className="flex items-center gap-2 px-2 py-1.5 rounded-full bg-pill-grey text-pill-grey-foreground">
+                <HeartPulse className="h-3.5 w-3.5 text-pill-grey-foreground" />
+                <div className="text-left">
+                  <p className="text-xs font-semibold">{profile?.full_name || "User"}</p>
+                  <p className="text-xs opacity-80">{roleLabel}</p>
+                </div>
+              </div>
             </div>
           );
         })()}
+
         {(isAdmin || TEST_PROFILES.some((p) => p.email === currentEmail)) && (
           <div className="border-t border-border mt-1 pt-1">
             <div className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
