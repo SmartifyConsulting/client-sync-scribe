@@ -314,47 +314,43 @@ export default function MyPersonalDashboard() {
               </ul>
             </Panel>
 
-            <Panel title="Quick access" icon={FolderOpen} unlocked={unlocked}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {TILES.map((tile) => {
-                  const Icon = tile.icon;
-                  const card = (
-                    <div
-                      className={cn(
-                        "rounded-lg border p-3 transition-colors h-full",
-                        unlocked
-                          ? "border-primary bg-card hover:bg-primary/5 cursor-pointer"
-                          : "border-border bg-muted/30 opacity-60 cursor-not-allowed",
-                      )}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className={cn("flex h-8 w-8 items-center justify-center rounded-lg", unlocked ? "bg-primary/10" : "bg-muted")}>
-                          <Icon className={cn("h-4 w-4", unlocked ? "text-primary" : "text-muted-foreground")} />
-                        </div>
-                        {!unlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-                      </div>
-                      <p className="mt-2 text-xs font-semibold text-foreground">{tile.label}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{tile.description}</p>
-                      {!unlocked && (
-                        <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          Coming soon
+            <Panel
+              title="My Round Tables"
+              icon={MessageSquare}
+              unlocked
+              action={
+                <Link to="/patient/round-table" className="inline-flex items-center gap-1 text-xs text-primary font-semibold">
+                  View all <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              }
+            >
+              {roundTableLoading ? (
+                <p className="text-xs text-muted-foreground">Loading your round table notes…</p>
+              ) : roundTableNotes.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border bg-background/40 p-4 text-center">
+                  <MessageSquare className="mx-auto h-6 w-6 text-muted-foreground/50" />
+                  <p className="mt-1.5 text-xs font-semibold text-foreground">No round table notes yet</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    When your doctors share notes about your care, they'll appear here.
+                  </p>
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {roundTableNotes.map((note) => (
+                    <li key={note.id} className="rounded-lg border border-border bg-background/60 p-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-foreground truncate">{note.doctor_name || "Doctor"}</p>
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {format(new Date(note.created_at), "MMM d")}
                         </span>
-                      )}
-                    </div>
-                  );
-
-                  return unlocked ? (
-                    <Link key={tile.to} to={tile.to} className="block h-full">
-                      {card}
-                    </Link>
-                  ) : (
-                    <div key={tile.to} aria-disabled="true">
-                      {card}
-                    </div>
-                  );
-                })}
-              </div>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">{note.content}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Panel>
+
           </div>
         </div>
 
