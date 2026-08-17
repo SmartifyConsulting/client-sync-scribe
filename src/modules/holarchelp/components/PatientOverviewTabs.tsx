@@ -71,9 +71,9 @@ export function PatientOverviewTabs({ incidentId, patientId, patientName }: {
     <Tabs defaultValue="overview">
       <TabsList className="bg-neutral-600 flex-wrap h-auto gap-1">
         <TabsTrigger value="overview" className={SUB_TAB}><LayoutGrid className="h-3.5 w-3.5" /> Overview</TabsTrigger>
+        <TabsTrigger value="providers" className={SUB_TAB}><Users className="h-3.5 w-3.5" /> Healthcare Providers</TabsTrigger>
         <TabsTrigger value="personal" className={SUB_TAB}><User className="h-3.5 w-3.5" /> Personal Information</TabsTrigger>
         <TabsTrigger value="medical" className={SUB_TAB}><HeartPulse className="h-3.5 w-3.5" /> Medical Information</TabsTrigger>
-        <TabsTrigger value="providers" className={SUB_TAB}><Users className="h-3.5 w-3.5" /> Healthcare Providers</TabsTrigger>
         <TabsTrigger value="results" className={SUB_TAB}><FlaskConical className="h-3.5 w-3.5" /> Test Results</TabsTrigger>
       </TabsList>
 
