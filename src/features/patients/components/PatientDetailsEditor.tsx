@@ -1898,7 +1898,8 @@ export function PatientDetailsEditor({
                       ))}
                     </div>
                   ) : (
-                    <div className={FIELD_GRID_4_CLASS}>
+                    <div className={FIELD_GRID_2_CLASS}>
+
                       <ViewField label="Name" value={patient.next_of_kin_name} />
                       <ViewField label="Relationship" value={patient.next_of_kin_relationship} />
                       <ViewField label="Phone" value={stripDialCode(patient.next_of_kin_phone)} />
