@@ -128,7 +128,7 @@ serve(async (req) => {
         const { data: practice } = await admin
           .from("practices")
           .select("name")
-          .eq("user_id", user.id)
+          .eq("owner_id", user.id)
           .maybeSingle();
         practiceName = (practice as any)?.name || practiceName;
       }
