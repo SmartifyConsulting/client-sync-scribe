@@ -443,8 +443,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           ) : (
             <div className="space-y-1.5">
               {isDoctor && profileToggle}
+              {doctorInPatientMode && (
+                <p className="mx-1 px-3 py-1.5 rounded-md bg-neutral-900 text-[10px] font-bold uppercase tracking-[0.14em] text-white">
+                  My Holarchy
+                </p>
+              )}
               {visibleItems.map((item) => renderNavLink(item))}
             </div>
+
 
 
           )}
