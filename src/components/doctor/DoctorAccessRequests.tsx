@@ -309,26 +309,28 @@ export function DoctorAccessRequests() {
 
               {/* What this invitation grants — explicit, so the practitioner knows the scope */}
               <div className="rounded-xl border border-border bg-muted/30 p-3">
-                <p className="text-xs font-semibold text-foreground mb-2">
-                  What you will be able to access
-                </p>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <ul className="space-y-1">
-                    {GRANTED_ACCESS.map((item) => (
-                      <li key={item} className="flex items-start gap-1.5 text-xs text-foreground/80">
-                        <Check className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                    {DENIED_ACCESS.map((item) => (
-                      <li key={item} className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                        <X className="h-3.5 w-3.5 shrink-0 mt-0.5 text-crimson" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
                   <div>
-                    <p className="text-xs font-semibold text-foreground mb-2">
+                    <p className="text-xs font-semibold text-foreground mb-2 min-h-[2rem]">
+                      What you will be able to access
+                    </p>
+                    <ul className="space-y-1">
+                      {GRANTED_ACCESS.map((item) => (
+                        <li key={item} className="flex items-start gap-1.5 text-xs text-foreground/80">
+                          <Check className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                      {DENIED_ACCESS.map((item) => (
+                        <li key={item} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                          <X className="h-3.5 w-3.5 shrink-0 mt-0.5 text-crimson" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-foreground mb-2 min-h-[2rem]">
                       What other practitioners can access
                     </p>
                     <ul className="space-y-1">
