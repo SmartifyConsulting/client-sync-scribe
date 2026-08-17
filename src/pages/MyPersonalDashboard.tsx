@@ -53,8 +53,8 @@ const TILES: DashboardTile[] = [
   { icon: FolderOpen, label: "My Documents", description: "All generated and uploaded documents", to: "/documents" },
   { icon: FlaskConical, label: "Lab Results", description: "Lab requests and results", to: "/patient/lab-results" },
   { icon: ListChecks, label: "My Tasks", description: "To-dos and reminders", to: "/todos" },
-  { icon: Users2, label: "My Round Tables", description: "Shared notes with other specialists", to: "/doctor/round-tables" },
   { icon: BedDouble, label: "My Admissions", description: "Hospital admissions", to: "/admissions" },
+
 ];
 
 const SUMMARY_LINES = [
