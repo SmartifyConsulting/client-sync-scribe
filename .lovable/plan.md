@@ -64,3 +64,16 @@ My Holarchy
 - Shared signature markup reuses the same rules as `src/lib/signature.ts` (image first, typed fallback) so email and PDF match.
 - Greeting logic centralised in a small helper used by `useSessions.ts` referral generation and `ReferralLetterEditor.tsx`.
 - Sidebar changes are confined to `src/components/layout/Sidebar.tsx` (section definitions + new toggle component) and mirrored in `BottomNav.tsx` for mobile.
+
+## 8. Admissions screen: clearer records and a demo set
+
+Currently the screen opens on "Admitted by me" only, and each row shows the patient name with the admitting doctor tucked away in small grey text on the right, which is easy to miss.
+
+- Add an **All** filter and make it the default, so opening Admissions shows every admission you can see. Filters become: All | Admitted by Me | Other Doctors.
+- Rework each record so the patient and the reason read at a glance:
+  - Line 1: patient name, then the admission status badge.
+  - Line 2: "Admitted by Dr <name> · <hospital> · <reason/procedure>".
+  - Right side keeps the admission date (and discharge date when present).
+- The "Admitted by Me" line reads "Admitted by you" so the two filters stay visually distinct.
+- Seed a small set of demo admissions for Dr Georgia Adams (patient, hospital, ward, admitting doctor, procedure/diagnosis, admission date, one discharged) so "Admitted by Me" is never empty in the demo, and a couple attributed to other doctors so the "Other Doctors" view shows the admitting doctor clearly.
+- Clicking a record continues to open that patient; drill-down lands on the specific admission.
