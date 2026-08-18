@@ -187,13 +187,59 @@ export async function resolveDocumentPreviewContent(
     };
   }
 
+  // Referral letter context — the specialist comes from the document name (the
+  // generator stores "Referral Letter - <Specialist> - <date>"), and the
+  // clinical body from the linked session plus the patient's own record, so
+  // referral letters never preview as a skeleton of blanks.
+  let referral: FillContext["referral"] = null;
+  if (isReferralTemplate(doc.template_name) || isReferralTemplate(doc.name)) {
+    let sess: any = null;
+    if (doc.session_id) {
+      const { data } = await supabase
+        .from("sessions")
+        .select("summary, notes, diagnosis, ai_diagnosis, action_points, external_doctor_name, external_doctor_specialty")
+        .eq("id", doc.session_id)
+        .maybeSingle();
+      sess = data || null;
+    }
+
+    const nameParts = String(doc.name || "").split(" - ");
+    const fromName = nameParts.length > 1 ? nameParts[1].trim() : "";
+    const specialist =
+      sess?.external_doctor_name ||
+      (fromName && !/^\d/.test(fromName) && fromName !== (patient as any)?.name ? fromName : "");
+
+    const firstLine = (text?: string | null) =>
+      text ? String(text).split("\n").find((l) => l.trim())?.trim() || "" : "";
+
+    const diagnosis =
+      (sess?.diagnosis && String(sess.diagnosis).trim()) ||
+      (sess?.ai_diagnosis && String(sess.ai_diagnosis).trim()) ||
+      "";
+    const complaint = firstLine(sess?.summary) || diagnosis;
+
+    referral = {
+      specialist_name: specialist || null,
+      specialist_type: sess?.external_doctor_specialty || null,
+      presenting_complaint: complaint || null,
+      relevant_history: (patient as any)?.medical_history || null,
+      current_medications: formatMedications((patient as any)?.current_medications),
+      reason: diagnosis || complaint || null,
+      diagnosis: diagnosis || null,
+      clinical_notes: sess?.summary ? String(sess.summary).trim() : null,
+      urgency: null,
+    };
+  }
+
   const filled = fillDocumentPlaceholders(original, {
     patient,
     profile,
     invoice,
     prescription,
     certificate,
+    referral,
   });
+
 
   let content = filled.content;
 
