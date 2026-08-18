@@ -947,6 +947,15 @@ export default function Sessions() {
     differentials: [],
     investigations: [],
   });
+  // Never carry clinical reasoning across consultations: switching patient or
+  // starting a new session wipes the accumulated hint state and the notes body.
+  useEffect(() => {
+    hintImpressionRef.current = "";
+    hintLinesRef.current = new Map();
+    hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
+    setNotes("");
+  }, [patientId, currentSessionId]);
+
   useEffect(() => {
     if (!liveHint) return;
     const s = hintSectionsRef.current;
