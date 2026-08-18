@@ -677,7 +677,7 @@ export default function Sessions() {
         key: 'referral',
         label: 'Referral Letter',
         documentId: doc?.id || null,
-        content,
+        content: existing?.content || content,
         recipientEmail: (currentPatient as any)?.email || null,
         recipientName: currentPatient?.name || null,
       };
