@@ -167,6 +167,26 @@ export async function resolveDocumentPreviewContent(
     }
   }
 
+  // Older referral/letter rows were stamped before their tokens could be
+  // resolved and stored a page of "___" blanks. Re-stamp them from the
+  // owner's template so the fill below can put the real data back.
+  let source = original;
+  const blankCount = (original.match(/_{3,}/g) || []).length;
+  if (blankCount >= 3) {
+    const tplName = (row as any)?.template_name || doc.template_name;
+    if (tplName && doc.user_id) {
+      const { data: tpl } = await supabase
+        .from("document_templates")
+        .select("content")
+        .eq("user_id", doc.user_id)
+        .eq("name", tplName)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if ((tpl as any)?.content) source = (tpl as any).content as string;
+    }
+  }
+
 
   // Documents created outside a session (or older rows) may not carry a
   // patient_id — recover it from the linked session so certificates/invoices
