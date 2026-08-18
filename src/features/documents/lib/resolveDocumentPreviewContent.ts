@@ -78,11 +78,95 @@ function formatMedications(meds: unknown): string | null {
   return lines.length ? lines.join("\n") : null;
 }
 
+/** Placeholder bodies stored for uploads before the file itself is rendered. */
+const isUploadStub = (content: string) =>
+  !content.trim() ||
+  /^\s*\[(IMAGE|Uploaded File|AUDIO Recording|VIDEO Recording)\]/i.test(content.trim());
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"]/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string,
+  );
+
+/**
+ * Builds the preview body for an uploaded file: the file itself renders inline
+ * (image, PDF or media player) and any AI interpretation / transcription is
+ * shown underneath it rather than replacing it.
+ */
+function buildUploadPreview(row: any, storedContent: string): string | null {
+  const url: string | undefined = row?.media_url || row?.source_file_url || undefined;
+  if (!url) return null;
+
+  const type = String(row?.media_type || "").toLowerCase();
+  const name = String(row?.name || "Uploaded file");
+  const looksImage = type === "image" || /\.(png|jpe?g|gif|webp|bmp|heic)(\?|$)/i.test(url);
+  const looksPdf = type === "pdf" || /\.pdf(\?|$)/i.test(url);
+  const looksVideo = type === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(url);
+  const looksAudio = type === "audio" || /\.(mp3|wav|m4a|ogg|webm)(\?|$)/i.test(url);
+
+  let media = "";
+  if (looksImage) {
+    media = `<img src="${url}" alt="${escapeHtml(name)}" style="max-width:100%;height:auto;border-radius:8px;" />`;
+  } else if (looksPdf) {
+    media = `<iframe src="${url}" title="${escapeHtml(name)}" style="width:100%;height:70vh;border:1px solid #e5e7eb;border-radius:8px;"></iframe>`;
+  } else if (looksVideo) {
+    media = `<video src="${url}" controls style="max-width:100%;border-radius:8px;"></video>`;
+  } else if (looksAudio) {
+    media = `<audio src="${url}" controls style="width:100%;"></audio>`;
+  } else {
+    media = `<p><a href="${url}" target="_blank" rel="noreferrer">Open ${escapeHtml(name)}</a></p>`;
+  }
+
+  const parts = [`<p><strong>${escapeHtml(name)}</strong></p>`, media];
+
+  const transcript = isUploadStub(storedContent) ? "" : storedContent;
+  if (transcript.trim()) {
+    parts.push(`<h3>Transcribed content</h3><div>${transcript}</div>`);
+  }
+  const analysis = row?.ai_analysis ? String(row.ai_analysis) : "";
+  if (analysis.trim()) {
+    parts.push(
+      `<h3>AI interpretation</h3><div>${escapeHtml(analysis).replace(/\n/g, "<br/>")}</div>`,
+    );
+  }
+  if (!looksPdf) {
+    parts.push(
+      `<p style="font-size:12px;"><a href="${url}" target="_blank" rel="noreferrer">Open original file</a></p>`,
+    );
+  }
+  return parts.join("\n");
+}
 
 export async function resolveDocumentPreviewContent(
   doc: PreviewDocumentInput,
 ): Promise<ResolvedDocumentPreview> {
   const original = doc.content || "";
+
+  // Uploaded files (X-rays, scans, PDFs) store only a stub body — render the
+  // actual file instead of an empty document.
+  {
+    const { data: row } = await supabase
+      .from("documents")
+      .select("name, media_url, media_type, source_file_url, ai_analysis, template_name")
+      .eq("id", doc.id)
+      .maybeSingle();
+    const hasFile = !!((row as any)?.media_url || (row as any)?.source_file_url);
+    const isGeneratedDoc = /invoice|prescription|certificate|referral|letter|report|admission/i.test(
+      String((row as any)?.template_name || doc.template_name || ""),
+    );
+    if (hasFile && (isUploadStub(original) || !isGeneratedDoc)) {
+      const built = buildUploadPreview(row, original);
+      if (built) {
+        return {
+          resolvedContent: built,
+          templateName: (row as any)?.template_name ?? doc.template_name ?? null,
+          userId: doc.user_id ?? null,
+          didChange: false,
+        };
+      }
+    }
+  }
+
 
   // Documents created outside a session (or older rows) may not carry a
   // patient_id — recover it from the linked session so certificates/invoices
