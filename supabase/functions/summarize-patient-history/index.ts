@@ -53,11 +53,25 @@ serve(async (req) => {
       ?.map((s: any) => `- Date: ${s.started_at} | Summary: ${s.summary || 'No summary available'} | Transcript: ${s.transcript || 'No transcript'}`)
       ?.join('\n') || 'No completed sessions yet.';
 
+    // Historical transcriptions can run to many thousands of characters. Send
+    // them whole (split into ordered chunks) so no part of the record is lost.
+    const chunkRecord = (r: any) => {
+      const label = `${r.name || 'Historical record'} (record date: ${r.record_date || r.created_at || 'Unknown'})`;
+      const text = String(r.content || '').trim();
+      if (!text) return '';
+      const SIZE = 6000;
+      if (text.length <= SIZE) return `--- ${label} ---\n${text}`;
+      const parts: string[] = [];
+      for (let i = 0; i < text.length; i += SIZE) {
+        parts.push(`--- ${label} [part ${Math.floor(i / SIZE) + 1}] ---\n${text.slice(i, i + SIZE)}`);
+      }
+      return parts.join('\n');
+    };
+
     const historicalContext = Array.isArray(historicalRecords) && historicalRecords.length > 0
-      ? historicalRecords
-          .map((r: any) => `- Record date: ${r.record_date || r.created_at || 'Unknown'} | ${r.name || 'Historical record'}: ${(r.content || '').slice(0, 4000)}`)
-          .join('\n')
+      ? historicalRecords.map(chunkRecord).filter(Boolean).join('\n\n')
       : 'No historical paper records transcribed.';
+
 
     const patientContext = `
 Patient Name: ${patient.name}
@@ -73,8 +87,9 @@ Allergies: ${patient.allergies || 'None recorded'}
 Session History (with dates):
 ${sessionSummaries}
 
-Retrospective / historical records (transcribed handwritten or paper notes — place these on the timeline by their record date, not by upload date):
+Retrospective / historical records. These are full transcriptions of handwritten or paper notes and AI interpretations of scans/X-rays. Read EVERY part (records may be split into "[part N]" chunks — treat all parts of the same record as one document) and turn EVERY dated event, diagnosis, medication and procedure you find into its own timeline entry, placed by the record date rather than by upload date. Do not summarise away older events:
 ${historicalContext}
+
 `;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

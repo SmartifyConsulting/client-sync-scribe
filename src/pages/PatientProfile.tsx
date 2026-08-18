@@ -1,3 +1,4 @@
+import { SignedImage } from "@/features/documents/components/SignedImage";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BiologPanel } from "@/features/biolog/BiologPanel";
 import { useV2Demo } from "@/hooks/useV2Demo";
@@ -987,7 +988,7 @@ export default function PatientProfile() {
           <div className="space-y-4">
             {(analysisDialog as any)?.media_url && (
               <div className="rounded-lg overflow-hidden border bg-muted">
-                <img
+                <SignedImage
                   src={(analysisDialog as any).media_url}
                   alt={analysisDialog?.name}
                   className="w-full max-h-64 object-contain"

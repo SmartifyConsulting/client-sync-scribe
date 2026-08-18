@@ -1,3 +1,4 @@
+import { SignedImage } from "./SignedImage";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import {
@@ -38,6 +39,8 @@ import { DocumentPreview } from "@/features/sessions/components/DocumentPreview"
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { InformDocumentDialog } from "./InformDocumentDialog";
 import { AiUploadZone } from "./AiUploadZone";
+import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
+import { parseStorageUrl } from "../lib/signedMediaUrl";
 
 
 import { cn } from "@/lib/utils";
@@ -91,6 +94,11 @@ export function DocumentsBrowser({
   const [informDoc, setInformDoc] = useState<Document | null>(null);
   const [analysingId, setAnalysingId] = useState<string | null>(null);
   const [lastUploaded, setLastUploaded] = useState<string | null>(null);
+  const [extractingId, setExtractingId] = useState<string | null>(null);
+  const [pendingHistory, setPendingHistory] = useState<{
+    history: ExtractedHistory;
+    patientId: string | null;
+  } | null>(null);
 
 
 
@@ -175,6 +183,60 @@ export function DocumentsBrowser({
     [toast, fetchDocuments],
   );
 
+  /**
+   * Re-runs the transcription/extraction on an already-uploaded record so the
+   * clinical history it contains can be confirmed and applied again (records
+   * uploaded before extraction existed never had that step).
+   */
+  const reExtractHistory = useCallback(
+    async (doc: Document) => {
+      const url = ((doc as any).media_url || (doc as any).source_file_url) as string | undefined;
+      const ref = parseStorageUrl(url);
+      if (!ref) {
+        toast({ title: "No original file to re-read", variant: "destructive" });
+        return;
+      }
+      setExtractingId(doc.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("transcribe-record", {
+          body: {
+            storagePath: ref.path,
+            bucket: ref.bucket,
+            mimeType: (doc as any).media_type === "pdf" ? "application/pdf" : undefined,
+            fileName: doc.name,
+          },
+        });
+        if (error) throw error;
+        const history = (data as any)?.history;
+        if (!history) throw new Error("No clinical history could be read from this record");
+
+        const rd = history.record_date;
+        const updates: Record<string, unknown> = {};
+        if ((data as any)?.text) {
+          updates.content = (data as any).text;
+          updates.is_transcribed = true;
+        }
+        if (!(doc as any).record_date && typeof rd === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rd)) {
+          updates.record_date = rd;
+        }
+        if (Object.keys(updates).length) {
+          await supabase.from("documents").update(updates as any).eq("id", doc.id);
+        }
+        setPendingHistory({ history, patientId: (doc as any).patient_id || patientId || null });
+        void fetchDocuments();
+      } catch (err: any) {
+        toast({
+          title: "Could not re-extract the history",
+          description: err?.message || "The AI extraction failed",
+          variant: "destructive",
+        });
+      } finally {
+        setExtractingId(null);
+      }
+    },
+    [toast, fetchDocuments, patientId],
+  );
+
   const handleUploaded = useCallback(
     (lastId: string | null) => {
       void fetchDocuments();
@@ -182,6 +244,7 @@ export function DocumentsBrowser({
     },
     [fetchDocuments],
   );
+
 
 
 
@@ -261,7 +324,7 @@ export function DocumentsBrowser({
                     >
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
                         {isImageDoc ? (
-                          <img src={mediaUrl} alt={doc.name} className="h-10 w-10 object-cover" />
+                          <SignedImage src={mediaUrl} alt={doc.name} className="h-10 w-10 object-cover" />
                         ) : (
                           <FileText className="h-4 w-4 text-primary" />
                         )}
@@ -346,6 +409,22 @@ export function DocumentsBrowser({
                     Analyse with AI
                   </Button>
                 )}
+              {((previewDoc as any).is_transcribed ||
+                (previewDoc as any).media_type === "pdf") && (
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  disabled={extractingId === previewDoc.id}
+                  onClick={() => reExtractHistory(previewDoc)}
+                >
+                  {extractingId === previewDoc.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Re-extract history
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className="gap-2"
@@ -365,6 +444,20 @@ export function DocumentsBrowser({
           documentName={informDoc.name}
           open={!!informDoc}
           onOpenChange={(open) => !open && setInformDoc(null)}
+        />
+      )}
+
+      {pendingHistory?.patientId && (
+        <ApplyHistoryDialog
+          open
+          onOpenChange={(o) => !o && setPendingHistory(null)}
+          patientId={pendingHistory.patientId}
+          history={pendingHistory.history}
+          recordDate={pendingHistory.history.record_date || undefined}
+          onApplied={() => {
+            setPendingHistory(null);
+            void fetchDocuments();
+          }}
         />
       )}
     </div>
