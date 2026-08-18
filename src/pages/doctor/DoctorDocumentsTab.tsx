@@ -170,7 +170,12 @@ export default function DoctorDocumentsTab() {
 
   return (
     <div className="space-y-3 max-w-5xl">
+      <AiUploadZone
+        knownCategories={knownCategories}
+        onUploaded={() => fetchDocuments()}
+      />
       <MailboxIntakeAddress />
+
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
