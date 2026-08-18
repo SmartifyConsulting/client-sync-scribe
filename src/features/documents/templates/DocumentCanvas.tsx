@@ -77,8 +77,9 @@ export function DocumentCanvas({ content, headerFooter, fontFamily, logoUrl, com
   const hasFooter = sectionHasContent(headerFooter?.footer);
   // Typography is identical in both modes so the Content editor, the Content
   // Preview panel and the full Preview dialog never visually drift apart.
-  const bodyFontSize = "12pt";
   const sectionFontSize = "10.5pt";
+  // Body matches the letterhead header text exactly (same family, size, weight).
+  const bodyFontSize = sectionFontSize;
 
   return (
     <div
@@ -109,7 +110,7 @@ export function DocumentCanvas({ content, headerFooter, fontFamily, logoUrl, com
       {content ? (
         <div
           className="whitespace-pre-wrap text-black leading-relaxed"
-          style={{ fontFamily: resolvedFont, fontSize: bodyFontSize }}
+          style={{ fontFamily: resolvedFont, fontSize: bodyFontSize, fontWeight: 400 }}
           dangerouslySetInnerHTML={{ __html: renderFormattedContent(content) }}
         />
       ) : compact ? (
