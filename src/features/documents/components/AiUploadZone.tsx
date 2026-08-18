@@ -124,7 +124,7 @@ export function AiUploadZone({
               source_file_url: publicUrl,
               source_file_name: file.name,
               is_transcribed: transcribed,
-              record_date: details.recordDate || null,
+              record_date: details.recordDate || detectedRecordDate || null,
             } as any)
             .select("id")
             .maybeSingle();
