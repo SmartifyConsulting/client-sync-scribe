@@ -28,8 +28,20 @@ currently titled and back-linked as "Admissions". It becomes **Patient Overview*
   Recording screen is rendered: headline recap of the last 6 months, with
   Conditions / Current meds / Allergies columns and Recent visits.
 
-Everything else on the screen (vitals, lab results, imaging, diet & meals,
-admissions history, clinical notes) stays exactly as it is.
+## 3. Re-layout the frames below
+
+- **Diet & Meals** moves up to sit on the same row as, and to the left of, the
+  **Patient Overview** frame (two columns on desktop, stacked on mobile).
+- **Lab Results** and **Imaging** share the next row, side by side.
+- Vitals, admissions history and clinical notes keep their current positions.
+
+```text
+[ Vitals panel                                   ]
+[ Diet & Meals        ][ Patient Overview        ]
+[ Lab Results         ][ Imaging                 ]
+[ Admissions at this hospital                    ]
+```
+
 
 Note: the Allergies frame is included in the removals because the shared
 Patient Overview frame already shows allergies (in red) — keeping both would
