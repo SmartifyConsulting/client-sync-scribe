@@ -106,7 +106,7 @@ IMPORTANT DISCLAIMER: Always conclude with:
                 },
                 {
                   type: "image_url",
-                  image_url: { url: imageUrl },
+                  image_url: { url: inlineUrl },
                 },
               ],
             },
@@ -130,7 +130,7 @@ IMPORTANT DISCLAIMER: Always conclude with:
       }
       const errorText = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, errorText);
-      throw new Error("AI analysis failed");
+      throw new Error(`AI analysis failed (${aiResponse.status}): ${errorText.slice(0, 300)}`);
     }
 
     const aiResult = await aiResponse.json();
