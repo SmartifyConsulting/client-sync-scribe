@@ -446,6 +446,20 @@ export function DocumentsBrowser({
           onOpenChange={(open) => !open && setInformDoc(null)}
         />
       )}
+
+      {pendingHistory?.patientId && (
+        <ApplyHistoryDialog
+          open
+          onOpenChange={(o) => !o && setPendingHistory(null)}
+          patientId={pendingHistory.patientId}
+          history={pendingHistory.history}
+          recordDate={pendingHistory.history.record_date || undefined}
+          onApplied={() => {
+            setPendingHistory(null);
+            void fetchDocuments();
+          }}
+        />
+      )}
     </div>
   );
 }
