@@ -720,11 +720,11 @@ export default function Sessions() {
       if (d) results.push(d);
     }
     if (medCert) {
-      const d = await createMedCertDocument(medCert);
+      const d = await createMedCertDocument(medCert, sessionIdForDocs);
       if (d) results.push(d);
     }
     if (referralData) {
-      const d = await createReferralDocument(referralData);
+      const d = await createReferralDocument(referralData, sessionIdForDocs);
       if (d) results.push(d);
     }
     if (invoiceData) {
@@ -733,10 +733,10 @@ export default function Sessions() {
     }
     setGeneratedDocs(results);
 
-    // Only queue steps whose document actually exists, so the flow can never
-    // stall on an invisible step: prescription → med cert → referral → other
-    // docs → schedule → invoice → vulas.
-    const steps: PostSessionStepType[] = [];
+    // Review order: AI summary → prescription → med cert → referral → other
+    // docs → schedule → invoice → vulas. The invoice step is always queued —
+    // every consultation is billable, so it must never be skipped.
+    const steps: PostSessionStepType[] = ["summary"];
     const ORDER: PostSessionStepType[] = ["prescription", "medcert", "referral"];
     for (const key of ORDER) {
       if (results.some((d) => d.key === key)) steps.push(key);
@@ -746,7 +746,7 @@ export default function Sessions() {
       if (!steps.includes(key) && key !== "invoice") steps.push(key);
     }
     steps.push("schedule");
-    if (results.some((d) => d.key === "invoice")) steps.push("invoice");
+    steps.push("invoice");
     steps.push("vula");
 
     setPostSessionQueue(steps);
