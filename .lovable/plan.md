@@ -54,3 +54,8 @@ The large drag-and-drop "AI describe" zone currently exists only inside the pati
 - `src/features/sessions/components/PostSessionStepDialog.tsx`: gradient variant for the AI Clinician notes button.
 - `src/features/documents/lib/fillDocumentPlaceholders.ts`: referral fallbacks from patient/session context; blank-section pruning.
 - `src/hooks/useTemplates.ts` + prescription fill logic: dynamic medication list instead of `[Medication1..3]`.
+
+## 7. Document previews missing signature and prescription date
+
+- Document previews render `[DoctorSignature]` as blank because the doctor's selected signature (font style / drawn image) is not resolved into the preview path — only the export path fills it. Resolve the signature the same way for preview, PDF and email so what the doctor sees matches what is sent.
+- `[PrescriptionDate]` (and `[SignatureDate]`) are left empty on prescriptions. Default them to the session/document date, formatted like the rest of the app, whenever the prescription form does not supply one.
