@@ -476,25 +476,59 @@ export default function Sessions() {
   }, [aiDiagnosis]);
 
   // --- Silent document creation (no per-document review dialog) ---
-  const createMedCertDocument = async (data: MedCertData): Promise<GeneratedDoc | null> => {
+  /**
+   * The session finaliser already writes a full letterhead document for this
+   * session. Reuse it instead of inserting a second, unlinked plain-text copy,
+   * so Session History and the review queue show the same document.
+   */
+  const findSessionDocument = async (
+    userId: string,
+    sessionIdForDoc: string | null | undefined,
+    templateNameLike: string,
+  ): Promise<{ id: string; content: string } | null> => {
+    if (!sessionIdForDoc || !patientId) return null;
+    const { data } = await supabase
+      .from('documents')
+      .select('id, content')
+      .eq('user_id', userId)
+      .eq('patient_id', patientId)
+      .eq('session_id', sessionIdForDoc)
+      .ilike('template_name', `%${templateNameLike}%`)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    return data ? { id: data.id, content: data.content || '' } : null;
+  };
+
+  const createMedCertDocument = async (
+    data: MedCertData,
+    sessionIdArg?: string | null,
+  ): Promise<GeneratedDoc | null> => {
     if (!patientId) return null;
     try {
+      const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
       const content = `<b>MEDICAL CERTIFICATE</b>\n\nPatient: ${data.patient_name || currentPatient?.name}\nDiagnosis: ${data.diagnosis}\nLeave Period: ${data.start_date} to ${data.end_date}${data.notes ? `\nNotes: ${data.notes}` : ''}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      const { data: doc } = await supabase.from('documents').insert({
-        user_id: user.id,
-        patient_id: patientId,
-        patient_name: currentPatient?.name || null,
-        name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
-        content,
-        template_name: 'Medical Certificate',
-      }).select('id').single();
+      const existing = await findSessionDocument(user.id, sessionIdForDoc, 'certificate');
+      let doc: { id: string } | null = existing ? { id: existing.id } : null;
+      if (!doc) {
+        const { data: inserted } = await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          session_id: sessionIdForDoc,
+          name: `Medical Certificate - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Medical Certificate',
+        } as any).select('id').single();
+        doc = inserted ?? null;
+      }
       return {
         key: 'medcert',
         label: 'Medical Certificate',
         documentId: doc?.id || null,
-        content,
+        content: existing?.content || content,
         recipientEmail: (currentPatient as any)?.email || null,
         recipientName: currentPatient?.name || null,
       };
@@ -519,19 +553,25 @@ export default function Sessions() {
         });
       }
       const content = `<b>PRESCRIPTION</b>\n\nPatient: ${currentPatient?.name || ''}\n\n${data.medications.map(m => `• ${m.medication} — ${m.dosage}, ${m.frequency}${m.duration ? ` (${m.duration})` : ''}${m.instructions ? `\n  ${m.instructions}` : ''}`).join('\n')}`;
-      const { data: doc } = await supabase.from('documents').insert({
-        user_id: user.id,
-        patient_id: patientId,
-        patient_name: currentPatient?.name || null,
-        name: `Prescription - ${new Date().toLocaleDateString()}`,
-        content,
-        template_name: 'Prescription',
-      }).select('id').single();
+      const existing = await findSessionDocument(user.id, sessionIdForDoc, 'prescription');
+      let doc: { id: string } | null = existing ? { id: existing.id } : null;
+      if (!doc) {
+        const { data: inserted } = await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          session_id: sessionIdForDoc,
+          name: `Prescription - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Prescription',
+        } as any).select('id').single();
+        doc = inserted ?? null;
+      }
       return {
         key: 'prescription',
         label: 'Prescription',
         documentId: doc?.id || null,
-        content,
+        content: existing?.content || content,
         recipientEmail: (currentPatient as any)?.pharmacy_email || (currentPatient as any)?.email || null,
         recipientName: currentPatient?.name || null,
       };
@@ -597,20 +637,30 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  const createReferralDocument = async (data: ReferralData): Promise<GeneratedDoc | null> => {
+  const createReferralDocument = async (
+    data: ReferralData,
+    sessionIdArg?: string | null,
+  ): Promise<GeneratedDoc | null> => {
     if (!patientId) return null;
     try {
+      const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
       const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      const { data: doc } = await supabase.from('documents').insert({
-        user_id: user.id,
-        patient_id: patientId,
-        patient_name: currentPatient?.name || null,
-        name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
-        content,
-        template_name: 'Referral Letter',
-      }).select('id').single();
+      const existing = await findSessionDocument(user.id, sessionIdForDoc, 'referral');
+      let doc: { id: string } | null = existing ? { id: existing.id } : null;
+      if (!doc) {
+        const { data: inserted } = await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          session_id: sessionIdForDoc,
+          name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Referral Letter',
+        } as any).select('id').single();
+        doc = inserted ?? null;
+      }
       if (data.doctor_name) {
         const { data: refDoc } = await supabase.from('referral_doctors')
           .select('id, referral_count')
@@ -627,7 +677,7 @@ export default function Sessions() {
         key: 'referral',
         label: 'Referral Letter',
         documentId: doc?.id || null,
-        content,
+        content: existing?.content || content,
         recipientEmail: (currentPatient as any)?.email || null,
         recipientName: currentPatient?.name || null,
       };
@@ -670,11 +720,11 @@ export default function Sessions() {
       if (d) results.push(d);
     }
     if (medCert) {
-      const d = await createMedCertDocument(medCert);
+      const d = await createMedCertDocument(medCert, sessionIdForDocs);
       if (d) results.push(d);
     }
     if (referralData) {
-      const d = await createReferralDocument(referralData);
+      const d = await createReferralDocument(referralData, sessionIdForDocs);
       if (d) results.push(d);
     }
     if (invoiceData) {
@@ -683,10 +733,10 @@ export default function Sessions() {
     }
     setGeneratedDocs(results);
 
-    // Only queue steps whose document actually exists, so the flow can never
-    // stall on an invisible step: prescription → med cert → referral → other
-    // docs → schedule → invoice → vulas.
-    const steps: PostSessionStepType[] = [];
+    // Review order: AI summary → prescription → med cert → referral → other
+    // docs → schedule → invoice → vulas. The invoice step is always queued —
+    // every consultation is billable, so it must never be skipped.
+    const steps: PostSessionStepType[] = ["summary"];
     const ORDER: PostSessionStepType[] = ["prescription", "medcert", "referral"];
     for (const key of ORDER) {
       if (results.some((d) => d.key === key)) steps.push(key);
@@ -696,7 +746,7 @@ export default function Sessions() {
       if (!steps.includes(key) && key !== "invoice") steps.push(key);
     }
     steps.push("schedule");
-    if (results.some((d) => d.key === "invoice")) steps.push("invoice");
+    steps.push("invoice");
     steps.push("vula");
 
     setPostSessionQueue(steps);
@@ -897,6 +947,15 @@ export default function Sessions() {
     differentials: [],
     investigations: [],
   });
+  // Never carry clinical reasoning across consultations: switching patient or
+  // starting a new session wipes the accumulated hint state and the notes body.
+  useEffect(() => {
+    hintImpressionRef.current = "";
+    hintLinesRef.current = new Map();
+    hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
+    setNotes("");
+  }, [patientId]);
+
   useEffect(() => {
     if (!liveHint) return;
     const s = hintSectionsRef.current;
@@ -1277,6 +1336,8 @@ export default function Sessions() {
           transcript={pendingTranscript}
           onVulaConfirm={handleVisitCategoryConfirm}
           clinicianNotes={cleanClinicianNotes(notes)}
+          summary={summary}
+          actionPoints={actionPoints}
         />
       )}
 

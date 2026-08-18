@@ -26,7 +26,7 @@ const DOC_ICONS: Record<string, typeof FileText> = {
 };
 
 export type DocStepType = "prescription" | "medcert" | "referral" | "invoice";
-export type PostSessionStepType = DocStepType | "schedule" | "vula";
+export type PostSessionStepType = DocStepType | "summary" | "schedule" | "vula";
 
 interface PostSessionStepDialogProps {
   open: boolean;
@@ -285,6 +285,54 @@ function DocStepDialog({
 }
 
 
+/** First step of the queue — the AI summary and action points for the visit. */
+function SummaryStepDialog({
+  summary,
+  actionPoints,
+  patientName,
+  onAdvance,
+}: {
+  summary?: string | null;
+  actionPoints?: string[];
+  patientName?: string;
+  onAdvance: () => void;
+}) {
+  return (
+    <Dialog open onOpenChange={() => {}}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-primary" />
+            AI Summary
+          </DialogTitle>
+          <DialogDescription>
+            {patientName ? `Consultation summary for ${patientName}.` : "Consultation summary."}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 max-h-[55vh] overflow-y-auto text-sm leading-relaxed text-foreground">
+          <p className="whitespace-pre-wrap">{summary?.trim() || "No summary was produced for this session."}</p>
+          {(actionPoints || []).length > 0 && (
+            <div className="space-y-1.5">
+              <p className="font-semibold">Action points</p>
+              <ul className="list-disc pl-5 space-y-1">
+                {(actionPoints || []).map((point, i) => (
+                  <li key={i}>{point}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button onClick={onAdvance}>
+            <Check className="mr-2 h-4 w-4" />
+            Continue
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /** Renders nothing and immediately advances the queue past a missing document step. */
 function MissingStepAdvancer({ onAdvance }: { onAdvance: () => void }) {
   useEffect(() => {
@@ -312,6 +360,9 @@ interface PostSessionQueueDialogProps {
   onVulaConfirm: (categories: string[] | null) => Promise<void> | void;
   /** AI Clinician notes surfaced on the prescription step. */
   clinicianNotes?: string | null;
+  /** AI summary + action points shown as the first step of the queue. */
+  summary?: string | null;
+  actionPoints?: string[];
 }
 
 /**
@@ -334,9 +385,22 @@ export function PostSessionStepDialog({
   transcript,
   onVulaConfirm,
   clinicianNotes,
+  summary,
+  actionPoints,
 }: PostSessionQueueDialogProps) {
   const step = queue[index];
   if (!step) return null;
+
+  if (step === "summary") {
+    return (
+      <SummaryStepDialog
+        summary={summary}
+        actionPoints={actionPoints}
+        patientName={patientName || currentPatient?.name}
+        onAdvance={onAdvance}
+      />
+    );
+  }
 
   if (step === "schedule") {
     if (!currentPatient || !doctorId) {
