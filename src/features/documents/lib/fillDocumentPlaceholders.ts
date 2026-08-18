@@ -371,13 +371,9 @@ function pruneEmptyLines(content: string): string {
     kept.push(withoutMark);
   }
 
-  // Renumber surviving "1." / "2." medication rows.
-  let n = 0;
-  const renumbered = kept.map((line) =>
-    /^\s*\d+[.)]\s*\S/.test(line)
-      ? line.replace(/^(\s*)\d+([.)])/, (_m, pad) => `${pad}${++n}.`)
-      : line,
-  );
+  // Prescribed medications render as plain bullets — never numbered rows.
+  const renumbered = kept.map((line) => bulletiseRow(line));
+
 
   const joined = usesBr ? renumbered.join("<br>") : renumbered.join("\n");
   return usesBr
