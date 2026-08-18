@@ -2,7 +2,7 @@
 
 ## What I found (verified against the Okoli session of 18 Aug)
 
-- The AI summary itself was correct — it describes the itchy eye, the drops and the follow-up. What looked "unrelated" was not the session summary but the live AI Clinician panel, which is not cleared between patients/sessions.
+- The AI summary itself was correct — it describes the itchy eye, the drops and the follow-up. The **AI Clinician notes shown during the consultation were unrelated**; that panel is a separate live feed and is a fault in its own right (see below).
 - **Every document is created twice.** The session finaliser writes a full letterhead version (linked to the session), and the session screen immediately writes a second plain-text copy with **no session link**. Session History shows the letterhead one; the review dialog shows the plain one.
 - **The letterhead versions are mostly blank.** The medical certificate has `Date of consultation: ___`, `Nature of illness: ___`, `Recommended sick leave from ___ until ___`; the referral letter has `To: ___`, `Presenting complaint: ___`, `Reason for referral: ___`. The AI already extracted all of this — it is simply never mapped into the template, so every unmatched token becomes `___`. That is the "empty template" in Session History.
 - The review queue starts at the first document: there is no AI-summary step before the prescription.
