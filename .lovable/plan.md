@@ -23,3 +23,34 @@ The large drag-and-drop "AI describe" zone currently exists only inside the pati
 - `supabase/functions/analyze-medical-image/index.ts`: accept `storagePath`/`bucket`, service-role download, base64 inline, better error text; redeploy.
 - `src/features/documents/components/DocumentsBrowser.tsx`: pass `storagePath` to the analyser and improve the failure toast.
 - `src/pages/Documents.tsx`: render the shared upload zone (extracted from `DocumentsBrowser` so both screens use one component) above the document list, reusing `UploadDocumentsDialog` and `UploadProgressBar`.
+
+## 3. Session transcript frame moves under Patient Overview
+
+- Remove the standalone bordered frame currently wrapping the live session transcription.
+- Render the transcript accordion inside the Patient Overview frame instead, so the session screen has one container rather than two stacked frames.
+- Keep the existing transcript behaviour (live text, resume, expand/collapse) unchanged.
+
+## 4. Accentuate "Review AI Clinician notes"
+
+- Restyle the brain-icon button in the post-session step dialog with a warm orange→yellow→red gradient (new semantic tokens in the design system, not hardcoded colours) and white text, so it stands out from the other step actions.
+
+## 5. Referral letter must pull all patient fields
+
+- The referral template renders section headings with empty bodies because only the referral form fields are mapped; patient-derived fields are not.
+- Populate Relevant History, Current Medications, Investigations Performed and Diagnosis from the patient record and the current session when the referral form leaves them blank (conditions/history, active medication list, recent results, working impression).
+- Also fill patient identity/contact tokens (name, DOB, ID, medical aid, phone, address) on the referral document the same way the prescription does.
+- Any section that still has no data is dropped from the letter rather than printed as an empty heading.
+
+## 6. Prescription must not print blank medication slots
+
+- The default prescription template hardcodes slots 1, 2 and 3. Empty slots leave forgeable blank lines.
+- Replace the fixed three slots with a repeated block that renders only the medications actually prescribed, numbered sequentially.
+- Existing saved prescriptions render the same way: blank numbered blocks are stripped from the preview, the PDF and the emailed copy.
+- Trailing separators and the "---" rule are cleaned up when fewer items are present.
+
+## Technical notes (additions)
+
+- `src/pages/Sessions.tsx`: move `SessionTranscriptAccordion` inside the Patient Overview panel and drop its outer frame.
+- `src/features/sessions/components/PostSessionStepDialog.tsx`: gradient variant for the AI Clinician notes button.
+- `src/features/documents/lib/fillDocumentPlaceholders.ts`: referral fallbacks from patient/session context; blank-section pruning.
+- `src/hooks/useTemplates.ts` + prescription fill logic: dynamic medication list instead of `[Medication1..3]`.
