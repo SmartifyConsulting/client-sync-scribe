@@ -141,7 +141,7 @@ function fmtAmount(amount: number | string | null | undefined, currency = "ZAR")
 }
 
 function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; slotKeys: Set<string> } {
-  const { patient, profile, invoice, prescription, certificate, plainText } = ctx;
+  const { patient, profile, invoice, prescription, certificate, referral, plainText } = ctx;
   const today = ctx.today || new Date();
   const todayLong = fmtDateLong(today);
 
