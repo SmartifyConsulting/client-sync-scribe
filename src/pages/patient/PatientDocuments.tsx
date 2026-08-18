@@ -994,7 +994,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
 
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
                   {isImageDoc ? (
-                    <img src={doc.mediaUrl} alt={doc.name} className="h-7 w-7 rounded-md object-cover" />
+                    <SignedImage src={doc.mediaUrl} alt={doc.name} className="h-7 w-7 rounded-md object-cover" />
                   ) : (
                     <IconComponent className="h-3.5 w-3.5 text-primary" />
                   )}

@@ -261,7 +261,7 @@ export function DocumentsBrowser({
                     >
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
                         {isImageDoc ? (
-                          <img src={mediaUrl} alt={doc.name} className="h-10 w-10 object-cover" />
+                          <SignedImage src={mediaUrl} alt={doc.name} className="h-10 w-10 object-cover" />
                         ) : (
                           <FileText className="h-4 w-4 text-primary" />
                         )}
