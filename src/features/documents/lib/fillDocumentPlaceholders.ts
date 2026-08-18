@@ -343,7 +343,34 @@ const OPTIONAL_TOKENS = new Set([
   "specialinstructions",
   "numberofrepeats",
   "repeats",
+  "relevanthistory",
+  "currentmedications",
+  "investigations",
+  "clinicalnotes",
+  "specialistaddress",
+  "specialistspecialty",
+  "urgency",
 ]);
+
+/** Turns a leading "1." / "2)" list marker into a plain bullet. */
+function bulletiseRow(line: string): string {
+  return /^\s*\d+[.)]\s*\S/.test(line)
+    ? line.replace(/^(\s*)\d+[.)]/, (_m, pad) => `${pad}•`)
+    : line;
+}
+
+/**
+ * Prescriptions list one bullet per prescribed medication — numbered rows in
+ * legacy templates are converted so the count is never implied by ordinals.
+ */
+function bulletiseMedicationRows(content: string): string {
+  const usesBr = /<br\s*\/?>/i.test(content);
+  const parts = usesBr ? content.split(/<br\s*\/?>/i) : content.split("\n");
+  const mapped = parts.map(bulletiseRow);
+  return usesBr ? mapped.join("<br>") : mapped.join("\n");
+}
+
+
 
 /**
  * Removes prescription rows whose value resolved to nothing (e.g. an unused
