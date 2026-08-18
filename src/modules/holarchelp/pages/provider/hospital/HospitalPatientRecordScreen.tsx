@@ -20,39 +20,6 @@ const age = (dob?: string | null) => {
   return Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000));
 };
 
-const Section = ({
-  icon: Icon,
-  title,
-  items,
-  empty = "None recorded",
-}: {
-  icon: any;
-  title: string;
-  items: string[];
-  empty?: string;
-}) => (
-  <Card className="overflow-hidden">
-    <CardHeader className="bg-primary px-4 py-2">
-      <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
-        <Icon className="h-3.5 w-3.5" /> {title}
-      </CardTitle>
-    </CardHeader>
-    <CardContent className="p-4 text-xs">
-      {items.length ? (
-        <ul className="space-y-1">
-          {items.map((i, idx) => (
-            <li key={idx} className="flex gap-2">
-              <span className="text-primary">•</span>
-              <span>{i}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-muted-foreground">{empty}</p>
-      )}
-    </CardContent>
-  </Card>
-);
 
 export default function HospitalPatientRecordScreen() {
   const { patientId } = useParams();
