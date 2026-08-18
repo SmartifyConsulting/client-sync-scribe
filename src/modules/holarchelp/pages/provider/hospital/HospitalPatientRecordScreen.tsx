@@ -4,10 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, User, HeartPulse, Pill, ShieldAlert, Phone, BedDouble, FlaskConical, Scan, Utensils } from "lucide-react";
+import { Loader2, ArrowLeft, User, BedDouble, FlaskConical, Scan, Utensils } from "lucide-react";
 import { InpatientVitalsPanel } from "../../../components/InpatientVitalsPanel";
 import { AdmissionChartSection } from "../../../components/AdmissionChartSection";
 import { TestResultsPanel } from "../../../components/TestResultsPanel";
+import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
 
 type PatientRow = Record<string, any>;
 
