@@ -201,6 +201,31 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
     ReferralDate: todayLong,
     AdmissionDate: todayLong,
 
+    // Referral letter (optional)
+    SpecialistName: referral?.specialist_name || "",
+    ReferralDoctor: referral?.specialist_name || "",
+    ReferredTo: referral?.specialist_name || referral?.specialist_type || "",
+    SpecialistTitle: referral?.specialist_name ? "Dr" : "Colleague",
+    SpecialistSpecialty: referral?.specialist_type || "",
+    SpecialistType: referral?.specialist_type || "",
+    SpecialistAddress: referral?.specialist_address || "",
+    PresentingComplaint: referral?.presenting_complaint || "",
+    RelevantHistory: referral?.relevant_history || "",
+    CurrentMedications: referral?.current_medications || "",
+    Investigations: referral?.investigations || "",
+    ReasonForReferral: referral?.reason || "",
+    ReferralReason: referral?.reason || "",
+    Urgency: referral?.urgency || "",
+    Diagnosis: referral?.diagnosis || certificate?.nature_of_illness || "",
+    ClinicalNotes: referral?.clinical_notes || "",
+    ReferringDoctor: profile?.full_name || "",
+
+    // Contact details used across referral / admission letters
+    PatientContact: patient?.phone || patient?.email || "",
+    PatientDOB: patient?.dob || "",
+    PracticePhone: (profile as any)?.phone || (profile as any)?.practice_phone || "",
+
+
     // Signature — uploaded image when present, otherwise the typed signature
     // (font / colour / size configured in My Practice). Plain-text callers
     // (raw textarea editors) get the doctor's name instead of signature markup.
