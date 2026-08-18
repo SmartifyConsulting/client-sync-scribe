@@ -97,6 +97,18 @@ export default function DoctorDocumentsTab() {
   // view now, so this list is just every practice document — no owner filter needed.
   const { documents, loading, fetchDocuments } = useDocuments(undefined, { allOwners: true });
   const { templates } = useTemplates();
+  const knownCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          documents
+            .map((d) => d.template_name)
+            .filter((n): n is string => !!n && n.trim().length > 0),
+        ),
+      ).sort(),
+    [documents],
+  );
+
   const [q, setQ] = useState("");
   const [groupMode, setGroupMode] = useState<GroupMode>("type");
   const [selectedTemplate, setSelectedTemplate] = useState<(typeof templates)[number] | null>(null);
