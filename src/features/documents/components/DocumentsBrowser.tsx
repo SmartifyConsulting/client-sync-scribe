@@ -182,133 +182,14 @@ export function DocumentsBrowser({
     [toast, fetchDocuments],
   );
 
-  const uploadFiles = useCallback(
-    async (files: File[], details: UploadDetails) => {
-      if (files.length === 0) return;
-      setUploading(true);
-      setLastUploaded(null);
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) throw new Error("You must be signed in to upload");
-
-        let index = 0;
-        let lastId: string | null = null;
-        for (const file of files) {
-          index += 1;
-          const meta = { fileName: file.name, current: index, total: files.length };
-          setProgress({ stage: "uploading", percent: 20, ...meta });
-          if (file.size > 20 * 1024 * 1024) {
-            toast({
-              title: "File too large",
-              description: `${file.name} exceeds the 20MB limit`,
-              variant: "destructive",
-            });
-            continue;
-          }
-
-          // Storage RLS requires the first folder to be the uploader's user id.
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
-          const path = `${user.id}/${patientId || "self"}/${Date.now()}-${safeName}`;
-          const { error: uploadError } = await supabase.storage
-            .from("patient-media")
-            .upload(path, file, { upsert: true });
-          if (uploadError) throw uploadError;
-
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from("patient-media").getPublicUrl(path);
-
-          const isImage = file.type.startsWith("image/");
-          const isPdf = file.type === "application/pdf";
-
-          let content = `[Uploaded File] ${file.name}`;
-          let transcribed = false;
-
-          // Only PDFs go through handwriting/text transcription. Images
-          // (X-rays, scans, photos) are interpreted by the medical image
-          // analyser after the record exists.
-          if (isPdf) {
-            setProgress({ stage: "transcribing", percent: 60, ...meta });
-            try {
-              const { data, error } = await supabase.functions.invoke(
-                "transcribe-record",
-                { body: { storagePath: path, bucket: "patient-media", mimeType: file.type, fileName: file.name } },
-              );
-              if (!error && data?.text) {
-                content = data.text;
-                transcribed = true;
-                setProgress({ stage: "extracting", percent: 75, ...meta });
-                if (patientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
-              }
-            } catch {
-              /* fall back to the plain upload record */
-            }
-          }
-
-          setProgress({ stage: "saving", percent: 85, ...meta });
-          const { data: inserted, error: insertError } = await supabase
-            .from("documents")
-            .insert({
-              user_id: user.id,
-              patient_id: patientId || null,
-              patient_name: patientName || null,
-              name: file.name,
-              content,
-              template_name: details.category || "Upload",
-              media_url: publicUrl,
-              media_type: isImage ? "image" : isPdf ? "pdf" : "file",
-              source_file_url: publicUrl,
-              source_file_name: file.name,
-              is_transcribed: transcribed,
-              record_date: details.recordDate || null,
-            } as any)
-            .select("id")
-            .maybeSingle();
-          if (insertError) throw insertError;
-          lastId = inserted?.id || lastId;
-
-          if (isImage && inserted?.id) {
-            setProgress({ stage: "analysing", percent: 92, ...meta });
-            const { error: aiError } = await supabase.functions.invoke(
-              "analyze-medical-image",
-              { body: { imageUrl: publicUrl, documentId: inserted.id } },
-            );
-            if (aiError) {
-              toast({
-                title: "Uploaded, but AI description failed",
-                description: `${file.name}: ${aiError.message}. Open the file and use “Analyse with AI”.`,
-                variant: "destructive",
-              });
-            }
-          }
-        }
-
-        setProgress({ stage: "done", percent: 100 });
-        toast({ title: "Upload complete" });
-        const refreshed = await fetchDocuments();
-        setLastUploaded(lastId);
-        void refreshed;
-      } catch (err: any) {
-        const message = err?.message || "Could not upload the file";
-        setProgress((prev) => ({ ...prev, stage: "error", message }));
-        toast({ title: "Upload failed", description: message, variant: "destructive" });
-      } finally {
-        setUploading(false);
-        setTimeout(
-          () => setProgress((prev) => (prev.stage === "error" ? prev : { stage: "idle", percent: 0 })),
-          2500,
-        );
-      }
+  const handleUploaded = useCallback(
+    (lastId: string | null) => {
+      void fetchDocuments();
+      if (lastId) setLastUploaded(lastId);
     },
-    [patientId, patientName, toast, fetchDocuments],
+    [fetchDocuments],
   );
 
-  const handleFiles = useCallback((files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    setPendingFiles(Array.from(files));
-  }, []);
 
 
   return (
