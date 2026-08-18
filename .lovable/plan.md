@@ -14,7 +14,11 @@
 2. **Fill the templates properly.** Map the AI-extracted fields into the certificate and referral templates: diagnosis / nature of illness, consultation date and time, sick-leave from/until, recommendations; and for referrals the addressee and specialty, presenting complaint, relevant history, current medications, investigations, reason for referral, patient DOB and contact. Remaining unknown tokens render as a blank fill-in line rather than `___` scattered through clinical fields.
 3. **AI Summary first.** Add a summary step at the head of the review queue, so the order is: AI Summary → Prescription → Medical Certificate → Referral → other documents → Follow-up → Invoice → Award Vulas.
 4. **Invoice always appears.** The consultation-price fallback already guarantees invoice data; make the invoice step unconditional so it is always shown as the second-last step even if the document lookup hiccups.
-5. **Live AI Clinician reset.** Clear the live hint and clinician notes whenever the patient or session changes, so nothing from a previous consultation can appear on the next one.
+5. **AI Clinician notes — diagnose then fix.** The notes shown during the Okoli consultation did not match what was being said, so this step starts with a check, not an assumed cause:
+   - Confirm what the live hint call actually receives — whether the rolling transcript reaching it is the current session's text, whether an earlier patient's hint is still on screen, and whether hints are being appended rather than replaced.
+   - Once the check names the cause, fix it. The likely candidates to rule out are: the panel not clearing when the patient or session changes, hints from a previous run being merged into the notes, and stale patient context (medications, past sessions) being sent for the wrong patient.
+   - Add a guard so every hint is stamped with the session and patient it was produced for, and any hint that does not match the live session is discarded rather than rendered.
+   - Verify with a fresh recording: switch patients mid-flow and confirm the panel empties and then repopulates with content that matches the spoken words.
 6. **Remove the duplicate empty session row** left by the Okoli consultation and stop the shell row from being written when a session completes.
 
 ## Technical notes
