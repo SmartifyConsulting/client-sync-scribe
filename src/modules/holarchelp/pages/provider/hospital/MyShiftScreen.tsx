@@ -87,10 +87,18 @@ export default function MyShiftScreen() {
       .then(({ data }) => setNurseIds(((data ?? []) as { id: string }[]).map((n) => n.id)));
   }, [user?.id]);
 
-  /** Patients this staff member is personally responsible for. */
+  /** The shift the patient list is scoped to: the live one, else the next upcoming. */
+  const activeShift = useMemo(() => {
+    if (current) return current;
+    const now = Date.now();
+    return shifts.find((s) => new Date(s.ends_at).getTime() >= now) ?? null;
+  }, [current, shifts]);
+
+  /** Patients this staff member is personally responsible for on that shift. */
   const myPatients = useMemo(
     () =>
       inpatients
+        .filter((p) => !isNurse || !activeShift?.ward_id || p.ward_id === activeShift.ward_id)
         .map((p) => {
           const nurseRows = p.nurses.filter((n) => n.nurse_id && nurseIds.includes(n.nurse_id));
           const isDoctor = p.doctors.some((d) => d.doctor_id === user?.id);
@@ -98,7 +106,7 @@ export default function MyShiftScreen() {
           return { patient: p, tasks: nurseRows.flatMap((n) => n.care_tasks ?? []), isDoctor };
         })
         .filter(Boolean) as { patient: InpatientRecord; tasks: string[]; isDoctor: boolean }[],
-    [inpatients, nurseIds, user?.id],
+    [inpatients, nurseIds, user?.id, isNurse, activeShift?.ward_id],
   );
 
   const clock = async (id: string, action: "in" | "out") => {
@@ -115,54 +123,68 @@ export default function MyShiftScreen() {
       {isNurse ? (
         <NurseShiftCalendar shifts={shifts} onClock={clock} />
       ) : (
-        <>
-          <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
-            <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">Upcoming & current shifts</div>
-            <ul className="divide-y">
-              {shifts.map((s) => {
-                const live = shiftIsLive(s);
-                return (
-                  <li key={s.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs">
-                    <span className="font-semibold">{new Date(s.starts_at).toLocaleDateString()}</span>
-                    <span className="text-muted-foreground">{formatTimeRange(s.starts_at, s.ends_at)}</span>
-                    <Badge variant="outline" className="capitalize">{s.shift_type.replace(/_/g, "-")}</Badge>
-                    {live && <Badge className="bg-success text-success-foreground">Clocked in</Badge>}
-                    <div className="ml-auto">
-                      {live ? (
-                        <Button variant="outline" size="sm" onClick={() => clock(s.id, "out")}>Clock out</Button>
-                      ) : s.clocked_out_at ? (
-                        <span className="text-muted-foreground">Completed</span>
-                      ) : (
-                        <Button size="sm" onClick={() => clock(s.id, "in")}>Clock in</Button>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-              {!shifts.length && <li className="p-8 text-center text-xs text-muted-foreground">No shifts assigned to you.</li>}
-            </ul>
-          </div>
-
-          <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
-            <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">My patients</div>
-            <ul className="divide-y">
-              {myPatients.map(({ patient, tasks, isDoctor }) => (
-                <li key={patient.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs">
-                  <div>
-                    <p className="font-semibold">{patient.patient_name}</p>
-                    <p className="text-muted-foreground">Bed {patient.bed_number || "—"}{tasks.length ? ` · ${tasks.join(", ")}` : ""}</p>
+        <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
+          <div className="border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">Upcoming & current shifts</div>
+          <ul className="divide-y">
+            {shifts.map((s) => {
+              const live = shiftIsLive(s);
+              return (
+                <li key={s.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs">
+                  <span className="font-semibold">{new Date(s.starts_at).toLocaleDateString()}</span>
+                  <span className="text-muted-foreground">{formatTimeRange(s.starts_at, s.ends_at)}</span>
+                  <Badge variant="outline" className="capitalize">{s.shift_type.replace(/_/g, "-")}</Badge>
+                  {live && <Badge className="bg-success text-success-foreground">Clocked in</Badge>}
+                  <div className="ml-auto">
+                    {live ? (
+                      <Button variant="outline" size="sm" onClick={() => clock(s.id, "out")}>Clock out</Button>
+                    ) : s.clocked_out_at ? (
+                      <span className="text-muted-foreground">Completed</span>
+                    ) : (
+                      <Button size="sm" onClick={() => clock(s.id, "in")}>Clock in</Button>
+                    )}
                   </div>
-                  {isDoctor && <Badge variant="secondary">Attending doctor</Badge>}
-                  <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setLogFor(patient)}>
-                    <NotebookPen className="mr-1 h-3.5 w-3.5" /> Log activity
-                  </Button>
                 </li>
-              ))}
-              {!myPatients.length && <li className="p-8 text-center text-xs text-muted-foreground">No patients assigned to you.</li>}
-            </ul>
-          </div>
-        </>
+              );
+            })}
+            {!shifts.length && <li className="p-8 text-center text-xs text-muted-foreground">No shifts assigned to you.</li>}
+          </ul>
+        </div>
       )}
+
+      <div className="overflow-hidden rounded-xl border border-neutral-400 bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-primary px-3 py-2 text-xs font-bold uppercase tracking-wider text-white">
+          <span>My patients{activeShift ? " this shift" : ""}</span>
+          {activeShift && (
+            <span className="normal-case tracking-normal text-[11px] font-semibold text-white/85">
+              {new Date(activeShift.starts_at).toLocaleDateString()} · {formatTimeRange(activeShift.starts_at, activeShift.ends_at)}
+            </span>
+          )}
+        </div>
+        <ul className="divide-y">
+          {myPatients.map(({ patient, tasks, isDoctor }) => (
+            <li key={patient.id} className="flex flex-wrap items-center gap-2 px-3 py-2 text-xs">
+              <div>
+                {patient.patient_id ? (
+                  <Link to={`/provider/hospital/patient/${patient.patient_id}`} className="font-semibold text-foreground underline-offset-2 hover:underline">
+                    {patient.patient_name}
+                  </Link>
+                ) : (
+                  <p className="font-semibold">{patient.patient_name}</p>
+                )}
+                <p className="text-muted-foreground">Bed {patient.bed_number || "—"}{tasks.length ? ` · ${tasks.join(", ")}` : ""}</p>
+              </div>
+              {isDoctor && <Badge variant="secondary">Attending doctor</Badge>}
+              {patient.doctors[0] && !isDoctor && (
+                <Badge variant="outline" className="text-[10px]">Dr {patient.doctors[0].doctor_name.replace(/^Dr\.?\s*/i, "")}</Badge>
+              )}
+              <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setLogFor(patient)}>
+                <NotebookPen className="mr-1 h-3.5 w-3.5" /> Log activity
+              </Button>
+            </li>
+          ))}
+          {!myPatients.length && <li className="p-8 text-center text-xs text-muted-foreground">No patients assigned to you.</li>}
+        </ul>
+      </div>
 
       <LogActivityDialog
         admission={logFor}
@@ -174,3 +196,4 @@ export default function MyShiftScreen() {
     </div>
   );
 }
+
