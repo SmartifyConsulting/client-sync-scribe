@@ -49,7 +49,29 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // The AI provider cannot always fetch our storage URLs (it crawls them and
+    // respects robots.txt), so download the file here and inline it as base64.
+    let inlineUrl = imageUrl;
+    try {
+      const fileResponse = await fetch(imageUrl);
+      if (!fileResponse.ok) {
+        throw new Error(`Could not download the image (${fileResponse.status})`);
+      }
+      const bytes = new Uint8Array(await fileResponse.arrayBuffer());
+      if (bytes.byteLength === 0) throw new Error("The uploaded image is empty");
+      const mime = fileResponse.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+      let binary = "";
+      const chunk = 8192;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      inlineUrl = `data:${mime};base64,${btoa(binary)}`;
+    } catch (downloadError) {
+      console.error("Image download failed, falling back to URL:", downloadError);
+    }
+
     // Call Lovable AI with the image for analysis
+
     const aiResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
