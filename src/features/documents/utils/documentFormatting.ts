@@ -131,8 +131,9 @@ export const renderFormattedContent = (content: string): string => {
 
   const safeTags: string[] = [];
   const safeTagPattern =
-    /<\/?(h[1-4]|p|div|br|hr|blockquote|b|i|u|strong|em|span|sub|sup|table|thead|tbody|tr|td|th|ul|ol|li)(\s[^>]*)?\/?>/gi;
+    /<\/?(h[1-4]|p|div|br|hr|blockquote|b|i|u|strong|em|span|sub|sup|a|table|thead|tbody|tr|td|th|ul|ol|li)(\s[^>]*)?\/?>/gi;
   const imgPattern = /<img\s[^>]*\/?>/gi;
+
 
   let processed = withHeadings;
 
