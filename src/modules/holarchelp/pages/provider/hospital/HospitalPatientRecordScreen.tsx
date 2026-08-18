@@ -94,7 +94,9 @@ export default function HospitalPatientRecordScreen() {
         </Link>
       </Button>
 
-      <h1 className="text-lg font-bold text-foreground">Patient Overview</h1>
+      <div className="rounded-lg bg-primary px-4 py-2">
+        <h1 className="text-sm font-bold uppercase tracking-wider text-white">Patient Overview</h1>
+      </div>
 
       <Card className="overflow-hidden">
         <CardHeader className="bg-primary px-4 py-3">
@@ -154,7 +156,7 @@ export default function HospitalPatientRecordScreen() {
           </CardContent>
         </Card>
 
-        <SessionPatientOverview patient={patient} />
+        <SessionPatientOverview patient={patient} hideVisits />
       </div>
 
       <div className="grid items-start gap-3 lg:grid-cols-2">

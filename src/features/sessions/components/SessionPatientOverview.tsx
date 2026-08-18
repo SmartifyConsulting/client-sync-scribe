@@ -7,6 +7,8 @@ interface SessionPatientOverviewProps {
   currentMedications?: { medication: string; dosage: string; frequency: string }[];
   /** Rendered at the top of the frame (used for the DISC descriptor chips). */
   discSlot?: ReactNode;
+  /** Hide the "Recent visits" section — used where session visit history isn't relevant. */
+  hideVisits?: boolean;
 }
 
 const stripTags = (s: string) =>
@@ -73,7 +75,7 @@ const extractYear = (dateStr?: string) => {
  * labelled key points (conditions, current medications, allergies, symptoms,
  * recent visits) rather than one long paragraph.
  */
-export function SessionPatientOverview({ patient, currentMedications = [], discSlot }: SessionPatientOverviewProps) {
+export function SessionPatientOverview({ patient, currentMedications = [], discSlot, hideVisits }: SessionPatientOverviewProps) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<OverviewData | null>(null);
 
@@ -229,18 +231,20 @@ export function SessionPatientOverview({ patient, currentMedications = [], discS
               <Column label="Current meds" items={data.medications} />
               <Column label="Allergies" items={data.allergies} tone="danger" />
             </div>
-            <div className="pt-2 border-t border-border">
-              <p className="text-xs font-bold text-foreground mb-1">Recent visits</p>
-              {data.visits.length ? (
-                <ul className="space-y-0.5">
-                  {data.visits.map((v, i) => (
-                    <Visit key={i} value={v} />
-                  ))}
-                </ul>
-              ) : (
-                <span className="text-xs text-muted-foreground">None recorded</span>
-              )}
-            </div>
+            {!hideVisits && (
+              <div className="pt-2 border-t border-border">
+                <p className="text-xs font-bold text-foreground mb-1">Recent visits</p>
+                {data.visits.length ? (
+                  <ul className="space-y-0.5">
+                    {data.visits.map((v, i) => (
+                      <Visit key={i} value={v} />
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="text-xs text-muted-foreground">None recorded</span>
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">No history available for this patient yet.</p>
