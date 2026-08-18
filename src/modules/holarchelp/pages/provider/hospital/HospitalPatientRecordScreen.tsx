@@ -149,9 +149,11 @@ export default function HospitalPatientRecordScreen() {
     <div className="space-y-4">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link to="/provider/hospital/admissions">
-          <ArrowLeft className="mr-1 h-4 w-4" /> Admissions
+          <ArrowLeft className="mr-1 h-4 w-4" /> Back
         </Link>
       </Button>
+
+      <h1 className="text-lg font-bold text-foreground">Patient Overview</h1>
 
       <Card className="overflow-hidden">
         <CardHeader className="bg-primary px-4 py-3">
@@ -174,6 +176,8 @@ export default function HospitalPatientRecordScreen() {
             ["Email", patient.email || "—"],
             ["Medical aid", patient.medical_aid || "—"],
             ["Member no.", patient.medical_aid_number || "—"],
+            ["Emergency contact", emergencyContact.name],
+            ["Contact number", emergencyContact.phone],
           ].map(([label, value]) => (
             <div key={label as string} className="flex items-center gap-2">
               <span className="w-24 shrink-0 font-bold">{label}</span>
@@ -189,61 +193,61 @@ export default function HospitalPatientRecordScreen() {
         patientName={patient.name}
       />
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <Section icon={HeartPulse} title="Conditions & diagnoses" items={asList(patient.conditions_diagnoses)} />
-        <Section icon={ShieldAlert} title="Allergies" items={asList(patient.allergies)} />
-        <Section icon={Pill} title="Current medications" items={asList(patient.current_medications)} />
-        <Section icon={Phone} title="Emergency contacts" items={contacts} />
+      <div className="grid items-start gap-3 lg:grid-cols-2">
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-primary px-4 py-2">
+            <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
+              <Utensils className="h-3.5 w-3.5" /> Diet & Meals
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <AdmissionChartSection
+              admissionId={activeAdmission?.id}
+              section="diet-meals"
+              sectionLabel="Diet/meal"
+              hospitalId={activeAdmission?.hospital_id}
+              patientName={patient.name}
+              placeholder="Record a meal or dietary note…"
+              emptyLabel="No diet/meal entries yet."
+            />
+          </CardContent>
+        </Card>
+
+        <SessionPatientOverview patient={patient} />
       </div>
 
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-primary px-4 py-2">
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
-            <FlaskConical className="h-3.5 w-3.5" /> Lab Results
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <TestResultsPanel patientId={patient.id} />
-        </CardContent>
-      </Card>
+      <div className="grid items-start gap-3 lg:grid-cols-2">
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-primary px-4 py-2">
+            <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
+              <FlaskConical className="h-3.5 w-3.5" /> Lab Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <TestResultsPanel patientId={patient.id} />
+          </CardContent>
+        </Card>
 
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-primary px-4 py-2">
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
-            <Scan className="h-3.5 w-3.5" /> Imaging
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <AdmissionChartSection
-            admissionId={activeAdmission?.id}
-            section="imaging"
-            sectionLabel="Imaging"
-            hospitalId={activeAdmission?.hospital_id}
-            patientName={patient.name}
-            placeholder="Record imaging performed…"
-            emptyLabel="No imaging recorded yet."
-          />
-        </CardContent>
-      </Card>
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-primary px-4 py-2">
+            <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
+              <Scan className="h-3.5 w-3.5" /> Imaging
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <AdmissionChartSection
+              admissionId={activeAdmission?.id}
+              section="imaging"
+              sectionLabel="Imaging"
+              hospitalId={activeAdmission?.hospital_id}
+              patientName={patient.name}
+              placeholder="Record imaging performed…"
+              emptyLabel="No imaging recorded yet."
+            />
+          </CardContent>
+        </Card>
+      </div>
 
-      <Card className="overflow-hidden">
-        <CardHeader className="bg-primary px-4 py-2">
-          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
-            <Utensils className="h-3.5 w-3.5" /> Diet & Meals
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
-          <AdmissionChartSection
-            admissionId={activeAdmission?.id}
-            section="diet-meals"
-            sectionLabel="Diet/meal"
-            hospitalId={activeAdmission?.hospital_id}
-            patientName={patient.name}
-            placeholder="Record a meal or dietary note…"
-            emptyLabel="No diet/meal entries yet."
-          />
-        </CardContent>
-      </Card>
 
       <Card className="overflow-hidden">
         <CardHeader className="bg-primary px-4 py-2">
