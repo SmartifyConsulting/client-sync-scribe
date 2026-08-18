@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { CARE_ROLES, CARE_TASKS, ACTIVITY_ACTIONS } from "../lib/hospitalWards";
+import { CARE_ROLES, CARE_TASKS, ACTIVITY_ACTIONS, WARD_TYPES } from "../lib/hospitalWards";
 import type { WardWithOccupancy } from "../hooks/useHospitalWards";
 import type { InpatientRecord } from "../hooks/useHospitalInpatients";
 import type { StaffShift } from "../hooks/useHospitalShifts";
@@ -143,12 +143,28 @@ export function TransferPatientDialog({
   onSaved: () => void;
 }) {
   const { toast } = useToast();
+  const [wardType, setWardType] = useState("");
   const [wardId, setWardId] = useState("");
   const [bed, setBed] = useState("");
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setWardId(""); setBed(""); setReason(""); }, [admission?.id]);
+  useEffect(() => { setWardType(""); setWardId(""); setBed(""); setReason(""); }, [admission?.id]);
+
+  const transferableWards = useMemo(
+    () => wards.filter((w) => w.id !== admission?.ward_id),
+    [wards, admission?.ward_id],
+  );
+
+  const wardTypesAvailable = useMemo(
+    () => WARD_TYPES.filter((t) => transferableWards.some((w) => w.ward_type === t.value)),
+    [transferableWards],
+  );
+
+  const wardsInType = useMemo(
+    () => transferableWards.filter((w) => w.ward_type === wardType),
+    [transferableWards, wardType],
+  );
 
   const save = async () => {
     if (!admission || !wardId) return;
@@ -172,20 +188,31 @@ export function TransferPatientDialog({
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold">Move to ward</Label>
-              <Select value={wardId} onValueChange={setWardId}>
-                <SelectTrigger><SelectValue placeholder="Select ward" /></SelectTrigger>
+              <Label className="text-xs font-bold">Ward type</Label>
+              <Select value={wardType} onValueChange={(v) => { setWardType(v); setWardId(""); }}>
+                <SelectTrigger><SelectValue placeholder="Select ward type" /></SelectTrigger>
                 <SelectContent>
-                  {wards.filter((w) => w.id !== admission?.ward_id).map((w) => (
-                    <SelectItem key={w.id} value={w.id}>{w.name} ({w.occupied}/{w.bed_capacity})</SelectItem>
+                  {wardTypesAvailable.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-bold">New bed number</Label>
-              <Input value={bed} onChange={(e) => setBed(e.target.value)} />
+              <Label className="text-xs font-bold">Move to ward</Label>
+              <Select value={wardId} onValueChange={setWardId} disabled={!wardType}>
+                <SelectTrigger><SelectValue placeholder={wardType ? "Select ward" : "Choose a type first"} /></SelectTrigger>
+                <SelectContent>
+                  {wardsInType.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>{w.name} ({w.occupied}/{w.bed_capacity})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold">New bed number</Label>
+            <Input value={bed} onChange={(e) => setBed(e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-bold">Reason</Label>

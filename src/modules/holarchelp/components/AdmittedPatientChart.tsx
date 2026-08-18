@@ -6,6 +6,7 @@ import { PatientOverviewTabs } from "./PatientOverviewTabs";
 import { TestResultsPanel } from "./TestResultsPanel";
 import { InpatientVitalsPanel } from "./InpatientVitalsPanel";
 import { AdmissionChartSection } from "./AdmissionChartSection";
+import { AdmissionCareTeam } from "./AdmissionCareTeam";
 import {
   ClipboardList, HeartPulse, Pill, Stethoscope, NotebookPen, Droplet,
   Utensils, Activity, FlaskConical, Scan, ShieldAlert,
@@ -51,7 +52,7 @@ function admissionTypeLabel(source: string | null | undefined): string {
  * there's more than one closely-related record type) to keep the page
  * scannable at a glance.
  */
-export function AdmittedPatientChart({ incidentId, incident }: { incidentId: string; incident?: IncidentLite }) {
+export function AdmittedPatientChart({ incidentId, incident, forPatient }: { incidentId: string; incident?: IncidentLite; forPatient?: boolean }) {
   const [admission, setAdmission] = useState<Admission | null>(null);
   const [wardName, setWardName] = useState<string | null>(null);
 
@@ -129,8 +130,9 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
           <TabsTrigger value="orders-handover" className={TAB_TRIGGER}><FileText className="h-3.5 w-3.5" /> Orders</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="p-4 mt-0">
+        <TabsContent value="overview" className="p-4 mt-0 space-y-3">
           <PatientOverviewTabs incidentId={incidentId} patientId={admission?.patient_id} patientName={admission?.patient_name} />
+          {forPatient && <AdmissionCareTeam admissionId={admission?.id} />}
         </TabsContent>
 
         <TabsContent value="vitals" className="p-4 mt-0">

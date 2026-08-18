@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, MessageSquarePlus } from "lucide-react";
+import { Star, MessageSquarePlus, Gift, Check } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { toastError } from "@/lib/userMessage";
@@ -32,6 +32,10 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
   const [busy, setBusy] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [ratingRowId, setRatingRowId] = useState<string | null>(null);
+  const [awarded, setAwarded] = useState(false);
+  const [awardDismissed, setAwardDismissed] = useState(false);
+  const [awarding, setAwarding] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -42,19 +46,30 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
     if (!userId || !nurseId) return;
     supabase
       .from("nurse_record_ratings" as any)
-      .select("rating, comment")
+      .select("id, rating, comment")
       .eq("record_table", recordTable)
       .eq("record_id", recordId)
       .eq("patient_user_id", userId)
       .maybeSingle()
       .then(({ data }) => {
-        const r = (data as any)?.rating ?? null;
-        const c = (data as any)?.comment ?? "";
-        setRating(r);
-        setSavedComment(c);
-        setComment(c);
+        const row = data as any;
+        setRating(row?.rating ?? null);
+        setSavedComment(row?.comment ?? "");
+        setComment(row?.comment ?? "");
+        setRatingRowId(row?.id ?? null);
       });
   }, [userId, nurseId, recordTable, recordId]);
+
+  // Has this rating already been converted into an awarded Vulas record?
+  useEffect(() => {
+    if (!ratingRowId) { setAwarded(false); return; }
+    supabase
+      .from("nurse_pending_vulas" as any)
+      .select("id")
+      .eq("reference_id", ratingRowId)
+      .maybeSingle()
+      .then(({ data }) => setAwarded(!!data));
+  }, [ratingRowId]);
 
   // Load most-recent rating by this patient for this nurse to compute cooldown
   useEffect(() => {
@@ -92,7 +107,7 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
   const submit = async (value: number, note: string) => {
     if (busy) return;
     setBusy(true);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("nurse_record_ratings" as any)
       .upsert(
         {
@@ -105,7 +120,9 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
           comment: note?.trim() ? note.trim() : null,
         },
         { onConflict: "record_table,record_id,patient_user_id" },
-      );
+      )
+      .select("id")
+      .single();
     setBusy(false);
     if (error) {
       if (error.message?.includes("NURSE_RATING_COOLDOWN")) {
@@ -120,7 +137,25 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
     setSavedComment(note?.trim() || "");
     setShowComment(false);
     setCooldownUntil(Date.now() + COOLDOWN_MS);
+    setRatingRowId((data as any)?.id ?? ratingRowId);
+    setAwardDismissed(false);
     toast.success(`Thanks for rating ${nurseName || "the nurse"}!`);
+  };
+
+  const awardVulas = async () => {
+    if (!ratingRowId || !rating || !userId || awarding) return;
+    setAwarding(true);
+    const { error } = await supabase.from("nurse_pending_vulas" as any).insert({
+      hospital_nurse_id: nurseId,
+      vulas_count: rating,
+      reason: `Patient service rating (${rating}★)${savedComment ? `: ${savedComment}` : ""}`,
+      reference_id: ratingRowId,
+      awarded_by: userId,
+    });
+    setAwarding(false);
+    if (error) { toastError(error, "We couldn't award Vulas. Please try again."); return; }
+    setAwarded(true);
+    toast.success(`Awarded ${rating} Vulas to ${nurseName || "the nurse"}!`);
   };
 
   const handleStar = (v: number) => {
@@ -176,6 +211,35 @@ export function RateNurseControl({ admissionId, recordTable, recordId, nurseId, 
 
       {savedComment && !showComment && (
         <p className="text-xs italic text-muted-foreground pl-1">"{savedComment}"</p>
+      )}
+
+      {rating !== null && ratingRowId && !showComment && (
+        awarded ? (
+          <p className="flex items-center gap-1 text-xs font-medium text-green-600 pl-1">
+            <Check className="h-3 w-3" /> Awarded {rating} Vulas to {nurseName || "this nurse"}
+          </p>
+        ) : !awardDismissed ? (
+          <div className="flex items-center gap-2 pl-1">
+            <span className="text-xs text-muted-foreground">Great care deserves recognition:</span>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs gap-1 border-primary/40 text-primary hover:bg-primary/10"
+              onClick={awardVulas}
+              disabled={awarding}
+            >
+              <Gift className="h-3 w-3" /> Award {rating} Vulas
+            </Button>
+            <button
+              type="button"
+              onClick={() => setAwardDismissed(true)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Not now
+            </button>
+          </div>
+        ) : null
       )}
 
       {showComment && !cooling && (

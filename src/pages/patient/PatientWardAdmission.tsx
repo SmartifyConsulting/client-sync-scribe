@@ -53,7 +53,7 @@ export default function PatientWardAdmission() {
       ) : forbidden || !incidentId ? (
         <p className="text-sm text-muted-foreground">This admission record isn't available.</p>
       ) : (
-        <AdmittedPatientChart incidentId={incidentId} incident={incident} />
+        <AdmittedPatientChart incidentId={incidentId} incident={incident} forPatient />
       )}
     </div>
   );
