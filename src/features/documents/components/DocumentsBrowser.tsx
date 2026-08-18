@@ -139,21 +139,59 @@ export function DocumentsBrowser({
     }
   };
 
-  const handleFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files || files.length === 0) return;
+  /** Categories already used on existing documents, offered again on upload. */
+  const knownCategories = useMemo(() => {
+    const set = new Set<string>();
+    for (const doc of documents) {
+      const name = (doc.template_name || "").trim();
+      if (name && name.toLowerCase() !== "upload") set.add(name);
+    }
+    return Array.from(set).sort();
+  }, [documents]);
+
+  const analyseDocument = useCallback(
+    async (doc: Document) => {
+      const url = (doc as any).media_url as string | undefined;
+      if (!url) return;
+      setAnalysingId(doc.id);
+      try {
+        const { error } = await supabase.functions.invoke("analyze-medical-image", {
+          body: { imageUrl: url, documentId: doc.id },
+        });
+        if (error) throw error;
+        toast({ title: "AI description ready" });
+        fetchDocuments();
+        const resolved = await resolveDocumentPreviewContent(doc as any);
+        setPreviewContent(resolved.resolvedContent || doc.content || "");
+      } catch (err: any) {
+        toast({
+          title: "Could not describe the image",
+          description: err?.message || "The AI analysis failed",
+          variant: "destructive",
+        });
+      } finally {
+        setAnalysingId(null);
+      }
+    },
+    [toast, fetchDocuments],
+  );
+
+  const uploadFiles = useCallback(
+    async (files: File[], details: UploadDetails) => {
+      if (files.length === 0) return;
       setUploading(true);
+      setLastUploaded(null);
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) throw new Error("You must be signed in to upload");
 
-        const list = Array.from(files);
         let index = 0;
-        for (const file of list) {
+        let lastId: string | null = null;
+        for (const file of files) {
           index += 1;
-          const meta = { fileName: file.name, current: index, total: list.length };
+          const meta = { fileName: file.name, current: index, total: files.length };
           setProgress({ stage: "uploading", percent: 20, ...meta });
           if (file.size > 20 * 1024 * 1024) {
             toast({
@@ -212,34 +250,40 @@ export function DocumentsBrowser({
               patient_name: patientName || null,
               name: file.name,
               content,
-              template_name: transcribed ? "Historical Record" : "Upload",
+              template_name: details.category || "Upload",
               media_url: publicUrl,
               media_type: isImage ? "image" : isPdf ? "pdf" : "file",
               source_file_url: publicUrl,
               source_file_name: file.name,
               is_transcribed: transcribed,
-              record_date: recordDate || null,
+              record_date: details.recordDate || null,
             } as any)
             .select("id")
             .maybeSingle();
           if (insertError) throw insertError;
+          lastId = inserted?.id || lastId;
 
           if (isImage && inserted?.id) {
-            setProgress({ stage: "transcribing", percent: 90, ...meta });
-            try {
-              await supabase.functions.invoke("analyze-medical-image", {
-                body: { imageUrl: publicUrl, documentId: inserted.id },
+            setProgress({ stage: "analysing", percent: 92, ...meta });
+            const { error: aiError } = await supabase.functions.invoke(
+              "analyze-medical-image",
+              { body: { imageUrl: publicUrl, documentId: inserted.id } },
+            );
+            if (aiError) {
+              toast({
+                title: "Uploaded, but AI description failed",
+                description: `${file.name}: ${aiError.message}. Open the file and use “Analyse with AI”.`,
+                variant: "destructive",
               });
-            } catch {
-              /* the image is still viewable without an interpretation */
             }
           }
-
         }
 
         setProgress({ stage: "done", percent: 100 });
         toast({ title: "Upload complete" });
-        fetchDocuments();
+        const refreshed = await fetchDocuments();
+        setLastUploaded(lastId);
+        void refreshed;
       } catch (err: any) {
         const message = err?.message || "Could not upload the file";
         setProgress((prev) => ({ ...prev, stage: "error", message }));
@@ -248,12 +292,18 @@ export function DocumentsBrowser({
         setUploading(false);
         setTimeout(
           () => setProgress((prev) => (prev.stage === "error" ? prev : { stage: "idle", percent: 0 })),
-          1800,
+          2500,
         );
       }
     },
-    [patientId, patientName, recordDate, toast, fetchDocuments],
+    [patientId, patientName, toast, fetchDocuments],
   );
+
+  const handleFiles = useCallback((files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setPendingFiles(Array.from(files));
+  }, []);
+
 
   return (
     <div className={cn("space-y-4", className)}>
