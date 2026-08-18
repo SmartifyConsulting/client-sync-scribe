@@ -87,8 +87,9 @@ Allergies: ${patient.allergies || 'None recorded'}
 Session History (with dates):
 ${sessionSummaries}
 
-Retrospective / historical records (transcribed handwritten or paper notes — place these on the timeline by their record date, not by upload date):
+Retrospective / historical records. These are full transcriptions of handwritten or paper notes and AI interpretations of scans/X-rays. Read EVERY part (records may be split into "[part N]" chunks — treat all parts of the same record as one document) and turn EVERY dated event, diagnosis, medication and procedure you find into its own timeline entry, placed by the record date rather than by upload date. Do not summarise away older events:
 ${historicalContext}
+
 `;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
