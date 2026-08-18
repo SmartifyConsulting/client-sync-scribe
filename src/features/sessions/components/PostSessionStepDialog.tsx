@@ -360,6 +360,9 @@ interface PostSessionQueueDialogProps {
   onVulaConfirm: (categories: string[] | null) => Promise<void> | void;
   /** AI Clinician notes surfaced on the prescription step. */
   clinicianNotes?: string | null;
+  /** AI summary + action points shown as the first step of the queue. */
+  summary?: string | null;
+  actionPoints?: string[];
 }
 
 /**
