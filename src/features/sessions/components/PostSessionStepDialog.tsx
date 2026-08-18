@@ -385,9 +385,22 @@ export function PostSessionStepDialog({
   transcript,
   onVulaConfirm,
   clinicianNotes,
+  summary,
+  actionPoints,
 }: PostSessionQueueDialogProps) {
   const step = queue[index];
   if (!step) return null;
+
+  if (step === "summary") {
+    return (
+      <SummaryStepDialog
+        summary={summary}
+        actionPoints={actionPoints}
+        patientName={patientName || currentPatient?.name}
+        onAdvance={onAdvance}
+      />
+    );
+  }
 
   if (step === "schedule") {
     if (!currentPatient || !doctorId) {
