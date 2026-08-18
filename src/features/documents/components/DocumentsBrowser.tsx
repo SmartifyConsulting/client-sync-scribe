@@ -176,6 +176,60 @@ export function DocumentsBrowser({
     [toast, fetchDocuments],
   );
 
+  /**
+   * Re-runs the transcription/extraction on an already-uploaded record so the
+   * clinical history it contains can be confirmed and applied again (records
+   * uploaded before extraction existed never had that step).
+   */
+  const reExtractHistory = useCallback(
+    async (doc: Document) => {
+      const url = ((doc as any).media_url || (doc as any).source_file_url) as string | undefined;
+      const ref = parseStorageUrl(url);
+      if (!ref) {
+        toast({ title: "No original file to re-read", variant: "destructive" });
+        return;
+      }
+      setExtractingId(doc.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("transcribe-record", {
+          body: {
+            storagePath: ref.path,
+            bucket: ref.bucket,
+            mimeType: (doc as any).media_type === "pdf" ? "application/pdf" : undefined,
+            fileName: doc.name,
+          },
+        });
+        if (error) throw error;
+        const history = (data as any)?.history;
+        if (!history) throw new Error("No clinical history could be read from this record");
+
+        const rd = history.record_date;
+        const updates: Record<string, unknown> = {};
+        if ((data as any)?.text) {
+          updates.content = (data as any).text;
+          updates.is_transcribed = true;
+        }
+        if (!(doc as any).record_date && typeof rd === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rd)) {
+          updates.record_date = rd;
+        }
+        if (Object.keys(updates).length) {
+          await supabase.from("documents").update(updates as any).eq("id", doc.id);
+        }
+        setPendingHistory({ history, patientId: (doc as any).patient_id || patientId || null });
+        void fetchDocuments();
+      } catch (err: any) {
+        toast({
+          title: "Could not re-extract the history",
+          description: err?.message || "The AI extraction failed",
+          variant: "destructive",
+        });
+      } finally {
+        setExtractingId(null);
+      }
+    },
+    [toast, fetchDocuments, patientId],
+  );
+
   const handleUploaded = useCallback(
     (lastId: string | null) => {
       void fetchDocuments();
@@ -183,6 +237,7 @@ export function DocumentsBrowser({
     },
     [fetchDocuments],
   );
+
 
 
 
