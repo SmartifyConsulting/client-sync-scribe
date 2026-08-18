@@ -954,7 +954,7 @@ export default function Sessions() {
     hintLinesRef.current = new Map();
     hintSectionsRef.current = { alerts: [], differentials: [], investigations: [] };
     setNotes("");
-  }, [patientId, currentSessionId]);
+  }, [patientId]);
 
   useEffect(() => {
     if (!liveHint) return;
