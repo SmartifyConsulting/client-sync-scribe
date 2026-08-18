@@ -144,12 +144,14 @@ export async function resolveDocumentPreviewContent(
 
   // Uploaded files (X-rays, scans, PDFs) store only a stub body — render the
   // actual file instead of an empty document.
+  let row: any = null;
   {
-    const { data: row } = await supabase
+    const { data } = await supabase
       .from("documents")
       .select("name, media_url, media_type, source_file_url, ai_analysis, template_name")
       .eq("id", doc.id)
       .maybeSingle();
+    row = data;
     const hasFile = !!((row as any)?.media_url || (row as any)?.source_file_url);
     const isGeneratedDoc = /invoice|prescription|certificate|referral|letter|report|admission/i.test(
       String((row as any)?.template_name || doc.template_name || ""),
@@ -176,7 +178,7 @@ export async function resolveDocumentPreviewContent(
     const tplName = (row as any)?.template_name || doc.template_name;
     if (tplName && doc.user_id) {
       const { data: tpl } = await supabase
-        .from("document_templates")
+        .from("templates")
         .select("content")
         .eq("user_id", doc.user_id)
         .eq("name", tplName)
