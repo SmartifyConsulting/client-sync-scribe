@@ -113,7 +113,7 @@ export type ActivityLogRow = {
   created_at: string;
 };
 
-/** Read-only feed of every logged action across a hospital's admission charts. */
+/** Read-only feed of every logged action across a hospital's patient charts. */
 export function useHospitalActivityLog(hospitalId: string | null | undefined) {
   const [rows, setRows] = useState<ActivityLogRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -122,12 +122,34 @@ export function useHospitalActivityLog(hospitalId: string | null | undefined) {
     if (!hospitalId) { setRows([]); setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
-      .from("hospital_admission_activity_log" as any)
-      .select("*")
+      .from("patient_activity_logs")
+      .select("id, hospital_id, admission_id, patient_id, action_type, details, staff_name, staff_role, occurred_at")
       .eq("hospital_id", hospitalId)
-      .order("created_at", { ascending: false })
+      .order("occurred_at", { ascending: false })
       .limit(300);
-    setRows((data as any) ?? []);
+
+    const logs = data ?? [];
+    const patientIds = Array.from(new Set(logs.map((l) => l.patient_id).filter(Boolean))) as string[];
+    let names: Record<string, string> = {};
+    if (patientIds.length) {
+      const { data: pats } = await supabase.from("patients").select("id, full_name").in("id", patientIds);
+      names = Object.fromEntries((pats ?? []).map((p) => [p.id, p.full_name]));
+    }
+
+    setRows(
+      logs.map((l) => ({
+        id: l.id,
+        hospital_id: l.hospital_id ?? "",
+        admission_id: l.admission_id,
+        patient_name: l.patient_id ? names[l.patient_id] ?? null : null,
+        actor_name: l.staff_name ?? "System",
+        actor_role: l.staff_role,
+        section: l.staff_role,
+        action: l.action_type,
+        detail: l.details,
+        created_at: l.occurred_at,
+      })),
+    );
     setLoading(false);
   }, [hospitalId]);
 
@@ -138,12 +160,13 @@ export function useHospitalActivityLog(hospitalId: string | null | undefined) {
       .channel(`activity-log-${hospitalId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "hospital_admission_activity_log", filter: `hospital_id=eq.${hospitalId}` },
+        { event: "INSERT", schema: "public", table: "patient_activity_logs", filter: `hospital_id=eq.${hospitalId}` },
         () => load(),
       )
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [hospitalId, load]);
+
 
   return { rows, loading, reload: load };
 }
