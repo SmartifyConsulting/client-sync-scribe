@@ -26,5 +26,5 @@
 - `src/hooks/useSessions.ts` — extend the replacement maps in the medical-certificate and referral blocks; change the leftover-token fallback so unfilled clinical fields blank out.
 - `src/pages/Sessions.tsx` — `createMedCertDocument`, `createPrescriptionDocument`, `createReferralDocument` gain the same "reuse the session's letterhead document" lookup as `createInvoiceDocument`, and all pass `session_id`; queue construction adds `summary` first and always pushes `invoice`.
 - `src/features/sessions/components/PostSessionStepDialog.tsx` — render the new summary step.
-- `src/hooks/useLiveDiagnosticHint.ts` — reset on patient/session change, not only on `enabled`.
+- `src/hooks/useLiveDiagnosticHint.ts`, `src/features/sessions/utils/clinicianNotesSections.ts` and the clinician panel — inspect the transcript/context actually sent, reset on patient/session change (not only on `enabled`), and drop hints whose session/patient stamp does not match.
 - One data cleanup query for the orphan session row. No schema changes.
