@@ -182,7 +182,10 @@ export function DocumentsBrowser({
           let content = `[Uploaded File] ${file.name}`;
           let transcribed = false;
 
-          if (isImage || isPdf) {
+          // Only PDFs go through handwriting/text transcription. Images
+          // (X-rays, scans, photos) are interpreted by the medical image
+          // analyser after the record exists.
+          if (isPdf) {
             setProgress({ stage: "transcribing", percent: 60, ...meta });
             try {
               const { data, error } = await supabase.functions.invoke(
@@ -201,21 +204,37 @@ export function DocumentsBrowser({
           }
 
           setProgress({ stage: "saving", percent: 85, ...meta });
-          const { error: insertError } = await supabase.from("documents").insert({
-            user_id: user.id,
-            patient_id: patientId || null,
-            patient_name: patientName || null,
-            name: file.name,
-            content,
-            template_name: transcribed ? "Historical Record" : "Upload",
-            media_url: publicUrl,
-            media_type: isImage ? "image" : isPdf ? "pdf" : "file",
-            source_file_url: publicUrl,
-            source_file_name: file.name,
-            is_transcribed: transcribed,
-            record_date: recordDate || null,
-          } as any);
+          const { data: inserted, error: insertError } = await supabase
+            .from("documents")
+            .insert({
+              user_id: user.id,
+              patient_id: patientId || null,
+              patient_name: patientName || null,
+              name: file.name,
+              content,
+              template_name: transcribed ? "Historical Record" : "Upload",
+              media_url: publicUrl,
+              media_type: isImage ? "image" : isPdf ? "pdf" : "file",
+              source_file_url: publicUrl,
+              source_file_name: file.name,
+              is_transcribed: transcribed,
+              record_date: recordDate || null,
+            } as any)
+            .select("id")
+            .maybeSingle();
           if (insertError) throw insertError;
+
+          if (isImage && inserted?.id) {
+            setProgress({ stage: "transcribing", percent: 90, ...meta });
+            try {
+              await supabase.functions.invoke("analyze-medical-image", {
+                body: { imageUrl: publicUrl, documentId: inserted.id },
+              });
+            } catch {
+              /* the image is still viewable without an interpretation */
+            }
+          }
+
         }
 
         setProgress({ stage: "done", percent: 100 });
