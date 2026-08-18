@@ -20,9 +20,11 @@ import { cn } from "@/lib/utils";
 import {
   BiologPayload,
   EMPTY_PAYLOAD,
+  EntryExercise,
   MEAL_SLOTS,
   MealSlot,
 } from "./types";
+
 import {
   todayISO,
   useBiologEntry,
