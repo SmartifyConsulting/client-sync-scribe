@@ -26,7 +26,7 @@ const DOC_ICONS: Record<string, typeof FileText> = {
 };
 
 export type DocStepType = "prescription" | "medcert" | "referral" | "invoice";
-export type PostSessionStepType = DocStepType | "schedule" | "vula";
+export type PostSessionStepType = DocStepType | "summary" | "schedule" | "vula";
 
 interface PostSessionStepDialogProps {
   open: boolean;
