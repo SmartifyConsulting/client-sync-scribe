@@ -446,15 +446,19 @@ export function DocumentsBrowser({
                   const mediaUrl = (doc as any).media_url as string | undefined;
                   const isImageDoc =
                     !!mediaUrl && (doc as any).media_type === "image";
+                  const hasAnalysis = !!(doc as any).ai_analysis;
                   return (
                     <div
                       key={doc.id}
-                      className="flex items-center gap-3 py-2 px-1 hover:bg-muted/30 transition-colors cursor-pointer"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-1 hover:bg-muted/30 transition-colors cursor-pointer",
+                        lastUploaded === doc.id && "bg-primary/5 rounded-lg",
+                      )}
                       onClick={() => openPreview(doc)}
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
                         {isImageDoc ? (
-                          <img src={mediaUrl} alt={doc.name} className="h-8 w-8 object-cover" />
+                          <img src={mediaUrl} alt={doc.name} className="h-10 w-10 object-cover" />
                         ) : (
                           <FileText className="h-4 w-4 text-primary" />
                         )}
@@ -471,6 +475,11 @@ export function DocumentsBrowser({
                           {doc.patient_name && groupBy !== "patient" ? ` · ${doc.patient_name}` : ""}
                         </p>
                       </div>
+                      {hasAnalysis && (
+                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                          <Sparkles className="h-3 w-3" /> AI described
+                        </span>
+                      )}
                       {(doc as any).is_transcribed && (
                         <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-medium text-violet-700">
                           <Sparkles className="h-3 w-3" /> AI transcribed
@@ -516,14 +525,33 @@ export function DocumentsBrowser({
           content={previewLoading ? "Loading…" : previewContent}
           onClose={() => setPreviewDoc(null)}
           extraActions={
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => setInformDoc(previewDoc)}
-            >
-              <Link2 className="h-4 w-4" />
-              Inform
-            </Button>
+            <>
+              {(previewDoc as any).media_url &&
+                (previewDoc as any).media_type === "image" &&
+                !(previewDoc as any).ai_analysis && (
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    disabled={analysingId === previewDoc.id}
+                    onClick={() => analyseDocument(previewDoc)}
+                  >
+                    {analysingId === previewDoc.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    Analyse with AI
+                  </Button>
+                )}
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setInformDoc(previewDoc)}
+              >
+                <Link2 className="h-4 w-4" />
+                Inform
+              </Button>
+            </>
           }
         />
       )}
