@@ -54,6 +54,15 @@ const isCertificateTemplate = (name?: string | null) =>
 const isReferralTemplate = (name?: string | null) =>
   !!name && /referral/i.test(name);
 
+/** Renders the patient's stored conditions as readable lines. */
+function formatConditions(items: unknown): string | null {
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const lines = items
+    .map((c: any) => (typeof c === "string" ? c : c?.condition || c?.name || ""))
+    .filter(Boolean);
+  return lines.length ? lines.join("\n") : null;
+}
+
 /** Renders the patient's stored medication list as readable lines. */
 function formatMedications(meds: unknown): string | null {
   if (!Array.isArray(meds) || meds.length === 0) return null;
@@ -216,7 +225,7 @@ export async function resolveDocumentPreviewContent(
     if (doc.session_id) {
       const { data } = await supabase
         .from("sessions")
-        .select("summary, notes, diagnosis, ai_diagnosis, action_points, external_doctor_name, external_doctor_specialty")
+        .select("summary, notes, ai_diagnosis, action_points, external_doctor_name, external_doctor_specialty")
         .eq("id", doc.session_id)
         .maybeSingle();
       sess = data || null;
@@ -232,7 +241,6 @@ export async function resolveDocumentPreviewContent(
       text ? String(text).split("\n").find((l) => l.trim())?.trim() || "" : "";
 
     const diagnosis =
-      (sess?.diagnosis && String(sess.diagnosis).trim()) ||
       (sess?.ai_diagnosis && String(sess.ai_diagnosis).trim()) ||
       "";
     const complaint = firstLine(sess?.summary) || diagnosis;
@@ -241,7 +249,7 @@ export async function resolveDocumentPreviewContent(
       specialist_name: specialist || null,
       specialist_type: sess?.external_doctor_specialty || null,
       presenting_complaint: complaint || null,
-      relevant_history: (patient as any)?.medical_history || null,
+      relevant_history: formatConditions((patient as any)?.conditions_diagnoses),
       current_medications: formatMedications((patient as any)?.current_medications),
       reason: diagnosis || complaint || null,
       diagnosis: diagnosis || null,
