@@ -51,6 +51,25 @@ const isPrescriptionTemplate = (name?: string | null) =>
 const isCertificateTemplate = (name?: string | null) =>
   !!name && /(certificate|sick\s*note)/i.test(name);
 
+const isReferralTemplate = (name?: string | null) =>
+  !!name && /referral/i.test(name);
+
+/** Renders the patient's stored medication list as readable lines. */
+function formatMedications(meds: unknown): string | null {
+  if (!Array.isArray(meds) || meds.length === 0) return null;
+  const lines = meds
+    .map((m: any) => {
+      if (typeof m === "string") return m;
+      const name = m?.name || m?.medication || "";
+      if (!name) return "";
+      const detail = [m?.dosage, m?.frequency].filter(Boolean).join(" ");
+      return detail ? `${name} — ${detail}` : name;
+    })
+    .filter(Boolean);
+  return lines.length ? lines.join("\n") : null;
+}
+
+
 export async function resolveDocumentPreviewContent(
   doc: PreviewDocumentInput,
 ): Promise<ResolvedDocumentPreview> {
