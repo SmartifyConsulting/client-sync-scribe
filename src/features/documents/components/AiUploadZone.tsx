@@ -82,6 +82,7 @@ export function AiUploadZone({
 
           let content = `[Uploaded File] ${file.name}`;
           let transcribed = false;
+          let detectedRecordDate: string | null = null;
 
           if (isPdf) {
             setProgress({ stage: "transcribing", percent: 60, ...meta });
@@ -98,12 +99,15 @@ export function AiUploadZone({
                 content = data.text;
                 transcribed = true;
                 setProgress({ stage: "extracting", percent: 75, ...meta });
+                const rd = (data?.history as any)?.record_date;
+                if (typeof rd === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rd)) detectedRecordDate = rd;
                 if (patientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
               }
             } catch {
               /* fall back to the plain upload record */
             }
           }
+
 
           setProgress({ stage: "saving", percent: 85, ...meta });
           const { data: inserted, error: insertError } = await supabase
