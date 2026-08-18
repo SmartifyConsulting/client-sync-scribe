@@ -637,20 +637,30 @@ export default function Sessions() {
     } catch (e) { console.error(e); return null; }
   };
 
-  const createReferralDocument = async (data: ReferralData): Promise<GeneratedDoc | null> => {
+  const createReferralDocument = async (
+    data: ReferralData,
+    sessionIdArg?: string | null,
+  ): Promise<GeneratedDoc | null> => {
     if (!patientId) return null;
     try {
+      const sessionIdForDoc = sessionIdArg ?? currentSessionIdRef.current;
       const content = `<b>REFERRAL LETTER</b>\n\nReferral To: ${data.specialist_type}${data.doctor_name ? ` - ${data.doctor_name}` : ''}\nReason: ${data.reason}\nUrgency: ${data.urgency || 'routine'}`;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
-      const { data: doc } = await supabase.from('documents').insert({
-        user_id: user.id,
-        patient_id: patientId,
-        patient_name: currentPatient?.name || null,
-        name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
-        content,
-        template_name: 'Referral Letter',
-      }).select('id').single();
+      const existing = await findSessionDocument(user.id, sessionIdForDoc, 'referral');
+      let doc: { id: string } | null = existing ? { id: existing.id } : null;
+      if (!doc) {
+        const { data: inserted } = await supabase.from('documents').insert({
+          user_id: user.id,
+          patient_id: patientId,
+          patient_name: currentPatient?.name || null,
+          session_id: sessionIdForDoc,
+          name: `Referral Letter - ${data.specialist_type} - ${new Date().toLocaleDateString()}`,
+          content,
+          template_name: 'Referral Letter',
+        } as any).select('id').single();
+        doc = inserted ?? null;
+      }
       if (data.doctor_name) {
         const { data: refDoc } = await supabase.from('referral_doctors')
           .select('id, referral_count')
