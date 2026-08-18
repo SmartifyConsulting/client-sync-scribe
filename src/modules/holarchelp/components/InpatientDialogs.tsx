@@ -146,10 +146,26 @@ export function TransferPatientDialog({
   const [wardType, setWardType] = useState("");
   const [wardId, setWardId] = useState("");
   const [bed, setBed] = useState("");
+  const [occupiedBeds, setOccupiedBeds] = useState<Set<string>>(new Set());
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { setWardType(""); setWardId(""); setBed(""); setReason(""); }, [admission?.id]);
+
+  useEffect(() => {
+    if (!wardId) { setOccupiedBeds(new Set()); return; }
+    let cancelled = false;
+    supabase
+      .from("hospital_inpatient_admissions")
+      .select("bed_number")
+      .eq("ward_id", wardId)
+      .neq("status", "discharged")
+      .then(({ data }) => {
+        if (cancelled) return;
+        setOccupiedBeds(new Set((data ?? []).map((r: any) => r.bed_number).filter(Boolean)));
+      });
+    return () => { cancelled = true; };
+  }, [wardId]);
 
   const transferableWards = useMemo(
     () => wards.filter((w) => w.id !== admission?.ward_id),
@@ -165,6 +181,18 @@ export function TransferPatientDialog({
     () => transferableWards.filter((w) => w.ward_type === wardType),
     [transferableWards, wardType],
   );
+
+  const selectedWard = useMemo(() => wardsInType.find((w) => w.id === wardId) ?? null, [wardsInType, wardId]);
+
+  const availableBeds = useMemo(() => {
+    if (!selectedWard) return [];
+    const beds: string[] = [];
+    for (let i = 1; i <= selectedWard.bed_capacity; i++) {
+      const label = String(i);
+      if (!occupiedBeds.has(label)) beds.push(label);
+    }
+    return beds;
+  }, [selectedWard, occupiedBeds]);
 
   const save = async () => {
     if (!admission || !wardId) return;
@@ -200,7 +228,7 @@ export function TransferPatientDialog({
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-bold">Move to ward</Label>
-              <Select value={wardId} onValueChange={setWardId} disabled={!wardType}>
+              <Select value={wardId} onValueChange={(v) => { setWardId(v); setBed(""); }} disabled={!wardType}>
                 <SelectTrigger><SelectValue placeholder={wardType ? "Select ward" : "Choose a type first"} /></SelectTrigger>
                 <SelectContent>
                   {wardsInType.map((w) => (
@@ -212,7 +240,14 @@ export function TransferPatientDialog({
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-bold">New bed number</Label>
-            <Input value={bed} onChange={(e) => setBed(e.target.value)} />
+            <Select value={bed} onValueChange={setBed} disabled={!wardId}>
+              <SelectTrigger><SelectValue placeholder={wardId ? (availableBeds.length ? "Select bed" : "No free beds in this ward") : "Choose a ward first"} /></SelectTrigger>
+              <SelectContent>
+                {availableBeds.map((b) => (
+                  <SelectItem key={b} value={b}>Bed {b}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs font-bold">Reason</Label>
@@ -221,7 +256,7 @@ export function TransferPatientDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={save} disabled={saving || !wardId}>Transfer</Button>
+          <Button onClick={save} disabled={saving || !wardId || (availableBeds.length > 0 && !bed)}>Transfer</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
