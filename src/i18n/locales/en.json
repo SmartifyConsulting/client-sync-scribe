@@ -1,4 +1,35 @@
 {
+  "auth": {
+    "common": {
+      "continue": "Continue",
+      "error": "Something went wrong",
+      "home": "Home",
+      "returnHome": "Return home"
+    },
+    "provider": {
+      "title": "Provider application",
+      "subtitle": "Register your organisation on Holarc Health. Applications are vetted before your administrator account is activated.",
+      "organizationType": "Organisation type",
+      "hospital": "Hospital",
+      "emergency": "Emergency service provider",
+      "insurance": "Medical insurer",
+      "pharmacy": "Pharmacy",
+      "applicationLabel": "application",
+      "formIncomplete": "Application incomplete",
+      "licenseRequired": "Licence required",
+      "licenseMessage": "Please upload a certified copy of your licence before submitting.",
+      "passwordRequired": "Please enter a password of at least 8 characters",
+      "applicationExists": "Application already on file",
+      "emailAlreadyRegistered": "Email already registered",
+      "signupFailed": "Sign-up failed",
+      "applicationReceived": "Application received",
+      "pendingApproval": "Your application is pending approval. We aim to review within 6 hours.",
+      "savePassword": "Save this password now",
+      "copyCredentials": "Copy credentials",
+      "copied": "Copied",
+      "alreadyHaveAccount": "Already have an account? Sign in"
+    }
+  },
   "common": {
     "language": "Language",
     "changeLanguage": "Change language",

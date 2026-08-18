@@ -295,7 +295,7 @@ export default function ProviderSignup() {
                   <SelectTrigger id="org_kind"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="hospital">{t("auth.provider.hospital")}</SelectItem>
-                    <SelectItem value="esp">{t("auth.provider.emergency")}</SelectItem>
+                    <SelectItem value="emergency">{t("auth.provider.emergency")}</SelectItem>
                     <SelectItem value="insurance">{t("auth.provider.insurance")}</SelectItem>
                     <SelectItem value="pharmacy">{t("auth.provider.pharmacy")}</SelectItem>
                   </SelectContent>
