@@ -133,14 +133,10 @@ async function buildUploadPreview(row: any, storedContent: string): Promise<stri
     .filter(Boolean)
     .join("\n");
 
-  // Always pair the attachment with its description: side by side on wide
-  // screens, stacked on narrow ones.
-  const body = description
-    ? `<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
-  <div style="flex:1 1 320px;min-width:280px;">${media}</div>
-  <div style="flex:1 1 320px;min-width:280px;">${description}</div>
-</div>`
-    : media;
+  // The attachment reads first, centred, with its description underneath.
+  const body = `<div style="text-align:center;margin:0 auto 16px;">${media}</div>${
+    description ? `\n<div>${description}</div>` : ""
+  }`;
 
   const parts = [`<p><strong>${escapeHtml(name)}</strong></p>`, body];
   if (!description) {
@@ -148,13 +144,12 @@ async function buildUploadPreview(row: any, storedContent: string): Promise<stri
       `<p style="font-size:12px;color:#6b7280;">No AI description yet — use “Analyse with AI” to have this visual described.</p>`,
     );
   }
-  if (!looksPdf) {
-    parts.push(
-      `<p style="font-size:12px;"><a href="${url}" target="_blank" rel="noreferrer">Open original file</a></p>`,
-    );
-  }
+  parts.push(
+    `<p style="font-size:12px;"><a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#0f766e;">Open original file</a></p>`,
+  );
   return parts.join("\n");
 }
+
 
 export async function resolveDocumentPreviewContent(
   doc: PreviewDocumentInput,
