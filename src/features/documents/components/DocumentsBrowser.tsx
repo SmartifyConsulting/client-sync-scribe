@@ -313,6 +313,54 @@ export function DocumentsBrowser({
 
   return (
     <div className={cn("space-y-4", className)}>
+      {/* Prominent AI upload zone */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          handleFiles(e.dataTransfer.files);
+        }}
+        className={cn(
+          "rounded-2xl border-2 border-dashed p-6 text-center transition-colors",
+          dragging ? "border-primary bg-primary/5" : "border-primary/40 bg-primary/[0.03]",
+        )}
+      >
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+          <Sparkles className="h-6 w-6 text-primary" />
+        </div>
+        <p className="text-base font-semibold text-foreground">
+          Upload a file to have AI describe it
+        </p>
+        <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
+          Drag an X-ray, CT, MRI, photo or PDF here — or choose a file. Images are
+          interpreted by AI, PDFs of handwritten notes are transcribed. You'll be
+          asked for a category next.
+        </p>
+        <Button
+          className="mt-4 gap-2"
+          disabled={uploading}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          Choose file
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            handleFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+      </div>
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[180px]">
@@ -334,58 +382,22 @@ export function DocumentsBrowser({
             <SelectItem value="patient">Group by Patient</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-1">
-          <span className="text-[11px] text-muted-foreground whitespace-nowrap">Record date</span>
-          <Input
-            type="date"
-            value={recordDate}
-            onChange={(e) => setRecordDate(e.target.value)}
-            className="h-9 w-[150px]"
-            title="Optional — file an old record under the date it was originally written"
-          />
-        </div>
-        <Button
-          variant="outline"
-          className="gap-2"
-          disabled={uploading}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          Upload
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            handleFiles(e.target.files);
-            e.target.value = "";
-          }}
-        />
       </div>
 
-      {/* Drop zone */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          handleFiles(e.dataTransfer.files);
-        }}
-        className={cn(
-          "rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground transition-colors",
-          dragging ? "border-primary bg-primary/5" : "border-border",
-        )}
-      >
-        Drop files here to upload. Photos or scans of handwritten records are
-        transcribed automatically by AI. Set a record date first to file
-        historical notes under the date they were written.
-      </div>
+      {pendingFiles.length > 0 && (
+        <UploadDocumentsDialog
+          files={pendingFiles}
+          knownCategories={knownCategories}
+          onCancel={() => setPendingFiles([])}
+          onConfirm={(details) => {
+            const files = pendingFiles;
+            setPendingFiles([]);
+            setRecordDate(details.recordDate);
+            void uploadFiles(files, details);
+          }}
+        />
+      )}
+
 
       <UploadProgressBar state={progress} />
 
