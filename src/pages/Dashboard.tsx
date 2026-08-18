@@ -348,11 +348,13 @@ export default function Dashboard() {
             to="/doctor/rewards"
             className="col-span-2 min-h-[80px] md:min-h-[100px] flex items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-white p-2 md:p-3 text-center shadow-card hover:shadow-card-hover transition-all duration-300"
           >
-            <img src={vulaVouchersLogo} alt="Vulas" className="h-7 w-auto md:h-8 object-contain shrink-0" />
-            <p className="text-xl md:text-2xl font-bold text-foreground shrink-0">{doctorVulas + patientVulas}</p>
+            <div className="flex flex-col items-center shrink-0">
+              <p className="text-xl md:text-2xl font-bold text-blue-600 leading-none mb-1">{doctorVulas + patientVulas}</p>
+              <img src={vulaVouchersLogo} alt="Vulas" className="h-9 w-auto md:h-10 object-contain" />
+            </div>
             <div className="min-w-0 text-left">
               <p className="text-xs md:text-sm font-bold text-foreground leading-tight">
-                Vulas reward you for reaching your goals.
+                For reaching your goals.
               </p>
               <p className="text-xs text-muted-foreground">
                 Track your progress and redeem vouchers
