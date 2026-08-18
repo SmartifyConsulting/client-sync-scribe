@@ -194,7 +194,7 @@ export async function resolveDocumentPreviewContent(
     if (doc.session_id) {
       const { data } = await supabase
         .from("sessions")
-        .select("created_at, started_at, summary, diagnosis")
+        .select("created_at, started_at, summary, ai_diagnosis")
         .eq("id", doc.session_id)
         .maybeSingle();
       sess = data || null;
@@ -202,7 +202,8 @@ export async function resolveDocumentPreviewContent(
     const when =
       sess?.started_at || sess?.created_at || (doc as any).created_at || new Date().toISOString();
     const nature =
-      (sess?.diagnosis && String(sess.diagnosis).trim()) ||
+      (sess?.ai_diagnosis && String(sess.ai_diagnosis).trim()) ||
+
       (sess?.summary ? String(sess.summary).split("\n").find((l: string) => l.trim())?.trim() : "") ||
       "";
     certificate = {
