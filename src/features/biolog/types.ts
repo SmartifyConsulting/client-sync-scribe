@@ -49,8 +49,23 @@ export interface EntryMeal {
 export interface EntryExercise {
   name: string;
   duration?: number | null;
+  /** Legacy 1-10 effort score; still shown as "Effort". */
   performance?: number | null;
+  /** 1-10 how hard you pushed. */
+  intensity?: number | null;
+  /** 1-10 how hard it felt (RPE). */
+  effort?: number | null;
+  /** Cardio: distance in km. */
+  distance?: number | null;
+  /** Cardio: average heart rate (bpm). */
+  heartRate?: number | null;
+  /** Strength: sets / reps / weight in kg. */
+  sets?: number | null;
+  reps?: number | null;
+  weight?: number | null;
+  note?: string | null;
 }
+
 
 export interface EntryMedication {
   label: string;
