@@ -16,6 +16,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { renderSignatureHtml } from "@/lib/signature";
+import { signedMediaUrl } from "./signedMediaUrl";
+
 
 import {
   fillDocumentPlaceholders,
@@ -174,7 +176,7 @@ export async function resolveDocumentPreviewContent(
       String((row as any)?.template_name || doc.template_name || ""),
     );
     if (hasFile && (isUploadStub(original) || !isGeneratedDoc)) {
-      const built = buildUploadPreview(row, original);
+      const built = await buildUploadPreview(row, original);
       if (built) {
         return {
           resolvedContent: built,
