@@ -37,9 +37,8 @@ import { useDocuments, type Document } from "@/hooks/useDocuments";
 import { DocumentPreview } from "@/features/sessions/components/DocumentPreview";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { InformDocumentDialog } from "./InformDocumentDialog";
-import { UploadProgressBar, type UploadProgressState } from "./UploadProgressBar";
-import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
-import { UploadDocumentsDialog, type UploadDetails } from "./UploadDocumentsDialog";
+import { AiUploadZone } from "./AiUploadZone";
+
 
 import { cn } from "@/lib/utils";
 
