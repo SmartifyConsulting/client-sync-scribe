@@ -280,9 +280,14 @@ export default function MyPersonalDashboard() {
               <Leaf className={cn("h-5 w-5", biologUnlocked ? "text-primary" : "text-muted-foreground")} />
             </span>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <p className="text-sm font-semibold text-foreground">🌱 Your Biolog Updates</p>
-                {!biologUnlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-semibold text-foreground">🌱 Your Biolog Updates</p>
+                  {!biologUnlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                </div>
+                <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 shrink-0" onClick={() => navigate("/biolog")} disabled={!biologUnlocked}>
+                  <TrendingUp className="h-3.5 w-3.5" /> Open Biolog
+                </Button>
               </div>
               <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
                 {biologUnlocked
@@ -311,11 +316,6 @@ export default function MyPersonalDashboard() {
                   <li key={i} className="text-xs text-muted-foreground">{i}</li>
                 ))}
               </ul>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Button size="sm" variant="outline" className="h-9 text-xs gap-1.5" onClick={() => navigate("/biolog")} disabled={!biologUnlocked}>
-                  <TrendingUp className="h-3.5 w-3.5" /> Open Biolog
-                </Button>
-              </div>
             </div>
           </div>
         </Panel>

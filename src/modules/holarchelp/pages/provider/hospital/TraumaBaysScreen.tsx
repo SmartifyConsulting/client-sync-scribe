@@ -17,6 +17,19 @@ type Row = {
   handover_status: string | null;
 };
 
+const SEVERITY_TONE: Record<string, string> = {
+  critical: "bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20",
+  high: "bg-orange-500/10 text-orange-600 border-orange-500/30 hover:bg-orange-500/20",
+  moderate: "bg-yellow-500/10 text-yellow-600 border-yellow-500/30 hover:bg-yellow-500/20",
+  low: "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20",
+};
+
+const HANDOVER_TONE: Record<string, string> = {
+  completed: "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20",
+  in_progress: "bg-blue-500/10 text-blue-600 border-blue-500/30 hover:bg-blue-500/20",
+  pending: "bg-amber-500/10 text-amber-600 border-amber-500/30 hover:bg-amber-500/20",
+};
+
 /** Trauma Bays — bay capacity plus live bay assignments from shared incidents. */
 export default function TraumaBaysScreen() {
   const { providerId } = useProviderAccess();
@@ -73,8 +86,16 @@ export default function TraumaBaysScreen() {
                   </p>
                 </div>
                 <div className="flex gap-1.5">
-                  {r.severity && <Badge variant="outline">{r.severity}</Badge>}
-                  {r.handover_status && <Badge variant="outline">Handover {r.handover_status.replace(/_/g, " ")}</Badge>}
+                  {r.severity && (
+                    <Badge className={cn("text-xs capitalize", SEVERITY_TONE[r.severity] ?? "bg-muted text-muted-foreground border-border")}>
+                      {r.severity}
+                    </Badge>
+                  )}
+                  {r.handover_status && (
+                    <Badge className={cn("text-xs capitalize", HANDOVER_TONE[r.handover_status] ?? "bg-muted text-muted-foreground border-border")}>
+                      Handover {r.handover_status.replace(/_/g, " ")}
+                    </Badge>
+                  )}
                 </div>
               </div>
             ))}

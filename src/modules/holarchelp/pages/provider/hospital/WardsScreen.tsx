@@ -126,7 +126,7 @@ export default function WardsScreen({ wardType, title = "Wards" }: { wardType?: 
                 <AccordionTrigger className={SECTION_TRIGGER_CLASS}>
                   <div className="flex w-full items-center gap-3 pr-3">
                     <BedDouble className="h-4 w-4 shrink-0" />
-                    <span className="text-base font-bold">{ward.name}</span>
+                    <span className="text-sm font-bold">{ward.name}</span>
                     <span className="text-xs font-semibold uppercase tracking-wider opacity-70">{wardTypeLabel(ward.ward_type)}</span>
                     <span className="ml-auto text-xs font-semibold tabular-nums">{ward.occupied} / {ward.bed_capacity}</span>
                   </div>
