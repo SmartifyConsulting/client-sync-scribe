@@ -61,7 +61,7 @@ export default function Biolog() {
             {!isAdmin && <Lock className="h-3 w-3 mr-1" />}
             Programmes
           </TabsTrigger>
-          <TabsTrigger value="ageing" className={tabTriggerClass}>Ageing</TabsTrigger>
+          <TabsTrigger value="ageing" className={tabTriggerClass}>Age</TabsTrigger>
           {!readOnly && <TabsTrigger value="customise" className={tabTriggerClass}>Customise</TabsTrigger>}
         </TabsList>
 

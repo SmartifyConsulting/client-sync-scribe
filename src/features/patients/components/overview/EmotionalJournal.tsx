@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Lock, Sparkles, Trash2, Info } from "lucide-react";
+import { Loader2, Lock, Sparkles, Trash2, Info, Bold, Italic, Underline } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { SIGNATURE_FONTS, getSignatureFontFamily } from "@/lib/signature";
@@ -20,8 +21,19 @@ interface JournalEntry {
   entry_date: string;
   body: string;
   font_key: string | null;
+  font_size: number | null;
+  is_bold: boolean | null;
+  is_italic: boolean | null;
+  is_underline: boolean | null;
   created_at: string;
 }
+
+const FONT_SIZES = [
+  { value: "16", label: "Small" },
+  { value: "20", label: "Medium" },
+  { value: "24", label: "Large" },
+  { value: "28", label: "X-Large" },
+];
 
 interface InsightRow {
   entry_id: string | null;
@@ -61,6 +73,10 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
   const [body, setBody] = useState("");
   const [entryDate, setEntryDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [fontKey, setFontKey] = useState<string>(SIGNATURE_FONTS[7].value);
+  const [fontSize, setFontSize] = useState<string>("20");
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
 
   const isOwner = !!userId && !!ownerUserId && userId === ownerUserId;
 
@@ -82,7 +98,7 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
       if (uid && owner && uid === owner) {
         const { data } = await supabase
           .from("patient_emotional_journal")
-          .select("id, entry_date, body, font_key, created_at")
+          .select("id, entry_date, body, font_key, font_size, is_bold, is_italic, is_underline, created_at")
           .eq("patient_user_id", uid)
           .order("entry_date", { ascending: false })
           .order("created_at", { ascending: false });
@@ -135,6 +151,10 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
         entry_date: entryDate,
         body: body.trim(),
         font_key: fontKey,
+        font_size: Number(fontSize),
+        is_bold: isBold,
+        is_italic: isItalic,
+        is_underline: isUnderline,
       });
       if (error) throw error;
       setBody("");
@@ -205,12 +225,61 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
               </div>
             </div>
 
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={fontSize} onValueChange={setFontSize}>
+                <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {FONT_SIZES.map((f) => (
+                    <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={cn("h-8 w-8", isBold && "border-primary bg-primary/10 text-primary")}
+                  onClick={() => setIsBold((v) => !v)}
+                  aria-pressed={isBold}
+                >
+                  <Bold className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={cn("h-8 w-8", isItalic && "border-primary bg-primary/10 text-primary")}
+                  onClick={() => setIsItalic((v) => !v)}
+                  aria-pressed={isItalic}
+                >
+                  <Italic className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={cn("h-8 w-8", isUnderline && "border-primary bg-primary/10 text-primary")}
+                  onClick={() => setIsUnderline((v) => !v)}
+                  aria-pressed={isUnderline}
+                >
+                  <Underline className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={5}
               placeholder="What is happening for you emotionally right now?"
-              style={{ fontFamily: getSignatureFontFamily(fontKey), fontSize: "18px" }}
+              style={{
+                fontFamily: getSignatureFontFamily(fontKey),
+                fontSize: `${fontSize}px`,
+                fontWeight: isBold ? 700 : 400,
+                fontStyle: isItalic ? "italic" : "normal",
+                textDecoration: isUnderline ? "underline" : "none",
+              }}
             />
 
             <div className="flex justify-end gap-2">
@@ -266,7 +335,13 @@ export function EmotionalJournal({ patientId }: { patientId: string }) {
                     )}
                     <p
                       className="text-foreground whitespace-pre-wrap"
-                      style={{ fontFamily: getSignatureFontFamily(e.font_key), fontSize: "18px" }}
+                      style={{
+                        fontFamily: getSignatureFontFamily(e.font_key),
+                        fontSize: `${e.font_size ?? 18}px`,
+                        fontWeight: e.is_bold ? 700 : 400,
+                        fontStyle: e.is_italic ? "italic" : "normal",
+                        textDecoration: e.is_underline ? "underline" : "none",
+                      }}
                     >
                       {e.body}
                     </p>
