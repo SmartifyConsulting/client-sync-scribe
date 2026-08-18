@@ -1112,7 +1112,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
               {/* Image Preview */}
               {analysisDialog?.mediaUrl && (
                 <div className="rounded-lg overflow-hidden border bg-muted">
-                  <img
+                  <SignedImage
+
                     src={analysisDialog.mediaUrl}
                     alt={analysisDialog.name}
                     className="w-full max-h-64 object-contain"

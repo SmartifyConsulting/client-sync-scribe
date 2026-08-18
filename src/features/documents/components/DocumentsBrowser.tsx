@@ -1,3 +1,4 @@
+import { SignedImage } from "./SignedImage";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import {

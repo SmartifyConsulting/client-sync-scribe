@@ -1,3 +1,4 @@
+import { SignedImage } from "@/features/documents/components/SignedImage";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BiologPanel } from "@/features/biolog/BiologPanel";
 import { useV2Demo } from "@/hooks/useV2Demo";
