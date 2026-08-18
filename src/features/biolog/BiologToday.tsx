@@ -36,6 +36,8 @@ import {
   useSaveEntry,
 } from "./useBiolog";
 import { BiologVoiceCheckIn } from "./BiologVoiceCheckIn";
+import { ExerciseSection } from "./ExerciseSection";
+
 
 const LABEL = "text-xs font-bold text-foreground";
 
