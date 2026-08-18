@@ -39,6 +39,8 @@ import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewConte
 import { InformDocumentDialog } from "./InformDocumentDialog";
 import { UploadProgressBar, type UploadProgressState } from "./UploadProgressBar";
 import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
+import { UploadDocumentsDialog, type UploadDetails } from "./UploadDocumentsDialog";
+
 import { cn } from "@/lib/utils";
 
 type GroupBy = "type" | "date" | "patient";
@@ -93,7 +95,11 @@ export function DocumentsBrowser({
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<UploadProgressState>({ stage: "idle", percent: 0 });
   const [pendingHistory, setPendingHistory] = useState<ExtractedHistory | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [analysingId, setAnalysingId] = useState<string | null>(null);
+  const [lastUploaded, setLastUploaded] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const groups = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -139,21 +145,59 @@ export function DocumentsBrowser({
     }
   };
 
-  const handleFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files || files.length === 0) return;
+  /** Categories already used on existing documents, offered again on upload. */
+  const knownCategories = useMemo(() => {
+    const set = new Set<string>();
+    for (const doc of documents) {
+      const name = (doc.template_name || "").trim();
+      if (name && name.toLowerCase() !== "upload") set.add(name);
+    }
+    return Array.from(set).sort();
+  }, [documents]);
+
+  const analyseDocument = useCallback(
+    async (doc: Document) => {
+      const url = (doc as any).media_url as string | undefined;
+      if (!url) return;
+      setAnalysingId(doc.id);
+      try {
+        const { error } = await supabase.functions.invoke("analyze-medical-image", {
+          body: { imageUrl: url, documentId: doc.id },
+        });
+        if (error) throw error;
+        toast({ title: "AI description ready" });
+        fetchDocuments();
+        const resolved = await resolveDocumentPreviewContent(doc as any);
+        setPreviewContent(resolved.resolvedContent || doc.content || "");
+      } catch (err: any) {
+        toast({
+          title: "Could not describe the image",
+          description: err?.message || "The AI analysis failed",
+          variant: "destructive",
+        });
+      } finally {
+        setAnalysingId(null);
+      }
+    },
+    [toast, fetchDocuments],
+  );
+
+  const uploadFiles = useCallback(
+    async (files: File[], details: UploadDetails) => {
+      if (files.length === 0) return;
       setUploading(true);
+      setLastUploaded(null);
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) throw new Error("You must be signed in to upload");
 
-        const list = Array.from(files);
         let index = 0;
-        for (const file of list) {
+        let lastId: string | null = null;
+        for (const file of files) {
           index += 1;
-          const meta = { fileName: file.name, current: index, total: list.length };
+          const meta = { fileName: file.name, current: index, total: files.length };
           setProgress({ stage: "uploading", percent: 20, ...meta });
           if (file.size > 20 * 1024 * 1024) {
             toast({
@@ -212,34 +256,40 @@ export function DocumentsBrowser({
               patient_name: patientName || null,
               name: file.name,
               content,
-              template_name: transcribed ? "Historical Record" : "Upload",
+              template_name: details.category || "Upload",
               media_url: publicUrl,
               media_type: isImage ? "image" : isPdf ? "pdf" : "file",
               source_file_url: publicUrl,
               source_file_name: file.name,
               is_transcribed: transcribed,
-              record_date: recordDate || null,
+              record_date: details.recordDate || null,
             } as any)
             .select("id")
             .maybeSingle();
           if (insertError) throw insertError;
+          lastId = inserted?.id || lastId;
 
           if (isImage && inserted?.id) {
-            setProgress({ stage: "transcribing", percent: 90, ...meta });
-            try {
-              await supabase.functions.invoke("analyze-medical-image", {
-                body: { imageUrl: publicUrl, documentId: inserted.id },
+            setProgress({ stage: "analysing", percent: 92, ...meta });
+            const { error: aiError } = await supabase.functions.invoke(
+              "analyze-medical-image",
+              { body: { imageUrl: publicUrl, documentId: inserted.id } },
+            );
+            if (aiError) {
+              toast({
+                title: "Uploaded, but AI description failed",
+                description: `${file.name}: ${aiError.message}. Open the file and use “Analyse with AI”.`,
+                variant: "destructive",
               });
-            } catch {
-              /* the image is still viewable without an interpretation */
             }
           }
-
         }
 
         setProgress({ stage: "done", percent: 100 });
         toast({ title: "Upload complete" });
-        fetchDocuments();
+        const refreshed = await fetchDocuments();
+        setLastUploaded(lastId);
+        void refreshed;
       } catch (err: any) {
         const message = err?.message || "Could not upload the file";
         setProgress((prev) => ({ ...prev, stage: "error", message }));
@@ -248,15 +298,69 @@ export function DocumentsBrowser({
         setUploading(false);
         setTimeout(
           () => setProgress((prev) => (prev.stage === "error" ? prev : { stage: "idle", percent: 0 })),
-          1800,
+          2500,
         );
       }
     },
-    [patientId, patientName, recordDate, toast, fetchDocuments],
+    [patientId, patientName, toast, fetchDocuments],
   );
+
+  const handleFiles = useCallback((files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setPendingFiles(Array.from(files));
+  }, []);
+
 
   return (
     <div className={cn("space-y-4", className)}>
+      {/* Prominent AI upload zone */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          handleFiles(e.dataTransfer.files);
+        }}
+        className={cn(
+          "rounded-2xl border-2 border-dashed p-6 text-center transition-colors",
+          dragging ? "border-primary bg-primary/5" : "border-primary/40 bg-primary/[0.03]",
+        )}
+      >
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+          <Sparkles className="h-6 w-6 text-primary" />
+        </div>
+        <p className="text-base font-semibold text-foreground">
+          Upload a file to have AI describe it
+        </p>
+        <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
+          Drag an X-ray, CT, MRI, photo or PDF here — or choose a file. Images are
+          interpreted by AI, PDFs of handwritten notes are transcribed. You'll be
+          asked for a category next.
+        </p>
+        <Button
+          className="mt-4 gap-2"
+          disabled={uploading}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          Choose file
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            handleFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+      </div>
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[180px]">
@@ -278,58 +382,22 @@ export function DocumentsBrowser({
             <SelectItem value="patient">Group by Patient</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-1">
-          <span className="text-[11px] text-muted-foreground whitespace-nowrap">Record date</span>
-          <Input
-            type="date"
-            value={recordDate}
-            onChange={(e) => setRecordDate(e.target.value)}
-            className="h-9 w-[150px]"
-            title="Optional — file an old record under the date it was originally written"
-          />
-        </div>
-        <Button
-          variant="outline"
-          className="gap-2"
-          disabled={uploading}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          Upload
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            handleFiles(e.target.files);
-            e.target.value = "";
-          }}
-        />
       </div>
 
-      {/* Drop zone */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          handleFiles(e.dataTransfer.files);
-        }}
-        className={cn(
-          "rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground transition-colors",
-          dragging ? "border-primary bg-primary/5" : "border-border",
-        )}
-      >
-        Drop files here to upload. Photos or scans of handwritten records are
-        transcribed automatically by AI. Set a record date first to file
-        historical notes under the date they were written.
-      </div>
+      {pendingFiles.length > 0 && (
+        <UploadDocumentsDialog
+          files={pendingFiles}
+          knownCategories={knownCategories}
+          onCancel={() => setPendingFiles([])}
+          onConfirm={(details) => {
+            const files = pendingFiles;
+            setPendingFiles([]);
+            setRecordDate(details.recordDate);
+            void uploadFiles(files, details);
+          }}
+        />
+      )}
+
 
       <UploadProgressBar state={progress} />
 
@@ -378,15 +446,19 @@ export function DocumentsBrowser({
                   const mediaUrl = (doc as any).media_url as string | undefined;
                   const isImageDoc =
                     !!mediaUrl && (doc as any).media_type === "image";
+                  const hasAnalysis = !!(doc as any).ai_analysis;
                   return (
                     <div
                       key={doc.id}
-                      className="flex items-center gap-3 py-2 px-1 hover:bg-muted/30 transition-colors cursor-pointer"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-1 hover:bg-muted/30 transition-colors cursor-pointer",
+                        lastUploaded === doc.id && "bg-primary/5 rounded-lg",
+                      )}
                       onClick={() => openPreview(doc)}
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
                         {isImageDoc ? (
-                          <img src={mediaUrl} alt={doc.name} className="h-8 w-8 object-cover" />
+                          <img src={mediaUrl} alt={doc.name} className="h-10 w-10 object-cover" />
                         ) : (
                           <FileText className="h-4 w-4 text-primary" />
                         )}
@@ -403,6 +475,11 @@ export function DocumentsBrowser({
                           {doc.patient_name && groupBy !== "patient" ? ` · ${doc.patient_name}` : ""}
                         </p>
                       </div>
+                      {hasAnalysis && (
+                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                          <Sparkles className="h-3 w-3" /> AI described
+                        </span>
+                      )}
                       {(doc as any).is_transcribed && (
                         <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-medium text-violet-700">
                           <Sparkles className="h-3 w-3" /> AI transcribed
@@ -448,14 +525,33 @@ export function DocumentsBrowser({
           content={previewLoading ? "Loading…" : previewContent}
           onClose={() => setPreviewDoc(null)}
           extraActions={
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => setInformDoc(previewDoc)}
-            >
-              <Link2 className="h-4 w-4" />
-              Inform
-            </Button>
+            <>
+              {(previewDoc as any).media_url &&
+                (previewDoc as any).media_type === "image" &&
+                !(previewDoc as any).ai_analysis && (
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    disabled={analysingId === previewDoc.id}
+                    onClick={() => analyseDocument(previewDoc)}
+                  >
+                    {analysingId === previewDoc.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    Analyse with AI
+                  </Button>
+                )}
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setInformDoc(previewDoc)}
+              >
+                <Link2 className="h-4 w-4" />
+                Inform
+              </Button>
+            </>
           }
         />
       )}

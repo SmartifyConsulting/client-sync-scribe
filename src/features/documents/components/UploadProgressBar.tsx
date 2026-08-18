@@ -4,6 +4,7 @@ export type UploadStage =
   | "idle"
   | "uploading"
   | "transcribing"
+  | "analysing"
   | "extracting"
   | "saving"
   | "done"
@@ -26,6 +27,7 @@ const STAGE_LABEL: Record<UploadStage, string> = {
   idle: "",
   uploading: "Uploading document…",
   transcribing: "Transcribing handwritten notes…",
+  analysing: "Describing the image with AI…",
   extracting: "Extracting medical history…",
   saving: "Recording data in the app…",
   done: "Done",
@@ -46,7 +48,10 @@ export function UploadProgressBar({
 }) {
   if (state.stage === "idle") return null;
 
-  const indeterminate = state.stage === "transcribing" || state.stage === "extracting";
+  const indeterminate =
+    state.stage === "transcribing" ||
+    state.stage === "analysing" ||
+    state.stage === "extracting";
   const isError = state.stage === "error";
   const pct = state.stage === "done" ? 100 : Math.max(4, Math.min(100, state.percent));
 

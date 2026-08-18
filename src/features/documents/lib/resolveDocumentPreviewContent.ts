@@ -117,16 +117,30 @@ function buildUploadPreview(row: any, storedContent: string): string | null {
     media = `<p><a href="${url}" target="_blank" rel="noreferrer">Open ${escapeHtml(name)}</a></p>`;
   }
 
-  const parts = [`<p><strong>${escapeHtml(name)}</strong></p>`, media];
-
   const transcript = isUploadStub(storedContent) ? "" : storedContent;
-  if (transcript.trim()) {
-    parts.push(`<h3>Transcribed content</h3><div>${transcript}</div>`);
-  }
   const analysis = row?.ai_analysis ? String(row.ai_analysis) : "";
-  if (analysis.trim()) {
+  const description = [
+    analysis.trim()
+      ? `<h3 style="margin-top:0;">AI interpretation</h3><div>${escapeHtml(analysis).replace(/\n/g, "<br/>")}</div>`
+      : "",
+    transcript.trim() ? `<h3>Transcribed content</h3><div>${transcript}</div>` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  // Always pair the attachment with its description: side by side on wide
+  // screens, stacked on narrow ones.
+  const body = description
+    ? `<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;">
+  <div style="flex:1 1 320px;min-width:280px;">${media}</div>
+  <div style="flex:1 1 320px;min-width:280px;">${description}</div>
+</div>`
+    : media;
+
+  const parts = [`<p><strong>${escapeHtml(name)}</strong></p>`, body];
+  if (!description) {
     parts.push(
-      `<h3>AI interpretation</h3><div>${escapeHtml(analysis).replace(/\n/g, "<br/>")}</div>`,
+      `<p style="font-size:12px;color:#6b7280;">No AI description yet — use “Analyse with AI” to have this visual described.</p>`,
     );
   }
   if (!looksPdf) {
