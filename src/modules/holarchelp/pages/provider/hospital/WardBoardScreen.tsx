@@ -44,7 +44,7 @@ export default function WardBoardScreen() {
           <p className="text-muted-foreground text-xs">Trauma bays, wards, ICU, theatre and high care in one place</p>
         </div>
         {capacityStatus && (
-          <Badge className={`text-xs capitalize shrink-0 ${CAPACITY_TONE[capacityStatus] ?? "bg-muted text-muted-foreground border-border"}`}>
+          <Badge className={`text-[10px] capitalize shrink-0 ${CAPACITY_TONE[capacityStatus] ?? "bg-muted text-muted-foreground border-border"}`}>
             {CAPACITY_LABEL[capacityStatus] ?? `ER Capacity: ${capacityStatus}`}
           </Badge>
         )}

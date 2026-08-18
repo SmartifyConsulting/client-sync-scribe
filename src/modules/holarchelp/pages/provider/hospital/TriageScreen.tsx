@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toastError } from "@/lib/userMessage";
+import { cn } from "@/lib/utils";
 
 type Row = {
   id: string; status: string; severity: string | null;
@@ -14,12 +15,12 @@ type Row = {
   eta_minutes: number | null; created_at: string;
 };
 
-const COLUMNS: { key: string; labelKey: string; statuses: string[]; admit?: string }[] = [
-  { key: "incoming", labelKey: "triageBoard.incoming", statuses: ["assigned","en_route","patient_collected","en_route_to_hospital"] },
-  { key: "awaiting", labelKey: "triageBoard.awaiting", statuses: ["arrived"] },
-  { key: "arrived", labelKey: "triageBoard.arrived", statuses: ["at_hospital"], admit: "arrived" },
-  { key: "triage", labelKey: "triageBoard.inTriage", statuses: ["at_hospital"], admit: "in_triage" },
-  { key: "admitted", labelKey: "status.admitted", statuses: ["at_hospital","completed"], admit: "admitted" },
+const COLUMNS: { key: string; labelKey: string; statuses: string[]; admit?: string; tone: string }[] = [
+  { key: "incoming", labelKey: "triageBoard.incoming", statuses: ["assigned","en_route","patient_collected","en_route_to_hospital"], tone: "bg-slate-500/10 text-slate-700" },
+  { key: "awaiting", labelKey: "triageBoard.awaiting", statuses: ["arrived"], tone: "bg-amber-500/10 text-amber-700" },
+  { key: "arrived", labelKey: "triageBoard.arrived", statuses: ["at_hospital"], admit: "arrived", tone: "bg-blue-500/10 text-blue-700" },
+  { key: "triage", labelKey: "triageBoard.inTriage", statuses: ["at_hospital"], admit: "in_triage", tone: "bg-purple-500/10 text-purple-700" },
+  { key: "admitted", labelKey: "status.admitted", statuses: ["at_hospital","completed"], admit: "admitted", tone: "bg-green-500/10 text-green-700" },
 ];
 
 const sevDot = (s: string | null) =>
@@ -72,10 +73,10 @@ export default function TriageScreen() {
         {COLUMNS.map((col) => {
           const items = bucketize(col);
           return (
-            <div key={col.key} className="flex min-h-[300px] flex-col rounded-xl border border-neutral-400 bg-card">
-              <div className="flex items-center justify-between border-b px-3 py-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t(col.labelKey)}</p>
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-bold">{items.length}</span>
+            <div key={col.key} className="flex min-h-[300px] flex-col rounded-xl border border-neutral-400 bg-card overflow-hidden">
+              <div className={cn("flex items-center justify-between px-3 py-2", col.tone)}>
+                <p className="text-xs font-bold uppercase tracking-wider">{t(col.labelKey)}</p>
+                <span className="rounded-full bg-white/60 px-1.5 py-0.5 text-xs font-bold">{items.length}</span>
               </div>
               <div className="flex-1 space-y-1.5 overflow-auto p-2">
                 {items.map((r) => {

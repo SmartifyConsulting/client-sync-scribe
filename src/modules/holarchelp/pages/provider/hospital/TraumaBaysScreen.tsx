@@ -87,12 +87,12 @@ export default function TraumaBaysScreen() {
                 </div>
                 <div className="flex gap-1.5">
                   {r.severity && (
-                    <Badge className={cn("text-xs capitalize", SEVERITY_TONE[r.severity] ?? "bg-muted text-muted-foreground border-border")}>
+                    <Badge className={cn("text-[10px] capitalize", SEVERITY_TONE[r.severity] ?? "bg-muted text-muted-foreground border-border")}>
                       {r.severity}
                     </Badge>
                   )}
                   {r.handover_status && (
-                    <Badge className={cn("text-xs capitalize", HANDOVER_TONE[r.handover_status] ?? "bg-muted text-muted-foreground border-border")}>
+                    <Badge className={cn("text-[10px] capitalize", HANDOVER_TONE[r.handover_status] ?? "bg-muted text-muted-foreground border-border")}>
                       Handover {r.handover_status.replace(/_/g, " ")}
                     </Badge>
                   )}

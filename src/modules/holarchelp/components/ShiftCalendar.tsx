@@ -165,47 +165,89 @@ export function ShiftCalendar({
       </div>
 
       {/* Availability — moved below the calendar so the calendar itself can use the full width */}
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        <div className="border-b bg-muted/40 px-3 py-2 text-xs font-bold uppercase tracking-wider">Availability</div>
-        <ul className="grid divide-y sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-3 xl:grid-cols-4">
-          {staff.map((p) => {
-            const hours = scheduledHours(weekShifts, p.key);
-            const next = nextShiftFor(shifts, p.key);
-            const busyToday = SHIFT_BANDS.some((b) => isBookedInSlot(weekShifts, p.key, today, b.value));
-            return (
-              <li
-                key={p.key}
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData("text/staff-key", p.key)}
-                className="cursor-grab px-3 py-2 text-xs active:cursor-grabbing hover:bg-muted/30"
-              >
-                <div className="flex items-center gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="font-semibold">{p.name}</span>
-                    </TooltipTrigger>
-                    <TooltipContent className="flex items-center gap-1 text-xs">
-                      <Phone className="h-3 w-3" /> {p.phone || "No phone on file"}
-                    </TooltipContent>
-                  </Tooltip>
-                  <Badge variant="outline" className="capitalize">{p.role}</Badge>
-                  {hours === 0 ? (
-                    <Badge className="ml-auto bg-success text-success-foreground">Free</Badge>
-                  ) : busyToday ? (
-                    <Badge variant="secondary" className="ml-auto">Off-duty</Badge>
-                  ) : (
-                    <Badge variant="outline" className="ml-auto">Scheduled</Badge>
-                  )}
-                </div>
-                <p className="mt-0.5 text-muted-foreground">
-                  {hours ? `${hours.toFixed(0)}h this week` : "No shifts this week"}
-                  {next ? ` · next ${new Date(next.starts_at).toLocaleDateString(undefined, { weekday: "short" })} ${timeShort(next.starts_at)}` : ""}
-                </p>
-              </li>
-            );
-          })}
-          {!staff.length && <li className="p-6 text-center text-xs text-muted-foreground sm:col-span-full">No staff linked to this hospital.</li>}
-        </ul>
+      <AvailabilityRail staff={staff} shifts={shifts} weekShifts={weekShifts} today={today} phoneByKey={phoneByKey} />
+    </div>
+  );
+}
+
+type AvailabilityStatus = "free" | "scheduled" | "off_duty";
+
+const STATUS_META: Record<AvailabilityStatus, { label: string; dot: string; badge: string }> = {
+  free: { label: "Free", dot: "bg-green-500", badge: "bg-green-500/10 text-green-700 border-green-500/30" },
+  scheduled: { label: "Scheduled", dot: "bg-blue-500", badge: "bg-blue-500/10 text-blue-700 border-blue-500/30" },
+  off_duty: { label: "Off-duty", dot: "bg-amber-500", badge: "bg-amber-500/10 text-amber-700 border-amber-500/30" },
+};
+
+function AvailabilityRail({
+  staff, shifts, weekShifts, today, phoneByKey,
+}: {
+  staff: StaffOption[];
+  shifts: StaffShift[];
+  weekShifts: StaffShift[];
+  today: Date;
+  phoneByKey: Map<string, string | null | undefined>;
+}) {
+  const rows = staff.map((p) => {
+    const hours = scheduledHours(weekShifts, p.key);
+    const next = nextShiftFor(shifts, p.key);
+    const busyToday = SHIFT_BANDS.some((b) => isBookedInSlot(weekShifts, p.key, today, b.value));
+    const status: AvailabilityStatus = hours === 0 ? "free" : busyToday ? "off_duty" : "scheduled";
+    return { p, hours, next, status };
+  });
+  const counts = rows.reduce(
+    (acc, r) => ({ ...acc, [r.status]: acc[r.status] + 1 }),
+    { free: 0, scheduled: 0, off_duty: 0 } as Record<AvailabilityStatus, number>,
+  );
+
+  return (
+    <div className="overflow-hidden rounded-2xl border bg-card">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/40 px-3 py-2">
+        <span className="text-xs font-bold uppercase tracking-wider">Availability</span>
+        <div className="flex items-center gap-2">
+          {(Object.keys(STATUS_META) as AvailabilityStatus[]).map((s) => (
+            <span key={s} className="flex items-center gap-1 text-[11px] text-muted-foreground">
+              <span className={cn("h-1.5 w-1.5 rounded-full", STATUS_META[s].dot)} />
+              {counts[s]} {STATUS_META[s].label.toLowerCase()}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-2 p-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {rows.map(({ p, hours, next, status }) => (
+          <div
+            key={p.key}
+            draggable
+            onDragStart={(e) => e.dataTransfer.setData("text/staff-key", p.key)}
+            className={cn(
+              "cursor-grab rounded-lg border-l-4 border bg-background px-2.5 py-2 text-xs active:cursor-grabbing hover:bg-muted/30",
+              status === "free" ? "border-l-green-500" : status === "off_duty" ? "border-l-amber-500" : "border-l-blue-500",
+            )}
+          >
+            <div className="flex items-center justify-between gap-1.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="truncate font-semibold">{p.name}</span>
+                </TooltipTrigger>
+                <TooltipContent className="flex items-center gap-1 text-xs">
+                  <Phone className="h-3 w-3" /> {phoneByKey.get(p.key) || "No phone on file"}
+                </TooltipContent>
+              </Tooltip>
+              <Badge variant="outline" className="shrink-0 text-[10px] capitalize">{p.role}</Badge>
+            </div>
+            <div className="mt-1 flex items-center justify-between gap-1.5">
+              <Badge className={cn("text-[10px]", STATUS_META[status].badge)}>{STATUS_META[status].label}</Badge>
+              <span className="truncate text-right text-[11px] text-muted-foreground">
+                {hours ? `${hours.toFixed(0)}h this wk` : "No shifts"}
+              </span>
+            </div>
+            {next && (
+              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                Next {new Date(next.starts_at).toLocaleDateString(undefined, { weekday: "short" })} {timeShort(next.starts_at)}
+              </p>
+            )}
+          </div>
+        ))}
+        {!staff.length && <p className="p-6 text-center text-xs text-muted-foreground sm:col-span-full">No staff linked to this hospital.</p>}
       </div>
     </div>
   );
