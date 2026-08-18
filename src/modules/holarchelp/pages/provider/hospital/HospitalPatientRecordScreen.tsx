@@ -97,28 +97,16 @@ export default function HospitalPatientRecordScreen() {
     };
   }, [patientId]);
 
-  const contacts = useMemo(() => {
-    if (!patient) return [] as string[];
-    const list: string[] = [];
-    if (patient.next_of_kin_name) {
-      list.push(
-        `${patient.next_of_kin_name}${patient.next_of_kin_relationship ? ` (${patient.next_of_kin_relationship})` : ""}${
-          patient.next_of_kin_phone ? ` · ${patient.next_of_kin_phone}` : ""
-        }`,
-      );
-    }
-    if (patient.emergency_contact_name) {
-      list.push(
-        `${patient.emergency_contact_name}${
-          patient.emergency_contact_relationship ? ` (${patient.emergency_contact_relationship})` : ""
-        }${patient.emergency_contact_phone ? ` · ${patient.emergency_contact_phone}` : ""}`,
-      );
-    }
-    for (const c of Array.isArray(patient.emergency_contacts) ? patient.emergency_contacts : []) {
-      if (c?.name) list.push(`${c.name}${c.relationship ? ` (${c.relationship})` : ""}${c.phone ? ` · ${c.phone}` : ""}`);
-    }
-    return list;
+  /** Emergency contact, falling back to next of kin, then the first listed contact. */
+  const emergencyContact = useMemo(() => {
+    const first = (Array.isArray(patient?.emergency_contacts) ? patient?.emergency_contacts : [])[0] || {};
+    const name = patient?.emergency_contact_name || patient?.next_of_kin_name || first?.name || "—";
+    const relationship =
+      patient?.emergency_contact_relationship || patient?.next_of_kin_relationship || first?.relationship || "";
+    const phone = patient?.emergency_contact_phone || patient?.next_of_kin_phone || first?.phone || "—";
+    return { name: relationship && name !== "—" ? `${name} (${relationship})` : name, phone };
   }, [patient]);
+
 
   if (loading) {
     return (
