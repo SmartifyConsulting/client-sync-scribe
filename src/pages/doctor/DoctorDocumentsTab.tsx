@@ -33,6 +33,8 @@ import { DocumentEditor } from "@/components/documents/DocumentEditor";
 import { DocumentPreviewWithLetterhead } from "@/features/documents/components/DocumentPreviewWithLetterhead";
 import { UploadDocumentDialog } from "@/features/documents/UploadDocumentDialog";
 import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
+import { AiUploadZone } from "@/features/documents/components/AiUploadZone";
+
 import { format } from "date-fns";
 import { SampleBadge } from "@/components/patients/SampleBadge";
 import { isSamplePatient } from "@/lib/samplePatients";
