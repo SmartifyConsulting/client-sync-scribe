@@ -23,10 +23,18 @@ import { supabase } from "@/integrations/supabase/client";
  *  and updates for a patient on her ward. Read-only for anyone without write
  *  access; the record button is always shown since visibility already implies
  *  hospital-staff access (RLS enforces the actual write permission). */
-export function InpatientVitalsPanel({ admissionId }: { admissionId: string | null | undefined }) {
+export function InpatientVitalsPanel({
+  admissionId,
+  hospitalId,
+  patientName,
+}: {
+  admissionId: string | null | undefined;
+  hospitalId?: string | null;
+  patientName?: string | null;
+}) {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const { vitals, loading, recordVitals } = useInpatientVitals(admissionId);
+  const { vitals, loading, recordVitals } = useInpatientVitals(admissionId, { hospitalId, patientName });
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -36,16 +44,23 @@ export function InpatientVitalsPanel({ admissionId }: { admissionId: string | nu
   const [summarizing, setSummarizing] = useState(false);
 
   useEffect(() => {
-    if (vitals.length < 2) { setTrendSummary(null); return; }
+    if (vitals.length === 0 || !admissionId) { setTrendSummary(null); return; }
     let cancelled = false;
     setSummarizing(true);
-    supabase.functions
-      .invoke("summarize-vitals-trend", { body: { readings: vitals.slice(0, 10) } })
-      .then(({ data }) => { if (!cancelled) setTrendSummary(data?.summary || null); })
-      .catch(() => { if (!cancelled) setTrendSummary(null); })
-      .finally(() => { if (!cancelled) setSummarizing(false); });
+    (async () => {
+      const [{ data: meds }, { data: meals }] = await Promise.all([
+        supabase.from("hospital_admission_chart_entries" as any).select("content").eq("admission_id", admissionId).eq("section", "mar").order("created_at", { ascending: false }).limit(10),
+        supabase.from("hospital_admission_chart_entries" as any).select("content").eq("admission_id", admissionId).eq("section", "diet-meals").order("created_at", { ascending: false }).limit(10),
+      ]);
+      if (cancelled) return;
+      supabase.functions
+        .invoke("summarize-vitals-trend", { body: { readings: vitals.slice(0, 10), medications: meds ?? [], mealEntries: meals ?? [] } })
+        .then(({ data }) => { if (!cancelled) setTrendSummary(data?.summary || null); })
+        .catch(() => { if (!cancelled) setTrendSummary(null); })
+        .finally(() => { if (!cancelled) setSummarizing(false); });
+    })();
     return () => { cancelled = true; };
-  }, [vitals]);
+  }, [vitals, admissionId]);
 
   const handleSave = async () => {
     setSaving(true);

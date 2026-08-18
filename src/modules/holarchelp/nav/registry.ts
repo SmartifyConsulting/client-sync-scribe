@@ -7,6 +7,7 @@ import {
   CalendarClock,
   ClipboardList,
   HeartPulse,
+  History,
   LayoutDashboard,
   LucideIcon,
   Navigation as NavIcon,
@@ -73,6 +74,7 @@ export const PROVIDER_MODULES: NavModule[] = [
       { icon: LayoutDashboard, labelKey: "nav.hospitalDashboard", label: "Dashboard", to: "/provider/hospital/dashboard" },
       { icon: ClipboardList, labelKey: "nav.admissions", label: "Admissions", to: "/provider/hospital/admissions" },
       { icon: CalendarClock, labelKey: "nav.resourcePlanning", label: "Resource Planning", to: "/provider/hospital/shifts" },
+      { icon: History, labelKey: "nav.activityLog", label: "Activity Log", to: "/provider/hospital/activity-log" },
     ],
   },
   {
@@ -136,6 +138,7 @@ export const PROVIDER_MODULES: NavModule[] = [
       { icon: Users, labelKey: "nav.crews", label: "Crews", to: "/provider/ambulance/crews" },
       { icon: HeartPulse, labelKey: "nav.hospitals", label: "Hospitals", to: "/provider/ambulance/hospitals" },
       { icon: ClipboardList, labelKey: "nav.reports", label: "Reports", to: "/provider/ambulance/reports" },
+      { icon: History, labelKey: "nav.activityLog", label: "Activity Log", to: "/provider/ambulance/activity-log" },
     ],
   },
   {

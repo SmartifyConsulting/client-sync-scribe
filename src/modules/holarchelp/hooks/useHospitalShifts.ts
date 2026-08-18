@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdmissionActivity } from "./useAdmissionChartEntries";
 
 export type StaffShift = {
   id: string;
@@ -93,10 +94,41 @@ export function useMyShifts(userId: string | null | undefined) {
   return { shifts, current, loading, reload: load };
 }
 
+/** Clocks a shift in/out. On clock-in, logs an entry into the chart of every
+ *  patient currently admitted to that nurse's ward, so the ward knows who's
+ *  on duty from the patient's own record. */
 export async function clockShift(shiftId: string, action: "in" | "out") {
   const { error } = await supabase.rpc("hospital_shift_clock", {
     _shift_id: shiftId,
     _action: action,
   });
   if (error) throw error;
+
+  if (action === "in") {
+    const { data: shift } = await supabase
+      .from("hospital_staff_shifts")
+      .select("hospital_id, ward_id, staff_name, staff_role")
+      .eq("id", shiftId)
+      .maybeSingle();
+    if (shift?.ward_id) {
+      const { data: admissions } = await supabase
+        .from("hospital_inpatient_admissions" as any)
+        .select("id, patient_name")
+        .eq("ward_id", shift.ward_id)
+        .eq("status", "admitted");
+      await Promise.all(
+        ((admissions as any[]) ?? []).map((a) =>
+          logAdmissionActivity({
+            hospitalId: shift.hospital_id,
+            admissionId: a.id,
+            patientName: a.patient_name,
+            actorName: shift.staff_name,
+            actorRole: shift.staff_role,
+            action: "clocked in",
+            detail: `${shift.staff_name} clocked in for this ward's shift`,
+          }),
+        ),
+      );
+    }
+  }
 }

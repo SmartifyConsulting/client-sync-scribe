@@ -4,8 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, User, HeartPulse, Pill, ShieldAlert, Phone, BedDouble } from "lucide-react";
+import { Loader2, ArrowLeft, User, HeartPulse, Pill, ShieldAlert, Phone, BedDouble, FlaskConical, Scan, Utensils } from "lucide-react";
 import { InpatientVitalsPanel } from "../../../components/InpatientVitalsPanel";
+import { AdmissionChartSection } from "../../../components/AdmissionChartSection";
+import { TestResultsPanel } from "../../../components/TestResultsPanel";
 
 type PatientRow = Record<string, any>;
 
@@ -80,7 +82,7 @@ export default function HospitalPatientRecordScreen() {
         supabase.from("patients").select("*").eq("id", patientId!).maybeSingle(),
         supabase
           .from("hospital_inpatient_admissions")
-          .select("id, status, admitted_at, discharged_at, bed_number, reason, ward_id, hospital_wards(name)")
+          .select("id, hospital_id, status, admitted_at, discharged_at, bed_number, reason, ward_id, hospital_wards(name)")
           .eq("patient_id", patientId!)
           .order("admitted_at", { ascending: false }),
       ]);
@@ -181,7 +183,11 @@ export default function HospitalPatientRecordScreen() {
         </CardContent>
       </Card>
 
-      <InpatientVitalsPanel admissionId={activeAdmission?.id ?? null} />
+      <InpatientVitalsPanel
+        admissionId={activeAdmission?.id ?? null}
+        hospitalId={activeAdmission?.hospital_id ?? null}
+        patientName={patient.name}
+      />
 
       <div className="grid gap-3 md:grid-cols-2">
         <Section icon={HeartPulse} title="Conditions & diagnoses" items={asList(patient.conditions_diagnoses)} />
@@ -189,6 +195,55 @@ export default function HospitalPatientRecordScreen() {
         <Section icon={Pill} title="Current medications" items={asList(patient.current_medications)} />
         <Section icon={Phone} title="Emergency contacts" items={contacts} />
       </div>
+
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-primary px-4 py-2">
+          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
+            <FlaskConical className="h-3.5 w-3.5" /> Lab Results
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <TestResultsPanel patientId={patient.id} />
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-primary px-4 py-2">
+          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
+            <Scan className="h-3.5 w-3.5" /> Imaging
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <AdmissionChartSection
+            admissionId={activeAdmission?.id}
+            section="imaging"
+            sectionLabel="Imaging"
+            hospitalId={activeAdmission?.hospital_id}
+            patientName={patient.name}
+            placeholder="Record imaging performed…"
+            emptyLabel="No imaging recorded yet."
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-primary px-4 py-2">
+          <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
+            <Utensils className="h-3.5 w-3.5" /> Diet & Meals
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <AdmissionChartSection
+            admissionId={activeAdmission?.id}
+            section="diet-meals"
+            sectionLabel="Diet/meal"
+            hospitalId={activeAdmission?.hospital_id}
+            patientName={patient.name}
+            placeholder="Record a meal or dietary note…"
+            emptyLabel="No diet/meal entries yet."
+          />
+        </CardContent>
+      </Card>
 
       <Card className="overflow-hidden">
         <CardHeader className="bg-primary px-4 py-2">

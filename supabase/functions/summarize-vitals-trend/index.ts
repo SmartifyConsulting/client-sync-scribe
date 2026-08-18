@@ -15,7 +15,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { readings } = await req.json();
+    const { readings, medications, mealEntries } = await req.json();
     if (!Array.isArray(readings) || readings.length === 0) {
       return new Response(JSON.stringify({ summary: "" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
@@ -29,6 +29,15 @@ serve(async (req) => {
       )
       .join("\n");
 
+    const medsText = Array.isArray(medications) && medications.length
+      ? medications.map((m: any) => `- ${m.content}`).join("\n")
+      : "None recorded.";
+    const mealsText = Array.isArray(mealEntries) && mealEntries.length
+      ? mealEntries.map((m: any) => `- ${m.content}`).join("\n")
+      : "None recorded.";
+
+    const userContent = `VITALS (newest first):\n${table}\n\nACTIVE MEDICATIONS:\n${medsText}\n\nDIET & MEALS:\n${mealsText}`;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -38,9 +47,9 @@ serve(async (req) => {
           {
             role: "system",
             content:
-              "You are a clinical assistant summarising a hospital inpatient's vitals trend for the ward nurse. Given a list of vitals readings (newest first), write ONE short sentence (max 25 words) describing the overall trend — e.g. whether heart rate, blood pressure, SpO2 or temperature are stable, improving, or worsening. Be factual and concise. No preamble, no disclaimers, just the sentence.",
+              "You are a clinical assistant summarising a hospital inpatient's stay for the ward nurse. Given vitals readings (newest first), active medications, and diet/meal entries, write 1-2 short sentences: describe the overall vitals trend over the stay (stable/improving/worsening), and flag any notable pattern or possible red flag connecting vitals to medications or diet (e.g. a medication that could explain a vitals change, or a missed/refused meal alongside a concerning reading). If nothing notable connects them, just report the vitals trend plainly. Be factual and concise, no preamble, no disclaimers, max 40 words total.",
           },
-          { role: "user", content: table },
+          { role: "user", content: userContent },
         ],
       }),
     });

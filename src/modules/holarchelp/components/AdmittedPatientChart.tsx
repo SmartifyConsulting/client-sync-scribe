@@ -5,6 +5,7 @@ import { IncidentPhotos } from "./IncidentPhotos";
 import { PatientOverviewTabs } from "./PatientOverviewTabs";
 import { TestResultsPanel } from "./TestResultsPanel";
 import { InpatientVitalsPanel } from "./InpatientVitalsPanel";
+import { AdmissionChartSection } from "./AdmissionChartSection";
 import {
   ClipboardList, HeartPulse, Pill, Stethoscope, NotebookPen, Droplet,
   Utensils, Activity, FlaskConical, Scan, ShieldAlert,
@@ -28,10 +29,6 @@ type Admission = {
 type IncidentLite = {
   assigned_doctor_name?: string | null;
 };
-
-function Empty({ children = "No data recorded yet." }: { children?: React.ReactNode }) {
-  return <p className="px-1 py-4 text-sm text-muted-foreground italic">{children}</p>;
-}
 
 const TAB_TRIGGER =
   "gap-1.5 data-[state=active]:bg-white data-[state=active]:text-black text-white whitespace-nowrap text-xs px-3 py-1.5";
@@ -137,30 +134,52 @@ export function AdmittedPatientChart({ incidentId, incident }: { incidentId: str
         </TabsContent>
 
         <TabsContent value="vitals" className="p-4 mt-0">
-          <InpatientVitalsPanel admissionId={admission?.id ?? null} />
+          <InpatientVitalsPanel admissionId={admission?.id ?? null} hospitalId={admission?.hospital_id} patientName={admission?.patient_name} />
         </TabsContent>
-        <TabsContent value="observations" className="p-4 mt-0"><Empty>No specialised observation charts started yet.</Empty></TabsContent>
+        <TabsContent value="observations" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="observations" sectionLabel="Observation" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Record an observation…" emptyLabel="No specialised observation charts started yet." />
+        </TabsContent>
 
-        <TabsContent value="mar" className="p-4 mt-0"><Empty>No medications administered yet.</Empty></TabsContent>
-        <TabsContent value="fluid-balance" className="p-4 mt-0"><Empty>No fluid balance entries yet.</Empty></TabsContent>
-        <TabsContent value="nutrition" className="p-4 mt-0"><Empty>No intake/nutrition data recorded yet.</Empty></TabsContent>
+        <TabsContent value="mar" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="mar" sectionLabel="Medication" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Record a medication administered…" emptyLabel="No medications administered yet." />
+        </TabsContent>
+        <TabsContent value="fluid-balance" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="fluid-balance" sectionLabel="Fluid balance" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Record fluid intake/output…" emptyLabel="No fluid balance entries yet." />
+        </TabsContent>
+        <TabsContent value="nutrition" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="nutrition" sectionLabel="Intake/nutrition" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Record intake/nutrition…" emptyLabel="No intake/nutrition data recorded yet." />
+        </TabsContent>
 
-        <TabsContent value="doctor-notes" className="p-4 mt-0"><Empty>No progress notes recorded yet.</Empty></TabsContent>
-        <TabsContent value="nursing-notes" className="p-4 mt-0"><Empty>No nursing notes recorded yet.</Empty></TabsContent>
+        <TabsContent value="doctor-notes" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="doctor-notes" sectionLabel="Doctor's note" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Add a progress note…" emptyLabel="No progress notes recorded yet." />
+        </TabsContent>
+        <TabsContent value="nursing-notes" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="nursing-notes" sectionLabel="Nursing note" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Add a nursing note…" emptyLabel="No nursing notes recorded yet." />
+        </TabsContent>
 
         <TabsContent value="labs" className="p-4 mt-0"><TestResultsPanel patientId={admission?.patient_id} /></TabsContent>
         <TabsContent value="imaging" className="p-4 mt-0">
           <IncidentPhotos incidentId={incidentId} readOnly />
         </TabsContent>
 
-        <TabsContent value="care-activities" className="p-4 mt-0"><Empty>No care activities recorded yet.</Empty></TabsContent>
-        <TabsContent value="interventions" className="p-4 mt-0"><Empty>No interventions recorded yet.</Empty></TabsContent>
-        <TabsContent value="referrals" className="p-4 mt-0"><Empty>No referrals made yet.</Empty></TabsContent>
-        <TabsContent value="handover" className="p-4 mt-0"><Empty>No handover notes recorded yet.</Empty></TabsContent>
-        <TabsContent value="discharge" className="p-4 mt-0"><Empty>No discharge planning started yet.</Empty></TabsContent>
+        <TabsContent value="care-activities" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="care-activities" sectionLabel="Care activity" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Record a care activity…" emptyLabel="No care activities recorded yet." />
+        </TabsContent>
+        <TabsContent value="interventions" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="interventions" sectionLabel="Intervention" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Record an intervention…" emptyLabel="No interventions recorded yet." />
+        </TabsContent>
+        <TabsContent value="referrals" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="referrals" sectionLabel="Referral" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Record a referral…" emptyLabel="No referrals made yet." />
+        </TabsContent>
+        <TabsContent value="handover" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="handover" sectionLabel="Handover note" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Add a handover note…" emptyLabel="No handover notes recorded yet." />
+        </TabsContent>
+        <TabsContent value="discharge" className="p-4 mt-0">
+          <AdmissionChartSection admissionId={admission?.id} section="discharge" sectionLabel="Discharge note" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Add discharge planning…" emptyLabel="No discharge planning started yet." />
+        </TabsContent>
 
         <TabsContent value="orders-handover" className="p-4 mt-0">
-          <Empty>No outstanding orders.</Empty>
+          <AdmissionChartSection admissionId={admission?.id} section="orders" sectionLabel="Order" hospitalId={admission?.hospital_id} patientName={admission?.patient_name} placeholder="Add an order…" emptyLabel="No outstanding orders." />
         </TabsContent>
       </Tabs>
     </div>

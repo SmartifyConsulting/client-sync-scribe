@@ -33,6 +33,7 @@ import {
   Sparkles,
   Lock,
   Stethoscope,
+  History,
 } from "lucide-react";
 
 import { useUserRole } from "@/hooks/useUserRole";
@@ -129,6 +130,7 @@ const NURSE_SECTIONS: NavSection[] = [
       { icon: LayoutDashboard, label: "Dashboard", labelKey: "nav.nurseDashboard", to: "/provider/hospital/nurse-dashboard" },
       { icon: User, label: "My Profile", labelKey: "nav.myProfile", to: "/nurse-profile" },
       { icon: Clock, label: "My Shifts", labelKey: "nav.myShift", to: "/my-shift" },
+      { icon: History, label: "Activity Log", labelKey: "nav.activityLog", to: "/provider/hospital/activity-log" },
     ],
   },
 ];

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logAdmissionActivity } from "./useAdmissionChartEntries";
 
 export type InpatientVitals = {
   id: string;
@@ -17,7 +18,10 @@ export type InpatientVitals = {
 };
 
 /** Vitals history for a single ward inpatient admission, newest first. */
-export function useInpatientVitals(admissionId: string | null | undefined) {
+export function useInpatientVitals(
+  admissionId: string | null | undefined,
+  activityContext?: { hospitalId?: string | null; patientName?: string | null },
+) {
   const [vitals, setVitals] = useState<InpatientVitals[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,8 +56,19 @@ export function useInpatientVitals(admissionId: string | null | undefined) {
         recorded_by: user?.id ?? null,
         ...entry,
       });
+      if (activityContext?.hospitalId) {
+        await logAdmissionActivity({
+          hospitalId: activityContext.hospitalId,
+          admissionId,
+          patientName: activityContext.patientName,
+          actorName: entry.recorded_by_name || "Staff",
+          section: "vitals",
+          action: "added",
+          detail: `HR ${entry.heart_rate ?? "—"}, BP ${entry.bp_systolic ?? "—"}/${entry.bp_diastolic ?? "—"}, SpO2 ${entry.spo2 ?? "—"}%`,
+        });
+      }
     },
-    [admissionId],
+    [admissionId, activityContext?.hospitalId, activityContext?.patientName],
   );
 
   return { vitals, loading, reload: load, recordVitals };
