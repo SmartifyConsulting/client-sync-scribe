@@ -2,6 +2,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
+import { SignedImage } from "@/features/documents/components/SignedImage";
+
 import { useAuth } from "@/hooks/useAuth";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
