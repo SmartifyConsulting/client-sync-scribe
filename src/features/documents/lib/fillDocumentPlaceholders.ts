@@ -323,7 +323,10 @@ export function fillDocumentPlaceholders(
     return blank;
   });
 
-  const pruned = pruneEmptyLines(resolved);
+  const pruned = ctx.prescription
+    ? bulletiseMedicationRows(pruneEmptyLines(resolved))
+    : pruneEmptyLines(resolved);
+
 
   // Legacy templates hardcode an "INV-" prefix before [InvoiceNumber], while the
   // generated number already carries it. Collapse any duplicated prefix.
