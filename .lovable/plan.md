@@ -21,6 +21,19 @@ the patient Documents tab:
 - After the upload finishes, a success row with a "View AI description" link
   that opens the preview showing the image plus its interpretation.
 
+### Always show the attachment next to its AI description
+
+For any visual record (X-ray, CT, MRI, photo, scan):
+
+- The document list row shows a small thumbnail of the attached image and a
+  badge when an AI description exists.
+- The preview shows the attachment itself (image, PDF, or media player) at the
+  top and the AI description directly beneath it, side by side on wide screens,
+  so the picture and its interpretation are always seen together.
+- If a visual has no AI description yet, the preview shows an "Analyse with AI"
+  button to generate it on demand.
+
+
 ## 2. Prompt for a category on upload (and allow new ones on the fly)
 
 Add an upload dialog that appears once files are chosen, before saving:
