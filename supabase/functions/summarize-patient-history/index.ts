@@ -53,11 +53,25 @@ serve(async (req) => {
       ?.map((s: any) => `- Date: ${s.started_at} | Summary: ${s.summary || 'No summary available'} | Transcript: ${s.transcript || 'No transcript'}`)
       ?.join('\n') || 'No completed sessions yet.';
 
+    // Historical transcriptions can run to many thousands of characters. Send
+    // them whole (split into ordered chunks) so no part of the record is lost.
+    const chunkRecord = (r: any) => {
+      const label = `${r.name || 'Historical record'} (record date: ${r.record_date || r.created_at || 'Unknown'})`;
+      const text = String(r.content || '').trim();
+      if (!text) return '';
+      const SIZE = 6000;
+      if (text.length <= SIZE) return `--- ${label} ---\n${text}`;
+      const parts: string[] = [];
+      for (let i = 0; i < text.length; i += SIZE) {
+        parts.push(`--- ${label} [part ${Math.floor(i / SIZE) + 1}] ---\n${text.slice(i, i + SIZE)}`);
+      }
+      return parts.join('\n');
+    };
+
     const historicalContext = Array.isArray(historicalRecords) && historicalRecords.length > 0
-      ? historicalRecords
-          .map((r: any) => `- Record date: ${r.record_date || r.created_at || 'Unknown'} | ${r.name || 'Historical record'}: ${(r.content || '').slice(0, 4000)}`)
-          .join('\n')
+      ? historicalRecords.map(chunkRecord).filter(Boolean).join('\n\n')
       : 'No historical paper records transcribed.';
+
 
     const patientContext = `
 Patient Name: ${patient.name}
