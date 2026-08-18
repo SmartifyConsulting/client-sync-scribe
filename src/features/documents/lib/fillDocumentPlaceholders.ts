@@ -93,16 +93,33 @@ export interface FillCertificate {
   other_recommendations?: string | null;
 }
 
+/** Referral letter details extracted from the session. */
+export interface FillReferral {
+  specialist_name?: string | null;
+  specialist_type?: string | null;
+  specialist_address?: string | null;
+  presenting_complaint?: string | null;
+  relevant_history?: string | null;
+  current_medications?: string | null;
+  investigations?: string | null;
+  reason?: string | null;
+  urgency?: string | null;
+  diagnosis?: string | null;
+  clinical_notes?: string | null;
+}
+
 export interface FillContext {
   patient?: FillPatient | null;
   profile?: FillProfile | null;
   invoice?: FillInvoice | null;
   prescription?: FillPrescription | null;
   certificate?: FillCertificate | null;
+  referral?: FillReferral | null;
   today?: Date;
   /** Render results for a raw text surface: no HTML markup for signatures or blanks. */
   plainText?: boolean;
 }
+
 
 const CURRENCY_SYMBOL: Record<string, string> = {
   ZAR: "R", NGN: "₦", USD: "$", EUR: "€", GBP: "£", BWP: "P", SZL: "E", LSL: "M",
