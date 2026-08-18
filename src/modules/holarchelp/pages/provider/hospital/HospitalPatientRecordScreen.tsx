@@ -12,21 +12,6 @@ import { SessionPatientOverview } from "@/features/sessions/components/SessionPa
 
 type PatientRow = Record<string, any>;
 
-const asList = (value: any): string[] => {
-  if (!value) return [];
-  if (Array.isArray(value)) {
-    return value
-      .map((v) => (typeof v === "string" ? v : v?.name || v?.condition || v?.medication || v?.title || ""))
-      .filter(Boolean);
-  }
-  if (typeof value === "string") {
-    return value
-      .split(/[\n,;]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-  }
-  return [];
-};
 
 const age = (dob?: string | null) => {
   if (!dob) return null;
