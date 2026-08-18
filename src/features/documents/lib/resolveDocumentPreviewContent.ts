@@ -93,9 +93,12 @@ const escapeHtml = (value: string) =>
  * (image, PDF or media player) and any AI interpretation / transcription is
  * shown underneath it rather than replacing it.
  */
-function buildUploadPreview(row: any, storedContent: string): string | null {
-  const url: string | undefined = row?.media_url || row?.source_file_url || undefined;
-  if (!url) return null;
+async function buildUploadPreview(row: any, storedContent: string): Promise<string | null> {
+  const stored: string | undefined = row?.media_url || row?.source_file_url || undefined;
+  if (!stored) return null;
+  // The media buckets are private, so the stored public URL 400s — sign it.
+  const url = (await signedMediaUrl(stored)) || stored;
+
 
   const type = String(row?.media_type || "").toLowerCase();
   const name = String(row?.name || "Uploaded file");
