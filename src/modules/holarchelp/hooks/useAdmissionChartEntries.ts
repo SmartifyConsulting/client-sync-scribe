@@ -132,8 +132,8 @@ export function useHospitalActivityLog(hospitalId: string | null | undefined) {
     const patientIds = Array.from(new Set(logs.map((l) => l.patient_id).filter(Boolean))) as string[];
     let names: Record<string, string> = {};
     if (patientIds.length) {
-      const { data: pats } = await supabase.from("patients").select("id, full_name").in("id", patientIds);
-      names = Object.fromEntries((pats ?? []).map((p) => [p.id, p.full_name]));
+      const { data: pats } = await supabase.from("patients").select("id, name").in("id", patientIds);
+      names = Object.fromEntries((pats ?? []).map((p) => [p.id, p.name]));
     }
 
     setRows(
