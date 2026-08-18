@@ -365,7 +365,7 @@ export async function resolveDocumentPreviewContent(
     };
   }
 
-  const filled = fillDocumentPlaceholders(original, {
+  const filled = fillDocumentPlaceholders(source, {
     patient,
     profile,
     invoice,
