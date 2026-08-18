@@ -166,14 +166,26 @@ export const renderFormattedContent = (content: string): string => {
   }
 
   // Final defense-in-depth pass through DOMPurify to strip anything that slipped past.
-  return DOMPurify.sanitize(processed, {
+  const clean = DOMPurify.sanitize(processed, {
     ALLOWED_TAGS: [
       "h1", "h2", "h3", "h4", "p", "div", "br", "hr", "blockquote",
-      "b", "i", "u", "strong", "em", "span", "sub", "sup",
+      "b", "i", "u", "strong", "em", "span", "sub", "sup", "a",
       "table", "thead", "tbody", "tr", "td", "th",
       "ul", "ol", "li", "img",
     ],
-    ALLOWED_ATTR: ["src", "alt", "width", "height", "colspan", "rowspan", "align", "style"],
+    ALLOWED_ATTR: [
+      "src", "alt", "width", "height", "colspan", "rowspan", "align", "style",
+      "href", "target", "rel", "title",
+    ],
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|data:image\/)/i,
   });
+
+  // Force safe link behaviour on any anchors that survived sanitisation.
+  return clean.replace(/<a\b([^>]*)>/gi, (_m, attrs: string) => {
+    const stripped = String(attrs)
+      .replace(/\s+(target|rel)\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+      .trim();
+    return `<a ${stripped}${stripped ? " " : ""}target="_blank" rel="noopener noreferrer">`;
+  });
 };
+
