@@ -1327,6 +1327,8 @@ export default function Sessions() {
           transcript={pendingTranscript}
           onVulaConfirm={handleVisitCategoryConfirm}
           clinicianNotes={cleanClinicianNotes(notes)}
+          summary={summary}
+          actionPoints={actionPoints}
         />
       )}
 
