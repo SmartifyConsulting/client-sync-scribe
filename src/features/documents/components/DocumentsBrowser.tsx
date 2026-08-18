@@ -39,6 +39,8 @@ import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewConte
 import { InformDocumentDialog } from "./InformDocumentDialog";
 import { UploadProgressBar, type UploadProgressState } from "./UploadProgressBar";
 import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
+import { UploadDocumentsDialog, type UploadDetails } from "./UploadDocumentsDialog";
+
 import { cn } from "@/lib/utils";
 
 type GroupBy = "type" | "date" | "patient";
