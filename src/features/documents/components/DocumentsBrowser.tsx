@@ -93,7 +93,11 @@ export function DocumentsBrowser({
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState<UploadProgressState>({ stage: "idle", percent: 0 });
   const [pendingHistory, setPendingHistory] = useState<ExtractedHistory | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [analysingId, setAnalysingId] = useState<string | null>(null);
+  const [lastUploaded, setLastUploaded] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   const groups = useMemo(() => {
     const term = search.trim().toLowerCase();
