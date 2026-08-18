@@ -22,3 +22,11 @@ Compact on mobile (smaller text, same three lines), full width on desktop.
 - New presentational component `src/features/sessions/components/SessionPrivacyNotice.tsx`, rendered by `src/pages/Sessions.tsx` and `src/pages/MySessions.tsx`.
 - Copy goes through `t()` with English fallbacks and new `sessions.privacy.*` keys in `src/i18n/locales/en.json`.
 - Presentation only — no changes to data access rules, retention jobs, or queries.
+
+# Landing hero image swap
+
+Replace the current hero visual on the landing page with the newly uploaded ChatGPT image.
+
+- Upload the new image as a CDN asset pointer (`src/assets/holarc-hero.png.asset.json`) and swap the `src` currently rendering `holarc-capabilities-wave.png` in `src/pages/Landing.tsx` (line ~305).
+- Keep the existing hero container sizing, rounding and alt text approach; only the image source changes.
+- Retire the old capabilities-wave pointer once nothing else references it.
