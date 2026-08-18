@@ -39,6 +39,8 @@ import { DocumentPreview } from "@/features/sessions/components/DocumentPreview"
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { InformDocumentDialog } from "./InformDocumentDialog";
 import { AiUploadZone } from "./AiUploadZone";
+import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
+import { parseStorageUrl } from "../lib/signedMediaUrl";
 
 
 import { cn } from "@/lib/utils";
@@ -92,6 +94,11 @@ export function DocumentsBrowser({
   const [informDoc, setInformDoc] = useState<Document | null>(null);
   const [analysingId, setAnalysingId] = useState<string | null>(null);
   const [lastUploaded, setLastUploaded] = useState<string | null>(null);
+  const [extractingId, setExtractingId] = useState<string | null>(null);
+  const [pendingHistory, setPendingHistory] = useState<{
+    history: ExtractedHistory;
+    patientId: string | null;
+  } | null>(null);
 
 
 
@@ -402,6 +409,22 @@ export function DocumentsBrowser({
                     Analyse with AI
                   </Button>
                 )}
+              {((previewDoc as any).is_transcribed ||
+                (previewDoc as any).media_type === "pdf") && (
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  disabled={extractingId === previewDoc.id}
+                  onClick={() => reExtractHistory(previewDoc)}
+                >
+                  {extractingId === previewDoc.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Re-extract history
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className="gap-2"
