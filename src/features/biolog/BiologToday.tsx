@@ -140,13 +140,18 @@ export function BiologToday({ ownerUserId, readOnly }: Props) {
         : { ...p, exercises: [...list, { name, duration: null, performance: null }] };
     });
 
-  const setExerciseField = (name: string, field: "duration" | "performance", value: number | null) =>
+  const setExerciseField = (
+    name: string,
+    field: keyof EntryExercise,
+    value: number | string | null,
+  ) =>
     setPayload((p) => ({
       ...p,
       exercises: (p.exercises ?? []).map((e) =>
         e.name === name ? { ...e, [field]: value } : e,
       ),
     }));
+
 
   const toggleMedication = (label: string) =>
     setPayload((p) => {
