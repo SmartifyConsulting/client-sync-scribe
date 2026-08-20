@@ -185,7 +185,7 @@ export function usePatientContext({ patientUserId, enabled = true }: UsePatientC
           interactions.push({
             drug_1: newMedication,
             drug_2: existing,
-            severity: data[0].severity,
+            severity: data[0].severity as DrugInteraction["severity"],
             effect: data[0].clinical_effect,
             recommendation: data[0].recommendation,
           });
