@@ -4,10 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, User, BedDouble, FlaskConical, Scan, Utensils } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2, ArrowLeft, User, BedDouble, FlaskConical, Scan, Utensils, Receipt } from "lucide-react";
 import { InpatientVitalsPanel } from "../../../components/InpatientVitalsPanel";
 import { AdmissionChartSection } from "../../../components/AdmissionChartSection";
 import { TestResultsPanel } from "../../../components/TestResultsPanel";
+import { RecordStockUsagePanel } from "../../../components/RecordStockUsagePanel";
+import { PatientInvoiceView } from "../../../components/PatientInvoiceView";
 import { SessionPatientOverview } from "@/features/sessions/components/SessionPatientOverview";
 
 type PatientRow = Record<string, any>;
@@ -26,6 +30,7 @@ export default function HospitalPatientRecordScreen() {
   const [patient, setPatient] = useState<PatientRow | null>(null);
   const [admissions, setAdmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [procedureName, setProcedureName] = useState("General Ward Care");
 
   useEffect(() => {
     let cancelled = false;
@@ -218,6 +223,44 @@ export default function HospitalPatientRecordScreen() {
           )}
         </CardContent>
       </Card>
+
+      {activeAdmission ? (
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-primary px-4 py-2">
+            <CardTitle className="flex items-center gap-2 text-xs font-semibold text-white">
+              <Receipt className="h-3.5 w-3.5" /> Procedure Stock Usage & Billing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 p-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Procedure</Label>
+              <Input
+                value={procedureName}
+                onChange={(e) => setProcedureName(e.target.value)}
+                placeholder="e.g. Appendectomy, Wound Dressing"
+                className="h-9"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Stock recorded here is grouped under this procedure name and billed together.
+              </p>
+            </div>
+
+            <div className="grid items-start gap-4 lg:grid-cols-2">
+              <RecordStockUsagePanel
+                admissionId={activeAdmission.id}
+                hospitalId={activeAdmission.hospital_id}
+                procedureName={procedureName}
+              />
+              <PatientInvoiceView
+                admissionId={activeAdmission.id}
+                patientId={patient.id}
+                hospitalId={activeAdmission.hospital_id}
+                procedureName={procedureName}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {patient.notes ? (
         <Card className="overflow-hidden">

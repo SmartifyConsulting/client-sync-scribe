@@ -21,6 +21,7 @@ import ActivityLogScreen from "./pages/provider/hospital/ActivityLogScreen";
 
 import HospitalDashboardScreen from "./pages/provider/hospital/HospitalDashboardScreen";
 import WardBoardScreen from "./pages/provider/hospital/WardBoardScreen";
+import InventoryScreen from "./pages/provider/hospital/InventoryScreen";
 import ShiftsScreen from "./pages/provider/hospital/ShiftsScreen";
 import MyShiftScreen from "./pages/provider/hospital/MyShiftScreen";
 import NurseDashboardScreen from "./pages/provider/hospital/NurseDashboardScreen";
@@ -155,6 +156,7 @@ export default function ProviderRoutes() {
         <Route path="incident/:id" element={<HospitalIncidentConsole />} />
         <Route path="patient/:patientId" element={<HospitalPatientRecordScreen />} />
         <Route path="activity-log" element={<ActivityLogScreen />} />
+        <Route path="inventory" element={<InventoryScreen />} />
 
         <Route path="admins" element={<AdministratorsScreen />} />
         <Route path="profile" element={<ProviderProfile />} />

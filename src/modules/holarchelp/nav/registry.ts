@@ -11,11 +11,14 @@ import {
   LayoutDashboard,
   LucideIcon,
   Navigation as NavIcon,
+  Package,
   Radar,
   Siren,
   Stethoscope,
+  Truck,
   UserCheck,
   Users,
+  Wallet,
   Wrench,
 } from "lucide-react";
 import type { ProviderCapabilities } from "../hooks/useProviderCapabilities";
@@ -90,6 +93,19 @@ export const PROVIDER_MODULES: NavModule[] = [
       { icon: Users, labelKey: "nav.crews", label: "Crew", to: "/provider/hospital/crews" },
       { icon: ClipboardList, labelKey: "nav.dispatchHistory", label: "Dispatch History", to: "/provider/hospital/dispatch-history" },
       { icon: Wrench, labelKey: "nav.vehicleMaintenance", label: "Vehicle Maintenance", to: "/provider/hospital/fleet" },
+    ],
+  },
+  {
+    id: "inventory",
+    titleKey: "nav.moduleInventory",
+    title: "Inventory & Finance",
+    portals: ["hospital"],
+    enabled: always,
+    items: [
+      { icon: Package, labelKey: "nav.stock", label: "Stock", to: "/provider/hospital/inventory?tab=stock" },
+      { icon: ClipboardList, labelKey: "nav.requisitions", label: "Requisitions", to: "/provider/hospital/inventory?tab=requisitions" },
+      { icon: Truck, labelKey: "nav.purchaseOrders", label: "Purchase Orders", to: "/provider/hospital/inventory?tab=purchase-orders" },
+      { icon: Wallet, labelKey: "nav.budget", label: "Budget", to: "/provider/hospital/inventory?tab=budget" },
     ],
   },
   {
