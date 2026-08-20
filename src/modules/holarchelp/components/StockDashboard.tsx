@@ -17,6 +17,16 @@ interface LowStockItem {
   reorder_quantity: number;
 }
 
+interface StockItemRow {
+  id: string;
+  item_name: string;
+  category: string;
+  unit_of_measure: string;
+  unit_cost: number | null;
+  reorder_threshold: number;
+  quantityOnHand: number;
+}
+
 interface StockDashboardProps {
   hospitalId: string | null;
   className?: string;
@@ -24,6 +34,7 @@ interface StockDashboardProps {
 
 export function StockDashboard({ hospitalId, className }: StockDashboardProps) {
   const [lowStock, setLowStock] = useState<LowStockItem[]>([]);
+  const [allItems, setAllItems] = useState<StockItemRow[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -36,12 +47,32 @@ export function StockDashboard({ hospitalId, className }: StockDashboardProps) {
       });
       setLowStock(lowStockData || []);
 
-      const { count } = await supabase
+      const { data: items } = await supabase
         .from("stock_items")
-        .select("id", { count: "exact", head: true })
+        .select("id, item_name, category, unit_of_measure, unit_cost, reorder_threshold")
         .eq("hospital_id", hospitalId)
-        .eq("is_active", true);
-      setTotalItems(count || 0);
+        .eq("is_active", true)
+        .order("item_name");
+
+      const itemIds = (items || []).map((i) => i.id);
+      let levelsByItem = new Map<string, number>();
+      if (itemIds.length > 0) {
+        const { data: levels } = await supabase
+          .from("stock_levels")
+          .select("stock_item_id, quantity_on_hand")
+          .in("stock_item_id", itemIds);
+        for (const l of levels || []) {
+          levelsByItem.set(l.stock_item_id, (levelsByItem.get(l.stock_item_id) || 0) + (l.quantity_on_hand || 0));
+        }
+      }
+
+      setAllItems(
+        (items || []).map((i) => ({
+          ...i,
+          quantityOnHand: levelsByItem.get(i.id) || 0,
+        }))
+      );
+      setTotalItems(items?.length || 0);
     } finally {
       setLoading(false);
     }
@@ -89,7 +120,7 @@ export function StockDashboard({ hospitalId, className }: StockDashboardProps) {
         </div>
       </div>
 
-      {lowStock.length > 0 ? (
+      {lowStock.length > 0 && (
         <Alert className="border-warning/50 bg-warning/10">
           <AlertTriangle className="h-4 w-4 text-warning" />
           <AlertTitle className="text-warning">
@@ -117,14 +148,47 @@ export function StockDashboard({ hospitalId, className }: StockDashboardProps) {
             ))}
           </AlertDescription>
         </Alert>
-      ) : (
+      )}
+
+      {allItems.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground text-center">
-              All stock levels are healthy — no items below reorder threshold
+              No stock items yet — use Import above to add your catalog
             </p>
           </CardContent>
         </Card>
+      ) : (
+        <div className="space-y-2">
+          {allItems.map((item) => {
+            const isLow = item.quantityOnHand <= item.reorder_threshold;
+            return (
+              <Card
+                key={item.id}
+                className={cn(
+                  "rounded-xl border p-4",
+                  isLow ? "border-warning/50 bg-warning/5" : "border-primary bg-card"
+                )}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate">{item.item_name}</p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {item.category} · {item.unit_of_measure}
+                      {item.unit_cost != null ? ` · R${item.unit_cost.toFixed(2)}` : ""}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={isLow ? "secondary" : "outline"}
+                    className={cn("shrink-0", isLow && "bg-warning/20 text-warning-foreground")}
+                  >
+                    {item.quantityOnHand} on hand
+                  </Badge>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
       )}
     </div>
   );
