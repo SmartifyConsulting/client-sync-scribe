@@ -8,6 +8,9 @@ import { EtaCountdown } from "../../components/EtaCountdown";
 import { EmergencyPatientContext } from "../../components/EmergencyPatientContext";
 import { TriageControls } from "../../components/TriageControls";
 import { PatientContextPanel } from "../../components/PatientContextPanel";
+import { MedicationPrescriptionForm } from "../../components/MedicationPrescriptionForm";
+import { AlertsPanel } from "../../components/AlertsPanel";
+import { IncidentClinicalNotes } from "../../components/IncidentClinicalNotes";
 import { AdmittedPatientChart } from "../../components/AdmittedPatientChart";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -145,6 +148,15 @@ export default function HospitalIncidentConsole() {
             <PatientContextPanel
               patientUserId={incident?.patient_user_id}
               admissionId={id}
+            />
+            <AlertsPanel patientUserId={incident?.patient_user_id} />
+            <MedicationPrescriptionForm
+              patientUserId={incident?.patient_user_id}
+              patientName={incident?.patient_name}
+            />
+            <IncidentClinicalNotes
+              patientUserId={incident?.patient_user_id}
+              incidentId={id}
             />
             <EmergencyPatientContext incidentId={id!} />
             <IncidentPhotos incidentId={id!} readOnly />
