@@ -608,9 +608,11 @@ const completeSession = async (
 
           let certContent: string;
           if (certTemplate) {
-            const fromDate = cert.from_date || today;
-            const toDate = cert.to_date || today;
+            const fromDate = cert.from_date || cert.start_date || today;
+            const toDate = cert.to_date || cert.end_date || today;
             const days = Math.max(1, Math.round((new Date(toDate).getTime() - new Date(fromDate).getTime()) / 86400000) + 1);
+            const nowTime = new Date().toTimeString().slice(0, 5);
+            const nature = cert.diagnosis || cert.reason || '';
             const replacements: Record<string, string> = {
               'ClientName': patientRecord?.name || 'Unknown',
               'PatientName': patientRecord?.name || 'Unknown',
@@ -618,6 +620,9 @@ const completeSession = async (
               'Date': today,
               'IssuedDate': today,
               'SessionDate': today,
+              'ConsultationDate': today,
+              'ConsultationTime': nowTime,
+              'SignatureDate': today,
               'DoctorName': docProfile?.full_name || '',
               'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
@@ -630,17 +635,24 @@ const completeSession = async (
               'DOB': (patientRecord as any)?.dob || '',
               'Phone': (patientRecord as any)?.phone || '',
               'Email': (patientRecord as any)?.email || '',
-              'Diagnosis': cert.diagnosis || '',
+              'Diagnosis': nature,
+              'NatureOfIllness': nature,
               'FromDate': fromDate,
               'ToDate': toDate,
+              'SickLeaveFrom': fromDate,
+              'SickLeaveUntil': toDate,
+              'Inclusive': '(inclusive)',
               'Days': String(days),
-              'Reason': cert.reason || '',
+              'Reason': cert.reason || nature,
+              'OtherRecommendations': cert.notes || cert.recommendations || '',
             };
             certContent = certTemplate.content;
             for (const [key, value] of Object.entries(replacements)) {
               certContent = certContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
-            certContent = certContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
+            // Anything still unresolved stays as a blank fill-in line rather than
+            // littering the clinical body with "___".
+            certContent = certContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '');
           } else {
             certContent = `<h2>Medical Certificate</h2>
 <p><strong>Date:</strong> ${today}</p>
@@ -711,17 +723,23 @@ const completeSession = async (
 
           let refContent: string;
           if (refTemplate) {
+            const specialistName = ref.doctor_name || ref.referred_to || ref.specialist_type || '';
+            const reason = ref.reason || ref.diagnosis || '';
+            const complaint = ref.clinical_notes || summaryData?.summary || reason;
             const replacements: Record<string, string> = {
               'ClientName': patientRecord?.name || 'Unknown',
               'PatientName': patientRecord?.name || 'Unknown',
               'Patient Name': patientRecord?.name || 'Unknown',
               'Date': today,
               'SessionDate': today,
+              'ReferralDate': today,
+              'SignatureDate': today,
               'DoctorName': docProfile?.full_name || '',
               'DoctorNumber': docProfile?.doctor_number || '',
               'PracticeNumber': docProfile?.practice_number || '',
               'RegistrationNumber': docProfile?.doctor_number || '',
               'PracticeAddress': docProfile?.practice_address || '',
+              'PracticePhone': (docProfile as any)?.phone || '',
               'Specialty': docProfile?.specialty || '',
               'ReferringDoctor': docProfile?.full_name || '',
               'PatientAddress': (patientRecord as any)?.physical_address || (patientRecord as any)?.address || '',
@@ -729,10 +747,22 @@ const completeSession = async (
               'MedicalAidNumber': (patientRecord as any)?.medical_aid_number || '',
               'IDNumber': (patientRecord as any)?.id_passport_number || '',
               'DOB': (patientRecord as any)?.dob || '',
+              'PatientDOB': (patientRecord as any)?.dob || '',
               'Phone': (patientRecord as any)?.phone || '',
+              'PatientContact': (patientRecord as any)?.phone || (patientRecord as any)?.email || '',
               'Email': (patientRecord as any)?.email || '',
-              'ReferralDoctor': ref.referred_to || '',
-              'ReferralReason': ref.reason || '',
+              'ReferralDoctor': specialistName,
+              'SpecialistName': specialistName,
+              'SpecialistTitle': ref.doctor_name ? 'Dr' : 'Colleague',
+              'SpecialistSpecialty': ref.specialist_type || '',
+              'SpecialistAddress': ref.address || '',
+              'ReferralReason': reason,
+              'ReasonForReferral': reason,
+              'Urgency': ref.urgency || 'routine',
+              'PresentingComplaint': complaint,
+              'RelevantHistory': ref.relevant_history || ref.history || '',
+              'CurrentMedications': ref.current_medications || '',
+              'Investigations': ref.investigations || '',
               'Diagnosis': ref.diagnosis || '',
               'ClinicalNotes': ref.clinical_notes || '',
             };
@@ -740,7 +770,8 @@ const completeSession = async (
             for (const [key, value] of Object.entries(replacements)) {
               refContent = refContent.replace(new RegExp(`\\[${key}\\]`, 'gi'), value);
             }
-            refContent = refContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '___');
+            // Leave unresolved tokens blank instead of stamping "___" across the letter.
+            refContent = refContent.replace(/\[[A-Za-z][A-Za-z0-9_ -]*\]/g, '');
           } else {
             refContent = `<h2>Referral Letter</h2>
 <p><strong>Date:</strong> ${today}</p>

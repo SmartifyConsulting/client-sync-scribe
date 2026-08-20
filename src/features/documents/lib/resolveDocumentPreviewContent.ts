@@ -16,6 +16,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { renderSignatureHtml } from "@/lib/signature";
+import { signedMediaUrl } from "./signedMediaUrl";
+
 
 import {
   fillDocumentPlaceholders,
@@ -51,10 +53,156 @@ const isPrescriptionTemplate = (name?: string | null) =>
 const isCertificateTemplate = (name?: string | null) =>
   !!name && /(certificate|sick\s*note)/i.test(name);
 
+const isReferralTemplate = (name?: string | null) =>
+  !!name && /referral/i.test(name);
+
+/** Renders the patient's stored conditions as readable lines. */
+function formatConditions(items: unknown): string | null {
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const lines = items
+    .map((c: any) => (typeof c === "string" ? c : c?.condition || c?.name || ""))
+    .filter(Boolean);
+  return lines.length ? lines.join("\n") : null;
+}
+
+/** Renders the patient's stored medication list as readable lines. */
+function formatMedications(meds: unknown): string | null {
+  if (!Array.isArray(meds) || meds.length === 0) return null;
+  const lines = meds
+    .map((m: any) => {
+      if (typeof m === "string") return m;
+      const name = m?.name || m?.medication || "";
+      if (!name) return "";
+      const detail = [m?.dosage, m?.frequency].filter(Boolean).join(" ");
+      return detail ? `${name} — ${detail}` : name;
+    })
+    .filter(Boolean);
+  return lines.length ? lines.join("\n") : null;
+}
+
+/** Placeholder bodies stored for uploads before the file itself is rendered. */
+const isUploadStub = (content: string) =>
+  !content.trim() ||
+  /^\s*\[(IMAGE|Uploaded File|AUDIO Recording|VIDEO Recording)\]/i.test(content.trim());
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"]/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] as string,
+  );
+
+/**
+ * Builds the preview body for an uploaded file: the file itself renders inline
+ * (image, PDF or media player) and any AI interpretation / transcription is
+ * shown underneath it rather than replacing it.
+ */
+async function buildUploadPreview(row: any, storedContent: string): Promise<string | null> {
+  const stored: string | undefined = row?.media_url || row?.source_file_url || undefined;
+  if (!stored) return null;
+  // The media buckets are private, so the stored public URL 400s — sign it.
+  const url = (await signedMediaUrl(stored)) || stored;
+
+
+  const type = String(row?.media_type || "").toLowerCase();
+  const name = String(row?.name || "Uploaded file");
+  const looksImage = type === "image" || /\.(png|jpe?g|gif|webp|bmp|heic)(\?|$)/i.test(url);
+  const looksPdf = type === "pdf" || /\.pdf(\?|$)/i.test(url);
+  const looksVideo = type === "video" || /\.(mp4|webm|mov)(\?|$)/i.test(url);
+  const looksAudio = type === "audio" || /\.(mp3|wav|m4a|ogg|webm)(\?|$)/i.test(url);
+
+  let media = "";
+  if (looksImage) {
+    media = `<img src="${url}" alt="${escapeHtml(name)}" style="max-width:100%;height:auto;border-radius:8px;" />`;
+  } else if (looksPdf) {
+    media = `<iframe src="${url}" title="${escapeHtml(name)}" style="width:100%;height:70vh;border:1px solid #e5e7eb;border-radius:8px;"></iframe>`;
+  } else if (looksVideo) {
+    media = `<video src="${url}" controls style="max-width:100%;border-radius:8px;"></video>`;
+  } else if (looksAudio) {
+    media = `<audio src="${url}" controls style="width:100%;"></audio>`;
+  } else {
+    media = `<p><a href="${url}" target="_blank" rel="noreferrer">Open ${escapeHtml(name)}</a></p>`;
+  }
+
+  const transcript = isUploadStub(storedContent) ? "" : storedContent;
+  const analysis = row?.ai_analysis ? String(row.ai_analysis) : "";
+  const description = [
+    analysis.trim()
+      ? `<h3 style="margin-top:0;">AI interpretation</h3><div>${escapeHtml(analysis).replace(/\n/g, "<br/>")}</div>`
+      : "",
+    transcript.trim() ? `<h3>Transcribed content</h3><div>${transcript}</div>` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  // The attachment reads first, centred, with its description underneath.
+  const body = `<div style="text-align:center;margin:0 auto 16px;">${media}</div>${
+    description ? `\n<div>${description}</div>` : ""
+  }`;
+
+  const parts = [`<p><strong>${escapeHtml(name)}</strong></p>`, body];
+  if (!description) {
+    parts.push(
+      `<p style="font-size:12px;color:#6b7280;">No AI description yet — use “Analyse with AI” to have this visual described.</p>`,
+    );
+  }
+  parts.push(
+    `<p style="font-size:12px;"><a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#0f766e;">Open original file</a></p>`,
+  );
+  return parts.join("\n");
+}
+
+
 export async function resolveDocumentPreviewContent(
   doc: PreviewDocumentInput,
 ): Promise<ResolvedDocumentPreview> {
   const original = doc.content || "";
+
+  // Uploaded files (X-rays, scans, PDFs) store only a stub body — render the
+  // actual file instead of an empty document.
+  let row: any = null;
+  {
+    const { data } = await supabase
+      .from("documents")
+      .select("name, media_url, media_type, source_file_url, ai_analysis, template_name")
+      .eq("id", doc.id)
+      .maybeSingle();
+    row = data;
+    const hasFile = !!((row as any)?.media_url || (row as any)?.source_file_url);
+    const isGeneratedDoc = /invoice|prescription|certificate|referral|letter|report|admission/i.test(
+      String((row as any)?.template_name || doc.template_name || ""),
+    );
+    if (hasFile && (isUploadStub(original) || !isGeneratedDoc)) {
+      const built = await buildUploadPreview(row, original);
+      if (built) {
+        return {
+          resolvedContent: built,
+          templateName: (row as any)?.template_name ?? doc.template_name ?? null,
+          userId: doc.user_id ?? null,
+          didChange: false,
+        };
+      }
+    }
+  }
+
+  // Older referral/letter rows were stamped before their tokens could be
+  // resolved and stored a page of "___" blanks. Re-stamp them from the
+  // owner's template so the fill below can put the real data back.
+  let source = original;
+  const blankCount = (original.match(/_{3,}/g) || []).length;
+  if (blankCount >= 3) {
+    const tplName = (row as any)?.template_name || doc.template_name;
+    if (tplName && doc.user_id) {
+      const { data: tpl } = await supabase
+        .from("templates")
+        .select("content")
+        .eq("user_id", doc.user_id)
+        .eq("name", tplName)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if ((tpl as any)?.content) source = (tpl as any).content as string;
+    }
+  }
+
 
   // Documents created outside a session (or older rows) may not carry a
   // patient_id — recover it from the linked session so certificates/invoices
@@ -166,7 +314,7 @@ export async function resolveDocumentPreviewContent(
     if (doc.session_id) {
       const { data } = await supabase
         .from("sessions")
-        .select("created_at, started_at, summary, diagnosis")
+        .select("created_at, started_at, summary, ai_diagnosis")
         .eq("id", doc.session_id)
         .maybeSingle();
       sess = data || null;
@@ -174,7 +322,8 @@ export async function resolveDocumentPreviewContent(
     const when =
       sess?.started_at || sess?.created_at || (doc as any).created_at || new Date().toISOString();
     const nature =
-      (sess?.diagnosis && String(sess.diagnosis).trim()) ||
+      (sess?.ai_diagnosis && String(sess.ai_diagnosis).trim()) ||
+
       (sess?.summary ? String(sess.summary).split("\n").find((l: string) => l.trim())?.trim() : "") ||
       "";
     certificate = {
@@ -187,13 +336,58 @@ export async function resolveDocumentPreviewContent(
     };
   }
 
-  const filled = fillDocumentPlaceholders(original, {
+  // Referral letter context — the specialist comes from the document name (the
+  // generator stores "Referral Letter - <Specialist> - <date>"), and the
+  // clinical body from the linked session plus the patient's own record, so
+  // referral letters never preview as a skeleton of blanks.
+  let referral: FillContext["referral"] = null;
+  if (isReferralTemplate(doc.template_name) || isReferralTemplate(doc.name)) {
+    let sess: any = null;
+    if (doc.session_id) {
+      const { data } = await supabase
+        .from("sessions")
+        .select("summary, notes, ai_diagnosis, action_points, external_doctor_name, external_doctor_specialty")
+        .eq("id", doc.session_id)
+        .maybeSingle();
+      sess = data || null;
+    }
+
+    const nameParts = String(doc.name || "").split(" - ");
+    const fromName = nameParts.length > 1 ? nameParts[1].trim() : "";
+    const specialist =
+      sess?.external_doctor_name ||
+      (fromName && !/^\d/.test(fromName) && fromName !== (patient as any)?.name ? fromName : "");
+
+    const firstLine = (text?: string | null) =>
+      text ? String(text).split("\n").find((l) => l.trim())?.trim() || "" : "";
+
+    const diagnosis =
+      (sess?.ai_diagnosis && String(sess.ai_diagnosis).trim()) ||
+      "";
+    const complaint = firstLine(sess?.summary) || diagnosis;
+
+    referral = {
+      specialist_name: specialist || null,
+      specialist_type: sess?.external_doctor_specialty || null,
+      presenting_complaint: complaint || null,
+      relevant_history: formatConditions((patient as any)?.conditions_diagnoses),
+      current_medications: formatMedications((patient as any)?.current_medications),
+      reason: diagnosis || complaint || null,
+      diagnosis: diagnosis || null,
+      clinical_notes: sess?.summary ? String(sess.summary).trim() : null,
+      urgency: null,
+    };
+  }
+
+  const filled = fillDocumentPlaceholders(source, {
     patient,
     profile,
     invoice,
     prescription,
     certificate,
+    referral,
   });
+
 
   let content = filled.content;
 

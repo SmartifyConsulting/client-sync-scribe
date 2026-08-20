@@ -120,10 +120,18 @@ export function BiologHistory({ ownerUserId }: Props) {
                       <p className="text-[11px] text-muted-foreground">
                         <span className="font-bold text-foreground">Exercise:</span>{" "}
                         {exercises
-                          .map((e) => (e.duration ? `${e.name} (${e.duration})` : e.name))
+                          .map((e) => {
+                            const bits = [
+                              e.duration != null ? `${e.duration} min` : null,
+                              e.distance != null ? `${e.distance} km` : null,
+                              e.intensity != null ? `intensity ${e.intensity}` : null,
+                            ].filter(Boolean);
+                            return bits.length ? `${e.name} (${bits.join(", ")})` : e.name;
+                          })
                           .join(", ")}
                       </p>
                     )}
+
                     {meds.length > 0 && (
                       <p className="text-[11px] text-muted-foreground">
                         <span className="font-bold text-foreground">Medication:</span>{" "}

@@ -272,15 +272,26 @@ function PhysicalOverview({ patient, sessions, isSelfService = false }: PatientO
   const generateSummary = async (force = false) => {
     setLoading(true);
     try {
-      // Transcribed handwritten/paper records so the overview timeline includes
-      // retrospective history, dated by the record date rather than upload date.
-      const { data: historicalRecords } = await supabase
+      // Transcribed handwritten/paper records AND AI-described visuals (X-rays,
+      // scans) so the overview timeline includes retrospective history, dated by
+      // the record date rather than the upload date.
+      const { data: docRows } = await supabase
         .from("documents")
-        .select("name, content, record_date, created_at")
+        .select("name, content, ai_analysis, is_transcribed, record_date, created_at")
         .eq("patient_id", patient.id)
-        .eq("is_transcribed", true)
+        .or("is_transcribed.eq.true,ai_analysis.not.is.null")
         .order("record_date", { ascending: true })
-        .limit(20);
+        .limit(60);
+
+      const historicalRecords = (docRows || [])
+        .map((r: any) => ({
+          name: r.name,
+          record_date: r.record_date,
+          created_at: r.created_at,
+          content: r.is_transcribed && r.content ? r.content : r.ai_analysis || r.content || "",
+        }))
+        .filter((r) => (r.content || "").trim().length > 0);
+
 
       // Fingerprint of everything the timeline is built from — while it is
       // unchanged the cached timeline is reused instead of regenerating.

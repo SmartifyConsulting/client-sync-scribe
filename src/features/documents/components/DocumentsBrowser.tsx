@@ -1,3 +1,4 @@
+import { SignedImage } from "./SignedImage";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
 import {
@@ -37,8 +38,11 @@ import { useDocuments, type Document } from "@/hooks/useDocuments";
 import { DocumentPreview } from "@/features/sessions/components/DocumentPreview";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { InformDocumentDialog } from "./InformDocumentDialog";
-import { UploadProgressBar, type UploadProgressState } from "./UploadProgressBar";
+import { AiUploadZone } from "./AiUploadZone";
 import { ApplyHistoryDialog, type ExtractedHistory } from "./ApplyHistoryDialog";
+import { parseStorageUrl } from "../lib/signedMediaUrl";
+
+
 import { cn } from "@/lib/utils";
 
 type GroupBy = "type" | "date" | "patient";
@@ -88,12 +92,15 @@ export function DocumentsBrowser({
   const [previewContent, setPreviewContent] = useState("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [informDoc, setInformDoc] = useState<Document | null>(null);
-  const [recordDate, setRecordDate] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [dragging, setDragging] = useState(false);
-  const [progress, setProgress] = useState<UploadProgressState>({ stage: "idle", percent: 0 });
-  const [pendingHistory, setPendingHistory] = useState<ExtractedHistory | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [analysingId, setAnalysingId] = useState<string | null>(null);
+  const [lastUploaded, setLastUploaded] = useState<string | null>(null);
+  const [extractingId, setExtractingId] = useState<string | null>(null);
+  const [pendingHistory, setPendingHistory] = useState<{
+    history: ExtractedHistory;
+    patientId: string | null;
+  } | null>(null);
+
+
 
   const groups = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -139,105 +146,117 @@ export function DocumentsBrowser({
     }
   };
 
-  const handleFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files || files.length === 0) return;
-      setUploading(true);
+  /** Categories already used on existing documents, offered again on upload. */
+  const knownCategories = useMemo(() => {
+    const set = new Set<string>();
+    for (const doc of documents) {
+      const name = (doc.template_name || "").trim();
+      if (name && name.toLowerCase() !== "upload") set.add(name);
+    }
+    return Array.from(set).sort();
+  }, [documents]);
+
+  const analyseDocument = useCallback(
+    async (doc: Document) => {
+      const url = (doc as any).media_url as string | undefined;
+      if (!url) return;
+      setAnalysingId(doc.id);
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) throw new Error("You must be signed in to upload");
-
-        const list = Array.from(files);
-        let index = 0;
-        for (const file of list) {
-          index += 1;
-          const meta = { fileName: file.name, current: index, total: list.length };
-          setProgress({ stage: "uploading", percent: 20, ...meta });
-          if (file.size > 20 * 1024 * 1024) {
-            toast({
-              title: "File too large",
-              description: `${file.name} exceeds the 20MB limit`,
-              variant: "destructive",
-            });
-            continue;
-          }
-
-          // Storage RLS requires the first folder to be the uploader's user id.
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-");
-          const path = `${user.id}/${patientId || "self"}/${Date.now()}-${safeName}`;
-          const { error: uploadError } = await supabase.storage
-            .from("patient-media")
-            .upload(path, file, { upsert: true });
-          if (uploadError) throw uploadError;
-
-          const {
-            data: { publicUrl },
-          } = supabase.storage.from("patient-media").getPublicUrl(path);
-
-          const isImage = file.type.startsWith("image/");
-          const isPdf = file.type === "application/pdf";
-
-          let content = `[Uploaded File] ${file.name}`;
-          let transcribed = false;
-
-          if (isImage || isPdf) {
-            setProgress({ stage: "transcribing", percent: 60, ...meta });
-            try {
-              const { data, error } = await supabase.functions.invoke(
-                "transcribe-record",
-                { body: { storagePath: path, bucket: "patient-media", mimeType: file.type, fileName: file.name } },
-              );
-              if (!error && data?.text) {
-                content = data.text;
-                transcribed = true;
-                setProgress({ stage: "extracting", percent: 75, ...meta });
-                if (patientId && data?.history) setPendingHistory(data.history as ExtractedHistory);
-              }
-            } catch {
-              /* fall back to the plain upload record */
-            }
-          }
-
-          setProgress({ stage: "saving", percent: 85, ...meta });
-          const { error: insertError } = await supabase.from("documents").insert({
-            user_id: user.id,
-            patient_id: patientId || null,
-            patient_name: patientName || null,
-            name: file.name,
-            content,
-            template_name: transcribed ? "Historical Record" : "Upload",
-            media_url: publicUrl,
-            media_type: isImage ? "image" : isPdf ? "pdf" : "file",
-            source_file_url: publicUrl,
-            source_file_name: file.name,
-            is_transcribed: transcribed,
-            record_date: recordDate || null,
-          } as any);
-          if (insertError) throw insertError;
-        }
-
-        setProgress({ stage: "done", percent: 100 });
-        toast({ title: "Upload complete" });
+        const { error } = await supabase.functions.invoke("analyze-medical-image", {
+          body: { imageUrl: url, documentId: doc.id },
+        });
+        if (error) throw error;
+        toast({ title: "AI description ready" });
         fetchDocuments();
+        const resolved = await resolveDocumentPreviewContent(doc as any);
+        setPreviewContent(resolved.resolvedContent || doc.content || "");
       } catch (err: any) {
-        const message = err?.message || "Could not upload the file";
-        setProgress((prev) => ({ ...prev, stage: "error", message }));
-        toast({ title: "Upload failed", description: message, variant: "destructive" });
+        toast({
+          title: "Could not describe the image",
+          description: err?.message || "The AI analysis failed",
+          variant: "destructive",
+        });
       } finally {
-        setUploading(false);
-        setTimeout(
-          () => setProgress((prev) => (prev.stage === "error" ? prev : { stage: "idle", percent: 0 })),
-          1800,
-        );
+        setAnalysingId(null);
       }
     },
-    [patientId, patientName, recordDate, toast, fetchDocuments],
+    [toast, fetchDocuments],
   );
+
+  /**
+   * Re-runs the transcription/extraction on an already-uploaded record so the
+   * clinical history it contains can be confirmed and applied again (records
+   * uploaded before extraction existed never had that step).
+   */
+  const reExtractHistory = useCallback(
+    async (doc: Document) => {
+      const url = ((doc as any).media_url || (doc as any).source_file_url) as string | undefined;
+      const ref = parseStorageUrl(url);
+      if (!ref) {
+        toast({ title: "No original file to re-read", variant: "destructive" });
+        return;
+      }
+      setExtractingId(doc.id);
+      try {
+        const { data, error } = await supabase.functions.invoke("transcribe-record", {
+          body: {
+            storagePath: ref.path,
+            bucket: ref.bucket,
+            mimeType: (doc as any).media_type === "pdf" ? "application/pdf" : undefined,
+            fileName: doc.name,
+          },
+        });
+        if (error) throw error;
+        const history = (data as any)?.history;
+        if (!history) throw new Error("No clinical history could be read from this record");
+
+        const rd = history.record_date;
+        const updates: Record<string, unknown> = {};
+        if ((data as any)?.text) {
+          updates.content = (data as any).text;
+          updates.is_transcribed = true;
+        }
+        if (!(doc as any).record_date && typeof rd === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rd)) {
+          updates.record_date = rd;
+        }
+        if (Object.keys(updates).length) {
+          await supabase.from("documents").update(updates as any).eq("id", doc.id);
+        }
+        setPendingHistory({ history, patientId: (doc as any).patient_id || patientId || null });
+        void fetchDocuments();
+      } catch (err: any) {
+        toast({
+          title: "Could not re-extract the history",
+          description: err?.message || "The AI extraction failed",
+          variant: "destructive",
+        });
+      } finally {
+        setExtractingId(null);
+      }
+    },
+    [toast, fetchDocuments, patientId],
+  );
+
+  const handleUploaded = useCallback(
+    (lastId: string | null) => {
+      void fetchDocuments();
+      if (lastId) setLastUploaded(lastId);
+    },
+    [fetchDocuments],
+  );
+
+
+
 
   return (
     <div className={cn("space-y-4", className)}>
+      <AiUploadZone
+        patientId={patientId}
+        patientName={patientName}
+        knownCategories={knownCategories}
+        onUploaded={handleUploaded}
+      />
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[180px]">
@@ -259,74 +278,8 @@ export function DocumentsBrowser({
             <SelectItem value="patient">Group by Patient</SelectItem>
           </SelectContent>
         </Select>
-        <div className="flex items-center gap-1">
-          <span className="text-[11px] text-muted-foreground whitespace-nowrap">Record date</span>
-          <Input
-            type="date"
-            value={recordDate}
-            onChange={(e) => setRecordDate(e.target.value)}
-            className="h-9 w-[150px]"
-            title="Optional — file an old record under the date it was originally written"
-          />
-        </div>
-        <Button
-          variant="outline"
-          className="gap-2"
-          disabled={uploading}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          Upload
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          className="hidden"
-          onChange={(e) => {
-            handleFiles(e.target.files);
-            e.target.value = "";
-          }}
-        />
       </div>
 
-      {/* Drop zone */}
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          handleFiles(e.dataTransfer.files);
-        }}
-        className={cn(
-          "rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground transition-colors",
-          dragging ? "border-primary bg-primary/5" : "border-border",
-        )}
-      >
-        Drop files here to upload. Photos or scans of handwritten records are
-        transcribed automatically by AI. Set a record date first to file
-        historical notes under the date they were written.
-      </div>
-
-      <UploadProgressBar state={progress} />
-
-      {patientId && pendingHistory && (
-        <ApplyHistoryDialog
-          open
-          onOpenChange={(o) => !o && setPendingHistory(null)}
-          patientId={patientId}
-          history={pendingHistory}
-          recordDate={recordDate || undefined}
-          onApplied={() => {
-            setPendingHistory(null);
-            fetchDocuments();
-          }}
-        />
-      )}
 
       {/* List */}
       {loading ? (
@@ -359,15 +312,19 @@ export function DocumentsBrowser({
                   const mediaUrl = (doc as any).media_url as string | undefined;
                   const isImageDoc =
                     !!mediaUrl && (doc as any).media_type === "image";
+                  const hasAnalysis = !!(doc as any).ai_analysis;
                   return (
                     <div
                       key={doc.id}
-                      className="flex items-center gap-3 py-2 px-1 hover:bg-muted/30 transition-colors cursor-pointer"
+                      className={cn(
+                        "flex items-center gap-3 py-2 px-1 hover:bg-muted/30 transition-colors cursor-pointer",
+                        lastUploaded === doc.id && "bg-primary/5 rounded-lg",
+                      )}
                       onClick={() => openPreview(doc)}
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 overflow-hidden shrink-0">
                         {isImageDoc ? (
-                          <img src={mediaUrl} alt={doc.name} className="h-8 w-8 object-cover" />
+                          <SignedImage src={mediaUrl} alt={doc.name} className="h-10 w-10 object-cover" />
                         ) : (
                           <FileText className="h-4 w-4 text-primary" />
                         )}
@@ -384,6 +341,11 @@ export function DocumentsBrowser({
                           {doc.patient_name && groupBy !== "patient" ? ` · ${doc.patient_name}` : ""}
                         </p>
                       </div>
+                      {hasAnalysis && (
+                        <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                          <Sparkles className="h-3 w-3" /> AI described
+                        </span>
+                      )}
                       {(doc as any).is_transcribed && (
                         <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-medium text-violet-700">
                           <Sparkles className="h-3 w-3" /> AI transcribed
@@ -429,14 +391,49 @@ export function DocumentsBrowser({
           content={previewLoading ? "Loading…" : previewContent}
           onClose={() => setPreviewDoc(null)}
           extraActions={
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => setInformDoc(previewDoc)}
-            >
-              <Link2 className="h-4 w-4" />
-              Inform
-            </Button>
+            <>
+              {(previewDoc as any).media_url &&
+                (previewDoc as any).media_type === "image" &&
+                !(previewDoc as any).ai_analysis && (
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    disabled={analysingId === previewDoc.id}
+                    onClick={() => analyseDocument(previewDoc)}
+                  >
+                    {analysingId === previewDoc.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    Analyse with AI
+                  </Button>
+                )}
+              {((previewDoc as any).is_transcribed ||
+                (previewDoc as any).media_type === "pdf") && (
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  disabled={extractingId === previewDoc.id}
+                  onClick={() => reExtractHistory(previewDoc)}
+                >
+                  {extractingId === previewDoc.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Re-extract history
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => setInformDoc(previewDoc)}
+              >
+                <Link2 className="h-4 w-4" />
+                Inform
+              </Button>
+            </>
           }
         />
       )}
@@ -447,6 +444,20 @@ export function DocumentsBrowser({
           documentName={informDoc.name}
           open={!!informDoc}
           onOpenChange={(open) => !open && setInformDoc(null)}
+        />
+      )}
+
+      {pendingHistory?.patientId && (
+        <ApplyHistoryDialog
+          open
+          onOpenChange={(o) => !o && setPendingHistory(null)}
+          patientId={pendingHistory.patientId}
+          history={pendingHistory.history}
+          recordDate={pendingHistory.history.record_date || undefined}
+          onApplied={() => {
+            setPendingHistory(null);
+            void fetchDocuments();
+          }}
         />
       )}
     </div>

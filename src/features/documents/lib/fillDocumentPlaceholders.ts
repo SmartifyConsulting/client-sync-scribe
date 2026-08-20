@@ -93,16 +93,33 @@ export interface FillCertificate {
   other_recommendations?: string | null;
 }
 
+/** Referral letter details extracted from the session. */
+export interface FillReferral {
+  specialist_name?: string | null;
+  specialist_type?: string | null;
+  specialist_address?: string | null;
+  presenting_complaint?: string | null;
+  relevant_history?: string | null;
+  current_medications?: string | null;
+  investigations?: string | null;
+  reason?: string | null;
+  urgency?: string | null;
+  diagnosis?: string | null;
+  clinical_notes?: string | null;
+}
+
 export interface FillContext {
   patient?: FillPatient | null;
   profile?: FillProfile | null;
   invoice?: FillInvoice | null;
   prescription?: FillPrescription | null;
   certificate?: FillCertificate | null;
+  referral?: FillReferral | null;
   today?: Date;
   /** Render results for a raw text surface: no HTML markup for signatures or blanks. */
   plainText?: boolean;
 }
+
 
 const CURRENCY_SYMBOL: Record<string, string> = {
   ZAR: "R", NGN: "₦", USD: "$", EUR: "€", GBP: "£", BWP: "P", SZL: "E", LSL: "M",
@@ -124,7 +141,7 @@ function fmtAmount(amount: number | string | null | undefined, currency = "ZAR")
 }
 
 function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; slotKeys: Set<string> } {
-  const { patient, profile, invoice, prescription, certificate, plainText } = ctx;
+  const { patient, profile, invoice, prescription, certificate, referral, plainText } = ctx;
   const today = ctx.today || new Date();
   const todayLong = fmtDateLong(today);
 
@@ -183,6 +200,31 @@ function buildReplacements(ctx: FillContext): { lookup: Record<string, string>; 
 
     ReferralDate: todayLong,
     AdmissionDate: todayLong,
+
+    // Referral letter (optional)
+    SpecialistName: referral?.specialist_name || "",
+    ReferralDoctor: referral?.specialist_name || "",
+    ReferredTo: referral?.specialist_name || referral?.specialist_type || "",
+    SpecialistTitle: referral?.specialist_name ? "Dr" : "Colleague",
+    SpecialistSpecialty: referral?.specialist_type || "",
+    SpecialistType: referral?.specialist_type || "",
+    SpecialistAddress: referral?.specialist_address || "",
+    PresentingComplaint: referral?.presenting_complaint || "",
+    RelevantHistory: referral?.relevant_history || "",
+    CurrentMedications: referral?.current_medications || "",
+    Investigations: referral?.investigations || "",
+    ReasonForReferral: referral?.reason || "",
+    ReferralReason: referral?.reason || "",
+    Urgency: referral?.urgency || "",
+    Diagnosis: referral?.diagnosis || certificate?.nature_of_illness || "",
+    ClinicalNotes: referral?.clinical_notes || "",
+    ReferringDoctor: profile?.full_name || "",
+
+    // Contact details used across referral / admission letters
+    PatientContact: patient?.phone || patient?.email || "",
+    PatientDOB: patient?.dob || "",
+    PracticePhone: (profile as any)?.phone || (profile as any)?.practice_phone || "",
+
 
     // Signature — uploaded image when present, otherwise the typed signature
     // (font / colour / size configured in My Practice). Plain-text callers
@@ -281,7 +323,10 @@ export function fillDocumentPlaceholders(
     return blank;
   });
 
-  const pruned = pruneEmptyLines(resolved);
+  const pruned = ctx.prescription
+    ? bulletiseMedicationRows(pruneEmptyLines(resolved))
+    : pruneEmptyLines(resolved);
+
 
   // Legacy templates hardcode an "INV-" prefix before [InvoiceNumber], while the
   // generated number already carries it. Collapse any duplicated prefix.
@@ -298,7 +343,34 @@ const OPTIONAL_TOKENS = new Set([
   "specialinstructions",
   "numberofrepeats",
   "repeats",
+  "relevanthistory",
+  "currentmedications",
+  "investigations",
+  "clinicalnotes",
+  "specialistaddress",
+  "specialistspecialty",
+  "urgency",
 ]);
+
+/** Turns a leading "1." / "2)" list marker into a plain bullet. */
+function bulletiseRow(line: string): string {
+  return /^\s*\d+[.)]\s*\S/.test(line)
+    ? line.replace(/^(\s*)\d+[.)]/, (_m, pad) => `${pad}•`)
+    : line;
+}
+
+/**
+ * Prescriptions list one bullet per prescribed medication — numbered rows in
+ * legacy templates are converted so the count is never implied by ordinals.
+ */
+function bulletiseMedicationRows(content: string): string {
+  const usesBr = /<br\s*\/?>/i.test(content);
+  const parts = usesBr ? content.split(/<br\s*\/?>/i) : content.split("\n");
+  const mapped = parts.map(bulletiseRow);
+  return usesBr ? mapped.join("<br>") : mapped.join("\n");
+}
+
+
 
 /**
  * Removes prescription rows whose value resolved to nothing (e.g. an unused
@@ -329,13 +401,9 @@ function pruneEmptyLines(content: string): string {
     kept.push(withoutMark);
   }
 
-  // Renumber surviving "1." / "2." medication rows.
-  let n = 0;
-  const renumbered = kept.map((line) =>
-    /^\s*\d+[.)]\s*\S/.test(line)
-      ? line.replace(/^(\s*)\d+([.)])/, (_m, pad) => `${pad}${++n}.`)
-      : line,
-  );
+  // Prescribed medications render as plain bullets — never numbered rows.
+  const renumbered = kept.map((line) => bulletiseRow(line));
+
 
   const joined = usesBr ? renumbered.join("<br>") : renumbered.join("\n");
   return usesBr

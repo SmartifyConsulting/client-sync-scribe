@@ -2,6 +2,8 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
+import { SignedImage } from "@/features/documents/components/SignedImage";
+
 import { useAuth } from "@/hooks/useAuth";
 import { resolveDocumentPreviewContent } from "@/lib/resolveDocumentPreviewContent";
 import { MailboxIntakeAddress } from "@/components/documents/MailboxIntakeAddress";
@@ -994,7 +996,7 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
 
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
                   {isImageDoc ? (
-                    <img src={doc.mediaUrl} alt={doc.name} className="h-7 w-7 rounded-md object-cover" />
+                    <SignedImage src={doc.mediaUrl} alt={doc.name} className="h-7 w-7 rounded-md object-cover" />
                   ) : (
                     <IconComponent className="h-3.5 w-3.5 text-primary" />
                   )}
@@ -1112,7 +1114,8 @@ export default function PatientDocuments({ hideHeader = false }: { hideHeader?: 
               {/* Image Preview */}
               {analysisDialog?.mediaUrl && (
                 <div className="rounded-lg overflow-hidden border bg-muted">
-                  <img
+                  <SignedImage
+
                     src={analysisDialog.mediaUrl}
                     alt={analysisDialog.name}
                     className="w-full max-h-64 object-contain"

@@ -20,9 +20,11 @@ import { cn } from "@/lib/utils";
 import {
   BiologPayload,
   EMPTY_PAYLOAD,
+  EntryExercise,
   MEAL_SLOTS,
   MealSlot,
 } from "./types";
+
 import {
   todayISO,
   useBiologEntry,
@@ -34,6 +36,8 @@ import {
   useSaveEntry,
 } from "./useBiolog";
 import { BiologVoiceCheckIn } from "./BiologVoiceCheckIn";
+import { ExerciseSection } from "./ExerciseSection";
+
 
 const LABEL = "text-xs font-bold text-foreground";
 
@@ -140,13 +144,18 @@ export function BiologToday({ ownerUserId, readOnly }: Props) {
         : { ...p, exercises: [...list, { name, duration: null, performance: null }] };
     });
 
-  const setExerciseField = (name: string, field: "duration" | "performance", value: number | null) =>
+  const setExerciseField = (
+    name: string,
+    field: keyof EntryExercise,
+    value: number | string | null,
+  ) =>
     setPayload((p) => ({
       ...p,
       exercises: (p.exercises ?? []).map((e) =>
         e.name === name ? { ...e, [field]: value } : e,
       ),
     }));
+
 
   const toggleMedication = (label: string) =>
     setPayload((p) => {
@@ -447,63 +456,15 @@ export function BiologToday({ ownerUserId, readOnly }: Props) {
             </span>
           </AccordionTrigger>
           <AccordionContent className={SECTION_CONTENT_CLASS}>
-            {exercises.length === 0 && (
-              <p className="text-xs text-muted-foreground">
-                Add the exercises you do on the Customise tab.
-              </p>
-            )}
-            {exercises.map((ex) => {
-              const logged = payload.exercises?.find((e) => e.name === ex.name);
-              return (
-                <div key={ex.id} className="flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-2">
-                    <Checkbox
-                      checked={!!logged}
-                      disabled={readOnly}
-                      onCheckedChange={() => toggleExercise(ex.name)}
-                    />
-                    <span className="text-xs font-bold">{ex.name}</span>
-                  </label>
-                  {logged && (
-                    <>
-                      <Input
-                        type="number"
-                        value={logged.duration ?? ""}
-                        placeholder={ex.unit}
-                        disabled={readOnly}
-                        className="h-8 w-24 text-xs"
-                        onChange={(e) =>
-                          setExerciseField(
-                            ex.name,
-                            "duration",
-                            e.target.value === "" ? null : Number(e.target.value),
-                          )
-                        }
-                      />
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-muted-foreground">Performance</span>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={10}
-                          value={logged.performance ?? ""}
-                          disabled={readOnly}
-                          className="h-8 w-16 text-xs"
-                          onChange={(e) =>
-                            setExerciseField(
-                              ex.name,
-                              "performance",
-                              e.target.value === "" ? null : Number(e.target.value),
-                            )
-                          }
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
+            <ExerciseSection
+              exercises={exercises}
+              logged={payload.exercises ?? []}
+              readOnly={readOnly}
+              onToggle={toggleExercise}
+              onField={setExerciseField}
+            />
           </AccordionContent>
+
         </AccordionItem>
 
         <AccordionItem value="medication" className={SECTION_ITEM_CLASS}>

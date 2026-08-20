@@ -36,7 +36,7 @@ serve(async (req) => {
       });
     }
 
-    const { imageUrl, documentId } = await req.json();
+    const { imageUrl, documentId, storagePath, bucket } = await req.json();
     if (!imageUrl || !documentId) {
       return new Response(
         JSON.stringify({ error: "imageUrl and documentId are required" }),
@@ -49,7 +49,72 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Our storage buckets are private, so a public URL is not readable by the
+    // AI provider (and often not by us either). Pull the bytes with the service
+    // role and inline them as a base64 data URL.
+    const storageBucket = bucket || "patient-media";
+    let path: string | null = storagePath || null;
+    if (!path && typeof imageUrl === "string") {
+      const match = imageUrl.match(
+        new RegExp(`/storage/v1/object/(?:public|sign)/${storageBucket}/(.+?)(?:\\?|$)`),
+      );
+      if (match) path = decodeURIComponent(match[1]);
+    }
+
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    let inlineUrl: string | null = null;
+    let downloadProblem = "";
+    try {
+      let bytes: Uint8Array | null = null;
+      let mime = "image/jpeg";
+
+      if (path) {
+        const { data: blob, error: dlError } = await admin.storage
+          .from(storageBucket)
+          .download(path);
+        if (dlError || !blob) throw new Error(dlError?.message || "file not found in storage");
+        bytes = new Uint8Array(await blob.arrayBuffer());
+        mime = blob.type || mime;
+      } else {
+        const fileResponse = await fetch(imageUrl);
+        if (!fileResponse.ok) {
+          throw new Error(`could not download the image (${fileResponse.status})`);
+        }
+        bytes = new Uint8Array(await fileResponse.arrayBuffer());
+        mime = fileResponse.headers.get("content-type")?.split(";")[0] || mime;
+      }
+
+      if (!bytes || bytes.byteLength === 0) throw new Error("the uploaded image is empty");
+      if (bytes.byteLength > 15 * 1024 * 1024) {
+        throw new Error("the image is larger than 15MB");
+      }
+      if (!mime.startsWith("image/")) mime = "image/jpeg";
+
+      let binary = "";
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+      }
+      inlineUrl = `data:${mime};base64,${btoa(binary)}`;
+    } catch (downloadError) {
+      downloadProblem = (downloadError as Error)?.message || "unknown error";
+      console.error("Image download failed:", downloadProblem);
+    }
+
+    if (!inlineUrl) {
+      return new Response(
+        JSON.stringify({ error: `The image could not be read: ${downloadProblem}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+
     // Call Lovable AI with the image for analysis
+
     const aiResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
@@ -84,7 +149,7 @@ IMPORTANT DISCLAIMER: Always conclude with:
                 },
                 {
                   type: "image_url",
-                  image_url: { url: imageUrl },
+                  image_url: { url: inlineUrl },
                 },
               ],
             },
@@ -108,7 +173,7 @@ IMPORTANT DISCLAIMER: Always conclude with:
       }
       const errorText = await aiResponse.text();
       console.error("AI gateway error:", aiResponse.status, errorText);
-      throw new Error("AI analysis failed");
+      throw new Error(`AI analysis failed (${aiResponse.status}): ${errorText.slice(0, 300)}`);
     }
 
     const aiResult = await aiResponse.json();
