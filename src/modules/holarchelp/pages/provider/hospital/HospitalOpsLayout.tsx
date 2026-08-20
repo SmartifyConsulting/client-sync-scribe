@@ -17,6 +17,8 @@ function TopChip({ label, value, tone }: { label: string; value: React.ReactNode
   );
 }
 
+const CAPACITY_SHORT: Record<string, string> = { green: "Green", yellow: "Yellow", red: "Red" };
+
 function HospitalStatsStrip() {
   const { t } = useTranslation();
   const { providerId } = useProviderAccess();
@@ -47,7 +49,7 @@ function HospitalStatsStrip() {
       <TopChip label={t("nav.incomingEr")} value={stats.incomingAmbulances} tone="bg-primary/10 text-primary" />
       <TopChip label={t("capacity.erBeds")} value={stats.erBedsAvailable ?? "—"} tone="bg-card text-foreground" />
       <TopChip label={t("capacity.icuBeds")} value={stats.icuAvailable ?? "—"} tone="bg-card text-foreground" />
-      <TopChip label={t("capacity.title")} value={t(`capacity.${stats.capacityStatus ?? "green"}`)} tone={capTone} />
+      <TopChip label={t("capacity.title")} value={CAPACITY_SHORT[stats.capacityStatus ?? "green"] ?? "Green"} tone={capTone} />
       <TopChip label={t("topbar.notifications")} value={stats.alerts} tone="bg-warning/10 text-warning" />
     </div>
   );
