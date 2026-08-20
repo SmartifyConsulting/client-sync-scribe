@@ -108,14 +108,14 @@ export function usePatientContext({ patientUserId, enabled = true }: UsePatientC
       }
 
       if (data && data.length > 0) {
-        const contextData = data[0];
+        const contextData = data[0] as Record<string, unknown>;
         setContext({
-          medical_history: contextData.medical_history || [],
-          allergies: contextData.allergies || [],
-          current_medications: contextData.current_medications || [],
-          recent_labs: contextData.recent_labs || [],
-          recent_imaging: contextData.recent_imaging || [],
-          drug_interactions: contextData.drug_interactions || [],
+          medical_history: (contextData.medical_history as PatientMedicalHistory[]) || [],
+          allergies: (contextData.allergies as PatientAllergyAlert[]) || [],
+          current_medications: (contextData.current_medications as PatientMedication[]) || [],
+          recent_labs: (contextData.recent_labs as PatientLabResult[]) || [],
+          recent_imaging: (contextData.recent_imaging as PatientImaging[]) || [],
+          drug_interactions: (contextData.drug_interactions as DrugInteraction[]) || [],
         });
 
         // Log access for audit
