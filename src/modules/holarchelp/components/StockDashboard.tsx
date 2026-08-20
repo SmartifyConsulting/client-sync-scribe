@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Package, Loader2 } from "lucide-react";
+import { AlertTriangle, Package, Loader2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { StockImportDialog } from "./StockImportDialog";
 
 interface LowStockItem {
   stock_item_id: string;
@@ -25,30 +27,29 @@ export function StockDashboard({ hospitalId, className }: StockDashboardProps) {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchStock = useCallback(async () => {
     if (!hospitalId) return;
+    setLoading(true);
+    try {
+      const { data: lowStockData } = await supabase.rpc("get_low_stock_items", {
+        p_hospital_id: hospitalId,
+      });
+      setLowStock(lowStockData || []);
 
-    const fetchStock = async () => {
-      setLoading(true);
-      try {
-        const { data: lowStockData } = await supabase.rpc("get_low_stock_items", {
-          p_hospital_id: hospitalId,
-        });
-        setLowStock(lowStockData || []);
-
-        const { count } = await supabase
-          .from("stock_items")
-          .select("id", { count: "exact", head: true })
-          .eq("hospital_id", hospitalId)
-          .eq("is_active", true);
-        setTotalItems(count || 0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStock();
+      const { count } = await supabase
+        .from("stock_items")
+        .select("id", { count: "exact", head: true })
+        .eq("hospital_id", hospitalId)
+        .eq("is_active", true);
+      setTotalItems(count || 0);
+    } finally {
+      setLoading(false);
+    }
   }, [hospitalId]);
+
+  useEffect(() => {
+    fetchStock();
+  }, [fetchStock]);
 
   if (!hospitalId) {
     return (
@@ -73,7 +74,19 @@ export function StockDashboard({ hospitalId, className }: StockDashboardProps) {
           <Package className="h-4 w-4" />
           Stock Overview
         </p>
-        <Badge variant="outline">{totalItems} active items</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline">{totalItems} active items</Badge>
+          <StockImportDialog
+            hospitalId={hospitalId}
+            onImportComplete={fetchStock}
+            trigger={
+              <Button size="sm" variant="outline" className="h-7 text-xs">
+                <Upload className="h-3.5 w-3.5 mr-1.5" />
+                Import
+              </Button>
+            }
+          />
+        </div>
       </div>
 
       {lowStock.length > 0 ? (

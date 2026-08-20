@@ -112,36 +112,34 @@ export function PurchaseOrderPanel({ hospitalId, className }: PurchaseOrderPanel
             </p>
           ) : (
             orders.map((po) => (
-              <Card key={po.id}>
-                <CardContent className="pt-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-semibold flex items-center gap-2">
-                        <Truck className="h-4 w-4" />
-                        {po.po_number}
+              <Card key={po.id} className="rounded-xl border border-primary bg-card p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-semibold flex items-center gap-2">
+                      <Truck className="h-4 w-4" />
+                      {po.po_number}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {po.suppliers?.supplier_name || "Unknown supplier"}
+                    </p>
+                    {po.expected_delivery_date && (
+                      <p className="text-xs text-muted-foreground">
+                        Expected: {new Date(po.expected_delivery_date).toLocaleDateString()}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {po.suppliers?.supplier_name || "Unknown supplier"}
-                      </p>
-                      {po.expected_delivery_date && (
-                        <p className="text-xs text-muted-foreground">
-                          Expected: {new Date(po.expected_delivery_date).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <Badge
-                        variant={po.status === "received" ? "default" : "secondary"}
-                        className="capitalize"
-                      >
-                        {po.status}
-                      </Badge>
-                      <p className="text-sm font-bold mt-1">
-                        R{po.total_amount.toFixed(2)}
-                      </p>
-                    </div>
+                    )}
                   </div>
-                </CardContent>
+                  <div className="text-right">
+                    <Badge
+                      variant={po.status === "received" ? "default" : "secondary"}
+                      className="capitalize"
+                    >
+                      {po.status}
+                    </Badge>
+                    <p className="text-sm font-bold mt-1">
+                      R{po.total_amount.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
               </Card>
             ))
           )}
