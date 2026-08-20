@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Package2, Plus, Trash2, Loader2, X } from "lucide-react";
+import { Package2, Plus, Trash2, Pencil, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StockItem {
@@ -55,6 +55,7 @@ export function ProcedureKitsPanel({ hospitalId, className }: ProcedureKitsPanel
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingKitId, setEditingKitId] = useState<string | null>(null);
 
   const [kitName, setKitName] = useState("");
   const [procedureName, setProcedureName] = useState("");
@@ -117,6 +118,7 @@ export function ProcedureKitsPanel({ hospitalId, className }: ProcedureKitsPanel
   };
 
   const resetForm = () => {
+    setEditingKitId(null);
     setKitName("");
     setProcedureName("");
     setDraftItems([]);
@@ -124,27 +126,63 @@ export function ProcedureKitsPanel({ hospitalId, className }: ProcedureKitsPanel
     setQuantity("1");
   };
 
+  const openNewKit = () => {
+    resetForm();
+    setDialogOpen(true);
+  };
+
+  const openEditKit = async (kit: Kit) => {
+    setEditingKitId(kit.id);
+    setKitName(kit.kit_name);
+    setProcedureName(kit.procedure_name || "");
+
+    const { data: existingItems } = await supabase
+      .from("procedure_kit_items")
+      .select("stock_item_id, quantity, stock_items(item_name)")
+      .eq("kit_id", kit.id);
+
+    setDraftItems(
+      (existingItems || []).map((i: any) => ({
+        stock_item_id: i.stock_item_id,
+        item_name: i.stock_items?.item_name || "Unknown item",
+        quantity: i.quantity,
+      }))
+    );
+    setDialogOpen(true);
+  };
+
   const handleSaveKit = async () => {
     if (!hospitalId || !user?.id || !kitName || draftItems.length === 0) return;
 
     setSaving(true);
     try {
-      const { data: kit, error } = await supabase
-        .from("procedure_kits")
-        .insert({
-          hospital_id: hospitalId,
-          kit_name: kitName,
-          procedure_name: procedureName || null,
-          created_by: user.id,
-        })
-        .select("id")
-        .single();
+      let kitId = editingKitId;
 
-      if (error) throw error;
+      if (editingKitId) {
+        await supabase
+          .from("procedure_kits")
+          .update({ kit_name: kitName, procedure_name: procedureName || null })
+          .eq("id", editingKitId);
+        // Full replace of items is simplest and safest for an edit.
+        await supabase.from("procedure_kit_items").delete().eq("kit_id", editingKitId);
+      } else {
+        const { data: kit, error } = await supabase
+          .from("procedure_kits")
+          .insert({
+            hospital_id: hospitalId,
+            kit_name: kitName,
+            procedure_name: procedureName || null,
+            created_by: user.id,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        kitId = kit.id;
+      }
 
       await supabase.from("procedure_kit_items").insert(
         draftItems.map((item) => ({
-          kit_id: kit.id,
+          kit_id: kitId,
           stock_item_id: item.stock_item_id,
           quantity: item.quantity,
         }))
@@ -181,14 +219,14 @@ export function ProcedureKitsPanel({ hospitalId, className }: ProcedureKitsPanel
 
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="h-7 text-xs">
+            <Button size="sm" className="h-7 text-xs" onClick={openNewKit}>
               <Plus className="h-3.5 w-3.5 mr-1.5" />
               New Kit
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>New Procedure Kit</DialogTitle>
+              <DialogTitle>{editingKitId ? "Edit Procedure Kit" : "New Procedure Kit"}</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
@@ -272,7 +310,7 @@ export function ProcedureKitsPanel({ hospitalId, className }: ProcedureKitsPanel
                 disabled={!kitName || draftItems.length === 0 || saving}
                 className="w-full"
               >
-                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Kit"}
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingKitId ? "Save Changes" : "Save Kit"}
               </Button>
             </div>
           </DialogContent>
@@ -304,6 +342,14 @@ export function ProcedureKitsPanel({ hospitalId, className }: ProcedureKitsPanel
                   <Badge variant="outline" className="text-xs">
                     {kit.itemCount} item{kit.itemCount !== 1 ? "s" : ""}
                   </Badge>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0"
+                    onClick={() => openEditKit(kit)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"

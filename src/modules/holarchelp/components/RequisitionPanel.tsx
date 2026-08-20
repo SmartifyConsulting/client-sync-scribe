@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardList, Send, Check, Loader2 } from "lucide-react";
+import { ClipboardList, Send, Check, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StockItem {
@@ -108,12 +108,43 @@ export function RequisitionPanel({
   };
 
   const handleFulfill = async (req: Requisition) => {
-    if (!user?.id) return;
+    if (!user?.id || !hospitalId) return;
+
+    // Fulfilling a requisition actually moves stock out of Central Store —
+    // without this, the requisition status changes but inventory never reflects it.
+    const { data: level } = await supabase
+      .from("stock_levels")
+      .select("id, quantity_on_hand")
+      .eq("stock_item_id", req.stock_item_id)
+      .eq("hospital_id", hospitalId)
+      .eq("location_name", "Central Store")
+      .maybeSingle();
+
+    if (level) {
+      await supabase
+        .from("stock_levels")
+        .update({ quantity_on_hand: Math.max(0, level.quantity_on_hand - req.quantity_requested) })
+        .eq("id", level.id);
+    }
+
     await supabase
       .from("stock_requisitions")
       .update({
         status: "fulfilled",
         quantity_fulfilled: req.quantity_requested,
+        fulfilled_at: new Date().toISOString(),
+        fulfilled_by: user.id,
+      })
+      .eq("id", req.id);
+    await fetchData();
+  };
+
+  const handleReject = async (req: Requisition) => {
+    if (!user?.id) return;
+    await supabase
+      .from("stock_requisitions")
+      .update({
+        status: "rejected",
         fulfilled_at: new Date().toISOString(),
         fulfilled_by: user.id,
       })
@@ -248,14 +279,26 @@ export function RequisitionPanel({
                   {req.status}
                 </Badge>
                 {canApprove && req.status === "pending" && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-2"
-                    onClick={() => handleFulfill(req)}
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                  </Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2"
+                      onClick={() => handleFulfill(req)}
+                      aria-label="Fulfill"
+                    >
+                      <Check className="h-3.5 w-3.5 text-green-600" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2"
+                      onClick={() => handleReject(req)}
+                      aria-label="Reject"
+                    >
+                      <X className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

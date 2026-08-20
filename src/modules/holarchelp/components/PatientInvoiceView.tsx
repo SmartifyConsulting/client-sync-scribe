@@ -4,8 +4,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Receipt, FileText, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Receipt, FileText, Plus, DollarSign, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const LINE_SOURCE_TYPES = [
+  { value: "procedure_fee", label: "Procedure Fee" },
+  { value: "bed_charge", label: "Bed Charge" },
+  { value: "other", label: "Other" },
+];
 
 interface InvoiceLine {
   id: string;
@@ -48,6 +70,14 @@ export function PatientInvoiceView({
   const [pendingUsageCount, setPendingUsageCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  const [lineDialogOpen, setLineDialogOpen] = useState(false);
+  const [lineInvoiceId, setLineInvoiceId] = useState<string | null>(null);
+  const [lineDescription, setLineDescription] = useState("");
+  const [lineSourceType, setLineSourceType] = useState("procedure_fee");
+  const [lineQuantity, setLineQuantity] = useState("1");
+  const [lineUnitCost, setLineUnitCost] = useState("");
+  const [savingLine, setSavingLine] = useState(false);
 
   const fetchData = async () => {
     if (!admissionId) return;
@@ -109,6 +139,64 @@ export function PatientInvoiceView({
     } finally {
       setGenerating(false);
     }
+  };
+
+  const openAddLine = (invoiceId: string) => {
+    setLineInvoiceId(invoiceId);
+    setLineDescription("");
+    setLineSourceType("procedure_fee");
+    setLineQuantity("1");
+    setLineUnitCost("");
+    setLineDialogOpen(true);
+  };
+
+  const handleAddLine = async () => {
+    if (!lineInvoiceId || !lineDescription || !lineUnitCost) return;
+    setSavingLine(true);
+    try {
+      const qty = parseInt(lineQuantity, 10) || 1;
+      const unitCost = parseFloat(lineUnitCost);
+      const lineTotal = qty * unitCost;
+
+      await supabase.from("patient_invoice_lines").insert({
+        invoice_id: lineInvoiceId,
+        description: lineDescription,
+        source_type: lineSourceType,
+        quantity: qty,
+        unit_cost: unitCost,
+        line_total: lineTotal,
+      });
+
+      const invoice = invoices.find((i) => i.id === lineInvoiceId);
+      if (invoice) {
+        const newSubtotal = invoice.subtotal + lineTotal;
+        await supabase
+          .from("patient_invoices")
+          .update({ subtotal: newSubtotal, total_amount: newSubtotal + invoice.tax_amount })
+          .eq("id", lineInvoiceId);
+      }
+
+      setLineDialogOpen(false);
+      await fetchData();
+    } finally {
+      setSavingLine(false);
+    }
+  };
+
+  const markInvoiceIssued = async (invoiceId: string) => {
+    await supabase
+      .from("patient_invoices")
+      .update({ status: "issued", issued_date: new Date().toISOString().slice(0, 10) })
+      .eq("id", invoiceId);
+    await fetchData();
+  };
+
+  const markInvoicePaid = async (invoiceId: string, totalAmount: number) => {
+    await supabase
+      .from("patient_invoices")
+      .update({ status: "paid", paid_amount: totalAmount })
+      .eq("id", invoiceId);
+    await fetchData();
   };
 
   if (!admissionId) {
@@ -210,10 +298,69 @@ export function PatientInvoiceView({
                   <span>R{invoice.total_amount.toFixed(2)}</span>
                 </div>
               </div>
+
+              <div className="flex gap-2 mt-3">
+                {invoice.status === "draft" && (
+                  <>
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => openAddLine(invoice.id)}>
+                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                      Add Line
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markInvoiceIssued(invoice.id)}>
+                      <Send className="h-3.5 w-3.5 mr-1.5" />
+                      Mark Issued
+                    </Button>
+                  </>
+                )}
+                {invoice.status === "issued" && (
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markInvoicePaid(invoice.id, invoice.total_amount)}>
+                    <DollarSign className="h-3.5 w-3.5 mr-1.5" />
+                    Mark Paid
+                  </Button>
+                )}
+              </div>
             </Card>
           ))}
         </div>
       )}
+
+      <Dialog open={lineDialogOpen} onOpenChange={setLineDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Add Invoice Line</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs">Description</Label>
+              <Input value={lineDescription} onChange={(e) => setLineDescription(e.target.value)} placeholder="e.g. Surgeon's fee" className="h-9" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Type</Label>
+              <Select value={lineSourceType} onValueChange={setLineSourceType}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {LINE_SOURCE_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label className="text-xs">Quantity</Label>
+                <Input type="number" min="1" value={lineQuantity} onChange={(e) => setLineQuantity(e.target.value)} className="h-9" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Unit Cost (R)</Label>
+                <Input type="number" step="0.01" value={lineUnitCost} onChange={(e) => setLineUnitCost(e.target.value)} className="h-9" />
+              </div>
+            </div>
+            <Button onClick={handleAddLine} disabled={!lineDescription || !lineUnitCost || savingLine} className="w-full">
+              {savingLine ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add Line"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
