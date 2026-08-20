@@ -225,7 +225,7 @@ export default function HolarcHelpIncidentDetail() {
   const cancelAlert = async () => {
     if (!id) return;
     await supabase.from("holarchelp_incidents" as any)
-      .update({ status: "cancelled", resolved_at: new Date().toISOString() } as any).eq("id", id);
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() } as any).eq("id", id);
     toast.success("Alert cancelled");
     navigate("/patient/holarchelp");
   };

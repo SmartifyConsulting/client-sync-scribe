@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
+import { triggerEmergencySOS } from "../services/emergencyService";
 
 const logo = holarcLogoAsset.url;
 
@@ -62,37 +63,15 @@ export default function HolarcHelpHome() {
     }
     setTriggering(true);
     try {
-      const pos = await new Promise<GeolocationPosition>((res, rej) => {
-        if (!("geolocation" in navigator)) return rej(new Error("Geolocation not supported"));
-        navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 });
-      }).catch((e: any) => {
-        if (e?.code === 1) setPermDenied(true);
-        return null;
-      });
-      if (!pos) { setTriggering(false); return; }
-      setPermDenied(false);
+      const result = await triggerEmergencySOS({ activationMethod: "in_app" });
 
-      let coverage: "public" | "private" = "public";
-      try {
-        const { data: pat } = await supabase
-          .from("patients").select("medical_aid")
-          .eq("patient_user_id", user.id)
-          .order("created_at", { ascending: false }).limit(1).maybeSingle();
-        if (pat?.medical_aid && String(pat.medical_aid).trim() !== "") coverage = "private";
-      } catch { /* default public */ }
+      if (!result.success || !result.incidentId) {
+        toast.error(result.error ?? "Could not trigger SOS");
+        return;
+      }
 
-      const { data: incident, error } = await supabase
-        .from("holarchelp_incidents" as any)
-        .insert({ user_id: user.id, status: "open", coverage, severity: "critical" } as any)
-        .select("id, tracking_token").single();
-      if (error || !incident) throw error ?? new Error("Failed to create incident");
-
-      await supabase.from("holarchelp_locations" as any).insert({
-        incident_id: (incident as any).id,
-        latitude: pos.coords.latitude,
-        longitude: pos.coords.longitude,
-        accuracy: pos.coords.accuracy,
-      });
+      if (!result.locationCaptured) setPermDenied(true);
+      else setPermDenied(false);
 
       if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
 
@@ -100,16 +79,9 @@ export default function HolarcHelpHome() {
         toast.message("SOS sent. Add an emergency contact later so we can also notify someone you trust.");
       }
 
-      // Fire-and-forget dispatch + in-app notification to emergency contacts
-      supabase.functions.invoke("dispatch-sos", { body: { incident_id: (incident as any).id } })
-        .catch((e) => console.warn("dispatch-sos failed", e));
-      supabase.functions.invoke("share-incident-with-contacts", {
-        body: { incident_id: (incident as any).id, tracking_token: (incident as any).tracking_token },
-      }).catch((e) => console.warn("share-incident-with-contacts failed", e));
-
       // Route patient straight to the live incident page where they see the
       // list of available ambulances/hospitals to choose from.
-      navigate(`/patient/holarchelp/incident/${(incident as any).id}?fresh=1`);
+      navigate(`/patient/holarchelp/incident/${result.incidentId}?fresh=1`);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not trigger SOS");
     } finally {
@@ -255,6 +227,12 @@ export default function HolarcHelpHome() {
           className="text-xs font-semibold text-muted-foreground underline-offset-4 hover:underline"
         >
           {t("sos.viewHistory")}
+        </button>
+        <button
+          onClick={() => navigate("/patient/holarchelp/readiness")}
+          className="text-xs font-semibold text-muted-foreground underline-offset-4 hover:underline"
+        >
+          Emergency Readiness
         </button>
       </div>
     </div>
