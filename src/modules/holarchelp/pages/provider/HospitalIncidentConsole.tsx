@@ -7,6 +7,7 @@ import { IncidentPhotos } from "../../components/IncidentPhotos";
 import { EtaCountdown } from "../../components/EtaCountdown";
 import { EmergencyPatientContext } from "../../components/EmergencyPatientContext";
 import { TriageControls } from "../../components/TriageControls";
+import { PatientContextPanel } from "../../components/PatientContextPanel";
 import { AdmittedPatientChart } from "../../components/AdmittedPatientChart";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -141,6 +142,10 @@ export default function HospitalIncidentConsole() {
             }} />
           </div>
           <div className="space-y-3">
+            <PatientContextPanel
+              patientUserId={incident?.patient_user_id}
+              admissionId={id}
+            />
             <EmergencyPatientContext incidentId={id!} />
             <IncidentPhotos incidentId={id!} readOnly />
             <IncidentTimeline incidentId={id!} />

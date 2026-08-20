@@ -9,6 +9,7 @@ import { useHospitalShifts } from "../../../hooks/useHospitalShifts";
 import {
   AdmitPatientDialog, AssignDoctorDialog, AssignNurseDialog, LogActivityDialog, TransferPatientDialog,
 } from "../../../components/InpatientDialogs";
+import { PatientSearchPanel } from "../../../components/PatientSearchPanel";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   SECTION_CONTENT_CLASS, SECTION_FRAME_CLASS, SECTION_ITEM_CLASS,
@@ -109,6 +110,14 @@ export default function InpatientsScreen() {
           </Button>
         </div>
       </header>
+
+      <PatientSearchPanel
+        hospitalId={providerId}
+        admissionId={null}
+        onLinkAdmission={(admissionId, patientUserId) => {
+          reload();
+        }}
+      />
 
       <div className="flex flex-wrap gap-1.5">
         {STATUS_CHIPS.map((chip) => (
