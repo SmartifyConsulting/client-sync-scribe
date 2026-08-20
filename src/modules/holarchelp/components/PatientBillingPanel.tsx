@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Receipt, DollarSign, ExternalLink, Loader2 } from "lucide-react";
+import { Receipt, DollarSign, Send, ExternalLink, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PatientInvoiceRow {
@@ -70,6 +70,19 @@ export function PatientBillingPanel({ hospitalId, className }: PatientBillingPan
   useEffect(() => {
     fetchInvoices();
   }, [fetchInvoices]);
+
+  const markIssued = async (id: string) => {
+    await supabase
+      .from("patient_invoices")
+      .update({ status: "issued", issued_date: new Date().toISOString().slice(0, 10) })
+      .eq("id", id);
+    await fetchInvoices();
+  };
+
+  const markPaid = async (id: string, totalAmount: number) => {
+    await supabase.from("patient_invoices").update({ status: "paid", paid_amount: totalAmount }).eq("id", id);
+    await fetchInvoices();
+  };
 
   const filtered = statusFilter === "all" ? invoices : invoices.filter((i) => i.status === statusFilter);
 
@@ -157,6 +170,18 @@ export function PatientBillingPanel({ hospitalId, className }: PatientBillingPan
                     </Badge>
                     <p className="text-sm font-bold mt-0.5">R{inv.total_amount.toFixed(2)}</p>
                   </div>
+                  {inv.status === "draft" && (
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markIssued(inv.id)}>
+                      <Send className="h-3.5 w-3.5 mr-1" />
+                      Issue
+                    </Button>
+                  )}
+                  {inv.status === "issued" && (
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => markPaid(inv.id, inv.total_amount)}>
+                      <DollarSign className="h-3.5 w-3.5 mr-1" />
+                      Mark Paid
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" className="h-7 w-7 p-0" asChild>
                     <Link to={`/provider/hospital/patient/${inv.patient_id}`}>
                       <ExternalLink className="h-3.5 w-3.5" />
