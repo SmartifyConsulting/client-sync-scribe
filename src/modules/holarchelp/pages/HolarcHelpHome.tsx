@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import holarcLogoAsset from "@/assets/holarc-health-logo.png.asset.json";
-import { triggerEmergencySOS } from "../services/emergencyService";
+import { triggerEmergencySOS, flushPendingSOS } from "../services/emergencyService";
 
 const logo = holarcLogoAsset.url;
 
@@ -53,6 +53,17 @@ export default function HolarcHelpHome() {
       .then(({ data }: any) => {
         if (data?.id) setActiveIncidentId(data.id);
       });
+
+    // A prior SOS may still be queued locally if it was triggered while
+    // offline — retry it now that the app is open and (likely) connected.
+    flushPendingSOS()
+      .then((result) => {
+        if (result?.success && !result.queued && result.incidentId) {
+          toast.success("A previously queued SOS has now been sent.");
+          setActiveIncidentId(result.incidentId);
+        }
+      })
+      .catch(() => {});
   }, [user]);
 
   const triggerSOS = async () => {
@@ -65,8 +76,19 @@ export default function HolarcHelpHome() {
     try {
       const result = await triggerEmergencySOS({ activationMethod: "in_app" });
 
-      if (!result.success || !result.incidentId) {
+      if (!result.success) {
         toast.error(result.error ?? "Could not trigger SOS");
+        return;
+      }
+
+      if (result.queued) {
+        if ("vibrate" in navigator) navigator.vibrate?.([200, 100, 200]);
+        toast.message("SOS saved — no connection right now. It will send automatically the moment you're back online.");
+        return;
+      }
+
+      if (!result.incidentId) {
+        toast.error("Could not trigger SOS");
         return;
       }
 

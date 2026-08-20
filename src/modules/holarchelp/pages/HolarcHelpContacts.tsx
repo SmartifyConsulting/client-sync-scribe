@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Trash2, UserPlus, ChevronLeft, ChevronDown, Pencil, Check, X, Info } from "lucide-react";
+import { Trash2, UserPlus, ChevronLeft, ChevronDown, ChevronUp, Pencil, Check, X, Info } from "lucide-react";
 import { toast } from "sonner";
 import { toastError } from "@/lib/userMessage";
 
@@ -24,6 +24,7 @@ type Contact = {
   notify_min_severity: Severity;
   source?: Source;
   personal_info_ref?: string | null;
+  priority: number;
 };
 
 const SEVERITIES: { value: Severity; label: string }[] = [
@@ -60,10 +61,32 @@ export default function HolarcHelpContacts() {
     const { data } = await supabase
       .from("holarchelp_emergency_contacts" as any)
       .select("*")
+      .order("priority", { ascending: true })
       .order("created_at", { ascending: true });
     setContacts((data as any) ?? []);
     setLoading(false);
     return (data as any) ?? [];
+  };
+
+  // Reorders this contact relative to its neighbor and renumbers the whole
+  // list sequentially (0, 1, 2…) — this is the order emergency escalation
+  // notifies contacts in. Renumbering rather than swapping matters because
+  // every contact starts at priority 0 (the "notify everyone at once"
+  // default); swapping two zeros would otherwise be a no-op.
+  const moveContact = async (index: number, direction: -1 | 1) => {
+    if (!contacts[index + direction]) return;
+
+    const reordered = [...contacts];
+    [reordered[index], reordered[index + direction]] = [reordered[index + direction], reordered[index]];
+    const renumbered = reordered.map((c, i) => ({ ...c, priority: i }));
+    setContacts(renumbered);
+
+    await Promise.all(
+      renumbered.map((c) =>
+        supabase.from("holarchelp_emergency_contacts" as any).update({ priority: c.priority } as any).eq("id", c.id)
+      )
+    );
+    load();
   };
 
   // First load + auto-seed from Personal Information if SOS list is empty
@@ -174,11 +197,44 @@ export default function HolarcHelpContacts() {
             No contacts yet — add one below.
           </li>
         )}
-        {contacts.map((c) => {
+        {contacts.length > 1 && (
+          <li className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground">
+            <Info className="h-3 w-3 shrink-0" />
+            Notified in this order during an SOS — reorder with the arrows if a contact isn't responding.
+          </li>
+        )}
+        {contacts.map((c, index) => {
           const isEditing = editingId === c.id;
           return (
             <li key={c.id} className="rounded-2xl border-2 border-primary/30 bg-card p-3 shadow-[var(--shadow-card)]">
               <div className="flex items-start gap-3">
+                {contacts.length > 1 && (
+                  <div className="flex flex-col items-center gap-0.5 shrink-0 pt-0.5">
+                    <span className="text-[10px] font-bold text-primary">{index + 1}</span>
+                    <div className="flex flex-col">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        disabled={index === 0}
+                        onClick={() => moveContact(index, -1)}
+                        aria-label="Notify earlier"
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5"
+                        disabled={index === contacts.length - 1}
+                        onClick={() => moveContact(index, 1)}
+                        aria-label="Notify later"
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <Avatar className="h-10 w-10 border-2 border-primary shrink-0">
                   <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                     {initials(c.name)}

@@ -35,6 +35,14 @@ export default function PublicTrack() {
     setLocations((locs as any) ?? []);
   };
 
+  // Someone opening this link means the alert has been seen — this halts
+  // further emergency-contact escalation for the incident. Fire-and-forget,
+  // idempotent (only the first call sets the timestamp).
+  useEffect(() => {
+    if (!token) return;
+    supabase.rpc("holarchelp_ack_tracking" as any, { _token: token }).then(() => {}, () => {});
+  }, [token]);
+
   useEffect(() => { load(); const t = setInterval(load, 7000); return () => clearInterval(t); }, [token]);
 
   if (notFound) {

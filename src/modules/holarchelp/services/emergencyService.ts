@@ -42,7 +42,81 @@ export interface TriggerSOSResult {
   incidentId?: string;
   trackingToken?: string;
   locationCaptured: boolean;
+  /** True if the network was unreachable and the SOS was stored locally to retry — treat as "captured", not failed, in the UI. */
+  queued?: boolean;
   error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Offline resilience — if the network is unreachable when SOS is triggered,
+// the event is stored locally (activation time + location, best-effort) and
+// retried automatically once connectivity returns. Only one pending SOS is
+// tracked at a time: a real emergency doesn't produce multiple concurrent
+// unrelated triggers, and collapsing to one avoids duplicate incidents once
+// the connection comes back.
+// ---------------------------------------------------------------------------
+
+const PENDING_SOS_KEY = "holarc_pending_sos";
+
+interface PendingSOS {
+  activationMethod: ActivationMethod;
+  deviceId?: string;
+  queuedAt: string;
+  coords: { latitude: number; longitude: number; accuracy: number } | null;
+}
+
+function readPendingSOS(): PendingSOS | null {
+  try {
+    const raw = localStorage.getItem(PENDING_SOS_KEY);
+    return raw ? (JSON.parse(raw) as PendingSOS) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writePendingSOS(entry: PendingSOS) {
+  try {
+    localStorage.setItem(PENDING_SOS_KEY, JSON.stringify(entry));
+  } catch {
+    // localStorage unavailable (private browsing, quota) — nothing more we can do client-side
+  }
+}
+
+function clearPendingSOS() {
+  try {
+    localStorage.removeItem(PENDING_SOS_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+function looksLikeNetworkFailure(message: string | undefined): boolean {
+  if (!navigator.onLine) return true;
+  if (!message) return false;
+  return /fetch|network|load failed|connection|offline/i.test(message);
+}
+
+/**
+ * Attempts to send a previously-queued SOS. Safe to call repeatedly (e.g. on
+ * every 'online' event, or on app start) — it's a no-op if nothing is queued,
+ * and clears the queue entry once the incident is actually created.
+ */
+export async function flushPendingSOS(): Promise<TriggerSOSResult | null> {
+  const pending = readPendingSOS();
+  if (!pending) return null;
+
+  const result = await createIncident(pending.activationMethod, pending.deviceId, pending.coords, pending.queuedAt);
+
+  if (result.success && !result.queued) {
+    clearPendingSOS();
+  }
+  return result;
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    flushPendingSOS().catch((e) => console.warn("flushPendingSOS on reconnect failed", e));
+  });
 }
 
 // Idempotency guard — a native trigger (Siri, hardware button) firing the
@@ -85,6 +159,22 @@ async function doTrigger(options: TriggerSOSOptions): Promise<TriggerSOSResult> 
     return { success: false, error: "Not authenticated", locationCaptured: false };
   }
 
+  // If an earlier trigger is still queued from being offline, retry that one
+  // first rather than starting a second, unrelated incident.
+  const pending = readPendingSOS();
+  if (pending) {
+    const flushed = await createIncident(
+      pending.activationMethod,
+      pending.deviceId,
+      pending.coords,
+      pending.queuedAt
+    );
+    if (!flushed.queued) clearPendingSOS();
+    if (flushed.success) return flushed;
+    // Still offline or a hard failure — fall through and attempt a fresh
+    // trigger below rather than getting stuck.
+  }
+
   // Reuse an already-active incident instead of creating a duplicate.
   const { data: existing } = await supabase
     .from("holarchelp_incidents" as any)
@@ -121,6 +211,34 @@ async function doTrigger(options: TriggerSOSOptions): Promise<TriggerSOSResult> 
     pos = null;
   }
 
+  const coords = pos
+    ? { latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy }
+    : null;
+
+  return createIncident(activationMethod, options.deviceId, coords);
+}
+
+/**
+ * Creates the incident row and fires off dispatch/notification. Shared by
+ * the normal trigger path and the offline-retry path. If the insert itself
+ * fails because the network is unreachable, the event is queued locally
+ * (never lost) rather than reported as a failure — location_status simply
+ * becomes "will send when connectivity returns".
+ */
+async function createIncident(
+  activationMethod: ActivationMethod,
+  deviceId: string | undefined,
+  coords: { latitude: number; longitude: number; accuracy: number } | null,
+  originalActivatedAt?: string
+): Promise<TriggerSOSResult> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Not authenticated", locationCaptured: false };
+  }
+
   let coverage: "public" | "private" = "public";
   try {
     const { data: pat } = await supabase
@@ -135,22 +253,36 @@ async function doTrigger(options: TriggerSOSOptions): Promise<TriggerSOSResult> 
     // default public
   }
 
+  const insertPayload: Record<string, unknown> = {
+    user_id: user.id,
+    status: "open",
+    coverage,
+    severity: "critical",
+    activation_method: activationMethod,
+    device_id: deviceId ?? null,
+    triggered_by_role: "patient",
+    triggered_by_user_id: user.id,
+  };
+  // Preserve the true activation time when replaying a queued offline SOS,
+  // rather than letting it default to "now" once the network returns.
+  if (originalActivatedAt) insertPayload.created_at = originalActivatedAt;
+
   const { data: incident, error } = await supabase
     .from("holarchelp_incidents" as any)
-    .insert({
-      user_id: user.id,
-      status: "open",
-      coverage,
-      severity: "critical",
-      activation_method: activationMethod,
-      device_id: options.deviceId ?? null,
-      triggered_by_role: "patient",
-      triggered_by_user_id: user.id,
-    } as any)
+    .insert(insertPayload as any)
     .select("id, tracking_token")
     .single();
 
   if (error || !incident) {
+    if (looksLikeNetworkFailure(error?.message)) {
+      writePendingSOS({
+        activationMethod,
+        deviceId,
+        queuedAt: originalActivatedAt ?? new Date().toISOString(),
+        coords,
+      });
+      return { success: true, queued: true, locationCaptured: !!coords };
+    }
     return {
       success: false,
       error: error?.message ?? "Failed to create incident",
@@ -161,12 +293,12 @@ async function doTrigger(options: TriggerSOSOptions): Promise<TriggerSOSResult> 
   const incidentId = (incident as any).id as string;
   const trackingToken = (incident as any).tracking_token as string;
 
-  if (pos) {
+  if (coords) {
     await supabase.from("holarchelp_locations" as any).insert({
       incident_id: incidentId,
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude,
-      accuracy: pos.coords.accuracy,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+      accuracy: coords.accuracy,
     });
   }
 
@@ -178,7 +310,7 @@ async function doTrigger(options: TriggerSOSOptions): Promise<TriggerSOSResult> 
     .catch((e) => console.warn("dispatch-sos failed", e));
   supabase.functions
     .invoke("share-incident-with-contacts", {
-      body: { incident_id: incidentId, tracking_token: trackingToken },
+      body: { incident_id: incidentId, tracking_token: trackingToken, escalation_level: 0 },
     })
     .catch((e) => console.warn("share-incident-with-contacts failed", e));
 
@@ -186,7 +318,7 @@ async function doTrigger(options: TriggerSOSOptions): Promise<TriggerSOSResult> 
     success: true,
     incidentId,
     trackingToken,
-    locationCaptured: !!pos,
+    locationCaptured: !!coords,
   };
 }
 
