@@ -9042,6 +9042,10 @@ export type Database = {
         Args: { _incident_id: string }
         Returns: boolean
       }
+      can_access_patient_clinical: {
+        Args: { _patient_user_id: string }
+        Returns: boolean
+      }
       can_edit_admission: { Args: { _admission_id: string }; Returns: boolean }
       can_log_patient_activity: {
         Args: { _hospital_id: string; _patient_id: string }
