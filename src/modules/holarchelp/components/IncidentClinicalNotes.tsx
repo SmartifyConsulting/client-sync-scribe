@@ -93,8 +93,8 @@ export function IncidentClinicalNotes({
         setNotes(
           data.map((n) => ({
             id: n.id,
-            note_type: n.note_type,
-            staff_name: n.staff_name || "Staff",
+            note_type: n.note_type as ClinicalNote["note_type"],
+            staff_name: (n as { staff_name?: string }).staff_name || "Staff",
             note_text: n.note_text,
             created_at: n.created_at,
             relevant_conditions: n.relevant_conditions,
@@ -136,8 +136,8 @@ export function IncidentClinicalNotes({
           setNotes(
             data.map((n) => ({
               id: n.id,
-              note_type: n.note_type,
-              staff_name: n.staff_name || "Staff",
+              note_type: n.note_type as ClinicalNote["note_type"],
+              staff_name: (n as { staff_name?: string }).staff_name || "Staff",
               note_text: n.note_text,
               created_at: n.created_at,
               relevant_conditions: n.relevant_conditions,
