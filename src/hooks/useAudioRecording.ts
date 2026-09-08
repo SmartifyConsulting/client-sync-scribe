@@ -254,6 +254,10 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       };
 
       mediaRecorder.start(1000);
+      setLiveTranscribeError(null);
+      // Rolling live transcription feeds the AI clinician while the doctor talks.
+      startLiveChunking();
+
       setIsRecording(true);
       endSessionDetectedRef.current = false;
       liveTranscriptRef.current = '';
@@ -268,7 +272,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           const recognition = new SpeechRecognitionAPI();
           recognition.continuous = true;
           recognition.interimResults = true;
-          recognition.lang = 'en-US';
+          recognition.lang = optionsRef.current.language || 'en-US';
+
           
           const endPhrases = ['end session', 'end of session', 'end the session', 'conclude the session', 'session ended'];
           
@@ -372,7 +377,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
             const recognition = new SpeechRecognitionAPI();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'en-US';
+            recognition.lang = optionsRef.current.language || 'en-US';
             recognition.onresult = (event: SpeechRecognitionEvent) => {
               const last = event.results[event.results.length - 1];
               if (!last.isFinal) {
