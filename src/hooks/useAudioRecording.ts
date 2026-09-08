@@ -70,8 +70,13 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
           mediaRecorderRef.current.stop();
         }
       } catch {}
+      chunkingActiveRef.current = false;
+      if (chunkTimerRef.current) clearTimeout(chunkTimerRef.current);
+      try { chunkRecorderRef.current?.stop(); } catch {}
+      chunkRecorderRef.current = null;
       try { speechRecognitionRef.current?.stop(); } catch {}
       speechRecognitionRef.current = null;
+
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
@@ -507,6 +512,8 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
     isSavingAudio,
     transcript,
     liveTranscript,
+    liveTranscribeError,
+
     liveMessages,
     isSpeaking,
     audioUrl,
