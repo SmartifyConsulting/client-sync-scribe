@@ -359,6 +359,7 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
       try {
         mediaRecorderRef.current.pause();
         setIsPaused(true);
+        stopLiveChunking(true);
         if (speechRecognitionRef.current) {
           try { speechRecognitionRef.current.stop(); } catch {}
         }
@@ -366,14 +367,17 @@ export function useAudioRecording(options: UseAudioRecordingOptions = {}) {
         console.error('Pause failed:', err);
       }
     }
-  }, []);
+  }, [stopLiveChunking]);
+
 
   const resumeRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'paused') {
       try {
         mediaRecorderRef.current.resume();
         setIsPaused(false);
+        startLiveChunking();
         // Restart speech recognition
+
         try {
           const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
           if (SpeechRecognitionAPI && !speechRecognitionRef.current) {
